@@ -34,7 +34,6 @@ open --es scary.debug.open details:hereditary
 shot 05-details 5
 
 open --es scary.debug.open search --es scary.debug.query fincher
-key KEYCODE_BACK
 shot 06-search 4
 
 open --es scary.debug.open apps
