@@ -6,7 +6,8 @@ import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -36,8 +37,9 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 
 /**
  * Base for everything the remote can land on: grows, gets a candlelight border and a warm glow when focused.
- * D-pad center and Enter trigger [onClick] through `clickable`.
+ * D-pad center and Enter trigger [onClick]; holding them triggers [onLongClick] when given.
  */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FocusSurface(
     onClick: () -> Unit,
@@ -50,6 +52,7 @@ fun FocusSurface(
     focusedBorderColor: Color = ScaryColors.Candle,
     contentDescription: String? = null,
     onFocusChanged: (Boolean) -> Unit = {},
+    onLongClick: (() -> Unit)? = null,
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -99,7 +102,12 @@ fun FocusSurface(
             .clip(shape)
             .background(container)
             .border(2.dp, if (focused) focusedBorderColor else borderColor, shape)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .combinedClickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onLongClick = onLongClick,
+                onClick = onClick,
+            )
             .then(
                 if (contentDescription != null) {
                     Modifier.semantics { this.contentDescription = contentDescription }

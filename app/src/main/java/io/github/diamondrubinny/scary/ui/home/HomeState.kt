@@ -13,7 +13,12 @@ data class HomeUiState(
     val hero: Movie? = null,
     val rows: List<HomeRow> = emptyList(),
     val effectsEnabled: Boolean = false,
+    /** Every installed TV app, hidden ones included, for the all-apps drawer. */
+    val drawer: List<DrawerApp> = emptyList(),
+    val nightMaxFear: Int = 5,
 )
+
+data class DrawerApp(val app: InstalledApp, val pinned: Boolean, val hidden: Boolean)
 
 sealed interface HomeRow {
     val key: String
@@ -43,6 +48,10 @@ sealed interface AppTile {
         override val key = "suggest:$packageName"
     }
 
+    data object AllApps : AppTile {
+        override val key = "all_apps"
+    }
+
     data object SystemSettings : AppTile {
         override val key = "system_settings"
     }
@@ -53,6 +62,8 @@ data class MovieDetails(val movie: Movie, val similar: List<Movie>)
 sealed interface Screen {
     data object Home : Screen
     data class Details(val movieId: String) : Screen
+    data object AllApps : Screen
+    data object Settings : Screen
 }
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())

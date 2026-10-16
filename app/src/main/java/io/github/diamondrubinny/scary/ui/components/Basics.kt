@@ -145,6 +145,24 @@ fun FogIcon(color: Color, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun GridIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val cell = size.minDimension * 0.38f
+        val gap = size.minDimension - cell * 2
+        for (row in 0..1) {
+            for (col in 0..1) {
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(col * (cell + gap), row * (cell + gap)),
+                    size = Size(cell, cell),
+                    cornerRadius = CornerRadius(cell * 0.25f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
 fun GearIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {
         val r = size.minDimension / 2

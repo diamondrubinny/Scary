@@ -2,19 +2,20 @@ package io.github.diamondrubinny.scary
 
 import android.content.Context
 import android.content.res.Configuration
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.data.LanguageStore
 import java.util.Locale
 
-/**
- * The launcher is Hebrew-first even when the TV's system language is English.
- * A language setting replaces this constant in a later phase.
- */
+/** Applies the launcher's own language (Hebrew by default) regardless of the TV's system language. */
 object LocaleOverride {
-    private val hebrew: Locale = Locale.forLanguageTag("he")
-
     fun wrap(base: Context): Context {
+        val locale = when (LanguageStore.read(base)) {
+            Language.HE -> Locale.forLanguageTag("he")
+            Language.EN -> Locale.forLanguageTag("en")
+        }
         val config = Configuration(base.resources.configuration)
-        config.setLocale(hebrew)
-        config.setLayoutDirection(hebrew)
+        config.setLocale(locale)
+        config.setLayoutDirection(locale)
         return base.createConfigurationContext(config)
     }
 }

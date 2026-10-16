@@ -131,11 +131,20 @@ fun AppTileCard(
     onFocused: () -> Unit,
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
+    badge: String? = null,
+    dimmed: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val label = when (tile) {
         is AppTile.Installed -> tile.app.label
         is AppTile.Suggestion -> stringResource(R.string.install_app, tile.label)
+        AppTile.AllApps -> stringResource(R.string.all_apps)
         AppTile.SystemSettings -> stringResource(R.string.system_settings)
+    }
+    val description = when {
+        tile is AppTile.SystemSettings -> stringResource(R.string.system_settings_description)
+        badge != null -> "$label, $badge"
+        else -> label
     }
     FocusSurface(
         onClick = onClick,
@@ -144,8 +153,9 @@ fun AppTileCard(
             .aspectRatio(16f / 9f),
         containerColor = ScaryColors.Crypt,
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
-        contentDescription = if (tile is AppTile.SystemSettings) stringResource(R.string.system_settings_description) else label,
+        contentDescription = description,
         onFocusChanged = { if (it) onFocused() },
+        onLongClick = onLongClick,
     ) {
         val banner = (tile as? AppTile.Installed)?.app?.banner
         if (banner != null) {
@@ -165,6 +175,7 @@ fun AppTileCard(
                 when {
                     icon != null -> Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
                     tile is AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    tile is AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
                     else -> Box(
                         Modifier
                             .size(30.dp)
@@ -178,6 +189,18 @@ fun AppTileCard(
                     overflow = TextOverflow.Ellipsis,
                 )
             }
+        }
+        if (dimmed) Box(Modifier.fillMaxSize().background(ScaryColors.Void.copy(alpha = 0.55f)))
+        if (badge != null) {
+            BasicText(
+                text = badge,
+                style = ScaryType.Caption.copy(color = ScaryColors.Void),
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(5.dp)
+                    .background(ScaryColors.Candle, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 1.dp),
+            )
         }
     }
 }

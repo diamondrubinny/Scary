@@ -19,6 +19,7 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
+import io.github.diamondrubinny.scary.data.LauncherPrefs
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.launch.LaunchResult
 import io.github.diamondrubinny.scary.launch.Launcher
@@ -58,7 +59,7 @@ class HomeViewModel(
     private val _message = MutableStateFlow<UserMessage?>(null)
     private val _homeResets = MutableStateFlow(0)
 
-    /** Key of the last focused home card, used to restore focus when returning from details. */
+    /** Key of the last focused home card, used to restore focus when returning from another screen. */
     var lastFocusedKey: String? = null
         private set
 
@@ -73,18 +74,21 @@ class HomeViewModel(
         catalog,
         installedApps,
         heroId,
-        settings.effectsEnabled,
-        settings.recentIds,
-    ) { catalogState, apps, hero, effects, recent ->
+        settings.prefs,
+    ) { catalogState, apps, hero, prefs ->
+        val tiles = appTiles(apps, prefs)
+        val drawer = drawerApps(apps, prefs)
         when (catalogState) {
-            CatalogState.Loading -> HomeUiState(loading = true, effectsEnabled = effects)
+            CatalogState.Loading -> HomeUiState(loading = true, effectsEnabled = prefs.effectsEnabled)
             CatalogState.Error -> HomeUiState(
                 loading = false,
                 catalogError = true,
-                rows = listOf(HomeRow.Apps(appTiles(apps))),
-                effectsEnabled = effects,
+                rows = listOf(HomeRow.Apps(tiles)),
+                effectsEnabled = prefs.effectsEnabled,
+                drawer = drawer,
+                nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, apps, hero, effects, recent)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, hero, prefs)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
@@ -117,16 +121,16 @@ class HomeViewModel(
 
     private fun buildState(
         catalog: Catalog,
-        apps: List<InstalledApp>,
+        tiles: List<AppTile>,
+        drawer: List<DrawerApp>,
         heroId: String?,
-        effects: Boolean,
-        recentIds: List<String>,
+        prefs: LauncherPrefs,
     ): HomeUiState {
-        val nightPick = NightPick.pick(catalog.movies, today())
+        val nightPick = NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
         val rows = buildList {
-            val recent = recentIds.mapNotNull(catalog::movie)
+            val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
-            add(HomeRow.Apps(appTiles(apps)))
+            add(HomeRow.Apps(tiles))
             catalog.collections.forEach { add(HomeRow.Collection(it, catalog.moviesOf(it))) }
         }
         return HomeUiState(
@@ -134,21 +138,27 @@ class HomeViewModel(
             nightPick = nightPick,
             hero = heroId?.let(catalog::movie) ?: nightPick,
             rows = rows,
-            effectsEnabled = effects,
+            effectsEnabled = prefs.effectsEnabled,
+            drawer = drawer,
+            nightMaxFear = prefs.nightMaxFear,
         )
     }
 
-    private fun appTiles(apps: List<InstalledApp>): List<AppTile> {
-        val installed = AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, KnownPackages.PINNED)
+    private fun appTiles(apps: List<InstalledApp>, prefs: LauncherPrefs): List<AppTile> {
+        val installed = AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned, prefs.hidden)
             .map { AppTile.Installed(it) }
-        val installedPackages = apps.map { it.packageName }.toSet()
-        val suggestions = if (KnownPackages.STREMIO in installedPackages) {
+        val stremioInstalled = apps.any { it.packageName == KnownPackages.STREMIO }
+        val suggestions = if (stremioInstalled) {
             emptyList()
         } else {
             listOf(AppTile.Suggestion(KnownPackages.STREMIO, Launcher.STREMIO_LABEL))
         }
-        return suggestions + installed + AppTile.SystemSettings
+        return suggestions + installed + AppTile.AllApps + AppTile.SystemSettings
     }
+
+    private fun drawerApps(apps: List<InstalledApp>, prefs: LauncherPrefs): List<DrawerApp> =
+        AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned)
+            .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
     fun details(movieId: String): MovieDetails? {
         val ready = catalog.value as? CatalogState.Ready ?: return null
@@ -161,8 +171,14 @@ class HomeViewModel(
         if (movieId != null) heroId.value = movieId
     }
 
-    fun openDetails(movieId: String) {
-        backStack.update { it + Screen.Details(movieId) }
+    fun openDetails(movieId: String) = push(Screen.Details(movieId))
+
+    fun openAllApps() = push(Screen.AllApps)
+
+    fun openSettings() = push(Screen.Settings)
+
+    private fun push(screen: Screen) {
+        backStack.update { if (it.last() == screen) it else it + screen }
     }
 
     /** Returns false when already on the home screen, so Back does nothing there. */
@@ -187,17 +203,37 @@ class HomeViewModel(
     fun trailer(movie: Movie) = report(launcher.openTrailer(movie))
 
     fun openTile(tile: AppTile, settingsLabel: String) {
-        val result = when (tile) {
-            is AppTile.Installed -> launcher.launchApp(tile.app.packageName, tile.app.label)
-            is AppTile.Suggestion -> launcher.openStoreFor(tile.packageName, tile.label)
-            AppTile.SystemSettings -> launcher.openSystemSettings(settingsLabel)
+        when (tile) {
+            is AppTile.Installed -> report(launcher.launchApp(tile.app.packageName, tile.app.label))
+            is AppTile.Suggestion -> report(launcher.openStoreFor(tile.packageName, tile.label))
+            AppTile.AllApps -> openAllApps()
+            AppTile.SystemSettings -> report(launcher.openSystemSettings(settingsLabel))
         }
-        report(result)
+    }
+
+    fun launchApp(app: InstalledApp) = report(launcher.launchApp(app.packageName, app.label))
+
+    fun openAppInfo(app: InstalledApp) = report(launcher.openAppInfo(app.packageName, app.label))
+
+    fun togglePinned(app: InstalledApp) {
+        viewModelScope.launch { settings.togglePinned(app.packageName) }
+    }
+
+    fun movePinned(app: InstalledApp, delta: Int) {
+        viewModelScope.launch { settings.movePinned(app.packageName, delta) }
+    }
+
+    fun toggleHidden(app: InstalledApp) {
+        viewModelScope.launch { settings.toggleHidden(app.packageName) }
+    }
+
+    fun setNightMaxFear(level: Int) {
+        viewModelScope.launch { settings.setNightMaxFear(level) }
     }
 
     fun toggleEffects() {
         viewModelScope.launch {
-            val enabled = !settings.effectsEnabled.first()
+            val enabled = !settings.prefs.first().effectsEnabled
             settings.setEffectsEnabled(enabled)
             show(if (enabled) R.string.msg_effects_on else R.string.msg_effects_off)
         }

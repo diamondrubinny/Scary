@@ -1,5 +1,10 @@
 package io.github.diamondrubinny.scary.ui
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,10 +18,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.data.LanguageStore
+import io.github.diamondrubinny.scary.data.SettingsRepository
+import io.github.diamondrubinny.scary.ui.apps.AllAppsActions
+import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
+import io.github.diamondrubinny.scary.ui.settings.SettingsActions
+import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
 import io.github.diamondrubinny.scary.ui.details.DetailsScreen
 import io.github.diamondrubinny.scary.ui.fx.Atmosphere
@@ -60,19 +72,47 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onTrailer = viewModel::trailer,
             onTile = { viewModel.openTile(it, settingsLabel) },
             onToggleEffects = viewModel::toggleEffects,
-            onSystemSettings = { viewModel.openTile(AppTile.SystemSettings, settingsLabel) },
+            onOpenSettings = viewModel::openSettings,
         )
     }
+    val allAppsActions = remember(viewModel) {
+        AllAppsActions(
+            onLaunch = viewModel::launchApp,
+            onTogglePinned = viewModel::togglePinned,
+            onMovePinned = viewModel::movePinned,
+            onToggleHidden = viewModel::toggleHidden,
+            onAppInfo = viewModel::openAppInfo,
+        )
+    }
+    val context = LocalContext.current
+    val settingsActions = SettingsActions(
+        onToggleLanguage = {
+            LanguageStore.write(context, if (language == Language.HE) Language.EN else Language.HE)
+            context.findActivity()?.recreate()
+        },
+        onToggleEffects = viewModel::toggleEffects,
+        onCycleNightFear = { viewModel.setNightMaxFear(state.nightMaxFear % SettingsRepository.MAX_FEAR + 1) },
+        onSystemSettings = { viewModel.openTile(AppTile.SystemSettings, settingsLabel) },
+    )
+    val versionName = remember(context) { context.versionName() }
 
     ScaryTheme(reduceMotion = !state.effectsEnabled) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
-            HeroBackdrop(details?.movie ?: state.hero)
+            HeroBackdrop(if (current == Screen.Home || details != null) details?.movie ?: state.hero else null)
             Atmosphere(animate = !LocalReduceMotion.current)
 
             when {
                 state.loading -> LoadingView()
+                current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
+                current == Screen.Settings -> SettingsScreen(
+                    language = language,
+                    effectsEnabled = state.effectsEnabled,
+                    nightMaxFear = state.nightMaxFear,
+                    versionName = versionName,
+                    actions = settingsActions,
+                )
                 details != null -> DetailsScreen(
                     details = details,
                     language = language,
@@ -98,4 +138,22 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             )
         }
     }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+private fun Context.versionName(): String = try {
+    val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        packageManager.getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+    } else {
+        @Suppress("DEPRECATION")
+        packageManager.getPackageInfo(packageName, 0)
+    }
+    info.versionName.orEmpty()
+} catch (_: PackageManager.NameNotFoundException) {
+    ""
 }

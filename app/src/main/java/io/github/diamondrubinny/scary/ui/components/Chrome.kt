@@ -38,7 +38,7 @@ import java.time.format.DateTimeFormatter
 fun TopBar(
     effectsEnabled: Boolean,
     onToggleEffects: () -> Unit,
-    onSystemSettings: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -55,8 +55,8 @@ fun TopBar(
                 dimmed = !effectsEnabled,
             ) { FogIcon(it) }
             IconCircleButton(
-                contentDescription = stringResource(R.string.system_settings_description),
-                onClick = onSystemSettings,
+                contentDescription = stringResource(R.string.settings_title),
+                onClick = onOpenSettings,
             ) { GearIcon(it) }
         }
     }

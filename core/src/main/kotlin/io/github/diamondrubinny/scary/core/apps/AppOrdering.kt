@@ -22,3 +22,18 @@ object AppOrdering {
         return pinnedApps + rest
     }
 }
+
+/** Edits to the user's ordered list of pinned packages. Pure, so the UI and tests share one behavior. */
+object PinnedList {
+    fun toggle(pinned: List<String>, packageName: String): List<String> =
+        if (packageName in pinned) pinned - packageName else pinned + packageName
+
+    /** Moves [packageName] by [delta] positions, clamped to the list bounds. Unknown packages leave the list as is. */
+    fun move(pinned: List<String>, packageName: String, delta: Int): List<String> {
+        val from = pinned.indexOf(packageName)
+        if (from < 0) return pinned
+        val to = (from + delta).coerceIn(0, pinned.lastIndex)
+        if (to == from) return pinned
+        return pinned.toMutableList().apply { add(to, removeAt(from)) }
+    }
+}

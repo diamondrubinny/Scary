@@ -46,7 +46,7 @@ class HomeActions(
     val onTrailer: (Movie) -> Unit,
     val onTile: (AppTile) -> Unit,
     val onToggleEffects: () -> Unit,
-    val onSystemSettings: () -> Unit,
+    val onOpenSettings: () -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -76,7 +76,7 @@ fun HomeScreen(
         TopBar(
             effectsEnabled = state.effectsEnabled,
             onToggleEffects = actions.onToggleEffects,
-            onSystemSettings = actions.onSystemSettings,
+            onOpenSettings = actions.onOpenSettings,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
         )
         Hero(

@@ -54,6 +54,11 @@ class Launcher(
         return if (start(market) || start(web)) LaunchResult.OpenedStoreInstead(label) else LaunchResult.Failed(label)
     }
 
+    fun openAppInfo(packageName: String, label: String): LaunchResult {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
+        return if (start(intent)) LaunchResult.Opened else LaunchResult.Failed(label)
+    }
+
     fun openSystemSettings(label: String): LaunchResult =
         if (start(Intent(Settings.ACTION_SETTINGS))) LaunchResult.Opened else LaunchResult.Failed(label)
 
