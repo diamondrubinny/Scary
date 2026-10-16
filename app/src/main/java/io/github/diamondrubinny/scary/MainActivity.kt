@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent { ScaryRoot(viewModel) }
+        handleDebugIntent(intent)
 
         val settings = (application as ScaryApplication).container.settingsRepository
         lifecycleScope.launch {
@@ -58,5 +60,32 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.onHomePressed()
+        handleDebugIntent(intent)
+    }
+
+    /**
+     * Debug builds only: lets CI open a specific screen for automated screenshots, e.g.
+     * `adb shell am start -n <pkg>/.MainActivity --es scary.debug.open search --es scary.debug.query fincher`.
+     * Release builds are not debuggable, so this does nothing there.
+     */
+    private fun handleDebugIntent(intent: Intent?) {
+        if (intent == null || applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE == 0) return
+        val target = intent.getStringExtra(DEBUG_OPEN) ?: return
+        viewModel.onHomePressed()
+        when {
+            target == "search" -> {
+                viewModel.setSearchQuery(intent.getStringExtra(DEBUG_QUERY).orEmpty())
+                viewModel.openSearch()
+            }
+            target == "apps" -> viewModel.openAllApps()
+            target == "settings" -> viewModel.openSettings()
+            target == "pin" -> viewModel.startPinSetup()
+            target.startsWith("details:") -> viewModel.openDetails(target.removePrefix("details:"))
+        }
+    }
+
+    private companion object {
+        const val DEBUG_OPEN = "scary.debug.open"
+        const val DEBUG_QUERY = "scary.debug.query"
     }
 }
