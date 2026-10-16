@@ -1,0 +1,1066 @@
+{
+ "version": 1,
+ "movies": [
+  {
+   "id": "psycho",
+   "imdbId": "tt0054215",
+   "title": "Psycho",
+   "year": 1960,
+   "director": "Alfred Hitchcock",
+   "runtimeMin": 109,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "slasher"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "מזכירה בורחת עם כסף גנוב ועוצרת ללילה במוטל צדדי שמנהל צעיר שקט מדי.",
+   "synopsisEn": "A secretary on the run with stolen cash stops for the night at a roadside motel run by an unnervingly quiet young man."
+  },
+  {
+   "id": "rosemarys_baby",
+   "imdbId": "tt0063522",
+   "title": "Rosemary's Baby",
+   "year": 1968,
+   "director": "Roman Polanski",
+   "runtimeMin": 137,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 90,
+   "saturation": 20,
+   "synopsisHe": "זוג צעיר עובר לבניין יוקרתי בניו יורק, והשכנים מגלים בהריון שלה עניין רב מדי.",
+   "synopsisEn": "A young couple moves into a grand New York building, and the neighbors take far too much interest in her pregnancy."
+  },
+  {
+   "id": "the_exorcist",
+   "imdbId": "tt0070047",
+   "title": "The Exorcist",
+   "year": 1973,
+   "director": "William Friedkin",
+   "runtimeMin": 122,
+   "genre": "horror",
+   "subgenres": [
+    "possession",
+    "supernatural"
+   ],
+   "fear": 5,
+   "hue": 200,
+   "saturation": 55,
+   "synopsisHe": "אם מנסה להציל את בתה מכוח שהשתלט עליה, ופונה לשני כמרים כמוצא אחרון.",
+   "synopsisEn": "A mother fights to save her daughter from a force that has taken hold of her, and turns to two priests as a last resort."
+  },
+  {
+   "id": "texas_chain_saw",
+   "imdbId": "tt0072271",
+   "title": "The Texas Chain Saw Massacre",
+   "year": 1974,
+   "director": "Tobe Hooper",
+   "runtimeMin": 83,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "survival"
+   ],
+   "fear": 5,
+   "hue": 35,
+   "saturation": 60,
+   "synopsisHe": "חמישה חברים בטיול בטקסס הכפרית נתקלים בבית שכדאי היה לעקוף.",
+   "synopsisEn": "Five friends on a road trip through rural Texas stumble onto a house they should have driven past."
+  },
+  {
+   "id": "halloween",
+   "imdbId": "tt0077651",
+   "title": "Halloween",
+   "year": 1978,
+   "director": "John Carpenter",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "slasher"
+   ],
+   "fear": 4,
+   "hue": 28,
+   "saturation": 70,
+   "synopsisHe": "חמש־עשרה שנה אחרי רצח בליל כל הקדושים, הרוצח בורח וחוזר לעיירה שבה הכל התחיל.",
+   "synopsisEn": "Fifteen years after a Halloween murder, the killer escapes and returns to the small town where it began."
+  },
+  {
+   "id": "alien",
+   "imdbId": "tt0078748",
+   "title": "Alien",
+   "year": 1979,
+   "director": "Ridley Scott",
+   "runtimeMin": 117,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 160,
+   "saturation": 35,
+   "synopsisHe": "צוות של ספינת משא בחלל עונה לאות מצוקה ומעלה לסיפון נוסע שלא הוזמן.",
+   "synopsisEn": "The crew of a space freighter answers a distress call and brings an uninvited passenger aboard."
+  },
+  {
+   "id": "the_shining",
+   "imdbId": "tt0081505",
+   "title": "The Shining",
+   "year": 1980,
+   "director": "Stanley Kubrick",
+   "runtimeMin": 146,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 20,
+   "saturation": 55,
+   "synopsisHe": "שומר חורף במלון מבודד בהרים מתחיל לאבד את שפיותו, בזמן שבנו רואה את מה שהמלון מסתיר.",
+   "synopsisEn": "A winter caretaker at an isolated mountain hotel starts to lose his mind while his son sees what the hotel is hiding."
+  },
+  {
+   "id": "the_thing",
+   "imdbId": "tt0084787",
+   "title": "The Thing",
+   "year": 1982,
+   "director": "John Carpenter",
+   "runtimeMin": 109,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 190,
+   "saturation": 55,
+   "synopsisHe": "צוות מחקר באנטארקטיקה מגלה ישות שיכולה להתחזות לכל אחד מהם.",
+   "synopsisEn": "A research team in Antarctica uncovers a being that can imitate any one of them."
+  },
+  {
+   "id": "nightmare_elm_street",
+   "imdbId": "tt0087800",
+   "title": "A Nightmare on Elm Street",
+   "year": 1984,
+   "director": "Wes Craven",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 15,
+   "saturation": 65,
+   "synopsisHe": "בני נוער ברחוב אחד מגלים שהם חולמים על אותו אדם, ושמה שקורה בחלום לא נשאר שם.",
+   "synopsisEn": "Teenagers on one street realize they share the same nightmare, and what happens in the dream does not stay there."
+  },
+  {
+   "id": "jacobs_ladder",
+   "imdbId": "tt0099871",
+   "title": "Jacob's Ladder",
+   "year": 1990,
+   "director": "Adrian Lyne",
+   "runtimeMin": 113,
+   "genre": "horror",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 50,
+   "saturation": 25,
+   "synopsisHe": "ותיק מלחמת וייטנאם בניו יורק נרדף בחזיונות שגורמים לו לפקפק במה שאמיתי.",
+   "synopsisEn": "A Vietnam veteran in New York is haunted by visions that make him doubt what is real."
+  },
+  {
+   "id": "the_sixth_sense",
+   "imdbId": "tt0167404",
+   "title": "The Sixth Sense",
+   "year": 1999,
+   "director": "M. Night Shyamalan",
+   "runtimeMin": 107,
+   "genre": "thriller",
+   "subgenres": [
+    "ghost",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 0,
+   "saturation": 45,
+   "synopsisHe": "פסיכולוג ילדים מטפל בילד שטוען שהוא רואה אנשים מתים.",
+   "synopsisEn": "A child psychologist treats a boy who says he can see dead people."
+  },
+  {
+   "id": "the_others",
+   "imdbId": "tt0230600",
+   "title": "The Others",
+   "year": 2001,
+   "director": "Alejandro Amenábar",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 45,
+   "saturation": 30,
+   "synopsisHe": "אם ושני ילדיה חיים באחוזה חשוכה, עד שמשהו בבית מתחיל להתנהג כאילו הוא לא שלהם.",
+   "synopsisEn": "A mother and her two children live in a darkened manor until the house starts behaving as if it belongs to someone else."
+  },
+  {
+   "id": "the_ring",
+   "imdbId": "tt0298130",
+   "title": "The Ring",
+   "year": 2002,
+   "director": "Gore Verbinski",
+   "runtimeMin": 115,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "mystery"
+   ],
+   "fear": 4,
+   "hue": 175,
+   "saturation": 40,
+   "synopsisHe": "עיתונאית חוקרת קלטת וידאו שלפי השמועה כל מי שצופה בה מת אחרי שבעה ימים.",
+   "synopsisEn": "A journalist investigates a videotape rumored to kill anyone who watches it within seven days."
+  },
+  {
+   "id": "28_days_later",
+   "imdbId": "tt0289043",
+   "title": "28 Days Later",
+   "year": 2002,
+   "director": "Danny Boyle",
+   "runtimeMin": 113,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "creature"
+   ],
+   "fear": 4,
+   "hue": 10,
+   "saturation": 40,
+   "synopsisHe": "גבר מתעורר בבית חולים נטוש ומגלה שלונדון התרוקנה, ומשהו זועם מסתובב ברחובות.",
+   "synopsisEn": "A man wakes in an abandoned hospital to find London emptied out and something furious roaming the streets."
+  },
+  {
+   "id": "saw",
+   "imdbId": "tt0387564",
+   "title": "Saw",
+   "year": 2004,
+   "director": "James Wan",
+   "runtimeMin": 103,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "survival"
+   ],
+   "fear": 5,
+   "hue": 70,
+   "saturation": 45,
+   "synopsisHe": "שני גברים מתעוררים כבולים בחדר שירותים מוזנח, עם הוראות למשחק שאין בו כללים הוגנים.",
+   "synopsisEn": "Two men wake up chained in a filthy bathroom, holding instructions for a game with no fair rules."
+  },
+  {
+   "id": "the_descent",
+   "imdbId": "tt0435625",
+   "title": "The Descent",
+   "year": 2005,
+   "director": "Neil Marshall",
+   "runtimeMin": 99,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 5,
+   "hue": 25,
+   "saturation": 60,
+   "synopsisHe": "קבוצת חברות יורדת למערכת מערות לא ממופה ומגלה שהן לא לבד בחושך.",
+   "synopsisEn": "A group of friends descends into an unmapped cave system and finds they are not alone in the dark."
+  },
+  {
+   "id": "rec",
+   "imdbId": "tt1038988",
+   "title": "[REC]",
+   "year": 2007,
+   "director": "Jaume Balagueró, Paco Plaza",
+   "runtimeMin": 78,
+   "genre": "horror",
+   "subgenres": [
+    "found_footage",
+    "survival"
+   ],
+   "fear": 5,
+   "hue": 40,
+   "saturation": 50,
+   "synopsisHe": "כתבת טלוויזיה מלווה כבאים לקריאה בבניין דירות בברצלונה, והבניין נאטם כשהם בפנים.",
+   "synopsisEn": "A TV reporter follows firefighters to a call in a Barcelona apartment building, which is sealed off with them inside."
+  },
+  {
+   "id": "insidious",
+   "imdbId": "tt1591095",
+   "title": "Insidious",
+   "year": 2010,
+   "director": "James Wan",
+   "runtimeMin": 103,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "ghost"
+   ],
+   "fear": 4,
+   "hue": 260,
+   "saturation": 35,
+   "synopsisHe": "אחרי שבנם שוקע בתרדמת בלתי מוסברת, הורים מגלים שהבית החדש הוא לא הבעיה.",
+   "synopsisEn": "When their son falls into an unexplained coma, two parents learn the new house is not the problem."
+  },
+  {
+   "id": "sinister",
+   "imdbId": "tt1922777",
+   "title": "Sinister",
+   "year": 2012,
+   "director": "Scott Derrickson",
+   "runtimeMin": 110,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "mystery"
+   ],
+   "fear": 5,
+   "hue": 30,
+   "saturation": 50,
+   "synopsisHe": "סופר פשע מוצא בעליית הגג של ביתו החדש קופסה של סרטים ביתיים שמתעדים מקרי רצח.",
+   "synopsisEn": "A true-crime writer finds a box of home movies documenting murders in the attic of his new house."
+  },
+  {
+   "id": "the_conjuring",
+   "imdbId": "tt1457767",
+   "title": "The Conjuring",
+   "year": 2013,
+   "director": "James Wan",
+   "runtimeMin": 112,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "possession"
+   ],
+   "fear": 4,
+   "hue": 210,
+   "saturation": 30,
+   "synopsisHe": "זוג חוקרי תופעות על־טבעיות נקרא לעזור למשפחה שבית החווה שלה מאוכלס במשהו עוין.",
+   "synopsisEn": "Two paranormal investigators are called to help a family whose farmhouse is occupied by something hostile."
+  },
+  {
+   "id": "the_babadook",
+   "imdbId": "tt2321549",
+   "title": "The Babadook",
+   "year": 2014,
+   "director": "Jennifer Kent",
+   "runtimeMin": 94,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 220,
+   "saturation": 55,
+   "synopsisHe": "ספר ילדים מסתורי מופיע בבית של אם ובנה, והדמות שבו מסרבת לעזוב.",
+   "synopsisEn": "A mysterious children's book appears in the home of a widowed mother and her son, and the figure in it refuses to leave."
+  },
+  {
+   "id": "it_follows",
+   "imdbId": "tt3235888",
+   "title": "It Follows",
+   "year": 2014,
+   "director": "David Robert Mitchell",
+   "runtimeMin": 100,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 330,
+   "saturation": 40,
+   "synopsisHe": "אחרי מפגש אחד, צעירה מגלה שמשהו הולך אחריה בקצב איטי, ולא יפסיק.",
+   "synopsisEn": "After a single encounter, a young woman realizes something is walking toward her, slowly, and it will not stop."
+  },
+  {
+   "id": "the_witch",
+   "imdbId": "tt4263482",
+   "title": "The Witch",
+   "year": 2015,
+   "director": "Robert Eggers",
+   "runtimeMin": 92,
+   "genre": "horror",
+   "subgenres": [
+    "folk",
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 95,
+   "saturation": 20,
+   "synopsisHe": "משפחה פוריטנית בניו אינגלנד של המאה ה־17 מתיישבת בשולי יער, והיער מתחיל לקחת.",
+   "synopsisEn": "A Puritan family in 1630s New England settles at the edge of a forest, and the forest begins to take."
+  },
+  {
+   "id": "get_out",
+   "imdbId": "tt5052448",
+   "title": "Get Out",
+   "year": 2017,
+   "director": "Jordan Peele",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "social",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 140,
+   "saturation": 55,
+   "synopsisHe": "ביקור ראשון אצל משפחת החברה הופך מסוף שבוע מביך לסיוט.",
+   "synopsisEn": "A first visit to his girlfriend's family turns from an awkward weekend into a nightmare."
+  },
+  {
+   "id": "a_quiet_place",
+   "imdbId": "tt6644200",
+   "title": "A Quiet Place",
+   "year": 2018,
+   "director": "John Krasinski",
+   "runtimeMin": 90,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 35,
+   "synopsisHe": "משפחה שורדת בעולם שבו כל רעש מושך יצורים ציידים, וחייבת לחיות בשקט מוחלט.",
+   "synopsisEn": "A family survives in a world where any sound draws hunting creatures, so they must live in total silence."
+  },
+  {
+   "id": "hereditary",
+   "imdbId": "tt7784604",
+   "title": "Hereditary",
+   "year": 2018,
+   "director": "Ari Aster",
+   "runtimeMin": 127,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 5,
+   "hue": 15,
+   "saturation": 55,
+   "synopsisHe": "אחרי מות הסבתא, משפחה מגלה שהירושה שהשאירה אחריה כבדה ומפחידה בהרבה ממה שחשבו.",
+   "synopsisEn": "After the grandmother dies, a family learns that what she left behind is far heavier and darker than they knew."
+  },
+  {
+   "id": "us",
+   "imdbId": "tt6857112",
+   "title": "Us",
+   "year": 2019,
+   "director": "Jordan Peele",
+   "runtimeMin": 116,
+   "genre": "horror",
+   "subgenres": [
+    "social",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 60,
+   "synopsisHe": "חופשה משפחתית בחוף מתהפכת כשארבעה זרים, שנראים בדיוק כמותם, עומדים בחניה.",
+   "synopsisEn": "A family beach vacation turns when four strangers who look exactly like them appear in the driveway."
+  },
+  {
+   "id": "midsommar",
+   "imdbId": "tt8772262",
+   "title": "Midsommar",
+   "year": 2019,
+   "director": "Ari Aster",
+   "runtimeMin": 148,
+   "genre": "horror",
+   "subgenres": [
+    "folk",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 55,
+   "saturation": 45,
+   "synopsisHe": "זוג במשבר מצטרף לחברים בפסטיבל קיץ בכפר שוודי מבודד, שבו השמש לא שוקעת.",
+   "synopsisEn": "A couple in crisis joins friends at a midsummer festival in a remote Swedish village where the sun never sets."
+  },
+  {
+   "id": "the_lighthouse",
+   "imdbId": "tt7984734",
+   "title": "The Lighthouse",
+   "year": 2019,
+   "director": "Robert Eggers",
+   "runtimeMin": 109,
+   "genre": "horror",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "שני שומרי מגדלור על אי סלעי ומבודד מתחילים לאבד את אחיזתם במציאות.",
+   "synopsisEn": "Two lighthouse keepers on a remote, storm-battered island begin to lose their grip on reality."
+  },
+  {
+   "id": "the_invisible_man",
+   "imdbId": "tt1051906",
+   "title": "The Invisible Man",
+   "year": 2020,
+   "director": "Leigh Whannell",
+   "runtimeMin": 124,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "social"
+   ],
+   "fear": 3,
+   "hue": 205,
+   "saturation": 30,
+   "synopsisHe": "אישה נמלטת מבן זוג מתעלל, ואחרי מותו המדווח היא בטוחה שהוא עדיין שם.",
+   "synopsisEn": "A woman escapes an abusive partner, and after his reported death she is certain he is still there."
+  },
+  {
+   "id": "barbarian",
+   "imdbId": "tt15791034",
+   "title": "Barbarian",
+   "year": 2022,
+   "director": "Zach Cregger",
+   "runtimeMin": 102,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "mystery"
+   ],
+   "fear": 4,
+   "hue": 30,
+   "saturation": 40,
+   "synopsisHe": "צעירה מגיעה בלילה לדירה שהזמינה בדטרויט ומגלה שהיא כבר מושכרת לזר.",
+   "synopsisEn": "A young woman arrives at her Detroit rental at night to find it already booked by a stranger."
+  },
+  {
+   "id": "smile",
+   "imdbId": "tt15474916",
+   "title": "Smile",
+   "year": 2022,
+   "director": "Parker Finn",
+   "runtimeMin": 115,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 350,
+   "saturation": 50,
+   "synopsisHe": "פסיכיאטרית עדה לאירוע טראומטי ומתחילה לראות חיוכים שאי אפשר להסביר.",
+   "synopsisEn": "A psychiatrist witnesses a traumatic incident and begins to see smiles that cannot be explained."
+  },
+  {
+   "id": "talk_to_me",
+   "imdbId": "tt10638522",
+   "title": "Talk to Me",
+   "year": 2022,
+   "director": "Danny Philippou, Michael Philippou",
+   "runtimeMin": 95,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "possession"
+   ],
+   "fear": 5,
+   "hue": 280,
+   "saturation": 40,
+   "synopsisHe": "חבורת בני נוער מגלה יד חנוטה שמאפשרת לדבר עם המתים, והמשחק יוצא משליטה.",
+   "synopsisEn": "Teenagers discover an embalmed hand that lets them contact the dead, and the game spirals out of control."
+  },
+  {
+   "id": "rear_window",
+   "imdbId": "tt0047396",
+   "title": "Rear Window",
+   "year": 1954,
+   "director": "Alfred Hitchcock",
+   "runtimeMin": 112,
+   "genre": "thriller",
+   "subgenres": [
+    "mystery",
+    "crime"
+   ],
+   "fear": 1,
+   "hue": 210,
+   "saturation": 35,
+   "synopsisHe": "צלם מרותק לכיסא גלגלים מתבונן בשכנים מהחלון, ומשתכנע שאחד מהם ביצע רצח.",
+   "synopsisEn": "A photographer confined to a wheelchair watches his neighbors and becomes convinced one of them committed murder."
+  },
+  {
+   "id": "vertigo",
+   "imdbId": "tt0052357",
+   "title": "Vertigo",
+   "year": 1958,
+   "director": "Alfred Hitchcock",
+   "runtimeMin": 128,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 1,
+   "hue": 300,
+   "saturation": 45,
+   "synopsisHe": "בלש לשעבר עם פחד גבהים נשכר לעקוב אחרי אישה, ונשאב לאובססיה.",
+   "synopsisEn": "A retired detective with a fear of heights is hired to follow a woman and is pulled into obsession."
+  },
+  {
+   "id": "misery",
+   "imdbId": "tt0100157",
+   "title": "Misery",
+   "year": 1990,
+   "director": "Rob Reiner",
+   "runtimeMin": 107,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 195,
+   "saturation": 30,
+   "synopsisHe": "סופר פצוע מחולץ מתאונה על ידי המעריצה הגדולה שלו, שלא מתכוונת לשחרר אותו.",
+   "synopsisEn": "An injured novelist is rescued from a car crash by his biggest fan, who has no intention of letting him go."
+  },
+  {
+   "id": "silence_of_the_lambs",
+   "imdbId": "tt0102926",
+   "title": "The Silence of the Lambs",
+   "year": 1991,
+   "director": "Jonathan Demme",
+   "runtimeMin": 118,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 55,
+   "synopsisHe": "חניכה ב־FBI נעזרת ברוצח סדרתי כלוא כדי לתפוס רוצח אחר.",
+   "synopsisEn": "An FBI trainee seeks help from an imprisoned killer to catch another one."
+  },
+  {
+   "id": "se7en",
+   "imdbId": "tt0114369",
+   "title": "Se7en",
+   "year": 1995,
+   "director": "David Fincher",
+   "runtimeMin": 127,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "mystery"
+   ],
+   "fear": 4,
+   "hue": 60,
+   "saturation": 25,
+   "synopsisHe": "שני בלשים רודפים אחרי רוצח שבוחר את קורבנותיו לפי שבעת החטאים.",
+   "synopsisEn": "Two detectives hunt a killer who chooses his victims according to the seven deadly sins."
+  },
+  {
+   "id": "scream",
+   "imdbId": "tt0117571",
+   "title": "Scream",
+   "year": 1996,
+   "director": "Wes Craven",
+   "runtimeMin": 111,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 215,
+   "saturation": 50,
+   "synopsisHe": "רוצח במסכה מטיל אימה על עיירה קטנה, ומכיר היטב את כל החוקים של סרטי אימה.",
+   "synopsisEn": "A masked killer terrorizes a small town, and he knows every rule of horror movies."
+  },
+  {
+   "id": "fight_club",
+   "imdbId": "tt0137523",
+   "title": "Fight Club",
+   "year": 1999,
+   "director": "David Fincher",
+   "runtimeMin": 139,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 330,
+   "saturation": 40,
+   "synopsisHe": "עובד משרד מותש מנדודי שינה פוגש מוכר סבון כריזמטי, ויחד הם מקימים מועדון מחתרתי.",
+   "synopsisEn": "An insomniac office worker meets a charismatic soap salesman, and together they start an underground club."
+  },
+  {
+   "id": "memento",
+   "imdbId": "tt0209144",
+   "title": "Memento",
+   "year": 2000,
+   "director": "Christopher Nolan",
+   "runtimeMin": 113,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 1,
+   "hue": 35,
+   "saturation": 45,
+   "synopsisHe": "אדם ללא זיכרון לטווח קצר מנסה למצוא את מי שרצח את אשתו, בעזרת פתקים וקעקועים.",
+   "synopsisEn": "A man with no short-term memory hunts his wife's killer using notes and tattoos."
+  },
+  {
+   "id": "mulholland_drive",
+   "imdbId": "tt0166924",
+   "title": "Mulholland Drive",
+   "year": 2001,
+   "director": "David Lynch",
+   "runtimeMin": 147,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 250,
+   "saturation": 50,
+   "synopsisHe": "שחקנית צעירה בהוליווד עוזרת לאישה שאיבדה את זיכרונה, והעיר מתחילה להתפרק סביבן.",
+   "synopsisEn": "An aspiring actress in Hollywood helps a woman who has lost her memory, and the city starts to come apart around them."
+  },
+  {
+   "id": "oldboy",
+   "imdbId": "tt0364569",
+   "title": "Oldboy",
+   "year": 2003,
+   "director": "Park Chan-wook",
+   "runtimeMin": 120,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 120,
+   "saturation": 40,
+   "synopsisHe": "אדם שנכלא בחדר במשך חמש־עשרה שנה בלי הסבר משוחרר פתאום, ויש לו חמישה ימים להבין למה.",
+   "synopsisEn": "A man imprisoned in a room for fifteen years without explanation is suddenly released and given five days to find out why."
+  },
+  {
+   "id": "the_machinist",
+   "imdbId": "tt0361862",
+   "title": "The Machinist",
+   "year": 2004,
+   "director": "Brad Anderson",
+   "runtimeMin": 101,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 60,
+   "saturation": 15,
+   "synopsisHe": "פועל מפעל שלא ישן כבר שנה מוצא פתקים מסתוריים במקרר, ומתחיל לחשוד בכולם.",
+   "synopsisEn": "A factory worker who has not slept in a year finds cryptic notes on his fridge and starts to suspect everyone."
+  },
+  {
+   "id": "zodiac",
+   "imdbId": "tt0443706",
+   "title": "Zodiac",
+   "year": 2007,
+   "director": "David Fincher",
+   "runtimeMin": 157,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 45,
+   "saturation": 30,
+   "synopsisHe": "קריקטוריסט, כתב ובלש נשאבים לאורך שנים אל המצוד אחרי רוצח שמתגרה בעיתונות.",
+   "synopsisEn": "A cartoonist, a reporter and a detective spend years obsessed with hunting a killer who taunts the press."
+  },
+  {
+   "id": "black_swan",
+   "imdbId": "tt0947798",
+   "title": "Black Swan",
+   "year": 2010,
+   "director": "Darren Aronofsky",
+   "runtimeMin": 108,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 300,
+   "saturation": 10,
+   "synopsisHe": "רקדנית בלט שזכתה בתפקיד חייה מתחילה לאבד את הגבול בין הבמה לבין עצמה.",
+   "synopsisEn": "A ballerina who lands the role of her life starts to lose the line between the stage and herself."
+  },
+  {
+   "id": "shutter_island",
+   "imdbId": "tt1130884",
+   "title": "Shutter Island",
+   "year": 2010,
+   "director": "Martin Scorsese",
+   "runtimeMin": 138,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 170,
+   "saturation": 55,
+   "synopsisHe": "מרשל פדרלי חוקר היעלמות של מטופלת מבית חולים על אי, וכל רמז מוביל אותו עמוק יותר פנימה.",
+   "synopsisEn": "A U.S. marshal investigates a patient's disappearance from an island hospital, and every clue pulls him deeper in."
+  },
+  {
+   "id": "prisoners",
+   "imdbId": "tt1392214",
+   "title": "Prisoners",
+   "year": 2013,
+   "director": "Denis Villeneuve",
+   "runtimeMin": 153,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 210,
+   "saturation": 12,
+   "synopsisHe": "כששתי ילדות נעלמות ביום חג ההודיה, אב אחד מחליט לקחת את החקירה לידיים.",
+   "synopsisEn": "When two girls go missing on Thanksgiving, one father decides to take the investigation into his own hands."
+  },
+  {
+   "id": "enemy",
+   "imdbId": "tt2316411",
+   "title": "Enemy",
+   "year": 2013,
+   "director": "Denis Villeneuve",
+   "runtimeMin": 91,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 50,
+   "saturation": 55,
+   "synopsisHe": "מרצה להיסטוריה מגלה בסרט שחקן שנראה בדיוק כמוהו, ומתחיל לעקוב אחריו.",
+   "synopsisEn": "A history lecturer spots an actor who looks exactly like him in a movie and starts to track him down."
+  },
+  {
+   "id": "gone_girl",
+   "imdbId": "tt2267998",
+   "title": "Gone Girl",
+   "year": 2014,
+   "director": "David Fincher",
+   "runtimeMin": 149,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 195,
+   "saturation": 25,
+   "synopsisHe": "ביום הנישואין החמישי שלהם אשתו נעלמת, והחשדות מתחילים להצביע עליו.",
+   "synopsisEn": "On their fifth wedding anniversary his wife disappears, and suspicion starts pointing at him."
+  },
+  {
+   "id": "nightcrawler",
+   "imdbId": "tt2872718",
+   "title": "Nightcrawler",
+   "year": 2014,
+   "director": "Dan Gilroy",
+   "runtimeMin": 117,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 40,
+   "saturation": 60,
+   "synopsisHe": "צעיר שאפתני בלוס אנג׳לס מגלה עד כמה משלמים על צילומי פשע לילי, ואין לו גבולות.",
+   "synopsisEn": "An ambitious young man in Los Angeles discovers how much nighttime crime footage is worth, and he has no limits."
+  },
+  {
+   "id": "parasite",
+   "imdbId": "tt6751668",
+   "title": "Parasite",
+   "year": 2019,
+   "director": "Bong Joon-ho",
+   "runtimeMin": 132,
+   "genre": "thriller",
+   "subgenres": [
+    "social",
+    "crime"
+   ],
+   "fear": 2,
+   "hue": 95,
+   "saturation": 25,
+   "synopsisHe": "משפחה ענייה מסתננת אחד אחד לעבודה בבית של משפחה עשירה, עד שהבית חושף סוד משלו.",
+   "synopsisEn": "A poor family worms its way, one by one, into jobs in a wealthy household until the house reveals a secret of its own."
+  }
+ ],
+ "collections": [
+  {
+   "id": "classics",
+   "titleHe": "קלאסיקות שאסור לפספס",
+   "titleEn": "Classics you can't skip",
+   "movieIds": [
+    "psycho",
+    "rosemarys_baby",
+    "the_exorcist",
+    "texas_chain_saw",
+    "halloween",
+    "alien",
+    "the_shining",
+    "the_thing",
+    "nightmare_elm_street"
+   ]
+  },
+  {
+   "id": "psychological_horror",
+   "titleHe": "אימה פסיכולוגית",
+   "titleEn": "Psychological horror",
+   "movieIds": [
+    "the_babadook",
+    "hereditary",
+    "the_lighthouse",
+    "jacobs_ladder",
+    "midsommar",
+    "the_witch",
+    "smile",
+    "the_invisible_man"
+   ]
+  },
+  {
+   "id": "supernatural",
+   "titleHe": "רוחות, שדים ודיבוקים",
+   "titleEn": "Ghosts, demons and possession",
+   "movieIds": [
+    "the_conjuring",
+    "insidious",
+    "sinister",
+    "the_ring",
+    "the_others",
+    "it_follows",
+    "talk_to_me",
+    "the_sixth_sense"
+   ]
+  },
+  {
+   "id": "psychological_thriller",
+   "titleHe": "מתח פסיכולוגי",
+   "titleEn": "Psychological thrillers",
+   "movieIds": [
+    "shutter_island",
+    "black_swan",
+    "memento",
+    "the_machinist",
+    "enemy",
+    "mulholland_drive",
+    "fight_club",
+    "misery",
+    "vertigo"
+   ]
+  },
+  {
+   "id": "crime_thriller",
+   "titleHe": "מותחני פשע וחקירה",
+   "titleEn": "Crime and investigation",
+   "movieIds": [
+    "se7en",
+    "silence_of_the_lambs",
+    "zodiac",
+    "prisoners",
+    "gone_girl",
+    "nightcrawler",
+    "oldboy",
+    "rear_window"
+   ]
+  },
+  {
+   "id": "social",
+   "titleHe": "האימה שבחברה",
+   "titleEn": "Social nightmares",
+   "movieIds": [
+    "get_out",
+    "us",
+    "parasite",
+    "the_invisible_man",
+    "barbarian"
+   ]
+  },
+  {
+   "id": "survival",
+   "titleHe": "לשרוד עד הבוקר",
+   "titleEn": "Survive till morning",
+   "movieIds": [
+    "alien",
+    "the_thing",
+    "the_descent",
+    "a_quiet_place",
+    "rec",
+    "28_days_later",
+    "saw"
+   ]
+  },
+  {
+   "id": "slashers",
+   "titleHe": "סכינים ומסכות",
+   "titleEn": "Masks and blades",
+   "movieIds": [
+    "halloween",
+    "scream",
+    "nightmare_elm_street",
+    "texas_chain_saw",
+    "saw"
+   ]
+  },
+  {
+   "id": "max_fear",
+   "titleHe": "מד פחד 5: רק לאמיצים",
+   "titleEn": "Fear level 5: brave souls only",
+   "movieIds": [
+    "the_exorcist",
+    "texas_chain_saw",
+    "saw",
+    "the_descent",
+    "rec",
+    "sinister",
+    "hereditary",
+    "talk_to_me"
+   ]
+  }
+ ]
+}

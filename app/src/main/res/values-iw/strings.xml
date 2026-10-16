@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="night_pick">הסרט של הלילה</string>
+    <string name="action_watch_stremio">צפייה ב־Stremio</string>
+    <string name="action_trailer">טריילר</string>
+    <string name="action_details">פרטים</string>
+    <string name="row_recent">נפתחו לאחרונה</string>
+    <string name="row_apps">האפליקציות שלי</string>
+    <string name="row_more_like">עוד כאלה</string>
+    <string name="minutes">%1$d דק׳</string>
+    <string name="fear_short">מד פחד %1$d/5</string>
+    <string name="fear_description">רמת פחד %1$d מתוך 5</string>
+    <string name="directed_by">בימוי: %1$s</string>
+    <string name="genre_horror">אימה</string>
+    <string name="genre_thriller">מתח</string>
+    <string name="subgenre_psychological">פסיכולוגי</string>
+    <string name="subgenre_supernatural">על־טבעי</string>
+    <string name="subgenre_possession">דיבוק</string>
+    <string name="subgenre_ghost">רוחות</string>
+    <string name="subgenre_slasher">סלאשר</string>
+    <string name="subgenre_creature">יצורים</string>
+    <string name="subgenre_folk">אימה פולקלורית</string>
+    <string name="subgenre_social">אימה חברתית</string>
+    <string name="subgenre_found_footage">פאונד פוטג׳</string>
+    <string name="subgenre_survival">הישרדות</string>
+    <string name="subgenre_mystery">תעלומה</string>
+    <string name="subgenre_crime">פשע</string>
+    <string name="effects_on_description">אפקטי אווירה: פועלים</string>
+    <string name="effects_off_description">אפקטי אווירה: כבויים</string>
+    <string name="msg_effects_on">ערפל וגרעיניות פועלים</string>
+    <string name="msg_effects_off">ערפל וגרעיניות כבויים</string>
+    <string name="system_settings">הגדרות</string>
+    <string name="system_settings_description">פתיחת הגדרות המערכת</string>
+    <string name="install_app">התקנת %1$s</string>
+    <string name="msg_not_installed_store">%1$s לא מותקנת. פותח את חנות Play.</string>
+    <string name="msg_open_failed">לא הצלחנו לפתוח את %1$s.</string>
+    <string name="msg_stremio_app_only">Stremio נפתחה. חפשו שם את %1$s.</string>
+    <string name="msg_catalog_error">לא הצלחנו לטעון את מאגר הסרטים. התקנה מחדש של האפליקציה תפתור את זה.</string>
+    <string name="loading">טוען…</string>
+</resources>
