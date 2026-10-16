@@ -102,7 +102,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions)
+                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked)
             }
         }
     }
@@ -163,6 +163,7 @@ private fun HomeRowView(
     restoreKey: String?,
     restoreFocus: FocusRequester,
     actions: HomeActions,
+    isLocked: (Movie) -> Boolean,
 ) {
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
@@ -188,6 +189,7 @@ private fun HomeRowView(
                     val key = "${row.key}:${movie.id}"
                     WideMovieCard(
                         movie = movie,
+                        locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
@@ -206,6 +208,7 @@ private fun HomeRowView(
                     val key = "${row.key}:${movie.id}"
                     PosterCard(
                         movie = movie,
+                        locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },

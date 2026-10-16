@@ -9,12 +9,15 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.links.KnownPackages
+import io.github.diamondrubinny.scary.core.security.LockoutState
+import io.github.diamondrubinny.scary.core.security.PinHash
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -32,7 +35,15 @@ data class LauncherPrefs(
     val hidden: Set<String>,
     /** Highest fear level tonight's pick may have, 1..5. */
     val nightMaxFear: Int,
-)
+    /** Salted hash of the parental PIN; null when the lock is off. */
+    val pinHash: PinHash?,
+    /** Movies at or above this fear level need the PIN. */
+    val lockFromFear: Int,
+    val lockout: LockoutState,
+    val soundsEnabled: Boolean,
+) {
+    val parentalEnabled: Boolean get() = pinHash != null
+}
 
 /** Local-only preferences. No account, no sync, no analytics. */
 class SettingsRepository(private val context: Context) {
@@ -46,6 +57,10 @@ class SettingsRepository(private val context: Context) {
                 pinned = p[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED,
                 hidden = p[HIDDEN] ?: emptySet(),
                 nightMaxFear = (p[NIGHT_MAX_FEAR] ?: MAX_FEAR).coerceIn(1, MAX_FEAR),
+                pinHash = PinHash.decode(p[PIN_HASH]),
+                lockFromFear = (p[LOCK_FROM_FEAR] ?: DEFAULT_LOCK_FROM_FEAR).coerceIn(1, MAX_FEAR),
+                lockout = LockoutState(p[PIN_FAILED] ?: 0, p[PIN_LOCKED_UNTIL] ?: 0L),
+                soundsEnabled = p[SOUNDS] ?: false,
             )
         }
         .distinctUntilChanged()
@@ -67,6 +82,27 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setNightMaxFear(level: Int) = edit { it[NIGHT_MAX_FEAR] = level.coerceIn(1, MAX_FEAR) }
 
+    suspend fun setPin(hash: PinHash) = edit {
+        it[PIN_HASH] = hash.encode()
+        it[PIN_FAILED] = 0
+        it[PIN_LOCKED_UNTIL] = 0L
+    }
+
+    suspend fun clearPin() = edit {
+        it.remove(PIN_HASH)
+        it.remove(PIN_FAILED)
+        it.remove(PIN_LOCKED_UNTIL)
+    }
+
+    suspend fun setLockout(state: LockoutState) = edit {
+        it[PIN_FAILED] = state.failedAttempts
+        it[PIN_LOCKED_UNTIL] = state.lockedUntilMillis
+    }
+
+    suspend fun setLockFromFear(level: Int) = edit { it[LOCK_FROM_FEAR] = level.coerceIn(1, MAX_FEAR) }
+
+    suspend fun setSoundsEnabled(enabled: Boolean) = edit { it[SOUNDS] = enabled }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -86,5 +122,11 @@ class SettingsRepository(private val context: Context) {
         private val PINNED = stringPreferencesKey("pinned_apps")
         private val HIDDEN = stringSetPreferencesKey("hidden_apps")
         private val NIGHT_MAX_FEAR = intPreferencesKey("night_max_fear")
+        private val PIN_HASH = stringPreferencesKey("parental_pin_hash")
+        private val PIN_FAILED = intPreferencesKey("parental_pin_failed")
+        private val PIN_LOCKED_UNTIL = longPreferencesKey("parental_pin_locked_until")
+        private val LOCK_FROM_FEAR = intPreferencesKey("parental_lock_from_fear")
+        private val SOUNDS = booleanPreferencesKey("ambient_sounds")
+        const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

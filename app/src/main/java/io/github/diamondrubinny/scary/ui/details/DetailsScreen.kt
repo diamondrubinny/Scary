@@ -45,6 +45,7 @@ fun DetailsScreen(
     onWatch: (Movie) -> Unit,
     onTrailer: (Movie) -> Unit,
     onOpenSimilar: (Movie) -> Unit,
+    isLocked: (Movie) -> Boolean = { false },
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -112,6 +113,7 @@ fun DetailsScreen(
                         onClick = { onOpenSimilar(similar) },
                         onFocused = {},
                         width = 92.dp,
+                        locked = isLocked(similar),
                     )
                 }
             }

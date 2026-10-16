@@ -58,6 +58,7 @@ fun SearchScreen(
     query: String,
     onQueryChange: (String) -> Unit,
     onOpenMovie: (Movie) -> Unit,
+    isLocked: (Movie) -> Boolean = { false },
 ) {
     val resources = LocalContext.current.resources
     val results = remember(movies, query, resources) {
@@ -136,7 +137,7 @@ fun SearchScreen(
             modifier = Modifier.weight(1f),
         ) {
             items(results, key = { it.id }) { movie ->
-                PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {})
+                PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
             }
         }
     }

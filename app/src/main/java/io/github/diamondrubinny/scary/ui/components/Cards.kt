@@ -73,17 +73,20 @@ fun PosterCard(
     modifier: Modifier = Modifier,
     width: Dp = 104.dp,
     focusRequester: FocusRequester? = null,
+    locked: Boolean = false,
 ) {
+    val lockedLabel = stringResource(R.string.locked_badge)
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(width)
             .aspectRatio(2f / 3f),
-        contentDescription = "${movie.title}, ${movie.year}",
+        contentDescription = if (locked) "${movie.title}, ${movie.year}, $lockedLabel" else "${movie.title}, ${movie.year}",
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
         PosterArt(movie, Modifier.fillMaxSize())
+        if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
         BasicText(
             text = movie.year.toString(),
             style = ScaryType.Caption,
@@ -106,6 +109,7 @@ fun WideMovieCard(
     onFocused: () -> Unit,
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
+    locked: Boolean = false,
 ) {
     FocusSurface(
         onClick = onClick,
@@ -117,10 +121,23 @@ fun WideMovieCard(
         onFocusChanged = { if (it) onFocused() },
     ) {
         PosterArt(movie, Modifier.fillMaxSize())
+        if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
             BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize), maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
         }
+    }
+}
+
+@Composable
+private fun LockBadge(modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .padding(6.dp)
+            .background(ScaryColors.Void.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
+            .padding(4.dp),
+    ) {
+        LockIcon(ScaryColors.Candle)
     }
 }
 

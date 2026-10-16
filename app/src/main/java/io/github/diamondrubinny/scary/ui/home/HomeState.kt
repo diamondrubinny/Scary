@@ -18,6 +18,34 @@ data class HomeUiState(
     val nightMaxFear: Int = 5,
     /** The whole catalog, for search. */
     val movies: List<Movie> = emptyList(),
+    val parentalEnabled: Boolean = false,
+    val lockFromFear: Int = 4,
+    /** True after the PIN was entered, until the launcher leaves the screen or 30 minutes pass. */
+    val sessionUnlocked: Boolean = false,
+    val soundsEnabled: Boolean = false,
+) {
+    fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fear >= lockFromFear
+}
+
+/** Something the parental PIN guards; it runs once the PIN is accepted. */
+sealed interface GatedAction {
+    data class Details(val movieId: String) : GatedAction
+    data class Watch(val movie: Movie) : GatedAction
+    data class Trailer(val movie: Movie) : GatedAction
+    data object Settings : GatedAction
+}
+
+sealed interface PinStep {
+    data class Verify(val action: GatedAction) : PinStep
+    data object Create : PinStep
+    data class Confirm(val firstEntry: String) : PinStep
+}
+
+data class PinDialogState(
+    val step: PinStep,
+    @StringRes val error: Int? = null,
+    val lockedUntilMillis: Long = 0L,
+    val busy: Boolean = false,
 )
 
 data class DrawerApp(val app: InstalledApp, val pinned: Boolean, val hidden: Boolean)

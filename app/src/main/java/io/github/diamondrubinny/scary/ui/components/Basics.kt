@@ -145,6 +145,30 @@ fun FogIcon(color: Color, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun LockIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(14.dp)) {
+        val w = size.width
+        val h = size.height
+        val stroke = w * 0.14f
+        drawArc(
+            color = color,
+            startAngle = 180f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(w * 0.22f, h * 0.05f),
+            size = Size(w * 0.56f, h * 0.6f),
+            style = Stroke(width = stroke),
+        )
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(w * 0.1f, h * 0.4f),
+            size = Size(w * 0.8f, h * 0.58f),
+            cornerRadius = CornerRadius(w * 0.12f),
+        )
+    }
+}
+
+@Composable
 fun SearchIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {
         val stroke = 2.2.dp.toPx()

@@ -35,6 +35,10 @@ class SettingsActions(
     val onToggleEffects: () -> Unit,
     val onCycleNightFear: () -> Unit,
     val onSystemSettings: () -> Unit,
+    val onToggleSounds: () -> Unit,
+    val onSetupPin: () -> Unit,
+    val onCycleLockLevel: () -> Unit,
+    val onTurnOffLock: () -> Unit,
 )
 
 @Composable
@@ -42,6 +46,9 @@ fun SettingsScreen(
     language: Language,
     effectsEnabled: Boolean,
     nightMaxFear: Int,
+    soundsEnabled: Boolean,
+    parentalEnabled: Boolean,
+    lockFromFear: Int,
     versionName: String,
     actions: SettingsActions,
 ) {
@@ -81,6 +88,30 @@ fun SettingsScreen(
             onClick = actions.onCycleNightFear,
             trailing = { FearMeter(nightMaxFear) },
         )
+        SettingRow(
+            label = stringResource(R.string.settings_sounds),
+            value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleSounds,
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_parental),
+            value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),
+            onClick = if (parentalEnabled) actions.onTurnOffLock else actions.onSetupPin,
+        )
+        if (parentalEnabled) {
+            SettingRow(
+                label = stringResource(R.string.settings_lock_level),
+                value = stringResource(R.string.settings_lock_level_value, lockFromFear),
+                onClick = actions.onCycleLockLevel,
+                trailing = { FearMeter(lockFromFear) },
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_change_pin),
+                value = null,
+                onClick = actions.onSetupPin,
+            )
+        }
+        BasicText(stringResource(R.string.settings_parental_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_system),
             value = null,

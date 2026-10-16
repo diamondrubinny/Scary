@@ -27,6 +27,7 @@ import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.ui.apps.AllAppsActions
 import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
+import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.search.SearchScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
@@ -51,6 +52,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val message by viewModel.message.collectAsStateWithLifecycle()
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -96,6 +98,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleEffects = viewModel::toggleEffects,
         onCycleNightFear = { viewModel.setNightMaxFear(state.nightMaxFear % SettingsRepository.MAX_FEAR + 1) },
         onSystemSettings = { viewModel.openTile(AppTile.SystemSettings, settingsLabel) },
+        onToggleSounds = viewModel::toggleSounds,
+        onSetupPin = viewModel::startPinSetup,
+        onCycleLockLevel = viewModel::cycleLockLevel,
+        onTurnOffLock = viewModel::turnOffParental,
     )
     val versionName = remember(context) { context.versionName() }
 
@@ -113,12 +119,16 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     query = searchQuery,
                     onQueryChange = viewModel::setSearchQuery,
                     onOpenMovie = { viewModel.openDetails(it.id) },
+                    isLocked = state::isLocked,
                 )
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
                     language = language,
                     effectsEnabled = state.effectsEnabled,
                     nightMaxFear = state.nightMaxFear,
+                    soundsEnabled = state.soundsEnabled,
+                    parentalEnabled = state.parentalEnabled,
+                    lockFromFear = state.lockFromFear,
                     versionName = versionName,
                     actions = settingsActions,
                 )
@@ -128,6 +138,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onWatch = viewModel::watch,
                     onTrailer = viewModel::trailer,
                     onOpenSimilar = { viewModel.openDetails(it.id) },
+                    isLocked = state::isLocked,
                 )
                 else -> HomeScreen(
                     state = state,
@@ -138,6 +149,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     resets = resets,
                     actions = actions,
                 )
+            }
+
+            pinDialog?.let { dialog ->
+                PinDialog(state = dialog, onSubmit = viewModel::submitPin, onDismiss = viewModel::dismissPin)
             }
 
             MessageBanner(
