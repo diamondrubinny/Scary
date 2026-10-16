@@ -11,7 +11,6 @@
     <string name="minutes">%1$d min</string>
     <string name="fear_short">Fear %1$d/5</string>
     <string name="fear_description">Fear level %1$d of 5</string>
-    <string name="directed_by">Directed by %1$s</string>
     <string name="genre_horror">Horror</string>
     <string name="genre_thriller">Thriller</string>
     <string name="subgenre_psychological">Psychological</string>

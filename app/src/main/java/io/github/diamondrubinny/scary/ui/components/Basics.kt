@@ -55,7 +55,9 @@ fun ScaryButton(
             text = text,
             style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
             maxLines = 1,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 9.dp),
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 20.dp, vertical = 9.dp),
         )
     }
 }

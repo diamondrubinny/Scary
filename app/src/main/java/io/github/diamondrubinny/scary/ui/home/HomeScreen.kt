@@ -25,6 +25,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
@@ -97,7 +104,10 @@ fun HomeScreen(
         }
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .fadeTopEdge(36.dp),
             contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -218,6 +228,17 @@ private fun HomeRowView(
         }
     }
 }
+
+/** Rows scrolled past the top melt into the dark instead of showing as a cut strip under the hero. */
+private fun Modifier.fadeTopEdge(height: Dp): Modifier = this
+    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+    .drawWithContent {
+        drawContent()
+        drawRect(
+            brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = 0f, endY = height.toPx()),
+            blendMode = BlendMode.DstIn,
+        )
+    }
 
 @Composable
 fun subgenreLine(movie: Movie): String {

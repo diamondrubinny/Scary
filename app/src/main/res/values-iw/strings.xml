@@ -10,7 +10,6 @@
     <string name="minutes">%1$d דק׳</string>
     <string name="fear_short">מד פחד %1$d/5</string>
     <string name="fear_description">רמת פחד %1$d מתוך 5</string>
-    <string name="directed_by">בימוי: %1$s</string>
     <string name="genre_horror">אימה</string>
     <string name="genre_thriller">מתח</string>
     <string name="subgenre_psychological">פסיכולוגי</string>

@@ -69,7 +69,6 @@ fun DetailsScreen(
                     modifier = Modifier.semantics { heading() },
                 )
                 MovieMeta(movie)
-                BasicText(stringResource(R.string.directed_by, movie.director), style = ScaryType.Body.copy(color = ScaryColors.Ash))
                 BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
