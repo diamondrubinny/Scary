@@ -1,0 +1,420 @@
+<title>Scary Launcher Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Karantina:wght@400;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+/* Layout: a 16:9 TV screen (container-query scaled) with hero + leanback rows, annotations below. Single committed dark look. */
+:root {
+  --void: #0a0b0b;
+  --crypt: #141514;
+  --bone: #e9e1cf;
+  --ash: #9a958a;
+  --blood: #8e1b1b;
+  --candle: #e0a94a;
+  --font-display: "Rubik Wet Paint", "Karantina", Impact, sans-serif;
+  --font-title: "Karantina", "Arial Narrow", sans-serif;
+  --font-body: "Assistant", "Segoe UI", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--void); color: var(--bone); }
+body {
+  font-family: var(--font-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 40px;
+}
+.page { max-width: 1280px; margin: 0 auto; display: grid; gap: 20px; }
+.page-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 24px; }
+.page-head h1 { font-family: var(--font-title); font-size: 2.2rem; font-weight: 700; margin: 0; letter-spacing: .02em; text-wrap: balance; }
+.page-head p { margin: 0; color: var(--ash); font-size: .95rem; }
+kbd { font-family: var(--font-body); border: 1px solid #3a3a36; border-bottom-width: 2px; border-radius: 4px; padding: 0 6px; font-size: .85em; background: var(--crypt); color: var(--bone); }
+
+/* ---------- TV frame ---------- */
+.tv-bezel {
+  background: #050505; padding: clamp(6px, 1.2vw, 14px); border-radius: 14px;
+  box-shadow: 0 0 0 1px #222, 0 30px 80px -20px rgba(142,27,27,.35);
+}
+.tv {
+  position: relative; aspect-ratio: 16 / 9; max-width: 100%; overflow: hidden;
+  container-type: inline-size; background: var(--void); border-radius: 4px;
+  outline: none;
+}
+.tv:focus-visible { box-shadow: 0 0 0 2px var(--candle); }
+#fog { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.hero-art { position: absolute; inset: 0; z-index: 0; transition: background 600ms ease; }
+.vignette {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none;
+  background: radial-gradient(ellipse 90% 80% at 60% 35%, transparent 40%, rgba(0,0,0,.85) 100%);
+  animation: breathe 7s ease-in-out infinite;
+}
+.grain {
+  position: absolute; inset: -50%; z-index: 3; pointer-events: none; opacity: .09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 1.2s steps(4) infinite;
+}
+@keyframes breathe { 0%,100% { opacity: 1 } 50% { opacity: .82 } }
+@keyframes grain { 0% { transform: translate(0,0) } 25% { transform: translate(-3%,2%) } 50% { transform: translate(2%,-3%) } 75% { transform: translate(-2%,-1%) } }
+.tv.calm .vignette, .tv.calm .grain { animation: none; }
+@media (prefers-reduced-motion: reduce) { .vignette, .grain { animation: none; } }
+
+.ui { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; padding: 2.2cqw 3.4cqw 0; }
+
+/* top bar */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 2cqw; }
+.brand { font-family: var(--font-display); font-size: 3.1cqw; color: var(--bone); line-height: 1; text-shadow: 0 .3cqw 0 var(--blood); }
+.brand small { font-family: var(--font-body); font-size: 1cqw; color: var(--ash); margin-inline-start: .8cqw; letter-spacing: .1em; text-shadow: none; }
+.top-actions { display: flex; align-items: center; gap: 1.2cqw; }
+.clock { font-family: var(--font-title); font-size: 2.6cqw; font-variant-numeric: tabular-nums; color: var(--bone); margin-inline-end: 1cqw; }
+.icon-btn {
+  width: 3.4cqw; height: 3.4cqw; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(233,225,207,.08); border: .12cqw solid rgba(233,225,207,.15); color: var(--bone); cursor: pointer; padding: 0;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+.icon-btn svg { width: 1.7cqw; height: 1.7cqw; }
+
+/* hero */
+.hero { flex: 0 0 auto; height: 21cqw; display: flex; flex-direction: column; justify-content: flex-end; gap: .9cqw; max-width: 52cqw; padding-bottom: 1.4cqw; }
+.eyebrow { font-size: 1.05cqw; letter-spacing: .25em; color: var(--candle); font-weight: 600; }
+.hero h2 { font-family: var(--font-title); font-weight: 700; font-size: 6.2cqw; line-height: .85; margin: 0; letter-spacing: .01em; direction: ltr; text-align: right; text-shadow: 0 .4cqw 2cqw rgba(0,0,0,.8); }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5cqw 1.3cqw; font-size: 1.25cqw; color: var(--ash); }
+.meta b { color: var(--bone); font-weight: 600; }
+.fear { display: inline-flex; align-items: center; gap: .35cqw; }
+.fear i { display: block; width: .8cqw; height: 1.3cqw; border-radius: 0 0 .5cqw .5cqw; background: #3a2222; }
+.fear i.on { background: var(--blood); box-shadow: 0 0 .5cqw rgba(142,27,27,.8); }
+.synopsis { font-size: 1.3cqw; line-height: 1.45; color: #cfc8b8; margin: 0; max-width: 46cqw; }
+.hero-actions { display: flex; gap: 1cqw; margin-top: .4cqw; }
+.btn {
+  font-family: var(--font-body); font-weight: 700; font-size: 1.25cqw; border-radius: .5cqw; padding: .7cqw 1.6cqw;
+  border: .12cqw solid rgba(233,225,207,.25); background: rgba(10,11,11,.55); color: var(--bone); cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease, color 160ms ease;
+}
+.btn.primary { background: var(--blood); border-color: var(--blood); }
+
+/* rows */
+.rows-viewport { flex: 1 1 auto; overflow: hidden; position: relative; margin-inline: -3.4cqw; padding-inline: 3.4cqw; }
+.rows { display: flex; flex-direction: column; gap: 1.6cqw; transition: transform 320ms cubic-bezier(.2,.7,.2,1); padding-top: .8cqw; }
+.row h3 { margin: 0 0 .7cqw; font-size: 1.5cqw; font-weight: 700; display: flex; align-items: baseline; gap: 1cqw; }
+.row h3 span { font-size: 1cqw; color: var(--ash); font-weight: 400; }
+.track-clip { overflow: hidden; margin-inline: -1cqw; padding: 1cqw; }
+.track { display: flex; gap: 1.2cqw; transition: transform 320ms cubic-bezier(.2,.7,.2,1); }
+
+.card {
+  flex: 0 0 auto; position: relative; border-radius: .6cqw; cursor: pointer; overflow: hidden;
+  border: .12cqw solid rgba(233,225,207,.08); background: var(--crypt); padding: 0; color: var(--bone); font-family: var(--font-body); text-align: right;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, filter 180ms ease;
+  filter: saturate(.75) brightness(.85);
+}
+.poster { width: 11cqw; aspect-ratio: 2 / 3; }
+.wide { width: 19cqw; aspect-ratio: 16 / 9; }
+.app { width: 12.5cqw; aspect-ratio: 16 / 9; }
+.poster-art { position: absolute; inset: 0; }
+.poster-art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.9) 0%, transparent 55%); }
+.poster-title { position: absolute; inset-inline: .8cqw; bottom: .7cqw; z-index: 1; font-family: var(--font-title); font-weight: 700; font-size: 1.9cqw; line-height: .9; direction: ltr; text-align: right; }
+.poster-year { position: absolute; top: .6cqw; inset-inline-start: .7cqw; z-index: 1; font-size: .9cqw; color: var(--ash); font-variant-numeric: tabular-nums; }
+.progress { position: absolute; inset-inline: 0; bottom: 0; height: .35cqw; background: rgba(233,225,207,.15); z-index: 2; }
+.progress i { display: block; height: 100%; background: var(--blood); }
+.wide .poster-title { font-size: 2.2cqw; bottom: 1.1cqw; }
+.wide .sub { position: absolute; inset-inline: .9cqw; bottom: .4cqw; z-index: 1; font-size: .85cqw; color: var(--ash); }
+
+.app { display: grid; place-items: center; gap: .3cqw; align-content: center; background: linear-gradient(160deg, #1c1d1b, #0f100f); }
+.app .glyph { width: 4cqw; height: 4cqw; display: grid; place-items: center; border-radius: 1cqw; }
+.app .glyph svg { width: 2.4cqw; height: 2.4cqw; }
+.app .name { font-weight: 700; font-size: 1.15cqw; }
+.app .hint { font-size: .8cqw; color: var(--ash); }
+
+/* focus = candle light */
+.card.focus, .card:hover { transform: scale(1.09); filter: none; border-color: var(--candle); box-shadow: 0 0 0 .2cqw var(--candle), 0 0 2.4cqw rgba(224,169,74,.45); z-index: 2; }
+.btn.focus, .btn:hover { transform: scale(1.06); background: var(--bone); color: var(--void); border-color: var(--bone); box-shadow: 0 0 1.8cqw rgba(224,169,74,.5); }
+.btn.primary.focus, .btn.primary:hover { background: var(--candle); border-color: var(--candle); color: var(--void); }
+.icon-btn.focus, .icon-btn:hover { transform: scale(1.12); background: var(--bone); color: var(--void); box-shadow: 0 0 1.4cqw rgba(224,169,74,.55); }
+.icon-btn[aria-pressed="false"] { opacity: .7; }
+
+.toast {
+  position: absolute; z-index: 6; inset-inline-start: 50%; transform: translate(50%, 0); bottom: 2.4cqw;
+  background: rgba(10,11,11,.92); border: .12cqw solid var(--candle); color: var(--bone); padding: .8cqw 1.8cqw; border-radius: .6cqw; font-size: 1.25cqw;
+  transition: opacity 200ms ease;
+}
+.toast[hidden] { display: none !important; }
+.toast code { font-family: ui-monospace, Menlo, monospace; font-size: .95em; color: var(--candle); direction: ltr; unicode-bidi: isolate; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- annotations below ---------- */
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.note { background: var(--crypt); border: 1px solid #262724; border-radius: 8px; padding: 14px 16px; min-width: 0; }
+.note h4 { margin: 0 0 6px; font-size: 1rem; color: var(--candle); }
+.note p { margin: 0; color: #cfc8b8; line-height: 1.55; font-size: .95rem; }
+.disclaimer { color: var(--ash); font-size: .85rem; margin: 0; }
+</style>
+
+<div class="page" dir="rtl" lang="he">
+  <header class="page-head">
+    <h1>SCARY · לאנצ׳ר אימה ל־Android TV</h1>
+    <p>הדמיה אינטראקטיבית. שליטה כמו בשלט: <kbd>חצים</kbd> לניווט, <kbd>Enter</kbd> לבחירה. אפשר גם ללחוץ בעכבר.</p>
+  </header>
+
+  <div class="tv-bezel">
+    <div class="tv" id="tv" tabindex="0" role="application" aria-label="מסך הבית של הלאנצ׳ר. השתמשו בחצים כדי לנווט וב-Enter כדי לבחור.">
+      <div class="hero-art" id="heroArt"></div>
+      <canvas id="fog" aria-hidden="true"></canvas>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="grain" aria-hidden="true"></div>
+
+      <div class="ui">
+        <div class="topbar">
+          <div class="brand" aria-hidden="true">SCARY<small>HOME</small></div>
+          <div class="top-actions" data-row="0">
+            <span class="clock" id="clock" aria-label="שעה">23:47</span>
+            <button class="icon-btn" data-col="0" data-action="search" aria-label="חיפוש במאגר">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            </button>
+            <button class="icon-btn" data-col="1" data-action="effects" aria-label="אפקטי ערפל ותנועה" aria-pressed="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9h12a3 3 0 1 0-3-3"/><path d="M3 14h16a3 3 0 1 1-3 3"/><path d="M3 19h7"/></svg>
+            </button>
+            <button class="icon-btn" data-col="2" data-action="settings" aria-label="הגדרות">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <section class="hero" aria-live="polite">
+          <div class="eyebrow" id="heroEyebrow">הסרט של הלילה</div>
+          <h2 id="heroTitle">The Shining</h2>
+          <div class="meta" id="heroMeta"></div>
+          <p class="synopsis" id="heroSynopsis"></p>
+          <div class="hero-actions" data-row="1">
+            <button class="btn primary" data-col="0" data-action="stremio">▶ צפייה ב־Stremio</button>
+            <button class="btn" data-col="1" data-action="trailer">טריילר</button>
+            <button class="btn" data-col="2" data-action="watchlist">+ לרשימה שלי</button>
+          </div>
+        </section>
+
+        <div class="rows-viewport">
+          <div class="rows" id="rows"></div>
+        </div>
+      </div>
+
+      <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+  </div>
+
+  <section class="notes" aria-label="הסברים להדמיה">
+    <div class="note"><h4>מסך בית במקום Android TV</h4><p>הלאנצ׳ר נרשם כ־HOME של המכשיר. סרגל עליון עם שעה, חיפוש, הגדרות ומתג אפקטים. כל השורות נגישות בשלט בלבד.</p></div>
+    <div class="note"><h4>מאגר אימה ומתח פסיכולוגי</h4><p>שורות לפי תת־ז׳אנר עם "מד פחד" מ־1 עד 5. בחירה בסרט פותחת אותו ב־Stremio. נתוני הסרטים יגיעו ממקור מטא־דאטה (לאישורך).</p></div>
+    <div class="note"><h4>אפליקציות</h4><p>Stremio, חנות Play ושאר האפליקציות המותקנות מוצגות בשורה משלהן. אפשר להצמיד, להסתיר ולסדר מחדש.</p></div>
+    <div class="note"><h4>אווירה בלי לפגוע בנגישות</h4><p>ערפל, גרעיניות של פילם ונשימה איטית של התאורה. בלי הבהובים מהירים. מתג אחד מכבה את כל התנועה, והיא כבויה אוטומטית כשהמערכת מבקשת פחות תנועה.</p></div>
+  </section>
+  <p class="disclaimer">ההדמיה משתמשת בשמות סרטים אמיתיים כדוגמה בלבד. פוסטרים, נתוני צפייה ו"המשך צפייה" הם דוגמאות. אין כאן תוכן וידאו וגם לא יהיה באפליקציה: היא מפנה לאפליקציות צפייה מותקנות.</p>
+</div>
+
+<script>
+(() => {
+  const MOVIES = {
+    shining:   { t: "The Shining", y: 1980, d: "Stanley Kubrick", m: 146, fear: 4, sub: "אימה פסיכולוגית", imdb: "tt0081505", hue: 20,  syn: "שומר חורף במלון מבודד בהרים מתחיל לאבד את שפיותו, בזמן שבנו רואה את מה שהמלון מסתיר." },
+    hereditary:{ t: "Hereditary",  y: 2018, d: "Ari Aster",       m: 127, fear: 5, sub: "אימה על־טבעית", imdb: "tt7784604", hue: 15,  syn: "אחרי מות הסבתא, משפחה מגלה שהירושה שהשאירה אחריה כבדה ומפחידה בהרבה ממה שחשבו." },
+    exorcist:  { t: "The Exorcist",y: 1973, d: "William Friedkin",m: 122, fear: 5, sub: "דיבוק",          imdb: "tt0070047", hue: 200, syn: "אם מנסה להציל את בתה מכוח שהשתלט עליה, ופונה לשני כמרים כמוצא אחרון." },
+    psycho:    { t: "Psycho",      y: 1960, d: "Alfred Hitchcock",m: 109, fear: 3, sub: "קלאסיקה",        imdb: "tt0054215", hue: 0,   sat: 0, syn: "מזכירה בורחת עם כסף גנוב ועוצרת ללילה במוטל צדדי שמנהל צעיר שקט מדי." },
+    babadook:  { t: "The Babadook",y: 2014, d: "Jennifer Kent",   m: 94,  fear: 4, sub: "אימה פסיכולוגית", imdb: "tt2321549", hue: 220, syn: "ספר ילדים מסתורי מופיע בבית של אם ובנה, והדמות שבו מסרבת לעזוב." },
+    getout:    { t: "Get Out",     y: 2017, d: "Jordan Peele",    m: 104, fear: 3, sub: "אימה חברתית",    imdb: "tt5052448", hue: 140, syn: "ביקור ראשון אצל משפחת החברה הופך מסוף שבוע מביך לסיוט." },
+    thing:     { t: "The Thing",   y: 1982, d: "John Carpenter",  m: 109, fear: 4, sub: "יצורים",          imdb: "tt0084787", hue: 190, syn: "צוות מחקר באנטארקטיקה מגלה ישות שיכולה להתחזות לכל אחד מהם." },
+    others:    { t: "The Others",  y: 2001, d: "Alejandro Amenábar", m: 104, fear: 3, sub: "רוחות",        imdb: "tt0230600", hue: 45,  syn: "אם ושני ילדיה חיים באחוזה חשוכה, עד שמשהו בבית מתחיל להתנהג כאילו הוא לא שלהם." },
+    shutter:   { t: "Shutter Island", y: 2010, d: "Martin Scorsese", m: 138, fear: 2, sub: "מתח פסיכולוגי", imdb: "tt1130884", hue: 170, syn: "מרשל פדרלי חוקר היעלמות של מטופלת מבית חולים על אי, וכל רמז מוביל אותו עמוק יותר פנימה." },
+    swan:      { t: "Black Swan",  y: 2010, d: "Darren Aronofsky", m: 108, fear: 3, sub: "מתח פסיכולוגי", imdb: "tt0947798", hue: 300, sat: 10, syn: "רקדנית בלט שזכתה בתפקיד חייה מתחילה לאבד את הגבול בין הבמה לבין עצמה." },
+    lambs:     { t: "The Silence of the Lambs", y: 1991, d: "Jonathan Demme", m: 118, fear: 3, sub: "מותחן", imdb: "tt0102926", hue: 30, syn: "חניכה ב־FBI נעזרת ברוצח סדרתי כלוא כדי לתפוס רוצח אחר." },
+    seven:     { t: "Se7en",       y: 1995, d: "David Fincher",   m: 127, fear: 4, sub: "מותחן",          imdb: "tt0114369", hue: 60,  sat: 25, syn: "שני בלשים רודפים אחרי רוצח שבוחר את קורבנותיו לפי שבעת החטאים." },
+    memento:   { t: "Memento",     y: 2000, d: "Christopher Nolan", m: 113, fear: 1, sub: "מתח פסיכולוגי", imdb: "tt0209144", hue: 35, syn: "אדם ללא זיכרון לטווח קצר מנסה למצוא את מי שרצח את אשתו, בעזרת פתקים וקעקועים." },
+    prisoners: { t: "Prisoners",   y: 2013, d: "Denis Villeneuve", m: 153, fear: 3, sub: "מותחן",         imdb: "tt1392214", hue: 210, sat: 12, syn: "כששתי ילדות נעלמות, אב אחד מחליט לקחת את החקירה לידיים." },
+    sixth:     { t: "The Sixth Sense", y: 1999, d: "M. Night Shyamalan", m: 107, fear: 2, sub: "רוחות",   imdb: "tt0167404", hue: 0, sat: 45, syn: "פסיכולוג ילדים מטפל בילד שטוען שהוא רואה אנשים מתים." },
+    rosemary:  { t: "Rosemary's Baby", y: 1968, d: "Roman Polanski", m: 137, fear: 3, sub: "קלאסיקה",     imdb: "tt0063522", hue: 90,  sat: 20, syn: "זוג צעיר עובר לבניין יוקרתי בניו יורק, והשכנים מתעניינים בהריון שלה יותר מדי." }
+  };
+
+  const APPS = [
+    { id: "stremio", name: "Stremio", hint: "המדיה שלך", color: "#4b2a7a", icon: '<path d="M8 5v14l11-7z" fill="currentColor"/>' },
+    { id: "play",    name: "חנות Play", hint: "התקנת אפליקציות", color: "#1f5130", icon: '<path d="M6 4l12 8-12 8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' },
+    { id: "youtube", name: "YouTube", hint: "טריילרים", color: "#6e1717", icon: '<rect x="3" y="6" width="18" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 9v6l5-3z" fill="currentColor"/>' },
+    { id: "files",   name: "קבצים", hint: "נגן מקומי", color: "#3b3a2c", icon: '<path d="M4 6h6l2 2h8v10H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>' },
+    { id: "add",     name: "הוספת אפליקציה", hint: "מתוך המותקנות", color: "#262724", icon: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>' }
+  ];
+
+  const ROWS = [
+    { title: "המשך צפייה", note: "דוגמה", kind: "wide", items: [["hereditary", 62], ["shutter", 35], ["exorcist", 80]] },
+    { title: "האפליקציות שלי", kind: "app", items: APPS.map(a => a.id) },
+    { title: "קלאסיקות שאסור לפספס", note: "מאגר אימה", kind: "poster", items: ["shining", "exorcist", "psycho", "rosemary", "thing", "others", "babadook", "getout"] },
+    { title: "מתח פסיכולוגי", note: "מסובבים את הראש", kind: "poster", items: ["shutter", "swan", "lambs", "seven", "memento", "prisoners", "sixth"] }
+  ];
+
+  const $ = (s, el = document) => el.querySelector(s);
+  const tv = $("#tv"), rowsEl = $("#rows"), toast = $("#toast");
+
+  function posterBg(mv) {
+    const s = mv.sat ?? 55;
+    return `radial-gradient(circle at 70% 28%, hsla(${mv.hue},${s}%,55%,.55), transparent 45%),
+            linear-gradient(170deg, hsl(${mv.hue},${s}%,18%) 0%, hsl(${mv.hue},${Math.max(s-20,0)}%,7%) 70%, #050505 100%)`;
+  }
+
+  // build rows (row indices 2..)
+  ROWS.forEach((row, ri) => {
+    const sec = document.createElement("section");
+    sec.className = "row";
+    sec.dataset.row = String(ri + 2);
+    sec.innerHTML = `<h3>${row.title}${row.note ? `<span>${row.note}</span>` : ""}</h3><div class="track-clip"><div class="track"></div></div>`;
+    const track = $(".track", sec);
+    row.items.forEach((it, ci) => {
+      const b = document.createElement("button");
+      b.dataset.col = String(ci);
+      if (row.kind === "app") {
+        const a = APPS.find(x => x.id === it);
+        b.className = "card app";
+        b.dataset.action = "app:" + a.id;
+        b.setAttribute("aria-label", a.name);
+        b.innerHTML = `<span class="glyph" style="background:${a.color}"><svg viewBox="0 0 24 24" aria-hidden="true">${a.icon}</svg></span><span class="name">${a.name}</span><span class="hint">${a.hint}</span>`;
+      } else {
+        const [key, pct] = Array.isArray(it) ? it : [it, null];
+        const mv = MOVIES[key];
+        b.className = "card " + (row.kind === "wide" ? "wide" : "poster");
+        b.dataset.movie = key;
+        b.dataset.action = "movie";
+        b.setAttribute("aria-label", `${mv.t}, ${mv.y}, ${mv.sub}`);
+        b.innerHTML = `<span class="poster-art" style="background:${posterBg(mv)}"></span>
+          <span class="poster-year">${mv.y}</span>
+          <span class="poster-title">${mv.t}</span>
+          ${row.kind === "wide" ? `<span class="sub">נשארו ${Math.round(mv.m * (1 - pct / 100))} דק׳</span><span class="progress"><i style="width:${pct}%"></i></span>` : ""}`;
+      }
+      track.appendChild(b);
+    });
+    rowsEl.appendChild(sec);
+  });
+
+  const rowEls = [...document.querySelectorAll("[data-row]")].sort((a, b) => a.dataset.row - b.dataset.row);
+  const itemsOf = r => [...rowEls[r].querySelectorAll("[data-col]")];
+  let focus = { r: 1, c: 0 };
+  const lastCol = {};
+  let currentMovie = "shining";
+
+  function setHero(key, eyebrow) {
+    const mv = MOVIES[key];
+    currentMovie = key;
+    $("#heroArt").style.background = `radial-gradient(ellipse 60% 90% at 20% 30%, hsla(${mv.hue},${mv.sat ?? 55}%,35%,.55), transparent 60%), linear-gradient(90deg, #050505 0%, hsl(${mv.hue},${(mv.sat ?? 55) * .5}%,9%) 100%)`;
+    $("#heroEyebrow").textContent = eyebrow || mv.sub;
+    $("#heroTitle").textContent = mv.t;
+    const bars = Array.from({ length: 5 }, (_, i) => `<i class="${i < mv.fear ? "on" : ""}"></i>`).join("");
+    $("#heroMeta").innerHTML = `<b>${mv.y}</b><span>${mv.d}</span><span>${mv.m} דק׳</span><span class="fear" aria-label="מד פחד ${mv.fear} מתוך 5">${bars}</span><span>מד פחד ${mv.fear}/5</span>`;
+    $("#heroSynopsis").textContent = mv.syn;
+  }
+
+  function render(scroll = true) {
+    document.querySelectorAll(".focus").forEach(e => e.classList.remove("focus"));
+    const items = itemsOf(focus.r);
+    focus.c = Math.min(focus.c, items.length - 1);
+    const el = items[focus.c];
+    el.classList.add("focus");
+    if (el.dataset.movie) setHero(el.dataset.movie);
+    if (!scroll) return;
+    // vertical: keep focused content row near the top of the rows viewport
+    const rowIdx = focus.r - 2;
+    const target = rowIdx > 0 ? rowEls[focus.r].offsetTop - rowEls[2].offsetTop : 0;
+    rowsEl.style.transform = `translateY(${-target}px)`;
+    // horizontal (RTL): shift track so focused card stays visible
+    const track = el.closest(".track");
+    if (track) {
+      const cards = [...track.children];
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const step = cards[0].offsetWidth + gap;
+      const clipW = track.parentElement.clientWidth;
+      const visible = Math.max(1, Math.floor(clipW / step) - 1);
+      const shift = Math.max(0, focus.c - visible + 1);
+      track.style.transform = `translateX(${shift * step}px)`;
+    }
+  }
+
+  let toastTimer;
+  function say(html) {
+    toast.innerHTML = html;
+    toast.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { toast.hidden = true; }, 2600);
+  }
+
+  function activate(el) {
+    const a = el.dataset.action;
+    const mv = MOVIES[currentMovie];
+    if (a === "movie" || a === "stremio") return say(`פותח ב־Stremio · <code>${mv.imdb}</code> (הדמיה)`);
+    if (a === "trailer") return say(`פותח טריילר של ${mv.t} ב־YouTube (הדמיה)`);
+    if (a === "watchlist") return say(`${mv.t} נוסף לרשימה שלי`);
+    if (a === "search") return say("חיפוש קולי וטקסטואלי במאגר (הדמיה)");
+    if (a === "settings") return say("הגדרות: שורות, אפליקציות, נעילת הורים, אפקטים");
+    if (a === "effects") {
+      const on = el.getAttribute("aria-pressed") !== "true";
+      el.setAttribute("aria-pressed", String(on));
+      tv.classList.toggle("calm", !on);
+      fx.enabled = on;
+      return say(on ? "אפקטי אווירה פועלים" : "אפקטי אווירה כבויים");
+    }
+    if (a.startsWith("app:")) {
+      const app = APPS.find(x => "app:" + x.id === a);
+      return say(app.id === "add" ? "בחירת אפליקציה מתוך המותקנות (הדמיה)" : `פותח את ${app.name} (הדמיה)`);
+    }
+  }
+
+  tv.addEventListener("keydown", e => {
+    const k = e.key;
+    if (!["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Enter", " "].includes(k)) return;
+    e.preventDefault();
+    if (k === "Enter" || k === " ") return activate(itemsOf(focus.r)[focus.c]);
+    lastCol[focus.r] = focus.c;
+    if (k === "ArrowUp" && focus.r > 0) { focus.r--; focus.c = lastCol[focus.r] ?? 0; }
+    if (k === "ArrowDown" && focus.r < rowEls.length - 1) { focus.r++; focus.c = lastCol[focus.r] ?? 0; }
+    // RTL: left moves forward in the row
+    if (k === "ArrowLeft") focus.c = Math.min(focus.c + 1, itemsOf(focus.r).length - 1);
+    if (k === "ArrowRight") focus.c = Math.max(focus.c - 1, 0);
+    render();
+  });
+
+  tv.addEventListener("click", e => {
+    const el = e.target.closest("[data-col]");
+    if (!el) return;
+    const rowEl = el.closest("[data-row]");
+    focus = { r: rowEls.indexOf(rowEl), c: Number(el.dataset.col) };
+    render(false);
+    activate(el);
+    tv.focus({ preventScroll: true });
+  });
+
+  // clock
+  const clock = $("#clock");
+  const tick = () => { const d = new Date(); clock.textContent = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }); };
+  tick(); setInterval(tick, 15000);
+
+  // fog
+  const canvas = $("#fog"), ctx = canvas.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)");
+  const fx = { enabled: true };
+  const puffs = Array.from({ length: 14 }, (_, i) => ({ x: Math.random(), y: .25 + Math.random() * .8, r: .18 + Math.random() * .25, v: (Math.random() * .4 + .15) * (i % 2 ? 1 : -1) / 6000, a: .04 + Math.random() * .05 }));
+  function size() { const r = tv.getBoundingClientRect(); canvas.width = Math.max(1, r.width / 2); canvas.height = Math.max(1, r.height / 2); }
+  function draw(dt) {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    for (const p of puffs) {
+      if (dt) { p.x += p.v * dt; if (p.x > 1.3) p.x = -.3; if (p.x < -.3) p.x = 1.3; }
+      const g = ctx.createRadialGradient(p.x * w, p.y * h, 0, p.x * w, p.y * h, p.r * w);
+      g.addColorStop(0, `rgba(200,195,185,${p.a})`);
+      g.addColorStop(1, "rgba(200,195,185,0)");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, w, h);
+    }
+  }
+  let last = 0;
+  function loop(t) {
+    const dt = last ? Math.min(t - last, 50) : 0; last = t;
+    draw(fx.enabled && !reduce.matches ? dt : 0);
+    requestAnimationFrame(loop);
+  }
+  new ResizeObserver(() => { size(); draw(0); render(); }).observe(tv);
+  size();
+  requestAnimationFrame(loop);
+
+  setHero("shining", "הסרט של הלילה");
+  render();
+})();
+</script>
