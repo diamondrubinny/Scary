@@ -47,6 +47,7 @@ class HomeActions(
     val onTile: (AppTile) -> Unit,
     val onToggleEffects: () -> Unit,
     val onOpenSettings: () -> Unit,
+    val onOpenSearch: () -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -77,6 +78,7 @@ fun HomeScreen(
             effectsEnabled = state.effectsEnabled,
             onToggleEffects = actions.onToggleEffects,
             onOpenSettings = actions.onOpenSettings,
+            onOpenSearch = actions.onOpenSearch,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
         )
         Hero(

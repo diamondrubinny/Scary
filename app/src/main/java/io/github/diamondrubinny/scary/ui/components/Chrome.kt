@@ -39,6 +39,7 @@ fun TopBar(
     effectsEnabled: Boolean,
     onToggleEffects: () -> Unit,
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -47,6 +48,10 @@ fun TopBar(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Clock()
             Spacer(Modifier.width(4.dp))
+            IconCircleButton(
+                contentDescription = stringResource(R.string.search_title),
+                onClick = onOpenSearch,
+            ) { SearchIcon(it) }
             IconCircleButton(
                 contentDescription = stringResource(
                     if (effectsEnabled) R.string.effects_on_description else R.string.effects_off_description,

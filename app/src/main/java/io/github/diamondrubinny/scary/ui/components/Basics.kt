@@ -145,6 +145,23 @@ fun FogIcon(color: Color, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun SearchIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = 2.2.dp.toPx()
+        val r = size.minDimension * 0.32f
+        val c = Offset(size.width * 0.44f, size.height * 0.44f)
+        drawCircle(color, radius = r, center = c, style = Stroke(width = stroke))
+        drawLine(
+            color = color,
+            start = Offset(c.x + r * 0.72f, c.y + r * 0.72f),
+            end = Offset(size.width * 0.92f, size.height * 0.92f),
+            strokeWidth = stroke,
+            cap = StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
 fun GridIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {
         val cell = size.minDimension * 0.38f

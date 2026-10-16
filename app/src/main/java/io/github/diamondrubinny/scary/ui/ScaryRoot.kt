@@ -27,6 +27,7 @@ import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.ui.apps.AllAppsActions
 import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
+import io.github.diamondrubinny.scary.ui.search.SearchScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
@@ -49,6 +50,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val screen by viewModel.screen.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -73,6 +75,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onTile = { viewModel.openTile(it, settingsLabel) },
             onToggleEffects = viewModel::toggleEffects,
             onOpenSettings = viewModel::openSettings,
+            onOpenSearch = viewModel::openSearch,
         )
     }
     val allAppsActions = remember(viewModel) {
@@ -105,6 +108,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
 
             when {
                 state.loading -> LoadingView()
+                current == Screen.Search -> SearchScreen(
+                    movies = state.movies,
+                    query = searchQuery,
+                    onQueryChange = viewModel::setSearchQuery,
+                    onOpenMovie = { viewModel.openDetails(it.id) },
+                )
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
                     language = language,

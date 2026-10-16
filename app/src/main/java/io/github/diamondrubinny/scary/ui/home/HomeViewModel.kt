@@ -141,6 +141,7 @@ class HomeViewModel(
             effectsEnabled = prefs.effectsEnabled,
             drawer = drawer,
             nightMaxFear = prefs.nightMaxFear,
+            movies = catalog.movies,
         )
     }
 
@@ -176,6 +177,17 @@ class HomeViewModel(
     fun openAllApps() = push(Screen.AllApps)
 
     fun openSettings() = push(Screen.Settings)
+
+    fun openSearch() = push(Screen.Search)
+
+    private val _searchQuery = MutableStateFlow("")
+
+    /** Kept here so the query survives a trip to a movie's details and back. */
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    fun setSearchQuery(text: String) {
+        _searchQuery.value = text.take(MAX_QUERY_LENGTH)
+    }
 
     private fun push(screen: Screen) {
         backStack.update { if (it.last() == screen) it else it + screen }
@@ -259,6 +271,7 @@ class HomeViewModel(
     companion object {
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
+        private const val MAX_QUERY_LENGTH = 80
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
             initializer {

@@ -64,4 +64,9 @@
     <string name="settings_system">הגדרות המערכת של הטלוויזיה</string>
     <string name="settings_about">אודות</string>
     <string name="settings_about_text">SCARY %1$s. אין חשבונות ואין מעקב, ובגרסה הזו אין גישה לאינטרנט. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant ו־Rubik Wet Paint ברישיון SIL Open Font License 1.1.</string>
+    <string name="search_title">חיפוש</string>
+    <string name="search_hint">שם סרט, במאי, שנה או סוג אימה</string>
+    <string name="search_prompt">הקלידו או הכתיבו בקול כדי לחפש ב־%1$d סרטים.</string>
+    <string name="search_no_results">לא מצאנו סרטים עבור %1$s.</string>
+    <string name="search_count">תוצאות: %1$d</string>
 </resources>

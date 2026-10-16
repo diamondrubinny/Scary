@@ -16,6 +16,8 @@ data class HomeUiState(
     /** Every installed TV app, hidden ones included, for the all-apps drawer. */
     val drawer: List<DrawerApp> = emptyList(),
     val nightMaxFear: Int = 5,
+    /** The whole catalog, for search. */
+    val movies: List<Movie> = emptyList(),
 )
 
 data class DrawerApp(val app: InstalledApp, val pinned: Boolean, val hidden: Boolean)
@@ -64,6 +66,7 @@ sealed interface Screen {
     data class Details(val movieId: String) : Screen
     data object AllApps : Screen
     data object Settings : Screen
+    data object Search : Screen
 }
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())
