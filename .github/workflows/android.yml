@@ -1,0 +1,157 @@
+name: Android CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # The same debug key for every build, so a new APK installs over the old one without losing settings.
+      # The key is created by the first build and kept in the Actions cache, never in the repository.
+      - name: Restore debug signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: android-debug-keystore-v1
+
+      - name: Core unit tests (catalog, search, PIN, curation, links)
+        run: ./gradlew --no-daemon :core:test
+
+      - name: Build debug APK
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: Lint
+        run: ./gradlew --no-daemon :app:lintDebug
+
+      - name: Name the APK
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/scary-${GITHUB_RUN_NUMBER}.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk dist/scary.apk
+          sha256sum dist/scary.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: scary-debug-apk
+          path: dist/scary-*.apk
+          retention-days: 14
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            core/build/reports/tests/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  publish:
+    # Only for pushes to this repository, never for pull requests.
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: scary-debug-apk
+          path: dist
+
+      - name: Publish as the "latest-build" pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cp dist/scary-*.apk dist/scary.apk
+          gh release delete latest-build --cleanup-tag --yes || true
+          gh release create latest-build dist/scary.apk \
+            --target "${GITHUB_SHA}" \
+            --prerelease \
+            --title "SCARY build ${GITHUB_RUN_NUMBER}" \
+            --notes "Debug build from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}. Install guide: docs/XIAOMI_SETUP.md"
+
+      - name: Keep the APK on the apk-builds branch
+        run: |
+          git init -q out && cd out
+          cp ../dist/scary.apk .
+          printf 'Latest SCARY debug APK, build %s from %s.\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
+          git add scary.apk README.md
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "SCARY build ${GITHUB_RUN_NUMBER}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/apk-builds
+
+  screenshots:
+    # Runs the real APK on an Android TV emulator and stores the screenshots on the "screenshots" branch.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: scary-debug-apk
+          path: dist
+
+      - name: Prepare APK
+        run: cp dist/scary-*.apk dist/scary.apk
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run on Android TV emulator and capture screens
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: android-tv
+          arch: x86
+          profile: tv_1080p
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/screenshots.sh
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: screenshots/
+          retention-days: 14
+
+      - name: Keep screenshots on the screenshots branch
+        run: |
+          git init -q out && cd out
+          cp ../screenshots/*.png .
+          printf 'SCARY screenshots from an Android TV emulator, build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Screenshots for build ${GITHUB_RUN_NUMBER}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots
