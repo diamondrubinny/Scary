@@ -9,7 +9,7 @@ object NightPick {
      * Returns null when no movie is at or below [maxFear].
      */
     fun pick(movies: List<Movie>, date: LocalDate, maxFear: Int = 5): Movie? {
-        val pool = movies.filter { it.fear <= maxFear }.sortedBy { it.id }
+        val pool = movies.filter { m -> m.curated && m.fear != null && m.fear <= maxFear }.sortedBy { it.id }
         if (pool.isEmpty()) return null
         // Multiplicative hashing spreads consecutive days across the pool.
         val mixed = date.toEpochDay() * 2_654_435_761L
@@ -27,7 +27,7 @@ object Similar {
             .sortedWith(
                 compareByDescending<Pair<Movie, Int>> { it.second }
                     .thenByDescending { it.first.genre == movie.genre }
-                    .thenBy { kotlin.math.abs(it.first.fear - movie.fear) }
+                    .thenBy { kotlin.math.abs(it.first.fearForLock - movie.fearForLock) }
                     .thenBy { it.first.id },
             )
             .map { it.first }

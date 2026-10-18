@@ -92,4 +92,20 @@
     <string name="settings_parental_note">הנעילה חלה על סרטים שנפתחים מ־SCARY ועל ההגדרות האלה. היא לא נועלת את Stremio או אפליקציות אחרות. שכחתם את הקוד? מחיקת הנתונים של SCARY בהגדרות המערכת של הטלוויזיה מאפסת אותו, יחד עם שאר ההעדפות.</string>
     <string name="settings_sounds">צלילי אווירה</string>
     <string name="locked_badge">נעול</string>
+    <string name="settings_online">תמונות ומידע מהאינטרנט</string>
+    <string name="settings_online_note">פוסטרים, רקעים, דירוג IMDb, שחקנים והשורות הפופולריות מגיעים מ־Cinemeta, מאגר הסרטים הציבורי של Stremio. נשלחים רק מזהי סרטים, אף פעם לא פרטים אישיים. כמו בכל אתר, השרת רואה את כתובת ה־IP של הטלוויזיה. כיבוי משאיר את SCARY בלי אינטרנט בכלל.</string>
+    <string name="imdb_rating">IMDb %1$s</string>
+    <string name="cast_line">בכיכובם: %1$s</string>
+    <string name="settings_home_section">מסך הבית</string>
+    <string name="settings_default_home">SCARY כמסך הבית</string>
+    <string name="value_home_yes">פעיל</string>
+    <string name="value_home_no">לא מוגדר</string>
+    <string name="settings_home_button">כפתור הבית בשלט</string>
+    <string name="value_home_button_on">פותח את SCARY</string>
+    <string name="value_home_button_off">כבוי</string>
+    <string name="settings_home_note">אם הטלוויזיה לא מאפשרת לבחור את SCARY כמסך הבית (נפוץ ב־Google TV ובחלק ממכשירי Xiaomi), הפעילו את כפתור הבית בשלט. SCARY תיפתח בכל לחיצה על Home ובהדלקת הטלוויזיה. השירות מאזין רק למקש Home ולא קורא שום דבר מהמסך.</string>
+    <string name="tile_set_home">הגדרת SCARY כמסך הבית</string>
+    <string name="a11y_service_label">SCARY: כפתור הבית</string>
+    <string name="a11y_service_description">גורם לכפתור Home בשלט לפתוח את SCARY, ופותח את SCARY כשהטלוויזיה נדלקת. השירות מאזין רק למקש Home, ולא יכול לקרוא או לשנות שום דבר במסך.</string>
+    <string name="msg_enable_service">בהגדרות הנגישות בחרו “SCARY: כפתור הבית” והפעילו.</string>
 </resources>

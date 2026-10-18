@@ -16,7 +16,7 @@ adb install -r dist/scary.apk
 adb shell svc power stayon true || true
 
 open
-shot 01-home 10
+shot 01-home 25
 
 key KEYCODE_DPAD_DOWN
 shot 02-apps-row 3
@@ -31,10 +31,10 @@ key KEYCODE_DPAD_DOWN
 shot 04-psychological-rows 3
 
 open --es scary.debug.open details:hereditary
-shot 05-details 5
+shot 05-details 8
 
 open --es scary.debug.open search --es scary.debug.query fincher
-shot 06-search 4
+shot 06-search 8
 
 open --es scary.debug.open apps
 shot 07-all-apps 4

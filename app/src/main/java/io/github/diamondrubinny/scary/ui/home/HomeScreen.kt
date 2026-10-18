@@ -68,6 +68,7 @@ fun HomeScreen(
     restoreKey: String?,
     resets: Int,
     actions: HomeActions,
+    showSetHome: Boolean = false,
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
@@ -112,7 +113,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked)
+                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
             }
         }
     }
@@ -174,6 +175,7 @@ private fun HomeRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    showSetHome: Boolean,
 ) {
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
@@ -205,7 +207,10 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Apps -> items(row.tiles, key = { it.key }) { tile ->
+                is HomeRow.Apps -> items(
+                    (if (showSetHome) listOf(AppTile.SetAsHome) else emptyList()) + row.tiles,
+                    key = { it.key },
+                ) { tile ->
                     val key = "${row.key}:${tile.key}"
                     AppTileCard(
                         tile = tile,

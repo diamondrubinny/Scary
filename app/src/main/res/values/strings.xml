@@ -93,4 +93,20 @@
     <string name="settings_parental_note">The lock covers movies opened from SCARY and these settings. It does not lock Stremio or other apps. Forgot the PIN? Clearing SCARY’s data in the TV system settings resets it, along with your other preferences.</string>
     <string name="settings_sounds">Ambient sounds</string>
     <string name="locked_badge">Locked</string>
+    <string name="settings_online">Artwork and info from the internet</string>
+    <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
+    <string name="imdb_rating">IMDb %1$s</string>
+    <string name="cast_line">Starring %1$s</string>
+    <string name="settings_home_section">Home screen</string>
+    <string name="settings_default_home">SCARY as the home screen</string>
+    <string name="value_home_yes">Active</string>
+    <string name="value_home_no">Not set</string>
+    <string name="settings_home_button">Home button on the remote</string>
+    <string name="value_home_button_on">Opens SCARY</string>
+    <string name="value_home_button_off">Off</string>
+    <string name="settings_home_note">If the TV does not let you pick SCARY as the home screen (common on Google TV and some Xiaomi models), turn on the Home button option. SCARY then opens on every Home press and when the TV starts. It listens only for the Home key and reads nothing on the screen.</string>
+    <string name="tile_set_home">Make SCARY the home screen</string>
+    <string name="a11y_service_label">SCARY Home button</string>
+    <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. It only listens for the Home key. It cannot read or change anything on the screen.</string>
+    <string name="msg_enable_service">In Accessibility, choose “SCARY Home button” and turn it on.</string>
 </resources>

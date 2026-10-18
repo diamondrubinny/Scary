@@ -36,6 +36,13 @@ object Links {
         return "https://play.google.com/store/apps/details?id=$packageName"
     }
 
+    private val youtubePattern = Regex("^[A-Za-z0-9_-]{11}$")
+
+    fun youTubeVideo(videoId: String): String {
+        require(youtubePattern.matches(videoId)) { "invalid YouTube id" }
+        return "https://www.youtube.com/watch?v=$videoId"
+    }
+
     fun youTubeTrailerSearch(title: String, year: Int): String {
         val query = URLEncoder.encode("$title $year trailer", StandardCharsets.UTF_8)
         return "https://www.youtube.com/results?search_query=$query"

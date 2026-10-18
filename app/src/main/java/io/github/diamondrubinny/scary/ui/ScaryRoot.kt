@@ -2,10 +2,15 @@ package io.github.diamondrubinny.scary.ui
 
 import android.app.Activity
 import android.content.Context
+import android.content.ActivityNotFoundException
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import io.github.diamondrubinny.scary.launch.HomeRole
+import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +39,7 @@ import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
 import io.github.diamondrubinny.scary.ui.details.DetailsScreen
 import io.github.diamondrubinny.scary.ui.fx.Atmosphere
-import io.github.diamondrubinny.scary.ui.fx.HeroBackdrop
+import io.github.diamondrubinny.scary.ui.fx.MovieBackdrop
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.home.HomeActions
 import io.github.diamondrubinny.scary.ui.home.HomeScreen
@@ -53,6 +58,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
+    val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -68,13 +74,43 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     // Back on the home screen is swallowed: a launcher has nowhere to go back to.
     BackHandler { viewModel.back() }
 
+    val context = LocalContext.current
+
+    // Becoming the home screen: the system dialog where the TV offers it, otherwise the Home button service.
+    fun refreshLauncherStatus() = viewModel.updateLauncherStatus(
+        LauncherStatus(HomeRole.isDefaultHome(context), HomeRole.isHomeButtonServiceOn(context)),
+    )
+    fun openAccessibility() {
+        try {
+            context.startActivity(HomeRole.accessibilitySettingsIntent())
+            viewModel.showMessage(R.string.msg_enable_service)
+        } catch (e: ActivityNotFoundException) {
+            viewModel.showMessage(R.string.settings_home_note)
+        }
+    }
+    val roleRequest = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        refreshLauncherStatus()
+        if (!HomeRole.isDefaultHome(context) && !HomeRole.isHomeButtonServiceOn(context)) openAccessibility()
+    }
+    fun requestDefaultHome() {
+        val intent = HomeRole.requestRoleIntent(context)
+        if (intent == null) {
+            openAccessibility()
+        } else {
+            try {
+                roleRequest.launch(intent)
+            } catch (e: ActivityNotFoundException) {
+                openAccessibility()
+            }
+        }
+    }
     val actions = remember(viewModel, settingsLabel) {
         HomeActions(
             onCardFocused = viewModel::onCardFocused,
             onOpenDetails = { viewModel.openDetails(it.id) },
             onWatch = viewModel::watch,
             onTrailer = viewModel::trailer,
-            onTile = { viewModel.openTile(it, settingsLabel) },
+            onTile = { tile -> if (tile == AppTile.SetAsHome) requestDefaultHome() else viewModel.openTile(tile, settingsLabel) },
             onToggleEffects = viewModel::toggleEffects,
             onOpenSettings = viewModel::openSettings,
             onOpenSearch = viewModel::openSearch,
@@ -89,7 +125,6 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onAppInfo = viewModel::openAppInfo,
         )
     }
-    val context = LocalContext.current
     val settingsActions = SettingsActions(
         onToggleLanguage = {
             LanguageStore.write(context, if (language == Language.HE) Language.EN else Language.HE)
@@ -102,6 +137,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
+        onToggleOnline = viewModel::toggleOnline,
+        onRequestDefaultHome = ::requestDefaultHome,
+        onOpenAccessibility = ::openAccessibility,
     )
     val versionName = remember(context) { context.versionName() }
 
@@ -109,7 +147,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
-            HeroBackdrop(if (current == Screen.Home || details != null) details?.movie ?: state.hero else null)
+            MovieBackdrop(if (current == Screen.Home || details != null) details?.movie ?: state.hero else null)
             Atmosphere(animate = !LocalReduceMotion.current)
 
             when {
@@ -129,6 +167,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     soundsEnabled = state.soundsEnabled,
                     parentalEnabled = state.parentalEnabled,
                     lockFromFear = state.lockFromFear,
+                    onlineEnabled = state.onlineEnabled,
+                    isDefaultHome = launcherStatus.isDefaultHome,
+                    homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
                     versionName = versionName,
                     actions = settingsActions,
                 )
@@ -148,6 +189,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     restoreKey = viewModel.lastFocusedKey,
                     resets = resets,
                     actions = actions,
+                    showSetHome = launcherStatus.needsSetup,
                 )
             }
 

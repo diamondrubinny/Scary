@@ -30,6 +30,9 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
+import io.github.diamondrubinny.scary.ui.components.rememberArtwork
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
@@ -69,6 +72,14 @@ fun DetailsScreen(
                     modifier = Modifier.semantics { heading() },
                 )
                 MovieMeta(movie)
+                if (movie.cast.isNotEmpty()) {
+                    BasicText(
+                        stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
+                        style = ScaryType.Body.copy(color = ScaryColors.Ash),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
                 BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
@@ -86,12 +97,17 @@ fun DetailsScreen(
                     .clip(RoundedCornerShape(8.dp)),
             ) {
                 PosterArt(movie, Modifier.fillMaxSize())
-                BasicText(
-                    text = movie.title,
-                    style = ScaryType.Title,
-                    maxLines = 3,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                )
+                val poster = rememberArtwork(movie.posterUrl)
+                if (poster != null) {
+                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                } else {
+                    BasicText(
+                        text = movie.title,
+                        style = ScaryType.Title,
+                        maxLines = 3,
+                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                    )
+                }
             }
         }
         if (details.similar.isNotEmpty()) {

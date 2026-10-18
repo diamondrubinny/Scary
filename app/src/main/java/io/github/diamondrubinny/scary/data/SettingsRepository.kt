@@ -41,6 +41,8 @@ data class LauncherPrefs(
     val lockFromFear: Int,
     val lockout: LockoutState,
     val soundsEnabled: Boolean,
+    /** Artwork and popular rows from Cinemeta. On by default; off keeps SCARY fully offline. */
+    val onlineEnabled: Boolean,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -61,6 +63,7 @@ class SettingsRepository(private val context: Context) {
                 lockFromFear = (p[LOCK_FROM_FEAR] ?: DEFAULT_LOCK_FROM_FEAR).coerceIn(1, MAX_FEAR),
                 lockout = LockoutState(p[PIN_FAILED] ?: 0, p[PIN_LOCKED_UNTIL] ?: 0L),
                 soundsEnabled = p[SOUNDS] ?: false,
+                onlineEnabled = p[ONLINE] ?: true,
             )
         }
         .distinctUntilChanged()
@@ -103,6 +106,8 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSoundsEnabled(enabled: Boolean) = edit { it[SOUNDS] = enabled }
 
+    suspend fun setOnlineEnabled(enabled: Boolean) = edit { it[ONLINE] = enabled }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -127,6 +132,7 @@ class SettingsRepository(private val context: Context) {
         private val PIN_LOCKED_UNTIL = longPreferencesKey("parental_pin_locked_until")
         private val LOCK_FROM_FEAR = intPreferencesKey("parental_lock_from_fear")
         private val SOUNDS = booleanPreferencesKey("ambient_sounds")
+        private val ONLINE = booleanPreferencesKey("online_artwork")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

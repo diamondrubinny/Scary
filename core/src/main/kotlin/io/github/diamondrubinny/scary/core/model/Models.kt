@@ -41,20 +41,34 @@ data class Movie(
     val imdbId: String,
     val title: String,
     val year: Int,
-    val director: String,
-    val runtimeMin: Int,
+    val director: String = "",
+    val runtimeMin: Int = 0,
     val genre: Genre,
-    val subgenres: List<Subgenre>,
-    /** Editorial scare rating, 1 (mild) to 5 (relentless). */
-    val fear: Int,
+    val subgenres: List<Subgenre> = emptyList(),
+    /** Editorial scare rating, 1 (mild) to 5 (relentless). Null for movies outside the curated library. */
+    val fear: Int? = null,
     /** Poster tint used for generated artwork, 0..359. */
-    val hue: Int,
+    val hue: Int = 0,
     /** Poster saturation in percent, 0..100. */
     val saturation: Int = 55,
-    val synopsisHe: String,
-    val synopsisEn: String,
+    val synopsisHe: String = "",
+    val synopsisEn: String = "",
+    /** Artwork and extras filled in from Cinemeta at runtime; absent in the bundled catalog. */
+    val posterUrl: String? = null,
+    val backgroundUrl: String? = null,
+    val logoUrl: String? = null,
+    val imdbRating: Double? = null,
+    val cast: List<String> = emptyList(),
+    val trailerYoutubeId: String? = null,
+    /** True for the hand-picked library, false for rows pulled from Cinemeta. */
+    val curated: Boolean = true,
 ) {
-    fun synopsis(language: Language): String = if (language == Language.HE) synopsisHe else synopsisEn
+    /** Hebrew synopsis when there is one, otherwise English, so online-only movies still show text. */
+    fun synopsis(language: Language): String =
+        if (language == Language.HE && synopsisHe.isNotBlank()) synopsisHe else synopsisEn.ifBlank { synopsisHe }
+
+    /** Unknown fear counts as the maximum for the parental lock, so unrated movies stay behind the PIN. */
+    val fearForLock: Int get() = fear ?: 5
 }
 
 @Serializable
