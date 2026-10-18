@@ -17,6 +17,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.serialization.json)
+    // Exposed because CinemetaCache is serializable and the app stores it.
+    api(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 }

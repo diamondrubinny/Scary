@@ -23,6 +23,8 @@ import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
 import io.github.diamondrubinny.scary.data.SettingsRepository
+import io.github.diamondrubinny.scary.data.TmdbKeyResult
+import io.github.diamondrubinny.scary.data.TmdbRepository
 import io.github.diamondrubinny.scary.launch.LaunchResult
 import io.github.diamondrubinny.scary.launch.Launcher
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -46,6 +49,7 @@ class HomeViewModel(
     private val appsRepository: InstalledAppsRepository,
     private val settings: SettingsRepository,
     private val launcher: Launcher,
+    private val tmdb: TmdbRepository,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -104,6 +108,7 @@ class HomeViewModel(
             lockFromFear = prefs.lockFromFear,
             sessionUnlocked = unlocked,
             soundsEnabled = prefs.soundsEnabled,
+            onlineEnabled = prefs.onlineEnabled,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
@@ -118,15 +123,17 @@ class HomeViewModel(
 
     private fun loadCatalog() {
         viewModelScope.launch {
-            catalog.value = try {
-                CatalogState.Ready(catalogRepository.load())
-            } catch (e: CatalogException) {
-                Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
-                CatalogState.Error
-            } catch (e: IOException) {
-                Log.e(TAG, "Bundled catalog could not be read", e)
-                CatalogState.Error
-            }
+            tmdb.load()
+            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled }, tmdb.keyMask.map { it != null })
+                .catch { e ->
+                    when (e) {
+                        is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
+                        is IOException -> Log.e(TAG, "Bundled catalog could not be read", e)
+                        else -> throw e
+                    }
+                    catalog.value = CatalogState.Error
+                }
+                .collect { catalog.value = CatalogState.Ready(it) }
         }
     }
 
@@ -233,7 +240,7 @@ class HomeViewModel(
     private fun guard(movie: Movie?, action: GatedAction) {
         val prefs = latestPrefs
         val needsPin = prefs != null && prefs.parentalEnabled && !isSessionUnlocked() &&
-            (movie == null || movie.fear >= prefs.lockFromFear)
+            (movie == null || movie.fearForLock >= prefs.lockFromFear)
         if (needsPin) _pinDialog.value = PinDialogState(PinStep.Verify(action)) else perform(action)
     }
 
@@ -347,6 +354,58 @@ class HomeViewModel(
         viewModelScope.launch { settings.setLockFromFear(current % SettingsRepository.MAX_FEAR + 1) }
     }
 
+    /** "…a1b2" when a TMDB key is saved, null otherwise. */
+    val tmdbKeyMask: StateFlow<String?> = tmdb.keyMask
+
+    private val _tmdbDialog = MutableStateFlow<TmdbDialogState?>(null)
+    val tmdbDialog: StateFlow<TmdbDialogState?> = _tmdbDialog.asStateFlow()
+
+    fun openTmdbDialog() {
+        _tmdbDialog.value = TmdbDialogState()
+    }
+
+    fun dismissTmdbDialog() {
+        _tmdbDialog.value = null
+    }
+
+    fun submitTmdbKey(input: String) {
+        if (_tmdbDialog.value?.busy == true) return
+        _tmdbDialog.value = TmdbDialogState(busy = true)
+        viewModelScope.launch {
+            val result = tmdb.setKey(input)
+            if (result == TmdbKeyResult.SAVED) {
+                _tmdbDialog.value = null
+                show(R.string.msg_tmdb_saved)
+            } else {
+                _tmdbDialog.value = TmdbDialogState(result = result)
+            }
+        }
+    }
+
+    fun clearTmdbKey() {
+        viewModelScope.launch {
+            tmdb.clearKey()
+            _tmdbDialog.value = null
+            show(R.string.msg_tmdb_deleted)
+        }
+    }
+
+    fun toggleOnline() {
+        val enabled = !(latestPrefs?.onlineEnabled ?: true)
+        viewModelScope.launch { settings.setOnlineEnabled(enabled) }
+    }
+
+    private val _launcherStatus = MutableStateFlow(LauncherStatus(isDefaultHome = true, homeButtonServiceOn = false))
+
+    /** Whether SCARY is the home screen, and whether the Home button service is on. Refreshed on every resume. */
+    val launcherStatus: StateFlow<LauncherStatus> = _launcherStatus.asStateFlow()
+
+    fun updateLauncherStatus(status: LauncherStatus) {
+        _launcherStatus.value = status
+    }
+
+    fun showMessage(@StringRes text: Int) = show(text)
+
     fun toggleSounds() {
         val enabled = !(latestPrefs?.soundsEnabled ?: false)
         viewModelScope.launch { settings.setSoundsEnabled(enabled) }
@@ -357,6 +416,7 @@ class HomeViewModel(
             is AppTile.Installed -> report(launcher.launchApp(tile.app.packageName, tile.app.label))
             is AppTile.Suggestion -> report(launcher.openStoreFor(tile.packageName, tile.label))
             AppTile.AllApps -> openAllApps()
+            AppTile.SetAsHome -> Unit // Needs an Activity result; ScaryRoot handles it.
             AppTile.SystemSettings -> report(launcher.openSystemSettings(settingsLabel))
         }
     }
@@ -419,6 +479,7 @@ class HomeViewModel(
                     container.appsRepository,
                     container.settingsRepository,
                     container.launcher,
+                    container.tmdbRepository,
                 )
             }
         }

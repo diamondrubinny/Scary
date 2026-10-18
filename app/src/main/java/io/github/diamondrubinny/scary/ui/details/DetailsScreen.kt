@@ -30,6 +30,9 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
+import io.github.diamondrubinny.scary.ui.components.rememberArtwork
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
@@ -37,6 +40,7 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 @Composable
 fun DetailsScreen(
@@ -62,14 +66,25 @@ fun DetailsScreen(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
                 BasicText(
-                    text = movie.title,
+                    text = movie.displayTitle(language),
                     style = ScaryType.Display,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.semantics { heading() },
                 )
+                if (movie.displayTitle(language) != movie.title) {
+                    BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
+                }
                 MovieMeta(movie)
-                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                if (movie.cast.isNotEmpty()) {
+                    BasicText(
+                        stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
+                        style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
                         text = stringResource(R.string.action_watch_stremio),
@@ -86,12 +101,17 @@ fun DetailsScreen(
                     .clip(RoundedCornerShape(8.dp)),
             ) {
                 PosterArt(movie, Modifier.fillMaxSize())
-                BasicText(
-                    text = movie.title,
-                    style = ScaryType.Title,
-                    maxLines = 3,
-                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                )
+                val poster = rememberArtwork(movie.posterUrl)
+                if (poster != null) {
+                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                } else {
+                    BasicText(
+                        text = movie.title,
+                        style = ScaryType.Title,
+                        maxLines = 3,
+                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                    )
+                }
             }
         }
         if (details.similar.isNotEmpty()) {

@@ -32,6 +32,7 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import java.util.Locale
 
 @Composable
 fun ScaryButton(
@@ -97,10 +98,22 @@ fun MovieMeta(movie: Movie, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         BasicText(movie.year.toString(), style = ScaryType.BodyStrong)
-        BasicText(movie.director, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1, overflow = TextOverflow.Ellipsis)
-        BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Body.copy(color = ScaryColors.Ash))
-        FearMeter(movie.fear)
-        BasicText(stringResource(R.string.fear_short, movie.fear), style = ScaryType.Body.copy(color = ScaryColors.Ash))
+        if (movie.director.isNotBlank()) {
+            BasicText(movie.director, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        }
+        if (movie.runtimeMin > 0) {
+            BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Body.copy(color = ScaryColors.Ash))
+        }
+        movie.imdbRating?.let { rating ->
+            BasicText(
+                stringResource(R.string.imdb_rating, String.format(Locale.US, "%.1f", rating)),
+                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+            )
+        }
+        movie.fear?.let { fear ->
+            FearMeter(fear)
+            BasicText(stringResource(R.string.fear_short, fear), style = ScaryType.Body.copy(color = ScaryColors.Ash))
+        }
     }
 }
 
@@ -143,6 +156,22 @@ fun FogIcon(color: Color, modifier: Modifier = Modifier) {
             }
             drawPath(path, color, style = stroke)
         }
+    }
+}
+
+@Composable
+fun HomeIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val w = size.width
+        val h = size.height
+        val roof = Path().apply {
+            moveTo(w * 0.5f, h * 0.08f)
+            lineTo(w * 0.95f, h * 0.48f)
+            lineTo(w * 0.05f, h * 0.48f)
+            close()
+        }
+        drawPath(roof, color)
+        drawRect(color, topLeft = Offset(w * 0.18f, h * 0.46f), size = Size(w * 0.64f, h * 0.46f))
     }
 }
 

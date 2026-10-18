@@ -42,7 +42,10 @@ class Launcher(
     }
 
     fun openTrailer(movie: Movie): LaunchResult {
-        val uri = Uri.parse(Links.youTubeTrailerSearch(movie.title, movie.year))
+        // The exact trailer when Cinemeta supplied one, otherwise a YouTube search.
+        val link = movie.trailerYoutubeId?.let { runCatching { Links.youTubeVideo(it) }.getOrNull() }
+            ?: Links.youTubeTrailerSearch(movie.title, movie.year)
+        val uri = Uri.parse(link)
         val viaApp = Intent(Intent.ACTION_VIEW, uri).setPackage(KnownPackages.YOUTUBE_TV)
         if (apps.isInstalled(KnownPackages.YOUTUBE_TV) && start(viaApp)) return LaunchResult.Opened
         return if (start(Intent(Intent.ACTION_VIEW, uri))) LaunchResult.Opened else LaunchResult.Failed(YOUTUBE_LABEL)

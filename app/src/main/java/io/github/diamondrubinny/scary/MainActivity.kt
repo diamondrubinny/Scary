@@ -11,6 +11,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
+import io.github.diamondrubinny.scary.launch.HomeRole
+import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -55,6 +57,9 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // Apps may have been installed or removed while another app was in front.
         viewModel.refreshApps()
+        viewModel.updateLauncherStatus(
+            LauncherStatus(HomeRole.isDefaultHome(this), HomeRole.isHomeButtonServiceOn(this)),
+        )
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -80,6 +85,10 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target == "tmdb" -> {
+                viewModel.openSettings()
+                viewModel.openTmdbDialog()
+            }
             target.startsWith("details:") -> viewModel.openDetails(target.removePrefix("details:"))
         }
     }

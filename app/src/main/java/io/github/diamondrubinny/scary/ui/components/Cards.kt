@@ -13,6 +13,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -32,6 +39,13 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+
+/** Image request with a short crossfade; Coil caches it in memory and on disk. */
+@Composable
+fun rememberArtwork(url: String?): ImageRequest? {
+    val context = LocalContext.current
+    return remember(url) { url?.let { ImageRequest.Builder(context).data(it).crossfade(true).build() } }
+}
 
 fun movieTint(movie: Movie, lightness: Float): Color =
     Color.hsl(movie.hue.toFloat(), movie.saturation / 100f, lightness)
@@ -85,20 +99,33 @@ fun PosterCard(
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
+        // The generated art stays underneath: it shows while the poster loads, offline, or if it fails.
+        var posterShown by remember(movie.posterUrl) { mutableStateOf(false) }
         PosterArt(movie, Modifier.fillMaxSize())
+        rememberArtwork(movie.posterUrl)?.let { request ->
+            AsyncImage(
+                model = request,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                onSuccess = { posterShown = true },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        if (!posterShown) {
+            BasicText(
+                text = movie.year.toString(),
+                style = ScaryType.Caption,
+                modifier = Modifier.align(Alignment.TopStart).padding(7.dp),
+            )
+            BasicText(
+                text = movie.title,
+                style = ScaryType.CardTitle,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp, vertical = 7.dp),
+            )
+        }
         if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
-        BasicText(
-            text = movie.year.toString(),
-            style = ScaryType.Caption,
-            modifier = Modifier.align(Alignment.TopStart).padding(7.dp),
-        )
-        BasicText(
-            text = movie.title,
-            style = ScaryType.CardTitle,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp, vertical = 7.dp),
-        )
     }
 }
 
@@ -121,6 +148,14 @@ fun WideMovieCard(
         onFocusChanged = { if (it) onFocused() },
     ) {
         PosterArt(movie, Modifier.fillMaxSize())
+        rememberArtwork(movie.backgroundUrl)?.let { request ->
+            AsyncImage(model = request, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))),
+            )
+        }
         if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
             BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize), maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -156,6 +191,7 @@ fun AppTileCard(
         is AppTile.Installed -> tile.app.label
         is AppTile.Suggestion -> stringResource(R.string.install_app, tile.label)
         AppTile.AllApps -> stringResource(R.string.all_apps)
+        AppTile.SetAsHome -> stringResource(R.string.tile_set_home)
         AppTile.SystemSettings -> stringResource(R.string.system_settings)
     }
     val description = when {
@@ -193,6 +229,7 @@ fun AppTileCard(
                     icon != null -> Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
                     tile is AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
                     tile is AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    tile is AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(26.dp))
                     else -> Box(
                         Modifier
                             .size(30.dp)

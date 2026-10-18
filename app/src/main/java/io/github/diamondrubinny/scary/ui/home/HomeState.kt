@@ -23,8 +23,19 @@ data class HomeUiState(
     /** True after the PIN was entered, until the launcher leaves the screen or 30 minutes pass. */
     val sessionUnlocked: Boolean = false,
     val soundsEnabled: Boolean = false,
+    val onlineEnabled: Boolean = true,
 ) {
-    fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fear >= lockFromFear
+    fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
+}
+
+data class TmdbDialogState(
+    val busy: Boolean = false,
+    val result: io.github.diamondrubinny.scary.data.TmdbKeyResult? = null,
+)
+
+data class LauncherStatus(val isDefaultHome: Boolean, val homeButtonServiceOn: Boolean) {
+    /** Show the "make SCARY the home screen" prompt only when neither route is active. */
+    val needsSetup: Boolean get() = !isDefaultHome && !homeButtonServiceOn
 }
 
 /** Something the parental PIN guards; it runs once the PIN is accepted. */
@@ -76,6 +87,10 @@ sealed interface AppTile {
     /** A pinned app that is not installed yet; selecting it opens Google Play. */
     data class Suggestion(val packageName: String, val label: String) : AppTile {
         override val key = "suggest:$packageName"
+    }
+
+    data object SetAsHome : AppTile {
+        override val key = "set_as_home"
     }
 
     data object AllApps : AppTile {

@@ -29,7 +29,7 @@ class CurationTest {
         assertEquals(NightPick.pick(movies, date), NightPick.pick(movies.shuffled(), date))
         repeat(30) { day ->
             val pick = NightPick.pick(movies, date.plusDays(day.toLong()), maxFear = 2)!!
-            assertTrue(pick.fear <= 2)
+            assertTrue(pick.fear!! <= 2)
         }
         assertNull(NightPick.pick(movies, date, maxFear = 0))
     }

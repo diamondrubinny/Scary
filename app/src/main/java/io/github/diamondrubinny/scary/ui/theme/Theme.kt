@@ -6,7 +6,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +58,16 @@ object ScaryType {
     val Eyebrow = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.2.em, color = ScaryColors.Candle)
     val RowTitle = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
 }
+
+/**
+ * For text that may be in either language (synopses, cast): bidi follows the text itself, while the paragraph
+ * stays aligned with the layout's reading side.
+ */
+@Composable
+fun TextStyle.mixedLanguage(): TextStyle = copy(
+    textDirection = TextDirection.Content,
+    textAlign = if (LocalLayoutDirection.current == LayoutDirection.Rtl) TextAlign.Right else TextAlign.Left,
+)
 
 /** True when decorative motion should stop: the user turned effects off, or the system removed animations. */
 val LocalReduceMotion = staticCompositionLocalOf { false }

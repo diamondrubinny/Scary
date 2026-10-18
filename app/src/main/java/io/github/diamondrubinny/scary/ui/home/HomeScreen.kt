@@ -44,6 +44,7 @@ import io.github.diamondrubinny.scary.ui.components.TopBar
 import io.github.diamondrubinny.scary.ui.components.WideMovieCard
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 /** Callbacks from the home screen, grouped so the composable signature stays readable. */
 class HomeActions(
@@ -68,6 +69,7 @@ fun HomeScreen(
     restoreKey: String?,
     resets: Int,
     actions: HomeActions,
+    showSetHome: Boolean = false,
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
@@ -107,12 +109,12 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .fadeTopEdge(36.dp),
+                .fadeTopEdge(72.dp),
             contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked)
+                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
             }
         }
     }
@@ -139,7 +141,7 @@ private fun Hero(
             style = ScaryType.Eyebrow,
         )
         BasicText(
-            text = movie.title,
+            text = movie.displayTitle(language),
             style = ScaryType.Display,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -148,7 +150,7 @@ private fun Hero(
         MovieMeta(movie)
         BasicText(
             text = movie.synopsis(language),
-            style = ScaryType.Body,
+            style = ScaryType.Body.mixedLanguage(),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )
@@ -174,6 +176,7 @@ private fun HomeRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    showSetHome: Boolean,
 ) {
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
@@ -205,7 +208,10 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Apps -> items(row.tiles, key = { it.key }) { tile ->
+                is HomeRow.Apps -> items(
+                    (if (showSetHome) listOf(AppTile.SetAsHome) else emptyList()) + row.tiles,
+                    key = { it.key },
+                ) { tile ->
                     val key = "${row.key}:${tile.key}"
                     AppTileCard(
                         tile = tile,
@@ -235,7 +241,13 @@ private fun Modifier.fadeTopEdge(height: Dp): Modifier = this
     .drawWithContent {
         drawContent()
         drawRect(
-            brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = 0f, endY = height.toPx()),
+            brush = Brush.verticalGradient(
+                0f to Color.Transparent,
+                0.45f to Color.Transparent,
+                1f to Color.Black,
+                startY = 0f,
+                endY = height.toPx(),
+            ),
             blendMode = BlendMode.DstIn,
         )
     }
