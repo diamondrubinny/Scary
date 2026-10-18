@@ -39,7 +39,8 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
 
     Box(modifier.fillMaxSize()) {
         HeroBackdrop(shown)
-        Crossfade(targetState = shown?.backgroundUrl, animationSpec = tween(FADE_MS), label = "backdrop") { url ->
+        // Some movies have no background art on Cinemeta; their poster still makes a moody backdrop.
+        Crossfade(targetState = shown?.let { it.backgroundUrl ?: it.posterUrl }, animationSpec = tween(FADE_MS), label = "backdrop") { url ->
             rememberArtwork(url)?.let { request ->
                 AsyncImage(
                     model = request,

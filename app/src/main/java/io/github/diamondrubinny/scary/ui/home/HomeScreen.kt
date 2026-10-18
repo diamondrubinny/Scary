@@ -109,7 +109,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .fadeTopEdge(64.dp),
+                .fadeTopEdge(72.dp),
             contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -241,7 +241,13 @@ private fun Modifier.fadeTopEdge(height: Dp): Modifier = this
     .drawWithContent {
         drawContent()
         drawRect(
-            brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = 0f, endY = height.toPx()),
+            brush = Brush.verticalGradient(
+                0f to Color.Transparent,
+                0.45f to Color.Transparent,
+                1f to Color.Black,
+                startY = 0f,
+                endY = height.toPx(),
+            ),
             blendMode = BlendMode.DstIn,
         )
     }
