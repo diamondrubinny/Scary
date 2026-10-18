@@ -231,6 +231,9 @@ class HomeViewModel(
     }
 
     fun onHomePressed() {
+        // Home always lands on a clean home screen: no dialog left floating over it.
+        _pinDialog.value = null
+        _tmdbDialog.value = null
         backStack.value = listOf(Screen.Home)
         heroId.value = null
         lastFocusedKey = null
