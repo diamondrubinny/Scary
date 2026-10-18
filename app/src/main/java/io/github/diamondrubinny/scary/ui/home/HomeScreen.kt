@@ -132,7 +132,7 @@ private fun Hero(
         modifier = Modifier
             .padding(horizontal = SidePadding)
             .fillMaxWidth(0.62f)
-            .height(196.dp),
+            .height(212.dp),
         verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
     ) {
         if (movie == null) return@Column
@@ -140,20 +140,27 @@ private fun Hero(
             text = if (isNightPick) stringResource(R.string.night_pick) else subgenreLine(movie),
             style = ScaryType.Eyebrow,
         )
-        BasicText(
-            text = movie.displayTitle(language),
-            style = ScaryType.Display,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.semantics { heading() },
-        )
-        MovieMeta(movie)
-        BasicText(
-            text = movie.synopsis(language),
-            style = ScaryType.Body.mixedLanguage(),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        // The text block yields space first, so the buttons below always keep their full height,
+        // even when a longer language wraps the synopsis to two lines.
+        Column(
+            modifier = Modifier.weight(1f, fill = false),
+            verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
+        ) {
+            BasicText(
+                text = movie.displayTitle(language),
+                style = ScaryType.Display,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() },
+            )
+            MovieMeta(movie)
+            BasicText(
+                text = movie.synopsis(language),
+                style = ScaryType.Body.mixedLanguage(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
             ScaryButton(
                 text = stringResource(R.string.action_watch_stremio),
