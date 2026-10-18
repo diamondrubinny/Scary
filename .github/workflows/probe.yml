@@ -10,13 +10,10 @@ jobs:
     steps:
       - name: Probe
         run: |
-          set -x
-          curl -sS https://v3-cinemeta.strem.io/meta/movie/tt0081505.json | head -c 4000; echo
-          curl -sS "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror.json" | head -c 2500; echo
-          curl -sS "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror.json" | python3 -c "import json,sys; d=json.load(sys.stdin); m=d['metas']; print(len(m)); print(sorted({k for x in m for k in x}))"
-          curl -sS "https://v3-cinemeta.strem.io/catalog/movie/imdbRating/genre=Horror.json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['metas']), [x['name'] for x in d['metas'][:5]])" || true
-          curl -sS "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Thriller.json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(len(d['metas']), [x['name'] for x in d['metas'][:5]])" || true
-          curl -sS https://v3-cinemeta.strem.io/manifest.json | head -c 3000; echo
-          curl -sSI https://images.metahub.space/background/medium/tt0081505/img | head -5
-          curl -sSI https://images.metahub.space/poster/medium/tt0081505/img | head -5
-          curl -sSI https://images.metahub.space/logo/medium/tt0081505/img | head -5
+          curl -sSL https://v3-cinemeta.strem.io/manifest.json | python3 -c "import json,sys; d=json.load(sys.stdin); [print(c['id'], c.get('type'), [ (e.get('name'), e.get('isRequired'), (e.get('options') or [])[:40]) for e in c.get('extra',[])]) for c in d['catalogs']]"
+          for u in "catalog/movie/top/genre=Horror.json" "catalog/movie/top/genre%3DHorror.json" "catalog/movie/top.json" "catalog/movie/imdbRating/genre=Horror.json" "catalog/movie/top/genre=Thriller.json"; do
+            echo "== $u"; curl -sSL -o out.json -w "%{http_code} %{size_download} %{url_effective}\n" "https://v3-cinemeta.strem.io/$u"
+            python3 -c "import json; d=json.load(open('out.json')); m=d.get('metas',[]); print(len(m), sorted({k for x in m for k in x})); print([ (x.get('name'), x.get('releaseInfo'), x.get('imdbRating'), x.get('background','')[:60]) for x in m[:4]])" || head -c 300 out.json
+          done
+          curl -sSI https://images.metahub.space/background/medium/tt0081505/img | head -4
+          curl -sSI https://images.metahub.space/poster/medium/tt0081505/img | head -4
