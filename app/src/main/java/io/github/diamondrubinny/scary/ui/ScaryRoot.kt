@@ -130,7 +130,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     }
     val settingsActions = SettingsActions(
         onToggleLanguage = {
-            LanguageStore.write(context, if (language == Language.HE) Language.EN else Language.HE)
+            LanguageStore.write(context, language.next())
             context.findActivity()?.recreate()
         },
         onToggleEffects = viewModel::toggleEffects,

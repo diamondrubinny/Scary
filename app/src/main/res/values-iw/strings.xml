@@ -53,8 +53,6 @@
     <string name="badge_hidden">מוסתרת</string>
     <string name="settings_title">הגדרות SCARY</string>
     <string name="settings_language">שפה</string>
-    <string name="language_name_he">עברית</string>
-    <string name="language_name_en">English</string>
     <string name="settings_effects">ערפל וגרעיניות</string>
     <string name="value_on">פועלים</string>
     <string name="value_off">כבויים</string>
@@ -62,7 +60,7 @@
     <string name="settings_night_fear_value">עד מד פחד %1$d</string>
     <string name="settings_system">הגדרות המערכת של הטלוויזיה</string>
     <string name="settings_about">אודות</string>
-    <string name="settings_about_text">SCARY %1$s. אין חשבונות ואין מעקב, ובגרסה הזו אין גישה לאינטרנט. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant ו־Rubik Wet Paint ברישיון SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">SCARY %1$s. אין חשבונות ואין מעקב. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant, Oswald, Rubik ו־Rubik Wet Paint ברישיון SIL Open Font License 1.1.</string>
     <string name="search_title">חיפוש</string>
     <string name="search_hint">שם סרט, במאי, שנה או סוג אימה</string>
     <string name="search_prompt">הקלידו או הכתיבו בקול כדי לחפש ב־%1$d סרטים.</string>
@@ -111,7 +109,7 @@
     <string name="settings_tmdb">מפתח TMDB</string>
     <string name="value_tmdb_none">לא הוגדר</string>
     <string name="tmdb_dialog_title">מפתח API של TMDB</string>
-    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מוסיפה שמות ותקצירים בעברית, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. ההקלדה נוחה יותר עם אפליקציית Google TV בטלפון.</string>
+    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מציגה שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. ההקלדה נוחה יותר עם אפליקציית Google TV בטלפון.</string>
     <string name="tmdb_hint">הדביקו או הקלידו את המפתח</string>
     <string name="tmdb_save">שמירה ובדיקה</string>
     <string name="tmdb_delete">מחיקת המפתח</string>

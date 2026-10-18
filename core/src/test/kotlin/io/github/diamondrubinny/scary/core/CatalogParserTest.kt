@@ -13,7 +13,7 @@ class CatalogParserTest {
     private fun movieJson(id: String, imdb: String = "tt0000001", fear: Int = 3) = """
         {"id":"$id","imdbId":"$imdb","title":"T","year":2000,"director":"D","runtimeMin":90,
          "genre":"horror","subgenres":["ghost"],"fear":$fear,"hue":10,
-         "synopsisHe":"ת","synopsisEn":"s"}
+         "synopsisHe":"ת","synopsisEn":"s","synopses":{"pt":"p","ru":"р"}}
     """.trimIndent()
 
     private fun catalogJson(movies: String, collections: String = "[]") =
@@ -67,9 +67,17 @@ class CatalogParserTest {
     fun `rejects collections that reference unknown movies`() {
         val text = catalogJson(
             movieJson("a"),
-            """[{"id":"c","titleHe":"ש","titleEn":"c","movieIds":["a","ghost"]}]""",
+            """[{"id":"c","titleHe":"ש","titleEn":"c","titles":{"pt":"c","ru":"к"},"movieIds":["a","ghost"]}]""",
         )
         assertTrue(problemsOf(text).any { "unknown movie 'ghost'" in it })
+    }
+
+    @Test
+    fun `requires portuguese and russian translations for curated entries`() {
+        val text = catalogJson(movieJson("a").replace(""","synopses":{"pt":"p","ru":"р"}""", ""))
+        val problems = problemsOf(text)
+        assertTrue(problems.any { "missing pt synopsis" in it })
+        assertTrue(problems.any { "missing ru synopsis" in it })
     }
 
     @Test

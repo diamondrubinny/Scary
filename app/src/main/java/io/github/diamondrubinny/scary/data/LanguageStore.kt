@@ -6,21 +6,18 @@ import io.github.diamondrubinny.scary.core.model.Language
 
 /**
  * The UI language must be known synchronously in attachBaseContext, before any coroutine can run,
- * so it lives in SharedPreferences rather than DataStore.
+ * so it lives in SharedPreferences rather than DataStore. Hebrew is the default.
  */
 object LanguageStore {
     private const val FILE = "locale"
     private const val KEY = "language"
 
     fun read(context: Context): Language =
-        when (context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY, null)) {
-            "en" -> Language.EN
-            else -> Language.HE
-        }
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).getString(KEY, null)
+            ?.let(Language::fromCode)
+            ?: Language.HE
 
     fun write(context: Context, language: Language) {
-        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit {
-            putString(KEY, if (language == Language.EN) "en" else "he")
-        }
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(KEY, language.code) }
     }
 }

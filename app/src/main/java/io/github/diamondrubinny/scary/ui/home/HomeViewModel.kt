@@ -15,6 +15,7 @@ import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.security.PinHasher
 import io.github.diamondrubinny.scary.core.security.PinLockout
@@ -62,6 +63,12 @@ class HomeViewModel(
     private val catalog = MutableStateFlow<CatalogState>(CatalogState.Loading)
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     private val heroId = MutableStateFlow<String?>(null)
+    private val language = MutableStateFlow(Language.HE)
+
+    /** The UI language; online text (TMDB) is fetched in it. */
+    fun setLanguage(value: Language) {
+        language.value = value
+    }
     private val sessionUnlocked = MutableStateFlow(false)
     private var unlockedAtMillis = 0L
     private var latestPrefs: LauncherPrefs? = null
@@ -124,7 +131,7 @@ class HomeViewModel(
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
-            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled }, tmdb.keyMask.map { it != null })
+            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled }, tmdb.keyMask.map { it != null }, language)
                 .catch { e ->
                     when (e) {
                         is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")

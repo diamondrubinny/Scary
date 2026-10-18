@@ -11,6 +11,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.data.LanguageStore
+import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
 import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -33,6 +36,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val language = LanguageStore.read(this)
+        ScaryFonts.useFor(language)
+        viewModel.setLanguage(language)
         setContent { ScaryRoot(viewModel) }
         handleDebugIntent(intent)
 
@@ -85,6 +91,10 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target.startsWith("language:") -> {
+                LanguageStore.write(this, Language.fromCode(target.removePrefix("language:")))
+                recreate()
+            }
             target == "tmdb" -> {
                 viewModel.openSettings()
                 viewModel.openTmdbDialog()

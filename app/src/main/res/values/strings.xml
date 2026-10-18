@@ -54,8 +54,6 @@
     <string name="badge_hidden">Hidden</string>
     <string name="settings_title">SCARY settings</string>
     <string name="settings_language">Language</string>
-    <string name="language_name_he">עברית</string>
-    <string name="language_name_en">English</string>
     <string name="settings_effects">Fog and film grain</string>
     <string name="value_on">On</string>
     <string name="value_off">Off</string>
@@ -63,7 +61,7 @@
     <string name="settings_night_fear_value">Up to fear level %1$d</string>
     <string name="settings_system">TV system settings</string>
     <string name="settings_about">About</string>
-    <string name="settings_about_text">SCARY %1$s. No accounts, no tracking, and this version has no internet access. Your preferences stay on this TV. Fonts: Karantina, Assistant and Rubik Wet Paint under the SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">SCARY %1$s. No accounts and no tracking. Your preferences stay on this TV. Fonts: Karantina, Assistant, Oswald, Rubik and Rubik Wet Paint under the SIL Open Font License 1.1.</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Title, director, year or kind of horror</string>
     <string name="search_prompt">Type or dictate to search %1$d movies.</string>
@@ -112,7 +110,7 @@
     <string name="settings_tmdb">TMDB key</string>
     <string name="value_tmdb_none">Not set</string>
     <string name="tmdb_dialog_title">TMDB API key</string>
-    <string name="tmdb_dialog_body">With your own TMDB key, SCARY adds Hebrew titles and synopses, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
+    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
     <string name="tmdb_hint">Paste or type the key</string>
     <string name="tmdb_save">Save and check</string>
     <string name="tmdb_delete">Delete the key</string>

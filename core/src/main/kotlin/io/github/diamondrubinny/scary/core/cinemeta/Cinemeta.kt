@@ -29,14 +29,21 @@ data class CinemetaMeta(
     val imdbRating: Double? = null,
     val runtimeMin: Int? = null,
     val trailerYoutubeId: String? = null,
-    /** Hebrew title and description; filled when the row comes from TMDB in Hebrew. */
-    val nameHe: String = "",
-    val descriptionHe: String = "",
+    /** Title and description in [localLanguage] (a Language.code), when the row comes from TMDB. */
+    val localName: String = "",
+    val localDescription: String = "",
+    val localLanguage: String = "",
 )
 
 /** A row pulled from a Cinemeta catalog, such as popular horror. */
 @Serializable
-data class OnlineRow(val id: String, val titleHe: String, val titleEn: String, val metas: List<CinemetaMeta>)
+data class OnlineRow(
+    val id: String,
+    val titleHe: String,
+    val titleEn: String,
+    val metas: List<CinemetaMeta>,
+    val titles: Map<String, String> = emptyMap(),
+)
 
 /**
  * Cinemeta is Stremio's public metadata service (no API key). Its responses are treated as untrusted:
@@ -123,14 +130,14 @@ object Cinemeta {
             id = "cm_" + meta.imdbId,
             imdbId = meta.imdbId,
             title = meta.name,
-            titleHe = meta.nameHe,
+            titles = localized(meta.localLanguage, meta.localName),
             year = year,
             director = meta.director.joinToString(", "),
             runtimeMin = meta.runtimeMin ?: 0,
             genre = if (meta.genres.any { it.equals("Horror", ignoreCase = true) }) Genre.HORROR else Genre.THRILLER,
             hue = Math.floorMod(meta.imdbId.hashCode(), 360),
             synopsisEn = meta.description,
-            synopsisHe = meta.descriptionHe,
+            synopses = localized(meta.localLanguage, meta.localDescription),
             posterUrl = meta.poster,
             backgroundUrl = meta.background,
             logoUrl = meta.logo,
@@ -157,12 +164,15 @@ object Cinemeta {
                 .distinct()
                 .take(perRow)
                 .toList()
-            if (ids.size < MIN_ROW_SIZE) null else MovieCollection("online_${row.id}", row.titleHe, row.titleEn, ids)
+            if (ids.size < MIN_ROW_SIZE) null else MovieCollection("online_${row.id}", row.titleHe, row.titleEn, ids, row.titles)
         }
         return base.copy(movies = curated + added, collections = onlineCollections + base.collections)
     }
 
     private const val MIN_ROW_SIZE = 4
+
+    private fun localized(language: String, text: String): Map<String, String> =
+        if (language.isBlank() || text.isBlank()) emptyMap() else mapOf(language to text)
 
     private fun JsonObject.str(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 

@@ -49,4 +49,18 @@ key KEYCODE_BACK
 open --es scary.debug.open tmdb
 shot 10-tmdb-key 4
 
+# The same key screens in English, Portuguese and Russian (Hebrew is the default run above).
+n=11
+for lang in en pt ru; do
+  open --es scary.debug.open "language:$lang"
+  sleep 6
+  open
+  shot "$n-home-$lang" 12; n=$((n+1))
+  open --es scary.debug.open details:the_shining
+  shot "$n-details-$lang" 6; n=$((n+1))
+  open --es scary.debug.open settings
+  shot "$n-settings-$lang" 4; n=$((n+1))
+done
+open --es scary.debug.open language:he
+
 ls -la "$OUT"

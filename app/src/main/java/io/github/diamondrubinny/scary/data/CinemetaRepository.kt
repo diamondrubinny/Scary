@@ -20,12 +20,19 @@ import javax.net.ssl.HttpsURLConnection
 class CinemetaRepository(context: Context) {
     private val cacheFile = File(context.filesDir, "cinemeta_cache.json")
 
-    private data class RowSpec(val id: String, val genre: String, val titleHe: String, val titleEn: String)
+    private data class RowSpec(
+        val id: String,
+        val genre: String,
+        val titleHe: String,
+        val titleEn: String,
+        val titlePt: String,
+        val titleRu: String,
+    )
 
     private val rowSpecs = listOf(
-        RowSpec("horror_popular", "Horror", "פופולרי עכשיו באימה", "Popular horror right now"),
-        RowSpec("thriller_popular", "Thriller", "מותחנים פופולריים", "Popular thrillers"),
-        RowSpec("mystery_popular", "Mystery", "תעלומות שכולם רואים", "Mysteries everyone is watching"),
+        RowSpec("horror_popular", "Horror", "פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас"),
+        RowSpec("thriller_popular", "Thriller", "מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры"),
+        RowSpec("mystery_popular", "Mystery", "תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все"),
     )
 
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
@@ -43,7 +50,7 @@ class CinemetaRepository(context: Context) {
             fetch(Cinemeta.catalogUrl("top", spec.genre))
                 ?.let(Cinemeta::parseCatalog)
                 ?.takeIf { it.isNotEmpty() }
-                ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it) }
+                ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it, mapOf("pt" to spec.titlePt, "ru" to spec.titleRu)) }
         }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
         CinemetaCache(System.currentTimeMillis(), metas, rows).also(::save)

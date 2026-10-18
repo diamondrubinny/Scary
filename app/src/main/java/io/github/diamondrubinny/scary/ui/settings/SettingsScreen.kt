@@ -110,7 +110,7 @@ fun SettingsScreen(
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_language),
-            value = stringResource(if (language == Language.HE) R.string.language_name_he else R.string.language_name_en),
+            value = language.nativeName,
             onClick = actions.onToggleLanguage,
         )
         SettingRow(
