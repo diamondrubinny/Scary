@@ -44,6 +44,7 @@ import io.github.diamondrubinny.scary.ui.components.TopBar
 import io.github.diamondrubinny.scary.ui.components.WideMovieCard
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 /** Callbacks from the home screen, grouped so the composable signature stays readable. */
 class HomeActions(
@@ -108,7 +109,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .fadeTopEdge(36.dp),
+                .fadeTopEdge(64.dp),
             contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -149,7 +150,7 @@ private fun Hero(
         MovieMeta(movie)
         BasicText(
             text = movie.synopsis(language),
-            style = ScaryType.Body,
+            style = ScaryType.Body.mixedLanguage(),
             maxLines = 2,
             overflow = TextOverflow.Ellipsis,
         )

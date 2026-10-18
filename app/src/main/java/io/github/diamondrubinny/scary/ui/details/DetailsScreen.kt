@@ -40,6 +40,7 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 @Composable
 fun DetailsScreen(
@@ -75,12 +76,12 @@ fun DetailsScreen(
                 if (movie.cast.isNotEmpty()) {
                     BasicText(
                         stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
-                        style = ScaryType.Body.copy(color = ScaryColors.Ash),
+                        style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(), maxLines = 5, overflow = TextOverflow.Ellipsis)
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
                         text = stringResource(R.string.action_watch_stremio),

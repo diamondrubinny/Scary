@@ -30,11 +30,10 @@ import kotlinx.coroutines.delay
 @Composable
 fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
     var shown by remember { mutableStateOf(movie) }
-    LaunchedEffect(movie?.id) {
-        if (shown?.id != movie?.id) {
-            delay(SWITCH_DELAY_MS)
-            shown = movie
-        }
+    LaunchedEffect(movie) {
+        // Same movie with new data (artwork just arrived): update at once. Another movie: wait for scrolling to settle.
+        if (shown?.id != movie?.id) delay(SWITCH_DELAY_MS)
+        shown = movie
     }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
