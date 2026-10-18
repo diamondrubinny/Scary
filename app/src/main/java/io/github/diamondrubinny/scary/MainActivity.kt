@@ -92,6 +92,9 @@ class MainActivity : ComponentActivity() {
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
             target.startsWith("language:") -> {
+                // Consume the target first, or the recreated activity would read it again and loop.
+                intent.removeExtra(DEBUG_OPEN)
+                this.intent?.removeExtra(DEBUG_OPEN)
                 LanguageStore.write(this, Language.fromCode(target.removePrefix("language:")))
                 recreate()
             }

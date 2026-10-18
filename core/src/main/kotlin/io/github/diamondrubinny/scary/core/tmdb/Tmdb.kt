@@ -150,8 +150,11 @@ object Tmdb {
         return TmdbInfo(
             tmdbId = result.tmdbId,
             language = language.code,
-            title = result.title.takeIf { isLocalized(language, it, result.originalTitle) }.orEmpty(),
-            overview = result.overview.takeIf { language == Language.PT && it.isNotBlank() || isLocalized(language, it) }.orEmpty(),
+            // English is TMDB's base language: its title and overview are always usable as English text.
+            title = result.title.takeIf { language == Language.EN || isLocalized(language, it, result.originalTitle) }.orEmpty(),
+            overview = result.overview.takeIf {
+                it.isNotBlank() && (language == Language.EN || language == Language.PT || isLocalized(language, it))
+            }.orEmpty(),
             poster = imageUrl(result.poster, "w500"),
             backdrop = imageUrl(result.backdrop, "w1280"),
             rating = result.rating,
@@ -174,7 +177,8 @@ object Tmdb {
         year = result.year,
         poster = imageUrl(result.poster, "w500"),
         background = imageUrl(result.backdrop, "w1280"),
-        description = if (language == Language.EN) result.overview else "",
+        // Without a translation, keep TMDB's overview as the English synopsis rather than showing none.
+        description = if (language == Language.EN || localOverview.isBlank()) result.overview else "",
         localName = localTitle,
         localDescription = localOverview,
         localLanguage = if (localTitle.isBlank() && localOverview.isBlank()) "" else language.code,
@@ -189,6 +193,14 @@ object Tmdb {
     /** Localized text and sharper art from TMDB. Curated translations and editorial fields always win. */
     fun enrich(movie: Movie, info: TmdbInfo): Movie {
         val lang = info.language
+        if (lang == Language.EN.code) {
+            // English lives in the base fields; fill only what is missing, curated text always wins.
+            return movie.copy(
+                synopsisEn = movie.synopsisEn.ifBlank { info.overview },
+                posterUrl = info.poster ?: movie.posterUrl,
+                backgroundUrl = info.backdrop ?: movie.backgroundUrl,
+            )
+        }
         val hasTitle = movie.titles[lang]?.isNotBlank() == true || (lang == Language.HE.code && movie.titleHe.isNotBlank())
         val hasSynopsis = movie.synopses[lang]?.isNotBlank() == true || (lang == Language.HE.code && movie.synopsisHe.isNotBlank())
         return movie.copy(

@@ -230,8 +230,12 @@ class HomeViewModel(
         return true
     }
 
+    /** Bumped whenever dialogs are closed, so PIN or TMDB work still running cannot act afterwards. */
+    private var dialogGeneration = 0L
+
     fun onHomePressed() {
         // Home always lands on a clean home screen: no dialog left floating over it.
+        dialogGeneration++
         _pinDialog.value = null
         _tmdbDialog.value = null
         backStack.value = listOf(Screen.Home)
@@ -283,6 +287,7 @@ class HomeViewModel(
     }
 
     fun dismissPin() {
+        dialogGeneration++
         _pinDialog.value = null
     }
 
@@ -301,8 +306,10 @@ class HomeViewModel(
                     return
                 }
                 _pinDialog.value = dialog.copy(busy = true)
+                val generation = dialogGeneration
                 viewModelScope.launch {
                     val hash = withContext(Dispatchers.Default) { PinHasher.hash(pin) }
+                    if (generation != dialogGeneration) return@launch
                     settings.setPin(hash)
                     unlockSession()
                     _pinDialog.value = null
@@ -328,8 +335,11 @@ class HomeViewModel(
             return
         }
         _pinDialog.value = dialog.copy(busy = true, error = null)
+        val generation = dialogGeneration
         viewModelScope.launch {
             val ok = withContext(Dispatchers.Default) { PinHasher.verify(pin, stored) }
+            // A wrong PIN still counts toward the lockout even if the dialog was closed meanwhile.
+            if (ok && generation != dialogGeneration) return@launch
             if (ok) {
                 settings.setLockout(PinLockout.onSuccess())
                 unlockSession()
@@ -338,6 +348,7 @@ class HomeViewModel(
             } else {
                 val next = PinLockout.onFailure(prefs.lockout, System.currentTimeMillis())
                 settings.setLockout(next)
+                if (generation != dialogGeneration) return@launch
                 _pinDialog.value = dialog.copy(
                     busy = false,
                     error = if (next.lockedUntilMillis > 0) R.string.pin_error_wait else R.string.pin_error_wrong,
@@ -375,14 +386,18 @@ class HomeViewModel(
     }
 
     fun dismissTmdbDialog() {
+        dialogGeneration++
         _tmdbDialog.value = null
     }
 
     fun submitTmdbKey(input: String) {
         if (_tmdbDialog.value?.busy == true) return
         _tmdbDialog.value = TmdbDialogState(busy = true)
+        val generation = dialogGeneration
         viewModelScope.launch {
             val result = tmdb.setKey(input)
+            // A key that was verified is kept; only the dialog update is skipped if it was closed meanwhile.
+            if (generation != dialogGeneration) return@launch
             if (result == TmdbKeyResult.SAVED) {
                 _tmdbDialog.value = null
                 show(R.string.msg_tmdb_saved)

@@ -123,6 +123,29 @@ class TmdbTest {
     }
 
     @Test
+    fun `english find fills only a missing english synopsis`() {
+        val en = Tmdb.parseFind(
+            """{"movie_results":[{"id":5,"title":"Alien","original_title":"Alien","overview":"In space no one can hear you scream."}]}""",
+            Language.EN,
+        )!!
+        assertEquals("Alien", en.title)
+        assertEquals("In space no one can hear you scream.", en.overview)
+        val curated = catalog.movie("alien")!!
+        assertEquals(curated.synopsisEn, Tmdb.enrich(curated, en).synopsisEn)
+        val online = curated.copy(synopsisEn = "", curated = false)
+        assertEquals("In space no one can hear you scream.", Tmdb.enrich(online, en).synopsisEn)
+    }
+
+    @Test
+    fun `untranslated discover overview is kept as english`() {
+        val result = Tmdb.parseDiscover("""{"results":[{"id":9,"title":"Smile 2","original_title":"Smile 2","overview":"A pop star starts to see things.","release_date":"2024-10-16","genre_ids":[27]}]}""").single()
+        val meta = Tmdb.toMeta(result, "tt29268110", Language.RU)
+        assertEquals("", meta.localDescription)
+        assertEquals("A pop star starts to see things.", meta.description)
+        assertTrue(Cinemeta.toMovie(meta)!!.synopsis(Language.RU).isNotBlank())
+    }
+
+    @Test
     fun `languages cycle and map from android codes`() {
         assertEquals(listOf(Language.HE, Language.EN, Language.PT, Language.RU), Language.entries.toList())
         assertEquals(Language.HE, Language.RU.next())
