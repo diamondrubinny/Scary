@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import io.github.diamondrubinny.scary.ui.ScaryRoot
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
 
 class MainActivity : ComponentActivity() {
 
@@ -91,6 +92,10 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target == "privacy" || target == "accessibility" -> {
+                viewModel.openSettings()
+                viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)
+            }
             target.startsWith("language:") -> {
                 // Consume the target first, or the recreated activity would read it again and loop.
                 intent.removeExtra(DEBUG_OPEN)

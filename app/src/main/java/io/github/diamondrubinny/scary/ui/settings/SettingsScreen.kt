@@ -26,6 +26,7 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.FearMeter
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
@@ -43,6 +44,8 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenPrivacy: () -> Unit,
+    val onOpenAccessibilityStatement: () -> Unit,
 )
 
 @Composable
@@ -59,11 +62,20 @@ fun SettingsScreen(
     tmdbKeyMask: String?,
     versionName: String,
     actions: SettingsActions,
+    returningFrom: DocumentKind? = null,
 ) {
     val firstFocus = remember { FocusRequester() }
+    val privacyFocus = remember { FocusRequester() }
+    val statementFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        runCatching { firstFocus.requestFocus() }
+        // Back from a document lands on the row that opened it, not at the top.
+        val target = when (returningFrom) {
+            DocumentKind.Privacy -> privacyFocus
+            DocumentKind.Accessibility -> statementFocus
+            null -> firstFocus
+        }
+        runCatching { target.requestFocus() }
     }
 
     Column(
@@ -159,6 +171,18 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        SettingRow(
+            label = stringResource(R.string.settings_privacy),
+            value = null,
+            onClick = actions.onOpenPrivacy,
+            modifier = Modifier.focusRequester(privacyFocus),
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_accessibility_statement),
+            value = null,
+            onClick = actions.onOpenAccessibilityStatement,
+            modifier = Modifier.focusRequester(statementFocus),
+        )
     }
 }
 

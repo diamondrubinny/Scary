@@ -19,13 +19,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.data.LanguageStore
@@ -35,6 +39,7 @@ import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.search.SearchScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
+import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.settings.TmdbKeyDialog
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
@@ -46,6 +51,7 @@ import io.github.diamondrubinny.scary.ui.home.HomeActions
 import io.github.diamondrubinny.scary.ui.home.HomeScreen
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.LoadingView
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
@@ -128,6 +134,11 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onAppInfo = viewModel::openAppInfo,
         )
     }
+    // Which document settings opened last, so focus can return to its row. Forgotten once settings close.
+    var lastDocument by remember { mutableStateOf<DocumentKind?>(null) }
+    LaunchedEffect(screen) {
+        if (screen != Screen.Settings && screen !is Screen.Document) lastDocument = null
+    }
     val settingsActions = SettingsActions(
         onToggleLanguage = {
             LanguageStore.write(context, language.next())
@@ -144,10 +155,22 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
         onOpenTmdb = viewModel::openTmdbDialog,
+        onOpenPrivacy = {
+            lastDocument = DocumentKind.Privacy
+            viewModel.openDocument(DocumentKind.Privacy)
+        },
+        onOpenAccessibilityStatement = {
+            lastDocument = DocumentKind.Accessibility
+            viewModel.openDocument(DocumentKind.Accessibility)
+        },
     )
     val versionName = remember(context) { context.versionName() }
 
-    ScaryTheme(reduceMotion = !state.effectsEnabled) {
+    // Re-read on every lifecycle change, so turning off animations in the TV settings applies on return.
+    val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val systemAnimations = remember(lifecycleState) { SettingsRepository.systemAnimationsEnabled(context) }
+
+    ScaryTheme(reduceMotion = !state.effectsEnabled || !systemAnimations) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
@@ -163,6 +186,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onOpenMovie = { viewModel.openDetails(it.id) },
                     isLocked = state::isLocked,
                 )
+                current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
                     language = language,
@@ -177,6 +201,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     tmdbKeyMask = tmdbKeyMask,
                     versionName = versionName,
                     actions = settingsActions,
+                    returningFrom = lastDocument,
                 )
                 details != null -> DetailsScreen(
                     details = details,

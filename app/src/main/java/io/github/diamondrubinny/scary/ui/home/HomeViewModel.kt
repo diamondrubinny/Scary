@@ -210,6 +210,8 @@ class HomeViewModel(
 
     fun openSearch() = push(Screen.Search)
 
+    fun openDocument(kind: DocumentKind) = push(Screen.Document(kind))
+
     private val _searchQuery = MutableStateFlow("")
 
     /** Kept here so the query survives a trip to a movie's details and back. */

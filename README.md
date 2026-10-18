@@ -105,6 +105,7 @@ SCARY заменяет главный экран Android TV на экран в �
 CI (GitHub Actions) runs the tests, builds and lints the APK, publishes it to the `latest-build` pre-release, and captures these screenshots on an Android TV emulator.
 
 Plan and spec (Hebrew): [docs/PLAN.md](docs/PLAN.md).
+Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibility review and draft statement: [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md). Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md). The privacy notice and accessibility statement are also in the app, under Settings → About.
 
 ## Privacy and credits
 

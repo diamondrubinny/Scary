@@ -117,10 +117,13 @@ class SettingsRepository(private val context: Context) {
         context.settingsStore.edit { block(it) }
     }
 
-    private fun systemAnimationsEnabled(): Boolean =
-        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    private fun systemAnimationsEnabled(): Boolean = systemAnimationsEnabled(context)
 
     companion object {
+        /** False when the TV's accessibility settings removed animations; that always stops decorative motion. */
+        fun systemAnimationsEnabled(context: Context): Boolean =
+            Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+
         const val MAX_FEAR = 5
         private val EFFECTS = booleanPreferencesKey("effects_enabled")
         private val RECENT = stringPreferencesKey("recent_movie_ids")

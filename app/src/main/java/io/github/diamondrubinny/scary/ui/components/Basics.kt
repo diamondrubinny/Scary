@@ -77,11 +77,11 @@ fun FearMeter(level: Int, modifier: Modifier = Modifier, dropWidth: Dp = 8.dp) {
                 val on = index < level
                 val radius = size.width / 2
                 drawRoundRect(
-                    color = if (on) ScaryColors.Blood else ScaryColors.BloodDim,
+                    color = if (on) ScaryColors.Fear else ScaryColors.BloodDim,
                     cornerRadius = CornerRadius(radius, radius),
                 )
                 drawRect(
-                    color = if (on) ScaryColors.Blood else ScaryColors.BloodDim,
+                    color = if (on) ScaryColors.Fear else ScaryColors.BloodDim,
                     size = Size(size.width, size.height / 2),
                 )
             }

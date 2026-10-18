@@ -1,0 +1,75 @@
+# SCARY: פרטיות
+
+> **טיוטה טכנית שדורשת בדיקה משפטית לפני פרסום.** המסמך מתאר את מה שהקוד עושה בפועל (גרסה 0.4.0, אוקטובר 2026), ולא טוען להתאמה מלאה לחוק הגנת הפרטיות (כולל תיקון 13) או ל־GDPR.
+> הטקסט שמוצג באפליקציה (הגדרות ← אודות ← פרטיות) הוא תקציר של סעיף 4, בארבע שפות, ב־`res/values*/strings.xml` (`privacy_paragraphs`).
+
+## 1. עקרונות
+
+- אין חשבונות, אין שרת SCARY, אין אנליטיקה, אין פרסום ואין SDK של צד שלישי.
+- אין עוגיות ואין trackers: זו אפליקציית Android נייטיב ללא WebView. לכן אין באנר עוגיות. אם תתווסף בעתיד אנליטיקה, היא תיטען רק אחרי הסכמה מפורשת, עם אפשרות משיכה (ראו `PLAN.md` סעיף 13).
+- המידע נשמר מקומית בלבד. `android:allowBackup="false"`, כך שהוא לא עובר לגיבוי של Google.
+- הרשת: HTTPS בלבד (`network_security_config`, ללא cleartext). בקשות API נשלחות רק ל־Cinemeta ול־TMDB. תמונות נטענות מכתובות HTTPS שהשירותים מחזירים (בעיקר `images.metahub.space` ו־`image.tmdb.org`).
+
+## 2. Data Map
+
+| סוג מידע | מקור | מטרה | גישה | אחסון | צד שלישי | שמירה | מחיקה |
+|---|---|---|---|---|---|---|---|
+| הגדרות (שפה, אפקטים, צלילים, מד פחד, מצב רשת) | המשתמש | תפעול | האפליקציה בלבד | DataStore / SharedPreferences במכשיר | אין | עד שינוי או מחיקה | ניקוי נתונים / הסרה |
+| אפליקציות מוצמדות ומוסתרות | המשתמש | סידור המסך | האפליקציה | DataStore | אין | כנ״ל | כנ״ל |
+| "נצפו לאחרונה" (מזהי סרטים) | שימוש | שורת "המשך מאיפה שעצרת" | האפליקציה | DataStore | אין | 12 האחרונים בלבד | כנ״ל |
+| PIN הורים | המשתמש | נעילת הורים | האפליקציה | hash מסוג PBKDF2-HMAC-SHA256 עם salt אקראי. ה־PIN עצמו לא נשמר | אין | עד כיבוי הנעילה | כיבוי נעילה / ניקוי נתונים |
+| מצב נעילה אחרי ניסיונות כושלים | שימוש | הגנה מניחוש | האפליקציה | DataStore | אין | עד הצלחה | אוטומטי |
+| מפתח TMDB | המשתמש (אופציונלי) | גישה ל־TMDB | האפליקציה | AES-256-GCM, מפתח ב־Android Keystore | נשלח ל־TMDB בלבד | עד מחיקה | "מחיקת מפתח" בהגדרות |
+| מטמון Cinemeta / TMDB | השירותים | הצגת מידע ללא רשת | האפליקציה | קבצי JSON ב־`filesDir` | — | רענון כל 24 שעות | מחיקת מפתח (TMDB) / ניקוי נתונים |
+| מטמון תמונות | השירותים | ביצועים | האפליקציה | Coil disk cache | — | לפי מגבלת גודל של Coil | ניקוי מטמון / נתונים |
+| רשימת אפליקציות מותקנות | המערכת | הצגה והפעלה | האפליקציה | זיכרון בלבד | אין | לא נשמרת | — |
+| כתובת IP | רשת | נדרש טכנית לכל בקשה | ספקי השירות | אצל הספקים | Cinemeta, Metahub, TMDB | לפי מדיניות הספק | **דורש בדיקה מול הספקים** |
+
+**מידע רגיש:** אין. אין מידע על קטינים מעבר לעצם השימוש בנעילת הורים, ואין מידע ביומטרי, רפואי או פיננסי.
+
+## 3. ספקים חיצוניים
+
+| ספק | מתי | מה נשלח | מטרה | הסכמה | לבדוק |
+|---|---|---|---|---|---|
+| Cinemeta (`v3-cinemeta.strem.io`, `cinemeta-catalogs.strem.io`) | כש"מידע מהרשת" פעיל (ברירת מחדל: פעיל) | מזהי IMDb ציבוריים, IP, User-Agent | פוסטרים, רקעים, דירוג, שחקנים, שורות פופולריות | לא נדרשת לדעתנו (אין מידע אישי מעבר ל־IP). **דורש בדיקה משפטית** | תנאי שימוש, זכויות בתמונות, מיקום שרתים |
+| מארחי תמונות (בעיקר `images.metahub.space`; כל כתובת HTTPS ש־Cinemeta מחזירה) | כנ״ל | בקשות תמונה, IP | תמונות | כנ״ל | כנ״ל. אפשר לשקול רשימת מארחים מותרים |
+| TMDB (`api.themoviedb.org`, `image.tmdb.org`) | רק עם מפתח שהמשתמש הזין | המפתח, מזהי סרטים, שפה, IP | שמות ותקצירים בשפה, שורות נוספות | המשתמש בוחר להזין מפתח | תנאי TMDB (אישי/מסחרי), קרדיט חובה מוצג |
+| Stremio / YouTube / Google Play | כשהמשתמש בוחר לצפות, טריילר או חנות | Intent עם מזהה סרט או חיפוש | העברה לאפליקציה אחרת | פעולה יזומה | המדיניות שלהם חלה מאותו רגע |
+
+## 4. טיוטת מדיניות פרטיות
+
+### עברית
+
+**מדיניות פרטיות – SCARY** (טיוטה, עודכן באוקטובר 2026)
+
+1. **מי אנחנו.** SCARY היא אפליקציית מסך בית (לאנצ׳ר) ל־Android TV, בקוד פתוח: github.com/diamondrubinny/Scary.
+2. **מה איננו אוספים.** אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות. אין שרת של SCARY, ושום מידע על השימוש שלכם לא נשלח אלינו.
+3. **מה נשמר בטלוויזיה שלכם בלבד.** הגדרות ושפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, קוד PIN של נעילת הורים כ־hash עם salt (לא הקוד עצמו), ומטמון של מידע ותמונות על סרטים. הסרת האפליקציה או ניקוי הנתונים שלה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.
+4. **אפליקציות מותקנות.** הרשימה נקראת בטלוויזיה כדי להציג ולהפעיל אותן, ולא יוצאת ממנה.
+5. **מידע על סרטים מהרשת** (אפשר לכבות בהגדרות). SCARY פונה ל־Cinemeta, שירות המטא־דאטה הציבורי של Stremio, ושולחת רק מזהי IMDb ציבוריים. התמונות נטענות מהכתובות ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים רואים את כתובת ה־IP של הטלוויזיה.
+6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון.
+7. **אפליקציות אחרות.** צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play, ומאותו רגע חלה מדיניות הפרטיות שלהן.
+8. **זכויותיכם.** כל המידע נמצא אצלכם ונמחק בניקוי הנתונים. לשאלות ובקשות: github.com/diamondrubinny/Scary/issues.
+9. **שינויים.** שינוי מהותי יופיע במסמך זה עם תאריך עדכון.
+
+### English
+
+**Privacy Policy – SCARY** (draft, updated October 2026)
+
+1. **Who we are.** SCARY is an open-source home screen (launcher) for Android TV: github.com/diamondrubinny/Scary.
+2. **What we do not collect.** No accounts, no ads, no analytics, no cookies. There is no SCARY server, and nothing about your use is sent to us.
+3. **What stays on your TV only.** Settings and language, pinned and hidden apps, the last 12 movies you opened, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling the app or clearing its data deletes everything. SCARY is excluded from Android backup.
+4. **Installed apps.** The list is read on the TV to show and open them, and never leaves it.
+5. **Online movie data** (can be turned off in settings). SCARY contacts Cinemeta, Stremio's public metadata service, sending only public IMDb IDs; images load from the addresses it supplies, mostly images.metahub.space. Like any website, these services see your TV's IP address.
+6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache.
+7. **Other apps.** Watching, trailers and the store open Stremio, YouTube or Google Play; their privacy policies apply from then on.
+8. **Your rights.** All data is on your device and is erased when you clear the app's data. Questions and requests: github.com/diamondrubinny/Scary/issues.
+9. **Changes.** Material changes will appear here with a new date.
+
+## 5. נושאים לבדיקה משפטית
+
+- האם SCARY היא "מאגר מידע" לפי חוק הגנת הפרטיות (סביר שלא, כי אין מידע אצל המפתח). **דורש בדיקה משפטית.**
+- האם שליחת IP לספקים מחוץ לישראל או לאיחוד האירופי דורשת גילוי או בסיס חוקי נוסף לפי GDPR (אינטרס לגיטימי / ביצוע השירות). **דורש בדיקה משפטית.**
+- תנאי השימוש של Cinemeta ושל TMDB, וזכויות בתמונות. **דורש בדיקה משפטית.**
+- פרסום ב־Google Play: טופס Data safety, הצהרת `<queries>` / גישה לרשימת אפליקציות, ומדיניות לאנצ׳רים. **דורש אימות מול מדיניות Google Play.**
+- תנאי שימוש: טרם נכתבו. נדרשים לפני הפצה ציבורית, כולל הסתייגות מתוכן של אפליקציות ותוספים של צד שלישי.

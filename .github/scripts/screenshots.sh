@@ -62,5 +62,12 @@ for lang in en pt ru; do
   shot "$n-settings-$lang" 4; n=$((n+1))
 done
 open --es scary.debug.open language:he
+sleep 6
+
+# Privacy notice and accessibility statement, reached from settings.
+open --es scary.debug.open privacy
+shot 20-privacy 5
+open --es scary.debug.open accessibility
+shot 21-accessibility 4
 
 ls -la "$OUT"

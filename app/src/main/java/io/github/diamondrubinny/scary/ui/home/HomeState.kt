@@ -104,12 +104,16 @@ sealed interface AppTile {
 
 data class MovieDetails(val movie: Movie, val similar: List<Movie>)
 
+/** Read-only texts reachable from settings. */
+enum class DocumentKind { Privacy, Accessibility }
+
 sealed interface Screen {
     data object Home : Screen
     data class Details(val movieId: String) : Screen
     data object AllApps : Screen
     data object Settings : Screen
     data object Search : Screen
+    data class Document(val kind: DocumentKind) : Screen
 }
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())

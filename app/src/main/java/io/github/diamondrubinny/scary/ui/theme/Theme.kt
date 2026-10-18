@@ -29,6 +29,9 @@ object ScaryColors {
     val Blood = Color(0xFF8E1B1B)
     val BloodDim = Color(0xFF3A2222)
     val Candle = Color(0xFFE0A94A)
+
+    /** Filled fear drops: at least 3:1 against the dark background and against the empty drops (WCAG 1.4.11). */
+    val Fear = Color(0xFFD94040)
 }
 
 /**
