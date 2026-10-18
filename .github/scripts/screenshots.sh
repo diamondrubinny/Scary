@@ -45,4 +45,8 @@ shot 08-settings 4
 open --es scary.debug.open pin
 shot 09-parental-pin 4
 
+key KEYCODE_BACK
+open --es scary.debug.open tmdb
+shot 10-tmdb-key 4
+
 ls -la "$OUT"

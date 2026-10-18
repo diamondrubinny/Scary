@@ -85,6 +85,10 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target == "tmdb" -> {
+                viewModel.openSettings()
+                viewModel.openTmdbDialog()
+            }
             target.startsWith("details:") -> viewModel.openDetails(target.removePrefix("details:"))
         }
     }
