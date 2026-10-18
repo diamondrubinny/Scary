@@ -141,7 +141,7 @@ private fun Hero(
             style = ScaryType.Eyebrow,
         )
         BasicText(
-            text = movie.title,
+            text = movie.displayTitle(language),
             style = ScaryType.Display,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

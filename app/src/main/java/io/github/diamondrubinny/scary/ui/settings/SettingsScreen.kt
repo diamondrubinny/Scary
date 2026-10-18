@@ -42,6 +42,7 @@ class SettingsActions(
     val onToggleOnline: () -> Unit,
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
+    val onOpenTmdb: () -> Unit,
 )
 
 @Composable
@@ -55,6 +56,7 @@ fun SettingsScreen(
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
+    tmdbKeyMask: String?,
     versionName: String,
     actions: SettingsActions,
 ) {
@@ -100,6 +102,12 @@ fun SettingsScreen(
             onClick = actions.onToggleOnline,
         )
         BasicText(stringResource(R.string.settings_online_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.settings_tmdb),
+            value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
+            onClick = actions.onOpenTmdb,
+        )
+        BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_language),
             value = stringResource(if (language == Language.HE) R.string.language_name_he else R.string.language_name_en),

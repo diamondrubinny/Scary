@@ -40,6 +40,8 @@ data class Movie(
     val id: String,
     val imdbId: String,
     val title: String,
+    /** Hebrew title from TMDB when one exists; empty otherwise. */
+    val titleHe: String = "",
     val year: Int,
     val director: String = "",
     val runtimeMin: Int = 0,
@@ -63,6 +65,9 @@ data class Movie(
     /** True for the hand-picked library, false for rows pulled from Cinemeta. */
     val curated: Boolean = true,
 ) {
+    fun displayTitle(language: Language): String =
+        if (language == Language.HE && titleHe.isNotBlank()) titleHe else title
+
     /** Hebrew synopsis when there is one, otherwise English, so online-only movies still show text. */
     fun synopsis(language: Language): String =
         if (language == Language.HE && synopsisHe.isNotBlank()) synopsisHe else synopsisEn.ifBlank { synopsisHe }

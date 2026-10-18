@@ -36,6 +36,7 @@ import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.search.SearchScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
+import io.github.diamondrubinny.scary.ui.settings.TmdbKeyDialog
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
 import io.github.diamondrubinny.scary.ui.details.DetailsScreen
 import io.github.diamondrubinny.scary.ui.fx.Atmosphere
@@ -59,6 +60,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
+    val tmdbKeyMask by viewModel.tmdbKeyMask.collectAsStateWithLifecycle()
+    val tmdbDialog by viewModel.tmdbDialog.collectAsStateWithLifecycle()
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -140,6 +143,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleOnline = viewModel::toggleOnline,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
+        onOpenTmdb = viewModel::openTmdbDialog,
     )
     val versionName = remember(context) { context.versionName() }
 
@@ -170,6 +174,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
+                    tmdbKeyMask = tmdbKeyMask,
                     versionName = versionName,
                     actions = settingsActions,
                 )
@@ -190,6 +195,16 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     resets = resets,
                     actions = actions,
                     showSetHome = launcherStatus.needsSetup,
+                )
+            }
+
+            tmdbDialog?.let { dialog ->
+                TmdbKeyDialog(
+                    state = dialog,
+                    keyMask = tmdbKeyMask,
+                    onSubmit = viewModel::submitTmdbKey,
+                    onDelete = viewModel::clearTmdbKey,
+                    onDismiss = viewModel::dismissTmdbDialog,
                 )
             }
 

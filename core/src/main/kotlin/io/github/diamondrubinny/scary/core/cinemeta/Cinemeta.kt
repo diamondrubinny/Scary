@@ -29,6 +29,9 @@ data class CinemetaMeta(
     val imdbRating: Double? = null,
     val runtimeMin: Int? = null,
     val trailerYoutubeId: String? = null,
+    /** Hebrew title and description; filled when the row comes from TMDB in Hebrew. */
+    val nameHe: String = "",
+    val descriptionHe: String = "",
 )
 
 /** A row pulled from a Cinemeta catalog, such as popular horror. */
@@ -120,12 +123,14 @@ object Cinemeta {
             id = "cm_" + meta.imdbId,
             imdbId = meta.imdbId,
             title = meta.name,
+            titleHe = meta.nameHe,
             year = year,
             director = meta.director.joinToString(", "),
             runtimeMin = meta.runtimeMin ?: 0,
             genre = if (meta.genres.any { it.equals("Horror", ignoreCase = true) }) Genre.HORROR else Genre.THRILLER,
             hue = Math.floorMod(meta.imdbId.hashCode(), 360),
             synopsisEn = meta.description,
+            synopsisHe = meta.descriptionHe,
             posterUrl = meta.poster,
             backgroundUrl = meta.background,
             logoUrl = meta.logo,

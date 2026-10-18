@@ -66,12 +66,15 @@ fun DetailsScreen(
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
                 BasicText(
-                    text = movie.title,
+                    text = movie.displayTitle(language),
                     style = ScaryType.Display,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.semantics { heading() },
                 )
+                if (movie.displayTitle(language) != movie.title) {
+                    BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
+                }
                 MovieMeta(movie)
                 if (movie.cast.isNotEmpty()) {
                     BasicText(

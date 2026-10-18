@@ -23,6 +23,8 @@ import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
 import io.github.diamondrubinny.scary.data.SettingsRepository
+import io.github.diamondrubinny.scary.data.TmdbKeyResult
+import io.github.diamondrubinny.scary.data.TmdbRepository
 import io.github.diamondrubinny.scary.launch.LaunchResult
 import io.github.diamondrubinny.scary.launch.Launcher
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +49,7 @@ class HomeViewModel(
     private val appsRepository: InstalledAppsRepository,
     private val settings: SettingsRepository,
     private val launcher: Launcher,
+    private val tmdb: TmdbRepository,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -120,7 +123,8 @@ class HomeViewModel(
 
     private fun loadCatalog() {
         viewModelScope.launch {
-            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled })
+            tmdb.load()
+            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled }, tmdb.keyMask.map { it != null })
                 .catch { e ->
                     when (e) {
                         is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
@@ -350,6 +354,42 @@ class HomeViewModel(
         viewModelScope.launch { settings.setLockFromFear(current % SettingsRepository.MAX_FEAR + 1) }
     }
 
+    /** "…a1b2" when a TMDB key is saved, null otherwise. */
+    val tmdbKeyMask: StateFlow<String?> = tmdb.keyMask
+
+    private val _tmdbDialog = MutableStateFlow<TmdbDialogState?>(null)
+    val tmdbDialog: StateFlow<TmdbDialogState?> = _tmdbDialog.asStateFlow()
+
+    fun openTmdbDialog() {
+        _tmdbDialog.value = TmdbDialogState()
+    }
+
+    fun dismissTmdbDialog() {
+        _tmdbDialog.value = null
+    }
+
+    fun submitTmdbKey(input: String) {
+        if (_tmdbDialog.value?.busy == true) return
+        _tmdbDialog.value = TmdbDialogState(busy = true)
+        viewModelScope.launch {
+            val result = tmdb.setKey(input)
+            if (result == TmdbKeyResult.SAVED) {
+                _tmdbDialog.value = null
+                show(R.string.msg_tmdb_saved)
+            } else {
+                _tmdbDialog.value = TmdbDialogState(result = result)
+            }
+        }
+    }
+
+    fun clearTmdbKey() {
+        viewModelScope.launch {
+            tmdb.clearKey()
+            _tmdbDialog.value = null
+            show(R.string.msg_tmdb_deleted)
+        }
+    }
+
     fun toggleOnline() {
         val enabled = !(latestPrefs?.onlineEnabled ?: true)
         viewModelScope.launch { settings.setOnlineEnabled(enabled) }
@@ -439,6 +479,7 @@ class HomeViewModel(
                     container.appsRepository,
                     container.settingsRepository,
                     container.launcher,
+                    container.tmdbRepository,
                 )
             }
         }

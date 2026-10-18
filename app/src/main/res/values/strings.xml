@@ -109,4 +109,21 @@
     <string name="a11y_service_label">SCARY Home button</string>
     <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. It only listens for the Home key. It cannot read or change anything on the screen.</string>
     <string name="msg_enable_service">In Accessibility, choose “SCARY Home button” and turn it on.</string>
+    <string name="settings_tmdb">TMDB key</string>
+    <string name="value_tmdb_none">Not set</string>
+    <string name="tmdb_dialog_title">TMDB API key</string>
+    <string name="tmdb_dialog_body">With your own TMDB key, SCARY adds Hebrew titles and synopses, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
+    <string name="tmdb_hint">Paste or type the key</string>
+    <string name="tmdb_save">Save and check</string>
+    <string name="tmdb_delete">Delete the key</string>
+    <string name="tmdb_checking">Checking with TMDB…</string>
+    <string name="tmdb_invalid_format">This does not look like a TMDB key. Copy the whole API key (32 characters) or Read Access Token.</string>
+    <string name="tmdb_rejected">TMDB rejected this key. Check that you copied all of it.</string>
+    <string name="tmdb_unreachable">Could not reach TMDB. Check the internet connection and try again. The key was not saved.</string>
+    <string name="tmdb_storage_failed">The TV could not store the key securely, so it was not saved.</string>
+    <string name="msg_tmdb_saved">Key saved and encrypted on this TV. Updating from TMDB.</string>
+    <string name="msg_tmdb_deleted">TMDB key deleted.</string>
+    <string name="tmdb_note">The key is encrypted with the Android Keystore and sent only to api.themoviedb.org. TMDB receives movie IDs and the key, nothing personal.</string>
+    <string name="original_title">Original title: %1$s</string>
+    <string name="tmdb_attribution" translatable="false">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
 </resources>

@@ -28,6 +28,11 @@ data class HomeUiState(
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }
 
+data class TmdbDialogState(
+    val busy: Boolean = false,
+    val result: io.github.diamondrubinny.scary.data.TmdbKeyResult? = null,
+)
+
 data class LauncherStatus(val isDefaultHome: Boolean, val homeButtonServiceOn: Boolean) {
     /** Show the "make SCARY the home screen" prompt only when neither route is active. */
     val needsSetup: Boolean get() = !isDefaultHome && !homeButtonServiceOn
