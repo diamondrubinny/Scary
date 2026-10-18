@@ -77,6 +77,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github
+
       - uses: actions/download-artifact@v4
         with:
           name: scary-debug-apk
@@ -88,12 +92,14 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           cp dist/scary-*.apk dist/scary.apk
+          # Release notes in four languages, with this build's number and commit.
+          sed -e "s/{{BUILD}}/${GITHUB_RUN_NUMBER}/" -e "s/{{SHA}}/${GITHUB_SHA::7}/" .github/release-notes.md > notes.md
           gh release delete latest-build --cleanup-tag --yes || true
           gh release create latest-build dist/scary.apk \
             --target "${GITHUB_SHA}" \
             --prerelease \
             --title "SCARY build ${GITHUB_RUN_NUMBER}" \
-            --notes "Debug build from ${GITHUB_REF_NAME} at ${GITHUB_SHA::7}. Install guide: docs/XIAOMI_SETUP.md"
+            --notes-file notes.md
 
       - name: Keep the APK on the apk-builds branch
         run: |
