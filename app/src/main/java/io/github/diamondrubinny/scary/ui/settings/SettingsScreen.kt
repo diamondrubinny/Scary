@@ -30,6 +30,7 @@ import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -119,7 +120,8 @@ fun SettingsScreen(
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
             onClick = actions.onOpenTmdb,
         )
-        BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption)
+        // The credit is English only; keep its punctuation in place inside a right-to-left layout.
+        BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         SettingRow(
             label = stringResource(R.string.settings_language),
             value = language.nativeName,
