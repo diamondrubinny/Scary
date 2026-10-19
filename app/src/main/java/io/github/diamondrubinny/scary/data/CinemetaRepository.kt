@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -41,17 +43,24 @@ class CinemetaRepository(context: Context) {
 
     /** Returns fresh data, or null when the TV is offline or the service is down. Never throws. */
     suspend fun refresh(imdbIds: List<String>): CinemetaCache? = withContext(Dispatchers.IO) {
-        val metas = coroutineScope {
-            imdbIds.distinct().chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                chunk.map { id -> async { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }.awaitAll()
+        // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
+        // and the three popular rows queue first so whole rows of posters appear early.
+        val pool = Semaphore(PARALLEL_REQUESTS)
+        val (metaList, rows) = coroutineScope {
+            val rows = rowSpecs.map { spec ->
+                async {
+                    pool.withPermit { fetch(Cinemeta.catalogUrl("top", spec.genre)) }
+                        ?.let(Cinemeta::parseCatalog)
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it, mapOf("pt" to spec.titlePt, "ru" to spec.titleRu)) }
+                }
             }
-        }.filterNotNull().associateBy { it.imdbId }
-        val rows = rowSpecs.mapNotNull { spec ->
-            fetch(Cinemeta.catalogUrl("top", spec.genre))
-                ?.let(Cinemeta::parseCatalog)
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it, mapOf("pt" to spec.titlePt, "ru" to spec.titleRu)) }
+            val metas = imdbIds.distinct().map { id ->
+                async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }
+            }
+            metas.awaitAll() to rows.awaitAll().filterNotNull()
         }
+        val metas = metaList.filterNotNull().associateBy { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
         CinemetaCache(System.currentTimeMillis(), metas, rows).also(::save)
     }
@@ -102,7 +111,7 @@ class CinemetaRepository(context: Context) {
     private companion object {
         const val TAG = "Cinemeta"
         const val TIMEOUT_MS = 10_000
-        const val PARALLEL_REQUESTS = 4
+        const val PARALLEL_REQUESTS = 6
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
     }
 }

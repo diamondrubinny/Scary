@@ -20,7 +20,8 @@
 - ✅ `handleDebugIntent` פועל רק ב־build מסוג debuggable
 - ⬜ חתימת release במפתח ייעודי (לא debug), שמור מחוץ ל־repo, ב־GitHub Secrets
 - ⬜ R8/minify ל־release ובדיקה שהכל עובד אחריו
-- ⬜ סריקת תלויות (Dependabot / OWASP Dependency-Check) ו־SBOM
+- ✅ Dependabot לעדכוני Gradle ו־GitHub Actions (`.github/dependabot.yml`). כדי לקבל גם התראות אבטחה, יש להפעיל Dependabot alerts בהגדרות ה־repo
+- ⬜ SBOM ו־OWASP Dependency-Check
 - ⬜ שירות הנגישות: לוודא שהוא מסנן רק מקש Home, ושהתיאור בהגדרות המערכת ברור. Google Play מגביל שימוש ב־AccessibilityService שלא לצורכי נגישות: **דורש אימות מול מדיניות Google Play**
 - ⬜ בדיקת חדירות קצרה (intents מבחוץ, ‏exported components) לפני הפצה רחבה
 
@@ -33,7 +34,8 @@
 - ✅ טקסט פרטיות בתוך האפליקציה בארבע שפות
 - ⬜ בדיקה משפטית: מדיניות פרטיות, ישראל (תיקון 13) ו־GDPR (`PRIVACY.md` סעיף 5)
 - ⬜ טופס Data safety ב־Google Play
-- ⬜ תנאי שימוש: טרם נכתבו
+- ✅ טיוטת תנאי שימוש: `docs/TERMS.md`
+- ⬜ בדיקה משפטית של תנאי השימוש
 
 | סוג מידע | מטרה | בסיס עיבוד (טיוטה) | אחסון | זמן שמירה | צדדים שלישיים |
 |---|---|---|---|---|---|
