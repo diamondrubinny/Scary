@@ -47,3 +47,12 @@ object RecentList {
 
     fun encode(ids: List<String>): String = ids.joinToString(",")
 }
+
+/** The viewer's own watchlist: newest first, stored with the same encoding as [RecentList]. */
+object MyList {
+    const val MAX_SIZE = 100
+
+    /** Removes [id] if it is on the list, otherwise adds it at the front. The oldest entry drops past [max]. */
+    fun toggle(current: List<String>, id: String, max: Int = MAX_SIZE): List<String> =
+        if (id in current) current.filter { it != id } else (listOf(id) + current).take(max)
+}

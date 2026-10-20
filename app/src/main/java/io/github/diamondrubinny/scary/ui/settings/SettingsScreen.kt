@@ -45,6 +45,7 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
     val onOpenAccessibilityStatement: () -> Unit,
 )
@@ -143,6 +144,12 @@ fun SettingsScreen(
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
         )
+        SettingRow(
+            label = stringResource(R.string.settings_screensaver),
+            value = stringResource(R.string.value_screensaver),
+            onClick = actions.onOpenScreensaver,
+        )
+        BasicText(stringResource(R.string.settings_screensaver_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_parental),
             value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),

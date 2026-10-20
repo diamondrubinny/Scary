@@ -56,6 +56,8 @@ class HomeActions(
     val onToggleEffects: () -> Unit,
     val onOpenSettings: () -> Unit,
     val onOpenSearch: () -> Unit,
+    /** Long press on a movie card: add to or remove from "My list". */
+    val onToggleMyList: (Movie) -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -187,6 +189,7 @@ private fun HomeRowView(
 ) {
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
+        is HomeRow.MyList -> stringResource(R.string.row_my_list)
         is HomeRow.Apps -> stringResource(R.string.row_apps)
         is HomeRow.Collection -> row.collection.title(language)
     }
@@ -211,6 +214,18 @@ private fun HomeRowView(
                         movie = movie,
                         locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
+                        onFocused = { actions.onCardFocused(key, movie.id) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+                is HomeRow.MyList -> items(row.movies, key = { it.id }) { movie ->
+                    val key = "${row.key}:${movie.id}"
+                    PosterCard(
+                        movie = movie,
+                        locked = isLocked(movie),
+                        onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
@@ -233,6 +248,7 @@ private fun HomeRowView(
                         movie = movie,
                         locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )

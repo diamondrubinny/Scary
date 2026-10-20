@@ -123,23 +123,38 @@
     <string name="tmdb_note">A chave é criptografada com o Android Keystore e enviada só para api.themoviedb.org. O TMDB recebe IDs de filmes e a chave, nada pessoal.</string>
     <string name="original_title">Título original: %1$s</string>
 
+    <!-- My list, voice search and screensaver -->
+    <string name="row_my_list">Minha lista</string>
+    <string name="action_add_my_list">+ Minha lista</string>
+    <string name="action_in_my_list">✓ Na minha lista</string>
+    <string name="msg_my_list_added">%1$s adicionado à Minha lista</string>
+    <string name="msg_my_list_removed">%1$s removido da Minha lista</string>
+    <string name="voice_search">Busca por voz</string>
+    <string name="voice_prompt">Qual filme de terror?</string>
+    <string name="dream_label">SCARY – fundos de terror</string>
+    <string name="settings_screensaver">Protetor de tela</string>
+    <string name="value_screensaver">Escolher</string>
+    <string name="settings_screensaver_note">Escolha \"SCARY – fundos de terror\" nas configurações de protetor de tela da TV. Com o controle dos pais ativo, só aparecem filmes abaixo do nível de bloqueio.</string>
+    <string name="msg_no_screensaver_settings">Esta TV não abre as configurações de protetor de tela a partir de apps. Procure em Configurações, Preferências do dispositivo, Protetor de tela.</string>
+
     <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
     <string name="settings_privacy">Privacidade</string>
     <string name="settings_accessibility_statement">Declaração de acessibilidade</string>
     <string name="document_hint">Use as setas para cima e para baixo para ler. Voltar retorna às configurações.</string>
     <string-array name="privacy_paragraphs">
         <item>O SCARY não tem contas, anúncios, análises nem cookies, e não existe um servidor do SCARY. Nada do que você faz no launcher é enviado para nós.</item>
-        <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, o PIN do controle dos pais como hash com salt (nunca o PIN em si) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
+        <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB.</item>
+        <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
         <item>Dúvidas, correções ou pedidos sobre seus dados: github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
     </string-array>
     <string-array name="accessibility_paragraphs">
         <item>O SCARY busca atender às WCAG 2.1 nível AA e à norma israelense IS 5568. Ainda não passou por auditoria de um consultor de acessibilidade, por isso não declara conformidade total.</item>
-        <item>Já incluído: todas as telas funcionam com as setas e o botão OK do controle, com um brilho de foco claro. Cartões, botões e configurações têm rótulos falados para o TalkBack, telas e fileiras têm títulos, e mensagens e erros de PIN são anunciados. O hebraico usa layout da direita para a esquerda.</item>
+        <item>Já incluído: todas as telas funcionam com as setas e o botão OK do controle, com um brilho de foco claro. Cartões, botões e configurações têm rótulos falados para o TalkBack, telas e fileiras têm títulos, e mensagens e erros de PIN são anunciados. Segurar OK em um pôster o adiciona à Minha lista, e o TalkBack oferece isso como ação. O hebraico usa layout da direita para a esquerda.</item>
         <item>Movimento e som: não há piscadas. A névoa e o granulado são suaves e param quando você desliga os efeitos ou ativa Remover animações nas configurações de acessibilidade da TV. Os sons ambientes vêm desligados.</item>
         <item>Limitações conhecidas: pôsteres on-line são descritos só por título e ano; as traduções para português e russo não foram revisadas por falantes nativos; fontes do sistema muito grandes podem encurtar textos em algumas fileiras; o TalkBack só foi testado em emulador até agora.</item>
         <item>Encontrou uma barreira? Informe em github.com/diamondrubinny/Scary/issues, descrevendo a tela e o que aconteceu. Procuramos responder em até 14 dias.</item>

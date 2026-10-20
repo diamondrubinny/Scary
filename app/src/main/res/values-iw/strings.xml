@@ -123,23 +123,38 @@
     <string name="tmdb_note">המפתח מוצפן ב־Android Keystore ונשלח רק ל־api.themoviedb.org. ל־TMDB נשלחים מזהי סרטים והמפתח, שום דבר אישי.</string>
     <string name="original_title">שם מקורי: %1$s</string>
 
+    <!-- My list, voice search and screensaver -->
+    <string name="row_my_list">הרשימה שלי</string>
+    <string name="action_add_my_list">+ לרשימה שלי</string>
+    <string name="action_in_my_list">✓ ברשימה שלי</string>
+    <string name="msg_my_list_added">%1$s נוסף לרשימה שלי</string>
+    <string name="msg_my_list_removed">%1$s הוסר מהרשימה שלי</string>
+    <string name="voice_search">חיפוש קולי</string>
+    <string name="voice_prompt">איזה סרט אימה?</string>
+    <string name="dream_label">SCARY – רקעים מסרטי אימה</string>
+    <string name="settings_screensaver">שומר מסך</string>
+    <string name="value_screensaver">בחירה</string>
+    <string name="settings_screensaver_note">בחרו \"SCARY – רקעים מסרטי אימה\" בהגדרות שומר המסך של הטלוויזיה. כשנעילת הורים פעילה, מוצגים רק סרטים מתחת לרמת הנעילה.</string>
+    <string name="msg_no_screensaver_settings">הטלוויזיה הזו לא פותחת את הגדרות שומר המסך מאפליקציות. חפשו בהגדרות ← העדפות מכשיר ← שומר מסך.</string>
+
     <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
     <string name="settings_privacy">פרטיות</string>
     <string name="settings_accessibility_statement">הצהרת נגישות</string>
     <string name="document_hint">החצים למעלה ולמטה לקריאה. חזרה מחזירה להגדרות.</string>
     <string-array name="privacy_paragraphs">
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
-        <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
+        <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB.</item>
+        <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>
         <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: github.com/diamondrubinny/Scary/issues</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי עורך דין.</item>
     </string-array>
     <string-array name="accessibility_paragraphs">
         <item>SCARY שואפת לעמוד ב־WCAG 2.1 ברמה AA ובתקן הישראלי ת״י 5568. היא עדיין לא נבדקה על ידי יועץ נגישות, ולכן איננו טוענים להתאמה מלאה.</item>
-        <item>מה כבר קיים: כל מסך עובד עם החצים וכפתור OK של השלט, עם הילת פוקוס ברורה. לכרטיסים, לכפתורים ולהגדרות יש תוויות מוקראות ל־TalkBack, למסכים ולשורות יש כותרות, והודעות ושגיאות PIN מוכרזות. בעברית הממשק מימין לשמאל.</item>
+        <item>מה כבר קיים: כל מסך עובד עם החצים וכפתור OK של השלט, עם הילת פוקוס ברורה. לכרטיסים, לכפתורים ולהגדרות יש תוויות מוקראות ל־TalkBack, למסכים ולשורות יש כותרות, והודעות ושגיאות PIN מוכרזות. לחיצה ארוכה על OK בפוסטר מוסיפה אותו ל\"רשימה שלי\", ו־TalkBack מציע זאת כפעולה. בעברית הממשק מימין לשמאל.</item>
         <item>תנועה וצליל: אין הבהובים. הערפל והגרעיניות עדינים, ונעצרים כשמכבים את האפקטים או מפעילים \"הסרת אנימציות\" בהגדרות הנגישות של הטלוויזיה. צלילי האווירה כבויים כברירת מחדל.</item>
         <item>מגבלות ידועות: פוסטרים מהרשת מתוארים רק בשם ובשנה; התרגומים לפורטוגזית ולרוסית לא נבדקו על ידי דוברי השפה; גודל גופן מערכת גדול מאוד עלול לקצר טקסט בחלק מהשורות; TalkBack נבדק עד עכשיו רק באמולטור.</item>
         <item>נתקלתם בחסם? דווחו ב־github.com/diamondrubinny/Scary/issues ותארו את המסך ומה קרה. אנחנו שואפים להשיב בתוך 14 יום.</item>

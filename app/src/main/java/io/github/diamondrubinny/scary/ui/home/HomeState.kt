@@ -24,6 +24,8 @@ data class HomeUiState(
     val sessionUnlocked: Boolean = false,
     val soundsEnabled: Boolean = false,
     val onlineEnabled: Boolean = true,
+    /** Ids on "My list", for the add/remove button on a movie's page. */
+    val myListIds: Set<String> = emptySet(),
 ) {
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }
@@ -66,6 +68,10 @@ sealed interface HomeRow {
 
     data class Recent(val movies: List<Movie>) : HomeRow {
         override val key = "recent"
+    }
+
+    data class MyList(val movies: List<Movie>) : HomeRow {
+        override val key = "mylist"
     }
 
     data class Apps(val tiles: List<AppTile>) : HomeRow {

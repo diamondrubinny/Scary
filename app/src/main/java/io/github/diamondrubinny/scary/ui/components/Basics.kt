@@ -217,6 +217,33 @@ fun SearchIcon(color: Color, modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun MicIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = 2.dp.toPx()
+        val w = size.width
+        val h = size.height
+        // Capsule, cradle arc and stand.
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(w * 0.36f, h * 0.05f),
+            size = Size(w * 0.28f, h * 0.5f),
+            cornerRadius = CornerRadius(w * 0.14f),
+        )
+        drawArc(
+            color = color,
+            startAngle = 0f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(w * 0.22f, h * 0.2f),
+            size = Size(w * 0.56f, h * 0.5f),
+            style = Stroke(width = stroke, cap = StrokeCap.Round),
+        )
+        drawLine(color, Offset(w * 0.5f, h * 0.7f), Offset(w * 0.5f, h * 0.9f), strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, Offset(w * 0.34f, h * 0.92f), Offset(w * 0.66f, h * 0.92f), strokeWidth = stroke, cap = StrokeCap.Round)
+    }
+}
+
+@Composable
 fun GridIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {
         val cell = size.minDimension * 0.38f

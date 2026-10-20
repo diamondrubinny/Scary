@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.apps.AppOrdering
 import io.github.diamondrubinny.scary.core.catalog.NightPick
+import io.github.diamondrubinny.scary.core.catalog.MyList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.model.Genre
@@ -63,6 +64,20 @@ class CurationTest {
         assertEquals(list, RecentList.decode(RecentList.encode(list)))
         assertEquals(emptyList<String>(), RecentList.decode(null))
         assertEquals(listOf("a", "b"), RecentList.decode(" a, ,b,"))
+    }
+
+    @Test
+    fun `my list adds at the front, removes on second toggle and caps the size`() {
+        var list = MyList.toggle(emptyList(), "a")
+        list = MyList.toggle(list, "b")
+        assertEquals(listOf("b", "a"), list)
+        assertEquals(listOf("b"), MyList.toggle(list, "a"))
+
+        var full = emptyList<String>()
+        (1..MyList.MAX_SIZE + 5).forEach { full = MyList.toggle(full, "m$it") }
+        assertEquals(MyList.MAX_SIZE, full.size)
+        assertEquals("m${MyList.MAX_SIZE + 5}", full.first())
+        assertTrue("m1" !in full)
     }
 
     @Test

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -69,6 +70,20 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    /** The remote's search key, on remotes that deliver it to the app rather than to the assistant. */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+            viewModel.openSearch()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onSearchRequested(): Boolean {
+        viewModel.openSearch()
+        return true
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.onHomePressed()
@@ -92,6 +107,7 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target == "home" -> viewModel.onHomePressed()
             target == "privacy" || target == "accessibility" -> {
                 viewModel.openSettings()
                 viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)

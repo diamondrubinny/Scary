@@ -116,6 +116,7 @@ class HomeViewModel(
             sessionUnlocked = unlocked,
             soundsEnabled = prefs.soundsEnabled,
             onlineEnabled = prefs.onlineEnabled,
+            myListIds = prefs.myListIds.toSet(),
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
@@ -161,6 +162,8 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
+            val myList = prefs.myListIds.mapNotNull(catalog::movie)
+            if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
             catalog.collections.forEach { add(HomeRow.Collection(it, catalog.moviesOf(it))) }
         }
         return HomeUiState(
@@ -244,6 +247,14 @@ class HomeViewModel(
         heroId.value = null
         lastFocusedKey = null
         _homeResets.update { it + 1 }
+    }
+
+    /** Adds or removes a movie from "My list" and says which happened. Not PIN-gated: it opens nothing. */
+    fun toggleMyList(movie: Movie, language: Language) {
+        viewModelScope.launch {
+            val added = settings.toggleMyList(movie.id)
+            show(if (added) R.string.msg_my_list_added else R.string.msg_my_list_removed, movie.displayTitle(language))
+        }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))

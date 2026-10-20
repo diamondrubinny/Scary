@@ -28,6 +28,7 @@ SCARY replaces the Android TV home screen with a horror-themed one. It brings to
 - **Optional TMDB key** (in settings): titles and synopses in your language, sharper art, three more rows. Stored encrypted with the Android Keystore.
 - **A real launcher**: asks the system to become the home screen, or, where the TV does not allow it (Google TV, many Xiaomi boxes), an optional accessibility service maps the remote's Home button to SCARY.
 - **Parental lock** with a PIN, offline search, all-apps drawer with pin/hide/reorder, fog and film-grain atmosphere you can switch off, optional ambient sound.
+- **My list, voice search and a horror screensaver**: hold OK on any poster to save it, search by voice with the remote's microphone, and pick "SCARY – horror backdrops" as the TV screensaver.
 - **Four languages**: Hebrew (right to left), English, Portuguese and Russian.
 
 Install guide: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md) (Hebrew).
@@ -45,6 +46,7 @@ SCARY מחליפה את מסך הבית של Android TV במסך בית בעיצ
 - **מפתח TMDB אופציונלי** (בהגדרות): שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. נשמר מוצפן ב־Android Keystore.
 - **לאנצ׳ר אמיתי**: בקשה מהמערכת להיות מסך הבית, ואם הטלוויזיה לא מאפשרת (Google TV, הרבה מכשירי Xiaomi), שירות נגישות אופציונלי שהופך את כפתור Home בשלט לפתיחת SCARY.
 - **נעילת הורים** בקוד, חיפוש בלי אינטרנט, מגירת אפליקציות עם הצמדה, הסתרה וסידור, ערפל וגרעיניות שאפשר לכבות וצלילי אווירה.
+- **"הרשימה שלי", חיפוש קולי ושומר מסך אימה**: לחיצה ארוכה על OK שומרת כל פוסטר, חיפוש בקול דרך המיקרופון של השלט, ו"SCARY – רקעים מסרטי אימה" כשומר המסך של הטלוויזיה.
 - **ארבע שפות**: עברית (מימין לשמאל), English, Português, Русский.
 
 מדריך התקנה: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
@@ -62,6 +64,7 @@ O SCARY substitui a tela inicial do Android TV por uma tela com clima de terror.
 - **Chave do TMDB opcional** (nas configurações): títulos e sinopses no seu idioma, imagens mais nítidas e mais três listas. Guardada com criptografia no Android Keystore.
 - **Um launcher de verdade**: pede ao sistema para ser a tela inicial ou, quando a TV não deixa (Google TV, muitos aparelhos Xiaomi), um serviço de acessibilidade opcional faz o botão Home do controle abrir o SCARY.
 - **Bloqueio dos pais** com PIN, busca offline, gaveta de apps com fixar, ocultar e reordenar, névoa e granulação que podem ser desligadas e sons de ambiente.
+- **Minha lista, busca por voz e protetor de tela de terror**: segure OK em qualquer pôster para salvá-lo, busque pela voz com o microfone do controle e escolha "SCARY – fundos de terror" como protetor de tela da TV.
 - **Quatro idiomas**: hebraico (da direita para a esquerda), inglês, português e russo.
 
 ## Русский
@@ -77,6 +80,7 @@ SCARY заменяет главный экран Android TV на экран в �
 - **Ключ TMDB по желанию** (в настройках): названия и описания на вашем языке, более чёткие изображения и ещё три подборки. Хранится в зашифрованном виде в Android Keystore.
 - **Настоящий лаунчер**: просит систему сделать его главным экраном, а если ТВ этого не позволяет (Google TV, многие приставки Xiaomi), необязательный сервис спец. возможностей заставляет кнопку «Домой» на пульте открывать SCARY.
 - **Родительская блокировка** по PIN-коду, офлайн-поиск, список всех приложений с закреплением, скрытием и сортировкой, отключаемые туман и зернистость плёнки, фоновые звуки.
+- **Мой список, голосовой поиск и заставка-ужастик**: удерживайте OK на постере, чтобы сохранить его, ищите голосом через микрофон пульта и выберите «SCARY – кадры из ужасов» заставкой телевизора.
 - **Четыре языка**: иврит (справа налево), английский, португальский и русский.
 
 ---

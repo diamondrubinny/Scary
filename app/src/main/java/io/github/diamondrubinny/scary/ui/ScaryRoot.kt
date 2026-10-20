@@ -4,8 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.ActivityNotFoundException
 import android.content.ContextWrapper
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -113,7 +115,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             }
         }
     }
-    val actions = remember(viewModel, settingsLabel) {
+    val actions = remember(viewModel, settingsLabel, language) {
         HomeActions(
             onCardFocused = viewModel::onCardFocused,
             onOpenDetails = { viewModel.openDetails(it.id) },
@@ -123,6 +125,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onToggleEffects = viewModel::toggleEffects,
             onOpenSettings = viewModel::openSettings,
             onOpenSearch = viewModel::openSearch,
+            onToggleMyList = { viewModel.toggleMyList(it, language) },
         )
     }
     val allAppsActions = remember(viewModel) {
@@ -155,6 +158,13 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
         onOpenTmdb = viewModel::openTmdbDialog,
+        onOpenScreensaver = {
+            try {
+                context.startActivity(Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (e: ActivityNotFoundException) {
+                viewModel.showMessage(R.string.msg_no_screensaver_settings)
+            }
+        },
         onOpenPrivacy = {
             lastDocument = DocumentKind.Privacy
             viewModel.openDocument(DocumentKind.Privacy)
@@ -184,6 +194,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     query = searchQuery,
                     onQueryChange = viewModel::setSearchQuery,
                     onOpenMovie = { viewModel.openDetails(it.id) },
+                    language = language,
                     isLocked = state::isLocked,
                 )
                 current is Screen.Document -> DocumentScreen(current.kind)
@@ -210,6 +221,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onTrailer = viewModel::trailer,
                     onOpenSimilar = { viewModel.openDetails(it.id) },
                     isLocked = state::isLocked,
+                    inMyList = details.movie.id in state.myListIds,
+                    onToggleMyList = { viewModel.toggleMyList(it, language) },
                 )
                 else -> HomeScreen(
                     state = state,
