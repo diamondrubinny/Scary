@@ -42,7 +42,8 @@ import kotlin.random.Random
  *
  * No flashing: a 1.5 second crossfade every 12 seconds and a slow 8% zoom, both skipped when the TV's
  * "Remove animations" is on. With the parental lock on, only movies below the lock level appear.
- * Offline it falls back to the curated movies' own tints, so it never shows a blank screen.
+ * Only the curated horror library appears. Offline it falls back to those movies' own tints, so it never shows a
+ * blank screen.
  */
 class ScaryDream : DreamService() {
     private var scope: CoroutineScope? = null
@@ -114,9 +115,12 @@ class ScaryDream : DreamService() {
             container.catalogRepository
                 .catalog(flowOf(prefs.onlineEnabled), flowOf(hasKey), flowOf(language))
                 .collect { catalog ->
-                    val allowed = catalog.movies.filter { !prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear }
+                    // Only the hand-picked library: the online "popular" rows can include plain action movies.
+                    val allowed = catalog.movies.filter {
+                        it.curated && (!prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear)
+                    }
                     val withArt = allowed.filter { it.backgroundUrl != null }
-                    val next = withArt.ifEmpty { allowed.filter { it.curated } }
+                    val next = withArt.ifEmpty { allowed }
                     // Only swap when the set grows into artwork, so the slideshow does not restart for nothing.
                     if (pool.isEmpty() || (withArt.isNotEmpty() && pool.none { it.backgroundUrl != null })) {
                         pool = next.shuffled(random)
