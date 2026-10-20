@@ -33,6 +33,14 @@ SCARY replaces the Android TV home screen with a horror-themed one. It brings to
 
 Install guide: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md) (Hebrew).
 
+### Support SCARY
+
+SCARY is free and open source. If it scares you properly, you can support its development through GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ $3 coffee · 🍿 $5 popcorn · 🎟️ $10 movie ticket · 🔪 $25 horror night. Pick the amount on the sponsor page, one-time or monthly.
+
 ## עברית
 
 SCARY מחליפה את מסך הבית של Android TV במסך בית בעיצוב אימה. היא מרכזת מאגר סרטי אימה ומתח פסיכולוגי, Stremio, חנות Play ואת אפליקציות הטלוויזיה שלך. היא לא מזרימה וידאו: בחירה בסרט פותחת אותו ב־Stremio.
@@ -51,6 +59,14 @@ SCARY מחליפה את מסך הבית של Android TV במסך בית בעיצ
 
 מדריך התקנה: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
 
+### תמיכה ב־SCARY
+
+SCARY חינמית ובקוד פתוח. אם היא מפחידה אתכם כמו שצריך, אפשר לתמוך בפיתוח דרך GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ ‎$3 קפה · 🍿 ‎$5 פופקורן · 🎟️ ‎$10 כרטיס לקולנוע · 🔪 ‎$25 ערב אימה. בוחרים את הסכום בעמוד התמיכה, חד־פעמי או חודשי.
+
 ## Português
 
 O SCARY substitui a tela inicial do Android TV por uma tela com clima de terror. Ele reúne uma biblioteca selecionada de filmes de terror e suspense psicológico, o Stremio, o Google Play e os apps instalados na TV. Ele não transmite vídeo: ao escolher um filme, ele abre no Stremio.
@@ -66,6 +82,14 @@ O SCARY substitui a tela inicial do Android TV por uma tela com clima de terror.
 - **Bloqueio dos pais** com PIN, busca offline, gaveta de apps com fixar, ocultar e reordenar, névoa e granulação que podem ser desligadas e sons de ambiente.
 - **Minha lista, busca por voz e protetor de tela de terror**: segure OK em qualquer pôster para salvá-lo, busque pela voz com o microfone do controle e escolha "SCARY – fundos de terror" como protetor de tela da TV.
 - **Quatro idiomas**: hebraico (da direita para a esquerda), inglês, português e russo.
+
+### Apoie o SCARY
+
+O SCARY é gratuito e de código aberto. Se ele te assusta do jeito certo, você pode apoiar o desenvolvimento pelo GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ US$ 3 café · 🍿 US$ 5 pipoca · 🎟️ US$ 10 ingresso de cinema · 🔪 US$ 25 noite de terror. Escolha o valor na página de apoio, único ou mensal.
 
 ## Русский
 
@@ -84,6 +108,14 @@ SCARY заменяет главный экран Android TV на экран в �
 - **Четыре языка**: иврит (справа налево), английский, португальский и русский.
 
 ---
+
+### Поддержать SCARY
+
+SCARY бесплатен и с открытым кодом. Если он пугает вас как надо, поддержите разработку через GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ $3 кофе · 🍿 $5 попкорн · 🎟️ $10 билет в кино · 🔪 $25 вечер ужасов. Сумму можно выбрать на странице спонсорства, разово или ежемесячно.
 
 ## More screens
 
