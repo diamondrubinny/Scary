@@ -78,8 +78,9 @@ object ScaryType {
     val Body: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp, color = ScaryColors.BoneDim)
     val BodyStrong: TextStyle get() = Body.copy(fontWeight = FontWeight.Bold, color = ScaryColors.Bone)
     val Label: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ScaryColors.Bone)
-    val Caption: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 12.sp, color = ScaryColors.Ash)
-    val Eyebrow: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.2.em, color = ScaryColors.Candle)
+    // 14sp is the smallest size SCARY uses: smaller text is hard to read from a sofa three meters away.
+    val Caption: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, color = ScaryColors.Ash)
+    val Eyebrow: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 0.18.em, color = ScaryColors.Candle)
     val RowTitle: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
 }
 

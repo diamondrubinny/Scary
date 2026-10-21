@@ -97,6 +97,18 @@ open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 26-surprise 6
 
+# The largest system font on Android TV (130%): checks that no text that matters is cut off.
+adb shell settings put system font_scale 1.3
+open --es scary.debug.open home
+shot 29-font130-home 6
+open --es scary.debug.open settings
+shot 30-font130-settings 4
+open --es scary.debug.open details:the_shining
+shot 31-font130-details 6
+adb shell settings put system font_scale 1.0
+open --es scary.debug.open home
+sleep 3
+
 # Release build (R8, not debuggable): installs over the debug build with the same key and keeps its data.
 # It must start and navigate without crashing, or this job fails and nothing is published.
 if [ -f dist/scary-release.apk ]; then
