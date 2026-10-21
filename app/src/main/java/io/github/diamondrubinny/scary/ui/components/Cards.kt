@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -206,8 +208,9 @@ fun AppTileCard(
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
-            .width(136.dp)
-            .aspectRatio(16f / 9f),
+            // The setup tile is the first thing a new viewer needs; it is wider so its label is never cut off.
+            .width(if (tile is AppTile.SetAsHome) SET_HOME_TILE_WIDTH else TILE_WIDTH)
+            .height(TILE_WIDTH * 9 / 16),
         containerColor = ScaryColors.Crypt,
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         contentDescription = description,
@@ -222,6 +225,21 @@ fun AppTileCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
+        } else if (tile is AppTile.SetAsHome) {
+            // Icon beside the text, so two full lines fit even at the largest system font.
+            Row(
+                modifier = Modifier.align(Alignment.Center).padding(horizontal = 14.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
+                BasicText(
+                    text = label,
+                    style = ScaryType.Label,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         } else {
             Column(
                 modifier = Modifier.align(Alignment.Center).padding(8.dp),
@@ -262,3 +280,6 @@ fun AppTileCard(
         }
     }
 }
+
+private val TILE_WIDTH = 136.dp
+private val SET_HOME_TILE_WIDTH = 240.dp

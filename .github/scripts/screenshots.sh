@@ -101,6 +101,8 @@ shot 26-surprise 6
 adb shell settings put system font_scale 1.3
 open --es scary.debug.open home
 shot 29-font130-home 6
+key KEYCODE_DPAD_DOWN
+shot 32-font130-apps-row 3
 open --es scary.debug.open settings
 shot 30-font130-settings 4
 open --es scary.debug.open details:the_shining
