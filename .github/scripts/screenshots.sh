@@ -97,4 +97,73 @@ open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 26-surprise 6
 
+# English set for the README gallery (copied to docs/screenshots/en-*.jpg).
+open --es scary.debug.open language:en
+sleep 6
+open --es scary.debug.open home
+shot 40-en-home 12
+open --es scary.debug.open details:hereditary
+shot 41-en-details 8
+open --es scary.debug.open search --es scary.debug.query conjuring
+shot 42-en-search-web 10
+open --es scary.debug.open home
+sleep 3
+key KEYCODE_DPAD_DOWN
+key KEYCODE_DPAD_DOWN
+shot 43-en-my-list 4
+open --es scary.debug.open home
+open --es scary.debug.open surprise
+shot 44-en-surprise 6
+open --es scary.debug.open apps
+shot 45-en-all-apps 4
+open --es scary.debug.open settings
+shot 46-en-settings 4
+open --es scary.debug.open privacy
+shot 47-en-privacy 4
+adb shell am start -n com.android.systemui/.Somnambulator > /dev/null 2>&1 || true
+shot 48-en-screensaver 15
+key KEYCODE_BACK
+open --es scary.debug.open language:he
+sleep 6
+open --es scary.debug.open home
+sleep 3
+
+# The largest system font on Android TV (130%): checks that no text that matters is cut off.
+adb shell settings put system font_scale 1.3
+open --es scary.debug.open home
+shot 29-font130-home 6
+key KEYCODE_DPAD_DOWN
+shot 32-font130-apps-row 3
+open --es scary.debug.open settings
+shot 30-font130-settings 4
+open --es scary.debug.open details:the_shining
+shot 31-font130-details 6
+adb shell settings put system font_scale 1.0
+open --es scary.debug.open home
+sleep 3
+
+# Release build (R8, not debuggable): installs over the debug build with the same key and keeps its data.
+# It must start and navigate without crashing, or this job fails and nothing is published.
+if [ -f dist/scary-release.apk ]; then
+  adb logcat -c || true
+  adb install -r dist/scary-release.apk
+  adb shell am force-stop "$PKG"
+  open
+  shot 27-release-home 20
+  # Right to left on the hero: Watch, Trailer, then Details.
+  key KEYCODE_DPAD_LEFT
+  key KEYCODE_DPAD_LEFT
+  key KEYCODE_DPAD_CENTER
+  shot 28-release-details 6
+  key KEYCODE_BACK
+  sleep 2
+  if adb logcat -d -b crash | grep -q "$PKG"; then
+    echo "The release build crashed:"
+    adb logcat -d -b crash
+    exit 1
+  fi
+  adb shell pidof "$PKG" > /dev/null || { echo "The release build is not running."; exit 1; }
+  echo "Release build smoke test passed."
+fi
+
 ls -la "$OUT"

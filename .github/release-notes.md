@@ -1,6 +1,6 @@
 **SCARY build {{BUILD}}** · `{{SHA}}` · [README](https://github.com/diamondrubinny/Scary#readme)
 
-Download **scary.apk** below and install it on your Android TV. Builds are signed with the same key, so a new build installs over the previous one and keeps your settings.
+Download **scary.apk** below and install it on your Android TV. It is the optimized build (R8, smaller and faster), tested on an Android TV emulator before it is published. Builds are signed with the same key, so a new build installs over the previous one and keeps your settings. `scary-debug.apk` is the same version as a debug build, only as a fallback.
 
 ---
 
@@ -29,4 +29,4 @@ Tela inicial com clima de terror para Android TV: uma biblioteca selecionada de 
 3. Откройте SCARY и выберите **Сделать SCARY главным экраном**. Если ТВ не предлагает выбор, включите **SCARY: кнопка «Домой»** в разделе спец. возможностей.
 
 ---
-Debug build for personal use. This product uses the TMDB API but is not endorsed or certified by TMDB.
+Personal-use build; not a Google Play release. This product uses the TMDB API but is not endorsed or certified by TMDB.

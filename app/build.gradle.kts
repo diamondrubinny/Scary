@@ -20,11 +20,26 @@ android {
         versionName = "0.4.0"
     }
 
+    // A dedicated release key, when one is provided (CI secret or local environment). Without it the release build
+    // is signed with the debug key, so it installs over the builds already on the TV. Never committed to the repo.
+    val releaseKeystore = providers.environmentVariable("SCARY_KEYSTORE_FILE").orNull?.takeIf { file(it).exists() }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = providers.environmentVariable("SCARY_KEYSTORE_PASSWORD").orNull
+                keyAlias = providers.environmentVariable("SCARY_KEY_ALIAS").orNull
+                keyPassword = providers.environmentVariable("SCARY_KEY_PASSWORD").orNull
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }
     }
 
