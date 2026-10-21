@@ -24,9 +24,19 @@ data class HomeUiState(
     val sessionUnlocked: Boolean = false,
     val soundsEnabled: Boolean = false,
     val onlineEnabled: Boolean = true,
+    /** Ids on "My list", for the add/remove button on a movie's page. */
+    val myListIds: Set<String> = emptySet(),
 ) {
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }
+
+/** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */
+data class WebSearchState(
+    val query: String = "",
+    val loading: Boolean = false,
+    val results: List<Movie> = emptyList(),
+    val failed: Boolean = false,
+)
 
 data class TmdbDialogState(
     val busy: Boolean = false,
@@ -68,6 +78,10 @@ sealed interface HomeRow {
         override val key = "recent"
     }
 
+    data class MyList(val movies: List<Movie>) : HomeRow {
+        override val key = "mylist"
+    }
+
     data class Apps(val tiles: List<AppTile>) : HomeRow {
         override val key = "apps"
     }
@@ -104,12 +118,16 @@ sealed interface AppTile {
 
 data class MovieDetails(val movie: Movie, val similar: List<Movie>)
 
+/** Read-only texts reachable from settings. */
+enum class DocumentKind { Privacy, Accessibility }
+
 sealed interface Screen {
     data object Home : Screen
     data class Details(val movieId: String) : Screen
     data object AllApps : Screen
     data object Settings : Screen
     data object Search : Screen
+    data class Document(val kind: DocumentKind) : Screen
 }
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())

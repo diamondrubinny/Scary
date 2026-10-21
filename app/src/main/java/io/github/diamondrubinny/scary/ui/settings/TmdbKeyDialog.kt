@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
@@ -70,6 +72,8 @@ fun TmdbKeyDialog(
                 .width(520.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                // The TV keyboard can cover the lower half of the screen: keep everything reachable.
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -122,7 +126,6 @@ fun TmdbKeyDialog(
                 style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
             )
-            BasicText(stringResource(R.string.tmdb_note), style = ScaryType.Caption)
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ScaryButton(
                     text = stringResource(R.string.tmdb_save),
@@ -132,6 +135,7 @@ fun TmdbKeyDialog(
                 if (keyMask != null) ScaryButton(stringResource(R.string.tmdb_delete), onClick = onDelete)
                 ScaryButton(stringResource(R.string.pin_cancel), onClick = onDismiss)
             }
+            BasicText(stringResource(R.string.tmdb_note), style = ScaryType.Caption)
         }
     }
 }

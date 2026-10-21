@@ -56,6 +56,9 @@ class HomeActions(
     val onToggleEffects: () -> Unit,
     val onOpenSettings: () -> Unit,
     val onOpenSearch: () -> Unit,
+    /** Long press on a movie card: add to or remove from "My list". */
+    val onToggleMyList: (Movie) -> Unit,
+    val onSurprise: () -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -88,6 +91,7 @@ fun HomeScreen(
             onToggleEffects = actions.onToggleEffects,
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
+            onSurprise = actions.onSurprise,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
         )
         Hero(
@@ -132,7 +136,7 @@ private fun Hero(
         modifier = Modifier
             .padding(horizontal = SidePadding)
             .fillMaxWidth(0.62f)
-            .height(196.dp),
+            .height(212.dp),
         verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
     ) {
         if (movie == null) return@Column
@@ -140,20 +144,27 @@ private fun Hero(
             text = if (isNightPick) stringResource(R.string.night_pick) else subgenreLine(movie),
             style = ScaryType.Eyebrow,
         )
-        BasicText(
-            text = movie.displayTitle(language),
-            style = ScaryType.Display,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.semantics { heading() },
-        )
-        MovieMeta(movie)
-        BasicText(
-            text = movie.synopsis(language),
-            style = ScaryType.Body.mixedLanguage(),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-        )
+        // The text block yields space first, so the buttons below always keep their full height,
+        // even when a longer language wraps the synopsis to two lines.
+        Column(
+            modifier = Modifier.weight(1f, fill = false),
+            verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
+        ) {
+            BasicText(
+                text = movie.displayTitle(language),
+                style = ScaryType.Display,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() },
+            )
+            MovieMeta(movie)
+            BasicText(
+                text = movie.synopsis(language),
+                style = ScaryType.Body.mixedLanguage(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
             ScaryButton(
                 text = stringResource(R.string.action_watch_stremio),
@@ -180,6 +191,7 @@ private fun HomeRowView(
 ) {
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
+        is HomeRow.MyList -> stringResource(R.string.row_my_list)
         is HomeRow.Apps -> stringResource(R.string.row_apps)
         is HomeRow.Collection -> row.collection.title(language)
     }
@@ -204,6 +216,18 @@ private fun HomeRowView(
                         movie = movie,
                         locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
+                        onFocused = { actions.onCardFocused(key, movie.id) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+                is HomeRow.MyList -> items(row.movies, key = { it.id }) { movie ->
+                    val key = "${row.key}:${movie.id}"
+                    PosterCard(
+                        movie = movie,
+                        locked = isLocked(movie),
+                        onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
@@ -226,6 +250,7 @@ private fun HomeRowView(
                         movie = movie,
                         locked = isLocked(movie),
                         onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )

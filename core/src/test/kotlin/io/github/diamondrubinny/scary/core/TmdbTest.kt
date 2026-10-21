@@ -39,7 +39,7 @@ class TmdbTest {
 
     @Test
     fun `v3 key goes in the query string, v4 token does not`() {
-        val url = Tmdb.findUrl("tt0081505")
+        val url = Tmdb.findUrl("tt0081505", Language.HE)
         assertTrue(Tmdb.authorize(url, TmdbAuth.ApiKey("k".repeat(32))).endsWith("&api_key=" + "k".repeat(32)))
         assertEquals(url, Tmdb.authorize(url, TmdbAuth.Bearer("eyJ.x.y")))
         assertTrue(Tmdb.authorize(Tmdb.configurationUrl(), TmdbAuth.ApiKey("a".repeat(32))).contains("?api_key="))
@@ -47,10 +47,11 @@ class TmdbTest {
 
     @Test
     fun `parses find with hebrew text and safe image urls`() {
-        val info = Tmdb.parseFind(findJson)!!
+        val info = Tmdb.parseFind(findJson, Language.HE)!!
         assertEquals(694L, info.tmdbId)
-        assertEquals("הניצוץ", info.titleHe)
-        assertTrue(info.overviewHe.startsWith("ג'ק"))
+        assertEquals("he", info.language)
+        assertEquals("הניצוץ", info.title)
+        assertTrue(info.overview.startsWith("ג'ק"))
         assertEquals("https://image.tmdb.org/t/p/w500/abcDEF123.jpg", info.poster)
         assertEquals("https://image.tmdb.org/t/p/w1280/back_drop-9.jpg", info.backdrop)
     }
@@ -58,21 +59,21 @@ class TmdbTest {
     @Test
     fun `english-only results do not pretend to be hebrew, bad paths are dropped`() {
         val info = Tmdb.parseFind(
-            """{"movie_results":[{"id":5,"title":"Alien","overview":"In space","poster_path":"../../etc/passwd","backdrop_path":"/x.svg"}]}""",
+            """{"movie_results":[{"id":5,"title":"Alien","original_title":"Alien","overview":"In space","poster_path":"../../etc/passwd","backdrop_path":"/x.svg"}]}""",
+            Language.RU,
         )!!
-        assertEquals("", info.titleHe)
-        assertEquals("", info.overviewHe)
+        assertEquals("", info.title)
+        assertEquals("", info.overview)
         assertNull(info.poster)
         assertNull(info.backdrop)
-        assertNull(Tmdb.parseFind("""{"movie_results":[]}"""))
-        assertNull(Tmdb.parseFind("<html>"))
+        assertNull(Tmdb.parseFind("""{"movie_results":[]}""", Language.HE))
+        assertNull(Tmdb.parseFind("<html>", Language.HE))
     }
 
     @Test
     fun `enrich adds hebrew title and keeps curated hebrew synopsis`() {
         val shining = catalog.movie("the_shining")!!
-        val enriched = Tmdb.enrich(shining, Tmdb.parseFind(findJson)!!)
-        assertEquals("הניצוץ", enriched.titleHe)
+        val enriched = Tmdb.enrich(shining, Tmdb.parseFind(findJson, Language.HE)!!)
         assertEquals("הניצוץ", enriched.displayTitle(Language.HE))
         assertEquals("The Shining", enriched.displayTitle(Language.EN))
         assertEquals(shining.synopsisHe, enriched.synopsisHe)
@@ -83,27 +84,89 @@ class TmdbTest {
     fun `discover results become online movies with hebrew text`() {
         val results = Tmdb.parseDiscover("""{"page":1,"results":[{"id":1,"title":"הנזירה","original_title":"The Nun","overview":"נזירה צעירה...","release_date":"2018-09-05","genre_ids":[27]},{"id":0,"title":"bad"}]}""")
         assertEquals(1, results.size)
-        val movie = Cinemeta.toMovie(Tmdb.toMeta(results.single(), "tt5814060"))!!
+        val movie = Cinemeta.toMovie(Tmdb.toMeta(results.single(), "tt5814060", Language.HE))!!
         assertEquals("The Nun", movie.title)
-        assertEquals("הנזירה", movie.titleHe)
+        assertEquals("הנזירה", movie.displayTitle(Language.HE))
+        assertEquals("The Nun", movie.displayTitle(Language.RU))
         assertTrue(movie.synopsis(Language.HE).startsWith("נזירה"))
         assertFalse(movie.curated)
     }
 
     @Test
     fun `discover urls use fixed parameters`() {
-        val url = Tmdb.discoverUrl(TmdbRow.NEW_HORROR, LocalDate.of(2026, 10, 18))
+        val url = Tmdb.discoverUrl(TmdbRow.NEW_HORROR, LocalDate.of(2026, 10, 18), Language.HE)
         assertTrue(url.startsWith("https://api.themoviedb.org/3/discover/movie?with_genres=27"))
         assertTrue("primary_release_date.gte=2025-10-18" in url)
         assertTrue("language=he-IL" in url)
-        assertTrue("with_genres=53%2C9648" in Tmdb.discoverUrl(TmdbRow.PSYCH_THRILLER, LocalDate.of(2026, 1, 1)))
+        assertTrue("with_genres=53%2C9648" in Tmdb.discoverUrl(TmdbRow.PSYCH_THRILLER, LocalDate.of(2026, 1, 1), Language.RU))
         assertEquals("tt0081505", Tmdb.parseImdbId("""{"id":694,"imdb_id":"tt0081505"}"""))
         assertNull(Tmdb.parseImdbId("""{"id":694,"imdb_id":null}"""))
     }
 
     @Test
+    fun `russian and portuguese text is used only when really translated`() {
+        val ru = Tmdb.parseFind(
+            """{"movie_results":[{"id":694,"title":"Сияние","original_title":"The Shining","overview":"Джек Торранс..."}]}""",
+            Language.RU,
+        )!!
+        val shining = catalog.movie("the_shining")!!
+        val enriched = Tmdb.enrich(shining, ru)
+        assertEquals("Сияние", enriched.displayTitle(Language.RU))
+        // The curated Russian synopsis wins over TMDB's.
+        assertEquals(shining.synopses["ru"], enriched.synopsis(Language.RU))
+        val pt = Tmdb.parseFind(
+            """{"movie_results":[{"id":694,"title":"The Shining","original_title":"The Shining","overview":"Jack Torrance..."}]}""",
+            Language.PT,
+        )!!
+        assertEquals("", pt.title)
+        assertEquals("Jack Torrance...", pt.overview)
+    }
+
+    @Test
+    fun `english find fills only a missing english synopsis`() {
+        val en = Tmdb.parseFind(
+            """{"movie_results":[{"id":5,"title":"Alien","original_title":"Alien","overview":"In space no one can hear you scream."}]}""",
+            Language.EN,
+        )!!
+        assertEquals("Alien", en.title)
+        assertEquals("In space no one can hear you scream.", en.overview)
+        val curated = catalog.movie("alien")!!
+        assertEquals(curated.synopsisEn, Tmdb.enrich(curated, en).synopsisEn)
+        val online = curated.copy(synopsisEn = "", curated = false)
+        assertEquals("In space no one can hear you scream.", Tmdb.enrich(online, en).synopsisEn)
+    }
+
+    @Test
+    fun `untranslated discover overview is kept as english`() {
+        val result = Tmdb.parseDiscover("""{"results":[{"id":9,"title":"Smile 2","original_title":"Smile 2","overview":"A pop star starts to see things.","release_date":"2024-10-16","genre_ids":[27]}]}""").single()
+        val meta = Tmdb.toMeta(result, "tt29268110", Language.RU)
+        assertEquals("", meta.localDescription)
+        assertEquals("A pop star starts to see things.", meta.description)
+        assertTrue(Cinemeta.toMovie(meta)!!.synopsis(Language.RU).isNotBlank())
+    }
+
+    @Test
+    fun `languages cycle and map from android codes`() {
+        assertEquals(listOf(Language.HE, Language.EN, Language.PT, Language.RU), Language.entries.toList())
+        assertEquals(Language.HE, Language.RU.next())
+        assertEquals(Language.PT, Language.fromCode("pt"))
+        assertEquals(Language.RU, Language.fromCode("ru"))
+        assertEquals(Language.HE, Language.fromCode("iw"))
+        assertEquals(Language.EN, Language.fromCode("fr"))
+    }
+
+    @Test
+    fun `curated catalog reads in all four languages`() {
+        val exorcist = catalog.movie("the_exorcist")!!
+        Language.entries.forEach { assertTrue(exorcist.synopsis(it).isNotBlank()) }
+        assertTrue(exorcist.synopsis(Language.RU).contains("священник"))
+        assertEquals("Classics you can't skip", catalog.collections.first().title(Language.EN))
+        assertEquals("Clássicos imperdíveis", catalog.collections.first().title(Language.PT))
+    }
+
+    @Test
     fun `cache round trip never contains the key`() {
-        val cache = TmdbCache(1L, mapOf("tt0081505" to Tmdb.parseFind(findJson)!!), emptyList())
+        val cache = TmdbCache(1L, "he", mapOf("tt0081505" to Tmdb.parseFind(findJson, Language.HE)!!), emptyList())
         val text = cache.encode()
         assertEquals(cache, TmdbCache.decode(text))
         assertFalse("api_key" in text)

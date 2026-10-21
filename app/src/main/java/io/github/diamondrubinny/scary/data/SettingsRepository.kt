@@ -14,6 +14,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
+import io.github.diamondrubinny.scary.core.catalog.MyList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.security.LockoutState
@@ -43,6 +44,8 @@ data class LauncherPrefs(
     val soundsEnabled: Boolean,
     /** Artwork and popular rows from Cinemeta. On by default; off keeps SCARY fully offline. */
     val onlineEnabled: Boolean,
+    /** The viewer's watchlist, newest first. */
+    val myListIds: List<String> = emptyList(),
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -64,6 +67,7 @@ class SettingsRepository(private val context: Context) {
                 lockout = LockoutState(p[PIN_FAILED] ?: 0, p[PIN_LOCKED_UNTIL] ?: 0L),
                 soundsEnabled = p[SOUNDS] ?: false,
                 onlineEnabled = p[ONLINE] ?: true,
+                myListIds = RecentList.decode(p[MY_LIST]),
             )
         }
         .distinctUntilChanged()
@@ -72,6 +76,17 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun pushRecent(movieId: String) = edit {
         it[RECENT] = RecentList.encode(RecentList.push(RecentList.decode(it[RECENT]), movieId))
+    }
+
+    /** Adds the movie to "My list", or removes it if it is already there. Returns true when it was added. */
+    suspend fun toggleMyList(movieId: String): Boolean {
+        var added = false
+        edit {
+            val current = RecentList.decode(it[MY_LIST])
+            added = movieId !in current
+            it[MY_LIST] = RecentList.encode(MyList.toggle(current, movieId))
+        }
+        return added
     }
 
     suspend fun togglePinned(packageName: String) = editPinned { PinnedList.toggle(it, packageName) }
@@ -117,13 +132,17 @@ class SettingsRepository(private val context: Context) {
         context.settingsStore.edit { block(it) }
     }
 
-    private fun systemAnimationsEnabled(): Boolean =
-        Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+    private fun systemAnimationsEnabled(): Boolean = systemAnimationsEnabled(context)
 
     companion object {
+        /** False when the TV's accessibility settings removed animations; that always stops decorative motion. */
+        fun systemAnimationsEnabled(context: Context): Boolean =
+            Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
+
         const val MAX_FEAR = 5
         private val EFFECTS = booleanPreferencesKey("effects_enabled")
         private val RECENT = stringPreferencesKey("recent_movie_ids")
+        private val MY_LIST = stringPreferencesKey("my_list_movie_ids")
         private val PINNED = stringPreferencesKey("pinned_apps")
         private val HIDDEN = stringSetPreferencesKey("hidden_apps")
         private val NIGHT_MAX_FEAR = intPreferencesKey("night_max_fear")

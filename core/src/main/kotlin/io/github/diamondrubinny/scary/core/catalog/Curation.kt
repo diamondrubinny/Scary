@@ -15,6 +15,21 @@ object NightPick {
         val mixed = date.toEpochDay() * 2_654_435_761L
         return pool[Math.floorMod(mixed, pool.size.toLong()).toInt()]
     }
+
+    /**
+     * "Surprise me": a random curated movie at or below [maxFear], skipping [exclude] (the one on screen) and any
+     * movie [isLocked] rejects, so the button never lands on a PIN prompt. Null when nothing qualifies.
+     */
+    fun surprise(
+        movies: List<Movie>,
+        maxFear: Int,
+        random: kotlin.random.Random,
+        exclude: String? = null,
+        isLocked: (Movie) -> Boolean = { false },
+    ): Movie? {
+        val pool = movies.filter { m -> m.curated && m.fear != null && m.fear <= maxFear && !isLocked(m) }
+        return pool.filter { it.id != exclude }.ifEmpty { pool }.randomOrNull(random)
+    }
 }
 
 object Similar {
@@ -46,4 +61,13 @@ object RecentList {
         raw?.split(',')?.map(String::trim)?.filter(String::isNotEmpty) ?: emptyList()
 
     fun encode(ids: List<String>): String = ids.joinToString(",")
+}
+
+/** The viewer's own watchlist: newest first, stored with the same encoding as [RecentList]. */
+object MyList {
+    const val MAX_SIZE = 100
+
+    /** Removes [id] if it is on the list, otherwise adds it at the front. The oldest entry drops past [max]. */
+    fun toggle(current: List<String>, id: String, max: Int = MAX_SIZE): List<String> =
+        if (id in current) current.filter { it != id } else (listOf(id) + current).take(max)
 }

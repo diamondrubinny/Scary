@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.core.model.Language
 
 /** Single committed dark palette: bone on void, dried blood for primary actions, candlelight for focus. */
 object ScaryColors {
@@ -28,35 +29,58 @@ object ScaryColors {
     val Blood = Color(0xFF8E1B1B)
     val BloodDim = Color(0xFF3A2222)
     val Candle = Color(0xFFE0A94A)
+
+    /** Filled fear drops: at least 3:1 against the dark background and against the empty drops (WCAG 1.4.11). */
+    val Fear = Color(0xFFD94040)
 }
 
+/**
+ * Karantina and Assistant have no Cyrillic, so Russian switches to Oswald (condensed headings) and Rubik (text).
+ * Set once per Activity before setContent; a language change recreates the Activity.
+ */
 object ScaryFonts {
-    val Display = FontFamily(Font(R.font.karantina_bold, FontWeight.Bold))
-    val Body = FontFamily(
+    private val karantina = FontFamily(Font(R.font.karantina_bold, FontWeight.Bold))
+    private val assistant = FontFamily(
         Font(R.font.assistant_regular, FontWeight.Normal),
         Font(R.font.assistant_bold, FontWeight.Bold),
     )
+    private val oswald = FontFamily(Font(R.font.oswald_semibold, FontWeight.Bold))
+    private val rubik = FontFamily(
+        Font(R.font.rubik_regular, FontWeight.Normal),
+        Font(R.font.rubik_bold, FontWeight.Bold),
+    )
+
+    var Display: FontFamily = karantina
+        private set
+    var Body: FontFamily = assistant
+        private set
     val Logo = FontFamily(Font(R.font.rubik_wet_paint, FontWeight.Normal))
+
+    fun useFor(language: Language) {
+        val cyrillic = language == Language.RU
+        Display = if (cyrillic) oswald else karantina
+        Body = if (cyrillic) rubik else assistant
+    }
 }
 
 /** Sizes target a 960x540dp TV canvas viewed from about three meters. */
 object ScaryType {
-    val Logo = TextStyle(
+    val Logo: TextStyle get() = TextStyle(
         fontFamily = ScaryFonts.Logo,
         fontSize = 34.sp,
         color = ScaryColors.Bone,
         shadow = Shadow(ScaryColors.Blood, Offset(0f, 5f), 0f),
     )
-    val Display = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 60.sp, lineHeight = 54.sp, color = ScaryColors.Bone)
-    val Title = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 26.sp, lineHeight = 26.sp, color = ScaryColors.Bone)
-    val CardTitle = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 18.sp, color = ScaryColors.Bone)
-    val Clock = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 30.sp, color = ScaryColors.Bone)
-    val Body = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp, color = ScaryColors.BoneDim)
-    val BodyStrong = Body.copy(fontWeight = FontWeight.Bold, color = ScaryColors.Bone)
-    val Label = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ScaryColors.Bone)
-    val Caption = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 12.sp, color = ScaryColors.Ash)
-    val Eyebrow = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.2.em, color = ScaryColors.Candle)
-    val RowTitle = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
+    val Display: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 60.sp, lineHeight = 54.sp, color = ScaryColors.Bone)
+    val Title: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 26.sp, lineHeight = 26.sp, color = ScaryColors.Bone)
+    val CardTitle: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 20.sp, lineHeight = 18.sp, color = ScaryColors.Bone)
+    val Clock: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Display, fontWeight = FontWeight.Bold, fontSize = 30.sp, color = ScaryColors.Bone)
+    val Body: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 15.sp, lineHeight = 22.sp, color = ScaryColors.BoneDim)
+    val BodyStrong: TextStyle get() = Body.copy(fontWeight = FontWeight.Bold, color = ScaryColors.Bone)
+    val Label: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, color = ScaryColors.Bone)
+    val Caption: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 12.sp, color = ScaryColors.Ash)
+    val Eyebrow: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 0.2.em, color = ScaryColors.Candle)
+    val RowTitle: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
 }
 
 /**

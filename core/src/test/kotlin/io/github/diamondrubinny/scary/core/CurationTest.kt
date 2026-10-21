@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.apps.AppOrdering
 import io.github.diamondrubinny.scary.core.catalog.NightPick
+import io.github.diamondrubinny.scary.core.catalog.MyList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.model.Genre
@@ -63,6 +64,35 @@ class CurationTest {
         assertEquals(list, RecentList.decode(RecentList.encode(list)))
         assertEquals(emptyList<String>(), RecentList.decode(null))
         assertEquals(listOf("a", "b"), RecentList.decode(" a, ,b,"))
+    }
+
+    @Test
+    fun `surprise stays within the fear limit, skips locked and the current movie`() {
+        val movies = (1..20).map { movie("m$it", fear = 1 + it % 5) } + movie("online", fear = 1).copy(fear = null, curated = false)
+        val random = kotlin.random.Random(1)
+        repeat(50) {
+            val pick = NightPick.surprise(movies, maxFear = 2, random = random)!!
+            assertTrue(pick.curated && pick.fear!! <= 2)
+        }
+        val mild = movies.filter { it.fear == 1 }
+        repeat(20) { assertTrue(NightPick.surprise(mild, 1, random, exclude = mild.first().id)!!.id != mild.first().id) }
+        // With a single candidate, excluding it still returns it rather than nothing.
+        assertEquals("m5", NightPick.surprise(listOf(movie("m5", fear = 1)), 1, random, exclude = "m5")!!.id)
+        assertNull(NightPick.surprise(movies, maxFear = 5, random = random, isLocked = { true }))
+    }
+
+    @Test
+    fun `my list adds at the front, removes on second toggle and caps the size`() {
+        var list = MyList.toggle(emptyList(), "a")
+        list = MyList.toggle(list, "b")
+        assertEquals(listOf("b", "a"), list)
+        assertEquals(listOf("b"), MyList.toggle(list, "a"))
+
+        var full = emptyList<String>()
+        (1..MyList.MAX_SIZE + 5).forEach { full = MyList.toggle(full, "m$it") }
+        assertEquals(MyList.MAX_SIZE, full.size)
+        assertEquals("m${MyList.MAX_SIZE + 5}", full.first())
+        assertTrue("m1" !in full)
     }
 
     @Test

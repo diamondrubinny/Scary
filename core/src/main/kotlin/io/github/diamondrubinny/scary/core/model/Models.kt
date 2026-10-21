@@ -3,13 +3,23 @@ package io.github.diamondrubinny.scary.core.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-enum class Language {
-    HE,
-    EN;
+/** UI languages. [code] keys localized text; [nativeName] is how the language names itself in the picker. */
+enum class Language(val code: String, val nativeName: String, val tmdbTag: String, val rtl: Boolean) {
+    HE("he", "עברית", "he-IL", true),
+    EN("en", "English", "en-US", false),
+    PT("pt", "Português", "pt-BR", false),
+    RU("ru", "Русский", "ru-RU", false);
+
+    fun next(): Language = entries[(ordinal + 1) % entries.size]
 
     companion object {
-        /** Android reports Hebrew as either "he" or the legacy "iw". */
-        fun fromCode(code: String): Language = if (code == "he" || code == "iw") HE else EN
+        /** Android reports Hebrew as either "he" or the legacy "iw". Unknown languages fall back to English. */
+        fun fromCode(code: String): Language = when (code.lowercase()) {
+            "he", "iw" -> HE
+            "pt" -> PT
+            "ru" -> RU
+            else -> EN
+        }
     }
 }
 
@@ -62,15 +72,22 @@ data class Movie(
     val imdbRating: Double? = null,
     val cast: List<String> = emptyList(),
     val trailerYoutubeId: String? = null,
+    /** Titles and synopses in other languages, keyed by [Language.code] (curated translations or TMDB). */
+    val titles: Map<String, String> = emptyMap(),
+    val synopses: Map<String, String> = emptyMap(),
     /** True for the hand-picked library, false for rows pulled from Cinemeta. */
     val curated: Boolean = true,
 ) {
     fun displayTitle(language: Language): String =
-        if (language == Language.HE && titleHe.isNotBlank()) titleHe else title
+        titles[language.code]?.takeIf(String::isNotBlank)
+            ?: titleHe.takeIf { language == Language.HE && it.isNotBlank() }
+            ?: title
 
     /** Hebrew synopsis when there is one, otherwise English, so online-only movies still show text. */
     fun synopsis(language: Language): String =
-        if (language == Language.HE && synopsisHe.isNotBlank()) synopsisHe else synopsisEn.ifBlank { synopsisHe }
+        synopses[language.code]?.takeIf(String::isNotBlank)
+            ?: synopsisHe.takeIf { language == Language.HE && it.isNotBlank() }
+            ?: synopsisEn.ifBlank { synopsisHe }
 
     /** Unknown fear counts as the maximum for the parental lock, so unrated movies stay behind the PIN. */
     val fearForLock: Int get() = fear ?: 5
@@ -82,8 +99,14 @@ data class MovieCollection(
     val titleHe: String,
     val titleEn: String,
     val movieIds: List<String>,
+    /** Titles in further languages, keyed by [Language.code]. */
+    val titles: Map<String, String> = emptyMap(),
 ) {
-    fun title(language: Language): String = if (language == Language.HE) titleHe else titleEn
+    fun title(language: Language): String = when {
+        language == Language.HE -> titleHe
+        language == Language.EN -> titleEn
+        else -> titles[language.code]?.takeIf(String::isNotBlank) ?: titleEn
+    }
 }
 
 @Serializable

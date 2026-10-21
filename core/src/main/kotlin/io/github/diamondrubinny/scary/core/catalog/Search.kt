@@ -48,11 +48,11 @@ object Search {
     }
 
     private fun score(movie: Movie, terms: List<String>, labels: List<String>): Int? {
-        val title = normalize(movie.title + " " + movie.titleHe)
+        val title = normalize(movie.title + " " + movie.titleHe + " " + movie.titles.values.joinToString(" "))
         val titleWords = title.split(' ')
         val director = normalize(movie.director)
         val labelText = normalize(labels.joinToString(" "))
-        val synopsis = normalize(movie.synopsisHe + " " + movie.synopsisEn)
+        val synopsis = normalize(movie.synopsisHe + " " + movie.synopsisEn + " " + movie.synopses.values.joinToString(" "))
         val year = movie.year.toString()
 
         var total = 0

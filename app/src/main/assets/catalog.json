@@ -17,7 +17,11 @@
    "hue": 0,
    "saturation": 0,
    "synopsisHe": "מזכירה בורחת עם כסף גנוב ועוצרת ללילה במוטל צדדי שמנהל צעיר שקט מדי.",
-   "synopsisEn": "A secretary on the run with stolen cash stops for the night at a roadside motel run by an unnervingly quiet young man."
+   "synopsisEn": "A secretary on the run with stolen cash stops for the night at a roadside motel run by an unnervingly quiet young man.",
+   "synopses": {
+    "pt": "Uma secretária em fuga com dinheiro roubado para passar a noite num motel de beira de estrada, administrado por um jovem quieto demais.",
+    "ru": "Секретарша, сбежавшая с украденными деньгами, останавливается на ночь в придорожном мотеле, которым управляет пугающе тихий молодой человек."
+   }
   },
   {
    "id": "rosemarys_baby",
@@ -35,7 +39,11 @@
    "hue": 90,
    "saturation": 20,
    "synopsisHe": "זוג צעיר עובר לבניין יוקרתי בניו יורק, והשכנים מגלים בהריון שלה עניין רב מדי.",
-   "synopsisEn": "A young couple moves into a grand New York building, and the neighbors take far too much interest in her pregnancy."
+   "synopsisEn": "A young couple moves into a grand New York building, and the neighbors take far too much interest in her pregnancy.",
+   "synopses": {
+    "pt": "Um jovem casal se muda para um prédio imponente em Nova York, e os vizinhos se interessam demais pela gravidez dela.",
+    "ru": "Молодая пара переезжает в роскошный дом в Нью-Йорке, и соседи проявляют слишком большой интерес к её беременности."
+   }
   },
   {
    "id": "the_exorcist",
@@ -53,7 +61,11 @@
    "hue": 200,
    "saturation": 55,
    "synopsisHe": "אם מנסה להציל את בתה מכוח שהשתלט עליה, ופונה לשני כמרים כמוצא אחרון.",
-   "synopsisEn": "A mother fights to save her daughter from a force that has taken hold of her, and turns to two priests as a last resort."
+   "synopsisEn": "A mother fights to save her daughter from a force that has taken hold of her, and turns to two priests as a last resort.",
+   "synopses": {
+    "pt": "Uma mãe luta para salvar a filha de uma força que se apoderou dela e recorre a dois padres como última esperança.",
+    "ru": "Мать пытается спасти дочь от силы, которая завладела девочкой, и в отчаянии обращается к двум священникам."
+   }
   },
   {
    "id": "texas_chain_saw",
@@ -71,7 +83,11 @@
    "hue": 35,
    "saturation": 60,
    "synopsisHe": "חמישה חברים בטיול בטקסס הכפרית נתקלים בבית שכדאי היה לעקוף.",
-   "synopsisEn": "Five friends on a road trip through rural Texas stumble onto a house they should have driven past."
+   "synopsisEn": "Five friends on a road trip through rural Texas stumble onto a house they should have driven past.",
+   "synopses": {
+    "pt": "Cinco amigos numa viagem pelo interior do Texas encontram uma casa que deveriam ter evitado.",
+    "ru": "Пятеро друзей, путешествуя по сельскому Техасу, натыкаются на дом, мимо которого лучше было проехать."
+   }
   },
   {
    "id": "halloween",
@@ -88,7 +104,11 @@
    "hue": 28,
    "saturation": 70,
    "synopsisHe": "חמש־עשרה שנה אחרי רצח בליל כל הקדושים, הרוצח בורח וחוזר לעיירה שבה הכל התחיל.",
-   "synopsisEn": "Fifteen years after a Halloween murder, the killer escapes and returns to the small town where it began."
+   "synopsisEn": "Fifteen years after a Halloween murder, the killer escapes and returns to the small town where it began.",
+   "synopses": {
+    "pt": "Quinze anos depois de um assassinato no Halloween, o assassino foge e volta à pequena cidade onde tudo começou.",
+    "ru": "Через пятнадцать лет после убийства в Хэллоуин убийца сбегает и возвращается в городок, где всё началось."
+   }
   },
   {
    "id": "alien",
@@ -106,7 +126,11 @@
    "hue": 160,
    "saturation": 35,
    "synopsisHe": "צוות של ספינת משא בחלל עונה לאות מצוקה ומעלה לסיפון נוסע שלא הוזמן.",
-   "synopsisEn": "The crew of a space freighter answers a distress call and brings an uninvited passenger aboard."
+   "synopsisEn": "The crew of a space freighter answers a distress call and brings an uninvited passenger aboard.",
+   "synopses": {
+    "pt": "A tripulação de um cargueiro espacial atende a um pedido de socorro e leva a bordo um passageiro indesejado.",
+    "ru": "Экипаж космического грузовика откликается на сигнал бедствия и берёт на борт незваного пассажира."
+   }
   },
   {
    "id": "the_shining",
@@ -124,7 +148,11 @@
    "hue": 20,
    "saturation": 55,
    "synopsisHe": "שומר חורף במלון מבודד בהרים מתחיל לאבד את שפיותו, בזמן שבנו רואה את מה שהמלון מסתיר.",
-   "synopsisEn": "A winter caretaker at an isolated mountain hotel starts to lose his mind while his son sees what the hotel is hiding."
+   "synopsisEn": "A winter caretaker at an isolated mountain hotel starts to lose his mind while his son sees what the hotel is hiding.",
+   "synopses": {
+    "pt": "O zelador de inverno de um hotel isolado nas montanhas começa a perder a razão, enquanto o filho vê o que o hotel esconde.",
+    "ru": "Зимний смотритель уединённого горного отеля начинает сходить с ума, а его сын видит то, что скрывает отель."
+   }
   },
   {
    "id": "the_thing",
@@ -142,7 +170,11 @@
    "hue": 190,
    "saturation": 55,
    "synopsisHe": "צוות מחקר באנטארקטיקה מגלה ישות שיכולה להתחזות לכל אחד מהם.",
-   "synopsisEn": "A research team in Antarctica uncovers a being that can imitate any one of them."
+   "synopsisEn": "A research team in Antarctica uncovers a being that can imitate any one of them.",
+   "synopses": {
+    "pt": "Uma equipe de pesquisa na Antártida descobre um ser capaz de imitar qualquer um deles.",
+    "ru": "Исследователи в Антарктиде обнаруживают существо, способное принять облик любого из них."
+   }
   },
   {
    "id": "nightmare_elm_street",
@@ -160,7 +192,11 @@
    "hue": 15,
    "saturation": 65,
    "synopsisHe": "בני נוער ברחוב אחד מגלים שהם חולמים על אותו אדם, ושמה שקורה בחלום לא נשאר שם.",
-   "synopsisEn": "Teenagers on one street realize they share the same nightmare, and what happens in the dream does not stay there."
+   "synopsisEn": "Teenagers on one street realize they share the same nightmare, and what happens in the dream does not stay there.",
+   "synopses": {
+    "pt": "Adolescentes de uma mesma rua percebem que têm o mesmo pesadelo, e o que acontece no sonho não fica lá.",
+    "ru": "Подростки с одной улицы понимают, что видят один и тот же кошмар, и то, что происходит во сне, не остаётся во сне."
+   }
   },
   {
    "id": "jacobs_ladder",
@@ -177,7 +213,11 @@
    "hue": 50,
    "saturation": 25,
    "synopsisHe": "ותיק מלחמת וייטנאם בניו יורק נרדף בחזיונות שגורמים לו לפקפק במה שאמיתי.",
-   "synopsisEn": "A Vietnam veteran in New York is haunted by visions that make him doubt what is real."
+   "synopsisEn": "A Vietnam veteran in New York is haunted by visions that make him doubt what is real.",
+   "synopses": {
+    "pt": "Um veterano do Vietnã em Nova York é atormentado por visões que o fazem duvidar do que é real.",
+    "ru": "Ветерана Вьетнама в Нью-Йорке преследуют видения, из-за которых он перестаёт понимать, что реально."
+   }
   },
   {
    "id": "the_sixth_sense",
@@ -195,7 +235,11 @@
    "hue": 0,
    "saturation": 45,
    "synopsisHe": "פסיכולוג ילדים מטפל בילד שטוען שהוא רואה אנשים מתים.",
-   "synopsisEn": "A child psychologist treats a boy who says he can see dead people."
+   "synopsisEn": "A child psychologist treats a boy who says he can see dead people.",
+   "synopses": {
+    "pt": "Um psicólogo infantil trata um menino que diz ver gente morta.",
+    "ru": "Детский психолог лечит мальчика, который говорит, что видит мёртвых."
+   }
   },
   {
    "id": "the_others",
@@ -213,7 +257,11 @@
    "hue": 45,
    "saturation": 30,
    "synopsisHe": "אם ושני ילדיה חיים באחוזה חשוכה, עד שמשהו בבית מתחיל להתנהג כאילו הוא לא שלהם.",
-   "synopsisEn": "A mother and her two children live in a darkened manor until the house starts behaving as if it belongs to someone else."
+   "synopsisEn": "A mother and her two children live in a darkened manor until the house starts behaving as if it belongs to someone else.",
+   "synopses": {
+    "pt": "Uma mãe e os dois filhos vivem numa mansão às escuras, até que a casa começa a agir como se pertencesse a outra pessoa.",
+    "ru": "Мать с двумя детьми живёт в затемнённом особняке, пока дом не начинает вести себя так, будто принадлежит кому-то другому."
+   }
   },
   {
    "id": "the_ring",
@@ -231,7 +279,11 @@
    "hue": 175,
    "saturation": 40,
    "synopsisHe": "עיתונאית חוקרת קלטת וידאו שלפי השמועה כל מי שצופה בה מת אחרי שבעה ימים.",
-   "synopsisEn": "A journalist investigates a videotape rumored to kill anyone who watches it within seven days."
+   "synopsisEn": "A journalist investigates a videotape rumored to kill anyone who watches it within seven days.",
+   "synopses": {
+    "pt": "Uma jornalista investiga uma fita de vídeo que, dizem, mata quem a assiste em sete dias.",
+    "ru": "Журналистка расследует историю видеокассеты, которая, по слухам, убивает каждого посмотревшего через семь дней."
+   }
   },
   {
    "id": "28_days_later",
@@ -249,7 +301,11 @@
    "hue": 10,
    "saturation": 40,
    "synopsisHe": "גבר מתעורר בבית חולים נטוש ומגלה שלונדון התרוקנה, ומשהו זועם מסתובב ברחובות.",
-   "synopsisEn": "A man wakes in an abandoned hospital to find London emptied out and something furious roaming the streets."
+   "synopsisEn": "A man wakes in an abandoned hospital to find London emptied out and something furious roaming the streets.",
+   "synopses": {
+    "pt": "Um homem acorda num hospital abandonado e encontra Londres vazia, com algo furioso vagando pelas ruas.",
+    "ru": "Мужчина приходит в себя в заброшенной больнице и видит опустевший Лондон, по улицам которого бродит что-то яростное."
+   }
   },
   {
    "id": "saw",
@@ -267,7 +323,11 @@
    "hue": 70,
    "saturation": 45,
    "synopsisHe": "שני גברים מתעוררים כבולים בחדר שירותים מוזנח, עם הוראות למשחק שאין בו כללים הוגנים.",
-   "synopsisEn": "Two men wake up chained in a filthy bathroom, holding instructions for a game with no fair rules."
+   "synopsisEn": "Two men wake up chained in a filthy bathroom, holding instructions for a game with no fair rules.",
+   "synopses": {
+    "pt": "Dois homens acordam acorrentados num banheiro imundo, com instruções para um jogo sem regras justas.",
+    "ru": "Двое мужчин приходят в себя прикованными в грязной ванной с инструкциями к игре без честных правил."
+   }
   },
   {
    "id": "the_descent",
@@ -285,7 +345,11 @@
    "hue": 25,
    "saturation": 60,
    "synopsisHe": "קבוצת חברות יורדת למערכת מערות לא ממופה ומגלה שהן לא לבד בחושך.",
-   "synopsisEn": "A group of friends descends into an unmapped cave system and finds they are not alone in the dark."
+   "synopsisEn": "A group of friends descends into an unmapped cave system and finds they are not alone in the dark.",
+   "synopses": {
+    "pt": "Um grupo de amigas desce a um sistema de cavernas desconhecido e descobre que não está sozinho no escuro.",
+    "ru": "Группа подруг спускается в неисследованную систему пещер и понимает, что они не одни в темноте."
+   }
   },
   {
    "id": "rec",
@@ -303,7 +367,11 @@
    "hue": 40,
    "saturation": 50,
    "synopsisHe": "כתבת טלוויזיה מלווה כבאים לקריאה בבניין דירות בברצלונה, והבניין נאטם כשהם בפנים.",
-   "synopsisEn": "A TV reporter follows firefighters to a call in a Barcelona apartment building, which is sealed off with them inside."
+   "synopsisEn": "A TV reporter follows firefighters to a call in a Barcelona apartment building, which is sealed off with them inside.",
+   "synopses": {
+    "pt": "Uma repórter de TV acompanha bombeiros num chamado a um prédio em Barcelona, que é lacrado com eles lá dentro.",
+    "ru": "Телерепортёр едет с пожарными на вызов в жилой дом в Барселоне, и здание оцепляют, пока они внутри."
+   }
   },
   {
    "id": "insidious",
@@ -321,7 +389,11 @@
    "hue": 260,
    "saturation": 35,
    "synopsisHe": "אחרי שבנם שוקע בתרדמת בלתי מוסברת, הורים מגלים שהבית החדש הוא לא הבעיה.",
-   "synopsisEn": "When their son falls into an unexplained coma, two parents learn the new house is not the problem."
+   "synopsisEn": "When their son falls into an unexplained coma, two parents learn the new house is not the problem.",
+   "synopses": {
+    "pt": "Quando o filho entra num coma inexplicável, os pais descobrem que o problema não é a casa nova.",
+    "ru": "Когда их сын впадает в необъяснимую кому, родители понимают, что дело не в новом доме."
+   }
   },
   {
    "id": "sinister",
@@ -339,7 +411,11 @@
    "hue": 30,
    "saturation": 50,
    "synopsisHe": "סופר פשע מוצא בעליית הגג של ביתו החדש קופסה של סרטים ביתיים שמתעדים מקרי רצח.",
-   "synopsisEn": "A true-crime writer finds a box of home movies documenting murders in the attic of his new house."
+   "synopsisEn": "A true-crime writer finds a box of home movies documenting murders in the attic of his new house.",
+   "synopses": {
+    "pt": "Um escritor de crimes reais encontra no sótão da casa nova uma caixa de filmes caseiros que registram assassinatos.",
+    "ru": "Писатель, пишущий о реальных преступлениях, находит на чердаке нового дома коробку домашних плёнок с записями убийств."
+   }
   },
   {
    "id": "the_conjuring",
@@ -357,7 +433,11 @@
    "hue": 210,
    "saturation": 30,
    "synopsisHe": "זוג חוקרי תופעות על־טבעיות נקרא לעזור למשפחה שבית החווה שלה מאוכלס במשהו עוין.",
-   "synopsisEn": "Two paranormal investigators are called to help a family whose farmhouse is occupied by something hostile."
+   "synopsisEn": "Two paranormal investigators are called to help a family whose farmhouse is occupied by something hostile.",
+   "synopses": {
+    "pt": "Dois investigadores paranormais são chamados para ajudar uma família cuja casa de fazenda é ocupada por algo hostil.",
+    "ru": "Двух исследователей паранормального зовут на помощь семье, в фермерском доме которой поселилось что-то враждебное."
+   }
   },
   {
    "id": "the_babadook",
@@ -375,7 +455,11 @@
    "hue": 220,
    "saturation": 55,
    "synopsisHe": "ספר ילדים מסתורי מופיע בבית של אם ובנה, והדמות שבו מסרבת לעזוב.",
-   "synopsisEn": "A mysterious children's book appears in the home of a widowed mother and her son, and the figure in it refuses to leave."
+   "synopsisEn": "A mysterious children's book appears in the home of a widowed mother and her son, and the figure in it refuses to leave.",
+   "synopses": {
+    "pt": "Um livro infantil misterioso aparece na casa de uma mãe viúva e do filho, e a figura do livro se recusa a ir embora.",
+    "ru": "В доме вдовы и её сына появляется загадочная детская книга, и существо из неё не желает уходить."
+   }
   },
   {
    "id": "it_follows",
@@ -392,7 +476,11 @@
    "hue": 330,
    "saturation": 40,
    "synopsisHe": "אחרי מפגש אחד, צעירה מגלה שמשהו הולך אחריה בקצב איטי, ולא יפסיק.",
-   "synopsisEn": "After a single encounter, a young woman realizes something is walking toward her, slowly, and it will not stop."
+   "synopsisEn": "After a single encounter, a young woman realizes something is walking toward her, slowly, and it will not stop.",
+   "synopses": {
+    "pt": "Depois de um único encontro, uma jovem percebe que algo caminha na direção dela, devagar, e não vai parar.",
+    "ru": "После одной встречи девушка понимает, что к ней медленно идёт нечто, и оно не остановится."
+   }
   },
   {
    "id": "the_witch",
@@ -410,7 +498,11 @@
    "hue": 95,
    "saturation": 20,
    "synopsisHe": "משפחה פוריטנית בניו אינגלנד של המאה ה־17 מתיישבת בשולי יער, והיער מתחיל לקחת.",
-   "synopsisEn": "A Puritan family in 1630s New England settles at the edge of a forest, and the forest begins to take."
+   "synopsisEn": "A Puritan family in 1630s New England settles at the edge of a forest, and the forest begins to take.",
+   "synopses": {
+    "pt": "Uma família puritana na Nova Inglaterra dos anos 1630 se instala à beira de uma floresta, e a floresta começa a levar.",
+    "ru": "Пуританская семья в Новой Англии 1630-х годов селится на краю леса, и лес начинает забирать своё."
+   }
   },
   {
    "id": "get_out",
@@ -428,7 +520,11 @@
    "hue": 140,
    "saturation": 55,
    "synopsisHe": "ביקור ראשון אצל משפחת החברה הופך מסוף שבוע מביך לסיוט.",
-   "synopsisEn": "A first visit to his girlfriend's family turns from an awkward weekend into a nightmare."
+   "synopsisEn": "A first visit to his girlfriend's family turns from an awkward weekend into a nightmare.",
+   "synopses": {
+    "pt": "A primeira visita à família da namorada deixa de ser um fim de semana constrangedor e vira um pesadelo.",
+    "ru": "Первая поездка к семье девушки превращается из неловких выходных в кошмар."
+   }
   },
   {
    "id": "a_quiet_place",
@@ -446,7 +542,11 @@
    "hue": 40,
    "saturation": 35,
    "synopsisHe": "משפחה שורדת בעולם שבו כל רעש מושך יצורים ציידים, וחייבת לחיות בשקט מוחלט.",
-   "synopsisEn": "A family survives in a world where any sound draws hunting creatures, so they must live in total silence."
+   "synopsisEn": "A family survives in a world where any sound draws hunting creatures, so they must live in total silence.",
+   "synopses": {
+    "pt": "Uma família sobrevive num mundo em que qualquer som atrai criaturas caçadoras, e por isso precisa viver em silêncio total.",
+    "ru": "Семья выживает в мире, где любой звук привлекает охотящихся существ, поэтому жить приходится в полной тишине."
+   }
   },
   {
    "id": "hereditary",
@@ -464,7 +564,11 @@
    "hue": 15,
    "saturation": 55,
    "synopsisHe": "אחרי מות הסבתא, משפחה מגלה שהירושה שהשאירה אחריה כבדה ומפחידה בהרבה ממה שחשבו.",
-   "synopsisEn": "After the grandmother dies, a family learns that what she left behind is far heavier and darker than they knew."
+   "synopsisEn": "After the grandmother dies, a family learns that what she left behind is far heavier and darker than they knew.",
+   "synopses": {
+    "pt": "Depois da morte da avó, uma família descobre que o que ela deixou é muito mais pesado e sombrio do que imaginava.",
+    "ru": "После смерти бабушки семья узнаёт, что её наследство гораздо тяжелее и мрачнее, чем казалось."
+   }
   },
   {
    "id": "us",
@@ -482,7 +586,11 @@
    "hue": 0,
    "saturation": 60,
    "synopsisHe": "חופשה משפחתית בחוף מתהפכת כשארבעה זרים, שנראים בדיוק כמותם, עומדים בחניה.",
-   "synopsisEn": "A family beach vacation turns when four strangers who look exactly like them appear in the driveway."
+   "synopsisEn": "A family beach vacation turns when four strangers who look exactly like them appear in the driveway.",
+   "synopses": {
+    "pt": "As férias de uma família na praia mudam quando quatro estranhos idênticos a eles aparecem na entrada da casa.",
+    "ru": "Семейный отпуск у моря оборачивается кошмаром, когда у дома появляются четверо незнакомцев, точь-в-точь похожих на них."
+   }
   },
   {
    "id": "midsommar",
@@ -500,7 +608,11 @@
    "hue": 55,
    "saturation": 45,
    "synopsisHe": "זוג במשבר מצטרף לחברים בפסטיבל קיץ בכפר שוודי מבודד, שבו השמש לא שוקעת.",
-   "synopsisEn": "A couple in crisis joins friends at a midsummer festival in a remote Swedish village where the sun never sets."
+   "synopsisEn": "A couple in crisis joins friends at a midsummer festival in a remote Swedish village where the sun never sets.",
+   "synopses": {
+    "pt": "Um casal em crise acompanha amigos a um festival de verão num vilarejo isolado da Suécia, onde o sol nunca se põe.",
+    "ru": "Пара в кризисе едет с друзьями на праздник середины лета в отдалённую шведскую деревню, где солнце не заходит."
+   }
   },
   {
    "id": "the_lighthouse",
@@ -517,7 +629,11 @@
    "hue": 0,
    "saturation": 0,
    "synopsisHe": "שני שומרי מגדלור על אי סלעי ומבודד מתחילים לאבד את אחיזתם במציאות.",
-   "synopsisEn": "Two lighthouse keepers on a remote, storm-battered island begin to lose their grip on reality."
+   "synopsisEn": "Two lighthouse keepers on a remote, storm-battered island begin to lose their grip on reality.",
+   "synopses": {
+    "pt": "Dois faroleiros numa ilha remota castigada por tempestades começam a perder o contato com a realidade.",
+    "ru": "Два смотрителя маяка на отдалённом острове, терзаемом штормами, начинают терять связь с реальностью."
+   }
   },
   {
    "id": "the_invisible_man",
@@ -535,7 +651,11 @@
    "hue": 205,
    "saturation": 30,
    "synopsisHe": "אישה נמלטת מבן זוג מתעלל, ואחרי מותו המדווח היא בטוחה שהוא עדיין שם.",
-   "synopsisEn": "A woman escapes an abusive partner, and after his reported death she is certain he is still there."
+   "synopsisEn": "A woman escapes an abusive partner, and after his reported death she is certain he is still there.",
+   "synopses": {
+    "pt": "Uma mulher foge de um parceiro abusivo e, depois da suposta morte dele, tem certeza de que ele continua ali.",
+    "ru": "Женщина сбегает от жестокого партнёра, а после сообщения о его смерти уверена, что он всё ещё рядом."
+   }
   },
   {
    "id": "barbarian",
@@ -553,7 +673,11 @@
    "hue": 30,
    "saturation": 40,
    "synopsisHe": "צעירה מגיעה בלילה לדירה שהזמינה בדטרויט ומגלה שהיא כבר מושכרת לזר.",
-   "synopsisEn": "A young woman arrives at her Detroit rental at night to find it already booked by a stranger."
+   "synopsisEn": "A young woman arrives at her Detroit rental at night to find it already booked by a stranger.",
+   "synopses": {
+    "pt": "Uma jovem chega à noite ao imóvel que alugou em Detroit e descobre que ele já foi reservado por um estranho.",
+    "ru": "Девушка ночью приезжает в арендованный дом в Детройте и обнаруживает, что его уже снял незнакомец."
+   }
   },
   {
    "id": "smile",
@@ -571,7 +695,11 @@
    "hue": 350,
    "saturation": 50,
    "synopsisHe": "פסיכיאטרית עדה לאירוע טראומטי ומתחילה לראות חיוכים שאי אפשר להסביר.",
-   "synopsisEn": "A psychiatrist witnesses a traumatic incident and begins to see smiles that cannot be explained."
+   "synopsisEn": "A psychiatrist witnesses a traumatic incident and begins to see smiles that cannot be explained.",
+   "synopses": {
+    "pt": "Uma psiquiatra presencia um incidente traumático e começa a ver sorrisos que não têm explicação.",
+    "ru": "Психиатр становится свидетелем травмирующего случая и начинает видеть улыбки, которым нет объяснения."
+   }
   },
   {
    "id": "talk_to_me",
@@ -589,7 +717,11 @@
    "hue": 280,
    "saturation": 40,
    "synopsisHe": "חבורת בני נוער מגלה יד חנוטה שמאפשרת לדבר עם המתים, והמשחק יוצא משליטה.",
-   "synopsisEn": "Teenagers discover an embalmed hand that lets them contact the dead, and the game spirals out of control."
+   "synopsisEn": "Teenagers discover an embalmed hand that lets them contact the dead, and the game spirals out of control.",
+   "synopses": {
+    "pt": "Adolescentes descobrem uma mão embalsamada que permite falar com os mortos, e o jogo sai do controle.",
+    "ru": "Подростки находят забальзамированную руку, позволяющую говорить с мёртвыми, и игра выходит из-под контроля."
+   }
   },
   {
    "id": "rear_window",
@@ -607,7 +739,11 @@
    "hue": 210,
    "saturation": 35,
    "synopsisHe": "צלם מרותק לכיסא גלגלים מתבונן בשכנים מהחלון, ומשתכנע שאחד מהם ביצע רצח.",
-   "synopsisEn": "A photographer confined to a wheelchair watches his neighbors and becomes convinced one of them committed murder."
+   "synopsisEn": "A photographer confined to a wheelchair watches his neighbors and becomes convinced one of them committed murder.",
+   "synopses": {
+    "pt": "Um fotógrafo preso a uma cadeira de rodas observa os vizinhos e se convence de que um deles cometeu um assassinato.",
+    "ru": "Фотограф, прикованный к инвалидному креслу, наблюдает за соседями и убеждается, что один из них совершил убийство."
+   }
   },
   {
    "id": "vertigo",
@@ -625,7 +761,11 @@
    "hue": 300,
    "saturation": 45,
    "synopsisHe": "בלש לשעבר עם פחד גבהים נשכר לעקוב אחרי אישה, ונשאב לאובססיה.",
-   "synopsisEn": "A retired detective with a fear of heights is hired to follow a woman and is pulled into obsession."
+   "synopsisEn": "A retired detective with a fear of heights is hired to follow a woman and is pulled into obsession.",
+   "synopses": {
+    "pt": "Um detetive aposentado com medo de altura é contratado para seguir uma mulher e acaba tomado pela obsessão.",
+    "ru": "Детектива в отставке, боящегося высоты, нанимают следить за женщиной, и он погружается в одержимость."
+   }
   },
   {
    "id": "misery",
@@ -643,7 +783,11 @@
    "hue": 195,
    "saturation": 30,
    "synopsisHe": "סופר פצוע מחולץ מתאונה על ידי המעריצה הגדולה שלו, שלא מתכוונת לשחרר אותו.",
-   "synopsisEn": "An injured novelist is rescued from a car crash by his biggest fan, who has no intention of letting him go."
+   "synopsisEn": "An injured novelist is rescued from a car crash by his biggest fan, who has no intention of letting him go.",
+   "synopses": {
+    "pt": "Um escritor ferido é resgatado de um acidente de carro pela maior fã dele, que não tem a menor intenção de deixá-lo ir.",
+    "ru": "Раненого писателя спасает после аварии его самая преданная поклонница, которая вовсе не собирается его отпускать."
+   }
   },
   {
    "id": "silence_of_the_lambs",
@@ -661,7 +805,11 @@
    "hue": 30,
    "saturation": 55,
    "synopsisHe": "חניכה ב־FBI נעזרת ברוצח סדרתי כלוא כדי לתפוס רוצח אחר.",
-   "synopsisEn": "An FBI trainee seeks help from an imprisoned killer to catch another one."
+   "synopsisEn": "An FBI trainee seeks help from an imprisoned killer to catch another one.",
+   "synopses": {
+    "pt": "Uma aprendiz do FBI pede ajuda a um assassino preso para capturar outro.",
+    "ru": "Стажёрка ФБР просит помощи у заключённого убийцы, чтобы поймать другого."
+   }
   },
   {
    "id": "se7en",
@@ -679,7 +827,11 @@
    "hue": 60,
    "saturation": 25,
    "synopsisHe": "שני בלשים רודפים אחרי רוצח שבוחר את קורבנותיו לפי שבעת החטאים.",
-   "synopsisEn": "Two detectives hunt a killer who chooses his victims according to the seven deadly sins."
+   "synopsisEn": "Two detectives hunt a killer who chooses his victims according to the seven deadly sins.",
+   "synopses": {
+    "pt": "Dois detetives caçam um assassino que escolhe as vítimas de acordo com os sete pecados capitais.",
+    "ru": "Два детектива охотятся на убийцу, выбирающего жертв по семи смертным грехам."
+   }
   },
   {
    "id": "scream",
@@ -697,7 +849,11 @@
    "hue": 215,
    "saturation": 50,
    "synopsisHe": "רוצח במסכה מטיל אימה על עיירה קטנה, ומכיר היטב את כל החוקים של סרטי אימה.",
-   "synopsisEn": "A masked killer terrorizes a small town, and he knows every rule of horror movies."
+   "synopsisEn": "A masked killer terrorizes a small town, and he knows every rule of horror movies.",
+   "synopses": {
+    "pt": "Um assassino mascarado aterroriza uma pequena cidade, e ele conhece todas as regras dos filmes de terror.",
+    "ru": "Убийца в маске терроризирует городок, и он знает все правила фильмов ужасов."
+   }
   },
   {
    "id": "fight_club",
@@ -714,7 +870,11 @@
    "hue": 330,
    "saturation": 40,
    "synopsisHe": "עובד משרד מותש מנדודי שינה פוגש מוכר סבון כריזמטי, ויחד הם מקימים מועדון מחתרתי.",
-   "synopsisEn": "An insomniac office worker meets a charismatic soap salesman, and together they start an underground club."
+   "synopsisEn": "An insomniac office worker meets a charismatic soap salesman, and together they start an underground club.",
+   "synopses": {
+    "pt": "Um funcionário de escritório com insônia conhece um carismático vendedor de sabonetes, e juntos eles criam um clube clandestino.",
+    "ru": "Офисный работник, страдающий бессонницей, знакомится с харизматичным продавцом мыла, и вместе они создают подпольный клуб."
+   }
   },
   {
    "id": "memento",
@@ -732,7 +892,11 @@
    "hue": 35,
    "saturation": 45,
    "synopsisHe": "אדם ללא זיכרון לטווח קצר מנסה למצוא את מי שרצח את אשתו, בעזרת פתקים וקעקועים.",
-   "synopsisEn": "A man with no short-term memory hunts his wife's killer using notes and tattoos."
+   "synopsisEn": "A man with no short-term memory hunts his wife's killer using notes and tattoos.",
+   "synopses": {
+    "pt": "Um homem sem memória recente caça o assassino da esposa usando anotações e tatuagens.",
+    "ru": "Человек без кратковременной памяти ищет убийцу жены с помощью записок и татуировок."
+   }
   },
   {
    "id": "mulholland_drive",
@@ -750,7 +914,11 @@
    "hue": 250,
    "saturation": 50,
    "synopsisHe": "שחקנית צעירה בהוליווד עוזרת לאישה שאיבדה את זיכרונה, והעיר מתחילה להתפרק סביבן.",
-   "synopsisEn": "An aspiring actress in Hollywood helps a woman who has lost her memory, and the city starts to come apart around them."
+   "synopsisEn": "An aspiring actress in Hollywood helps a woman who has lost her memory, and the city starts to come apart around them.",
+   "synopses": {
+    "pt": "Uma aspirante a atriz em Hollywood ajuda uma mulher que perdeu a memória, e a cidade começa a se desfazer ao redor delas.",
+    "ru": "Начинающая актриса в Голливуде помогает женщине, потерявшей память, и город вокруг них начинает распадаться."
+   }
   },
   {
    "id": "oldboy",
@@ -768,7 +936,11 @@
    "hue": 120,
    "saturation": 40,
    "synopsisHe": "אדם שנכלא בחדר במשך חמש־עשרה שנה בלי הסבר משוחרר פתאום, ויש לו חמישה ימים להבין למה.",
-   "synopsisEn": "A man imprisoned in a room for fifteen years without explanation is suddenly released and given five days to find out why."
+   "synopsisEn": "A man imprisoned in a room for fifteen years without explanation is suddenly released and given five days to find out why.",
+   "synopses": {
+    "pt": "Um homem preso num quarto por quinze anos sem explicação é solto de repente e tem cinco dias para descobrir o porquê.",
+    "ru": "Человека, пятнадцать лет без объяснений продержанного в комнате, внезапно отпускают, и у него пять дней, чтобы узнать почему."
+   }
   },
   {
    "id": "the_machinist",
@@ -785,7 +957,11 @@
    "hue": 60,
    "saturation": 15,
    "synopsisHe": "פועל מפעל שלא ישן כבר שנה מוצא פתקים מסתוריים במקרר, ומתחיל לחשוד בכולם.",
-   "synopsisEn": "A factory worker who has not slept in a year finds cryptic notes on his fridge and starts to suspect everyone."
+   "synopsisEn": "A factory worker who has not slept in a year finds cryptic notes on his fridge and starts to suspect everyone.",
+   "synopses": {
+    "pt": "Um operário que não dorme há um ano encontra bilhetes misteriosos na geladeira e passa a desconfiar de todos.",
+    "ru": "Рабочий, который не спит уже год, находит на холодильнике загадочные записки и начинает подозревать всех."
+   }
   },
   {
    "id": "zodiac",
@@ -803,7 +979,11 @@
    "hue": 45,
    "saturation": 30,
    "synopsisHe": "קריקטוריסט, כתב ובלש נשאבים לאורך שנים אל המצוד אחרי רוצח שמתגרה בעיתונות.",
-   "synopsisEn": "A cartoonist, a reporter and a detective spend years obsessed with hunting a killer who taunts the press."
+   "synopsisEn": "A cartoonist, a reporter and a detective spend years obsessed with hunting a killer who taunts the press.",
+   "synopses": {
+    "pt": "Um cartunista, um repórter e um detetive passam anos obcecados pela caça a um assassino que provoca a imprensa.",
+    "ru": "Карикатурист, репортёр и детектив годами одержимо охотятся на убийцу, который дразнит прессу."
+   }
   },
   {
    "id": "black_swan",
@@ -820,7 +1000,11 @@
    "hue": 300,
    "saturation": 10,
    "synopsisHe": "רקדנית בלט שזכתה בתפקיד חייה מתחילה לאבד את הגבול בין הבמה לבין עצמה.",
-   "synopsisEn": "A ballerina who lands the role of her life starts to lose the line between the stage and herself."
+   "synopsisEn": "A ballerina who lands the role of her life starts to lose the line between the stage and herself.",
+   "synopses": {
+    "pt": "Uma bailarina que conquista o papel da vida começa a perder a fronteira entre o palco e ela mesma.",
+    "ru": "Балерина, получившая роль всей жизни, перестаёт различать, где сцена, а где она сама."
+   }
   },
   {
    "id": "shutter_island",
@@ -838,7 +1022,11 @@
    "hue": 170,
    "saturation": 55,
    "synopsisHe": "מרשל פדרלי חוקר היעלמות של מטופלת מבית חולים על אי, וכל רמז מוביל אותו עמוק יותר פנימה.",
-   "synopsisEn": "A U.S. marshal investigates a patient's disappearance from an island hospital, and every clue pulls him deeper in."
+   "synopsisEn": "A U.S. marshal investigates a patient's disappearance from an island hospital, and every clue pulls him deeper in.",
+   "synopses": {
+    "pt": "Um delegado federal investiga o desaparecimento de uma paciente de um hospital numa ilha, e cada pista o leva mais fundo.",
+    "ru": "Федеральный маршал расследует исчезновение пациентки из больницы на острове, и каждая улика затягивает его всё глубже."
+   }
   },
   {
    "id": "prisoners",
@@ -856,7 +1044,11 @@
    "hue": 210,
    "saturation": 12,
    "synopsisHe": "כששתי ילדות נעלמות ביום חג ההודיה, אב אחד מחליט לקחת את החקירה לידיים.",
-   "synopsisEn": "When two girls go missing on Thanksgiving, one father decides to take the investigation into his own hands."
+   "synopsisEn": "When two girls go missing on Thanksgiving, one father decides to take the investigation into his own hands.",
+   "synopses": {
+    "pt": "Quando duas meninas somem no Dia de Ação de Graças, um pai decide fazer a investigação com as próprias mãos.",
+    "ru": "Когда в День благодарения пропадают две девочки, один отец решает взять расследование в свои руки."
+   }
   },
   {
    "id": "enemy",
@@ -874,7 +1066,11 @@
    "hue": 50,
    "saturation": 55,
    "synopsisHe": "מרצה להיסטוריה מגלה בסרט שחקן שנראה בדיוק כמוהו, ומתחיל לעקוב אחריו.",
-   "synopsisEn": "A history lecturer spots an actor who looks exactly like him in a movie and starts to track him down."
+   "synopsisEn": "A history lecturer spots an actor who looks exactly like him in a movie and starts to track him down.",
+   "synopses": {
+    "pt": "Um professor de história vê num filme um ator idêntico a ele e começa a procurá-lo.",
+    "ru": "Преподаватель истории замечает в фильме актёра, как две капли воды похожего на него, и начинает его разыскивать."
+   }
   },
   {
    "id": "gone_girl",
@@ -892,7 +1088,11 @@
    "hue": 195,
    "saturation": 25,
    "synopsisHe": "ביום הנישואין החמישי שלהם אשתו נעלמת, והחשדות מתחילים להצביע עליו.",
-   "synopsisEn": "On their fifth wedding anniversary his wife disappears, and suspicion starts pointing at him."
+   "synopsisEn": "On their fifth wedding anniversary his wife disappears, and suspicion starts pointing at him.",
+   "synopses": {
+    "pt": "No quinto aniversário de casamento, a esposa dele desaparece, e as suspeitas começam a apontar para ele.",
+    "ru": "В пятую годовщину свадьбы его жена исчезает, и подозрения начинают падать на него."
+   }
   },
   {
    "id": "nightcrawler",
@@ -910,7 +1110,11 @@
    "hue": 40,
    "saturation": 60,
    "synopsisHe": "צעיר שאפתני בלוס אנג׳לס מגלה עד כמה משלמים על צילומי פשע לילי, ואין לו גבולות.",
-   "synopsisEn": "An ambitious young man in Los Angeles discovers how much nighttime crime footage is worth, and he has no limits."
+   "synopsisEn": "An ambitious young man in Los Angeles discovers how much nighttime crime footage is worth, and he has no limits.",
+   "synopses": {
+    "pt": "Um jovem ambicioso em Los Angeles descobre quanto valem imagens de crimes noturnos, e ele não tem limites.",
+    "ru": "Амбициозный молодой человек в Лос-Анджелесе узнаёт, сколько стоят ночные съёмки преступлений, и не знает границ."
+   }
   },
   {
    "id": "parasite",
@@ -928,7 +1132,11 @@
    "hue": 95,
    "saturation": 25,
    "synopsisHe": "משפחה ענייה מסתננת אחד אחד לעבודה בבית של משפחה עשירה, עד שהבית חושף סוד משלו.",
-   "synopsisEn": "A poor family worms its way, one by one, into jobs in a wealthy household until the house reveals a secret of its own."
+   "synopsisEn": "A poor family worms its way, one by one, into jobs in a wealthy household until the house reveals a secret of its own.",
+   "synopses": {
+    "pt": "Uma família pobre se infiltra, um por um, em empregos na casa de uma família rica, até que a casa revela um segredo próprio.",
+    "ru": "Бедная семья по одному устраивается на работу в дом богачей, пока дом не раскрывает собственную тайну."
+   }
   }
  ],
  "collections": [
@@ -946,7 +1154,11 @@
     "the_shining",
     "the_thing",
     "nightmare_elm_street"
-   ]
+   ],
+   "titles": {
+    "pt": "Clássicos imperdíveis",
+    "ru": "Классика, которую нельзя пропустить"
+   }
   },
   {
    "id": "psychological_horror",
@@ -961,7 +1173,11 @@
     "the_witch",
     "smile",
     "the_invisible_man"
-   ]
+   ],
+   "titles": {
+    "pt": "Terror psicológico",
+    "ru": "Психологический хоррор"
+   }
   },
   {
    "id": "supernatural",
@@ -976,7 +1192,11 @@
     "it_follows",
     "talk_to_me",
     "the_sixth_sense"
-   ]
+   ],
+   "titles": {
+    "pt": "Fantasmas, demônios e possessão",
+    "ru": "Призраки, демоны и одержимость"
+   }
   },
   {
    "id": "psychological_thriller",
@@ -992,7 +1212,11 @@
     "fight_club",
     "misery",
     "vertigo"
-   ]
+   ],
+   "titles": {
+    "pt": "Suspense psicológico",
+    "ru": "Психологические триллеры"
+   }
   },
   {
    "id": "crime_thriller",
@@ -1007,7 +1231,11 @@
     "nightcrawler",
     "oldboy",
     "rear_window"
-   ]
+   ],
+   "titles": {
+    "pt": "Crime e investigação",
+    "ru": "Преступления и расследования"
+   }
   },
   {
    "id": "social",
@@ -1019,7 +1247,11 @@
     "parasite",
     "the_invisible_man",
     "barbarian"
-   ]
+   ],
+   "titles": {
+    "pt": "Pesadelos sociais",
+    "ru": "Социальные кошмары"
+   }
   },
   {
    "id": "survival",
@@ -1033,7 +1265,11 @@
     "rec",
     "28_days_later",
     "saw"
-   ]
+   ],
+   "titles": {
+    "pt": "Sobreviva até de manhã",
+    "ru": "Дожить до утра"
+   }
   },
   {
    "id": "slashers",
@@ -1045,7 +1281,11 @@
     "nightmare_elm_street",
     "texas_chain_saw",
     "saw"
-   ]
+   ],
+   "titles": {
+    "pt": "Máscaras e lâminas",
+    "ru": "Маски и клинки"
+   }
   },
   {
    "id": "max_fear",
@@ -1060,7 +1300,11 @@
     "sinister",
     "hereditary",
     "talk_to_me"
-   ]
+   ],
+   "titles": {
+    "pt": "Medo nível 5: só para corajosos",
+    "ru": "Страх 5 из 5: только для смелых"
+   }
   }
  ]
 }

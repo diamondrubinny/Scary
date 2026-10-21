@@ -4,6 +4,7 @@ import android.content.Context
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,10 +41,10 @@ class CatalogRepository(
      * the user has added a TMDB key. Re-runs when the online switch or the key changes.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun catalog(onlineEnabled: Flow<Boolean>, tmdbKeySet: Flow<Boolean>): Flow<Catalog> =
-        combine(onlineEnabled, tmdbKeySet) { online, hasKey -> online to hasKey }
+    fun catalog(onlineEnabled: Flow<Boolean>, tmdbKeySet: Flow<Boolean>, language: Flow<Language>): Flow<Catalog> =
+        combine(onlineEnabled, tmdbKeySet, language) { online, hasKey, lang -> Triple(online, hasKey, lang) }
             .distinctUntilChanged()
-            .flatMapLatest { (online, hasKey) ->
+            .flatMapLatest { (online, hasKey, lang) ->
                 flow {
                     val base = loadBundled()
                     emit(base)
@@ -51,7 +52,7 @@ class CatalogRepository(
 
                     val now = System.currentTimeMillis()
                     var cinemetaCache = cinemeta.cached()
-                    var tmdbCache = if (hasKey) tmdb.cached() else null
+                    var tmdbCache = if (hasKey) tmdb.cached(lang) else null
                     fun build(): Catalog {
                         val withCinemeta = cinemetaCache?.let { Cinemeta.merge(base, it.metas, it.rows) } ?: base
                         val cache = tmdbCache ?: return withCinemeta
@@ -67,7 +68,7 @@ class CatalogRepository(
                     val knownTmdb = tmdbCache
                     if (hasKey && (knownTmdb == null || knownTmdb.isStale(now))) {
                         val ids = build().movies.map { it.imdbId }
-                        tmdb.refresh(ids)?.let { tmdbCache = it; emit(build()) }
+                        tmdb.refresh(ids, lang)?.let { tmdbCache = it; emit(build()) }
                     }
                 }
             }

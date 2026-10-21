@@ -29,14 +29,21 @@ data class CinemetaMeta(
     val imdbRating: Double? = null,
     val runtimeMin: Int? = null,
     val trailerYoutubeId: String? = null,
-    /** Hebrew title and description; filled when the row comes from TMDB in Hebrew. */
-    val nameHe: String = "",
-    val descriptionHe: String = "",
+    /** Title and description in [localLanguage] (a Language.code), when the row comes from TMDB. */
+    val localName: String = "",
+    val localDescription: String = "",
+    val localLanguage: String = "",
 )
 
 /** A row pulled from a Cinemeta catalog, such as popular horror. */
 @Serializable
-data class OnlineRow(val id: String, val titleHe: String, val titleEn: String, val metas: List<CinemetaMeta>)
+data class OnlineRow(
+    val id: String,
+    val titleHe: String,
+    val titleEn: String,
+    val metas: List<CinemetaMeta>,
+    val titles: Map<String, String> = emptyMap(),
+)
 
 /**
  * Cinemeta is Stremio's public metadata service (no API key). Its responses are treated as untrusted:
@@ -53,6 +60,10 @@ object Cinemeta {
     private const val MAX_URL_LENGTH = 512
     private const val MAX_TEXT_LENGTH = 1_500
     private const val MAX_CAST = 6
+    private const val MIN_SEARCH_LENGTH = 3
+    private const val MAX_SEARCH_LENGTH = 60
+    private const val MAX_SEARCH_RESULTS = 20
+    private val THEME_GENRES = listOf("Horror", "Thriller", "Mystery")
 
     fun metaUrl(imdbId: String): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
@@ -64,6 +75,61 @@ object Cinemeta {
         require(genrePattern.matches(genre)) { "invalid genre" }
         return "$BASE_URL/catalog/movie/$catalogId/genre=$genre.json"
     }
+
+    /**
+     * Search in Cinemeta's "top" catalog, using the Stremio add-on "extra" path argument. Null when the query is too
+     * short or too long; otherwise every character outside [A-Za-z0-9-_.~] is percent-encoded as UTF-8.
+     */
+    fun searchUrl(query: String): String? {
+        val q = query.trim().replace(Regex("\\s+"), " ")
+        if (q.length !in MIN_SEARCH_LENGTH..MAX_SEARCH_LENGTH) return null
+        val encoded = buildString {
+            for (byte in q.toByteArray(Charsets.UTF_8)) {
+                val c = byte.toInt() and 0xFF
+                if (c.toChar().let { it in 'A'..'Z' || it in 'a'..'z' || it in '0'..'9' || it in "-_.~" }) {
+                    append(c.toChar())
+                } else {
+                    append('%').append("%02X".format(c))
+                }
+            }
+        }
+        return "$BASE_URL/catalog/movie/top/search=$encoded.json"
+    }
+
+    /**
+     * Web search results as movies: horror, thriller and mystery only when Cinemeta lists genres (results without
+     * genres are kept), minus anything already in [known], capped at [limit].
+     */
+    fun searchResults(text: String, known: Catalog, limit: Int = MAX_SEARCH_RESULTS): List<Movie> {
+        val knownImdb = known.movies.mapTo(HashSet()) { it.imdbId }
+        return parseCatalog(text).asSequence()
+            .filter { it.imdbId !in knownImdb }
+            .filter { meta -> meta.genres.isEmpty() || meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } }
+            .mapNotNull(::toMovie)
+            .distinctBy { it.imdbId }
+            .take(limit)
+            .toList()
+    }
+
+    /** The reverse of [toMovie], so a movie found online can be saved and rebuilt later. */
+    fun fromMovie(movie: Movie, language: String = ""): CinemetaMeta = CinemetaMeta(
+        imdbId = movie.imdbId,
+        name = movie.title,
+        year = movie.year,
+        poster = movie.posterUrl,
+        background = movie.backgroundUrl,
+        logo = movie.logoUrl,
+        description = movie.synopsisEn,
+        director = movie.director.split(',').map(String::trim).filter(String::isNotEmpty),
+        cast = movie.cast,
+        genres = listOf(if (movie.genre == Genre.HORROR) "Horror" else "Thriller"),
+        imdbRating = movie.imdbRating,
+        runtimeMin = movie.runtimeMin.takeIf { it > 0 },
+        trailerYoutubeId = movie.trailerYoutubeId,
+        localName = movie.titles[language].orEmpty(),
+        localDescription = movie.synopses[language].orEmpty(),
+        localLanguage = language.takeIf { movie.titles.containsKey(it) || movie.synopses.containsKey(it) }.orEmpty(),
+    )
 
     fun parseMeta(text: String): CinemetaMeta? =
         root(text)?.get("meta")?.let { it as? JsonObject }?.let(::toMeta)
@@ -123,14 +189,14 @@ object Cinemeta {
             id = "cm_" + meta.imdbId,
             imdbId = meta.imdbId,
             title = meta.name,
-            titleHe = meta.nameHe,
+            titles = localized(meta.localLanguage, meta.localName),
             year = year,
             director = meta.director.joinToString(", "),
             runtimeMin = meta.runtimeMin ?: 0,
             genre = if (meta.genres.any { it.equals("Horror", ignoreCase = true) }) Genre.HORROR else Genre.THRILLER,
             hue = Math.floorMod(meta.imdbId.hashCode(), 360),
             synopsisEn = meta.description,
-            synopsisHe = meta.descriptionHe,
+            synopses = localized(meta.localLanguage, meta.localDescription),
             posterUrl = meta.poster,
             backgroundUrl = meta.background,
             logoUrl = meta.logo,
@@ -157,12 +223,15 @@ object Cinemeta {
                 .distinct()
                 .take(perRow)
                 .toList()
-            if (ids.size < MIN_ROW_SIZE) null else MovieCollection("online_${row.id}", row.titleHe, row.titleEn, ids)
+            if (ids.size < MIN_ROW_SIZE) null else MovieCollection("online_${row.id}", row.titleHe, row.titleEn, ids, row.titles)
         }
         return base.copy(movies = curated + added, collections = onlineCollections + base.collections)
     }
 
     private const val MIN_ROW_SIZE = 4
+
+    private fun localized(language: String, text: String): Map<String, String> =
+        if (language.isBlank() || text.isBlank()) emptyMap() else mapOf(language to text)
 
     private fun JsonObject.str(key: String): String? = (this[key] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull
 

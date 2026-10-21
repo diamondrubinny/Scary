@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="night_pick">Фильм этой ночи</string>
+    <string name="action_watch_stremio">Смотреть в Stremio</string>
+    <string name="action_trailer">Трейлер</string>
+    <string name="action_details">Подробнее</string>
+    <string name="row_recent">Недавно открытые</string>
+    <string name="row_apps">Мои приложения</string>
+    <string name="row_more_like">Похожие фильмы</string>
+    <string name="minutes">%1$d мин</string>
+    <string name="fear_short">Страх %1$d/5</string>
+    <string name="fear_description">Уровень страха %1$d из 5</string>
+    <string name="genre_horror">Ужасы</string>
+    <string name="genre_thriller">Триллер</string>
+    <string name="subgenre_psychological">Психологический</string>
+    <string name="subgenre_supernatural">Сверхъестественное</string>
+    <string name="subgenre_possession">Одержимость</string>
+    <string name="subgenre_ghost">Призраки</string>
+    <string name="subgenre_slasher">Слэшер</string>
+    <string name="subgenre_creature">Чудовища</string>
+    <string name="subgenre_folk">Фолк-хоррор</string>
+    <string name="subgenre_social">Социальный хоррор</string>
+    <string name="subgenre_found_footage">Найденная плёнка</string>
+    <string name="subgenre_survival">Выживание</string>
+    <string name="subgenre_mystery">Детектив-загадка</string>
+    <string name="subgenre_crime">Криминал</string>
+    <string name="effects_on_description">Эффекты атмосферы: включены</string>
+    <string name="effects_off_description">Эффекты атмосферы: выключены</string>
+    <string name="msg_effects_on">Туман и зернистость включены</string>
+    <string name="msg_effects_off">Туман и зернистость выключены</string>
+    <string name="system_settings">Настройки</string>
+    <string name="system_settings_description">Открыть системные настройки</string>
+    <string name="install_app">Установить %1$s</string>
+    <string name="msg_not_installed_store">%1$s не установлено. Открываю Google Play.</string>
+    <string name="msg_open_failed">Не удалось открыть %1$s.</string>
+    <string name="msg_stremio_app_only">Stremio открыт. Найдите там %1$s.</string>
+    <string name="msg_catalog_error">Не удалось загрузить библиотеку фильмов. Переустановите приложение.</string>
+    <string name="loading">Загрузка…</string>
+    <string name="all_apps">Все приложения</string>
+    <string name="all_apps_edit">Изменить</string>
+    <string name="all_apps_done">Готово</string>
+    <string name="all_apps_edit_hint">Выберите приложение, чтобы закрепить, переместить или скрыть его. Можно также удерживать кнопку выбора на любом приложении.</string>
+    <string name="all_apps_empty">На этом устройстве не найдено приложений для ТВ.</string>
+    <string name="app_option_open">Открыть</string>
+    <string name="app_option_pin">Закрепить в начале моих приложений</string>
+    <string name="app_option_unpin">Открепить</string>
+    <string name="app_option_move_earlier">Переместить вперёд</string>
+    <string name="app_option_move_later">Переместить назад</string>
+    <string name="app_option_hide">Скрыть с главного экрана</string>
+    <string name="app_option_show">Показать на главном экране</string>
+    <string name="app_option_info">О приложении</string>
+    <string name="badge_pinned">Закреплено</string>
+    <string name="badge_hidden">Скрыто</string>
+    <string name="settings_title">Настройки SCARY</string>
+    <string name="settings_language">Язык</string>
+    <string name="settings_effects">Туман и зернистость</string>
+    <string name="value_on">Вкл.</string>
+    <string name="value_off">Выкл.</string>
+    <string name="settings_night_fear">Насколько страшный фильм ночи</string>
+    <string name="settings_night_fear_value">До уровня страха %1$d</string>
+    <string name="settings_system">Системные настройки ТВ</string>
+    <string name="settings_about">О приложении</string>
+    <string name="settings_about_text">SCARY %1$s. Без аккаунтов и без слежки. Ваши настройки остаются на этом ТВ. Шрифты: Karantina, Assistant, Oswald, Rubik и Rubik Wet Paint по лицензии SIL Open Font License 1.1.</string>
+    <string name="search_title">Поиск</string>
+    <string name="search_hint">Название, режиссёр, год или жанр ужасов</string>
+    <string name="search_prompt">Введите или продиктуйте запрос: %1$d фильмов.</string>
+    <string name="search_no_results">По запросу %1$s ничего не найдено.</string>
+    <string name="search_count">Найдено: %1$d</string>
+    <string name="pin_title_verify">Введите родительский PIN-код</string>
+    <string name="pin_title_create">Придумайте родительский PIN-код из 4–8 цифр</string>
+    <string name="pin_title_confirm">Введите PIN-код ещё раз</string>
+    <string name="pin_error_format">PIN-код должен содержать от 4 до 8 цифр.</string>
+    <string name="pin_error_mismatch">PIN-коды не совпали. Придумайте PIN-код заново.</string>
+    <string name="pin_error_wrong">Неверный PIN-код. Попробуйте ещё раз.</string>
+    <string name="pin_error_wait">Слишком много попыток. Повторите через %1$d с.</string>
+    <string name="pin_delete">Стереть</string>
+    <string name="pin_ok">ОК</string>
+    <string name="pin_cancel">Отмена</string>
+    <string name="pin_checking">Проверка…</string>
+    <string name="pin_entered_description">Введено цифр: %1$d</string>
+    <string name="msg_pin_set">Родительская блокировка включена.</string>
+    <string name="msg_pin_removed">Родительская блокировка выключена.</string>
+    <string name="settings_parental">Родительская блокировка</string>
+    <string name="value_lock_on">Вкл.</string>
+    <string name="value_lock_off">Выкл.</string>
+    <string name="settings_lock_level">Блокировать с уровня страха</string>
+    <string name="settings_lock_level_value">%1$d и выше</string>
+    <string name="settings_change_pin">Сменить PIN-код</string>
+    <string name="settings_turn_off_lock">Выключить блокировку</string>
+    <string name="settings_parental_note">Блокировка действует на фильмы, открытые из SCARY, и на эти настройки. Stremio и другие приложения она не блокирует. Забыли PIN-код? Очистка данных SCARY в системных настройках ТВ сбросит его вместе с остальными настройками.</string>
+    <string name="settings_sounds">Фоновые звуки</string>
+    <string name="locked_badge">Заблокировано</string>
+    <string name="settings_online">Изображения и данные из интернета</string>
+    <string name="settings_online_note">Постеры, фоны, рейтинги IMDb, актёры и популярные подборки берутся из Cinemeta, открытой базы фильмов Stremio. Отправляются только идентификаторы фильмов, а при поиске — текст запроса, никаких личных данных. Как и любой сайт, сервер видит IP-адрес ТВ. Выключите, чтобы работать полностью офлайн.</string>
+    <string name="imdb_rating">IMDb %1$s</string>
+    <string name="cast_line">В ролях: %1$s</string>
+    <string name="settings_home_section">Главный экран</string>
+    <string name="settings_default_home">SCARY как главный экран</string>
+    <string name="value_home_yes">Активно</string>
+    <string name="value_home_no">Не задано</string>
+    <string name="settings_home_button">Кнопка «Домой» на пульте</string>
+    <string name="value_home_button_on">Открывает SCARY</string>
+    <string name="value_home_button_off">Выкл.</string>
+    <string name="settings_home_note">Если ТВ не позволяет выбрать SCARY главным экраном (часто на Google TV и некоторых моделях Xiaomi), включите опцию кнопки «Домой». Тогда SCARY будет открываться при каждом нажатии «Домой» и при включении ТВ. Сервис слушает только клавишу «Домой» и ничего не читает с экрана.</string>
+    <string name="tile_set_home">Сделать SCARY главным экраном</string>
+    <string name="a11y_service_label">SCARY: кнопка «Домой»</string>
+    <string name="a11y_service_description">Кнопка «Домой» на пульте открывает SCARY, и SCARY запускается при включении ТВ. Сервис слушает только клавишу «Домой» и не может ничего читать или менять на экране.</string>
+    <string name="msg_enable_service">В разделе «Спец. возможности» выберите «SCARY: кнопка «Домой»» и включите.</string>
+    <string name="settings_tmdb">Ключ TMDB</string>
+    <string name="value_tmdb_none">Не задан</string>
+    <string name="tmdb_dialog_title">API-ключ TMDB</string>
+    <string name="tmdb_dialog_body">С вашим ключом TMDB SCARY покажет названия и описания на вашем языке, более чёткие изображения и ещё три подборки. Бесплатный ключ для личного использования можно получить на themoviedb.org в разделе «Настройки», затем API. Вставьте API-ключ (32 символа) или Read Access Token. Вводить удобнее через приложение Google TV на телефоне.</string>
+    <string name="tmdb_hint">Вставьте или введите ключ</string>
+    <string name="tmdb_save">Сохранить и проверить</string>
+    <string name="tmdb_delete">Удалить ключ</string>
+    <string name="tmdb_checking">Проверка в TMDB…</string>
+    <string name="tmdb_invalid_format">Это не похоже на ключ TMDB. Скопируйте API-ключ (32 символа) или Read Access Token целиком.</string>
+    <string name="tmdb_rejected">TMDB отклонил ключ. Проверьте, что он скопирован полностью.</string>
+    <string name="tmdb_unreachable">Нет связи с TMDB. Проверьте интернет и попробуйте снова. Ключ не сохранён.</string>
+    <string name="tmdb_storage_failed">ТВ не смог безопасно сохранить ключ, поэтому он не сохранён.</string>
+    <string name="msg_tmdb_saved">Ключ сохранён и зашифрован на этом ТВ. Обновляю данные из TMDB.</string>
+    <string name="msg_tmdb_deleted">Ключ TMDB удалён.</string>
+    <string name="tmdb_note">Ключ шифруется с помощью Android Keystore и отправляется только на api.themoviedb.org. TMDB получает идентификаторы фильмов и ключ, ничего личного.</string>
+    <string name="original_title">Оригинальное название: %1$s</string>
+
+    <!-- My list, voice search and screensaver -->
+    <string name="row_my_list">Мой список</string>
+    <string name="action_add_my_list">+ В мой список</string>
+    <string name="action_in_my_list">✓ В моём списке</string>
+    <string name="msg_my_list_added">«%1$s» добавлен в Мой список</string>
+    <string name="msg_my_list_removed">«%1$s» удалён из Моего списка</string>
+    <string name="voice_search">Голосовой поиск</string>
+    <string name="voice_prompt">Какой фильм ужасов?</string>
+    <string name="dream_label">SCARY – кадры из ужасов</string>
+    <string name="settings_screensaver">Заставка</string>
+    <string name="value_screensaver">Выбрать</string>
+    <string name="settings_screensaver_note">Выберите «SCARY – кадры из ужасов» в настройках заставки телевизора. При включённом родительском замке показываются только фильмы ниже уровня блокировки.</string>
+    <string name="msg_no_screensaver_settings">Этот телевизор не открывает настройки заставки из приложений. Найдите их в «Настройки → Настройки устройства → Заставка».</string>
+
+    <!-- Surprise me and web search -->
+    <string name="surprise_me">Удиви меня</string>
+    <string name="msg_surprise_none">Ни один фильм не подходит под сегодняшний уровень страха. Его можно повысить в настройках.</string>
+    <string name="search_web_title">Из интернета</string>
+    <string name="search_web_loading">Ищу и в интернете…</string>
+    <string name="search_web_failed">Поиск в интернете сейчас недоступен.</string>
+    <string name="search_web_none">В интернете нет ужасов по запросу «%1$s».</string>
+    <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
+    <string name="settings_privacy">Конфиденциальность</string>
+    <string name="settings_accessibility_statement">Заявление о доступности</string>
+    <string name="document_hint">Читайте, листая стрелками вверх и вниз. «Назад» вернёт в настройки.</string>
+    <string-array name="privacy_paragraphs">
+        <item>В SCARY нет аккаунтов, рекламы, аналитики и cookies, и у SCARY нет сервера. Ничего из того, что вы делаете в лаунчере, нам не отправляется.</item>
+        <item>Хранится только на этом телевизоре: настройки и язык, закреплённые и скрытые приложения, 12 последних открытых фильмов, ваш «Мой список», родительский PIN в виде хеша с солью (никогда не сам PIN), а также кеш сведений и изображений фильмов. Удаление SCARY или очистка его данных в настройках телевизора стирает всё. SCARY исключён из резервного копирования Android.</item>
+        <item>Список установленных приложений читается на телевизоре, чтобы показать их, и никуда не передаётся.</item>
+        <item>Онлайн-данные о фильмах, которые можно отключить в настройках: SCARY запрашивает у Cinemeta, публичного сервиса метаданных Stremio, постеры, фоны, рейтинги и актёров. Отправляются только публичные идентификаторы фильмов IMDb, а при поиске — текст запроса. Изображения загружаются по HTTPS-адресам, которые даёт Cinemeta, в основном с images.metahub.space. Как и любой сайт, эти сервисы видят IP-адрес телевизора. Сведения хранятся в кеше 24 часа.</item>
+        <item>TMDB, только если вы ввели свой ключ: запросы идут на api.themoviedb.org с ключом, идентификаторами фильмов и языком интерфейса. Ключ зашифрован на телевизоре с помощью Android Keystore, не пишется в журналы и отправляется только в TMDB. Удаление ключа удаляет и кеш TMDB.</item>
+        <item>Голосовой поиск передаётся системному распознаванию речи телевизора (обычно Google). Запись получает этот сервис, а не SCARY; SCARY получает только распознанный текст.</item>
+        <item>Просмотр, трейлеры и магазин открывают Stremio, YouTube или Google Play. С этого момента действуют их собственные политики конфиденциальности.</item>
+        <item>Вопросы, исправления или запросы о ваших данных: github.com/diamondrubinny/Scary/issues</item>
+        <item>Обновлено в октябре 2026 г. Это черновик, ещё не проверенный юристом.</item>
+    </string-array>
+    <string-array name="accessibility_paragraphs">
+        <item>SCARY стремится соответствовать WCAG 2.1 уровня AA и израильскому стандарту IS 5568. Аудит у консультанта по доступности ещё не проводился, поэтому мы не заявляем о полном соответствии.</item>
+        <item>Уже есть: каждый экран управляется стрелками и кнопкой OK пульта, фокус чётко подсвечен. У карточек, кнопок и настроек есть озвучиваемые подписи для TalkBack, у экранов и рядов есть заголовки, сообщения и ошибки PIN объявляются. Удержание OK на постере добавляет его в «Мой список», и TalkBack предлагает это как действие. Иврит отображается справа налево.</item>
+        <item>Движение и звук: мигания нет. Туман и зернистость едва заметны и останавливаются, если выключить эффекты или включить «Отключить анимацию» в настройках специальных возможностей телевизора. Фоновые звуки по умолчанию выключены.</item>
+        <item>Известные ограничения: онлайн-постеры описываются только названием и годом; переводы на португальский и русский не проверены носителями языка; очень крупный системный шрифт может сокращать текст в некоторых рядах; TalkBack пока проверялся только в эмуляторе.</item>
+        <item>Нашли препятствие? Сообщите на github.com/diamondrubinny/Scary/issues, опишите экран и что произошло. Мы стараемся ответить в течение 14 дней.</item>
+        <item>Обновлено в октябре 2026 г. Это черновик, ещё не проверенный консультантом по доступности.</item>
+    </string-array>
+</resources>

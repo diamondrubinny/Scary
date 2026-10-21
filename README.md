@@ -1,44 +1,148 @@
-# SCARY
+<p align="center"><img src="app/src/main/res/drawable-xhdpi/banner.png" alt="SCARY" width="320"></p>
 
-Horror-themed home screen (launcher) for Android TV. Built first for Xiaomi Mi devices.
-It brings together a curated library of horror and psychological thrillers, Stremio, Google Play and your installed TV apps.
+<h1 align="center">SCARY</h1>
 
-The launcher does not stream or host video. It opens apps that are already installed.
+<p align="center">
+A horror-movie home screen (launcher) for Android TV<br>
+<a href="#english">English</a> · <a href="#עברית">עברית</a> · <a href="#português">Português</a> · <a href="#русский">Русский</a>
+</p>
 
-- Plan and spec (Hebrew): [docs/PLAN.md](docs/PLAN.md)
-- Xiaomi install and "set as home" guide (Hebrew): [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md)
-- Interactive mockup: [mockup/launcher-mockup.html](mockup/launcher-mockup.html)
+<p align="center">
+<a href="https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk"><b>⬇ Download the latest APK</b></a>
+</p>
 
-## Structure
+All screenshots are real: CI installs the APK on an Android TV emulator (1080p) and captures them on every build.
+
+---
+
+## English
+
+SCARY replaces the Android TV home screen with a horror-themed one. It brings together a curated library of horror and psychological thrillers, Stremio, Google Play and your installed TV apps. It does not stream or host video: selecting a movie opens it in Stremio.
+
+| Home | Movie page | Settings |
+|---|---|---|
+| ![Home](docs/screenshots/en-home.jpg) | ![Movie page](docs/screenshots/en-details.jpg) | ![Settings](docs/screenshots/en-settings.jpg) |
+
+- **52 hand-picked films** with an editorial fear meter (1–5), plus popular horror, thriller and mystery rows that update daily.
+- **Real artwork**: posters, full-screen backgrounds, IMDb ratings and cast from Cinemeta. Works offline from a local cache.
+- **Optional TMDB key** (in settings): titles and synopses in your language, sharper art, three more rows. Stored encrypted with the Android Keystore.
+- **A real launcher**: asks the system to become the home screen, or, where the TV does not allow it (Google TV, many Xiaomi boxes), an optional accessibility service maps the remote's Home button to SCARY.
+- **Parental lock** with a PIN, offline search, all-apps drawer with pin/hide/reorder, fog and film-grain atmosphere you can switch off, optional ambient sound.
+- **My list, voice search and a horror screensaver**: hold OK on any poster to save it, search by voice with the remote's microphone, and pick "SCARY – horror backdrops" as the TV screensaver.
+- **Four languages**: Hebrew (right to left), English, Portuguese and Russian.
+
+Install guide: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md) (Hebrew).
+
+### Support SCARY
+
+SCARY is free and open source. If it scares you properly, you can support its development through GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ $3 coffee · 🍿 $5 popcorn · 🎟️ $10 movie ticket · 🔪 $25 horror night. Pick the amount on the sponsor page, one-time or monthly.
+
+## עברית
+
+SCARY מחליפה את מסך הבית של Android TV במסך בית בעיצוב אימה. היא מרכזת מאגר סרטי אימה ומתח פסיכולוגי, Stremio, חנות Play ואת אפליקציות הטלוויזיה שלך. היא לא מזרימה וידאו: בחירה בסרט פותחת אותו ב־Stremio.
+
+| מסך הבית | עמוד סרט | הגדרות |
+|---|---|---|
+| ![מסך הבית](docs/screenshots/he-home.jpg) | ![עמוד סרט](docs/screenshots/he-details.jpg) | ![הגדרות](docs/screenshots/he-settings.jpg) |
+
+- **52 סרטים נבחרים** עם מד פחד עריכתי (1–5), ושורות פופולריות של אימה, מתח ותעלומה שמתעדכנות כל יום.
+- **תמונות אמיתיות**: פוסטרים, רקעים במסך מלא, דירוג IMDb ושחקנים מ־Cinemeta. עובד גם בלי אינטרנט ממטמון מקומי.
+- **מפתח TMDB אופציונלי** (בהגדרות): שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. נשמר מוצפן ב־Android Keystore.
+- **לאנצ׳ר אמיתי**: בקשה מהמערכת להיות מסך הבית, ואם הטלוויזיה לא מאפשרת (Google TV, הרבה מכשירי Xiaomi), שירות נגישות אופציונלי שהופך את כפתור Home בשלט לפתיחת SCARY.
+- **נעילת הורים** בקוד, חיפוש בלי אינטרנט, מגירת אפליקציות עם הצמדה, הסתרה וסידור, ערפל וגרעיניות שאפשר לכבות וצלילי אווירה.
+- **"הרשימה שלי", חיפוש קולי ושומר מסך אימה**: לחיצה ארוכה על OK שומרת כל פוסטר, חיפוש בקול דרך המיקרופון של השלט, ו"SCARY – רקעים מסרטי אימה" כשומר המסך של הטלוויזיה.
+- **ארבע שפות**: עברית (מימין לשמאל), English, Português, Русский.
+
+מדריך התקנה: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
+
+### תמיכה ב־SCARY
+
+SCARY חינמית ובקוד פתוח. אם היא מפחידה אתכם כמו שצריך, אפשר לתמוך בפיתוח דרך GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ ‎$3 קפה · 🍿 ‎$5 פופקורן · 🎟️ ‎$10 כרטיס לקולנוע · 🔪 ‎$25 ערב אימה. בוחרים את הסכום בעמוד התמיכה, חד־פעמי או חודשי.
+
+## Português
+
+O SCARY substitui a tela inicial do Android TV por uma tela com clima de terror. Ele reúne uma biblioteca selecionada de filmes de terror e suspense psicológico, o Stremio, o Google Play e os apps instalados na TV. Ele não transmite vídeo: ao escolher um filme, ele abre no Stremio.
+
+| Tela inicial | Página do filme | Configurações |
+|---|---|---|
+| ![Tela inicial](docs/screenshots/pt-home.jpg) | ![Página do filme](docs/screenshots/pt-details.jpg) | ![Configurações](docs/screenshots/pt-settings.jpg) |
+
+- **52 filmes escolhidos a dedo** com um medidor de medo editorial (1–5), além de listas populares de terror, suspense e mistério atualizadas todo dia.
+- **Imagens reais**: pôsteres, fundos em tela cheia, notas do IMDb e elenco vindos do Cinemeta. Funciona offline a partir de um cache local.
+- **Chave do TMDB opcional** (nas configurações): títulos e sinopses no seu idioma, imagens mais nítidas e mais três listas. Guardada com criptografia no Android Keystore.
+- **Um launcher de verdade**: pede ao sistema para ser a tela inicial ou, quando a TV não deixa (Google TV, muitos aparelhos Xiaomi), um serviço de acessibilidade opcional faz o botão Home do controle abrir o SCARY.
+- **Bloqueio dos pais** com PIN, busca offline, gaveta de apps com fixar, ocultar e reordenar, névoa e granulação que podem ser desligadas e sons de ambiente.
+- **Minha lista, busca por voz e protetor de tela de terror**: segure OK em qualquer pôster para salvá-lo, busque pela voz com o microfone do controle e escolha "SCARY – fundos de terror" como protetor de tela da TV.
+- **Quatro idiomas**: hebraico (da direita para a esquerda), inglês, português e russo.
+
+### Apoie o SCARY
+
+O SCARY é gratuito e de código aberto. Se ele te assusta do jeito certo, você pode apoiar o desenvolvimento pelo GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ US$ 3 café · 🍿 US$ 5 pipoca · 🎟️ US$ 10 ingresso de cinema · 🔪 US$ 25 noite de terror. Escolha o valor na página de apoio, único ou mensal.
+
+## Русский
+
+SCARY заменяет главный экран Android TV на экран в стиле фильмов ужасов. Он собирает в одном месте подборку ужасов и психологических триллеров, Stremio, Google Play и установленные на ТВ приложения. Он не транслирует видео: выбранный фильм открывается в Stremio.
+
+| Главный экран | Страница фильма | Настройки |
+|---|---|---|
+| ![Главный экран](docs/screenshots/ru-home.jpg) | ![Страница фильма](docs/screenshots/ru-details.jpg) | ![Настройки](docs/screenshots/ru-settings.jpg) |
+
+- **52 отобранных фильма** с редакционной шкалой страха (1–5) и популярные подборки ужасов, триллеров и загадок, которые обновляются каждый день.
+- **Настоящие изображения**: постеры, полноэкранные фоны, рейтинги IMDb и актёры из Cinemeta. Работает офлайн из локального кэша.
+- **Ключ TMDB по желанию** (в настройках): названия и описания на вашем языке, более чёткие изображения и ещё три подборки. Хранится в зашифрованном виде в Android Keystore.
+- **Настоящий лаунчер**: просит систему сделать его главным экраном, а если ТВ этого не позволяет (Google TV, многие приставки Xiaomi), необязательный сервис спец. возможностей заставляет кнопку «Домой» на пульте открывать SCARY.
+- **Родительская блокировка** по PIN-коду, офлайн-поиск, список всех приложений с закреплением, скрытием и сортировкой, отключаемые туман и зернистость плёнки, фоновые звуки.
+- **Мой список, голосовой поиск и заставка-ужастик**: удерживайте OK на постере, чтобы сохранить его, ищите голосом через микрофон пульта и выберите «SCARY – кадры из ужасов» заставкой телевизора.
+- **Четыре языка**: иврит (справа налево), английский, португальский и русский.
+
+---
+
+### Поддержать SCARY
+
+SCARY бесплатен и с открытым кодом. Если он пугает вас как надо, поддержите разработку через GitHub Sponsors:
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+☕ $3 кофе · 🍿 $5 попкорн · 🎟️ $10 билет в кино · 🔪 $25 вечер ужасов. Сумму можно выбрать на странице спонсорства, разово или ежемесячно.
+
+## More screens
+
+| Search | All apps | Parental PIN | TMDB key |
+|---|---|---|---|
+| ![Search](docs/screenshots/search.jpg) | ![All apps](docs/screenshots/all-apps.jpg) | ![Parental PIN](docs/screenshots/parental-pin.jpg) | ![TMDB key](docs/screenshots/tmdb-key.jpg) |
+
+## For developers
 
 | Module | What it is |
 |--------|-----------|
-| `core/` | Pure Kotlin/JVM: catalog model and validation, tonight's pick, similar movies, app ordering, deep links. Unit tested. |
-| `app/` | Android app: Jetpack Compose UI, HOME intent filter, installed apps, launching. |
-| `app/src/main/assets/catalog.json` | The curated movie library. Validated by `core` tests on every build. |
-
-## Build
-
-Requires JDK 17 and the Android SDK (platform 35).
+| `core/` | Pure Kotlin/JVM: catalog model and validation, search, tonight's pick, Cinemeta and TMDB parsing, PIN hashing, deep links. Unit tested. |
+| `app/` | Android app: Jetpack Compose UI, HOME intent filter, Home-button accessibility service, installed apps, launching. |
+| `app/src/main/assets/catalog.json` | The curated library, in four languages. Validated by the `core` tests on every build. |
 
 ```bash
 ./gradlew :core:test          # unit tests
 ./gradlew :app:assembleDebug  # app/build/outputs/apk/debug/app-debug.apk
 ./gradlew :app:lintDebug
+./gradlew -Pscary.coreOnly :core:test   # without the Android SDK
 ```
 
-Without the Android SDK you can still run the core tests:
+CI (GitHub Actions) runs the tests, builds and lints the APK, publishes it to the `latest-build` pre-release, and captures these screenshots on an Android TV emulator.
 
-```bash
-./gradlew -Pscary.coreOnly :core:test
-```
+Plan and spec (Hebrew): [docs/PLAN.md](docs/PLAN.md).
+Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibility review and draft statement: [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md). Draft terms of use: [docs/TERMS.md](docs/TERMS.md). Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md). The privacy notice and accessibility statement are also in the app, under Settings → About.
 
-CI (GitHub Actions) runs all three on every push and uploads the debug APK as the `scary-debug-apk` artifact.
+## Privacy and credits
 
-## Privacy
-
-Phase 1 has no internet permission, no accounts and no analytics. Preferences and the "recently opened" list stay on the device.
-
-## Fonts
-
-Karantina, Assistant and Rubik Wet Paint, from Google Fonts, under the SIL Open Font License 1.1.
+No accounts, no analytics. Online artwork can be switched off in settings; only movie IDs are sent to Cinemeta and, with your own key, TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Movie metadata and images belong to their owners. Fonts: Karantina, Assistant, Oswald, Rubik and Rubik Wet Paint, under the SIL Open Font License 1.1.

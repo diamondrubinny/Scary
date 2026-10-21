@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -11,6 +12,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.data.LanguageStore
+import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
 import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -18,6 +22,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import io.github.diamondrubinny.scary.ui.ScaryRoot
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
 
 class MainActivity : ComponentActivity() {
 
@@ -33,6 +38,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val language = LanguageStore.read(this)
+        ScaryFonts.useFor(language)
+        viewModel.setLanguage(language)
         setContent { ScaryRoot(viewModel) }
         handleDebugIntent(intent)
 
@@ -62,6 +70,20 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    /** The remote's search key, on remotes that deliver it to the app rather than to the assistant. */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
+            viewModel.openSearch()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onSearchRequested(): Boolean {
+        viewModel.openSearch()
+        return true
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         if (intent.hasCategory(Intent.CATEGORY_HOME)) viewModel.onHomePressed()
@@ -85,6 +107,19 @@ class MainActivity : ComponentActivity() {
             target == "apps" -> viewModel.openAllApps()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
+            target == "home" -> viewModel.onHomePressed()
+            target == "surprise" -> viewModel.surprise()
+            target == "privacy" || target == "accessibility" -> {
+                viewModel.openSettings()
+                viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)
+            }
+            target.startsWith("language:") -> {
+                // Consume the target first, or the recreated activity would read it again and loop.
+                intent.removeExtra(DEBUG_OPEN)
+                this.intent?.removeExtra(DEBUG_OPEN)
+                LanguageStore.write(this, Language.fromCode(target.removePrefix("language:")))
+                recreate()
+            }
             target == "tmdb" -> {
                 viewModel.openSettings()
                 viewModel.openTmdbDialog()

@@ -77,11 +77,11 @@ fun FearMeter(level: Int, modifier: Modifier = Modifier, dropWidth: Dp = 8.dp) {
                 val on = index < level
                 val radius = size.width / 2
                 drawRoundRect(
-                    color = if (on) ScaryColors.Blood else ScaryColors.BloodDim,
+                    color = if (on) ScaryColors.Fear else ScaryColors.BloodDim,
                     cornerRadius = CornerRadius(radius, radius),
                 )
                 drawRect(
-                    color = if (on) ScaryColors.Blood else ScaryColors.BloodDim,
+                    color = if (on) ScaryColors.Fear else ScaryColors.BloodDim,
                     size = Size(size.width, size.height / 2),
                 )
             }
@@ -213,6 +213,53 @@ fun SearchIcon(color: Color, modifier: Modifier = Modifier) {
             strokeWidth = stroke,
             cap = StrokeCap.Round,
         )
+    }
+}
+
+/** A die showing five pips, for "Surprise me". */
+@Composable
+fun DiceIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = 2.dp.toPx()
+        val inset = stroke / 2 + size.minDimension * 0.06f
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(inset, inset),
+            size = Size(size.width - inset * 2, size.height - inset * 2),
+            cornerRadius = CornerRadius(size.minDimension * 0.2f),
+            style = Stroke(width = stroke),
+        )
+        val r = size.minDimension * 0.075f
+        listOf(0.32f to 0.32f, 0.68f to 0.32f, 0.5f to 0.5f, 0.32f to 0.68f, 0.68f to 0.68f).forEach { (x, y) ->
+            drawCircle(color, radius = r, center = Offset(size.width * x, size.height * y))
+        }
+    }
+}
+
+@Composable
+fun MicIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = 2.dp.toPx()
+        val w = size.width
+        val h = size.height
+        // Capsule, cradle arc and stand.
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(w * 0.36f, h * 0.05f),
+            size = Size(w * 0.28f, h * 0.5f),
+            cornerRadius = CornerRadius(w * 0.14f),
+        )
+        drawArc(
+            color = color,
+            startAngle = 0f,
+            sweepAngle = 180f,
+            useCenter = false,
+            topLeft = Offset(w * 0.22f, h * 0.2f),
+            size = Size(w * 0.56f, h * 0.5f),
+            style = Stroke(width = stroke, cap = StrokeCap.Round),
+        )
+        drawLine(color, Offset(w * 0.5f, h * 0.7f), Offset(w * 0.5f, h * 0.9f), strokeWidth = stroke, cap = StrokeCap.Round)
+        drawLine(color, Offset(w * 0.34f, h * 0.92f), Offset(w * 0.66f, h * 0.92f), strokeWidth = stroke, cap = StrokeCap.Round)
     }
 }
 

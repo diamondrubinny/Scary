@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import android.util.Log
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import io.github.diamondrubinny.scary.core.tmdb.TmdbAuth
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCache
@@ -68,32 +69,34 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         _keyMask.value = null
     }
 
-    suspend fun cached(): TmdbCache? = withContext(Dispatchers.IO) {
-        if (auth == null || !cacheFile.exists()) null else runCatching { TmdbCache.decode(cacheFile.readText()) }.getOrNull()
+    /** The cache only counts when it was fetched in the current UI language. */
+    suspend fun cached(language: Language): TmdbCache? = withContext(Dispatchers.IO) {
+        if (auth == null || !cacheFile.exists()) return@withContext null
+        runCatching { TmdbCache.decode(cacheFile.readText()) }.getOrNull()?.takeIf { it.language == language.code }
     }
 
     /** Hebrew info for the given movies plus the discover rows. Null without a key or when offline. */
-    suspend fun refresh(imdbIds: List<String>): TmdbCache? = withContext(Dispatchers.IO) {
+    suspend fun refresh(imdbIds: List<String>, language: Language): TmdbCache? = withContext(Dispatchers.IO) {
         val key = auth ?: return@withContext null
         val info = coroutineScope {
             imdbIds.distinct().chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                chunk.map { id -> async { body(Tmdb.findUrl(id), key)?.let(Tmdb::parseFind)?.let { id to it } } }.awaitAll()
+                chunk.map { id -> async { body(Tmdb.findUrl(id, language), key)?.let { Tmdb.parseFind(it, language) }?.let { id to it } } }.awaitAll()
             }
         }.filterNotNull().toMap()
         val today = LocalDate.now()
         val rows = TmdbRow.entries.mapNotNull { row ->
-            val results = body(Tmdb.discoverUrl(row, today), key)?.let(Tmdb::parseDiscover).orEmpty().take(ROW_SIZE)
+            val results = body(Tmdb.discoverUrl(row, today, language), key)?.let(Tmdb::parseDiscover).orEmpty().take(ROW_SIZE)
             val metas = coroutineScope {
                 results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
                     chunk.map { r ->
-                        async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it) } }
+                        async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it, language) } }
                     }.awaitAll()
                 }
             }.filterNotNull()
             metas.takeIf { it.isNotEmpty() }?.let { Tmdb.rowOf(row, it) }
         }
         if (info.isEmpty() && rows.isEmpty()) return@withContext null
-        TmdbCache(System.currentTimeMillis(), info, rows).also { cache ->
+        TmdbCache(System.currentTimeMillis(), language.code, info, rows).also { cache ->
             runCatching { cacheFile.writeText(cache.encode()) }
                 .onFailure { Log.w(TAG, "Could not save TMDB cache: ${it.javaClass.simpleName}") }
         }

@@ -22,6 +22,10 @@
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.HOME" />
         </intent>
+        <!-- Voice search hands over to the TV's speech recognizer; SCARY itself never records audio. -->
+        <intent>
+            <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
+        </intent>
         <package android:name="com.stremio.one" />
         <package android:name="com.android.vending" />
         <package android:name="com.google.android.youtube.tv" />
@@ -75,6 +79,21 @@
             <meta-data
                 android:name="android.accessibilityservice"
                 android:resource="@xml/home_button_service" />
+        </service>
+
+        <!--
+          Horror screensaver: backdrops from the library fade slowly in turn. Only the system can bind it
+          (BIND_DREAM_SERVICE); the user picks it in the TV's screen saver settings.
+        -->
+        <service
+            android:name=".dream.ScaryDream"
+            android:exported="true"
+            android:label="@string/dream_label"
+            android:permission="android.permission.BIND_DREAM_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.dreams.DreamService" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </service>
     </application>
 </manifest>

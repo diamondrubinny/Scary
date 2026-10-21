@@ -50,6 +50,8 @@ fun DetailsScreen(
     onTrailer: (Movie) -> Unit,
     onOpenSimilar: (Movie) -> Unit,
     isLocked: (Movie) -> Boolean = { false },
+    inMyList: Boolean = false,
+    onToggleMyList: (Movie) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -93,6 +95,10 @@ fun DetailsScreen(
                         focusRequester = watchFocus,
                     )
                     ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
+                    ScaryButton(
+                        text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
+                        onClick = { onToggleMyList(movie) },
+                    )
                 }
             }
             Box(

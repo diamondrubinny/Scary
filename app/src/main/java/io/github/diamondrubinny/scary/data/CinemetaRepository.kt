@@ -5,10 +5,14 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
+import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
@@ -20,12 +24,19 @@ import javax.net.ssl.HttpsURLConnection
 class CinemetaRepository(context: Context) {
     private val cacheFile = File(context.filesDir, "cinemeta_cache.json")
 
-    private data class RowSpec(val id: String, val genre: String, val titleHe: String, val titleEn: String)
+    private data class RowSpec(
+        val id: String,
+        val genre: String,
+        val titleHe: String,
+        val titleEn: String,
+        val titlePt: String,
+        val titleRu: String,
+    )
 
     private val rowSpecs = listOf(
-        RowSpec("horror_popular", "Horror", "פופולרי עכשיו באימה", "Popular horror right now"),
-        RowSpec("thriller_popular", "Thriller", "מותחנים פופולריים", "Popular thrillers"),
-        RowSpec("mystery_popular", "Mystery", "תעלומות שכולם רואים", "Mysteries everyone is watching"),
+        RowSpec("horror_popular", "Horror", "פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас"),
+        RowSpec("thriller_popular", "Thriller", "מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры"),
+        RowSpec("mystery_popular", "Mystery", "תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все"),
     )
 
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
@@ -34,19 +45,35 @@ class CinemetaRepository(context: Context) {
 
     /** Returns fresh data, or null when the TV is offline or the service is down. Never throws. */
     suspend fun refresh(imdbIds: List<String>): CinemetaCache? = withContext(Dispatchers.IO) {
-        val metas = coroutineScope {
-            imdbIds.distinct().chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                chunk.map { id -> async { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }.awaitAll()
+        // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
+        // and the three popular rows queue first so whole rows of posters appear early.
+        val pool = Semaphore(PARALLEL_REQUESTS)
+        val (metaList, rows) = coroutineScope {
+            val rows = rowSpecs.map { spec ->
+                async {
+                    pool.withPermit { fetch(Cinemeta.catalogUrl("top", spec.genre)) }
+                        ?.let(Cinemeta::parseCatalog)
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it, mapOf("pt" to spec.titlePt, "ru" to spec.titleRu)) }
+                }
             }
-        }.filterNotNull().associateBy { it.imdbId }
-        val rows = rowSpecs.mapNotNull { spec ->
-            fetch(Cinemeta.catalogUrl("top", spec.genre))
-                ?.let(Cinemeta::parseCatalog)
-                ?.takeIf { it.isNotEmpty() }
-                ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it) }
+            val metas = imdbIds.distinct().map { id ->
+                async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }
+            }
+            metas.awaitAll() to rows.awaitAll().filterNotNull()
         }
+        val metas = metaList.filterNotNull().associateBy { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
         CinemetaCache(System.currentTimeMillis(), metas, rows).also(::save)
+    }
+
+    /**
+     * Web search in Cinemeta for the search screen. Only the query text and the TV's IP reach Cinemeta. Null when the
+     * query is invalid, the TV is offline or the service is down; never throws.
+     */
+    suspend fun search(query: String, known: Catalog): List<Movie>? = withContext(Dispatchers.IO) {
+        val url = Cinemeta.searchUrl(query) ?: return@withContext null
+        fetch(url)?.let { Cinemeta.searchResults(it, known) }
     }
 
     private fun save(cache: CinemetaCache) {
@@ -95,7 +122,7 @@ class CinemetaRepository(context: Context) {
     private companion object {
         const val TAG = "Cinemeta"
         const val TIMEOUT_MS = 10_000
-        const val PARALLEL_REQUESTS = 4
+        const val PARALLEL_REQUESTS = 6
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
     }
 }

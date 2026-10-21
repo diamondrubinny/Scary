@@ -26,9 +26,11 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.FearMeter
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -43,6 +45,9 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenScreensaver: () -> Unit,
+    val onOpenPrivacy: () -> Unit,
+    val onOpenAccessibilityStatement: () -> Unit,
 )
 
 @Composable
@@ -59,11 +64,20 @@ fun SettingsScreen(
     tmdbKeyMask: String?,
     versionName: String,
     actions: SettingsActions,
+    returningFrom: DocumentKind? = null,
 ) {
     val firstFocus = remember { FocusRequester() }
+    val privacyFocus = remember { FocusRequester() }
+    val statementFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        runCatching { firstFocus.requestFocus() }
+        // Back from a document lands on the row that opened it, not at the top.
+        val target = when (returningFrom) {
+            DocumentKind.Privacy -> privacyFocus
+            DocumentKind.Accessibility -> statementFocus
+            null -> firstFocus
+        }
+        runCatching { target.requestFocus() }
     }
 
     Column(
@@ -107,10 +121,11 @@ fun SettingsScreen(
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
             onClick = actions.onOpenTmdb,
         )
-        BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption)
+        // The credit is English only; keep its punctuation in place inside a right-to-left layout.
+        BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         SettingRow(
             label = stringResource(R.string.settings_language),
-            value = stringResource(if (language == Language.HE) R.string.language_name_he else R.string.language_name_en),
+            value = language.nativeName,
             onClick = actions.onToggleLanguage,
         )
         SettingRow(
@@ -129,6 +144,12 @@ fun SettingsScreen(
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
         )
+        SettingRow(
+            label = stringResource(R.string.settings_screensaver),
+            value = stringResource(R.string.value_screensaver),
+            onClick = actions.onOpenScreensaver,
+        )
+        BasicText(stringResource(R.string.settings_screensaver_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_parental),
             value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),
@@ -159,6 +180,18 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        SettingRow(
+            label = stringResource(R.string.settings_privacy),
+            value = null,
+            onClick = actions.onOpenPrivacy,
+            modifier = Modifier.focusRequester(privacyFocus),
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_accessibility_statement),
+            value = null,
+            onClick = actions.onOpenAccessibilityStatement,
+            modifier = Modifier.focusRequester(statementFocus),
+        )
     }
 }
 

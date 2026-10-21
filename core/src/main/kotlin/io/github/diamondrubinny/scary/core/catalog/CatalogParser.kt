@@ -9,6 +9,9 @@ class CatalogException(val problems: List<String>) :
 object CatalogParser {
     const val SUPPORTED_VERSION = 1
 
+    /** Languages beyond Hebrew and English that every curated entry must be translated into. */
+    private val TRANSLATED = listOf("pt", "ru")
+
     private val json = Json { ignoreUnknownKeys = true }
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val idPattern = Regex("^[a-z0-9_]{1,64}$")
@@ -48,6 +51,7 @@ object CatalogParser {
             if (m.saturation !in 0..100) add("$tag: saturation must be 0..100")
             if (m.subgenres.isEmpty()) add("$tag: needs at least one subgenre")
             if (m.synopsisHe.isBlank() || m.synopsisEn.isBlank()) add("$tag: missing synopsis")
+            TRANSLATED.filter { m.synopses[it].isNullOrBlank() }.forEach { add("$tag: missing $it synopsis") }
         }
 
         val seenCollections = HashSet<String>()
@@ -56,6 +60,7 @@ object CatalogParser {
             if (!idPattern.matches(c.id)) add("$tag: invalid id")
             if (!seenCollections.add(c.id)) add("$tag: duplicate id")
             if (c.titleHe.isBlank() || c.titleEn.isBlank()) add("$tag: missing title")
+            TRANSLATED.filter { c.titles[it].isNullOrBlank() }.forEach { add("$tag: missing $it title") }
             if (c.movieIds.isEmpty()) add("$tag: is empty")
             if (c.movieIds.size != c.movieIds.toSet().size) add("$tag: lists a movie twice")
             c.movieIds.filterNot(seenIds::contains).forEach { add("$tag: unknown movie '$it'") }

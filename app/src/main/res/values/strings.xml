@@ -54,8 +54,6 @@
     <string name="badge_hidden">Hidden</string>
     <string name="settings_title">SCARY settings</string>
     <string name="settings_language">Language</string>
-    <string name="language_name_he">עברית</string>
-    <string name="language_name_en">English</string>
     <string name="settings_effects">Fog and film grain</string>
     <string name="value_on">On</string>
     <string name="value_off">Off</string>
@@ -63,7 +61,7 @@
     <string name="settings_night_fear_value">Up to fear level %1$d</string>
     <string name="settings_system">TV system settings</string>
     <string name="settings_about">About</string>
-    <string name="settings_about_text">SCARY %1$s. No accounts, no tracking, and this version has no internet access. Your preferences stay on this TV. Fonts: Karantina, Assistant and Rubik Wet Paint under the SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">SCARY %1$s. No accounts and no tracking. Your preferences stay on this TV. Fonts: Karantina, Assistant, Oswald, Rubik and Rubik Wet Paint under the SIL Open Font License 1.1.</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Title, director, year or kind of horror</string>
     <string name="search_prompt">Type or dictate to search %1$d movies.</string>
@@ -94,7 +92,7 @@
     <string name="settings_sounds">Ambient sounds</string>
     <string name="locked_badge">Locked</string>
     <string name="settings_online">Artwork and info from the internet</string>
-    <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
+    <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs and, when you search, the search text are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">Starring %1$s</string>
     <string name="settings_home_section">Home screen</string>
@@ -112,7 +110,7 @@
     <string name="settings_tmdb">TMDB key</string>
     <string name="value_tmdb_none">Not set</string>
     <string name="tmdb_dialog_title">TMDB API key</string>
-    <string name="tmdb_dialog_body">With your own TMDB key, SCARY adds Hebrew titles and synopses, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
+    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
     <string name="tmdb_hint">Paste or type the key</string>
     <string name="tmdb_save">Save and check</string>
     <string name="tmdb_delete">Delete the key</string>
@@ -126,4 +124,49 @@
     <string name="tmdb_note">The key is encrypted with the Android Keystore and sent only to api.themoviedb.org. TMDB receives movie IDs and the key, nothing personal.</string>
     <string name="original_title">Original title: %1$s</string>
     <string name="tmdb_attribution" translatable="false">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
+
+    <!-- My list, voice search and screensaver -->
+    <string name="row_my_list">My list</string>
+    <string name="action_add_my_list">+ My list</string>
+    <string name="action_in_my_list">✓ In my list</string>
+    <string name="msg_my_list_added">%1$s added to My list</string>
+    <string name="msg_my_list_removed">%1$s removed from My list</string>
+    <string name="voice_search">Voice search</string>
+    <string name="voice_prompt">Which horror movie?</string>
+    <string name="dream_label">SCARY – horror backdrops</string>
+    <string name="settings_screensaver">Screensaver</string>
+    <string name="value_screensaver">Choose</string>
+    <string name="settings_screensaver_note">Pick \"SCARY – horror backdrops\" in the TV\'s screensaver settings. With the parental lock on, it only shows movies below the lock level.</string>
+    <string name="msg_no_screensaver_settings">This TV does not open screensaver settings from apps. Look under Settings, Device preferences, Screen saver.</string>
+
+    <!-- Surprise me and web search -->
+    <string name="surprise_me">Surprise me</string>
+    <string name="msg_surprise_none">No movie fits tonight\'s fear level. Raise it in settings.</string>
+    <string name="search_web_title">From the web</string>
+    <string name="search_web_loading">Also searching the web…</string>
+    <string name="search_web_failed">Web search is not available right now.</string>
+    <string name="search_web_none">No horror on the web for \"%1$s\".</string>
+    <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_accessibility_statement">Accessibility statement</string>
+    <string name="document_hint">Move up and down to read. Back returns to settings.</string>
+    <string-array name="privacy_paragraphs">
+        <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
+        <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
+        <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
+        <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
+        <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache.</item>
+        <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
+        <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
+        <item>Questions, corrections or requests about your data: github.com/diamondrubinny/Scary/issues</item>
+        <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
+    </string-array>
+    <string-array name="accessibility_paragraphs">
+        <item>SCARY aims to meet WCAG 2.1 level AA and the Israeli standard IS 5568. It has not yet been audited by an accessibility consultant, so it does not claim full conformance.</item>
+        <item>Built in: every screen works with the remote\'s arrows and OK button, with a clear focus glow. Cards, buttons and settings have spoken labels for TalkBack, screens and rows have headings, and messages and PIN errors are announced. Holding OK on a poster adds it to My list, and TalkBack offers this as an action. Hebrew uses a right-to-left layout.</item>
+        <item>Motion and sound: there is no flashing. The fog and grain are faint and stop when you turn off effects or turn on Remove animations in the TV accessibility settings. Ambient sounds are off by default.</item>
+        <item>Known limitations: online posters are described only by title and year; the Portuguese and Russian translations have not been reviewed by native speakers; very large system font sizes can shorten text in some rows; TalkBack has been tested only on an emulator so far.</item>
+        <item>Found a barrier? Report it at github.com/diamondrubinny/Scary/issues and describe the screen and what happened. We aim to reply within 14 days.</item>
+        <item>Updated October 2026. This is a draft that has not yet been reviewed by an accessibility consultant.</item>
+    </string-array>
 </resources>

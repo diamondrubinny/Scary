@@ -88,10 +88,12 @@ fun PosterCard(
     width: Dp = 104.dp,
     focusRequester: FocusRequester? = null,
     locked: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val lockedLabel = stringResource(R.string.locked_badge)
     FocusSurface(
         onClick = onClick,
+        onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(width)
             .aspectRatio(2f / 3f),
@@ -137,9 +139,11 @@ fun WideMovieCard(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
     locked: Boolean = false,
+    onLongClick: (() -> Unit)? = null,
 ) {
     FocusSurface(
         onClick = onClick,
+        onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(176.dp)
             .aspectRatio(16f / 9f),

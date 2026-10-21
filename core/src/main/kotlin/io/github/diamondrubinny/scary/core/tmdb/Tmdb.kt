@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary.core.tmdb
 
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -16,12 +17,14 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
-/** What TMDB adds to a movie: Hebrew text and higher-resolution art. */
+/** What TMDB adds to a movie: text in the UI language and higher-resolution art. */
 @Serializable
 data class TmdbInfo(
     val tmdbId: Long,
-    val titleHe: String = "",
-    val overviewHe: String = "",
+    /** Language.code of [title] and [overview]. */
+    val language: String,
+    val title: String = "",
+    val overview: String = "",
     val poster: String? = null,
     val backdrop: String? = null,
     val rating: Double? = null,
@@ -47,10 +50,10 @@ sealed interface TmdbAuth {
 }
 
 /** Rows SCARY builds from TMDB's discover endpoint. Parameters are fixed here, never taken from input. */
-enum class TmdbRow(val id: String, val titleHe: String, val titleEn: String) {
-    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror"),
-    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror"),
-    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries"),
+enum class TmdbRow(val id: String, val titleHe: String, val titleEn: String, val titlePt: String, val titleRu: String) {
+    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы"),
+    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам"),
+    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки"),
 }
 
 /**
@@ -61,7 +64,6 @@ object Tmdb {
     const val API_HOST = "api.themoviedb.org"
     private const val API = "https://$API_HOST/3"
     private const val IMAGES = "https://image.tmdb.org/t/p"
-    private const val LANGUAGE = "he-IL"
     const val HORROR = 27
     const val THRILLER = 53
     const val MYSTERY = 9648
@@ -72,6 +74,18 @@ object Tmdb {
     private val imagePath = Regex("^/[A-Za-z0-9_\\-]{5,64}\\.(jpg|jpeg|png|webp)$")
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val hebrew = Regex("[\\u0590-\\u05FF]")
+    private val cyrillic = Regex("[\\u0400-\\u04FF]")
+
+    /**
+     * TMDB falls back to the original title when it has no translation, so text only counts as localized when
+     * it is in the right script (Hebrew, Russian) or differs from the original title (Portuguese).
+     */
+    private fun isLocalized(language: Language, text: String, original: String = ""): Boolean = when (language) {
+        Language.HE -> hebrew.containsMatchIn(text)
+        Language.RU -> cyrillic.containsMatchIn(text)
+        Language.PT -> text.isNotBlank() && !text.equals(original, ignoreCase = true)
+        Language.EN -> false
+    }
 
     /** Accepts a v3 API key (32 hex) or a v4 read access token (JWT). Whitespace around it is ignored. */
     fun parseAuth(input: String): TmdbAuth? {
@@ -88,9 +102,9 @@ object Tmdb {
 
     fun configurationUrl(): String = "$API/configuration"
 
-    fun findUrl(imdbId: String): String {
+    fun findUrl(imdbId: String, language: Language): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
-        return "$API/find/$imdbId?external_source=imdb_id&language=$LANGUAGE"
+        return "$API/find/$imdbId?external_source=imdb_id&language=${language.tmdbTag}"
     }
 
     fun externalIdsUrl(tmdbId: Long): String {
@@ -98,7 +112,7 @@ object Tmdb {
         return "$API/movie/$tmdbId/external_ids"
     }
 
-    fun discoverUrl(row: TmdbRow, today: LocalDate): String {
+    fun discoverUrl(row: TmdbRow, today: LocalDate, language: Language): String {
         val params = when (row) {
             TmdbRow.NEW_HORROR -> listOf(
                 "with_genres" to "$HORROR",
@@ -117,7 +131,7 @@ object Tmdb {
                 "sort_by" to "popularity.desc",
                 "vote_count.gte" to "500",
             )
-        } + listOf("include_adult" to "false", "language" to LANGUAGE, "page" to "1")
+        } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to "1")
         return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + URLEncoder.encode(v, StandardCharsets.UTF_8) }
     }
 
@@ -130,13 +144,17 @@ object Tmdb {
     fun imageUrl(path: String?, size: String): String? =
         path?.takeIf(imagePath::matches)?.let { "$IMAGES/$size$it" }
 
-    fun parseFind(text: String): TmdbInfo? {
+    fun parseFind(text: String, language: Language): TmdbInfo? {
         val first = (root(text)?.get("movie_results") as? JsonArray)?.firstOrNull() as? JsonObject ?: return null
         val result = toResult(first) ?: return null
         return TmdbInfo(
             tmdbId = result.tmdbId,
-            titleHe = result.title.takeIf { hebrew.containsMatchIn(it) }.orEmpty(),
-            overviewHe = result.overview.takeIf { hebrew.containsMatchIn(it) }.orEmpty(),
+            language = language.code,
+            // English is TMDB's base language: its title and overview are always usable as English text.
+            title = result.title.takeIf { language == Language.EN || isLocalized(language, it, result.originalTitle) }.orEmpty(),
+            overview = result.overview.takeIf {
+                it.isNotBlank() && (language == Language.EN || language == Language.PT || isLocalized(language, it))
+            }.orEmpty(),
             poster = imageUrl(result.poster, "w500"),
             backdrop = imageUrl(result.backdrop, "w1280"),
             rating = result.rating,
@@ -150,31 +168,51 @@ object Tmdb {
         (root(text)?.get("imdb_id") as? JsonPrimitive)?.contentOrNull?.takeIf(imdbPattern::matches)
 
     /** Turns a discover result plus its IMDb id into the same shape as a Cinemeta row entry. */
-    fun toMeta(result: TmdbResult, imdbId: String): CinemetaMeta = CinemetaMeta(
+    fun toMeta(result: TmdbResult, imdbId: String, language: Language): CinemetaMeta {
+        val localTitle = result.title.takeIf { isLocalized(language, it, result.originalTitle) }.orEmpty()
+        val localOverview = result.overview.takeIf { language != Language.EN && it.isNotBlank() && (language == Language.PT || isLocalized(language, it)) }.orEmpty()
+        return CinemetaMeta(
         imdbId = imdbId,
-        name = result.originalTitle.ifBlank { result.title },
-        nameHe = result.title.takeIf { hebrew.containsMatchIn(it) }.orEmpty(),
+        name = if (language == Language.EN) result.title else result.originalTitle.ifBlank { result.title },
         year = result.year,
         poster = imageUrl(result.poster, "w500"),
         background = imageUrl(result.backdrop, "w1280"),
-        descriptionHe = result.overview.takeIf { hebrew.containsMatchIn(it) }.orEmpty(),
-        description = result.overview.takeUnless { hebrew.containsMatchIn(it) }.orEmpty(),
+        // Without a translation, keep TMDB's overview as the English synopsis rather than showing none.
+        description = if (language == Language.EN || localOverview.isBlank()) result.overview else "",
+        localName = localTitle,
+        localDescription = localOverview,
+        localLanguage = if (localTitle.isBlank() && localOverview.isBlank()) "" else language.code,
         genres = buildList {
             if (HORROR in result.genreIds) add("Horror")
             if (THRILLER in result.genreIds) add("Thriller")
             if (MYSTERY in result.genreIds) add("Mystery")
         },
-    )
+        )
+    }
 
-    /** Hebrew text and sharper art from TMDB; editorial fields and existing Hebrew text are kept. */
-    fun enrich(movie: Movie, info: TmdbInfo): Movie = movie.copy(
-        titleHe = movie.titleHe.ifBlank { info.titleHe },
-        synopsisHe = movie.synopsisHe.ifBlank { info.overviewHe },
-        posterUrl = info.poster ?: movie.posterUrl,
-        backgroundUrl = info.backdrop ?: movie.backgroundUrl,
-    )
+    /** Localized text and sharper art from TMDB. Curated translations and editorial fields always win. */
+    fun enrich(movie: Movie, info: TmdbInfo): Movie {
+        val lang = info.language
+        if (lang == Language.EN.code) {
+            // English lives in the base fields; fill only what is missing, curated text always wins.
+            return movie.copy(
+                synopsisEn = movie.synopsisEn.ifBlank { info.overview },
+                posterUrl = info.poster ?: movie.posterUrl,
+                backgroundUrl = info.backdrop ?: movie.backgroundUrl,
+            )
+        }
+        val hasTitle = movie.titles[lang]?.isNotBlank() == true || (lang == Language.HE.code && movie.titleHe.isNotBlank())
+        val hasSynopsis = movie.synopses[lang]?.isNotBlank() == true || (lang == Language.HE.code && movie.synopsisHe.isNotBlank())
+        return movie.copy(
+            titles = if (hasTitle || info.title.isBlank()) movie.titles else movie.titles + (lang to info.title),
+            synopses = if (hasSynopsis || info.overview.isBlank()) movie.synopses else movie.synopses + (lang to info.overview),
+            posterUrl = info.poster ?: movie.posterUrl,
+            backgroundUrl = info.backdrop ?: movie.backgroundUrl,
+        )
+    }
 
-    fun rowOf(row: TmdbRow, metas: List<CinemetaMeta>): OnlineRow = OnlineRow(row.id, row.titleHe, row.titleEn, metas)
+    fun rowOf(row: TmdbRow, metas: List<CinemetaMeta>): OnlineRow =
+        OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu))
 
     private fun root(text: String): JsonObject? =
         try {
@@ -207,6 +245,8 @@ object Tmdb {
 @Serializable
 data class TmdbCache(
     val fetchedAtMillis: Long,
+    /** Language.code the text was fetched in; a different UI language means a refresh. */
+    val language: String = "",
     val info: Map<String, TmdbInfo>,
     val rows: List<OnlineRow>,
 ) {
