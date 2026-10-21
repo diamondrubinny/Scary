@@ -97,4 +97,28 @@ open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 26-surprise 6
 
+# Release build (R8, not debuggable): installs over the debug build with the same key and keeps its data.
+# It must start and navigate without crashing, or this job fails and nothing is published.
+if [ -f dist/scary-release.apk ]; then
+  adb logcat -c || true
+  adb install -r dist/scary-release.apk
+  adb shell am force-stop "$PKG"
+  open
+  shot 27-release-home 20
+  # Right to left on the hero: Watch, Trailer, then Details.
+  key KEYCODE_DPAD_LEFT
+  key KEYCODE_DPAD_LEFT
+  key KEYCODE_DPAD_CENTER
+  shot 28-release-details 6
+  key KEYCODE_BACK
+  sleep 2
+  if adb logcat -d -b crash | grep -q "$PKG"; then
+    echo "The release build crashed:"
+    adb logcat -d -b crash
+    exit 1
+  fi
+  adb shell pidof "$PKG" > /dev/null || { echo "The release build is not running."; exit 1; }
+  echo "Release build smoke test passed."
+fi
+
 ls -la "$OUT"

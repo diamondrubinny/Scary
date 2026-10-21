@@ -44,17 +44,38 @@ jobs:
       - name: Lint
         run: ./gradlew --no-daemon :app:lintDebug
 
-      - name: Name the APK
+      # Optional dedicated release key from repository secrets. Without it the release APK uses the debug key above.
+      - name: Release signing key (optional)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.SCARY_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+            echo "SCARY_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
+            echo "Using the release key from secrets."
+          else
+            echo "No release key secret; the release APK is signed with the debug key."
+          fi
+
+      - name: Build release APK (R8, not debuggable)
+        env:
+          SCARY_KEYSTORE_PASSWORD: ${{ secrets.SCARY_KEYSTORE_PASSWORD }}
+          SCARY_KEY_ALIAS: ${{ secrets.SCARY_KEY_ALIAS }}
+          SCARY_KEY_PASSWORD: ${{ secrets.SCARY_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleRelease
+
+      - name: Name the APKs
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk "dist/scary-${GITHUB_RUN_NUMBER}.apk"
-          cp app/build/outputs/apk/debug/app-debug.apk dist/scary.apk
-          sha256sum dist/scary.apk
+          cp app/build/outputs/apk/debug/app-debug.apk "dist/scary-debug-${GITHUB_RUN_NUMBER}.apk"
+          cp app/build/outputs/apk/release/app-release.apk "dist/scary-release-${GITHUB_RUN_NUMBER}.apk"
+          ls -l dist
+          sha256sum dist/*.apk
 
-      - name: Upload APK
+      - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:
-          name: scary-debug-apk
+          name: scary-apks
           path: dist/scary-*.apk
           retention-days: 14
 
@@ -70,9 +91,10 @@ jobs:
           retention-days: 7
 
   publish:
-    # Only for pushes to this repository, never for pull requests.
+    # Only for pushes to this repository, never for pull requests, and only after the release APK passed the
+    # emulator smoke test in the screenshots job.
     if: github.event_name == 'push'
-    needs: build
+    needs: [build, screenshots]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -83,7 +105,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: scary-debug-apk
+          name: scary-apks
           path: dist
 
       - name: Publish as the "latest-build" pre-release
@@ -91,11 +113,13 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          cp dist/scary-*.apk dist/scary.apk
+          # scary.apk is the optimized release build; scary-debug.apk stays available as a fallback.
+          cp dist/scary-release-*.apk dist/scary.apk
+          cp dist/scary-debug-*.apk dist/scary-debug.apk
           # Release notes in four languages, with this build's number and commit.
           sed -e "s/{{BUILD}}/${GITHUB_RUN_NUMBER}/" -e "s/{{SHA}}/${GITHUB_SHA::7}/" .github/release-notes.md > notes.md
           gh release delete latest-build --cleanup-tag --yes || true
-          gh release create latest-build dist/scary.apk \
+          gh release create latest-build dist/scary.apk dist/scary-debug.apk \
             --target "${GITHUB_SHA}" \
             --prerelease \
             --title "SCARY build ${GITHUB_RUN_NUMBER}" \
@@ -104,9 +128,9 @@ jobs:
       - name: Keep the APK on the apk-builds branch
         run: |
           git init -q out && cd out
-          cp ../dist/scary.apk .
-          printf 'Latest SCARY debug APK, build %s from %s.\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
-          git add scary.apk README.md
+          cp ../dist/scary.apk ../dist/scary-debug.apk .
+          printf 'Latest SCARY APK (release, R8), build %s from %s. scary-debug.apk is the debug build.\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
+          git add scary.apk scary-debug.apk README.md
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "SCARY build ${GITHUB_RUN_NUMBER}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/apk-builds
 
@@ -123,11 +147,13 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: scary-debug-apk
+          name: scary-apks
           path: dist
 
-      - name: Prepare APK
-        run: cp dist/scary-*.apk dist/scary.apk
+      - name: Prepare APKs
+        run: |
+          cp dist/scary-debug-*.apk dist/scary.apk
+          cp dist/scary-release-*.apk dist/scary-release.apk
 
       - name: Enable KVM
         run: |

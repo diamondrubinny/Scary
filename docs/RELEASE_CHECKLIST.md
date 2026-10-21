@@ -18,8 +18,8 @@
 - ✅ אין סודות בקוד או ב־repo; keystore ה־debug נשמר רק במטמון של CI
 - ✅ `allowBackup="false"`
 - ✅ `handleDebugIntent` פועל רק ב־build מסוג debuggable
-- ⬜ חתימת release במפתח ייעודי (לא debug), שמור מחוץ ל־repo, ב־GitHub Secrets
-- ⬜ R8/minify ל־release ובדיקה שהכל עובד אחריו
+- ⬜ חתימת release במפתח ייעודי: התמיכה קיימת (secrets בשם `SCARY_KEYSTORE_BASE64`, `SCARY_KEYSTORE_PASSWORD`, `SCARY_KEY_ALIAS`, `SCARY_KEY_PASSWORD`). בלעדיהם נעשה שימוש במפתח ה־debug. **מעבר למפתח חדש מחייב הסרה והתקנה מחדש בטלוויזיה, כלומר איבוד ההגדרות.** חובה לפני Google Play
+- ✅ R8/minify ו־shrinkResources ל־release. כל build בונה גם release, מתקין אותו באמולטור, פותח מסך בית ועמוד סרט, ונכשל אם יש קריסה. רק אחרי זה מתפרסם `scary.apk` (release). ה־debug נשאר כ־`scary-debug.apk`
 - ✅ Dependabot לעדכוני Gradle ו־GitHub Actions (`.github/dependabot.yml`). כדי לקבל גם התראות אבטחה, יש להפעיל Dependabot alerts בהגדרות ה־repo
 - ⬜ SBOM ו־OWASP Dependency-Check
 - ⬜ שירות הנגישות: לוודא שהוא מסנן רק מקש Home, ושהתיאור בהגדרות המערכת ברור. Google Play מגביל שימוש ב־AccessibilityService שלא לצורכי נגישות: **דורש אימות מול מדיניות Google Play**
