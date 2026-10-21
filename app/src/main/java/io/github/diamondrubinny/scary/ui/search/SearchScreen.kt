@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -45,6 +46,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -58,6 +60,7 @@ import io.github.diamondrubinny.scary.ui.components.MicIcon
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.SearchIcon
 import io.github.diamondrubinny.scary.ui.home.SidePadding
+import io.github.diamondrubinny.scary.ui.home.WebSearchState
 import io.github.diamondrubinny.scary.ui.home.labelRes
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
@@ -74,6 +77,7 @@ fun SearchScreen(
     onOpenMovie: (Movie) -> Unit,
     language: Language,
     isLocked: (Movie) -> Boolean = { false },
+    webSearch: WebSearchState = WebSearchState(),
 ) {
     val context = LocalContext.current
     val resources = context.resources
@@ -182,6 +186,41 @@ fun SearchScreen(
             items(results, key = { it.id }) { movie ->
                 PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
             }
+            // Web results only for the query on screen, and without movies the library already found.
+            if (webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
+                val localIds = results.mapTo(HashSet()) { it.imdbId }
+                val web = webSearch.results.filter { it.imdbId !in localIds }
+                item(span = { GridItemSpan(maxLineSpan) }, key = "web-header") {
+                    WebHeader(webSearch, web.isEmpty())
+                }
+                items(web, key = { "web:" + it.id }) { movie ->
+                    PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WebHeader(state: WebSearchState, nothingNew: Boolean) {
+    val note = when {
+        state.loading -> stringResource(R.string.search_web_loading)
+        state.failed -> stringResource(R.string.search_web_failed)
+        nothingNew -> stringResource(R.string.search_web_none, state.query)
+        else -> null
+    }
+    Column(Modifier.padding(top = 12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        BasicText(
+            stringResource(R.string.search_web_title),
+            style = ScaryType.RowTitle,
+            modifier = Modifier.semantics { heading() },
+        )
+        if (note != null) {
+            BasicText(
+                note,
+                style = ScaryType.Body.copy(color = ScaryColors.Ash),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
         }
     }
 }

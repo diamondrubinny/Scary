@@ -58,6 +58,7 @@ class HomeActions(
     val onOpenSearch: () -> Unit,
     /** Long press on a movie card: add to or remove from "My list". */
     val onToggleMyList: (Movie) -> Unit,
+    val onSurprise: () -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -90,6 +91,7 @@ fun HomeScreen(
             onToggleEffects = actions.onToggleEffects,
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
+            onSurprise = actions.onSurprise,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
         )
         Hero(

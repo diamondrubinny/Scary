@@ -30,6 +30,14 @@ data class HomeUiState(
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }
 
+/** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */
+data class WebSearchState(
+    val query: String = "",
+    val loading: Boolean = false,
+    val results: List<Movie> = emptyList(),
+    val failed: Boolean = false,
+)
+
 data class TmdbDialogState(
     val busy: Boolean = false,
     val result: io.github.diamondrubinny.scary.data.TmdbKeyResult? = null,

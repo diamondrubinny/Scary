@@ -108,6 +108,7 @@ class MainActivity : ComponentActivity() {
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
             target == "home" -> viewModel.onHomePressed()
+            target == "surprise" -> viewModel.surprise()
             target == "privacy" || target == "accessibility" -> {
                 viewModel.openSettings()
                 viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)

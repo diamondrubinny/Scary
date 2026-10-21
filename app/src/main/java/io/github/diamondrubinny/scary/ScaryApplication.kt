@@ -5,6 +5,7 @@ import android.content.Context
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
+import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.SecretStore
 import io.github.diamondrubinny.scary.data.TmdbRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
@@ -23,5 +24,6 @@ class AppContainer(context: Context) {
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val settingsRepository = SettingsRepository(appContext)
+    val savedMoviesRepository = SavedMoviesRepository(appContext)
     val launcher = Launcher(appContext, appsRepository)
 }

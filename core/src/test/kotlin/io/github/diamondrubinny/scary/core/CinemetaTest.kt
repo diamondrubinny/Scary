@@ -83,6 +83,44 @@ class CinemetaTest {
         assertEquals("https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror.json", Cinemeta.catalogUrl("top", "Horror"))
         assertEquals("https://www.youtube.com/watch?v=jAE7dNurHR4", Links.youTubeVideo("jAE7dNurHR4"))
     }
+
+    @Test
+    fun `search url encodes the query and rejects bad lengths`() {
+        assertEquals(
+            "https://v3-cinemeta.strem.io/catalog/movie/top/search=the%20thing.json",
+            Cinemeta.searchUrl("  the   thing "),
+        )
+        assertEquals(
+            "https://v3-cinemeta.strem.io/catalog/movie/top/search=%D7%90%D7%99%D7%9E%D7%94%2F..%3F.json",
+            Cinemeta.searchUrl("אימה/..?"),
+        )
+        assertNull(Cinemeta.searchUrl("ab"))
+        assertNull(Cinemeta.searchUrl("x".repeat(61)))
+    }
+
+    @Test
+    fun `search results keep the theme, skip known movies and cap the count`() {
+        val known = catalog.movies.first()
+        val text = """{"metas":[
+            {"id":"${known.imdbId}","name":"Known","releaseInfo":"1980","genres":["Horror"]},
+            {"id":"tt9000001","name":"Ghost House","releaseInfo":"2021","genres":["Horror","Drama"]},
+            {"id":"tt9000002","name":"Fast Cars","releaseInfo":"2022","genres":["Action"]},
+            {"id":"tt9000003","name":"No Genres","releaseInfo":"2019"},
+            {"id":"tt9000004","name":"No Year","genres":["Thriller"]}
+        ]}"""
+        val results = Cinemeta.searchResults(text, catalog)
+        assertEquals(listOf("Ghost House", "No Genres"), results.map { it.title })
+        assertTrue(results.none { it.curated })
+        assertEquals(1, Cinemeta.searchResults(text, catalog, limit = 1).size)
+    }
+
+    @Test
+    fun `a movie survives the trip through fromMovie and back`() {
+        val meta = Cinemeta.parseMeta(shiningJson)!!
+        val movie = Cinemeta.toMovie(meta.copy(localName = "הניצוץ", localLanguage = "he"))!!
+        val again = Cinemeta.toMovie(Cinemeta.fromMovie(movie, "he"))!!
+        assertEquals(movie.copy(hue = again.hue), again)
+    }
 }
 
 class CinemetaCacheTest {

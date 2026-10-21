@@ -91,7 +91,7 @@
     <string name="settings_sounds">צלילי אווירה</string>
     <string name="locked_badge">נעול</string>
     <string name="settings_online">תמונות ומידע מהאינטרנט</string>
-    <string name="settings_online_note">פוסטרים, רקעים, דירוג IMDb, שחקנים והשורות הפופולריות מגיעים מ־Cinemeta, מאגר הסרטים הציבורי של Stremio. נשלחים רק מזהי סרטים, אף פעם לא פרטים אישיים. כמו בכל אתר, השרת רואה את כתובת ה־IP של הטלוויזיה. כיבוי משאיר את SCARY בלי אינטרנט בכלל.</string>
+    <string name="settings_online_note">פוסטרים, רקעים, דירוג IMDb, שחקנים והשורות הפופולריות מגיעים מ־Cinemeta, מאגר הסרטים הציבורי של Stremio. נשלחים רק מזהי סרטים, ובחיפוש גם טקסט החיפוש, אף פעם לא פרטים אישיים. כמו בכל אתר, השרת רואה את כתובת ה־IP של הטלוויזיה. כיבוי משאיר את SCARY בלי אינטרנט בכלל.</string>
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">בכיכובם: %1$s</string>
     <string name="settings_home_section">מסך הבית</string>
@@ -137,6 +137,13 @@
     <string name="settings_screensaver_note">בחרו \"SCARY – רקעים מסרטי אימה\" בהגדרות שומר המסך של הטלוויזיה. כשנעילת הורים פעילה, מוצגים רק סרטים מתחת לרמת הנעילה.</string>
     <string name="msg_no_screensaver_settings">הטלוויזיה הזו לא פותחת את הגדרות שומר המסך מאפליקציות. חפשו בהגדרות ← העדפות מכשיר ← שומר מסך.</string>
 
+    <!-- Surprise me and web search -->
+    <string name="surprise_me">הפתע אותי</string>
+    <string name="msg_surprise_none">אין סרט שמתאים לרמת הפחד של הלילה. אפשר להעלות אותה בהגדרות.</string>
+    <string name="search_web_title">תוצאות מהרשת</string>
+    <string name="search_web_loading">מחפש גם ברשת…</string>
+    <string name="search_web_failed">החיפוש ברשת לא זמין כרגע.</string>
+    <string name="search_web_none">לא נמצאו סרטי אימה ברשת עבור \"%1$s\".</string>
     <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
     <string name="settings_privacy">פרטיות</string>
     <string name="settings_accessibility_statement">הצהרת נגישות</string>
@@ -145,7 +152,7 @@
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
         <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
-        <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
+        <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>

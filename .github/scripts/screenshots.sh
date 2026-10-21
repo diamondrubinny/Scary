@@ -90,4 +90,11 @@ adb shell am start -n com.android.systemui/.Somnambulator > /dev/null 2>&1 || ec
 shot 24-screensaver 15
 key KEYCODE_BACK
 
+# Web search below the library results, and "Surprise me".
+open --es scary.debug.open search --es scary.debug.query conjuring
+shot 25-search-web 10
+open --es scary.debug.open home
+open --es scary.debug.open surprise
+shot 26-surprise 6
+
 ls -la "$OUT"

@@ -70,6 +70,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
     val tmdbKeyMask by viewModel.tmdbKeyMask.collectAsStateWithLifecycle()
     val tmdbDialog by viewModel.tmdbDialog.collectAsStateWithLifecycle()
+    val webSearch by viewModel.webSearch.collectAsStateWithLifecycle()
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -126,6 +127,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onOpenSettings = viewModel::openSettings,
             onOpenSearch = viewModel::openSearch,
             onToggleMyList = { viewModel.toggleMyList(it, language) },
+            onSurprise = viewModel::surprise,
         )
     }
     val allAppsActions = remember(viewModel) {
@@ -196,6 +198,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onOpenMovie = { viewModel.openDetails(it.id) },
                     language = language,
                     isLocked = state::isLocked,
+                    webSearch = webSearch,
                 )
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)

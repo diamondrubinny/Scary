@@ -15,6 +15,21 @@ object NightPick {
         val mixed = date.toEpochDay() * 2_654_435_761L
         return pool[Math.floorMod(mixed, pool.size.toLong()).toInt()]
     }
+
+    /**
+     * "Surprise me": a random curated movie at or below [maxFear], skipping [exclude] (the one on screen) and any
+     * movie [isLocked] rejects, so the button never lands on a PIN prompt. Null when nothing qualifies.
+     */
+    fun surprise(
+        movies: List<Movie>,
+        maxFear: Int,
+        random: kotlin.random.Random,
+        exclude: String? = null,
+        isLocked: (Movie) -> Boolean = { false },
+    ): Movie? {
+        val pool = movies.filter { m -> m.curated && m.fear != null && m.fear <= maxFear && !isLocked(m) }
+        return pool.filter { it.id != exclude }.ifEmpty { pool }.randomOrNull(random)
+    }
 }
 
 object Similar {

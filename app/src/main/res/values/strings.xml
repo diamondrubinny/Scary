@@ -92,7 +92,7 @@
     <string name="settings_sounds">Ambient sounds</string>
     <string name="locked_badge">Locked</string>
     <string name="settings_online">Artwork and info from the internet</string>
-    <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
+    <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs and, when you search, the search text are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">Starring %1$s</string>
     <string name="settings_home_section">Home screen</string>
@@ -139,6 +139,13 @@
     <string name="settings_screensaver_note">Pick \"SCARY – horror backdrops\" in the TV\'s screensaver settings. With the parental lock on, it only shows movies below the lock level.</string>
     <string name="msg_no_screensaver_settings">This TV does not open screensaver settings from apps. Look under Settings, Device preferences, Screen saver.</string>
 
+    <!-- Surprise me and web search -->
+    <string name="surprise_me">Surprise me</string>
+    <string name="msg_surprise_none">No movie fits tonight\'s fear level. Raise it in settings.</string>
+    <string name="search_web_title">From the web</string>
+    <string name="search_web_loading">Also searching the web…</string>
+    <string name="search_web_failed">Web search is not available right now.</string>
+    <string name="search_web_none">No horror on the web for \"%1$s\".</string>
     <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
     <string name="settings_privacy">Privacy</string>
     <string name="settings_accessibility_statement">Accessibility statement</string>
@@ -147,7 +154,7 @@
         <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
         <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
-        <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
+        <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>

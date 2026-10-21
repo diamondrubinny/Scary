@@ -13,6 +13,8 @@ import io.github.diamondrubinny.scary.core.apps.AppOrdering
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.Similar
+import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
@@ -20,9 +22,11 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.security.PinHasher
 import io.github.diamondrubinny.scary.core.security.PinLockout
 import io.github.diamondrubinny.scary.data.CatalogRepository
+import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
+import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.data.TmdbKeyResult
 import io.github.diamondrubinny.scary.data.TmdbRepository
@@ -30,12 +34,14 @@ import io.github.diamondrubinny.scary.launch.LaunchResult
 import io.github.diamondrubinny.scary.launch.Launcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -44,6 +50,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.time.LocalDate
+import kotlin.random.Random
 
 class HomeViewModel(
     private val catalogRepository: CatalogRepository,
@@ -51,6 +58,8 @@ class HomeViewModel(
     private val settings: SettingsRepository,
     private val launcher: Launcher,
     private val tmdb: TmdbRepository,
+    private val savedMovies: SavedMoviesRepository,
+    private val cinemeta: CinemetaRepository,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -132,7 +141,11 @@ class HomeViewModel(
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
-            catalogRepository.catalog(settings.prefs.map { it.onlineEnabled }, tmdb.keyMask.map { it != null }, language)
+            savedMovies.load()
+            val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
+            catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language)
+                .combine(savedMovies.items) { catalog, saved -> catalog to saved }
+                .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) }
                 .catch { e ->
                     when (e) {
                         is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
@@ -143,6 +156,21 @@ class HomeViewModel(
                 }
                 .collect { catalog.value = CatalogState.Ready(it) }
         }
+    }
+
+    /**
+     * Adds movies the viewer kept from online rows or web search, so My list and Recently opened keep them after
+     * they leave the popular rows. With online data off their image URLs are dropped, so nothing loads from the web.
+     */
+    private fun withSaved(catalog: Catalog, saved: List<CinemetaMeta>, online: Boolean): Catalog {
+        if (saved.isEmpty()) return catalog
+        val known = catalog.movies.mapTo(HashSet()) { it.imdbId }
+        val extra = saved.asSequence()
+            .filter { it.imdbId !in known }
+            .mapNotNull(Cinemeta::toMovie)
+            .map { if (online) it else it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) }
+            .toList()
+        return if (extra.isEmpty()) catalog else catalog.copy(movies = catalog.movies + extra)
     }
 
     fun refreshApps() {
@@ -196,7 +224,7 @@ class HomeViewModel(
 
     fun details(movieId: String): MovieDetails? {
         val ready = catalog.value as? CatalogState.Ready ?: return null
-        val movie = ready.catalog.movie(movieId) ?: return null
+        val movie = ready.catalog.movie(movieId) ?: webMovies[movieId] ?: return null
         return MovieDetails(movie, Similar.find(ready.catalog.movies, movie))
     }
 
@@ -222,6 +250,51 @@ class HomeViewModel(
 
     fun setSearchQuery(text: String) {
         _searchQuery.value = text.take(MAX_QUERY_LENGTH)
+        scheduleWebSearch(_searchQuery.value)
+    }
+
+    private val _webSearch = MutableStateFlow(WebSearchState())
+
+    /** Results from Cinemeta's search for the current query, shown under the library results. */
+    val webSearch: StateFlow<WebSearchState> = _webSearch.asStateFlow()
+
+    /** Movies from the latest web search, so their pages open even though they are not in the catalog. */
+    private var webMovies: Map<String, Movie> = emptyMap()
+    private var webJob: Job? = null
+
+    private fun scheduleWebSearch(query: String) {
+        val q = query.trim()
+        // The same query again (focus moving around, coming back from a movie) keeps the search already done.
+        if (_webSearch.value.query == q && !_webSearch.value.failed && q.isNotEmpty()) return
+        webJob?.cancel()
+        val online = latestPrefs?.onlineEnabled ?: false
+        if (!online || Cinemeta.searchUrl(q) == null) {
+            _webSearch.value = WebSearchState()
+            return
+        }
+        _webSearch.value = WebSearchState(query = q, loading = true)
+        webJob = viewModelScope.launch {
+            // Wait for the typing to settle, so one search goes out per query rather than per letter.
+            delay(WEB_SEARCH_DELAY_MS)
+            val known = (catalog.value as? CatalogState.Ready)?.catalog ?: return@launch
+            val results = cinemeta.search(q, known)
+            if (results != null) webMovies = webMovies + results.associateBy { it.id }
+            _webSearch.value = if (results == null) WebSearchState(q, failed = true) else WebSearchState(q, results = results)
+        }
+    }
+
+    /** "Surprise me": a random curated movie within tonight's fear level that the parental lock allows. */
+    fun surprise() {
+        val ready = catalog.value as? CatalogState.Ready ?: return
+        val prefs = latestPrefs ?: return
+        val pick = NightPick.surprise(
+            movies = ready.catalog.movies,
+            maxFear = prefs.nightMaxFear,
+            random = Random.Default,
+            exclude = heroId.value,
+            isLocked = { prefs.parentalEnabled && !isSessionUnlocked() && it.fearForLock >= prefs.lockFromFear },
+        )
+        if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
 
     private fun push(screen: Screen) {
@@ -253,6 +326,7 @@ class HomeViewModel(
     fun toggleMyList(movie: Movie, language: Language) {
         viewModelScope.launch {
             val added = settings.toggleMyList(movie.id)
+            if (added) savedMovies.save(movie, language)
             show(if (added) R.string.msg_my_list_added else R.string.msg_my_list_removed, movie.displayTitle(language))
         }
     }
@@ -261,7 +335,8 @@ class HomeViewModel(
 
     fun trailer(movie: Movie) = guard(movie, GatedAction.Trailer(movie))
 
-    private fun movieById(id: String): Movie? = (catalog.value as? CatalogState.Ready)?.catalog?.movie(id)
+    private fun movieById(id: String): Movie? =
+        (catalog.value as? CatalogState.Ready)?.catalog?.movie(id) ?: webMovies[id]
 
     /** Runs [action] now, or asks for the PIN first when the parental lock covers it. */
     private fun guard(movie: Movie?, action: GatedAction) {
@@ -275,7 +350,10 @@ class HomeViewModel(
         when (action) {
             is GatedAction.Details -> push(Screen.Details(action.movieId))
             is GatedAction.Watch -> {
-                viewModelScope.launch { settings.pushRecent(action.movie.id) }
+                viewModelScope.launch {
+                    settings.pushRecent(action.movie.id)
+                    savedMovies.save(action.movie, language.value)
+                }
                 report(launcher.openInStremio(action.movie))
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
@@ -509,6 +587,7 @@ class HomeViewModel(
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val MAX_QUERY_LENGTH = 80
         private const val UNLOCK_WINDOW_MS = 30 * 60_000L
+        private const val WEB_SEARCH_DELAY_MS = 700L
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -518,6 +597,8 @@ class HomeViewModel(
                     container.settingsRepository,
                     container.launcher,
                     container.tmdbRepository,
+                    container.savedMoviesRepository,
+                    container.cinemetaRepository,
                 )
             }
         }

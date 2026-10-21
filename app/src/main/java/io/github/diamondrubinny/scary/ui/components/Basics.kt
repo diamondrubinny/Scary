@@ -216,6 +216,26 @@ fun SearchIcon(color: Color, modifier: Modifier = Modifier) {
     }
 }
 
+/** A die showing five pips, for "Surprise me". */
+@Composable
+fun DiceIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = 2.dp.toPx()
+        val inset = stroke / 2 + size.minDimension * 0.06f
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(inset, inset),
+            size = Size(size.width - inset * 2, size.height - inset * 2),
+            cornerRadius = CornerRadius(size.minDimension * 0.2f),
+            style = Stroke(width = stroke),
+        )
+        val r = size.minDimension * 0.075f
+        listOf(0.32f to 0.32f, 0.68f to 0.32f, 0.5f to 0.5f, 0.32f to 0.68f, 0.68f to 0.68f).forEach { (x, y) ->
+            drawCircle(color, radius = r, center = Offset(size.width * x, size.height * y))
+        }
+    }
+}
+
 @Composable
 fun MicIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {

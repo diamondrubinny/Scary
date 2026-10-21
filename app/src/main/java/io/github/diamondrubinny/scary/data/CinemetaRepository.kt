@@ -5,6 +5,8 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
+import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -63,6 +65,15 @@ class CinemetaRepository(context: Context) {
         val metas = metaList.filterNotNull().associateBy { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
         CinemetaCache(System.currentTimeMillis(), metas, rows).also(::save)
+    }
+
+    /**
+     * Web search in Cinemeta for the search screen. Only the query text and the TV's IP reach Cinemeta. Null when the
+     * query is invalid, the TV is offline or the service is down; never throws.
+     */
+    suspend fun search(query: String, known: Catalog): List<Movie>? = withContext(Dispatchers.IO) {
+        val url = Cinemeta.searchUrl(query) ?: return@withContext null
+        fetch(url)?.let { Cinemeta.searchResults(it, known) }
     }
 
     private fun save(cache: CinemetaCache) {
