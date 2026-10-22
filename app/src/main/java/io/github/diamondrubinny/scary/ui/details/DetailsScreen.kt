@@ -14,7 +14,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,13 +73,7 @@ fun DetailsScreen(
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
-                BasicText(
-                    text = movie.displayTitle(language),
-                    style = ScaryType.Display.mixedLanguage(),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.semantics { heading() },
-                )
+                MovieTitle(movie, language)
                 if (movie.displayTitle(language) != movie.title) {
                     BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
                 }
@@ -145,3 +145,38 @@ fun DetailsScreen(
         }
     }
 }
+
+/**
+ * The movie's logo art when Cinemeta has one and the title is shown in its original language (a translated title
+ * would contradict an English logo). The text title shows until the logo arrives, and whenever it cannot load.
+ */
+@Composable
+private fun MovieTitle(movie: Movie, language: Language) {
+    val title = movie.displayTitle(language)
+    val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
+    var logoShown by remember(movie.id) { mutableStateOf(false) }
+    Box(Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = title }) {
+        if (!logoShown) {
+            BasicText(
+                text = title,
+                style = ScaryType.Display.mixedLanguage(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (logo != null) {
+            AsyncImage(
+                model = logo,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterStart,
+                onSuccess = { logoShown = true },
+                onError = { logoShown = false },
+                modifier = Modifier.heightIn(max = LOGO_MAX_HEIGHT).widthIn(max = LOGO_MAX_WIDTH),
+            )
+        }
+    }
+}
+
+private val LOGO_MAX_HEIGHT = 110.dp
+private val LOGO_MAX_WIDTH = 480.dp

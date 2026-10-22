@@ -1,6 +1,11 @@
 package io.github.diamondrubinny.scary.ui.fx
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -20,12 +26,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import kotlinx.coroutines.delay
 
 /**
  * The selected movie's background art behind the whole screen, darkened on the text side and toward the rows
  * so text stays readable. Waits a moment before switching, so fast scrolling does not decode every image.
+ * The art drifts slowly (a Ken Burns zoom and pan) unless motion is reduced.
  */
 @Composable
 fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
@@ -36,6 +44,7 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
         shown = movie
     }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val drift = kenBurns(enabled = !LocalReduceMotion.current)
 
     Box(modifier.fillMaxSize()) {
         HeroBackdrop(shown)
@@ -47,7 +56,17 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     alpha = 0.9f,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        // Read in the draw phase only, so the drift never recomposes the screen.
+                        .graphicsLayer {
+                            val t = drift()
+                            val scale = 1f + KEN_BURNS_ZOOM * t
+                            scaleX = scale
+                            scaleY = scale
+                            // Drift away from the text side, toward the open part of the picture.
+                            translationX = (if (rtl) -1f else 1f) * size.width * KEN_BURNS_PAN * t
+                        },
                 )
             }
         }
@@ -79,5 +98,22 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
     }
 }
 
+/** 0 to 1 and back, slowly; always 0 when motion is reduced. */
+@Composable
+private fun kenBurns(enabled: Boolean): () -> Float {
+    if (!enabled) return { 0f }
+    val transition = rememberInfiniteTransition(label = "kenBurns")
+    val progress = transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(tween(KEN_BURNS_MS, easing = LinearEasing), RepeatMode.Reverse),
+        label = "kenBurnsProgress",
+    )
+    return { progress.value }
+}
+
 private const val SWITCH_DELAY_MS = 350L
+private const val KEN_BURNS_MS = 24_000
+private const val KEN_BURNS_ZOOM = 0.06f
+private const val KEN_BURNS_PAN = 0.015f
 private const val FADE_MS = 700

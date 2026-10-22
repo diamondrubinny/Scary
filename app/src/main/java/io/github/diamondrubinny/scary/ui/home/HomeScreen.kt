@@ -1,5 +1,18 @@
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -285,9 +298,67 @@ fun subgenreLine(movie: Movie): String {
     return (listOf(genre) + subs).joinToString(" · ")
 }
 
+/**
+ * The shape of the home screen while the library loads: hero lines and two rows of cards, pulsing slowly
+ * (about once every 1.4 seconds, far from flashing; still when motion is reduced). TalkBack hears "Loading".
+ */
 @Composable
 fun LoadingView(modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        BasicText(stringResource(R.string.loading), style = ScaryType.Title.copy(color = ScaryColors.Ash))
+    val loading = stringResource(R.string.loading)
+    val pulse = if (LocalReduceMotion.current) {
+        { SKELETON_ALPHA_MIN }
+    } else {
+        val transition = rememberInfiniteTransition(label = "skeleton")
+        val alpha = transition.animateFloat(
+            initialValue = SKELETON_ALPHA_MIN,
+            targetValue = SKELETON_ALPHA_MAX,
+            animationSpec = infiniteRepeatable(tween(SKELETON_PULSE_MS), RepeatMode.Reverse),
+            label = "skeletonAlpha",
+        );
+        { alpha.value }
+    }
+    Column(
+        modifier
+            .fillMaxSize()
+            .semantics(mergeDescendants = true) {
+                contentDescription = loading
+                liveRegion = LiveRegionMode.Polite
+            }
+            .graphicsLayer { alpha = pulse() }
+            .padding(horizontal = SidePadding),
+    ) {
+        Spacer(Modifier.height(150.dp))
+        SkeletonBlock(Modifier.width(140.dp).height(16.dp))
+        Spacer(Modifier.height(14.dp))
+        SkeletonBlock(Modifier.width(460.dp).height(64.dp))
+        Spacer(Modifier.height(14.dp))
+        SkeletonBlock(Modifier.width(380.dp).height(18.dp))
+        Spacer(Modifier.height(10.dp))
+        SkeletonBlock(Modifier.width(560.dp).height(18.dp))
+        Spacer(Modifier.height(22.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            SkeletonBlock(Modifier.width(190.dp).height(48.dp))
+            SkeletonBlock(Modifier.width(120.dp).height(48.dp))
+            SkeletonBlock(Modifier.width(120.dp).height(48.dp))
+        }
+        Spacer(Modifier.height(40.dp))
+        repeat(2) {
+            SkeletonBlock(Modifier.width(180.dp).height(20.dp))
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                repeat(SKELETON_CARDS) { SkeletonBlock(Modifier.width(104.dp).height(156.dp)) }
+            }
+            Spacer(Modifier.height(24.dp))
+        }
     }
 }
+
+@Composable
+private fun SkeletonBlock(modifier: Modifier) {
+    Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(6.dp)))
+}
+
+private const val SKELETON_ALPHA_MIN = 0.45f
+private const val SKELETON_ALPHA_MAX = 0.9f
+private const val SKELETON_PULSE_MS = 700
+private const val SKELETON_CARDS = 12
