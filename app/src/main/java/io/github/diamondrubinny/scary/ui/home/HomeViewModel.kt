@@ -16,6 +16,7 @@ import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
+import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
@@ -121,7 +122,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, hero, selectedMood, prefs)
+            is CatalogState.Ready -> buildState(visible(catalogState.catalog, prefs), tiles, drawer, hero, selectedMood, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -129,6 +130,7 @@ class HomeViewModel(
             soundsEnabled = prefs.soundsEnabled,
             onlineEnabled = prefs.onlineEnabled,
             myListIds = prefs.myListIds.toSet(),
+            familyNight = prefs.familyNight,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
@@ -201,7 +203,11 @@ class HomeViewModel(
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
             add(HomeRow.Moods(selectedMood, selectedMood?.pick(catalog.movies).orEmpty()))
-            catalog.collections.forEach { add(HomeRow.Collection(it, catalog.moviesOf(it))) }
+            catalog.collections.forEach { collection ->
+                // Family night can empty a row; an empty row is not shown.
+                val movies = catalog.moviesOf(collection)
+                if (movies.isNotEmpty()) add(HomeRow.Collection(collection, movies))
+            }
         }
         return HomeUiState(
             loading = false,
@@ -232,10 +238,21 @@ class HomeViewModel(
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
     fun details(movieId: String): MovieDetails? {
-        val ready = catalog.value as? CatalogState.Ready ?: return null
-        val movie = ready.catalog.movie(movieId) ?: webMovies[movieId] ?: return null
-        return MovieDetails(movie, Similar.find(ready.catalog.movies, movie))
+        val shown = visibleCatalog() ?: return null
+        val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
+        return MovieDetails(movie, Similar.find(shown.movies, movie))
     }
+
+    /** The catalog as the viewer may see it: in family night, only the gentlest curated movies. */
+    private fun visible(catalog: Catalog, prefs: LauncherPrefs?): Catalog =
+        if (prefs?.familyNight == true) FamilyNight.filter(catalog) else catalog
+
+    private fun visibleCatalog(): Catalog? =
+        (catalog.value as? CatalogState.Ready)?.catalog?.let { visible(it, latestPrefs) }
+
+    /** Movies from web search open only outside family night (they have no fear level to check). */
+    private fun webMovieIfAllowed(id: String): Movie? =
+        if (latestPrefs?.familyNight == true) null else webMovies[id]
 
     fun onCardFocused(key: String, movieId: String?) {
         lastFocusedKey = key
@@ -277,7 +294,8 @@ class HomeViewModel(
         if (_webSearch.value.query == q && !_webSearch.value.failed && q.isNotEmpty()) return
         webJob?.cancel()
         val online = latestPrefs?.onlineEnabled ?: false
-        if (!online || Cinemeta.searchUrl(q) == null) {
+        val family = latestPrefs?.familyNight ?: false
+        if (!online || family || Cinemeta.searchUrl(q) == null) {
             _webSearch.value = WebSearchState()
             return
         }
@@ -294,10 +312,10 @@ class HomeViewModel(
 
     /** "Surprise me": a random curated movie within tonight's fear level that the parental lock allows. */
     fun surprise() {
-        val ready = catalog.value as? CatalogState.Ready ?: return
+        val shown = visibleCatalog() ?: return
         val prefs = latestPrefs ?: return
         val pick = NightPick.surprise(
-            movies = ready.catalog.movies,
+            movies = shown.movies,
             maxFear = prefs.nightMaxFear,
             random = Random.Default,
             exclude = heroId.value,
@@ -344,8 +362,7 @@ class HomeViewModel(
 
     fun trailer(movie: Movie) = guard(movie, GatedAction.Trailer(movie))
 
-    private fun movieById(id: String): Movie? =
-        (catalog.value as? CatalogState.Ready)?.catalog?.movie(id) ?: webMovies[id]
+    private fun movieById(id: String): Movie? = visibleCatalog()?.movie(id) ?: webMovieIfAllowed(id)
 
     /** Runs [action] now, or asks for the PIN first when the parental lock covers it. */
     private fun guard(movie: Movie?, action: GatedAction) {
@@ -571,6 +588,20 @@ class HomeViewModel(
             val enabled = !settings.prefs.first().effectsEnabled
             settings.setEffectsEnabled(enabled)
             show(if (enabled) R.string.msg_effects_on else R.string.msg_effects_off)
+        }
+    }
+
+    /**
+     * Turning family night on also ends any PIN unlock, so turning it off again (in Settings) asks for the PIN.
+     * Without a PIN, anyone can turn it off; the setting's note says so.
+     */
+    fun toggleFamilyNight() {
+        viewModelScope.launch {
+            val enabled = !settings.prefs.first().familyNight
+            if (enabled) sessionUnlocked.value = false
+            settings.setFamilyNight(enabled)
+            _webSearch.value = WebSearchState()
+            show(if (enabled) R.string.msg_family_on else R.string.msg_family_off)
         }
     }
 

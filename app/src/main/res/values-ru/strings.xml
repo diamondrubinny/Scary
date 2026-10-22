@@ -177,4 +177,10 @@
     <string name="mood_relentless">Сегодня не уснуть</string>
     <string name="row_halloween">Скоро Хэллоуин</string>
     <string name="row_friday_13th">Пятница, 13-е</string>
+    <string name="settings_family_night">Семейный вечер</string>
+    <string name="settings_family_night_note">Везде показываются только самые мягкие фильмы (страх 1–2), поиск в интернете выключен. Чтобы выключить, нужен PIN.</string>
+    <string name="settings_family_night_note_no_pin">Везде показываются только самые мягкие фильмы (страх 1–2), поиск в интернете выключен. Задайте PIN выше, чтобы выключить мог только взрослый.</string>
+    <string name="msg_family_on">Семейный вечер включён: только мягкие фильмы</string>
+    <string name="msg_family_off">Семейный вечер выключен</string>
+    <string name="family_night_badge">Семейный вечер</string>
 </resources>

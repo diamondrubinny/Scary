@@ -42,9 +42,21 @@ fun TopBar(
     onOpenSearch: () -> Unit,
     onSurprise: () -> Unit,
     modifier: Modifier = Modifier,
+    familyNight: Boolean = false,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+        if (familyNight) {
+            // Not just a color: the badge says it in words.
+            BasicText(
+                stringResource(R.string.family_night_badge),
+                style = ScaryType.Label.copy(color = ScaryColors.Void),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .background(ScaryColors.Candle, RoundedCornerShape(50))
+                    .padding(horizontal = 14.dp, vertical = 5.dp),
+            )
+        }
         Spacer(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Clock()

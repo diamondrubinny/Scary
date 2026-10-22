@@ -177,4 +177,10 @@
     <string name="mood_relentless">Hoje ninguém dorme</string>
     <string name="row_halloween">O Halloween está chegando</string>
     <string name="row_friday_13th">Sexta-feira 13</string>
+    <string name="settings_family_night">Noite em família</string>
+    <string name="settings_family_night_note">Só os filmes mais leves (medo 1–2) aparecem, e a busca na web fica desligada. Para desligar, é preciso o PIN.</string>
+    <string name="settings_family_night_note_no_pin">Só os filmes mais leves (medo 1–2) aparecem, e a busca na web fica desligada. Defina um PIN acima para que só um adulto possa desligar.</string>
+    <string name="msg_family_on">Noite em família ligada: só filmes leves</string>
+    <string name="msg_family_off">Noite em família desligada</string>
+    <string name="family_night_badge">Noite em família</string>
 </resources>

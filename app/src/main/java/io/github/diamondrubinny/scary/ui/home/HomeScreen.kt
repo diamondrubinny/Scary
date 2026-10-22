@@ -113,6 +113,7 @@ fun HomeScreen(
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
+            familyNight = state.familyNight,
         )
         Hero(
             movie = state.hero,

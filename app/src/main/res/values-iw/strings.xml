@@ -177,4 +177,10 @@
     <string name="mood_relentless">לא לישון הלילה</string>
     <string name="row_halloween">הלואין מתקרב</string>
     <string name="row_friday_13th">שישי ה־13</string>
+    <string name="settings_family_night">ערב משפחתי</string>
+    <string name="settings_family_night_note">רק הסרטים העדינים ביותר (פחד 1–2) מוצגים בכל מקום, והחיפוש באינטרנט כבוי. כדי לכבות נדרש PIN.</string>
+    <string name="settings_family_night_note_no_pin">רק הסרטים העדינים ביותר (פחד 1–2) מוצגים בכל מקום, והחיפוש באינטרנט כבוי. הגדירו PIN למעלה, כדי שרק מבוגר יוכל לכבות.</string>
+    <string name="msg_family_on">ערב משפחתי פעיל: רק סרטים עדינים</string>
+    <string name="msg_family_off">ערב משפחתי כבוי</string>
+    <string name="family_night_badge">ערב משפחתי</string>
 </resources>

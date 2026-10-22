@@ -179,4 +179,10 @@
     <string name="mood_relentless">Don\'t sleep tonight</string>
     <string name="row_halloween">Halloween is coming</string>
     <string name="row_friday_13th">Friday the 13th</string>
+    <string name="settings_family_night">Family night</string>
+    <string name="settings_family_night_note">Only the gentlest movies (fear 1–2) appear anywhere, and web search is off. Turning it off needs the PIN.</string>
+    <string name="settings_family_night_note_no_pin">Only the gentlest movies (fear 1–2) appear anywhere, and web search is off. Set a PIN above so only an adult can turn it off.</string>
+    <string name="msg_family_on">Family night is on: only gentle movies</string>
+    <string name="msg_family_off">Family night is off</string>
+    <string name="family_night_badge">Family night</string>
 </resources>

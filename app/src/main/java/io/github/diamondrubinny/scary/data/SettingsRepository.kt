@@ -46,6 +46,8 @@ data class LauncherPrefs(
     val onlineEnabled: Boolean,
     /** The viewer's watchlist, newest first. */
     val myListIds: List<String> = emptyList(),
+    /** Only the gentlest curated movies (fear 1-2) appear anywhere, and no web search. */
+    val familyNight: Boolean = false,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -68,6 +70,7 @@ class SettingsRepository(private val context: Context) {
                 soundsEnabled = p[SOUNDS] ?: false,
                 onlineEnabled = p[ONLINE] ?: true,
                 myListIds = RecentList.decode(p[MY_LIST]),
+                familyNight = p[FAMILY_NIGHT] ?: false,
             )
         }
         .distinctUntilChanged()
@@ -123,6 +126,8 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setOnlineEnabled(enabled: Boolean) = edit { it[ONLINE] = enabled }
 
+    suspend fun setFamilyNight(enabled: Boolean) = edit { it[FAMILY_NIGHT] = enabled }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -152,6 +157,7 @@ class SettingsRepository(private val context: Context) {
         private val LOCK_FROM_FEAR = intPreferencesKey("parental_lock_from_fear")
         private val SOUNDS = booleanPreferencesKey("ambient_sounds")
         private val ONLINE = booleanPreferencesKey("online_artwork")
+        private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

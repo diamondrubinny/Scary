@@ -28,6 +28,7 @@ data class HomeUiState(
     val onlineEnabled: Boolean = true,
     /** Ids on "My list", for the add/remove button on a movie's page. */
     val myListIds: Set<String> = emptySet(),
+    val familyNight: Boolean = false,
 ) {
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }

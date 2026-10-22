@@ -41,6 +41,7 @@ class SettingsActions(
     val onSetupPin: () -> Unit,
     val onCycleLockLevel: () -> Unit,
     val onTurnOffLock: () -> Unit,
+    val onToggleFamilyNight: () -> Unit,
     val onToggleOnline: () -> Unit,
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
@@ -58,6 +59,7 @@ fun SettingsScreen(
     soundsEnabled: Boolean,
     parentalEnabled: Boolean,
     lockFromFear: Int,
+    familyNight: Boolean,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -169,6 +171,15 @@ fun SettingsScreen(
             )
         }
         BasicText(stringResource(R.string.settings_parental_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.settings_family_night),
+            value = stringResource(if (familyNight) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleFamilyNight,
+        )
+        BasicText(
+            stringResource(if (parentalEnabled) R.string.settings_family_night_note else R.string.settings_family_night_note_no_pin),
+            style = ScaryType.Caption,
+        )
         SettingRow(
             label = stringResource(R.string.settings_system),
             value = null,

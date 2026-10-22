@@ -23,6 +23,7 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ScaryApplication
+import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.data.LanguageStore
@@ -42,7 +43,8 @@ import kotlin.random.Random
  * SCARY's screensaver: backdrops from the library fade in one after another, each with its title.
  *
  * No flashing: a 1.5 second crossfade every 12 seconds and a slow 8% zoom, both skipped when the TV's
- * "Remove animations" is on. With the parental lock on, only movies below the lock level appear.
+ * "Remove animations" is on. With the parental lock on, only movies below the lock level appear; on family night,
+ * only the gentlest ones.
  * Only the curated horror library appears. Offline it falls back to those movies' own tints, so it never shows a
  * blank screen.
  */
@@ -118,7 +120,9 @@ class ScaryDream : DreamService() {
                 .collect { catalog ->
                     // Only the hand-picked library: the online "popular" rows can include plain action movies.
                     val allowed = catalog.movies.filter {
-                        it.curated && (!prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear)
+                        it.curated &&
+                            (!prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear) &&
+                            (!prefs.familyNight || FamilyNight.allows(it))
                     }
                     val withArt = allowed.filter { it.backgroundUrl != null }
                     val next = withArt.ifEmpty { allowed }

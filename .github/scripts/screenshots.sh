@@ -107,6 +107,13 @@ key KEYCODE_DPAD_CENTER
 shot 35-moods 4
 open --es scary.debug.open home
 
+# Family night: only gentle movies and a badge in the top bar; then back to normal.
+open --es scary.debug.open family
+shot 36-family-night 6
+open --es scary.debug.open family
+sleep 3
+open --es scary.debug.open home
+
 # English set for the README gallery (copied to docs/screenshots/en-*.jpg).
 open --es scary.debug.open language:en
 sleep 6
