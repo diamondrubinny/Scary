@@ -2,19 +2,18 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "io.github.diamondrubinny.scary"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.diamondrubinny.scary"
         // Android 8.0+. Covers Xiaomi Mi Box S / Mi TV Stick (Android TV 9+) and Google TV models.
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         // CI run number, so every build installs over the previous one.
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
         versionName = "0.4.0"
