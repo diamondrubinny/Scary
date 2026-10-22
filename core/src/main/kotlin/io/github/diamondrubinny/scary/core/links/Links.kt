@@ -5,7 +5,6 @@
 package io.github.diamondrubinny.scary.core.links
 
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 
 /** Known package names. Verify against the installed app on the device (see docs/XIAOMI_SETUP.md). */
 object KnownPackages {
@@ -49,6 +48,11 @@ object Links {
 
     fun youTubeTrailerSearch(title: String, year: Int): String = youTubeSearch("$title $year trailer")
 
-    fun youTubeSearch(query: String): String =
-        "https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, StandardCharsets.UTF_8)
+    fun youTubeSearch(query: String): String = "https://www.youtube.com/results?search_query=" + urlEncode(query)
+
+    /**
+     * Form encoding (spaces as +) that works on every Android version: URLEncoder.encode(String, Charset) only exists
+     * from Android 13 and crashed SCARY on older TVs, so the charset is named instead.
+     */
+    fun urlEncode(text: String): String = URLEncoder.encode(text, "UTF-8")
 }

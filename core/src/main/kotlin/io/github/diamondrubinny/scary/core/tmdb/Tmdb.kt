@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.tmdb
 
+import io.github.diamondrubinny.scary.core.links.Links
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.model.Language
@@ -17,8 +18,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 /** What TMDB adds to a movie: text in the UI language and higher-resolution art. */
@@ -145,7 +144,7 @@ object Tmdb {
                 "vote_count.gte" to "500",
             )
         } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to "1")
-        return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + URLEncoder.encode(v, StandardCharsets.UTF_8) }
+        return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
     }
 
     /** Adds the v3 key to a URL; v4 tokens go in the Authorization header instead. */
