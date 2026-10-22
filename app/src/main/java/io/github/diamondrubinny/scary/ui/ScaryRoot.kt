@@ -65,6 +65,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val screen by viewModel.screen.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
+    val scrollToRow by viewModel.scrollToRow.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
@@ -240,6 +241,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     resets = resets,
                     actions = actions,
                     showSetHome = launcherStatus.needsSetup,
+                    scrollToRow = scrollToRow,
+                    onScrolledToRow = viewModel::onScrolledToRow,
                 )
             }
 

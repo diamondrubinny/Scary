@@ -96,6 +96,21 @@ class HomeViewModel(
     var lastFocusedKey: String? = null
         private set
 
+    private val _scrollToRow = MutableStateFlow<String?>(null)
+
+    /** A home row to bring into view, then focus [lastFocusedKey] in it. Set only by debug intents. */
+    val scrollToRow: StateFlow<String?> = _scrollToRow.asStateFlow()
+
+    /** Debug builds only (via MainActivity): shows [rowKey] with the card [focusKey] focused, for screenshots. */
+    fun debugShowRow(rowKey: String, focusKey: String?) {
+        lastFocusedKey = focusKey
+        _scrollToRow.value = rowKey
+    }
+
+    fun onScrolledToRow() {
+        _scrollToRow.value = null
+    }
+
     val message: StateFlow<UserMessage?> = _message.asStateFlow()
     val homeResets: StateFlow<Int> = _homeResets.asStateFlow()
 

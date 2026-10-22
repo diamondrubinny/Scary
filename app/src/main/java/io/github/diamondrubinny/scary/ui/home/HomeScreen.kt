@@ -98,9 +98,23 @@ fun HomeScreen(
     resets: Int,
     actions: HomeActions,
     showSetHome: Boolean = false,
+    scrollToRow: String? = null,
+    onScrolledToRow: () -> Unit = {},
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
+
+    // Debug intents only: bring a row into view and focus the requested card in it.
+    LaunchedEffect(scrollToRow, state.loading) {
+        if (scrollToRow == null || state.loading) return@LaunchedEffect
+        val index = state.rows.indexOfFirst { it.key == scrollToRow }
+        if (index >= 0) {
+            listState.scrollToItem(index)
+            withFrameNanos { }
+            runCatching { restoreFocus.requestFocus() }
+        }
+        onScrolledToRow()
+    }
 
     // Focus lands on "watch tonight's pick" at start and after Home; on the last card when coming back from details.
     LaunchedEffect(state.loading, resets) {

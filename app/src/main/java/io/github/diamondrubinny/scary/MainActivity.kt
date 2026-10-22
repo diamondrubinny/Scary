@@ -12,6 +12,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
+import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
@@ -112,6 +113,13 @@ class MainActivity : ComponentActivity() {
             target == "home" -> viewModel.onHomePressed()
             target == "surprise" -> viewModel.surprise()
             target == "family" -> viewModel.toggleFamilyNight()
+            // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
+            // is chosen and its chip focused.
+            target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)
+            target.startsWith("mood:") -> Mood.fromKey(target.removePrefix("mood:"))?.let { mood ->
+                viewModel.toggleMood(mood)
+                viewModel.debugShowRow("moods", focusKey = "moods:chip:${mood.key}")
+            }
             target == "privacy" || target == "accessibility" -> {
                 viewModel.openSettings()
                 viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)
