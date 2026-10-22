@@ -198,4 +198,9 @@
         <item quantity="many">Введено %1$d цифр</item>
         <item quantity="other">Введено %1$d цифры</item>
     </plurals>
+    <string name="empty_search_title">Во тьме ничего нет</string>
+    <string name="empty_search_body">Попробуйте имя режиссёра, год или вид хоррора, например «призраки» или «слэшер».</string>
+    <string name="mood_empty_title">Сегодня для этого настроения ничего нет</string>
+    <string name="mood_empty_body">Семейный вечер или родительский замок скрывают эти фильмы. Выберите другое настроение.</string>
+    <string name="catalog_error_title">Библиотека фильмов не найдена</string>
 </resources>

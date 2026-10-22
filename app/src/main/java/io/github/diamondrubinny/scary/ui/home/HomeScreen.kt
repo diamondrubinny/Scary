@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.semantics.selected
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.ui.components.EmptyState
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -83,6 +85,9 @@ class HomeActions(
 
 val SidePadding = 48.dp
 
+/** The list of home rows, for UI tests. */
+const val HOME_ROWS_TAG = "homeRows"
+
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -123,9 +128,9 @@ fun HomeScreen(
             actions = actions,
         )
         if (state.catalogError) {
-            BasicText(
-                stringResource(R.string.msg_catalog_error),
-                style = ScaryType.BodyStrong,
+            EmptyState(
+                title = stringResource(R.string.catalog_error_title),
+                body = stringResource(R.string.msg_catalog_error),
                 modifier = Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
             )
         }
@@ -134,7 +139,8 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .fadeTopEdge(72.dp),
+                .fadeTopEdge(72.dp)
+                .testTag(HOME_ROWS_TAG),
             contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -419,6 +425,14 @@ private fun MoodsRowView(
                     focusRequester = restoreFocus.takeIf { key == restoreKey },
                 )
             }
+        }
+        if (row.selected != null && row.movies.isEmpty()) {
+            // Family night or the parental limits can leave a mood with nothing to show.
+            EmptyState(
+                title = stringResource(R.string.mood_empty_title),
+                body = stringResource(R.string.mood_empty_body),
+                modifier = Modifier.padding(horizontal = SidePadding, vertical = 8.dp),
+            )
         }
         if (row.selected != null && row.movies.isNotEmpty()) {
             LazyRow(

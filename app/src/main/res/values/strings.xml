@@ -194,4 +194,9 @@
         <item quantity="one">%1$d digit entered</item>
         <item quantity="other">%1$d digits entered</item>
     </plurals>
+    <string name="empty_search_title">Nothing in the dark</string>
+    <string name="empty_search_body">Try a director, a year, or a kind of horror such as ghosts or slasher.</string>
+    <string name="mood_empty_title">Nothing for this mood tonight</string>
+    <string name="mood_empty_body">Family night or the parental lock hides these movies. Try another mood.</string>
+    <string name="catalog_error_title">The library is missing</string>
 </resources>

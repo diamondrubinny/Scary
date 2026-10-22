@@ -41,6 +41,9 @@ jobs:
       - name: Build debug APK
         run: ./gradlew --no-daemon :app:assembleDebug
 
+      - name: Build UI test APK
+        run: ./gradlew --no-daemon :app:assembleDebugAndroidTest
+
       - name: Lint
         run: ./gradlew --no-daemon :app:lintDebug
 
@@ -69,6 +72,7 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/debug/app-debug.apk "dist/scary-debug-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/apk/release/app-release.apk "dist/scary-release-${GITHUB_RUN_NUMBER}.apk"
+          cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk "dist/scary-tests-${GITHUB_RUN_NUMBER}.apk"
           ls -l dist
           sha256sum dist/*.apk
 
@@ -154,6 +158,7 @@ jobs:
         run: |
           cp dist/scary-debug-*.apk dist/scary.apk
           cp dist/scary-release-*.apk dist/scary-release.apk
+          cp dist/scary-tests-*.apk dist/scary-tests.apk
 
       - name: Enable KVM
         run: |
@@ -183,7 +188,7 @@ jobs:
         run: |
           git init -q out && cd out
           cp ../screenshots/*.png .
-          cp ../screenshots/startup.txt . 2>/dev/null || true
+          cp ../screenshots/startup.txt ../screenshots/ui-tests.txt . 2>/dev/null || true
           printf 'SCARY screenshots from an Android TV emulator, build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
           git add .
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Screenshots for build ${GITHUB_RUN_NUMBER}"

@@ -15,6 +15,20 @@ adb install -r dist/scary.apk
 # Keep the screen awake for the whole run.
 adb shell svc power stayon true || true
 
+# UI tests first, on a clean install: home, search, a movie page and My list, the mood row, family night.
+# System animations are off while they run (the usual setup for UI tests) and back on for the screenshots.
+if [ -f dist/scary-tests.apk ]; then
+  adb install -r dist/scary-tests.apk
+  for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 0; done
+  result=$(adb shell am instrument -w "$PKG.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')
+  for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 1; done
+  echo "$result" | tee "$OUT/ui-tests.txt"
+  if ! echo "$result" | grep -q '^OK ('; then
+    echo "UI tests failed."
+    exit 1
+  fi
+fi
+
 open
 shot 01-home 25
 

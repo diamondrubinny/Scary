@@ -195,4 +195,9 @@
         <item quantity="two">הוזנו שתי ספרות</item>
         <item quantity="other">הוזנו %1$d ספרות</item>
     </plurals>
+    <string name="empty_search_title">שום דבר בחושך</string>
+    <string name="empty_search_body">נסו שם של במאי, שנה, או סוג אימה כמו רוחות או סלאשר.</string>
+    <string name="mood_empty_title">אין סרטים למצב הרוח הזה הלילה</string>
+    <string name="mood_empty_body">ערב משפחתי או נעילת ההורים מסתירים את הסרטים האלה. נסו מצב רוח אחר.</string>
+    <string name="catalog_error_title">ספריית הסרטים חסרה</string>
 </resources>

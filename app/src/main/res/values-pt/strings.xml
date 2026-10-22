@@ -195,4 +195,9 @@
         <item quantity="many">%1$d dígitos digitados</item>
         <item quantity="other">%1$d dígitos digitados</item>
     </plurals>
+    <string name="empty_search_title">Nada no escuro</string>
+    <string name="empty_search_body">Tente um diretor, um ano ou um tipo de terror, como fantasmas ou slasher.</string>
+    <string name="mood_empty_title">Nada para este clima hoje</string>
+    <string name="mood_empty_body">A noite em família ou o controle dos pais escondem estes filmes. Tente outro clima.</string>
+    <string name="catalog_error_title">A biblioteca está faltando</string>
 </resources>

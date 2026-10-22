@@ -201,6 +201,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     language = language,
                     isLocked = state::isLocked,
                     webSearch = webSearch,
+                    onSurprise = viewModel::surprise,
                 )
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)

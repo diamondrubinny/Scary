@@ -205,4 +205,9 @@
         <item quantity="many">تم إدخال %1$d رقمًا</item>
         <item quantity="other">تم إدخال %1$d رقم</item>
     </plurals>
+    <string name="empty_search_title">لا شيء في الظلام</string>
+    <string name="empty_search_body">جرّب اسم مخرج أو سنة أو نوعًا من الرعب مثل الأشباح أو السفّاحين.</string>
+    <string name="mood_empty_title">لا أفلام لهذا المزاج الليلة</string>
+    <string name="mood_empty_body">السهرة العائلية أو القفل الأبوي يخفيان هذه الأفلام. جرّب مزاجًا آخر.</string>
+    <string name="catalog_error_title">مكتبة الأفلام مفقودة</string>
 </resources>

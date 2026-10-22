@@ -58,6 +58,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.IconCircleButton
 import io.github.diamondrubinny.scary.ui.components.MicIcon
+import io.github.diamondrubinny.scary.ui.components.EmptyState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.SearchIcon
 import io.github.diamondrubinny.scary.ui.home.SidePadding
@@ -79,6 +80,7 @@ fun SearchScreen(
     language: Language,
     isLocked: (Movie) -> Boolean = { false },
     webSearch: WebSearchState = WebSearchState(),
+    onSurprise: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val resources = context.resources
@@ -184,6 +186,19 @@ fun SearchScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp),
             modifier = Modifier.weight(1f),
         ) {
+            // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
+            val webDone = webSearch.query != query.trim() || !webSearch.loading
+            val webEmpty = webSearch.query != query.trim() || webSearch.results.none { web -> results.none { it.imdbId == web.imdbId } }
+            if (query.isNotBlank() && results.isEmpty() && webDone && webEmpty) {
+                item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
+                    EmptyState(
+                        title = stringResource(R.string.empty_search_title),
+                        body = stringResource(R.string.empty_search_body),
+                        actionLabel = stringResource(R.string.surprise_me),
+                        onAction = onSurprise,
+                    )
+                }
+            }
             items(results, key = { it.id }) { movie ->
                 PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
             }
