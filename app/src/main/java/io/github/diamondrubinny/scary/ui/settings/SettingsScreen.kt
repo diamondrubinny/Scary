@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.settings
 
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -191,6 +196,7 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        CreditLine()
         SettingRow(
             label = stringResource(R.string.settings_privacy),
             value = null,

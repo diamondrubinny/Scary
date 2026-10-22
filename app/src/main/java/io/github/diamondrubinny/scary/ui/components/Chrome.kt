@@ -1,5 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.foundation.layout.Column
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.core.brand.Credit
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,7 +52,10 @@ fun TopBar(
     familyNight: Boolean = false,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+        Column {
+            BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+            CreditLine(short = true)
+        }
         if (familyNight) {
             // Not just a color: the badge says it in words.
             BasicText(
@@ -127,3 +137,16 @@ private const val MILLIS_PER_MINUTE = 60_000L
 private const val MESSAGE_DURATION_MS = 4_000L
 private const val MESSAGE_MS_PER_CHAR = 50L
 private const val MESSAGE_MAX_MS = 12_000L
+
+/**
+ * "Powered by SCARY · Open source". Required by the NOTICE file (Apache License 2.0, section 4(d)); see core Credit.
+ * Its own text direction, so the parts keep their order inside right-to-left screens.
+ */
+@Composable
+fun CreditLine(modifier: Modifier = Modifier, short: Boolean = false) {
+    BasicText(
+        text = if (short) Credit.SHORT else Credit.LINE,
+        style = ScaryType.Caption.mixedLanguage(),
+        modifier = modifier,
+    )
+}

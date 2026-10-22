@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary
 
 import android.view.KeyEvent
@@ -21,6 +25,8 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.brand.Credit
+import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import org.junit.Rule
 import org.junit.Test
@@ -73,6 +79,15 @@ class ScaryUiTest {
         waitFor(hasText(text(R.string.night_pick)))
         rule.onNodeWithContentDescription(text(R.string.search_title)).assertExists()
         rule.onNodeWithContentDescription(text(R.string.surprise_me)).assertExists()
+    }
+
+    @Test
+    fun theCreditShowsUnderTheLogoAndAtTheEndOfTheRows() {
+        waitForHome()
+        // Required by the NOTICE file (Apache License 2.0); the build fails if it disappears from the screen.
+        rule.onNode(hasText(Credit.SHORT)).assertExists()
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(CREDIT_KEY)
+        waitFor(hasText(Credit.LINE))
     }
 
     @Test

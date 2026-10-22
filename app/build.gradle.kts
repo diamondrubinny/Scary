@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {

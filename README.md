@@ -161,3 +161,9 @@ Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibi
 ## Privacy and credits
 
 No accounts, no analytics. Online artwork can be switched off in settings; only movie IDs (and your search text when you search) are sent to Cinemeta and, with your own key, TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Movie metadata and images belong to their owners. Fonts: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo, under the SIL Open Font License 1.1.
+
+## License and credit
+
+**Powered by SCARY · Open source · [github.com/diamondrubinny/Scary](https://github.com/diamondrubinny/Scary)**
+
+SCARY is licensed under the [Apache License 2.0](LICENSE). If you share a copy or build your own version, keep the [NOTICE](NOTICE) file and the "Powered by SCARY · Open source" credit in the app (Apache-2.0, section 4(d)). Every source file carries the credit, and CI fails without it.

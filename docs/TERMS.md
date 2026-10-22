@@ -15,7 +15,7 @@
 6. **מפתח TMDB.** אם תזינו מפתח, הוא שלכם, ואתם אחראים לעמוד בתנאי TMDB. SCARY שומרת אותו מוצפן במכשיר ושולחת אותו רק ל־TMDB.
 7. **מסך הבית ושירות הנגישות.** כדי ש־SCARY תיפתח בלחיצה על Home, אפשר להפעיל שירות נגישות שמאזין רק למקש Home. אפשר לכבות אותו, או לחזור למסך הבית המקורי, בכל רגע מהגדרות הטלוויזיה.
 8. **ללא אחריות.** האפליקציה ניתנת "כמות שהיא" (AS IS), ללא אחריות מכל סוג, במידה המרבית שהדין מתיר. איננו אחראים לנזק שנגרם משימוש בה, מחוסר זמינות של שירותים חיצוניים או מתוכן של צד שלישי. **ניסוח הגבלת האחריות דורש בדיקה משפטית, כי חלק מההגבלות אינן תקפות כלפי צרכנים.**
-9. **קוד פתוח.** קוד המקור זמין ב־github.com/diamondrubinny/Scary. הקוד מופץ ברישיון MIT (קובץ `LICENSE`). הגופנים מופצים ברישיון SIL Open Font License 1.1.
+9. **קוד פתוח.** קוד המקור זמין ב־github.com/diamondrubinny/Scary. הקוד מופץ ברישיון Apache 2.0 (קובצי `LICENSE` ו־`NOTICE`). מי שמפיץ עותק או גרסה משלו חייב להשאיר את קובץ ה־NOTICE ואת הקרדיט "Powered by SCARY · Open source". הגופנים מופצים ברישיון SIL Open Font License 1.1.
 10. **שינויים ויצירת קשר.** שינוי מהותי יופיע כאן עם תאריך. פניות: github.com/diamondrubinny/Scary/issues.
 
 ## English
@@ -30,12 +30,12 @@
 6. **TMDB key.** If you enter a key, it is yours and you are responsible for following TMDB's terms. SCARY stores it encrypted on the device and sends it only to TMDB.
 7. **Home screen and accessibility service.** To open SCARY with the Home button, you can turn on an accessibility service that listens only to the Home key. You can turn it off, or return to the original home screen, at any time in the TV settings.
 8. **No warranty.** The app is provided "as is", without warranty of any kind, to the fullest extent the law allows. We are not liable for damage from its use, from outside services being unavailable, or from third-party content. **The liability wording needs legal review, because some limits are not valid against consumers.**
-9. **Open source.** The source code is at github.com/diamondrubinny/Scary. The code is under the MIT License (`LICENSE` file). Fonts are distributed under the SIL Open Font License 1.1.
+9. **Open source.** The source code is at github.com/diamondrubinny/Scary. The code is under the Apache License 2.0 (`LICENSE` and `NOTICE` files). Anyone who redistributes a copy or a derived version must keep the NOTICE file and the "Powered by SCARY · Open source" credit. Fonts are distributed under the SIL Open Font License 1.1.
 10. **Changes and contact.** Material changes will appear here with a date. Contact: github.com/diamondrubinny/Scary/issues.
 
 ## נושאים לבדיקה משפטית
 - הגבלת אחריות מול חוק הגנת הצרכן ומול דיני האיחוד האירופי.
 - ניסוח ההסתייגות מתוספים ומתוכן מפר (סעיף 3), ואחריות אפשרית של מפיץ לאנצ׳ר שמקשר ל־Stremio.
 - זכויות בתמונות ובמידע מ־Cinemeta ו־TMDB, כולל שימוש מסחרי.
-- התאמת רישיון MIT לגופנים (OFL) ולספריות (Apache-2.0) שבאפליקציה, כולל קבצי NOTICE אם נדרשים.
+- המעבר מ־MIT ל־Apache-2.0: לוודא שכל הקוד שייך לבעל ה־repo (או שהתורמים מסכימים), ושדרישת הקרדיט ב־NOTICE אכיפה כפי שנוסחה. התאמה לגופנים (OFL) ולספריות (Apache-2.0).
 - דרישות Google Play לתנאי שימוש, אם האפליקציה תפורסם שם.

@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 pluginManagement {
     repositories {
         // Pass -Pscary.coreOnly to build only the pure-Kotlin :core module (no Android SDK or Google Maven needed).

@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -88,6 +93,9 @@ val SidePadding = 48.dp
 /** The list of home rows, for UI tests. */
 const val HOME_ROWS_TAG = "homeRows"
 
+/** Key of the credit line at the end of the home rows. */
+const val CREDIT_KEY = "credit"
+
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -160,6 +168,9 @@ fun HomeScreen(
         ) {
             items(state.rows, key = { it.key }) { row ->
                 HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
+            }
+            item(key = CREDIT_KEY) {
+                CreditLine(Modifier.padding(horizontal = SidePadding, vertical = 12.dp))
             }
         }
     }

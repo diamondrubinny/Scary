@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 # Installs the debug APK on the running TV emulator and captures each main screen.
 set -euo pipefail
 

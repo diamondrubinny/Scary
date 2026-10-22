@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.apps
 
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -115,6 +120,7 @@ fun AllAppsScreen(apps: List<DrawerApp>, actions: AllAppsActions) {
                 )
             }
         }
+        CreditLine(Modifier.padding(horizontal = SidePadding, vertical = 10.dp))
     }
 
     val selected = apps.firstOrNull { it.app.packageName == optionsFor }

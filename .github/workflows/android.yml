@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 name: Android CI
 
 on:
@@ -19,6 +22,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+
+      # Powered by SCARY · Open source: the Apache License 2.0 NOTICE requires the credit; the build fails without it.
+      - name: SCARY credit check
+        run: bash .github/scripts/check-credit.sh
 
       - uses: actions/setup-java@v4
         with:

@@ -41,6 +41,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Scary">
 
+        <!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+        <meta-data
+            android:name="io.github.diamondrubinny.scary.CREDIT"
+            android:value="Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize|screenLayout|orientation|uiMode"

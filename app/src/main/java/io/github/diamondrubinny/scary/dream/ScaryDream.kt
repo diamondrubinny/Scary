@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.dream
 
 import android.animation.AnimatorSet
@@ -23,6 +27,7 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ScaryApplication
+import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -250,8 +255,22 @@ class ScaryDream : DreamService() {
             setTextColor(BLOOD)
             setPadding(dp(48), dp(36), dp(48), 0)
         }
+        val credit = TextView(this).apply {
+            this.text = Credit.SHORT
+            typeface = font(R.font.assistant_regular)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextColor(ASH)
+            textDirection = View.TEXT_DIRECTION_LTR
+            setPadding(dp(48), 0, dp(48), 0)
+        }
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+            addView(logo)
+            addView(credit)
+        }
         overlay.addView(
-            logo,
+            brand,
             FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.END),
         )
         root.addView(overlay, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
