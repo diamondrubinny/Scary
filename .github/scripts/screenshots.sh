@@ -164,6 +164,24 @@ if [ -f dist/scary-release.apk ]; then
   fi
   adb shell pidof "$PKG" > /dev/null || { echo "The release build is not running."; exit 1; }
   echo "Release build smoke test passed."
+
+  # Cold start of the release build, 3 runs each: as installed, then compiled with its baseline profile the way the
+  # TV compiles it in the background (profileinstaller writes the profile on first launch).
+  cold_start() {
+    for _ in 1 2 3; do
+      adb shell am force-stop "$PKG"
+      sleep 2
+      adb shell am start -W -n "$ACT" | tr -d '\r' | awk -F': ' '/TotalTime/ {print $2}'
+      sleep 3
+    done | paste -sd ' '
+  }
+  {
+    echo "Release cold start, ms (emulator, API 30 TV, 3 runs)"
+    echo "as installed: $(cold_start)"
+    adb shell cmd package compile -f -m speed-profile "$PKG" > /dev/null || true
+    echo "speed-profile: $(cold_start)"
+  } | tee "$OUT/startup.txt"
+  adb shell am force-stop "$PKG"
 fi
 
 ls -la "$OUT"
