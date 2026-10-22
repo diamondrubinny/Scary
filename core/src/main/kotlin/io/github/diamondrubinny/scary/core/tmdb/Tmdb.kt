@@ -54,10 +54,17 @@ sealed interface TmdbAuth {
 }
 
 /** Rows SCARY builds from TMDB's discover endpoint. Parameters are fixed here, never taken from input. */
-enum class TmdbRow(val id: String, val titleHe: String, val titleEn: String, val titlePt: String, val titleRu: String) {
-    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы"),
-    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам"),
-    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки"),
+enum class TmdbRow(
+    val id: String,
+    val titleHe: String,
+    val titleEn: String,
+    val titlePt: String,
+    val titleRu: String,
+    val titleAr: String,
+) {
+    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы", "رعب جديد"),
+    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам", "أعلى أفلام الرعب تقييمًا"),
+    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки", "إثارة وغموض"),
 }
 
 /**
@@ -218,7 +225,7 @@ object Tmdb {
     }
 
     fun rowOf(row: TmdbRow, metas: List<CinemetaMeta>): OnlineRow =
-        OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu))
+        OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu, "ar" to row.titleAr))
 
     private fun root(text: String): JsonObject? =
         try {

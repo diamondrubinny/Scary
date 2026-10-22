@@ -11,6 +11,9 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.links.Links
 import org.junit.Assert.assertEquals
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -85,6 +88,11 @@ class CinemetaTest {
     fun `urls are validated`() {
         assertEquals("https://v3-cinemeta.strem.io/meta/movie/tt0081505.json", Cinemeta.metaUrl("tt0081505"))
         assertEquals("https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror.json", Cinemeta.catalogUrl("top", "Horror"))
+        assertEquals("https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror&skip=50.json", Cinemeta.catalogUrl("top", "Horror", 50))
+        assertEquals("https://v3-cinemeta.strem.io/catalog/movie/year/genre=2026.json", Cinemeta.catalogUrl("year", "2026"))
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top", "Horror&skip=1") }
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top", "Horror", -50) }
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top/../x", "Horror") }
         assertEquals("https://www.youtube.com/watch?v=jAE7dNurHR4", Links.youTubeVideo("jAE7dNurHR4"))
     }
 
@@ -133,6 +141,7 @@ class CinemetaCacheTest {
         val meta = CinemetaMeta("tt0081505", "The Shining", 1980, background = "https://x/b")
         val cache = io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache(
             1_000L, mapOf(meta.imdbId to meta), listOf(OnlineRow("r", "ש", "R", listOf(meta))),
+            io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.ROWS_VERSION,
         )
         val back = io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.decode(cache.encode())!!
         assertEquals(cache, back)
@@ -140,5 +149,30 @@ class CinemetaCacheTest {
         assertTrue(back.isStale(1_000L + 25L * 60 * 60 * 1000))
         assertTrue(back.isStale(0L)) // clock went backwards
         assertNull(io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.decode("{broken"))
+    }
+
+    @Test
+    fun `themed keeps horror, thriller and mystery but not documentaries`() {
+        fun meta(id: String, vararg genres: String) = CinemetaMeta(imdbId = id, name = id, genres = genres.toList())
+        val kept = Cinemeta.themed(
+            listOf(
+                meta("tt0000001", "Horror"),
+                meta("tt0000002", "Comedy"),
+                meta("tt0000003", "Documentary", "Thriller"),
+                meta("tt0000004", "Drama", "mystery"),
+                meta("tt0000005"),
+            ),
+        )
+        assertEquals(listOf("tt0000001", "tt0000004"), kept.map { it.imdbId })
+    }
+
+    @Test
+    fun `a cache from an older set of rows is stale at once`() {
+        val now = 1_000_000L
+        assertTrue(CinemetaCache(now, emptyMap(), emptyList()).isStale(now))
+        assertFalse(CinemetaCache(now, emptyMap(), emptyList(), CinemetaCache.ROWS_VERSION).isStale(now))
+        // Decoding an old file without the field gives the old version.
+        val old = CinemetaCache.decode("""{"fetchedAtMillis":$now,"metas":{},"rows":[]}""")!!
+        assertTrue(old.isStale(now))
     }
 }

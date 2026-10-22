@@ -59,7 +59,8 @@ object Cinemeta {
     private val json = Json { ignoreUnknownKeys = true }
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val youtubePattern = Regex("^[A-Za-z0-9_-]{11}$")
-    private val genrePattern = Regex("^[A-Za-z-]{1,32}$")
+    // Genres are names ("Horror") or, for the year catalog, years ("2026").
+    private val genrePattern = Regex("^[A-Za-z0-9-]{1,32}$")
     private val catalogIdPattern = Regex("^[A-Za-z]{1,32}$")
     private const val MAX_URL_LENGTH = 512
     private const val MAX_TEXT_LENGTH = 1_500
@@ -67,6 +68,10 @@ object Cinemeta {
     private const val MIN_SEARCH_LENGTH = 3
     private const val MAX_SEARCH_LENGTH = 60
     private const val MAX_SEARCH_RESULTS = 20
+    private const val MAX_SKIP = 1_000
+
+    /** Movies an online row may hold: two or three catalog pages. */
+    const val MAX_ROW_MOVIES = 60
     private val THEME_GENRES = listOf("Horror", "Thriller", "Mystery")
 
     fun metaUrl(imdbId: String): String {
@@ -74,10 +79,22 @@ object Cinemeta {
         return "$BASE_URL/meta/movie/$imdbId.json"
     }
 
-    fun catalogUrl(catalogId: String, genre: String): String {
+    /** A catalog page; Cinemeta pages hold 50 movies, so [skip] moves in steps of 50. */
+    fun catalogUrl(catalogId: String, genre: String, skip: Int = 0): String {
         require(catalogIdPattern.matches(catalogId)) { "invalid catalog id" }
         require(genrePattern.matches(genre)) { "invalid genre" }
-        return "$BASE_URL/catalog/movie/$catalogId/genre=$genre.json"
+        require(skip in 0..MAX_SKIP) { "invalid skip" }
+        val extra = if (skip > 0) "genre=$genre&skip=$skip" else "genre=$genre"
+        return "$BASE_URL/catalog/movie/$catalogId/$extra.json"
+    }
+
+    /**
+     * Only horror, thriller and mystery, for catalogs that mix every genre (the year catalog). Movies without genres
+     * and documentaries are left out.
+     */
+    fun themed(metas: List<CinemetaMeta>): List<CinemetaMeta> = metas.filter { meta ->
+        meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } &&
+            meta.genres.none { it.equals("Documentary", ignoreCase = true) }
     }
 
     /**
@@ -215,7 +232,7 @@ object Cinemeta {
      * Combines the bundled catalog with online data: curated movies get artwork, and each online row becomes
      * a collection placed before the curated ones. Movies already in the library are reused, not duplicated.
      */
-    fun merge(base: Catalog, metas: Map<String, CinemetaMeta>, rows: List<OnlineRow>, perRow: Int = 20): Catalog {
+    fun merge(base: Catalog, metas: Map<String, CinemetaMeta>, rows: List<OnlineRow>, perRow: Int = MAX_ROW_MOVIES): Catalog {
         val curated = base.movies.map { m -> metas[m.imdbId]?.let { enrich(m, it) } ?: m }
         val byImdb = curated.associateBy { it.imdbId }.toMutableMap()
         val added = mutableListOf<Movie>()
@@ -253,14 +270,18 @@ data class CinemetaCache(
     val fetchedAtMillis: Long,
     val metas: Map<String, CinemetaMeta>,
     val rows: List<OnlineRow>,
+    /** Which set of online rows this cache holds; caches from older sets refresh at once. */
+    val rowsVersion: Int = 1,
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
-        nowMillis - fetchedAtMillis !in 0..maxAgeMillis
+        rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
 
     fun encode(): String = cacheJson.encodeToString(serializer(), this)
 
     companion object {
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
+        /** Bumped whenever the online rows change (2: seven rows, several pages each). */
+        const val ROWS_VERSION = 2
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

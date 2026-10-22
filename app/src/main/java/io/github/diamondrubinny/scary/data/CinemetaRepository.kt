@@ -22,26 +22,66 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDate
 import javax.net.ssl.HttpsURLConnection
 
 /** Fetches artwork and popular rows from Cinemeta and keeps a copy on disk. */
 class CinemetaRepository(context: Context) {
     private val cacheFile = File(context.filesDir, "cinemeta_cache.json")
 
+    /**
+     * One online row: a Cinemeta catalog ([catalog] "top" or "year"), its [genre] (a genre name or a year), and the
+     * catalog pages to join ([skips], 50 movies each). Year catalogs mix every genre, so they keep only horror,
+     * thriller and mystery ([themedOnly]).
+     */
     private data class RowSpec(
         val id: String,
+        val catalog: String,
         val genre: String,
-        val titleHe: String,
-        val titleEn: String,
-        val titlePt: String,
-        val titleRu: String,
+        val skips: List<Int>,
+        val titles: Map<String, String>,
+        val themedOnly: Boolean = false,
     )
 
-    private val rowSpecs = listOf(
-        RowSpec("horror_popular", "Horror", "פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас"),
-        RowSpec("thriller_popular", "Thriller", "מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры"),
-        RowSpec("mystery_popular", "Mystery", "תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все"),
-    )
+    private val rowSpecs: List<RowSpec>
+        get() {
+            val year = LocalDate.now().year
+            return listOf(
+                RowSpec(
+                    "horror_popular", "top", "Horror", listOf(0, 50),
+                    titles("פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас", "رعب رائج الآن"),
+                ),
+                RowSpec(
+                    "horror_new", "year", year.toString(), listOf(0, 50, 100),
+                    titles("חדש השנה", "New this year", "Novos deste ano", "Новинки этого года", "جديد هذا العام"),
+                    themedOnly = true,
+                ),
+                RowSpec(
+                    "thriller_popular", "top", "Thriller", listOf(0, 50),
+                    titles("מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры", "أفلام إثارة رائجة"),
+                ),
+                RowSpec(
+                    "horror_deep", "top", "Horror", listOf(100, 150),
+                    titles("עוד מהמרתף", "Deeper in the cellar", "Mais fundo no porão", "Глубже в подвал", "أعمق في القبو"),
+                ),
+                RowSpec(
+                    "mystery_popular", "top", "Mystery", listOf(0, 50),
+                    titles("תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все", "ألغاز يشاهدها الجميع"),
+                ),
+                RowSpec(
+                    "horror_last_year", "year", (year - 1).toString(), listOf(0, 50, 100),
+                    titles("הפחדים של שנה שעברה", "Last year's scares", "Os sustos do ano passado", "Страхи прошлого года", "مخاوف العام الماضي"),
+                    themedOnly = true,
+                ),
+                RowSpec(
+                    "thriller_deep", "top", "Thriller", listOf(100),
+                    titles("עוד מותחנים", "More thrillers", "Mais suspenses", "Ещё триллеры", "مزيد من الإثارة"),
+                ),
+            )
+        }
+
+    private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
+        mapOf("he" to he, "en" to en, "pt" to pt, "ru" to ru, "ar" to ar)
 
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
         if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()
@@ -55,10 +95,14 @@ class CinemetaRepository(context: Context) {
         val (metaList, rows) = coroutineScope {
             val rows = rowSpecs.map { spec ->
                 async {
-                    pool.withPermit { fetch(Cinemeta.catalogUrl("top", spec.genre)) }
-                        ?.let(Cinemeta::parseCatalog)
-                        ?.takeIf { it.isNotEmpty() }
-                        ?.let { OnlineRow(spec.id, spec.titleHe, spec.titleEn, it, mapOf("pt" to spec.titlePt, "ru" to spec.titleRu)) }
+                    // The pages of one row load side by side; a page that fails just leaves the row shorter.
+                    val pages = spec.skips.map { skip ->
+                        async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip)) }?.let(Cinemeta::parseCatalog) }
+                    }.awaitAll().filterNotNull()
+                    val metas = pages.flatten().distinctBy { it.imdbId }.let { if (spec.themedOnly) Cinemeta.themed(it) else it }
+                    metas.takeIf { it.isNotEmpty() }?.let {
+                        OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
+                    }
                 }
             }
             val metas = imdbIds.distinct().map { id ->
@@ -68,7 +112,7 @@ class CinemetaRepository(context: Context) {
         }
         val metas = metaList.filterNotNull().associateBy { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
-        CinemetaCache(System.currentTimeMillis(), metas, rows).also(::save)
+        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION).also(::save)
     }
 
     /**
