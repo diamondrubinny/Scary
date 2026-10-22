@@ -32,7 +32,7 @@ import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
 import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails

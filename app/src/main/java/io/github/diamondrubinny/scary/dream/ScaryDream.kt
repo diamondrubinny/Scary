@@ -17,9 +17,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.asDrawable
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.core.model.Language
@@ -138,7 +139,7 @@ class ScaryDream : DreamService() {
         val back = layers[1 - front]
         val image = movie.backgroundUrl?.let { url ->
             val request = ImageRequest.Builder(this).data(url).build()
-            (imageLoader.execute(request) as? SuccessResult)?.drawable
+            (imageLoader.execute(request) as? SuccessResult)?.image?.asDrawable(resources)
         }
         back.setImageDrawable(image ?: tintFor(movie))
         back.scaleX = 1f
