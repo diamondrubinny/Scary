@@ -239,7 +239,7 @@ for _ in 1 2 3; do
 done
 adb shell am force-stop "$PKG"
 open
-shot 33-safe-mode 12
+shot 33-safe-mode 7
 adb shell am force-stop "$PKG"
 
 ls -la "$OUT"
