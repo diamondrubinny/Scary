@@ -69,7 +69,7 @@ fun DetailsScreen(
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
                 BasicText(
                     text = movie.displayTitle(language),
-                    style = ScaryType.Display,
+                    style = ScaryType.Display.mixedLanguage(),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.semantics { heading() },
@@ -113,7 +113,7 @@ fun DetailsScreen(
                 } else {
                     BasicText(
                         text = movie.title,
-                        style = ScaryType.Title,
+                        style = ScaryType.Title.mixedLanguage(),
                         maxLines = 3,
                         modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
                     )

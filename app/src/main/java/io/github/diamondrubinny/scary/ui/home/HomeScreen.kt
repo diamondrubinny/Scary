@@ -152,7 +152,8 @@ private fun Hero(
         ) {
             BasicText(
                 text = movie.displayTitle(language),
-                style = ScaryType.Display,
+                // Titles are often English inside the Hebrew UI: "28 Days Later" must not become "Days Later 28".
+                style = ScaryType.Display.mixedLanguage(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.semantics { heading() },

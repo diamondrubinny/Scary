@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 /** Image request with a short crossfade; Coil caches it in memory and on disk. */
 @Composable
@@ -124,7 +126,7 @@ fun PosterCard(
             )
             BasicText(
                 text = movie.title,
-                style = ScaryType.CardTitle,
+                style = ScaryType.CardTitle.mixedLanguage(),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp, vertical = 7.dp),
@@ -165,7 +167,7 @@ fun WideMovieCard(
         }
         if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
-            BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize).mixedLanguage(), maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
         }
     }
@@ -261,7 +263,8 @@ fun AppTileCard(
                 }
                 BasicText(
                     text = label,
-                    style = ScaryType.Label.copy(textAlign = TextAlign.Center),
+                    // App names are often English: "Disney+" must not become "+Disney" in the Hebrew UI.
+                    style = ScaryType.Label.copy(textAlign = TextAlign.Center, textDirection = TextDirection.Content),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
