@@ -58,8 +58,17 @@ class Launcher(
         return if (start(Intent(Intent.ACTION_VIEW, uri))) LaunchResult.Opened else LaunchResult.Failed(YOUTUBE_LABEL)
     }
 
-    /** Whether [packageName] accepts a search request (ACTION_SEARCH), so SCARY can hand it the movie's title. */
-    fun canSearchIn(packageName: String): Boolean = resolves(Intent(Intent.ACTION_SEARCH).setPackage(packageName))
+    /**
+     * Whether [searchIn] can hand [packageName] the movie's title: YouTube through its results page, other apps through
+     * a search request (ACTION_SEARCH). Kept in step with [searchIn], so the button says "Search" only when it does.
+     */
+    fun canSearchIn(packageName: String): Boolean {
+        if (packageName == KnownPackages.YOUTUBE_TV) {
+            val results = Intent(Intent.ACTION_VIEW, Uri.parse(Links.youTubeSearch("scary"))).setPackage(packageName)
+            if (resolves(results)) return true
+        }
+        return resolves(Intent(Intent.ACTION_SEARCH).setPackage(packageName))
+    }
 
     /**
      * Looks for the movie in another app: its own search when it has one, YouTube's results page for YouTube, and

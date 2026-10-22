@@ -115,10 +115,13 @@ class ScaryUiTest {
         rule.onNode(after).performClick()
         waitFor(before)
 
-        // "Look for it in your apps": the TV emulator has YouTube, so its search button is offered.
+        // "Look for it in your apps": the TV emulator has YouTube, so it gets a button. Its wording follows what the
+        // installed YouTube accepts ("Search in" or "Open"), which depends on that app's own version.
         if (isInstalled(KnownPackages.YOUTUBE_TV)) {
             waitFor(hasText(text(R.string.watch_elsewhere)))
-            waitFor(hasText(rule.activity.getString(R.string.search_in_app, "YouTube"), substring = true))
+            val searchIn = hasText(rule.activity.getString(R.string.search_in_app, "YouTube"), substring = true)
+            val open = hasText(rule.activity.getString(R.string.open_app, "YouTube"), substring = true)
+            waitFor(searchIn or open)
         }
 
         backToHome()
