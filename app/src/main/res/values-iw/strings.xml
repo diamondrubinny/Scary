@@ -168,4 +168,13 @@
         <item>נתקלתם בחסם? דווחו ב־github.com/diamondrubinny/Scary/issues ותארו את המסך ומה קרה. אנחנו שואפים להשיב בתוך 14 יום.</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי יועץ נגישות.</item>
     </string-array>
+    <string name="row_moods">מה בא לך הלילה?</string>
+    <string name="mood_gentle">מפחיד, אבל לא יותר מדי</string>
+    <string name="mood_mind_games">משחקי מוח</string>
+    <string name="mood_ghosts">רוחות ושדים</string>
+    <string name="mood_blood">דם וצרחות</string>
+    <string name="mood_classics">קלאסיקות של פעם</string>
+    <string name="mood_relentless">לא לישון הלילה</string>
+    <string name="row_halloween">הלואין מתקרב</string>
+    <string name="row_friday_13th">שישי ה־13</string>
 </resources>

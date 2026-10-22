@@ -168,4 +168,13 @@
         <item>Encontrou uma barreira? Informe em github.com/diamondrubinny/Scary/issues, descrevendo a tela e o que aconteceu. Procuramos responder em até 14 dias.</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um consultor de acessibilidade.</item>
     </string-array>
+    <string name="row_moods">O que você quer ver hoje à noite?</string>
+    <string name="mood_gentle">Medo, mas não demais</string>
+    <string name="mood_mind_games">Jogos mentais</string>
+    <string name="mood_ghosts">Fantasmas e demônios</string>
+    <string name="mood_blood">Sangue e gritos</string>
+    <string name="mood_classics">Clássicos de outros tempos</string>
+    <string name="mood_relentless">Hoje ninguém dorme</string>
+    <string name="row_halloween">O Halloween está chegando</string>
+    <string name="row_friday_13th">Sexta-feira 13</string>
 </resources>

@@ -128,6 +128,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onOpenSearch = viewModel::openSearch,
             onToggleMyList = { viewModel.toggleMyList(it, language) },
             onSurprise = viewModel::surprise,
+            onMood = viewModel::toggleMood,
         )
     }
     val allAppsActions = remember(viewModel) {

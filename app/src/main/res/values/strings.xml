@@ -170,4 +170,13 @@
         <item>Found a barrier? Report it at github.com/diamondrubinny/Scary/issues and describe the screen and what happened. We aim to reply within 14 days.</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by an accessibility consultant.</item>
     </string-array>
+    <string name="row_moods">What do you feel like tonight?</string>
+    <string name="mood_gentle">Scared, but not too much</string>
+    <string name="mood_mind_games">Mind games</string>
+    <string name="mood_ghosts">Ghosts and demons</string>
+    <string name="mood_blood">Blood and screams</string>
+    <string name="mood_classics">Old-school classics</string>
+    <string name="mood_relentless">Don\'t sleep tonight</string>
+    <string name="row_halloween">Halloween is coming</string>
+    <string name="row_friday_13th">Friday the 13th</string>
 </resources>

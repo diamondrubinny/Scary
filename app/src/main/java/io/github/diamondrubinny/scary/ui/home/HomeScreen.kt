@@ -13,6 +13,11 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.liveRegion
 import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.semantics.selected
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.ui.components.FocusSurface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -72,6 +77,8 @@ class HomeActions(
     /** Long press on a movie card: add to or remove from "My list". */
     val onToggleMyList: (Movie) -> Unit,
     val onSurprise: () -> Unit,
+    /** Picks a mood in "What do you feel like tonight?", or clears it when chosen again. */
+    val onMood: (Mood) -> Unit,
 )
 
 val SidePadding = 48.dp
@@ -203,11 +210,17 @@ private fun HomeRowView(
     isLocked: (Movie) -> Boolean,
     showSetHome: Boolean,
 ) {
+    if (row is HomeRow.Moods) {
+        MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked)
+        return
+    }
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
         is HomeRow.MyList -> stringResource(R.string.row_my_list)
         is HomeRow.Apps -> stringResource(R.string.row_apps)
         is HomeRow.Collection -> row.collection.title(language)
+        is HomeRow.Seasonal -> stringResource(row.season.titleRes())
+        is HomeRow.Moods -> stringResource(R.string.row_moods)
     }
     Column {
         BasicText(
@@ -258,7 +271,11 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Collection -> items(row.movies, key = { it.id }) { movie ->
+                is HomeRow.Moods -> Unit
+                is HomeRow.Collection, is HomeRow.Seasonal -> items(
+                    if (row is HomeRow.Collection) row.movies else (row as HomeRow.Seasonal).movies,
+                    key = { it.id },
+                ) { movie ->
                     val key = "${row.key}:${movie.id}"
                     PosterCard(
                         movie = movie,
@@ -362,3 +379,95 @@ private const val SKELETON_ALPHA_MIN = 0.45f
 private const val SKELETON_ALPHA_MAX = 0.9f
 private const val SKELETON_PULSE_MS = 700
 private const val SKELETON_CARDS = 12
+
+/**
+ * "What do you feel like tonight?": a row of mood chips; once one is chosen, its movies appear in a row below.
+ * Choosing the same mood again closes the row.
+ */
+@Composable
+private fun MoodsRowView(
+    row: HomeRow.Moods,
+    chipState: LazyListState,
+    restoreKey: String?,
+    restoreFocus: FocusRequester,
+    actions: HomeActions,
+    isLocked: (Movie) -> Boolean,
+) {
+    val movieState = rememberLazyListState()
+    LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
+    Column {
+        BasicText(
+            text = stringResource(R.string.row_moods),
+            style = ScaryType.RowTitle,
+            modifier = Modifier
+                .padding(horizontal = SidePadding)
+                .semantics { heading() },
+        )
+        LazyRow(
+            state = chipState,
+            contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(Mood.entries, key = { it.key }) { mood ->
+                val key = "${row.key}:chip:${mood.key}"
+                MoodChip(
+                    label = stringResource(mood.labelRes()),
+                    selected = mood == row.selected,
+                    onClick = { actions.onMood(mood) },
+                    onFocused = { actions.onCardFocused(key, null) },
+                    focusRequester = restoreFocus.takeIf { key == restoreKey },
+                )
+            }
+        }
+        if (row.selected != null && row.movies.isNotEmpty()) {
+            LazyRow(
+                state = movieState,
+                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                items(row.movies, key = { it.id }) { movie ->
+                    val key = "${row.key}:${movie.id}"
+                    PosterCard(
+                        movie = movie,
+                        locked = isLocked(movie),
+                        onClick = { actions.onOpenDetails(movie) },
+                        onLongClick = { actions.onToggleMyList(movie) },
+                        onFocused = { actions.onCardFocused(key, movie.id) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MoodChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    onFocused: () -> Unit,
+    focusRequester: FocusRequester?,
+) {
+    FocusSurface(
+        onClick = onClick,
+        onFocusChanged = { if (it) onFocused() },
+        modifier = (if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .semantics { this.selected = selected },
+        shape = RoundedCornerShape(50),
+        focusedScale = 1.06f,
+        containerColor = if (selected) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.6f),
+        focusedContainerColor = ScaryColors.Bone,
+        borderColor = if (selected) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
+        focusedBorderColor = ScaryColors.Candle,
+    ) { focused ->
+        BasicText(
+            text = label,
+            style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+            maxLines = 1,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(horizontal = 22.dp, vertical = 10.dp),
+        )
+    }
+}

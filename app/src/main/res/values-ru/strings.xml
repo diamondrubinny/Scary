@@ -168,4 +168,13 @@
         <item>Нашли препятствие? Сообщите на github.com/diamondrubinny/Scary/issues, опишите экран и что произошло. Мы стараемся ответить в течение 14 дней.</item>
         <item>Обновлено в октябре 2026 г. Это черновик, ещё не проверенный консультантом по доступности.</item>
     </string-array>
+    <string name="row_moods">Что посмотреть сегодня ночью?</string>
+    <string name="mood_gentle">Страшно, но в меру</string>
+    <string name="mood_mind_games">Игры разума</string>
+    <string name="mood_ghosts">Призраки и демоны</string>
+    <string name="mood_blood">Кровь и крики</string>
+    <string name="mood_classics">Старая классика</string>
+    <string name="mood_relentless">Сегодня не уснуть</string>
+    <string name="row_halloween">Скоро Хэллоуин</string>
+    <string name="row_friday_13th">Пятница, 13-е</string>
 </resources>

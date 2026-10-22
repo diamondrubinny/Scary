@@ -1,6 +1,8 @@
 package io.github.diamondrubinny.scary.ui.home
 
 import androidx.annotation.StringRes
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import io.github.diamondrubinny.scary.data.InstalledApp
@@ -88,6 +90,16 @@ sealed interface HomeRow {
 
     data class Collection(val collection: MovieCollection, val movies: List<Movie>) : HomeRow {
         override val key = "collection:${collection.id}"
+    }
+
+    /** Shown only around its dates (Halloween, Friday the 13th). */
+    data class Seasonal(val season: Season, val movies: List<Movie>) : HomeRow {
+        override val key = "season:${season.key}"
+    }
+
+    /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
+    data class Moods(val selected: Mood?, val movies: List<Movie>) : HomeRow {
+        override val key = "moods"
     }
 }
 

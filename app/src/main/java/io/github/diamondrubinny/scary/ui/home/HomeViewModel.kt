@@ -16,6 +16,8 @@ import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -72,6 +74,7 @@ class HomeViewModel(
     private val catalog = MutableStateFlow<CatalogState>(CatalogState.Loading)
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     private val heroId = MutableStateFlow<String?>(null)
+    private val mood = MutableStateFlow<Mood?>(null)
     private val language = MutableStateFlow(Language.HE)
 
     /** The UI language; online text (TMDB) is fetched in it. */
@@ -102,10 +105,10 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> = combine(
         catalog,
         installedApps,
-        heroId,
+        combine(heroId, mood, ::Pair),
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, hero, prefs, unlocked ->
+    ) { catalogState, apps, (hero, selectedMood), prefs, unlocked ->
         val tiles = appTiles(apps, prefs)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -118,7 +121,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, hero, prefs)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, hero, selectedMood, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -183,6 +186,7 @@ class HomeViewModel(
         tiles: List<AppTile>,
         drawer: List<DrawerApp>,
         heroId: String?,
+        selectedMood: Mood?,
         prefs: LauncherPrefs,
     ): HomeUiState {
         val nightPick = NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
@@ -190,8 +194,13 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
+            Season.activeOn(today()).forEach { season ->
+                val movies = season.pick(catalog.movies)
+                if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
+            }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
+            add(HomeRow.Moods(selectedMood, selectedMood?.pick(catalog.movies).orEmpty()))
             catalog.collections.forEach { add(HomeRow.Collection(it, catalog.moviesOf(it))) }
         }
         return HomeUiState(
@@ -563,6 +572,11 @@ class HomeViewModel(
             settings.setEffectsEnabled(enabled)
             show(if (enabled) R.string.msg_effects_on else R.string.msg_effects_off)
         }
+    }
+
+    /** Picks a mood, or clears it when the same mood is chosen again. */
+    fun toggleMood(selected: Mood) {
+        mood.update { if (it == selected) null else selected }
     }
 
     /** After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) and says so. */

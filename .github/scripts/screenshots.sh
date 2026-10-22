@@ -97,6 +97,16 @@ open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 26-surprise 6
 
+# Seasonal row (Halloween in October) and the mood row, reached with the remote from the hero.
+open --es scary.debug.open home
+sleep 3
+for _ in 1 2 3; do key KEYCODE_DPAD_DOWN; sleep 1; done
+shot 34-seasonal-row 3
+for _ in 1 2; do key KEYCODE_DPAD_DOWN; sleep 1; done
+key KEYCODE_DPAD_CENTER
+shot 35-moods 4
+open --es scary.debug.open home
+
 # English set for the README gallery (copied to docs/screenshots/en-*.jpg).
 open --es scary.debug.open language:en
 sleep 6
