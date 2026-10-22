@@ -29,6 +29,13 @@
         <package android:name="com.stremio.one" />
         <package android:name="com.android.vending" />
         <package android:name="com.google.android.youtube.tv" />
+        <!-- Movie pages offer "Search in <app>" for streaming apps that accept a search, and Google TV's search. -->
+        <intent>
+            <action android:name="android.intent.action.SEARCH" />
+        </intent>
+        <intent>
+            <action android:name="android.search.action.GLOBAL_SEARCH" />
+        </intent>
     </queries>
 
     <application

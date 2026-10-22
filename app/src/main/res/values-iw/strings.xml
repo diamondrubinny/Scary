@@ -34,7 +34,6 @@
     <string name="install_app">התקנת %1$s</string>
     <string name="msg_not_installed_store">%1$s לא מותקנת. פותח את חנות Play.</string>
     <string name="msg_open_failed">לא הצלחנו לפתוח את %1$s.</string>
-    <string name="msg_stremio_app_only">Stremio נפתחה. חפשו שם את %1$s.</string>
     <string name="msg_catalog_error">לא הצלחנו לטעון את מאגר הסרטים. התקנה מחדש של האפליקציה תפתור את זה.</string>
     <string name="loading">טוען…</string>
     <string name="all_apps">כל האפליקציות</string>
@@ -201,4 +200,10 @@
     <string name="mood_empty_body">ערב משפחתי או נעילת ההורים מסתירים את הסרטים האלה. נסו מצב רוח אחר.</string>
     <string name="catalog_error_title">ספריית הסרטים חסרה</string>
     <string name="launch_opening">נפתח ב־%1$s…</string>
+    <string name="msg_app_only">%1$s פתוחה. חפשו שם את %2$s.</string>
+    <string name="watch_elsewhere">לחפש באפליקציות שלך</string>
+    <string name="search_in_app">חיפוש ב־%1$s</string>
+    <string name="open_app">פתיחת %1$s</string>
+    <string name="search_everywhere">חיפוש בכל הטלוויזיה</string>
+    <string name="watch_elsewhere_note">SCARY מחפשת לפי שם הסרט. היא לא יודעת אם הסרט זמין בכל אפליקציה.</string>
 </resources>

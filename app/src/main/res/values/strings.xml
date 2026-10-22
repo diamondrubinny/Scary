@@ -35,7 +35,6 @@
     <string name="install_app">Install %1$s</string>
     <string name="msg_not_installed_store">%1$s is not installed. Opening Google Play.</string>
     <string name="msg_open_failed">Could not open %1$s.</string>
-    <string name="msg_stremio_app_only">Stremio is open. Search there for %1$s.</string>
     <string name="msg_catalog_error">The movie library could not be loaded. Reinstall the app to fix it.</string>
     <string name="loading">Loading…</string>
     <string name="all_apps">All apps</string>
@@ -200,4 +199,10 @@
     <string name="mood_empty_body">Family night or the parental lock hides these movies. Try another mood.</string>
     <string name="catalog_error_title">The library is missing</string>
     <string name="launch_opening">Opening in %1$s…</string>
+    <string name="msg_app_only">%1$s is open. Search there for %2$s.</string>
+    <string name="watch_elsewhere">Look for it in your apps</string>
+    <string name="search_in_app">Search in %1$s</string>
+    <string name="open_app">Open %1$s</string>
+    <string name="search_everywhere">Search the whole TV</string>
+    <string name="watch_elsewhere_note">SCARY searches by title. It cannot tell whether the movie is available in each app.</string>
 </resources>

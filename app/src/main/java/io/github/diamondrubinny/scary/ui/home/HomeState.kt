@@ -60,6 +60,8 @@ sealed interface GatedAction {
     data class Details(val movieId: String) : GatedAction
     data class Watch(val movie: Movie) : GatedAction
     data class Trailer(val movie: Movie) : GatedAction
+    data class SearchIn(val movie: Movie, val app: WatchOption) : GatedAction
+    data class SearchEverywhere(val movie: Movie) : GatedAction
     data object Settings : GatedAction
 }
 
@@ -146,6 +148,12 @@ sealed interface Screen {
     data object Search : Screen
     data class Document(val kind: DocumentKind) : Screen
 }
+
+/**
+ * A streaming app on this TV that a movie page can send the viewer to. [canSearch]: it accepts the title as a search;
+ * otherwise SCARY only opens it. Nothing here says the movie is available in that app.
+ */
+data class WatchOption(val packageName: String, val label: String, val canSearch: Boolean)
 
 /** The short shiver screen between pressing Watch and the other app coming up. */
 data class LaunchingState(val movie: Movie, val appLabel: String)

@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.details
 
+import io.github.diamondrubinny.scary.ui.home.WatchOption
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -63,6 +64,10 @@ fun DetailsScreen(
     isLocked: (Movie) -> Boolean = { false },
     inMyList: Boolean = false,
     onToggleMyList: (Movie) -> Unit = {},
+    watchOptions: List<WatchOption> = emptyList(),
+    canSearchEverywhere: Boolean = false,
+    onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
+    onSearchEverywhere: (Movie) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -91,7 +96,14 @@ fun DetailsScreen(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
+                // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
+                BasicText(
+                    movie.synopsis(language),
+                    style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                    maxLines = if (elsewhere) 3 else 5,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
                         text = stringResource(R.string.action_watch_stremio),
@@ -104,6 +116,9 @@ fun DetailsScreen(
                         text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                         onClick = { onToggleMyList(movie) },
                     )
+                }
+                if (elsewhere) {
+                    WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
                 }
             }
             Box(
@@ -186,3 +201,43 @@ private fun MovieTitle(movie: Movie, language: Language) {
 
 private val LOGO_MAX_HEIGHT = 110.dp
 private val LOGO_MAX_WIDTH = 480.dp
+
+/**
+ * "Look for it in your apps": a button per streaming app on this TV (search when the app accepts one, otherwise just
+ * open it), and Google TV's own search when there is one. SCARY does not know where a movie is available, and the note
+ * says so.
+ */
+@Composable
+private fun WatchElsewhere(
+    movie: Movie,
+    options: List<WatchOption>,
+    canSearchEverywhere: Boolean,
+    onSearchIn: (Movie, WatchOption) -> Unit,
+    onSearchEverywhere: (Movie) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
+        BasicText(
+            stringResource(R.string.watch_elsewhere),
+            style = ScaryType.Eyebrow,
+            modifier = Modifier.semantics { heading() },
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            // Room for the focused button to grow.
+            contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
+        ) {
+            if (canSearchEverywhere) {
+                item(key = "everywhere") {
+                    ScaryButton(stringResource(R.string.search_everywhere), onClick = { onSearchEverywhere(movie) })
+                }
+            }
+            items(options, key = { it.packageName }) { app ->
+                ScaryButton(
+                    text = stringResource(if (app.canSearch) R.string.search_in_app else R.string.open_app, app.label),
+                    onClick = { onSearchIn(movie, app) },
+                )
+            }
+        }
+        BasicText(stringResource(R.string.watch_elsewhere_note), style = ScaryType.Caption)
+    }
+}

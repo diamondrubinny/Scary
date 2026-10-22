@@ -35,7 +35,6 @@
     <string name="install_app">تثبيت %1$s</string>
     <string name="msg_not_installed_store">‏%1$s غير مثبّت. جارٍ فتح Google Play.</string>
     <string name="msg_open_failed">تعذّر فتح %1$s.</string>
-    <string name="msg_stremio_app_only">تم فتح Stremio. ابحث فيه عن %1$s.</string>
     <string name="msg_catalog_error">تعذّر تحميل مكتبة الأفلام. أعد تثبيت التطبيق لإصلاح ذلك.</string>
     <string name="loading">جارٍ التحميل…</string>
     <string name="all_apps">كل التطبيقات</string>
@@ -211,4 +210,10 @@
     <string name="mood_empty_body">السهرة العائلية أو القفل الأبوي يخفيان هذه الأفلام. جرّب مزاجًا آخر.</string>
     <string name="catalog_error_title">مكتبة الأفلام مفقودة</string>
     <string name="launch_opening">جارٍ الفتح في %1$s…</string>
+    <string name="msg_app_only">تم فتح %1$s. ابحث فيه عن %2$s.</string>
+    <string name="watch_elsewhere">ابحث عنه في تطبيقاتك</string>
+    <string name="search_in_app">البحث في %1$s</string>
+    <string name="open_app">فتح %1$s</string>
+    <string name="search_everywhere">البحث في التلفزيون كله</string>
+    <string name="watch_elsewhere_note">يبحث SCARY باسم الفيلم، ولا يعرف إن كان الفيلم متاحًا في كل تطبيق.</string>
 </resources>

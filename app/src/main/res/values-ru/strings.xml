@@ -34,7 +34,6 @@
     <string name="install_app">Установить %1$s</string>
     <string name="msg_not_installed_store">%1$s не установлено. Открываю Google Play.</string>
     <string name="msg_open_failed">Не удалось открыть %1$s.</string>
-    <string name="msg_stremio_app_only">Stremio открыт. Найдите там %1$s.</string>
     <string name="msg_catalog_error">Не удалось загрузить библиотеку фильмов. Переустановите приложение.</string>
     <string name="loading">Загрузка…</string>
     <string name="all_apps">Все приложения</string>
@@ -204,4 +203,10 @@
     <string name="mood_empty_body">Семейный вечер или родительский замок скрывают эти фильмы. Выберите другое настроение.</string>
     <string name="catalog_error_title">Библиотека фильмов не найдена</string>
     <string name="launch_opening">Открывается в %1$s…</string>
+    <string name="msg_app_only">%1$s открыт. Найдите там %2$s.</string>
+    <string name="watch_elsewhere">Поискать в ваших приложениях</string>
+    <string name="search_in_app">Искать в %1$s</string>
+    <string name="open_app">Открыть %1$s</string>
+    <string name="search_everywhere">Искать по всему ТВ</string>
+    <string name="watch_elsewhere_note">SCARY ищет по названию. Он не знает, доступен ли фильм в каждом приложении.</string>
 </resources>

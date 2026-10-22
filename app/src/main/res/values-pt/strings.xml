@@ -34,7 +34,6 @@
     <string name="install_app">Instalar %1$s</string>
     <string name="msg_not_installed_store">%1$s não está instalado. Abrindo o Google Play.</string>
     <string name="msg_open_failed">Não foi possível abrir %1$s.</string>
-    <string name="msg_stremio_app_only">O Stremio está aberto. Procure lá por %1$s.</string>
     <string name="msg_catalog_error">Não foi possível carregar a biblioteca de filmes. Reinstale o app para corrigir.</string>
     <string name="loading">Carregando…</string>
     <string name="all_apps">Todos os apps</string>
@@ -201,4 +200,10 @@
     <string name="mood_empty_body">A noite em família ou o controle dos pais escondem estes filmes. Tente outro clima.</string>
     <string name="catalog_error_title">A biblioteca está faltando</string>
     <string name="launch_opening">Abrindo no %1$s…</string>
+    <string name="msg_app_only">%1$s está aberto. Procure lá por %2$s.</string>
+    <string name="watch_elsewhere">Procurar nos seus apps</string>
+    <string name="search_in_app">Buscar no %1$s</string>
+    <string name="open_app">Abrir %1$s</string>
+    <string name="search_everywhere">Buscar em toda a TV</string>
+    <string name="watch_elsewhere_note">O SCARY busca pelo título. Ele não sabe se o filme está disponível em cada app.</string>
 </resources>

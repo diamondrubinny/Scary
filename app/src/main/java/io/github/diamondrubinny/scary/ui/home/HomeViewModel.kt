@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.links.StreamingApps
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -200,8 +201,33 @@ class HomeViewModel(
 
     fun refreshApps() {
         if (appsJob?.isActive == true) return
-        appsJob = viewModelScope.launch { installedApps.value = appsRepository.load() }
+        appsJob = viewModelScope.launch {
+            val apps = appsRepository.load()
+            installedApps.value = apps
+            _watchOptions.value = withContext(Dispatchers.IO) {
+                apps.mapNotNull { app ->
+                    StreamingApps.match(app.packageName, app.label)?.let {
+                        WatchOption(app.packageName, app.label, launcher.canSearchIn(app.packageName))
+                    }
+                }.sortedBy { it.label.lowercase() }
+            }
+            _canSearchEverywhere.value = withContext(Dispatchers.IO) { launcher.canSearchEverywhere() }
+        }
     }
+
+    private val _watchOptions = MutableStateFlow<List<WatchOption>>(emptyList())
+
+    /** Streaming apps on this TV, for "Search in …" on movie pages. Refreshed with the app list. */
+    val watchOptions: StateFlow<List<WatchOption>> = _watchOptions.asStateFlow()
+
+    private val _canSearchEverywhere = MutableStateFlow(false)
+
+    /** Whether this TV has a system-wide search (Google TV) that lists where a movie is. */
+    val canSearchEverywhere: StateFlow<Boolean> = _canSearchEverywhere.asStateFlow()
+
+    fun searchIn(movie: Movie, app: WatchOption) = guard(movie, GatedAction.SearchIn(movie, app))
+
+    fun searchEverywhere(movie: Movie) = guard(movie, GatedAction.SearchEverywhere(movie))
 
     private fun buildState(
         catalog: Catalog,
@@ -435,6 +461,15 @@ class HomeViewModel(
                 launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
+            is GatedAction.SearchIn -> {
+                viewModelScope.launch { settings.pushRecent(action.movie.id) }
+                launchWithShiver(action.movie, action.app.label) {
+                    launcher.searchIn(action.app.packageName, action.app.label, action.movie)
+                }
+            }
+            is GatedAction.SearchEverywhere -> launchWithShiver(action.movie, GOOGLE_TV_LABEL) {
+                launcher.searchEverywhere(action.movie, GOOGLE_TV_LABEL)
+            }
             GatedAction.Settings -> push(Screen.Settings)
         }
     }
@@ -682,7 +717,7 @@ class HomeViewModel(
     private fun report(result: LaunchResult) {
         when (result) {
             LaunchResult.Opened -> Unit
-            is LaunchResult.OpenedAppOnly -> show(R.string.msg_stremio_app_only, result.movieTitle)
+            is LaunchResult.OpenedAppOnly -> show(R.string.msg_app_only, result.appLabel, result.movieTitle)
             is LaunchResult.OpenedStoreInstead -> show(R.string.msg_not_installed_store, result.appLabel)
             is LaunchResult.Failed -> show(R.string.msg_open_failed, result.targetLabel)
         }
@@ -696,6 +731,7 @@ class HomeViewModel(
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
+        private const val GOOGLE_TV_LABEL = "Google TV"
         private const val LAUNCH_STILL_MS = 400L
         private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80

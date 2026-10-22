@@ -72,6 +72,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
     val scrollToRow by viewModel.scrollToRow.collectAsStateWithLifecycle()
     val launching by viewModel.launching.collectAsStateWithLifecycle()
+    val watchOptions by viewModel.watchOptions.collectAsStateWithLifecycle()
+    val canSearchEverywhere by viewModel.canSearchEverywhere.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
@@ -237,6 +239,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     isLocked = state::isLocked,
                     inMyList = details.movie.id in state.myListIds,
                     onToggleMyList = { viewModel.toggleMyList(it, language) },
+                    watchOptions = watchOptions,
+                    canSearchEverywhere = canSearchEverywhere,
+                    onSearchIn = viewModel::searchIn,
+                    onSearchEverywhere = viewModel::searchEverywhere,
                 )
                 else -> HomeScreen(
                     state = state,

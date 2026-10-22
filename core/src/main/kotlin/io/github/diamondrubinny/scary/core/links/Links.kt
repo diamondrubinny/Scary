@@ -47,8 +47,8 @@ object Links {
         return "https://www.youtube.com/watch?v=$videoId"
     }
 
-    fun youTubeTrailerSearch(title: String, year: Int): String {
-        val query = URLEncoder.encode("$title $year trailer", StandardCharsets.UTF_8)
-        return "https://www.youtube.com/results?search_query=$query"
-    }
+    fun youTubeTrailerSearch(title: String, year: Int): String = youTubeSearch("$title $year trailer")
+
+    fun youTubeSearch(query: String): String =
+        "https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, StandardCharsets.UTF_8)
 }

@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
@@ -56,6 +57,9 @@ class ScaryUiTest {
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         rule.waitForIdle()
     }
+
+    private fun isInstalled(packageName: String): Boolean =
+        runCatching { rule.activity.packageManager.getPackageInfo(packageName, 0) }.isSuccess
 
     private fun bundledMovies(): List<Movie> =
         rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }.movies
@@ -110,6 +114,12 @@ class ScaryUiTest {
         waitFor(after)
         rule.onNode(after).performClick()
         waitFor(before)
+
+        // "Look for it in your apps": the TV emulator has YouTube, so its search button is offered.
+        if (isInstalled(KnownPackages.YOUTUBE_TV)) {
+            waitFor(hasText(text(R.string.watch_elsewhere)))
+            waitFor(hasText(rule.activity.getString(R.string.search_in_app, "YouTube"), substring = true))
+        }
 
         backToHome()
     }
