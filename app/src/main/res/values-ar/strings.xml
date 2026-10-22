@@ -210,4 +210,5 @@
     <string name="mood_empty_title">لا أفلام لهذا المزاج الليلة</string>
     <string name="mood_empty_body">السهرة العائلية أو القفل الأبوي يخفيان هذه الأفلام. جرّب مزاجًا آخر.</string>
     <string name="catalog_error_title">مكتبة الأفلام مفقودة</string>
+    <string name="launch_opening">جارٍ الفتح في %1$s…</string>
 </resources>

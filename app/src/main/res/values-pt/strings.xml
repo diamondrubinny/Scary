@@ -200,4 +200,5 @@
     <string name="mood_empty_title">Nada para este clima hoje</string>
     <string name="mood_empty_body">A noite em família ou o controle dos pais escondem estes filmes. Tente outro clima.</string>
     <string name="catalog_error_title">A biblioteca está faltando</string>
+    <string name="launch_opening">Abrindo no %1$s…</string>
 </resources>

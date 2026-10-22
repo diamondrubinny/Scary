@@ -143,6 +143,9 @@ class SettingsRepository(private val context: Context) {
 
     private fun systemAnimationsEnabled(): Boolean = systemAnimationsEnabled(context)
 
+    /** Whether the TV currently allows animations ("Remove animations" off). */
+    fun systemAnimationsOn(): Boolean = systemAnimationsEnabled(context)
+
     companion object {
         /** False when the TV's accessibility settings removed animations; that always stops decorative motion. */
         fun systemAnimationsEnabled(context: Context): Boolean =

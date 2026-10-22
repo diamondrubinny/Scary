@@ -147,4 +147,7 @@ sealed interface Screen {
     data class Document(val kind: DocumentKind) : Screen
 }
 
+/** The short shiver screen between pressing Watch and the other app coming up. */
+data class LaunchingState(val movie: Movie, val appLabel: String)
+
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())

@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui
 
+import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
 import android.app.Activity
 import android.content.Context
 import android.content.ActivityNotFoundException
@@ -70,6 +71,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val message by viewModel.message.collectAsStateWithLifecycle()
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
     val scrollToRow by viewModel.scrollToRow.collectAsStateWithLifecycle()
+    val launching by viewModel.launching.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
@@ -260,6 +262,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                 )
             }
 
+            launching?.let { LaunchOverlay(it, language) }
             pinDialog?.let { dialog ->
                 PinDialog(state = dialog, onSubmit = viewModel::submitPin, onDismiss = viewModel::dismissPin)
             }

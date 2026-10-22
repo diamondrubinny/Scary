@@ -199,4 +199,5 @@
     <string name="mood_empty_title">Nothing for this mood tonight</string>
     <string name="mood_empty_body">Family night or the parental lock hides these movies. Try another mood.</string>
     <string name="catalog_error_title">The library is missing</string>
+    <string name="launch_opening">Opening in %1$s…</string>
 </resources>

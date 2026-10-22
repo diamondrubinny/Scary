@@ -50,6 +50,7 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.fx.chill
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 @Composable
@@ -159,7 +160,8 @@ private fun MovieTitle(movie: Movie, language: Language) {
     val title = movie.displayTitle(language)
     val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
     var logoShown by remember(movie.id) { mutableStateOf(false) }
-    Box(Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = title }) {
+    // The title shivers as it comes out of the dark; again when the logo art arrives and replaces the text.
+    Box(Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = title }.chill(movie.id to logoShown)) {
         if (!logoShown) {
             BasicText(
                 text = title,

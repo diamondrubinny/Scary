@@ -358,9 +358,41 @@ class HomeViewModel(
     /** Bumped whenever dialogs are closed, so PIN or TMDB work still running cannot act afterwards. */
     private var dialogGeneration = 0L
 
+    private val _launching = MutableStateFlow<LaunchingState?>(null)
+
+    /** Set while the shiver screen shows, just before another app opens a movie. */
+    val launching: StateFlow<LaunchingState?> = _launching.asStateFlow()
+    private var launchJob: Job? = null
+
+    /**
+     * Shows the movie's title shivering for a moment, then opens it in [appLabel]. Shorter and still when motion is
+     * reduced. Home cancels it; the screen clears once the other app is in front.
+     */
+    private fun launchWithShiver(movie: Movie, appLabel: String, open: () -> LaunchResult) {
+        launchJob?.cancel()
+        val generation = dialogGeneration
+        _launching.value = LaunchingState(movie, appLabel)
+        val motion = latestPrefs?.effectsEnabled != false && settings.systemAnimationsOn()
+        launchJob = viewModelScope.launch {
+            delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
+            if (generation != dialogGeneration) return@launch
+            report(open())
+            // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
+            delay(LAUNCH_CLEAR_MS)
+            _launching.value = null
+        }
+    }
+
+    private fun cancelLaunch() {
+        launchJob?.cancel()
+        launchJob = null
+        _launching.value = null
+    }
+
     fun onHomePressed() {
         // Home always lands on a clean home screen: no dialog left floating over it.
         dialogGeneration++
+        cancelLaunch()
         _pinDialog.value = null
         _tmdbDialog.value = null
         backStack.value = listOf(Screen.Home)
@@ -400,7 +432,7 @@ class HomeViewModel(
                     settings.pushRecent(action.movie.id)
                     savedMovies.save(action.movie, language.value)
                 }
-                report(launcher.openInStremio(action.movie))
+                launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
             GatedAction.Settings -> push(Screen.Settings)
@@ -417,6 +449,9 @@ class HomeViewModel(
     /** Called when the launcher leaves the screen: the next protected action asks for the PIN again. */
     fun onBackgrounded() {
         sessionUnlocked.value = false
+        // The other app is in front (or SCARY was left before it opened): coming back shows SCARY, not the shiver
+        // screen, and nothing opens by surprise later.
+        cancelLaunch()
     }
 
     fun startPinSetup() {
@@ -660,6 +695,9 @@ class HomeViewModel(
     companion object {
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
+        private const val LAUNCH_SHIVER_MS = 1_600L
+        private const val LAUNCH_STILL_MS = 400L
+        private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80
         private const val WEB_SEARCH_DELAY_MS = 700L
 

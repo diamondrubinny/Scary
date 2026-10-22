@@ -189,6 +189,16 @@ adb shell settings put system font_scale 1.0
 open --es scary.debug.open home
 sleep 3
 
+# Watch: the shiver screen with the movie's logo, just before Stremio (or Google Play, when it is missing) opens.
+open --es scary.debug.open details:the_shining
+sleep 6
+key KEYCODE_DPAD_CENTER
+shot 37-launch-shiver 1
+sleep 4
+adb shell am force-stop com.android.vending || true
+open --es scary.debug.open home
+sleep 3
+
 # Release build (R8, not debuggable): installs over the debug build with the same key and keeps its data.
 # It must start and navigate without crashing, or this job fails and nothing is published.
 if [ -f dist/scary-release.apk ]; then
