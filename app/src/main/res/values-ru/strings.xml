@@ -28,6 +28,7 @@
     <string name="effects_off_description">Эффекты атмосферы: выключены</string>
     <string name="msg_effects_on">Туман и зернистость включены</string>
     <string name="msg_effects_off">Туман и зернистость выключены</string>
+    <string name="msg_safe_mode">SCARY перезапущен после повторяющихся ошибок. Эффекты и звуки выключены, их можно снова включить в настройках.</string>
     <string name="system_settings">Настройки</string>
     <string name="system_settings_description">Открыть системные настройки</string>
     <string name="install_app">Установить %1$s</string>

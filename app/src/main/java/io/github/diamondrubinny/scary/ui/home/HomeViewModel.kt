@@ -565,6 +565,15 @@ class HomeViewModel(
         }
     }
 
+    /** After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) and says so. */
+    fun enterSafeMode() {
+        viewModelScope.launch {
+            settings.setEffectsEnabled(false)
+            settings.setSoundsEnabled(false)
+            show(R.string.msg_safe_mode)
+        }
+    }
+
     fun consumeMessage(id: Long) {
         _message.update { if (it?.id == id) null else it }
     }

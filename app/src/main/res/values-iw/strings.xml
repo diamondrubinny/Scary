@@ -28,6 +28,7 @@
     <string name="effects_off_description">אפקטי אווירה: כבויים</string>
     <string name="msg_effects_on">ערפל וגרעיניות פועלים</string>
     <string name="msg_effects_off">ערפל וגרעיניות כבויים</string>
+    <string name="msg_safe_mode">SCARY הופעלה מחדש אחרי שגיאות חוזרות. האפקטים והצלילים כובו, ואפשר להחזיר אותם בהגדרות.</string>
     <string name="system_settings">הגדרות</string>
     <string name="system_settings_description">פתיחת הגדרות המערכת</string>
     <string name="install_app">התקנת %1$s</string>

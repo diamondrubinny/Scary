@@ -28,6 +28,7 @@
     <string name="effects_off_description">Efeitos de atmosfera: desligados</string>
     <string name="msg_effects_on">Névoa e granulação ligadas</string>
     <string name="msg_effects_off">Névoa e granulação desligadas</string>
+    <string name="msg_safe_mode">O SCARY reiniciou após erros repetidos. Efeitos e sons foram desligados; você pode religá-los nas Configurações.</string>
     <string name="system_settings">Configurações</string>
     <string name="system_settings_description">Abrir as configurações do sistema</string>
     <string name="install_app">Instalar %1$s</string>

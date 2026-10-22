@@ -16,6 +16,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
+import io.github.diamondrubinny.scary.stability.CrashGuard
 import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -41,6 +42,7 @@ class MainActivity : ComponentActivity() {
         val language = LanguageStore.read(this)
         ScaryFonts.useFor(language)
         viewModel.setLanguage(language)
+        if (savedInstanceState == null && CrashGuard.consumeCrashLoop(this)) viewModel.enterSafeMode()
         setContent { ScaryRoot(viewModel) }
         handleDebugIntent(intent)
 
@@ -125,6 +127,8 @@ class MainActivity : ComponentActivity() {
                 viewModel.openTmdbDialog()
             }
             target.startsWith("details:") -> viewModel.openDetails(target.removePrefix("details:"))
+            // A real uncaught crash, so CI can check that three in a row start SCARY in safe mode.
+            target == "crash" -> throw IllegalStateException("Debug crash")
         }
     }
 

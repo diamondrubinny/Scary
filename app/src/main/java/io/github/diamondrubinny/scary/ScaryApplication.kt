@@ -3,6 +3,8 @@ package io.github.diamondrubinny.scary
 import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.os.StrictMode
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
@@ -20,9 +22,20 @@ import io.github.diamondrubinny.scary.data.SecretStore
 import io.github.diamondrubinny.scary.data.TmdbRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.launch.Launcher
+import io.github.diamondrubinny.scary.stability.CrashGuard
 
 class ScaryApplication : Application(), SingletonImageLoader.Factory {
     val container: AppContainer by lazy { AppContainer(this) }
+
+    override fun onCreate() {
+        super.onCreate()
+        CrashGuard.install(this)
+        if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
+            // Debug builds only: report disk and network work on the main thread, and leaked resources, in logcat.
+            StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
+            StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
+        }
+    }
 
     /**
      * One image loader for the whole app, tuned for TV boxes with little memory (a Mi Box S has 2 GB): a capped

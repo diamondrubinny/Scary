@@ -29,6 +29,7 @@
     <string name="effects_off_description">Atmosphere effects: off</string>
     <string name="msg_effects_on">Fog and film grain on</string>
     <string name="msg_effects_off">Fog and film grain off</string>
+    <string name="msg_safe_mode">SCARY restarted after repeated errors. Effects and sounds are off; you can turn them back on in Settings.</string>
     <string name="system_settings">Settings</string>
     <string name="system_settings_description">Open system settings</string>
     <string name="install_app">Install %1$s</string>

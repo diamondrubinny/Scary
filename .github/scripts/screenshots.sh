@@ -145,7 +145,7 @@ sleep 3
 # Release build (R8, not debuggable): installs over the debug build with the same key and keeps its data.
 # It must start and navigate without crashing, or this job fails and nothing is published.
 if [ -f dist/scary-release.apk ]; then
-  adb logcat -c || true
+  adb logcat -b all -c || true
   adb install -r dist/scary-release.apk
   adb shell am force-stop "$PKG"
   open
@@ -183,5 +183,19 @@ if [ -f dist/scary-release.apk ]; then
   } | tee "$OUT/startup.txt"
   adb shell am force-stop "$PKG"
 fi
+
+# Crash safety net, on the debug build: three real crashes in a row must bring SCARY back in safe mode, with a message.
+adb install -r dist/scary.apk
+for _ in 1 2 3; do
+  adb shell am force-stop "$PKG"
+  adb shell am start -n "$ACT" --es scary.debug.open crash > /dev/null || true
+  sleep 4
+  # Close the system's "SCARY has stopped" dialog, if the TV shows one.
+  adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS > /dev/null 2>&1 || true
+done
+adb shell am force-stop "$PKG"
+open
+shot 33-safe-mode 5
+adb shell am force-stop "$PKG"
 
 ls -la "$OUT"

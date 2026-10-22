@@ -93,8 +93,10 @@ fun Clock(modifier: Modifier = Modifier) {
 @Composable
 fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Modifier = Modifier) {
     if (message == null) return
+    val text = stringResource(message.text, *message.args.toTypedArray())
     LaunchedEffect(message.id) {
-        delay(MESSAGE_DURATION_MS)
+        // Longer messages stay longer, so there is time to read them (WCAG 2.2.1).
+        delay((MESSAGE_DURATION_MS + text.length * MESSAGE_MS_PER_CHAR).coerceAtMost(MESSAGE_MAX_MS))
         onDismiss(message.id)
     }
     Box(
@@ -105,9 +107,11 @@ fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Mo
             .padding(horizontal = 22.dp, vertical = 12.dp)
             .semantics { liveRegion = LiveRegionMode.Polite },
     ) {
-        BasicText(stringResource(message.text, *message.args.toTypedArray()), style = ScaryType.BodyStrong)
+        BasicText(text, style = ScaryType.BodyStrong)
     }
 }
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val MESSAGE_DURATION_MS = 4_000L
+private const val MESSAGE_MS_PER_CHAR = 50L
+private const val MESSAGE_MAX_MS = 12_000L
