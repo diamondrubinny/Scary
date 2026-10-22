@@ -61,6 +61,20 @@ for lang in en pt ru; do
   open --es scary.debug.open settings
   shot "$n-settings-$lang" 4; n=$((n+1))
 done
+# Arabic, the fifth language: right to left with its own fonts (Rakkas and Cairo).
+open --es scary.debug.open language:ar
+sleep 6
+open
+shot 50-ar-home 12
+open --es scary.debug.open details:the_shining
+shot 51-ar-details 6
+open --es scary.debug.open settings
+shot 52-ar-settings 4
+open --es scary.debug.open search --es scary.debug.query shining
+shot 53-ar-search 6
+open --es scary.debug.open pin
+shot 54-ar-pin 4
+key KEYCODE_BACK
 open --es scary.debug.open language:he
 sleep 6
 
@@ -212,7 +226,7 @@ for _ in 1 2 3; do
 done
 adb shell am force-stop "$PKG"
 open
-shot 33-safe-mode 5
+shot 33-safe-mode 12
 adb shell am force-stop "$PKG"
 
 ls -la "$OUT"

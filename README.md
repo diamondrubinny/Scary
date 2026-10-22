@@ -25,7 +25,7 @@
 </tr>
 <tr>
 <td><img src="docs/screenshots/en-all-apps.jpg" alt="All apps drawer" width="100%"><br><b>Your apps</b> · Stremio, Google Play and every TV app, pinned your way</td>
-<td><img src="docs/screenshots/en-settings.jpg" alt="Settings screen" width="100%"><br><b>Settings</b> · parental PIN, fear level, effects, four languages</td>
+<td><img src="docs/screenshots/en-settings.jpg" alt="Settings screen" width="100%"><br><b>Settings</b> · parental PIN, family night, fear level, effects, five languages</td>
 <td><img src="docs/screenshots/en-privacy.jpg" alt="Privacy notice inside the app" width="100%"><br><b>Private by design</b> · no account, no ads, no tracking</td>
 </tr>
 </table>
@@ -160,4 +160,4 @@ Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibi
 
 ## Privacy and credits
 
-No accounts, no analytics. Online artwork can be switched off in settings; only movie IDs (and your search text when you search) are sent to Cinemeta and, with your own key, TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Movie metadata and images belong to their owners. Fonts: Karantina, Assistant, Oswald, Rubik and Rubik Wet Paint, under the SIL Open Font License 1.1.
+No accounts, no analytics. Online artwork can be switched off in settings; only movie IDs (and your search text when you search) are sent to Cinemeta and, with your own key, TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Movie metadata and images belong to their owners. Fonts: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo, under the SIL Open Font License 1.1.

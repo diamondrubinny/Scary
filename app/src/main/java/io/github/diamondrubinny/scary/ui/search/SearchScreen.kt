@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -164,7 +165,7 @@ fun SearchScreen(
         }
 
         val status = when {
-            query.isBlank() -> stringResource(R.string.search_prompt, movies.size)
+            query.isBlank() -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
             results.isEmpty() -> stringResource(R.string.search_no_results, query.trim())
             else -> stringResource(R.string.search_count, results.size)
         }

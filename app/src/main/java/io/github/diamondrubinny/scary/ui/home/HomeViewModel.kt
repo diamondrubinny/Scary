@@ -448,7 +448,8 @@ class HomeViewModel(
         }
         val now = System.currentTimeMillis()
         if (PinLockout.remainingWaitMillis(prefs.lockout, now) > 0) {
-            _pinDialog.value = dialog.copy(error = R.string.pin_error_wait, lockedUntilMillis = prefs.lockout.lockedUntilMillis)
+            // The wait itself (lockedUntilMillis) is what the dialog shows, counting down.
+            _pinDialog.value = dialog.copy(error = null, lockedUntilMillis = prefs.lockout.lockedUntilMillis)
             return
         }
         _pinDialog.value = dialog.copy(busy = true, error = null)
@@ -468,7 +469,7 @@ class HomeViewModel(
                 if (generation != dialogGeneration) return@launch
                 _pinDialog.value = dialog.copy(
                     busy = false,
-                    error = if (next.lockedUntilMillis > 0) R.string.pin_error_wait else R.string.pin_error_wrong,
+                    error = if (next.lockedUntilMillis > 0) null else R.string.pin_error_wrong,
                     lockedUntilMillis = next.lockedUntilMillis,
                 )
             }

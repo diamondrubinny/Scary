@@ -75,14 +75,16 @@ object Tmdb {
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val hebrew = Regex("[\\u0590-\\u05FF]")
     private val cyrillic = Regex("[\\u0400-\\u04FF]")
+    private val arabic = Regex("[\\u0600-\\u06FF]")
 
     /**
      * TMDB falls back to the original title when it has no translation, so text only counts as localized when
-     * it is in the right script (Hebrew, Russian) or differs from the original title (Portuguese).
+     * it is in the right script (Hebrew, Russian, Arabic) or differs from the original title (Portuguese).
      */
     private fun isLocalized(language: Language, text: String, original: String = ""): Boolean = when (language) {
         Language.HE -> hebrew.containsMatchIn(text)
         Language.RU -> cyrillic.containsMatchIn(text)
+        Language.AR -> arabic.containsMatchIn(text)
         Language.PT -> text.isNotBlank() && !text.equals(original, ignoreCase = true)
         Language.EN -> false
     }

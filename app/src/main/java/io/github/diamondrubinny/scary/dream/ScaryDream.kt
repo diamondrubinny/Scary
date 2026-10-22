@@ -208,20 +208,31 @@ class ScaryDream : DreamService() {
             GradientDrawable.Orientation.TOP_BOTTOM,
             intArrayOf(Color.argb(90, 0, 0, 0), Color.TRANSPARENT, Color.argb(235, 0, 0, 0)),
         )
-        val cyrillic = language == Language.RU
         val text = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(64), 0, dp(64), dp(56))
         }
         title = TextView(this).apply {
-            typeface = font(if (cyrillic) R.font.oswald_semibold else R.font.karantina_bold)
+            typeface = font(
+                when (language) {
+                    Language.RU -> R.font.oswald_semibold
+                    Language.AR -> R.font.rakkas_regular
+                    else -> R.font.karantina_bold
+                },
+            )
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 64f)
             setTextColor(BONE)
             maxLines = 2
             textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         }
         meta = TextView(this).apply {
-            typeface = font(if (cyrillic) R.font.rubik_regular else R.font.assistant_regular)
+            typeface = font(
+                when (language) {
+                    Language.RU -> R.font.rubik_regular
+                    Language.AR -> R.font.cairo_regular
+                    else -> R.font.assistant_regular
+                },
+            )
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             setTextColor(ASH)
             textAlignment = View.TEXT_ALIGNMENT_VIEW_START

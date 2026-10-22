@@ -8,7 +8,8 @@ enum class Language(val code: String, val nativeName: String, val tmdbTag: Strin
     HE("he", "עברית", "he-IL", true),
     EN("en", "English", "en-US", false),
     PT("pt", "Português", "pt-BR", false),
-    RU("ru", "Русский", "ru-RU", false);
+    RU("ru", "Русский", "ru-RU", false),
+    AR("ar", "العربية", "ar-SA", true);
 
     fun next(): Language = entries[(ordinal + 1) % entries.size]
 
@@ -18,6 +19,7 @@ enum class Language(val code: String, val nativeName: String, val tmdbTag: Strin
             "he", "iw" -> HE
             "pt" -> PT
             "ru" -> RU
+            "ar" -> AR
             else -> EN
         }
     }

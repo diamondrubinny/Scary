@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arabic (Modern Standard Arabic). Draft translation: needs review by a native speaker before wide release. -->
+<resources>
+    <string name="night_pick">اختيار الليلة</string>
+    <string name="action_watch_stremio">شاهد في Stremio</string>
+    <string name="action_trailer">الإعلان</string>
+    <string name="action_details">التفاصيل</string>
+    <string name="row_recent">فُتحت مؤخرًا</string>
+    <string name="row_apps">تطبيقاتي</string>
+    <string name="row_more_like">أفلام مشابهة</string>
+    <string name="minutes">%1$d دقيقة</string>
+    <string name="fear_short">الرعب %1$d/5</string>
+    <string name="fear_description">مستوى الرعب %1$d من 5</string>
+    <string name="genre_horror">رعب</string>
+    <string name="genre_thriller">إثارة</string>
+    <string name="subgenre_psychological">نفسي</string>
+    <string name="subgenre_supernatural">خارق للطبيعة</string>
+    <string name="subgenre_possession">مسّ شيطاني</string>
+    <string name="subgenre_ghost">أشباح</string>
+    <string name="subgenre_slasher">سفّاحون</string>
+    <string name="subgenre_creature">مخلوقات</string>
+    <string name="subgenre_folk">رعب شعبي</string>
+    <string name="subgenre_social">رعب اجتماعي</string>
+    <string name="subgenre_found_footage">لقطات مُكتشفة</string>
+    <string name="subgenre_survival">نجاة</string>
+    <string name="subgenre_mystery">غموض</string>
+    <string name="subgenre_crime">جريمة</string>
+    <string name="effects_on_description">مؤثرات الأجواء: مفعّلة</string>
+    <string name="effects_off_description">مؤثرات الأجواء: متوقفة</string>
+    <string name="msg_effects_on">تم تشغيل الضباب وحبيبات الفيلم</string>
+    <string name="msg_effects_off">تم إيقاف الضباب وحبيبات الفيلم</string>
+    <string name="msg_safe_mode">أُعيد تشغيل SCARY بعد أخطاء متكررة. تم إيقاف المؤثرات والأصوات، ويمكنك إعادة تشغيلها من الإعدادات.</string>
+    <string name="system_settings">الإعدادات</string>
+    <string name="system_settings_description">فتح إعدادات النظام</string>
+    <string name="install_app">تثبيت %1$s</string>
+    <string name="msg_not_installed_store">‏%1$s غير مثبّت. جارٍ فتح Google Play.</string>
+    <string name="msg_open_failed">تعذّر فتح %1$s.</string>
+    <string name="msg_stremio_app_only">تم فتح Stremio. ابحث فيه عن %1$s.</string>
+    <string name="msg_catalog_error">تعذّر تحميل مكتبة الأفلام. أعد تثبيت التطبيق لإصلاح ذلك.</string>
+    <string name="loading">جارٍ التحميل…</string>
+    <string name="all_apps">كل التطبيقات</string>
+    <string name="all_apps_edit">تعديل</string>
+    <string name="all_apps_done">تم</string>
+    <string name="all_apps_edit_hint">اختر تطبيقًا لتثبيته في المقدمة أو نقله أو إخفائه. يمكنك أيضًا الضغط مطولًا على زر الاختيار فوق أي تطبيق.</string>
+    <string name="all_apps_empty">لم يُعثر على تطبيقات تلفزيون في هذا الجهاز.</string>
+    <string name="app_option_open">فتح</string>
+    <string name="app_option_pin">تثبيت في مقدمة تطبيقاتي</string>
+    <string name="app_option_unpin">إلغاء التثبيت</string>
+    <string name="app_option_move_earlier">نقل إلى الأمام</string>
+    <string name="app_option_move_later">نقل إلى الخلف</string>
+    <string name="app_option_hide">إخفاء من الشاشة الرئيسية</string>
+    <string name="app_option_show">إظهار في الشاشة الرئيسية</string>
+    <string name="app_option_info">معلومات التطبيق</string>
+    <string name="badge_pinned">مثبّت</string>
+    <string name="badge_hidden">مخفي</string>
+    <string name="settings_title">إعدادات SCARY</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_effects">الضباب وحبيبات الفيلم</string>
+    <string name="value_on">مفعّل</string>
+    <string name="value_off">متوقف</string>
+    <string name="settings_night_fear">شدة اختيار الليلة</string>
+    <string name="settings_night_fear_value">حتى مستوى الرعب %1$d</string>
+    <string name="settings_system">إعدادات نظام التلفزيون</string>
+    <string name="settings_about">حول التطبيق</string>
+    <string name="settings_about_text">‏SCARY %1$s. بلا حسابات وبلا تتبّع. تبقى تفضيلاتك على هذا التلفزيون. الخطوط: Karantina وAssistant وOswald وRubik وRubik Wet Paint وRakkas وCairo بموجب رخصة SIL Open Font License 1.1.</string>
+    <string name="search_title">بحث</string>
+    <string name="search_hint">العنوان أو المخرج أو السنة أو نوع الرعب</string>
+    <string name="search_no_results">لم يُعثر على أفلام لـ %1$s.</string>
+    <string name="search_count">النتائج: %1$d</string>
+    <string name="pin_title_verify">أدخل رمز PIN للرقابة الأبوية</string>
+    <string name="pin_title_create">اختر رمز PIN جديدًا للرقابة الأبوية، من 4 إلى 8 أرقام</string>
+    <string name="pin_title_confirm">أدخل الرمز مرة أخرى للتأكيد</string>
+    <string name="pin_error_format">يجب أن يتكون الرمز من 4 إلى 8 أرقام.</string>
+    <string name="pin_error_mismatch">الرمزان غير متطابقين. اختر الرمز من جديد.</string>
+    <string name="pin_error_wrong">رمز خاطئ. حاول مرة أخرى.</string>
+    <string name="pin_delete">حذف</string>
+    <string name="pin_ok">موافق</string>
+    <string name="pin_cancel">إلغاء</string>
+    <string name="pin_checking">جارٍ التحقق…</string>
+    <string name="msg_pin_set">تم تفعيل القفل الأبوي.</string>
+    <string name="msg_pin_removed">تم إيقاف القفل الأبوي.</string>
+    <string name="settings_parental">القفل الأبوي</string>
+    <string name="value_lock_on">مفعّل</string>
+    <string name="value_lock_off">متوقف</string>
+    <string name="settings_lock_level">القفل ابتداءً من مستوى الرعب</string>
+    <string name="settings_lock_level_value">%1$d وما فوق</string>
+    <string name="settings_change_pin">تغيير الرمز</string>
+    <string name="settings_turn_off_lock">إيقاف القفل</string>
+    <string name="settings_parental_note">يشمل القفل الأفلام التي تُفتح من SCARY وهذه الإعدادات. ولا يقفل Stremio أو التطبيقات الأخرى. نسيت الرمز؟ مسح بيانات SCARY من إعدادات نظام التلفزيون يعيد ضبطه مع باقي تفضيلاتك.</string>
+    <string name="settings_sounds">أصوات الأجواء</string>
+    <string name="locked_badge">مقفل</string>
+    <string name="settings_online">الصور والمعلومات من الإنترنت</string>
+    <string name="settings_online_note">تأتي الملصقات والخلفيات وتقييمات IMDb وطاقم التمثيل والصفوف الرائجة من Cinemeta، قاعدة بيانات الأفلام العامة الخاصة بـ Stremio. لا يُرسل سوى معرّفات الأفلام، ونص البحث عندما تبحث، ولا تُرسل أي بيانات شخصية. وكأي موقع ويب، يرى الخادم عنوان IP الخاص بالتلفزيون. أوقف هذا الخيار للبقاء دون اتصال تمامًا.</string>
+    <string name="imdb_rating">IMDb %1$s</string>
+    <string name="cast_line">بطولة %1$s</string>
+    <string name="settings_home_section">الشاشة الرئيسية</string>
+    <string name="settings_default_home">SCARY كشاشة رئيسية</string>
+    <string name="value_home_yes">مفعّل</string>
+    <string name="value_home_no">غير مضبوط</string>
+    <string name="settings_home_button">زر الشاشة الرئيسية في جهاز التحكم</string>
+    <string name="value_home_button_on">يفتح SCARY</string>
+    <string name="value_home_button_off">متوقف</string>
+    <string name="settings_home_note">إذا لم يسمح التلفزيون باختيار SCARY كشاشة رئيسية (وهذا شائع في Google TV وبعض طرازات Xiaomi)، فعّل خيار زر الشاشة الرئيسية. عندها يُفتح SCARY عند كل ضغطة على زر Home وعند تشغيل التلفزيون. هو يستمع إلى زر Home فقط ولا يقرأ أي شيء على الشاشة.</string>
+    <string name="tile_set_home">اجعل SCARY الشاشة الرئيسية</string>
+    <string name="a11y_service_label">زر الشاشة الرئيسية لـ SCARY</string>
+    <string name="a11y_service_description">يجعل زر Home في جهاز التحكم يفتح SCARY، ويفتح SCARY عند تشغيل التلفزيون. يستمع إلى زر Home فقط، ولا يستطيع قراءة أي شيء على الشاشة أو تغييره.</string>
+    <string name="msg_enable_service">في إعدادات تسهيل الاستخدام، اختر «زر الشاشة الرئيسية لـ SCARY» وفعّله.</string>
+    <string name="settings_tmdb">مفتاح TMDB</string>
+    <string name="value_tmdb_none">غير مضبوط</string>
+    <string name="tmdb_dialog_title">مفتاح TMDB API</string>
+    <string name="tmdb_dialog_body">باستخدام مفتاح TMDB الخاص بك، يعرض SCARY العناوين والملخصات بلغتك، وصورًا أوضح، وثلاثة صفوف إضافية. احصل على مفتاح مجاني للاستخدام الشخصي من themoviedb.org، من الإعدادات ثم API. الصق مفتاح API (‏32 حرفًا) أو Read Access Token. الكتابة أسهل باستخدام تطبيق Google TV على هاتفك.</string>
+    <string name="tmdb_hint">الصق المفتاح أو اكتبه</string>
+    <string name="tmdb_save">حفظ وتحقق</string>
+    <string name="tmdb_delete">حذف المفتاح</string>
+    <string name="tmdb_checking">جارٍ التحقق مع TMDB…</string>
+    <string name="tmdb_invalid_format">لا يبدو هذا مفتاح TMDB. انسخ مفتاح API كاملًا (‏32 حرفًا) أو Read Access Token.</string>
+    <string name="tmdb_rejected">رفض TMDB هذا المفتاح. تأكد من أنك نسخته كاملًا.</string>
+    <string name="tmdb_unreachable">تعذّر الوصول إلى TMDB. تحقق من الاتصال بالإنترنت وحاول مرة أخرى. لم يُحفظ المفتاح.</string>
+    <string name="tmdb_storage_failed">لم يتمكن التلفزيون من تخزين المفتاح بشكل آمن، لذلك لم يُحفظ.</string>
+    <string name="msg_tmdb_saved">تم حفظ المفتاح وتشفيره على هذا التلفزيون. جارٍ التحديث من TMDB.</string>
+    <string name="msg_tmdb_deleted">تم حذف مفتاح TMDB.</string>
+    <string name="tmdb_note">يُشفَّر المفتاح باستخدام Android Keystore ولا يُرسل إلا إلى api.themoviedb.org. يتلقى TMDB معرّفات الأفلام والمفتاح فقط، ولا شيء شخصي.</string>
+    <string name="original_title">العنوان الأصلي: %1$s</string>
+
+    <!-- My list, voice search and screensaver -->
+    <string name="row_my_list">قائمتي</string>
+    <string name="action_add_my_list">+ قائمتي</string>
+    <string name="action_in_my_list">✓ في قائمتي</string>
+    <string name="msg_my_list_added">تمت إضافة %1$s إلى قائمتي</string>
+    <string name="msg_my_list_removed">تمت إزالة %1$s من قائمتي</string>
+    <string name="voice_search">البحث الصوتي</string>
+    <string name="voice_prompt">أي فيلم رعب؟</string>
+    <string name="dream_label">SCARY – خلفيات رعب</string>
+    <string name="settings_screensaver">شاشة التوقف</string>
+    <string name="value_screensaver">اختيار</string>
+    <string name="settings_screensaver_note">اختر «SCARY – خلفيات رعب» من إعدادات شاشة التوقف في التلفزيون. عند تفعيل القفل الأبوي، لا تعرض إلا الأفلام التي تقل عن مستوى القفل.</string>
+    <string name="msg_no_screensaver_settings">لا يفتح هذا التلفزيون إعدادات شاشة التوقف من التطبيقات. ابحث في الإعدادات، ثم تفضيلات الجهاز، ثم شاشة التوقف.</string>
+
+    <!-- Surprise me and web search -->
+    <string name="surprise_me">فاجئني</string>
+    <string name="msg_surprise_none">لا يوجد فيلم يناسب مستوى رعب الليلة. ارفعه من الإعدادات.</string>
+    <string name="search_web_title">من الإنترنت</string>
+    <string name="search_web_loading">جارٍ البحث في الإنترنت أيضًا…</string>
+    <string name="search_web_failed">البحث في الإنترنت غير متاح حاليًا.</string>
+    <string name="search_web_none">لا توجد أفلام رعب على الإنترنت لـ «%1$s».</string>
+    <!-- Privacy and accessibility statements (drafts, see docs/PRIVACY.md and docs/ACCESSIBILITY.md) -->
+    <string name="settings_privacy">الخصوصية</string>
+    <string name="settings_accessibility_statement">بيان إمكانية الوصول</string>
+    <string name="document_hint">تحرّك للأعلى والأسفل للقراءة. زر الرجوع يعيدك إلى الإعدادات.</string>
+    <string-array name="privacy_paragraphs">
+        <item>لا يحتوي SCARY على حسابات ولا إعلانات ولا تحليلات ولا ملفات تعريف ارتباط، ولا يوجد خادم لـ SCARY. لا يُرسل إلينا أي شيء تفعله في الواجهة.</item>
+        <item>يُخزَّن على هذا التلفزيون فقط: إعداداتك ولغتك، والتطبيقات المثبّتة في المقدمة والمخفية، وآخر 12 فيلمًا فتحتها، وقائمتك، ورمز PIN للرقابة الأبوية بصيغة hash مع salt (وليس الرمز نفسه أبدًا)، وأوقات الأعطال الأخيرة (الوقت فقط)، ومعلومات الأفلام والصور المخزنة مؤقتًا. إلغاء تثبيت SCARY أو مسح بياناته من إعدادات التلفزيون يحذف كل ذلك. SCARY مستثنى من النسخ الاحتياطي في Android.</item>
+        <item>تُقرأ قائمة التطبيقات المثبتة على هذا التلفزيون لعرضها، ولا تغادره أبدًا.</item>
+        <item>بيانات الأفلام عبر الإنترنت، ويمكنك إيقافها من الإعدادات: يطلب SCARY من Cinemeta، خدمة البيانات الوصفية العامة لـ Stremio، الملصقات والخلفيات والتقييمات وطاقم التمثيل. لا يُرسل سوى معرّفات أفلام IMDb العامة، ونص البحث عندما تبحث. تُحمَّل الصور من عناوين HTTPS التي يقدّمها Cinemeta، ومعظمها من images.metahub.space. وكأي موقع ويب، ترى هذه الخدمات عنوان IP الخاص بتلفزيونك. تُخزَّن المعلومات مؤقتًا لمدة 24 ساعة.</item>
+        <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة.</item>
+        <item>يُسلِّم البحث الصوتي المهمة إلى أداة التعرف على الكلام في هذا التلفزيون (عادةً Google). يذهب التسجيل إلى تلك الخدمة وليس إلى SCARY، ولا يتلقى SCARY سوى النص المُتعرَّف عليه.</item>
+        <item>المشاهدة والإعلانات والمتجر تفتح Stremio أو YouTube أو Google Play. ومن تلك اللحظة تسري سياسات الخصوصية الخاصة بها.</item>
+        <item>للأسئلة أو التصحيحات أو الطلبات المتعلقة ببياناتك: github.com/diamondrubinny/Scary/issues</item>
+        <item>آخر تحديث: أكتوبر 2026. هذه مسودة لم يراجعها محامٍ بعد.</item>
+    </string-array>
+    <string-array name="accessibility_paragraphs">
+        <item>يهدف SCARY إلى استيفاء WCAG 2.1 بالمستوى AA والمعيار الإسرائيلي IS 5568. لم يُدقَّق بعد من قِبل مستشار إمكانية وصول، لذلك لا يدّعي التوافق الكامل.</item>
+        <item>ما تم تنفيذه: كل شاشة تعمل بأسهم جهاز التحكم وزر موافق، مع توهّج واضح للتركيز. للبطاقات والأزرار والإعدادات تسميات منطوقة لـ TalkBack، وللشاشات والصفوف عناوين، وتُعلَن الرسائل وأخطاء الرمز. الضغط المطوّل على موافق فوق ملصق يضيفه إلى قائمتي، ويعرض TalkBack ذلك كإجراء. تستخدم العربية والعبرية تخطيطًا من اليمين إلى اليسار.</item>
+        <item>الحركة والصوت: لا يوجد وميض. الضباب والحبيبات خافتة وتتوقف عند إيقاف المؤثرات أو تفعيل «إزالة الرسوم المتحركة» في إعدادات تسهيل الاستخدام في التلفزيون. أصوات الأجواء متوقفة افتراضيًا.</item>
+        <item>قيود معروفة: الملصقات من الإنترنت موصوفة بالعنوان والسنة فقط؛ لم يراجع متحدثون أصليون الترجمات البرتغالية والروسية والعربية بعد؛ أحجام خط النظام الكبيرة جدًا قد تقصّر النص في بعض الصفوف؛ اختُبر TalkBack على محاكٍ فقط حتى الآن.</item>
+        <item>وجدت عائقًا؟ أبلغ عنه على github.com/diamondrubinny/Scary/issues وصِف الشاشة وما حدث. نسعى للرد خلال 14 يومًا.</item>
+        <item>آخر تحديث: أكتوبر 2026. هذه مسودة لم يراجعها مستشار إمكانية وصول بعد.</item>
+    </string-array>
+    <string name="row_moods">ماذا تريد أن تشاهد الليلة؟</string>
+    <string name="mood_gentle">مخيف، لكن ليس كثيرًا</string>
+    <string name="mood_mind_games">ألعاب العقل</string>
+    <string name="mood_ghosts">أشباح وشياطين</string>
+    <string name="mood_blood">دماء وصراخ</string>
+    <string name="mood_classics">كلاسيكيات الزمن القديم</string>
+    <string name="mood_relentless">لا نوم الليلة</string>
+    <string name="row_halloween">الهالوين يقترب</string>
+    <string name="row_friday_13th">الجمعة 13</string>
+    <string name="settings_family_night">سهرة عائلية</string>
+    <string name="settings_family_night_note">تظهر الأفلام الأخف فقط (رعب 1–2) في كل مكان، ويتوقف البحث في الإنترنت. إيقافها يتطلب رمز PIN.</string>
+    <string name="settings_family_night_note_no_pin">تظهر الأفلام الأخف فقط (رعب 1–2) في كل مكان، ويتوقف البحث في الإنترنت. اضبط رمز PIN في الأعلى كي لا يتمكن من إيقافها إلا شخص بالغ.</string>
+    <string name="msg_family_on">السهرة العائلية مفعّلة: أفلام خفيفة فقط</string>
+    <string name="msg_family_off">السهرة العائلية متوقفة</string>
+    <string name="family_night_badge">سهرة عائلية</string>
+    <plurals name="search_prompt">
+        <item quantity="zero">اكتب أو تحدّث للبحث. لا توجد أفلام.</item>
+        <item quantity="one">اكتب أو تحدّث للبحث في فيلم واحد.</item>
+        <item quantity="two">اكتب أو تحدّث للبحث في فيلمين.</item>
+        <item quantity="few">اكتب أو تحدّث للبحث في %1$d أفلام.</item>
+        <item quantity="many">اكتب أو تحدّث للبحث في %1$d فيلمًا.</item>
+        <item quantity="other">اكتب أو تحدّث للبحث في %1$d فيلم.</item>
+    </plurals>
+    <plurals name="pin_error_wait">
+        <item quantity="zero">محاولات كثيرة جدًا. حاول مرة أخرى الآن.</item>
+        <item quantity="one">محاولات كثيرة جدًا. حاول مرة أخرى بعد ثانية واحدة.</item>
+        <item quantity="two">محاولات كثيرة جدًا. حاول مرة أخرى بعد ثانيتين.</item>
+        <item quantity="few">محاولات كثيرة جدًا. حاول مرة أخرى بعد %1$d ثوانٍ.</item>
+        <item quantity="many">محاولات كثيرة جدًا. حاول مرة أخرى بعد %1$d ثانية.</item>
+        <item quantity="other">محاولات كثيرة جدًا. حاول مرة أخرى بعد %1$d ثانية.</item>
+    </plurals>
+    <plurals name="pin_entered_description">
+        <item quantity="zero">لم يُدخل أي رقم</item>
+        <item quantity="one">تم إدخال رقم واحد</item>
+        <item quantity="two">تم إدخال رقمين</item>
+        <item quantity="few">تم إدخال %1$d أرقام</item>
+        <item quantity="many">تم إدخال %1$d رقمًا</item>
+        <item quantity="other">تم إدخال %1$d رقم</item>
+    </plurals>
+</resources>

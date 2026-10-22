@@ -62,10 +62,9 @@
     <string name="settings_night_fear_value">Up to fear level %1$d</string>
     <string name="settings_system">TV system settings</string>
     <string name="settings_about">About</string>
-    <string name="settings_about_text">SCARY %1$s. No accounts and no tracking. Your preferences stay on this TV. Fonts: Karantina, Assistant, Oswald, Rubik and Rubik Wet Paint under the SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">SCARY %1$s. No accounts and no tracking. Your preferences stay on this TV. Fonts: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo under the SIL Open Font License 1.1.</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Title, director, year or kind of horror</string>
-    <string name="search_prompt">Type or dictate to search %1$d movies.</string>
     <string name="search_no_results">No movies found for %1$s.</string>
     <string name="search_count">Results: %1$d</string>
     <string name="pin_title_verify">Enter the parental PIN</string>
@@ -74,12 +73,10 @@
     <string name="pin_error_format">The PIN needs 4 to 8 digits.</string>
     <string name="pin_error_mismatch">The PINs did not match. Choose a PIN again.</string>
     <string name="pin_error_wrong">Wrong PIN. Try again.</string>
-    <string name="pin_error_wait">Too many attempts. Try again in %1$d seconds.</string>
     <string name="pin_delete">Delete</string>
     <string name="pin_ok">OK</string>
     <string name="pin_cancel">Cancel</string>
     <string name="pin_checking">Checking…</string>
-    <string name="pin_entered_description">%1$d digits entered</string>
     <string name="msg_pin_set">Parental lock is on.</string>
     <string name="msg_pin_removed">Parental lock is off.</string>
     <string name="settings_parental">Parental lock</string>
@@ -153,7 +150,7 @@
     <string name="document_hint">Move up and down to read. Back returns to settings.</string>
     <string-array name="privacy_paragraphs">
         <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
-        <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
+        <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), the times of recent crashes (only the time), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache.</item>
@@ -164,9 +161,9 @@
     </string-array>
     <string-array name="accessibility_paragraphs">
         <item>SCARY aims to meet WCAG 2.1 level AA and the Israeli standard IS 5568. It has not yet been audited by an accessibility consultant, so it does not claim full conformance.</item>
-        <item>Built in: every screen works with the remote\'s arrows and OK button, with a clear focus glow. Cards, buttons and settings have spoken labels for TalkBack, screens and rows have headings, and messages and PIN errors are announced. Holding OK on a poster adds it to My list, and TalkBack offers this as an action. Hebrew uses a right-to-left layout.</item>
+        <item>Built in: every screen works with the remote\'s arrows and OK button, with a clear focus glow. Cards, buttons and settings have spoken labels for TalkBack, screens and rows have headings, and messages and PIN errors are announced. Holding OK on a poster adds it to My list, and TalkBack offers this as an action. Hebrew and Arabic use a right-to-left layout.</item>
         <item>Motion and sound: there is no flashing. The fog and grain are faint and stop when you turn off effects or turn on Remove animations in the TV accessibility settings. Ambient sounds are off by default.</item>
-        <item>Known limitations: online posters are described only by title and year; the Portuguese and Russian translations have not been reviewed by native speakers; very large system font sizes can shorten text in some rows; TalkBack has been tested only on an emulator so far.</item>
+        <item>Known limitations: online posters are described only by title and year; the Portuguese, Russian and Arabic translations have not been reviewed by native speakers; very large system font sizes can shorten text in some rows; TalkBack has been tested only on an emulator so far.</item>
         <item>Found a barrier? Report it at github.com/diamondrubinny/Scary/issues and describe the screen and what happened. We aim to reply within 14 days.</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by an accessibility consultant.</item>
     </string-array>
@@ -185,4 +182,16 @@
     <string name="msg_family_on">Family night is on: only gentle movies</string>
     <string name="msg_family_off">Family night is off</string>
     <string name="family_night_badge">Family night</string>
+    <plurals name="search_prompt">
+        <item quantity="one">Type or dictate to search %1$d movie.</item>
+        <item quantity="other">Type or dictate to search %1$d movies.</item>
+    </plurals>
+    <plurals name="pin_error_wait">
+        <item quantity="one">Too many attempts. Try again in %1$d second.</item>
+        <item quantity="other">Too many attempts. Try again in %1$d seconds.</item>
+    </plurals>
+    <plurals name="pin_entered_description">
+        <item quantity="one">%1$d digit entered</item>
+        <item quantity="other">%1$d digits entered</item>
+    </plurals>
 </resources>

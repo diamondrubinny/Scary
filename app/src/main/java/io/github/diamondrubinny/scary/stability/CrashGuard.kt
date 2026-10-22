@@ -2,6 +2,7 @@ package io.github.diamondrubinny.scary.stability
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import io.github.diamondrubinny.scary.core.stability.CrashLoop
 
 /**
@@ -22,7 +23,7 @@ object CrashGuard {
                 val prefs = appContext.getSharedPreferences(FILE, Context.MODE_PRIVATE)
                 val times = CrashLoop.record(CrashLoop.parse(prefs.getString(KEY, null)), System.currentTimeMillis())
                 // commit, not apply: the process is about to die.
-                prefs.edit().putString(KEY, CrashLoop.format(times)).commit()
+                prefs.edit(commit = true) { putString(KEY, CrashLoop.format(times)) }
             } catch (t: Throwable) {
                 Log.w(TAG, "Could not record crash: ${t.javaClass.simpleName}")
             }
@@ -34,7 +35,7 @@ object CrashGuard {
     fun consumeCrashLoop(context: Context): Boolean {
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
         val loop = CrashLoop.isLoop(CrashLoop.parse(prefs.getString(KEY, null)), System.currentTimeMillis())
-        if (loop) prefs.edit().remove(KEY).apply()
+        if (loop) prefs.edit { remove(KEY) }
         return loop
     }
 }

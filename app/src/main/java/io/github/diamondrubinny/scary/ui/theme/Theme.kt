@@ -35,7 +35,8 @@ object ScaryColors {
 }
 
 /**
- * Karantina and Assistant have no Cyrillic, so Russian switches to Oswald (condensed headings) and Rubik (text).
+ * Karantina and Assistant have no Cyrillic or Arabic, so Russian switches to Oswald (condensed headings) and Rubik
+ * (text), and Arabic to Rakkas (dramatic headings) and Cairo (text).
  * Set once per Activity before setContent; a language change recreates the Activity.
  */
 object ScaryFonts {
@@ -50,6 +51,12 @@ object ScaryFonts {
         Font(R.font.rubik_bold, FontWeight.Bold),
     )
 
+    private val rakkas = FontFamily(Font(R.font.rakkas_regular, FontWeight.Bold))
+    private val cairo = FontFamily(
+        Font(R.font.cairo_regular, FontWeight.Normal),
+        Font(R.font.cairo_bold, FontWeight.Bold),
+    )
+
     var Display: FontFamily = karantina
         private set
     var Body: FontFamily = assistant
@@ -57,9 +64,16 @@ object ScaryFonts {
     val Logo = FontFamily(Font(R.font.rubik_wet_paint, FontWeight.Normal))
 
     fun useFor(language: Language) {
-        val cyrillic = language == Language.RU
-        Display = if (cyrillic) oswald else karantina
-        Body = if (cyrillic) rubik else assistant
+        Display = when (language) {
+            Language.RU -> oswald
+            Language.AR -> rakkas
+            else -> karantina
+        }
+        Body = when (language) {
+            Language.RU -> rubik
+            Language.AR -> cairo
+            else -> assistant
+        }
     }
 }
 
