@@ -93,7 +93,8 @@ fun LaunchOverlay(state: LaunchingState, language: Language, modifier: Modifier 
                 modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
             )
         }
-        CreditLine(Modifier.align(Alignment.BottomCenter).padding(bottom = 28.dp), short = true)
+        // At the top: the bottom is where status messages appear ("Stremio is not installed…") and would cover it.
+        CreditLine(Modifier.align(Alignment.TopCenter).padding(top = 32.dp), short = true)
     }
 }
 
