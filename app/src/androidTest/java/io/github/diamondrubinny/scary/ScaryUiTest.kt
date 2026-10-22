@@ -18,6 +18,9 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.github.diamondrubinny.scary.core.catalog.CatalogParser
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import org.junit.Rule
 import org.junit.Test
@@ -47,6 +50,9 @@ class ScaryUiTest {
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
         rule.waitForIdle()
     }
+
+    private fun bundledMovies(): List<Movie> =
+        rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }.movies
 
     private fun waitForHome() = waitFor(hasText(text(R.string.row_apps)))
 
@@ -115,8 +121,9 @@ class ScaryUiTest {
         rule.onNode(chip).performClick()
         waitFor(chip and isSelected())
         rule.onNode(chip).assertIsSelected()
-        // Fear 4 and up: The Shining is one of them.
-        waitFor(hasContentDescription("The Shining", substring = true))
+        // The row starts with the scariest movie of the bundled library, the same pick the app makes.
+        val first = Mood.RELENTLESS.pick(bundledMovies()).first()
+        waitFor(hasContentDescription("${first.title}, ${first.year}", substring = true))
         rule.onNode(chip).performClick()
         rule.waitForIdle()
         rule.onNode(chip).assertIsNotSelected()
