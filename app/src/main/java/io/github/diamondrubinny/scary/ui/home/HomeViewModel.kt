@@ -17,6 +17,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
@@ -382,8 +383,8 @@ class HomeViewModel(
     /** Runs [action] now, or asks for the PIN first when the parental lock covers it. */
     private fun guard(movie: Movie?, action: GatedAction) {
         val prefs = latestPrefs
-        val needsPin = prefs != null && prefs.parentalEnabled && !isSessionUnlocked() &&
-            (movie == null || movie.fearForLock >= prefs.lockFromFear)
+        val needsPin = prefs != null &&
+            ParentalGate.needsPin(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, movie)
         if (needsPin) _pinDialog.value = PinDialogState(PinStep.Verify(action)) else perform(action)
     }
 
@@ -403,7 +404,7 @@ class HomeViewModel(
     }
 
     private fun isSessionUnlocked(): Boolean {
-        if (sessionUnlocked.value && System.currentTimeMillis() - unlockedAtMillis > UNLOCK_WINDOW_MS) {
+        if (sessionUnlocked.value && !ParentalGate.stillUnlocked(unlockedAtMillis, System.currentTimeMillis())) {
             sessionUnlocked.value = false
         }
         return sessionUnlocked.value
@@ -656,7 +657,6 @@ class HomeViewModel(
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val MAX_QUERY_LENGTH = 80
-        private const val UNLOCK_WINDOW_MS = 30 * 60_000L
         private const val WEB_SEARCH_DELAY_MS = 700L
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
