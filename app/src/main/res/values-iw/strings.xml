@@ -60,7 +60,8 @@
     <string name="settings_night_fear_value">עד מד פחד %1$d</string>
     <string name="settings_system">הגדרות המערכת של הטלוויזיה</string>
     <string name="settings_about">אודות</string>
-    <string name="settings_about_text">SCARY %1$s. אין חשבונות ואין מעקב. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant, Oswald, Rubik,‏ Rubik Wet Paint,‏ Rakkas ו־Cairo ברישיון SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">‏SCARY %1$s. אין חשבונות ואין מעקב. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant, Oswald, Rubik,‏ Rubik Wet Paint,‏ Rakkas ו־Cairo ברישיון SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">‏SCARY לא מארחת סרטים, ולא מחפשת, שומרת או מקשרת לקובצי וידאו, חוקיים או לא. היא מציגה מידע ציבורי על סרטים ופותחת את הסרט באפליקציית צפייה שכבר מותקנת במכשיר הזה, כמו Stremio,‏ Netflix או YouTube. מה שהאפליקציות האלה מציגות הוא באחריותן ובאחריותכם.</string>
     <string name="search_title">חיפוש</string>
     <string name="search_hint">שם סרט, במאי, שנה או סוג אימה</string>
     <string name="search_no_results">לא מצאנו סרטים עבור %1$s.</string>

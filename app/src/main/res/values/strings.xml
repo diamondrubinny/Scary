@@ -62,6 +62,7 @@
     <string name="settings_system">TV system settings</string>
     <string name="settings_about">About</string>
     <string name="settings_about_text">SCARY %1$s. No accounts and no tracking. Your preferences stay on this TV. Fonts: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo under the SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">SCARY hosts no movies, and does not search for, store or link to video files, legal or otherwise. It shows public movie information and opens the movie in a streaming app already installed on this device, such as Stremio, Netflix or YouTube. What those apps play is up to them and to you.</string>
     <string name="search_title">Search</string>
     <string name="search_hint">Title, director, year or kind of horror</string>
     <string name="search_no_results">No movies found for %1$s.</string>

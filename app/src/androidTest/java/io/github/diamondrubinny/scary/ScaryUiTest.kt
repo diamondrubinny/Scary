@@ -99,6 +99,16 @@ class ScaryUiTest {
     }
 
     @Test
+    fun settingsSayThatScaryHoldsNoVideoAndOnlyOpensInstalledApps() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val notice = hasText(text(R.string.settings_content_notice))
+        waitFor(notice)
+        rule.onNode(notice).performScrollTo().assertExists()
+        backToHome()
+    }
+
+    @Test
     fun searchFindsAMovieAndMyListToggles() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()

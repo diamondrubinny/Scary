@@ -61,6 +61,7 @@
     <string name="settings_system">Системные настройки ТВ</string>
     <string name="settings_about">О приложении</string>
     <string name="settings_about_text">SCARY %1$s. Без аккаунтов и без слежки. Ваши настройки остаются на этом ТВ. Шрифты: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas и Cairo по лицензии SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">SCARY не размещает фильмы и не ищет, не хранит и не даёт ссылок на видеофайлы — ни легальные, ни любые другие. Он показывает общедоступную информацию о фильмах и открывает фильм в приложении для просмотра, уже установленном на этом устройстве, например Stremio, Netflix или YouTube. За то, что показывают эти приложения, отвечают они и вы.</string>
     <string name="search_title">Поиск</string>
     <string name="search_hint">Название, режиссёр, год или жанр ужасов</string>
     <string name="search_no_results">По запросу %1$s ничего не найдено.</string>

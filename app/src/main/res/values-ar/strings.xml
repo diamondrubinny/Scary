@@ -62,6 +62,7 @@
     <string name="settings_system">إعدادات نظام التلفزيون</string>
     <string name="settings_about">حول التطبيق</string>
     <string name="settings_about_text">‏SCARY %1$s. بلا حسابات وبلا تتبّع. تبقى تفضيلاتك على هذا التلفزيون. الخطوط: Karantina وAssistant وOswald وRubik وRubik Wet Paint وRakkas وCairo بموجب رخصة SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">لا يستضيف SCARY أي أفلام، ولا يبحث عن ملفات فيديو أو يحفظها أو يربط إليها، قانونية كانت أم لا. يعرض معلومات عامة عن الأفلام ويفتح الفيلم في تطبيق مشاهدة مثبّت بالفعل على هذا الجهاز، مثل Stremio أو Netflix أو YouTube. ما تعرضه هذه التطبيقات مسؤوليتها ومسؤوليتك.</string>
     <string name="search_title">بحث</string>
     <string name="search_hint">العنوان أو المخرج أو السنة أو نوع الرعب</string>
     <string name="search_no_results">لم يُعثر على أفلام لـ %1$s.</string>

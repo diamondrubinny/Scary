@@ -203,6 +203,8 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
+        BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
         SettingRow(
             label = stringResource(R.string.settings_privacy),

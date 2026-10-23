@@ -61,6 +61,7 @@
     <string name="settings_system">Configurações do sistema da TV</string>
     <string name="settings_about">Sobre</string>
     <string name="settings_about_text">SCARY %1$s. Sem contas e sem rastreamento. As suas preferências ficam nesta TV. Fontes: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas e Cairo, sob a SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">O SCARY não hospeda filmes e não procura, guarda nem indica arquivos de vídeo, legais ou não. Ele mostra informações públicas sobre filmes e abre o filme em um app de streaming já instalado neste aparelho, como Stremio, Netflix ou YouTube. O que esses apps reproduzem é responsabilidade deles e sua.</string>
     <string name="search_title">Buscar</string>
     <string name="search_hint">Título, diretor, ano ou tipo de terror</string>
     <string name="search_no_results">Nenhum filme encontrado para %1$s.</string>

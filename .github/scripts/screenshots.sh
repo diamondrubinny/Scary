@@ -65,6 +65,9 @@ shot 07-all-apps 4
 
 open --es scary.debug.open settings
 shot 08-settings 4
+# The bottom of settings: the About text, the notice on where movies come from, and the credit.
+for _ in $(seq 20); do key KEYCODE_DPAD_DOWN; done
+shot 38-settings-about 3
 
 open --es scary.debug.open pin
 shot 09-parental-pin 4
@@ -172,6 +175,8 @@ open --es scary.debug.open apps
 shot 45-en-all-apps 4
 open --es scary.debug.open settings
 shot 46-en-settings 4
+for _ in $(seq 20); do key KEYCODE_DPAD_DOWN; done
+shot 49-en-settings-about 3
 open --es scary.debug.open privacy
 shot 47-en-privacy 4
 adb shell am start -n com.android.systemui/.Somnambulator > /dev/null 2>&1 || true

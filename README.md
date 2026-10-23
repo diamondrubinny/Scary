@@ -69,7 +69,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 2. Download and install [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (for example with Send Files to TV).
 3. Open SCARY and choose **Make SCARY the home screen**. If your TV offers no choice, turn on **SCARY Home button** in the accessibility settings. Full Xiaomi guide (Hebrew): [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
 
-SCARY does not stream or host movies: choosing a film opens it in Stremio.
+> ⚖️ **No illegal files, no video at all.** SCARY does not host, store, stream, search for or link to video files, legal or otherwise. It shows public movie information (titles, posters, ratings) and opens the movie in a streaming app that is already installed on the same device: your TV, or a tablet or phone if you install SCARY there (Stremio, Netflix, YouTube and the like). Playback happens entirely in that app, under its terms. SCARY installs and recommends no add-ons.
 
 **Support SCARY**: the project is free and open source. If it scares you just right, you can support it on GitHub Sponsors: ☕ $3 coffee · 🍿 $5 popcorn · 🎟️ $10 movie ticket · 🔪 $25 horror night.
 
@@ -115,7 +115,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 2. הורידו והתקינו את [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (למשל עם Send Files to TV).
 3. פתחו את SCARY ובחרו **הגדרת SCARY כמסך הבית**. אם הטלוויזיה לא מציעה בחירה, הפעילו את **SCARY: כפתור הבית** בהגדרות הנגישות. מדריך מלא ל־Xiaomi: [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
 
-SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת אותו ב־Stremio.
+> ⚖️ **אין קבצים לא חוקיים, ואין וידאו בכלל.** SCARY לא מארחת, לא שומרת, לא מזרימה, לא מאתרת ולא מקשרת לקובצי וידאו, חוקיים או לא. היא מציגה מידע ציבורי על סרטים (שם, פוסטר, דירוג) ופותחת את הסרט באפליקציית צפייה שכבר מותקנת באותו מכשיר: הטלוויזיה, או טאבלט או סלולרי אם התקנתם עליהם את SCARY (Stremio,‏ Netflix,‏ YouTube וכדומה). הצפייה עצמה מתבצעת כולה באפליקציה ההיא ולפי התנאים שלה. SCARY לא מתקינה ולא ממליצה על תוספים.
 
 **תמיכה ב־SCARY**: הפרויקט חינמי ובקוד פתוח. אם הוא מפחיד אתכם כמו שצריך, אפשר לתמוך דרך GitHub Sponsors: ☕ ‎$3 קפה · 🍿 ‎$5 פופקורן · 🎟️ ‎$10 כרטיס לקולנוע · 🔪 ‎$25 ערב אימה.
 
@@ -163,7 +163,7 @@ SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת �
 2. نزّل وثبّت [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (مثلًا عبر تطبيق Send Files to TV).
 3. افتح SCARY واختر **اجعل SCARY الشاشة الرئيسية**. إذا لم يعرض التلفاز خيارًا، فعّل **زر الشاشة الرئيسية لـ SCARY** في إعدادات إمكانية الوصول.
 
-لا يبث SCARY الأفلام ولا يستضيفها: اختيار فيلم يفتحه في Stremio.
+> ⚖️ **لا ملفات غير قانونية، ولا فيديو على الإطلاق.** لا يستضيف SCARY ملفات الفيديو ولا يحفظها ولا يبثها ولا يبحث عنها ولا يربط إليها، قانونية كانت أم لا. يعرض معلومات عامة عن الأفلام (الاسم والملصق والتقييم) ويفتح الفيلم في تطبيق مشاهدة مثبّت بالفعل على الجهاز نفسه: التلفاز، أو جهاز لوحي أو هاتف إذا ثبّتّ SCARY عليه (Stremio وNetflix وYouTube وغيرها). تجري المشاهدة بالكامل في ذلك التطبيق ووفق شروطه. لا يثبّت SCARY أي إضافات ولا يوصي بها.
 
 **ادعم SCARY**: المشروع مجاني ومفتوح المصدر. إذا أخافك كما يجب، يمكنك دعمه عبر GitHub Sponsors: ☕ ‎$3 قهوة · 🍿 ‎$5 فشار · 🎟️ ‎$10 تذكرة سينما · 🔪 ‎$25 ليلة رعب.
 
@@ -209,7 +209,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 2. Baixe e instale o [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (por exemplo, com o Send Files to TV).
 3. Abra o SCARY e escolha **Tornar o SCARY a tela inicial**. Se a TV não oferecer a escolha, ative **SCARY: botão Home** nas configurações de acessibilidade.
 
-O SCARY não transmite nem hospeda filmes: ao escolher um filme, ele abre no Stremio.
+> ⚖️ **Nenhum arquivo ilegal, nenhum vídeo.** O SCARY não hospeda, não guarda, não transmite, não procura e não indica arquivos de vídeo, legais ou não. Ele mostra informações públicas sobre filmes (título, pôster, nota) e abre o filme em um app de streaming já instalado no mesmo aparelho: a TV, ou um tablet ou celular se você instalar o SCARY nele (Stremio, Netflix, YouTube e similares). A reprodução acontece inteiramente nesse app, sob os termos dele. O SCARY não instala nem recomenda complementos.
 
 **Apoie o SCARY**: o projeto é gratuito e de código aberto. Se ele te assusta na medida certa, você pode apoiá-lo pelo GitHub Sponsors: ☕ $3 café · 🍿 $5 pipoca · 🎟️ $10 ingresso de cinema · 🔪 $25 noite de terror.
 
@@ -253,7 +253,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 2. Скачайте и установите [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (например, через Send Files to TV).
 3. Откройте SCARY и выберите **Сделать SCARY главным экраном**. Если ТВ не предлагает выбор, включите **SCARY: кнопка «Домой»** в разделе специальных возможностей.
 
-SCARY не транслирует и не хранит фильмы: выбранный фильм открывается в Stremio.
+> ⚖️ **Никаких нелегальных файлов и никакого видео.** SCARY не размещает, не хранит, не транслирует, не ищет видеофайлы и не даёт на них ссылок — ни легальные, ни любые другие. Он показывает общедоступную информацию о фильмах (название, постер, рейтинг) и открывает фильм в приложении для просмотра, уже установленном на том же устройстве: на телевизоре, а также на планшете или телефоне, если вы установили SCARY туда (Stremio, Netflix, YouTube и подобные). Просмотр полностью происходит в этом приложении и по его правилам. SCARY не устанавливает и не рекомендует дополнения.
 
 **Поддержите SCARY**: проект бесплатный и с открытым кодом. Если он пугает вас как надо, поддержите его через GitHub Sponsors: ☕ $3 кофе · 🍿 $5 попкорн · 🎟️ $10 билет в кино · 🔪 $25 вечер ужасов.
 
