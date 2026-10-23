@@ -14,18 +14,23 @@
 
 <table>
 <tr>
-<td width="33%"><img src="docs/screenshots/en-home.jpg" alt="Home screen with tonight's pick, apps row and My list" width="100%"><br><b>Tonight's pick</b> · a new horror film every night, full-screen artwork</td>
-<td width="33%"><img src="docs/screenshots/en-details.jpg" alt="Movie page for Hereditary with fear meter, cast and similar films" width="100%"><br><b>Movie pages</b> · fear meter, IMDb rating, cast, one click to Stremio</td>
-<td width="33%"><img src="docs/screenshots/en-search-web.jpg" alt="Search for conjuring with library and web results" width="100%"><br><b>Search</b> · by text or voice, in the library and across the web</td>
+<td width="33%"><img src="docs/screenshots/en-home.jpg" alt="Home screen with tonight's pick, the credit under the logo, the apps row and the Halloween row" width="100%"><br><b>Tonight's pick</b> · a new horror film every night, full-screen artwork</td>
+<td width="33%"><img src="docs/screenshots/en-details.jpg" alt="Movie page for Hereditary with its logo, fear meter, cast and buttons to search it in installed apps" width="100%"><br><b>Movie pages</b> · logo art, fear meter, and a search in every app you have</td>
+<td width="33%"><img src="docs/screenshots/shiver.jpg" alt="Dark launch screen with The Shining logo trembling before Stremio opens" width="100%"><br><b>The shiver</b> · the title trembles in the dark before the movie opens</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/moods.jpg" alt="Mood chips with Don't sleep tonight chosen and its movies below (Hebrew interface)" width="100%"><br><b>What do you feel like tonight?</b> · six moods, from mind games to no sleep</td>
+<td><img src="docs/screenshots/family-night.jpg" alt="Home screen in family night mode with a badge in the top bar (Hebrew interface)" width="100%"><br><b>Family night</b> · only the gentlest films, PIN to leave</td>
+<td><img src="docs/screenshots/en-search-web.jpg" alt="Search for conjuring with library and web results" width="100%"><br><b>Search</b> · by text or voice, in the library and across the web</td>
 </tr>
 <tr>
 <td><img src="docs/screenshots/en-my-list.jpg" alt="Home screen showing the My list row" width="100%"><br><b>My list</b> · hold OK on any poster to keep it</td>
-<td><img src="docs/screenshots/en-surprise.jpg" alt="Surprise me opened a random movie page" width="100%"><br><b>Surprise me</b> · a random scare within your fear level</td>
 <td><img src="docs/screenshots/en-screensaver.jpg" alt="SCARY screensaver with a full-screen horror backdrop and title" width="100%"><br><b>Horror screensaver</b> · backdrops that fade in the dark</td>
+<td><img src="docs/screenshots/ar-home.jpg" alt="Home screen in Arabic, right to left" width="100%"><br><b>Five languages</b> · Hebrew and Arabic right to left, English, Portuguese, Russian</td>
 </tr>
 <tr>
 <td><img src="docs/screenshots/en-all-apps.jpg" alt="All apps drawer" width="100%"><br><b>Your apps</b> · Stremio, Google Play and every TV app, pinned your way</td>
-<td><img src="docs/screenshots/en-settings.jpg" alt="Settings screen" width="100%"><br><b>Settings</b> · parental PIN, family night, fear level, effects, five languages</td>
+<td><img src="docs/screenshots/en-settings.jpg" alt="Settings screen" width="100%"><br><b>Settings</b> · parental PIN, family night, seasonal rows, effects</td>
 <td><img src="docs/screenshots/en-privacy.jpg" alt="Privacy notice inside the app" width="100%"><br><b>Private by design</b> · no account, no ads, no tracking</td>
 </tr>
 </table>
@@ -44,7 +49,11 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **למה SCARY?**
 
-- 🩸 **52 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד שורות פופולריות של אימה, מתח ותעלומה שמתעדכנות כל יום.
+- 🩸 **52 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 7 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות) עם מאות סרטים שמתעדכנים כל יום.
+- 🌙 **"מה בא לך הלילה?"**: שישה מצבי רוח, משחקי מוח ועד "לא לישון הלילה", ושורות מיוחדות להלואין ולשישי ה־13.
+- 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
+- 📺 **איפה לצפות**: חיפוש הסרט באפליקציות שמותקנות אצלכם (Netflix, ‏Apple TV, ‏yes, ‏HOT, סלקום TV ועוד) ובחיפוש של Google TV.
+- 👨‍👩‍👧 **ערב משפחתי**: רק הסרטים העדינים ביותר, בכל מקום, והיציאה דורשת PIN.
 - 🎲 **"הפתע אותי"**: סרט אקראי ברמת הפחד שבחרתם.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת.
 - ⭐ **"הרשימה שלי"**: לחיצה ארוכה על פוסטר שומרת אותו.
@@ -52,7 +61,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🔒 **נעילת הורים** בקוד PIN, לפי רמת הפחד.
 - 🕯️ **פרטיות**: בלי חשבון, בלי פרסומות ובלי מעקב. הכל נשמר בטלוויזיה.
 - ♿ **נגישות**: ניווט מלא בשלט, TalkBack, ניגודיות גבוהה וללא הבהובים.
-- 🌍 **ממשק בעברית** (מימין לשמאל), באנגלית, בפורטוגזית וברוסית.
+- 🌍 **ממשק בעברית ובערבית** (מימין לשמאל), באנגלית, בפורטוגזית וברוסית.
 
 **התקנה בשלוש דקות**
 
@@ -80,7 +89,11 @@ SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת �
 
 **لماذا SCARY؟**
 
-- 🩸 **52 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، وصفوف شائعة للرعب والإثارة والغموض تتجدد يوميًا.
+- 🩸 **52 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و7 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض) بمئات الأفلام التي تتجدد يوميًا.
+- 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ستة أمزجة من ألعاب العقل إلى «لا نوم الليلة»، وصفوف خاصة بالهالوين والجمعة 13.
+- 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.
+- 📺 **أين تشاهد**: البحث عن الفيلم في التطبيقات المثبتة لديك (Netflix وApple TV وغيرها) وفي بحث Google TV.
+- 👨‍👩‍👧 **سهرة عائلية**: أخف الأفلام فقط في كل مكان، والخروج منها يتطلب رمز PIN.
 - 🎲 **«فاجئني»**: فيلم عشوائي ضمن مستوى الرعب الذي تختاره.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت.
 - ⭐ **«قائمتي»**: ضغطة مطوّلة على أي ملصق تحفظه.
@@ -88,13 +101,13 @@ SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת �
 - 🔒 **قفل أبوي** برمز PIN حسب مستوى الرعب.
 - 🕯️ **الخصوصية**: بلا حساب وبلا إعلانات وبلا تتبع. كل شيء يُحفظ على التلفاز.
 - ♿ **إمكانية الوصول**: تنقّل كامل بجهاز التحكم، ودعم TalkBack، وتباين عالٍ، وبلا وميض.
-- 🌍 **الواجهة** متوفرة بالعبرية والإنجليزية والبرتغالية والروسية. العربية غير مدعومة داخل التطبيق بعد.
+- 🌍 **الواجهة بالعربية** (من اليمين إلى اليسار) وبالعبرية والإنجليزية والبرتغالية والروسية.
 
 **التثبيت في ثلاث دقائق**
 
 1. اسمح بالتثبيت من مصادر غير معروفة (الإعدادات ← تفضيلات الجهاز ← الأمان والقيود).
 2. نزّل وثبّت [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (مثلًا عبر تطبيق Send Files to TV).
-3. افتح SCARY واختر **Make SCARY the home screen** (اجعل SCARY الشاشة الرئيسية). إذا لم يعرض التلفاز خيارًا، فعّل **SCARY Home button** في إعدادات إمكانية الوصول.
+3. افتح SCARY واختر **اجعل SCARY الشاشة الرئيسية**. إذا لم يعرض التلفاز خيارًا، فعّل **زر الشاشة الرئيسية لـ SCARY** في إعدادات إمكانية الوصول.
 
 لا يبث SCARY الأفلام ولا يستضيفها: اختيار فيلم يفتحه في Stremio.
 
@@ -114,7 +127,11 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 
 **Почему SCARY?**
 
-- 🩸 **52 отобранных вручную фильма** со шкалой страха (1–5) и популярные подборки ужасов, триллеров и загадок, которые обновляются каждый день.
+- 🩸 **52 отобранных вручную фильма** со шкалой страха (1–5) и 7 рядов из интернета (популярное, новинки года, триллеры, загадки) — сотни фильмов, которые обновляются каждый день.
+- 🌙 **«Что посмотреть сегодня ночью?»**: шесть настроений, от «Игр разума» до «Сегодня не уснуть», и особые ряды к Хэллоуину и пятнице 13-го.
+- 😱 **Дрожь**: логотип фильма дрожит и мерцает, как умирающая лампа, а перед запуском фильма экран темнеет.
+- 📺 **Где смотреть**: поиск фильма в установленных приложениях (Netflix, Apple TV и другие) и в поиске Google TV.
+- 👨‍👩‍👧 **Семейный вечер**: везде только самые мягкие фильмы, выход — по PIN-коду.
 - 🎲 **«Удиви меня»**: случайный фильм в пределах выбранного уровня страха.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете.
 - ⭐ **«Мой список»**: удерживайте OK на постере, чтобы сохранить фильм.
@@ -122,7 +139,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 🔒 **Родительский замок** с PIN-кодом по уровню страха.
 - 🕯️ **Приватность**: без аккаунта, без рекламы и без слежки. Всё хранится на телевизоре.
 - ♿ **Доступность**: полное управление с пульта, TalkBack, высокая контрастность, без мигания.
-- 🌍 **Интерфейс** на иврите, английском, португальском и русском.
+- 🌍 **Интерфейс** на русском, английском, португальском, иврите и арабском.
 
 **Установка за три минуты**
 
@@ -144,7 +161,7 @@ SCARY не транслирует и не хранит фильмы: выбра�
 |--------|-----------|
 | `core/` | Pure Kotlin/JVM: catalog model and validation, search, tonight's pick, Cinemeta and TMDB parsing, PIN hashing, deep links. Unit tested. |
 | `app/` | Android app: Jetpack Compose UI, HOME intent filter, Home-button accessibility service, installed apps, launching. |
-| `app/src/main/assets/catalog.json` | The curated library, with text in four languages. Validated by the `core` tests on every build. |
+| `app/src/main/assets/catalog.json` | The curated library, with text in five languages (collection titles) and Hebrew and English synopses. Validated by the `core` tests on every build. |
 
 ```bash
 ./gradlew :core:test          # unit tests
