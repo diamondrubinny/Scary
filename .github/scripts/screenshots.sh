@@ -95,7 +95,7 @@ shot 51-ar-details 6
 open --es scary.debug.open settings
 shot 52-ar-settings 4
 open --es scary.debug.open search --es scary.debug.query shining
-shot 53-ar-search 6
+shot 53-ar-search 14
 open --es scary.debug.open pin
 shot 54-ar-pin 4
 key KEYCODE_BACK
