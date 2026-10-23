@@ -4,19 +4,21 @@
 
 <p align="center">
 <b>The horror home screen for Android TV.</b><br>
-<a href="#עברית">עברית</a> · <a href="#العربية">العربية</a> · <a href="#русский">Русский</a> · <a href="#for-developers">Developers</a>
+<a href="#english">English</a> · <a href="#עברית">עברית</a> · <a href="#العربية">العربية</a> · <a href="#português">Português</a> · <a href="#русский">Русский</a> · <a href="#for-developers">Developers</a>
 </p>
 
 <p align="center">
 <a href="https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk"><img src="https://img.shields.io/badge/Download-scary.apk-8e1b1b?style=for-the-badge&logo=android&logoColor=white" alt="Download the latest scary.apk"></a>
 <a href="https://github.com/sponsors/diamondrubinny"><img src="https://img.shields.io/badge/Sponsor-%E2%99%A5-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor SCARY on GitHub Sponsors"></a>
+<img src="https://img.shields.io/badge/Android_TV-8.0%2B-3ddc84?style=for-the-badge&logo=androidtv&logoColor=white" alt="Android TV 8.0 and up">
+<img src="https://img.shields.io/badge/License-Apache_2.0-555?style=for-the-badge" alt="Apache License 2.0">
 </p>
 
 <table>
 <tr>
 <td width="33%"><img src="docs/screenshots/en-home.jpg" alt="Home screen with tonight's pick, the credit under the logo, the apps row and the Halloween row" width="100%"><br><b>Tonight's pick</b> · a new horror film every night, full-screen artwork</td>
 <td width="33%"><img src="docs/screenshots/en-details.jpg" alt="Movie page for Hereditary with its logo, fear meter, cast and buttons to search it in installed apps" width="100%"><br><b>Movie pages</b> · logo art, fear meter, and a search in every app you have</td>
-<td width="33%"><img src="docs/screenshots/shiver.jpg" alt="Dark launch screen with The Shining logo trembling before Stremio opens" width="100%"><br><b>The shiver</b> · the title trembles in the dark before the movie opens</td>
+<td width="33%"><img src="docs/screenshots/shiver.jpg" alt="Dark launch screen with the movie's logo trembling before Stremio opens" width="100%"><br><b>The shiver</b> · the title trembles in the dark before the movie opens</td>
 </tr>
 <tr>
 <td><img src="docs/screenshots/moods.jpg" alt="Mood chips with Don't sleep tonight chosen and its movies below (Hebrew interface)" width="100%"><br><b>What do you feel like tonight?</b> · six moods, from mind games to no sleep</td>
@@ -24,7 +26,7 @@
 <td><img src="docs/screenshots/en-search-web.jpg" alt="Search for conjuring with library and web results" width="100%"><br><b>Search</b> · by text or voice, in the library and across the web</td>
 </tr>
 <tr>
-<td><img src="docs/screenshots/en-my-list.jpg" alt="Home screen showing the My list row" width="100%"><br><b>My list</b> · hold OK on any poster to keep it</td>
+<td><img src="docs/screenshots/en-my-list.jpg" alt="Home screen showing The Texas Chain Saw Massacre as the hero and the Halloween row" width="100%"><br><b>Endless rows</b> · scroll on and more films keep loading</td>
 <td><img src="docs/screenshots/en-screensaver.jpg" alt="SCARY screensaver with a full-screen horror backdrop and title" width="100%"><br><b>Horror screensaver</b> · backdrops that fade in the dark</td>
 <td><img src="docs/screenshots/ar-home.jpg" alt="Home screen in Arabic, right to left" width="100%"><br><b>Five languages</b> · Hebrew and Arabic right to left, English, Portuguese, Russian</td>
 </tr>
@@ -39,26 +41,70 @@
 
 ---
 
+## English
+
+### The home screen that makes you leave the lights on
+
+SCARY turns your Android TV into a horror cinema. Instead of a plain home screen you get a hand-picked library of horror and psychological thrillers with real posters and backdrops, "Tonight's pick" every evening, and Stremio, Google Play and all your apps in one place.
+
+**Why SCARY?**
+
+- 🩸 **52 hand-picked films** with a fear meter (1–5), plus 7 rows from the web (popular, new this year, thrillers, mysteries) that keep loading as you scroll: thousands of films, refreshed every day.
+- 🌙 **"What do you feel like tonight?"**: six moods, from mind games to "no sleep tonight", plus special rows for Halloween and Friday the 13th.
+- 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
+- 📺 **Where to watch**: search the movie in the apps you have (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex and more) and in Google TV search.
+- 👨‍👩‍👧 **Family night**: only the gentlest films, everywhere, and leaving it takes a PIN.
+- 🎲 **"Surprise me"**: a random film at the fear level you choose.
+- 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
+- ⭐ **My list**: hold OK on any poster to keep it.
+- 🌫️ **Atmosphere**: fog, film grain and an ambient drone (all can be turned off), and a screensaver of horror backdrops.
+- 🔒 **Parental lock** with a PIN, by fear level. Locked films show no poster or backdrop.
+- 🕯️ **Privacy**: no account, no ads, no tracking. Everything stays on your TV.
+- ♿ **Accessibility**: full remote navigation, TalkBack, high contrast, no strobing.
+- 🌍 **Interface in English, Hebrew, Arabic, Portuguese and Russian**, right to left where it should be.
+
+**Install in three minutes**
+
+1. Allow installs from unknown sources (Settings → Device Preferences → Security & restrictions).
+2. Download and install [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (for example with Send Files to TV).
+3. Open SCARY and choose **Make SCARY the home screen**. If your TV offers no choice, turn on **SCARY Home button** in the accessibility settings. Full Xiaomi guide (Hebrew): [docs/XIAOMI_SETUP.md](docs/XIAOMI_SETUP.md).
+
+SCARY does not stream or host movies: choosing a film opens it in Stremio.
+
+**Support SCARY**: the project is free and open source. If it scares you just right, you can support it on GitHub Sponsors: ☕ $3 coffee · 🍿 $5 popcorn · 🎟️ $10 movie ticket · 🔪 $25 horror night.
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+---
+
 <div dir="rtl">
 
 ## עברית
 
 ### מסך הבית שישאיר לכם את האור דולק
 
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/he-home.jpg" alt="מסך הבית בעברית עם הסרט של הלילה" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/he-details.jpg" alt="עמוד סרט בעברית עם מד פחד וכפתורי צפייה" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/he-search.jpg" alt="חיפוש בעברית עם תוצאות מהמאגר ומהרשת" width="100%"></td>
+</tr>
+</table>
+
 SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימה. במקום מסך בית רגיל מקבלים מאגר מאוצר של סרטי אימה ומתח פסיכולוגי עם פוסטרים ורקעים אמיתיים, "הסרט של הלילה" בכל ערב, ואת Stremio, Google Play וכל האפליקציות שלכם במקום אחד.
 
 **למה SCARY?**
 
-- 🩸 **52 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 7 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות) עם מאות סרטים שמתעדכנים כל יום.
-- 🌙 **"מה בא לך הלילה?"**: שישה מצבי רוח, משחקי מוח ועד "לא לישון הלילה", ושורות מיוחדות להלואין ולשישי ה־13.
+- 🩸 **52 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 7 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות) שממשיכות להיטען כשגוללים: אלפי סרטים שמתעדכנים כל יום.
+- 🌙 **"מה בא לך הלילה?"**: שישה מצבי רוח, ממשחקי מוח ועד "לא לישון הלילה", ושורות מיוחדות להלואין ולשישי ה־13.
 - 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
-- 📺 **איפה לצפות**: חיפוש הסרט באפליקציות שמותקנות אצלכם (Netflix, ‏Apple TV, ‏yes, ‏HOT, סלקום TV ועוד) ובחיפוש של Google TV.
+- 📺 **איפה לצפות**: חיפוש הסרט באפליקציות שמותקנות אצלכם (Netflix, ‏Apple TV, ‏yes, ‏HOT, סלקום TV, פרטנר TV ועוד) ובחיפוש של Google TV.
 - 👨‍👩‍👧 **ערב משפחתי**: רק הסרטים העדינים ביותר, בכל מקום, והיציאה דורשת PIN.
 - 🎲 **"הפתע אותי"**: סרט אקראי ברמת הפחד שבחרתם.
-- 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת.
+- 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
 - ⭐ **"הרשימה שלי"**: לחיצה ארוכה על פוסטר שומרת אותו.
 - 🌫️ **אווירה**: ערפל, גרעיניות קולנועית וצלילי רקע (אפשר לכבות), ושומר מסך עם רקעים מסרטי אימה.
-- 🔒 **נעילת הורים** בקוד PIN, לפי רמת הפחד.
+- 🔒 **נעילת הורים** בקוד PIN, לפי רמת הפחד. סרט נעול מוצג בלי פוסטר ורקע.
 - 🕯️ **פרטיות**: בלי חשבון, בלי פרסומות ובלי מעקב. הכל נשמר בטלוויזיה.
 - ♿ **נגישות**: ניווט מלא בשלט, TalkBack, ניגודיות גבוהה וללא הבהובים.
 - 🌍 **ממשק בעברית ובערבית** (מימין לשמאל), באנגלית, בפורטוגזית וברוסית.
@@ -85,20 +131,28 @@ SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת �
 
 ### شاشة رئيسية ستجعلك تترك الضوء مضاءً
 
-يحوّل SCARY جهاز Android TV إلى صالة سينما للرعب. بدلًا من الشاشة الرئيسية المعتادة تحصل على مكتبة مختارة من أفلام الرعب والإثارة النفسية مع ملصقات وخلفيات حقيقية، و«فيلم الليلة» كل مساء، إلى جانب Stremio وGoogle Play وجميع تطبيقاتك في مكان واحد.
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/ar-home.jpg" alt="الشاشة الرئيسية بالعربية مع فيلم الليلة" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/ar-details.jpg" alt="صفحة فيلم بالعربية مع مقياس الرعب" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/ar-search.jpg" alt="البحث بالعربية مع نتائج من المكتبة ومن الإنترنت" width="100%"></td>
+</tr>
+</table>
+
+يحوّل SCARY جهاز Android TV إلى صالة سينما للرعب. بدلًا من الشاشة الرئيسية المعتادة تحصل على مكتبة مختارة من أفلام الرعب والإثارة النفسية مع ملصقات وخلفيات حقيقية، و«اختيار الليلة» كل مساء، إلى جانب Stremio وGoogle Play وجميع تطبيقاتك في مكان واحد.
 
 **لماذا SCARY؟**
 
-- 🩸 **52 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و7 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض) بمئات الأفلام التي تتجدد يوميًا.
+- 🩸 **52 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و7 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض) تواصل التحميل كلما تابعت التمرير: آلاف الأفلام التي تتجدد يوميًا.
 - 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ستة أمزجة من ألعاب العقل إلى «لا نوم الليلة»، وصفوف خاصة بالهالوين والجمعة 13.
 - 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.
 - 📺 **أين تشاهد**: البحث عن الفيلم في التطبيقات المثبتة لديك (Netflix وApple TV وغيرها) وفي بحث Google TV.
 - 👨‍👩‍👧 **سهرة عائلية**: أخف الأفلام فقط في كل مكان، والخروج منها يتطلب رمز PIN.
 - 🎲 **«فاجئني»**: فيلم عشوائي ضمن مستوى الرعب الذي تختاره.
-- 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت.
+- 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
 - ⭐ **«قائمتي»**: ضغطة مطوّلة على أي ملصق تحفظه.
 - 🌫️ **أجواء**: ضباب وحبيبات سينمائية وأصوات خلفية (يمكن إيقافها)، وشاشة توقف بخلفيات من أفلام الرعب.
-- 🔒 **قفل أبوي** برمز PIN حسب مستوى الرعب.
+- 🔒 **قفل أبوي** برمز PIN حسب مستوى الرعب. الفيلم المقفل يظهر بلا ملصق وبلا خلفية.
 - 🕯️ **الخصوصية**: بلا حساب وبلا إعلانات وبلا تتبع. كل شيء يُحفظ على التلفاز.
 - ♿ **إمكانية الوصول**: تنقّل كامل بجهاز التحكم، ودعم TalkBack، وتباين عالٍ، وبلا وميض.
 - 🌍 **الواجهة بالعربية** (من اليمين إلى اليسار) وبالعبرية والإنجليزية والبرتغالية والروسية.
@@ -119,24 +173,76 @@ SCARY לא מזרים ולא מארח סרטים: בחירת סרט פותחת �
 
 ---
 
+## Português
+
+### A tela inicial que vai fazer você dormir de luz acesa
+
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/pt-home.jpg" alt="Tela inicial em português com o filme da noite" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/pt-details.jpg" alt="Página de filme em português com o medidor de medo" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/pt-settings.jpg" alt="Configurações em português" width="100%"></td>
+</tr>
+</table>
+
+O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma tela inicial comum, você ganha uma seleção de filmes de terror e suspense psicológico com pôsteres e fundos de verdade, "O filme da noite" todas as noites, e o Stremio, o Google Play e todos os seus apps em um só lugar.
+
+**Por que o SCARY?**
+
+- 🩸 **52 filmes escolhidos a dedo** com medidor de medo (1–5), e mais 7 fileiras da internet (populares, lançamentos do ano, suspense, mistério) que continuam carregando conforme você rola: milhares de filmes, atualizados todos os dias.
+- 🌙 **"O que você quer ver hoje à noite?"**: seis climas, de jogos mentais a "hoje ninguém dorme", e fileiras especiais para o Halloween e a sexta-feira 13.
+- 😱 **O arrepio**: o logo do filme treme e pisca como uma lâmpada morrendo, e a tela escurece logo antes de o filme abrir.
+- 📺 **Onde assistir**: busque o filme nos apps que você tem (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex e outros) e na busca do Google TV.
+- 👨‍👩‍👧 **Noite em família**: só os filmes mais leves, em todo lugar, e para sair é preciso o PIN.
+- 🎲 **"Surpreenda-me"**: um filme aleatório no nível de medo que você escolher.
+- 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
+- ⭐ **Minha lista**: segure OK em qualquer pôster para guardá-lo.
+- 🌫️ **Atmosfera**: névoa, granulado de cinema e som ambiente (tudo pode ser desligado), e um protetor de tela com fundos de filmes de terror.
+- 🔒 **Controle dos pais** com PIN, por nível de medo. Filmes bloqueados aparecem sem pôster e sem fundo.
+- 🕯️ **Privacidade**: sem conta, sem anúncios e sem rastreamento. Tudo fica na sua TV.
+- ♿ **Acessibilidade**: navegação completa pelo controle remoto, TalkBack, alto contraste e sem piscadas.
+- 🌍 **Interface em português**, inglês, hebraico, árabe e russo.
+
+**Instalação em três minutos**
+
+1. Permita a instalação de fontes desconhecidas (Configurações → Preferências do dispositivo → Segurança e restrições).
+2. Baixe e instale o [`scary.apk`](https://github.com/diamondrubinny/Scary/releases/download/latest-build/scary.apk) (por exemplo, com o Send Files to TV).
+3. Abra o SCARY e escolha **Tornar o SCARY a tela inicial**. Se a TV não oferecer a escolha, ative **SCARY: botão Home** nas configurações de acessibilidade.
+
+O SCARY não transmite nem hospeda filmes: ao escolher um filme, ele abre no Stremio.
+
+**Apoie o SCARY**: o projeto é gratuito e de código aberto. Se ele te assusta na medida certa, você pode apoiá-lo pelo GitHub Sponsors: ☕ $3 café · 🍿 $5 pipoca · 🎟️ $10 ingresso de cinema · 🔪 $25 noite de terror.
+
+[![Sponsor $3 (coffee) on GitHub Sponsors](https://img.shields.io/badge/%243-%E2%98%95-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $5 (popcorn) on GitHub Sponsors](https://img.shields.io/badge/%245-%F0%9F%8D%BF-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $10 (movie ticket) on GitHub Sponsors](https://img.shields.io/badge/%2410-%F0%9F%8E%9F%EF%B8%8F-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny) [![Sponsor $25 (horror night) on GitHub Sponsors](https://img.shields.io/badge/%2425-%F0%9F%94%AA-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/diamondrubinny)
+
+---
+
 ## Русский
 
 ### Главный экран, после которого не захочется выключать свет
 
-SCARY превращает ваш Android TV в кинозал ужасов. Вместо обычного главного экрана — отобранная коллекция фильмов ужасов и психологических триллеров с настоящими постерами и фонами, «Фильм на ночь» каждый вечер, а также Stremio, Google Play и все ваши приложения в одном месте.
+<table>
+<tr>
+<td width="33%"><img src="docs/screenshots/ru-home.jpg" alt="Главный экран на русском с фильмом на ночь" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/ru-details.jpg" alt="Страница фильма на русском со шкалой страха" width="100%"></td>
+<td width="33%"><img src="docs/screenshots/ru-settings.jpg" alt="Настройки на русском" width="100%"></td>
+</tr>
+</table>
+
+SCARY превращает ваш Android TV в кинозал ужасов. Вместо обычного главного экрана — отобранная коллекция фильмов ужасов и психологических триллеров с настоящими постерами и фонами, «Фильм этой ночи» каждый вечер, а также Stremio, Google Play и все ваши приложения в одном месте.
 
 **Почему SCARY?**
 
-- 🩸 **52 отобранных вручную фильма** со шкалой страха (1–5) и 7 рядов из интернета (популярное, новинки года, триллеры, загадки) — сотни фильмов, которые обновляются каждый день.
+- 🩸 **52 отобранных вручную фильма** со шкалой страха (1–5) и 7 рядов из интернета (популярное, новинки года, триллеры, загадки), которые подгружаются по мере прокрутки: тысячи фильмов, обновляемых каждый день.
 - 🌙 **«Что посмотреть сегодня ночью?»**: шесть настроений, от «Игр разума» до «Сегодня не уснуть», и особые ряды к Хэллоуину и пятнице 13-го.
 - 😱 **Дрожь**: логотип фильма дрожит и мерцает, как умирающая лампа, а перед запуском фильма экран темнеет.
 - 📺 **Где смотреть**: поиск фильма в установленных приложениях (Netflix, Apple TV и другие) и в поиске Google TV.
 - 👨‍👩‍👧 **Семейный вечер**: везде только самые мягкие фильмы, выход — по PIN-коду.
 - 🎲 **«Удиви меня»**: случайный фильм в пределах выбранного уровня страха.
-- 🔍 **Поиск текстом или голосом** — в коллекции и в интернете.
+- 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
 - ⭐ **«Мой список»**: удерживайте OK на постере, чтобы сохранить фильм.
 - 🌫️ **Атмосфера**: туман, киноплёночное зерно и фоновые звуки (можно отключить), а также заставка с кадрами из фильмов ужасов.
-- 🔒 **Родительский замок** с PIN-кодом по уровню страха.
+- 🔒 **Родительский замок** с PIN-кодом по уровню страха. Заблокированные фильмы показываются без постера и фона.
 - 🕯️ **Приватность**: без аккаунта, без рекламы и без слежки. Всё хранится на телевизоре.
 - ♿ **Доступность**: полное управление с пульта, TalkBack, высокая контрастность, без мигания.
 - 🌍 **Интерфейс** на русском, английском, португальском, иврите и арабском.
