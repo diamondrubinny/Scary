@@ -26,7 +26,7 @@
 <td><img src="docs/screenshots/en-search-web.jpg" alt="Search for conjuring with library and web results" width="100%"><br><b>Search</b> · by text or voice, in the library and across the web</td>
 </tr>
 <tr>
-<td><img src="docs/screenshots/en-my-list.jpg" alt="Home screen showing The Texas Chain Saw Massacre as the hero and the Halloween row" width="100%"><br><b>Endless rows</b> · scroll on and more films keep loading</td>
+<td><img src="docs/screenshots/rows.jpg" alt="Home screen with rows of horror posters, Backrooms as the hero (Hebrew interface)" width="100%"><br><b>Endless rows</b> · scroll on and more films keep loading</td>
 <td><img src="docs/screenshots/en-screensaver.jpg" alt="SCARY screensaver with a full-screen horror backdrop and title" width="100%"><br><b>Horror screensaver</b> · backdrops that fade in the dark</td>
 <td><img src="docs/screenshots/ar-home.jpg" alt="Home screen in Arabic, right to left" width="100%"><br><b>Five languages</b> · Hebrew and Arabic right to left, English, Portuguese, Russian</td>
 </tr>
