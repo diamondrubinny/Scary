@@ -44,6 +44,7 @@ import io.github.diamondrubinny.scary.launch.Launcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -127,13 +129,26 @@ class HomeViewModel(
         .map { it.last() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, Screen.Home)
 
-    val uiState: StateFlow<HomeUiState> = combine(
+    /**
+     * The catalog as shown: online pages loaded while scrolling merged in, filtered for family night. Rebuilt only when
+     * one of those changes, and off the main thread: with endless rows it can hold thousands of movies.
+     */
+    private val shownCatalog: StateFlow<CatalogState> = combine(
         catalog,
+        extraPages,
+        settings.prefs.map { it.onlineEnabled to it.familyNight }.distinctUntilChanged(),
+    ) { state, extras, (online, family) ->
+        if (state is CatalogState.Ready) CatalogState.Ready(shown(state.catalog, extras, online, family)) else state
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, CatalogState.Loading)
+
+    /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
+    private val homeBase: Flow<HomeUiState> = combine(
+        shownCatalog,
         installedApps,
-        combine(heroId, mood, extraPages, ::Triple),
+        mood,
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, (hero, selectedMood, extras), prefs, unlocked ->
+    ) { catalogState, apps, selectedMood, prefs, unlocked ->
         val tiles = appTiles(apps, prefs)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -146,7 +161,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(shown(catalogState.catalog, extras, prefs), tiles, drawer, hero, selectedMood, prefs)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -157,6 +172,12 @@ class HomeViewModel(
             familyNight = prefs.familyNight,
             seasonalRows = prefs.seasonalRows,
         )
+    }.flowOn(Dispatchers.Default)
+
+    /** The home screen: the base above, with the focused card's movie as the hero (tonight's pick otherwise). */
+    val uiState: StateFlow<HomeUiState> = combine(homeBase, heroId) { base, hero ->
+        val focused = hero?.let { id -> (shownCatalog.value as? CatalogState.Ready)?.catalog?.movie(id) }
+        if (focused == null || base.loading) base else base.copy(hero = focused)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
     private var appsJob: Job? = null
@@ -237,7 +258,6 @@ class HomeViewModel(
         catalog: Catalog,
         tiles: List<AppTile>,
         drawer: List<DrawerApp>,
-        heroId: String?,
         selectedMood: Mood?,
         prefs: LauncherPrefs,
     ): HomeUiState {
@@ -262,7 +282,7 @@ class HomeViewModel(
         return HomeUiState(
             loading = false,
             nightPick = nightPick,
-            hero = heroId?.let(catalog::movie) ?: nightPick,
+            hero = nightPick,
             rows = rows,
             effectsEnabled = prefs.effectsEnabled,
             drawer = drawer,
@@ -293,21 +313,17 @@ class HomeViewModel(
         return MovieDetails(movie, Similar.find(shown.movies, movie))
     }
 
-    /** The catalog as the viewer may see it: in family night, only the gentlest curated movies. */
-    private fun visible(catalog: Catalog, prefs: LauncherPrefs?): Catalog =
-        if (prefs?.familyNight == true) FamilyNight.filter(catalog) else catalog
-
-    private fun visibleCatalog(): Catalog? =
-        (catalog.value as? CatalogState.Ready)?.catalog?.let { shown(it, extraPages.value, latestPrefs) }
+    /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
+    private fun visibleCatalog(): Catalog? = (shownCatalog.value as? CatalogState.Ready)?.catalog
 
     /** The catalog with the pages loaded while scrolling, then filtered for family night. */
-    private fun shown(catalog: Catalog, extras: Map<String, List<CinemetaMeta>>, prefs: LauncherPrefs?): Catalog {
-        val extended = if (prefs?.onlineEnabled == false) {
+    private fun shown(catalog: Catalog, extras: Map<String, List<CinemetaMeta>>, online: Boolean, familyNight: Boolean): Catalog {
+        val extended = if (!online) {
             catalog
         } else {
             extras.entries.fold(catalog) { acc, (rowId, metas) -> Cinemeta.extend(acc, Cinemeta.onlineCollectionId(rowId), metas) }
         }
-        return visible(extended, prefs)
+        return if (familyNight) FamilyNight.filter(extended) else extended
     }
 
     private class RowPaging(var nextSkip: Int, var loading: Boolean = false, var done: Boolean = false)
