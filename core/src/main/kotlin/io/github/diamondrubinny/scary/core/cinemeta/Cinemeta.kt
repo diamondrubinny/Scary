@@ -58,6 +58,16 @@ object Cinemeta {
 
     private val json = Json { ignoreUnknownKeys = true }
     private val imdbPattern = Regex("^tt\\d{7,8}$")
+
+    /**
+     * Titles that announce adult content. Cinemeta has no adult flag, and such films are sometimes tagged as thrillers
+     * ("Shining Sex", 1977), so they would reach rows and search. A word list catches the obvious ones only; the
+     * parental lock (which hides every online movie's art) is the real control.
+     */
+    private val adultTitle = Regex(
+        "(?<![\\p{L}\\p{N}])(sex|sexy|porn|porno|xxx|erotic|erotica|erotik|érotique|hentai)(?![\\p{L}\\p{N}])",
+        RegexOption.IGNORE_CASE,
+    )
     private val youtubePattern = Regex("^[A-Za-z0-9_-]{11}$")
     // Genres are names ("Horror") or, for the year catalog, years ("2026").
     private val genrePattern = Regex("^[A-Za-z0-9-]{1,32}$")
@@ -193,6 +203,7 @@ object Cinemeta {
     private fun toMeta(o: JsonObject): CinemetaMeta? {
         val imdbId = (o.str("imdb_id") ?: o.str("id"))?.takeIf(imdbPattern::matches) ?: return null
         val name = o.str("name")?.trim()?.take(200)?.takeIf(String::isNotEmpty) ?: return null
+        if (adultTitle.containsMatchIn(name)) return null
         val year = (o.str("year") ?: o.str("releaseInfo"))?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
         val trailer = (o["trailerStreams"] as? JsonArray)?.firstNotNullOfOrNull { (it as? JsonObject)?.str("ytId") }
             ?: (o["trailers"] as? JsonArray)?.firstNotNullOfOrNull { (it as? JsonObject)?.str("source") }

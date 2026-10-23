@@ -203,6 +203,17 @@ class CinemetaCacheTest {
     }
 
     @Test
+    fun `titles that announce adult content are dropped, whole words only`() {
+        val text = """{"metas":[
+            {"id":"tt0000021","name":"Shining Sex","genres":["Thriller"],"releaseInfo":"1977"},
+            {"id":"tt0000022","name":"XXX Horror Night","genres":["Horror"],"releaseInfo":"2001"},
+            {"id":"tt0000023","name":"The Essex Murders","genres":["Thriller"],"releaseInfo":"2001"},
+            {"id":"tt0000024","name":"Sexton's Grave","genres":["Horror"],"releaseInfo":"2001"}
+        ]}"""
+        assertEquals(listOf("The Essex Murders", "Sexton's Grave"), Cinemeta.parseCatalog(text).map { it.name })
+    }
+
+    @Test
     fun `children's titles and documentaries never pass, even when tagged thriller`() {
         fun meta(id: String, vararg genres: String) = CinemetaMeta(imdbId = id, name = id, year = 2000, genres = genres.toList())
         val kept = Cinemeta.searchResults(
