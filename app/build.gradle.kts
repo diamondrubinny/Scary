@@ -17,7 +17,7 @@ android {
         applicationId = "io.github.diamondrubinny.scary"
         // Android 8.0+. Covers Xiaomi Mi Box S / Mi TV Stick (Android TV 9+) and Google TV models.
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         // CI run number, so every build installs over the previous one.
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
         versionName = "0.4.0"
