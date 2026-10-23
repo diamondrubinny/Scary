@@ -170,11 +170,12 @@ class ScaryUiTest {
         val present = runCatching { rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey(rowKey) }.isSuccess } }.isSuccess
         assumeTrue("Online rows are not available on this emulator", present)
         val row = rule.onNodeWithTag(rowTag(rowKey))
-        // The daily refresh loads two pages (up to 60 movies); reaching the end asks for the next page.
+        // The daily refresh loads two pages (up to 100 movies); reaching the end asks for the next page. Scrolling to
+        // the furthest card that exists brings the end into view, whatever the exact count.
         row.performScrollToIndex(0)
         rule.waitUntil(ONLINE_TIMEOUT_MS) {
-            runCatching { row.performScrollToIndex(BEYOND_FIRST_PAGES) }.isSuccess.also {
-                if (!it) runCatching { row.performScrollToIndex(LAST_OF_FIRST_PAGES) }
+            runCatching { row.performScrollToIndex(BEYOND_FIRST_PAGES) }.isSuccess.also { reached ->
+                if (!reached) NEAR_END_OF_FIRST_PAGES.firstOrNull { runCatching { row.performScrollToIndex(it) }.isSuccess }
             }
         }
     }
@@ -206,7 +207,7 @@ class ScaryUiTest {
         const val TIMEOUT_MS = 20_000L
         const val MAX_BACKS = 4
         const val ONLINE_TIMEOUT_MS = 45_000L
-        const val LAST_OF_FIRST_PAGES = 50
-        const val BEYOND_FIRST_PAGES = 70
+        val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
+        const val BEYOND_FIRST_PAGES = 120
     }
 }

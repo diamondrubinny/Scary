@@ -17,6 +17,10 @@ object ParentalGate {
     fun needsPin(lockEnabled: Boolean, unlocked: Boolean, lockFromFear: Int, movie: Movie?): Boolean =
         lockEnabled && !unlocked && (movie == null || movie.fearForLock >= lockFromFear)
 
+    /** Whether [movie] shows as locked (badge, Surprise me, screensaver): the same rule as [needsPin] for a movie. */
+    fun isLocked(lockEnabled: Boolean, unlocked: Boolean, lockFromFear: Int, movie: Movie): Boolean =
+        needsPin(lockEnabled, unlocked, lockFromFear, movie)
+
     /** Whether an unlock at [unlockedAtMillis] still holds at [nowMillis]. A clock moved backwards ends it too. */
     fun stillUnlocked(unlockedAtMillis: Long, nowMillis: Long): Boolean =
         nowMillis >= unlockedAtMillis && nowMillis - unlockedAtMillis <= UNLOCK_WINDOW_MS

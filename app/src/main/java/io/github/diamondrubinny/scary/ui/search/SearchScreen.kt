@@ -192,7 +192,7 @@ fun SearchScreen(
         ) {
             // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
             val webDone = webSearch.query != query.trim() || !webSearch.loading
-            val webEmpty = webSearch.query != query.trim() || webSearch.results.none { web -> results.none { it.imdbId == web.imdbId } }
+            val webEmpty = webSearch.query != query.trim() || webSearch.results.isEmpty()
             if (query.isNotBlank() && results.isEmpty() && webDone && webEmpty) {
                 item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
                     EmptyState(

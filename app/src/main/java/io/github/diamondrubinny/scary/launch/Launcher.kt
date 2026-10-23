@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.launch
 
+import android.content.pm.PackageManager
 import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -101,7 +102,8 @@ class Launcher(
     }
 
     private fun resolves(intent: Intent): Boolean = try {
-        context.packageManager.queryIntentActivities(intent, 0).isNotEmpty()
+        // MATCH_DEFAULT_ONLY: startActivity with an implicit intent only reaches activities with CATEGORY_DEFAULT.
+        context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
     } catch (e: RuntimeException) {
         false
     }

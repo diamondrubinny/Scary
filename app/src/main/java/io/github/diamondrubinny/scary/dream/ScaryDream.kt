@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.dream
 
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.Color
@@ -126,7 +127,8 @@ class ScaryDream : DreamService() {
                     // Only the hand-picked library: the online "popular" rows can include plain action movies.
                     val allowed = catalog.movies.filter {
                         it.curated &&
-                            (!prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear) &&
+                            // The screensaver never unlocks: it shows only what needs no PIN.
+                            !ParentalGate.isLocked(prefs.parentalEnabled, unlocked = false, prefs.lockFromFear, it) &&
                             (!prefs.familyNight || FamilyNight.allows(it))
                     }
                     val withArt = allowed.filter { it.backgroundUrl != null }

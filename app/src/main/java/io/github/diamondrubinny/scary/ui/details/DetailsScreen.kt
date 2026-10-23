@@ -175,7 +175,8 @@ fun DetailsScreen(
 private fun MovieTitle(movie: Movie, language: Language) {
     val title = movie.displayTitle(language)
     val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
-    var logoShown by remember(movie.id) { mutableStateOf(false) }
+    // Keyed on the logo itself: when the title changes language and the logo goes, the text title comes back.
+    var logoShown by remember(movie.id, logo) { mutableStateOf(false) }
     // The title shivers as it comes out of the dark; again when the logo art arrives and replaces the text.
     Box(Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = title }.chill(movie.id to logoShown)) {
         if (!logoShown) {

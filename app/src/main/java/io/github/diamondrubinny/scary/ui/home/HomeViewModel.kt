@@ -307,10 +307,15 @@ class HomeViewModel(
         AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned)
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
+    /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
+    private var detailsCache: Triple<String, Catalog, MovieDetails>? = null
+
+    /** Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. */
     fun details(movieId: String): MovieDetails? {
         val shown = visibleCatalog() ?: return null
+        detailsCache?.let { (id, catalog, details) -> if (id == movieId && catalog === shown) return details }
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        return MovieDetails(movie, Similar.find(shown.movies, movie))
+        return MovieDetails(movie, Similar.find(shown.movies, movie)).also { detailsCache = Triple(movieId, shown, it) }
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -351,6 +356,10 @@ class HomeViewModel(
                 var found = emptyList<CinemetaMeta>()
                 var attempts = 0
                 while (found.isEmpty() && attempts < MAX_EMPTY_PAGES) {
+                    if (state.nextSkip > Cinemeta.MAX_SKIP) {
+                        state.done = true
+                        break
+                    }
                     val page = cinemeta.loadPage(rowId, state.nextSkip) ?: return@launch
                     attempts++
                     if (page.rawSize == 0) {
@@ -441,7 +450,7 @@ class HomeViewModel(
             maxFear = prefs.nightMaxFear,
             random = Random.Default,
             exclude = heroId.value,
-            isLocked = { prefs.parentalEnabled && !isSessionUnlocked() && it.fearForLock >= prefs.lockFromFear },
+            isLocked = { ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, it) },
         )
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
@@ -452,6 +461,11 @@ class HomeViewModel(
 
     /** Returns false when already on the home screen, so Back does nothing there. */
     fun back(): Boolean {
+        // Back during the shiver screen cancels opening the movie, and stays on this screen.
+        if (_launching.value != null) {
+            cancelLaunch()
+            return true
+        }
         if (backStack.value.size <= 1) return false
         backStack.update { it.dropLast(1) }
         return true
@@ -475,14 +489,20 @@ class HomeViewModel(
         val generation = dialogGeneration
         _launching.value = LaunchingState(movie, appLabel)
         val motion = latestPrefs?.effectsEnabled != false && settings.systemAnimationsOn()
-        launchJob = viewModelScope.launch {
-            delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
-            if (generation != dialogGeneration) return@launch
-            report(open())
-            // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
-            delay(LAUNCH_CLEAR_MS)
-            _launching.value = null
+        val job = viewModelScope.launch {
+            try {
+                delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
+                if (generation != dialogGeneration) return@launch
+                report(open())
+                // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
+                delay(LAUNCH_CLEAR_MS)
+            } finally {
+                // Whatever ends it (done, cancelled, or a dialog closed meanwhile), the dark screen goes with it,
+                // unless a newer launch has taken its place.
+                if (launchJob === coroutineContext[Job]) _launching.value = null
+            }
         }
+        launchJob = job
     }
 
     private fun cancelLaunch() {
@@ -758,16 +778,16 @@ class HomeViewModel(
         }
     }
 
-    /**
-     * Turning family night on also ends any PIN unlock, so turning it off again (in Settings) asks for the PIN.
-     * Without a PIN, anyone can turn it off; the setting's note says so.
-     */
     fun toggleSeasonalRows() {
         viewModelScope.launch {
             settings.setSeasonalRows(!settings.prefs.first().seasonalRows)
         }
     }
 
+    /**
+     * Turning family night on also ends any PIN unlock, so turning it off again (in Settings) asks for the PIN.
+     * Without a PIN, anyone can turn it off; the setting's note says so.
+     */
     fun toggleFamilyNight() {
         viewModelScope.launch {
             val enabled = !settings.prefs.first().familyNight

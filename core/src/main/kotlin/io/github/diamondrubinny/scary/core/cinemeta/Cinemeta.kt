@@ -68,7 +68,8 @@ object Cinemeta {
     private const val MIN_SEARCH_LENGTH = 3
     private const val MAX_SEARCH_LENGTH = 60
     private const val MAX_SEARCH_RESULTS = 20
-    private const val MAX_SKIP = 10_000
+    /** The furthest catalog page SCARY asks for. */
+    const val MAX_SKIP = 10_000
 
     /** Movies in one catalog page. */
     const val PAGE_SIZE = 50
@@ -76,8 +77,11 @@ object Cinemeta {
     /** An endless row stops growing here, to keep memory in check on 2 GB TV boxes. */
     const val MAX_ENDLESS_ROW_MOVIES = 1_000
 
-    /** Movies an online row may hold: two or three catalog pages. */
-    const val MAX_ROW_MOVIES = 60
+    /**
+     * Movies an online row may hold after the daily refresh: three catalog pages, the most any row loads, so nothing
+     * fetched is dropped (endless rows continue right after their last page).
+     */
+    const val MAX_ROW_MOVIES = 150
     private val THEME_GENRES = listOf("Horror", "Thriller", "Mystery")
 
     fun metaUrl(imdbId: String): String {
@@ -308,8 +312,8 @@ data class CinemetaCache(
 
     companion object {
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
-        /** Bumped whenever the online rows change (2: seven rows, several pages each). */
-        const val ROWS_VERSION = 2
+        /** Bumped whenever the online rows change (3: popular rows one page, deeper rows right after them). */
+        const val ROWS_VERSION = 3
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

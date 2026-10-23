@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import androidx.annotation.StringRes
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.Season
@@ -35,7 +36,7 @@ data class HomeUiState(
     val familyNight: Boolean = false,
     val seasonalRows: Boolean = true,
 ) {
-    fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
+    fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
 }
 
 /** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */

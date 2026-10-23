@@ -33,8 +33,9 @@ class CinemetaRepository(context: Context) {
     /**
      * One online row: a Cinemeta catalog ([catalog] "top" or "year"), its [genre] (a genre name or a year), and the
      * catalog pages to join ([skips], 50 movies each). Year catalogs mix every genre, so they keep only horror,
-     * thriller and mystery ([themedOnly]). An [endless] row keeps loading further pages while the viewer scrolls; the
-     * popular rows stay short, because the "deeper" rows continue them.
+     * thriller and mystery ([themedOnly]). An [endless] row keeps loading further pages while the viewer scrolls. A
+     * popular row is the first page of its genre and its "deeper" row starts at the next one, so no movie falls in
+     * between and no page is loaded twice. Rows keep every movie of their pages (MAX_ROW_MOVIES is three pages).
      */
     private data class RowSpec(
         val id: String,
@@ -51,7 +52,7 @@ class CinemetaRepository(context: Context) {
             val year = LocalDate.now().year
             return listOf(
                 RowSpec(
-                    "horror_popular", "top", "Horror", listOf(0, 50),
+                    "horror_popular", "top", "Horror", listOf(0),
                     titles("פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас", "رعب رائج الآن"),
                 ),
                 RowSpec(
@@ -61,11 +62,11 @@ class CinemetaRepository(context: Context) {
                     endless = true,
                 ),
                 RowSpec(
-                    "thriller_popular", "top", "Thriller", listOf(0, 50),
+                    "thriller_popular", "top", "Thriller", listOf(0),
                     titles("מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры", "أفلام إثارة رائجة"),
                 ),
                 RowSpec(
-                    "horror_deep", "top", "Horror", listOf(100, 150),
+                    "horror_deep", "top", "Horror", listOf(50, 100),
                     titles("עוד מהמרתף", "Deeper in the cellar", "Mais fundo no porão", "Глубже в подвал", "أعمق في القبو"),
                     endless = true,
                 ),
@@ -81,7 +82,7 @@ class CinemetaRepository(context: Context) {
                     endless = true,
                 ),
                 RowSpec(
-                    "thriller_deep", "top", "Thriller", listOf(100),
+                    "thriller_deep", "top", "Thriller", listOf(50),
                     titles("עוד מותחנים", "More thrillers", "Mais suspenses", "Ещё триллеры", "مزيد من الإثارة"),
                     endless = true,
                 ),
@@ -101,7 +102,8 @@ class CinemetaRepository(context: Context) {
      */
     suspend fun loadPage(rowId: String, skip: Int): Page? = withContext(Dispatchers.IO) {
         val spec = rowSpecs.firstOrNull { it.id == rowId && it.endless } ?: return@withContext null
-        val metas = fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip))?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        val url = runCatching { Cinemeta.catalogUrl(spec.catalog, spec.genre, skip) }.getOrNull() ?: return@withContext null
+        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
         Page(metas.size, if (spec.themedOnly) Cinemeta.themed(metas) else metas)
     }
 

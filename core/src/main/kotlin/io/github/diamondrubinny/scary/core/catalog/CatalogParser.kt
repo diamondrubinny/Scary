@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.catalog
 
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Catalog
 import kotlinx.serialization.json.Json
 
@@ -14,7 +15,8 @@ object CatalogParser {
     const val SUPPORTED_VERSION = 1
 
     /** Languages beyond Hebrew and English that every curated entry must be translated into. */
-    private val TRANSLATED = listOf("pt", "ru")
+    /** Synopses every curated movie needs besides Hebrew and English: one per further UI language. */
+    private val TRANSLATED = Language.entries.map { it.code } - Language.HE.code - Language.EN.code
 
     private val json = Json { ignoreUnknownKeys = true }
     private val imdbPattern = Regex("^tt\\d{7,8}$")

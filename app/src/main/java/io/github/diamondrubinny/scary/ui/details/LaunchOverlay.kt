@@ -49,7 +49,7 @@ fun LaunchOverlay(state: LaunchingState, language: Language, modifier: Modifier 
     val title = movie.displayTitle(language)
     val backdrop = rememberArtwork(movie.backgroundUrl)
     val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
-    var logoShown by remember(movie.id) { mutableStateOf(false) }
+    var logoShown by remember(movie.id, logo) { mutableStateOf(false) }
 
     Box(modifier.fillMaxSize().background(ScaryColors.Void)) {
         if (backdrop != null) {
