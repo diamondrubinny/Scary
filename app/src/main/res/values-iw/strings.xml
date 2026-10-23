@@ -83,7 +83,6 @@
     <string name="settings_lock_level">נעילה מרמת פחד</string>
     <string name="settings_lock_level_value">%1$d ומעלה</string>
     <string name="settings_change_pin">החלפת הקוד</string>
-    <string name="settings_turn_off_lock">כיבוי הנעילה</string>
     <string name="settings_parental_note">הנעילה חלה על סרטים שנפתחים מ־SCARY ועל ההגדרות האלה. היא לא נועלת את Stremio או אפליקציות אחרות. שכחתם את הקוד? מחיקת הנתונים של SCARY בהגדרות המערכת של הטלוויזיה מאפסת אותו, יחד עם שאר ההעדפות.</string>
     <string name="settings_sounds">צלילי אווירה</string>
     <string name="locked_badge">נעול</string>

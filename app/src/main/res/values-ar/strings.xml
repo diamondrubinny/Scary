@@ -84,7 +84,6 @@
     <string name="settings_lock_level">القفل ابتداءً من مستوى الرعب</string>
     <string name="settings_lock_level_value">%1$d وما فوق</string>
     <string name="settings_change_pin">تغيير الرمز</string>
-    <string name="settings_turn_off_lock">إيقاف القفل</string>
     <string name="settings_parental_note">يشمل القفل الأفلام التي تُفتح من SCARY وهذه الإعدادات. ولا يقفل Stremio أو التطبيقات الأخرى. نسيت الرمز؟ مسح بيانات SCARY من إعدادات نظام التلفزيون يعيد ضبطه مع باقي تفضيلاتك.</string>
     <string name="settings_sounds">أصوات الأجواء</string>
     <string name="locked_badge">مقفل</string>

@@ -83,7 +83,6 @@
     <string name="settings_lock_level">Блокировать с уровня страха</string>
     <string name="settings_lock_level_value">%1$d и выше</string>
     <string name="settings_change_pin">Сменить PIN-код</string>
-    <string name="settings_turn_off_lock">Выключить блокировку</string>
     <string name="settings_parental_note">Блокировка действует на фильмы, открытые из SCARY, и на эти настройки. Stremio и другие приложения она не блокирует. Забыли PIN-код? Очистка данных SCARY в системных настройках ТВ сбросит его вместе с остальными настройками.</string>
     <string name="settings_sounds">Фоновые звуки</string>
     <string name="locked_badge">Заблокировано</string>

@@ -84,7 +84,6 @@
     <string name="settings_lock_level">Lock from fear level</string>
     <string name="settings_lock_level_value">%1$d and up</string>
     <string name="settings_change_pin">Change PIN</string>
-    <string name="settings_turn_off_lock">Turn off the lock</string>
     <string name="settings_parental_note">The lock covers movies opened from SCARY and these settings. It does not lock Stremio or other apps. Forgot the PIN? Clearing SCARY’s data in the TV system settings resets it, along with your other preferences.</string>
     <string name="settings_sounds">Ambient sounds</string>
     <string name="locked_badge">Locked</string>

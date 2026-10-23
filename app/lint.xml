@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<!-- Lint warnings checked by hand and kept on purpose, each with its reason (see docs/QA_REPORT.md). -->
+<lint>
+    <!-- The only drawable bitmap is the TV banner, which Android TV specifies at xhdpi (320x180). -->
+    <issue id="IconMissingDensityFolder" severity="ignore" />
+    <!-- "%1$d and up" (lock from fear level): the number is followed by "and", not by a noun that takes a plural. -->
+    <issue id="PluralsCandidate">
+        <ignore regexp="and" />
+    </issue>
+</lint>

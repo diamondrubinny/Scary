@@ -57,6 +57,14 @@ android {
         buildConfig = false
     }
 
+    // SCARY switches its language inside the app (LocaleOverride), so an app bundle must ship every language:
+    // split by language, Google Play would install only the TV's own and the in-app choice would break.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     lint {
         abortOnError = true
         warningsAsErrors = false

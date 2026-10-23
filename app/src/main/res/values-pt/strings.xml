@@ -83,7 +83,6 @@
     <string name="settings_lock_level">Bloquear a partir do nível de medo</string>
     <string name="settings_lock_level_value">%1$d ou mais</string>
     <string name="settings_change_pin">Trocar o PIN</string>
-    <string name="settings_turn_off_lock">Desligar o bloqueio</string>
     <string name="settings_parental_note">O bloqueio vale para filmes abertos pelo SCARY e para estas configurações. Ele não bloqueia o Stremio nem outros apps. Esqueceu o PIN? Limpar os dados do SCARY nas configurações do sistema da TV o redefine, junto com as outras preferências.</string>
     <string name="settings_sounds">Sons de ambiente</string>
     <string name="locked_badge">Bloqueado</string>
