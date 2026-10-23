@@ -108,3 +108,22 @@ private const val AFTERSHOCK_MS = 350L
 private const val AFTERSHOCK_DIP = 0.75f
 private const val REPEAT_MIN_MS = 7_000L
 private const val REPEAT_MAX_MS = 11_000L
+
+/**
+ * A screen arriving: it rises a little and fades in, so moving from a card to its movie page reads as one motion
+ * rather than a cut. A new [key] plays it again; nothing moves when motion is reduced.
+ */
+@Composable
+fun Modifier.riseIn(key: Any?): Modifier {
+    if (LocalReduceMotion.current) return this
+    val progress = remember(key) { Animatable(0f) }
+    val risePx = with(LocalDensity.current) { RISE.toPx() }
+    LaunchedEffect(key) { progress.animateTo(1f, tween(RISE_MS, easing = FastOutSlowInEasing)) }
+    return graphicsLayer {
+        alpha = progress.value
+        translationY = (1f - progress.value) * risePx
+    }
+}
+
+private val RISE = 24.dp
+private const val RISE_MS = 320

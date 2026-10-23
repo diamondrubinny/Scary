@@ -52,6 +52,7 @@ import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.fx.chill
+import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 @Composable
@@ -76,7 +77,7 @@ fun DetailsScreen(
         runCatching { watchFocus.requestFocus() }
     }
 
-    Column(Modifier.fillMaxSize().padding(top = 36.dp)) {
+    Column(Modifier.fillMaxSize().riseIn(movie.id).padding(top = 36.dp)) {
         Row(
             modifier = Modifier.padding(horizontal = SidePadding),
             horizontalArrangement = Arrangement.spacedBy(36.dp),

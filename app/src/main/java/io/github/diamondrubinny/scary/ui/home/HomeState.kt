@@ -33,6 +33,7 @@ data class HomeUiState(
     /** Ids on "My list", for the add/remove button on a movie's page. */
     val myListIds: Set<String> = emptySet(),
     val familyNight: Boolean = false,
+    val seasonalRows: Boolean = true,
 ) {
     fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
 }

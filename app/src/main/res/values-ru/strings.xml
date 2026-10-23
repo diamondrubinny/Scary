@@ -209,4 +209,5 @@
     <string name="open_app">Открыть %1$s</string>
     <string name="search_everywhere">Искать по всему ТВ</string>
     <string name="watch_elsewhere_note">SCARY ищет по названию. Он не знает, доступен ли фильм в каждом приложении.</string>
+    <string name="settings_seasonal">Сезонные ряды (Хэллоуин, пятница 13-е)</string>
 </resources>

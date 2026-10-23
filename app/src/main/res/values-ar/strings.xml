@@ -216,4 +216,5 @@
     <string name="open_app">فتح %1$s</string>
     <string name="search_everywhere">البحث في التلفزيون كله</string>
     <string name="watch_elsewhere_note">يبحث SCARY باسم الفيلم، ولا يعرف إن كان الفيلم متاحًا في كل تطبيق.</string>
+    <string name="settings_seasonal">صفوف موسمية (الهالوين، الجمعة 13)</string>
 </resources>

@@ -41,6 +41,7 @@ class SettingsActions(
     val onToggleLanguage: () -> Unit,
     val onToggleEffects: () -> Unit,
     val onCycleNightFear: () -> Unit,
+    val onToggleSeasonalRows: () -> Unit,
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onSetupPin: () -> Unit,
@@ -65,6 +66,7 @@ fun SettingsScreen(
     parentalEnabled: Boolean,
     lockFromFear: Int,
     familyNight: Boolean,
+    seasonalRows: Boolean,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -145,6 +147,11 @@ fun SettingsScreen(
             value = stringResource(R.string.settings_night_fear_value, nightMaxFear),
             onClick = actions.onCycleNightFear,
             trailing = { FearMeter(nightMaxFear) },
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_seasonal),
+            value = stringResource(if (seasonalRows) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleSeasonalRows,
         )
         SettingRow(
             label = stringResource(R.string.settings_sounds),

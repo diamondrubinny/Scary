@@ -205,4 +205,5 @@
     <string name="open_app">Open %1$s</string>
     <string name="search_everywhere">Search the whole TV</string>
     <string name="watch_elsewhere_note">SCARY searches by title. It cannot tell whether the movie is available in each app.</string>
+    <string name="settings_seasonal">Seasonal rows (Halloween, Friday the 13th)</string>
 </resources>

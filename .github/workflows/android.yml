@@ -184,6 +184,21 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash .github/scripts/screenshots.sh
 
+      # Cold start and UI test results in the run summary; a warning (not a failure) when start-up gets slow.
+      - name: Start-up time and UI tests
+        if: always()
+        run: |
+          if [ -f screenshots/ui-tests.txt ]; then
+            { echo "### UI tests"; echo '```'; tail -3 screenshots/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f screenshots/startup.txt ]; then
+            { echo "### Cold start (release)"; echo '```'; cat screenshots/startup.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            median=$(grep '^speed-profile:' screenshots/startup.txt | cut -d: -f2 | tr ' ' '\n' | sed '/^$/d' | sort -n | sed -n 2p)
+            if [ -n "$median" ] && [ "$median" -gt 2500 ]; then
+              echo "::warning::Release cold start is ${median} ms on the emulator (limit 2500 ms). Check what slowed it down."
+            fi
+          fi
+
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         with:

@@ -152,6 +152,7 @@ class HomeViewModel(
             onlineEnabled = prefs.onlineEnabled,
             myListIds = prefs.myListIds.toSet(),
             familyNight = prefs.familyNight,
+            seasonalRows = prefs.seasonalRows,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
@@ -242,7 +243,7 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
-            Season.activeOn(today()).forEach { season ->
+            if (prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
                 val movies = season.pick(catalog.movies)
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
             }
@@ -686,6 +687,12 @@ class HomeViewModel(
      * Turning family night on also ends any PIN unlock, so turning it off again (in Settings) asks for the PIN.
      * Without a PIN, anyone can turn it off; the setting's note says so.
      */
+    fun toggleSeasonalRows() {
+        viewModelScope.launch {
+            settings.setSeasonalRows(!settings.prefs.first().seasonalRows)
+        }
+    }
+
     fun toggleFamilyNight() {
         viewModelScope.launch {
             val enabled = !settings.prefs.first().familyNight

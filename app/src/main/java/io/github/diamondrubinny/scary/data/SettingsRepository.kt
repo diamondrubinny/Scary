@@ -52,6 +52,8 @@ data class LauncherPrefs(
     val myListIds: List<String> = emptyList(),
     /** Only the gentlest curated movies (fear 1-2) appear anywhere, and no web search. */
     val familyNight: Boolean = false,
+    /** Halloween and Friday the 13th rows around their dates. On by default. */
+    val seasonalRows: Boolean = true,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -75,6 +77,7 @@ class SettingsRepository(private val context: Context) {
                 onlineEnabled = p[ONLINE] ?: true,
                 myListIds = RecentList.decode(p[MY_LIST]),
                 familyNight = p[FAMILY_NIGHT] ?: false,
+                seasonalRows = p[SEASONAL_ROWS] ?: true,
             )
         }
         .distinctUntilChanged()
@@ -132,6 +135,8 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setFamilyNight(enabled: Boolean) = edit { it[FAMILY_NIGHT] = enabled }
 
+    suspend fun setSeasonalRows(enabled: Boolean) = edit { it[SEASONAL_ROWS] = enabled }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -165,6 +170,7 @@ class SettingsRepository(private val context: Context) {
         private val SOUNDS = booleanPreferencesKey("ambient_sounds")
         private val ONLINE = booleanPreferencesKey("online_artwork")
         private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
+        private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }
