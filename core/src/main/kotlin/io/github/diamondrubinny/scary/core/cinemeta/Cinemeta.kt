@@ -84,6 +84,12 @@ object Cinemeta {
     const val MAX_ROW_MOVIES = 150
     private val THEME_GENRES = listOf("Horror", "Thriller", "Mystery")
 
+    /** Never on SCARY's shelves even when also tagged as a thriller: documentaries and titles for children. */
+    private val OFF_THEME_GENRES = listOf("Documentary", "Family", "Animation", "Kids")
+
+    /** Full metas fetched per search to learn the genres of results that came without them. */
+    private const val MAX_GENRE_LOOKUPS = 12
+
     fun metaUrl(imdbId: String): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
         return "$BASE_URL/meta/movie/$imdbId.json"
@@ -102,10 +108,7 @@ object Cinemeta {
      * Only horror, thriller and mystery, for catalogs that mix every genre (the year catalog). Movies without genres
      * and documentaries are left out.
      */
-    fun themed(metas: List<CinemetaMeta>): List<CinemetaMeta> = metas.filter { meta ->
-        meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } &&
-            meta.genres.none { it.equals("Documentary", ignoreCase = true) }
-    }
+    fun themed(metas: List<CinemetaMeta>): List<CinemetaMeta> = metas.filter(::onTheme)
 
     /**
      * Search in Cinemeta's "top" catalog, using the Stremio add-on "extra" path argument. Null when the query is too
@@ -128,19 +131,31 @@ object Cinemeta {
     }
 
     /**
-     * Web search results as movies: horror, thriller and mystery only when Cinemeta lists genres (results without
-     * genres are kept), minus anything already in [known], capped at [limit].
+     * Web search results as movies: only horror, thriller and mystery, never documentaries or family titles, minus
+     * anything already in [known], capped at [limit]. Results without genres are dropped: Cinemeta's search often
+     * leaves them out, and kept unfiltered they let in children's shows and unrelated films. The caller looks their
+     * genres up first ([needsGenres]).
      */
-    fun searchResults(text: String, known: Catalog, limit: Int = MAX_SEARCH_RESULTS): List<Movie> {
+    fun searchResults(metas: List<CinemetaMeta>, known: Catalog, limit: Int = MAX_SEARCH_RESULTS): List<Movie> {
         val knownImdb = known.movies.mapTo(HashSet()) { it.imdbId }
-        return parseCatalog(text).asSequence()
+        return metas.asSequence()
             .filter { it.imdbId !in knownImdb }
-            .filter { meta -> meta.genres.isEmpty() || meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } }
+            .filter(::onTheme)
             .mapNotNull(::toMovie)
             .distinctBy { it.imdbId }
             .take(limit)
             .toList()
     }
+
+    /** Search results whose genres must be looked up (the full meta) before [searchResults] can judge them. */
+    fun needsGenres(metas: List<CinemetaMeta>, known: Catalog, limit: Int = MAX_GENRE_LOOKUPS): List<String> {
+        val knownImdb = known.movies.mapTo(HashSet()) { it.imdbId }
+        return metas.filter { it.genres.isEmpty() && it.imdbId !in knownImdb }.map { it.imdbId }.distinct().take(limit)
+    }
+
+    private fun onTheme(meta: CinemetaMeta): Boolean =
+        meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } &&
+            meta.genres.none { g -> OFF_THEME_GENRES.any { it.equals(g, ignoreCase = true) } }
 
     /** The reverse of [toMovie], so a movie found online can be saved and rebuilt later. */
     fun fromMovie(movie: Movie, language: String = ""): CinemetaMeta = CinemetaMeta(

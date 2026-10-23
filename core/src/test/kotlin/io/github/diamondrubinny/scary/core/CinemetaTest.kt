@@ -121,10 +121,15 @@ class CinemetaTest {
             {"id":"tt9000003","name":"No Genres","releaseInfo":"2019"},
             {"id":"tt9000004","name":"No Year","genres":["Thriller"]}
         ]}"""
-        val results = Cinemeta.searchResults(text, catalog)
-        assertEquals(listOf("Ghost House", "No Genres"), results.map { it.title })
+        val metas = Cinemeta.parseCatalog(text)
+        // Results without genres are not shown as they are: their genres are looked up first.
+        assertEquals(listOf("tt9000003"), Cinemeta.needsGenres(metas, catalog))
+        val results = Cinemeta.searchResults(metas, catalog)
+        assertEquals(listOf("Ghost House"), results.map { it.title })
         assertTrue(results.none { it.curated })
-        assertEquals(1, Cinemeta.searchResults(text, catalog, limit = 1).size)
+        val looked = metas.map { if (it.imdbId == "tt9000003") it.copy(genres = listOf("Mystery")) else it }
+        assertEquals(listOf("Ghost House", "No Genres"), Cinemeta.searchResults(looked, catalog).map { it.title })
+        assertEquals(1, Cinemeta.searchResults(looked, catalog, limit = 1).size)
     }
 
     @Test
@@ -195,5 +200,20 @@ class CinemetaCacheTest {
         val capped = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, (6..20).map(::meta), maxRow = 7)
         assertEquals(7, capped.collections.single { it.id == id }.movieIds.size)
         assertEquals(7, capped.movies.size)
+    }
+
+    @Test
+    fun `children's titles and documentaries never pass, even when tagged thriller`() {
+        fun meta(id: String, vararg genres: String) = CinemetaMeta(imdbId = id, name = id, year = 2000, genres = genres.toList())
+        val kept = Cinemeta.searchResults(
+            listOf(
+                meta("tt0000011", "TV Movie", "Family", "Fantasy"),
+                meta("tt0000012", "Documentary", "Horror"),
+                meta("tt0000013", "Animation", "Thriller"),
+                meta("tt0000014", "Drama", "Romance", "Thriller"),
+            ),
+            Catalog(1, emptyList(), emptyList()),
+        )
+        assertEquals(listOf("tt0000014"), kept.map { it.imdbId })
     }
 }

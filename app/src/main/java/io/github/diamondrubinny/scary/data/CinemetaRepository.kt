@@ -148,7 +148,19 @@ class CinemetaRepository(context: Context) {
      */
     suspend fun search(query: String, known: Catalog): List<Movie>? = withContext(Dispatchers.IO) {
         val url = Cinemeta.searchUrl(query) ?: return@withContext null
-        fetch(url)?.let { Cinemeta.searchResults(it, known) }
+        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        // The top results often come without genres: look them up (side by side), so the theme filter can judge them.
+        val missing = Cinemeta.needsGenres(metas, known)
+        val full = if (missing.isEmpty()) {
+            emptyMap()
+        } else {
+            val pool = Semaphore(PARALLEL_REQUESTS)
+            coroutineScope {
+                missing.map { id -> async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } } }
+                    .awaitAll().filterNotNull().associateBy { it.imdbId }
+            }
+        }
+        Cinemeta.searchResults(metas.map { full[it.imdbId] ?: it }, known)
     }
 
     private fun save(cache: CinemetaCache) {
