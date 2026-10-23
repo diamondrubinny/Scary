@@ -15,6 +15,7 @@ import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -167,7 +168,8 @@ class ScaryUiTest {
         val first = Mood.RELENTLESS.pick(bundledMovies()).first()
         waitFor(hasContentDescription("${first.title}, ${first.year}", substring = true))
         rule.onNode(chip).performClick()
-        rule.waitForIdle()
+        // The home state is built off the main thread, so idle Compose does not mean the new state has arrived yet.
+        waitFor(chip and isNotSelected())
         rule.onNode(chip).assertIsNotSelected()
     }
 
