@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.theme
 
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -100,6 +101,12 @@ object ScaryType {
     val Caption: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, color = ScaryColors.Ash)
     val Eyebrow: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 0.18.em, color = ScaryColors.Candle)
     val RowTitle: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
+
+    /** Movie titles in [Display]: a long one ("The Texas Chain Saw Massacre") shrinks to fit before it is cut off. */
+    val DisplayFit: TextAutoSize = TextAutoSize.StepBased(minFontSize = 34.sp, maxFontSize = 60.sp, stepSize = 2.sp)
+
+    /** [Display] with a line height that follows the size [DisplayFit] picks, for titles on two lines. */
+    val DisplayFitting: TextStyle get() = Display.copy(lineHeight = 0.9.em)
 }
 
 /**

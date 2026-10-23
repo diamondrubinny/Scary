@@ -199,7 +199,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
-            MovieBackdrop(if (current == Screen.Home || details != null) details?.movie ?: state.hero else null)
+            val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
+            // A locked movie's art stays off the screen, as on its card.
+            MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it })
             Atmosphere(animate = !LocalReduceMotion.current)
 
             when {

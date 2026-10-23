@@ -182,9 +182,10 @@ private fun MovieTitle(movie: Movie, language: Language) {
         if (!logoShown) {
             BasicText(
                 text = title,
-                style = ScaryType.Display.mixedLanguage(),
+                style = ScaryType.DisplayFitting.mixedLanguage(),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                autoSize = ScaryType.DisplayFit,
             )
         }
         if (logo != null) {

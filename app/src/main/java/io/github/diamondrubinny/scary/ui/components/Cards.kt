@@ -110,10 +110,11 @@ fun PosterCard(
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
-        // The generated art stays underneath: it shows while the poster loads, offline, or if it fails.
-        var posterShown by remember(movie.posterUrl) { mutableStateOf(false) }
+        // The generated art stays underneath: it shows while the poster loads, offline, or if it fails. A locked movie
+        // shows only that art: its real poster could be exactly what the lock is meant to keep off the screen.
+        var posterShown by remember(movie.posterUrl, locked) { mutableStateOf(false) }
         PosterArt(movie, Modifier.fillMaxSize())
-        rememberArtwork(movie.posterUrl)?.let { request ->
+        rememberArtwork(movie.posterUrl.takeUnless { locked })?.let { request ->
             AsyncImage(
                 model = request,
                 contentDescription = null,
@@ -161,7 +162,7 @@ fun WideMovieCard(
         onFocusChanged = { if (it) onFocused() },
     ) {
         PosterArt(movie, Modifier.fillMaxSize())
-        rememberArtwork(movie.backgroundUrl)?.let { request ->
+        rememberArtwork(movie.backgroundUrl.takeUnless { locked })?.let { request ->
             AsyncImage(model = request, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             Box(
                 Modifier
@@ -215,8 +216,15 @@ fun AppTileCard(
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
-            // The setup tile is the first thing a new viewer needs; it is wider so its label is never cut off.
-            .width(if (tile is AppTile.SetAsHome) SET_HOME_TILE_WIDTH else TILE_WIDTH)
+            // SCARY's own tiles carry text, not a banner: they are wider, so their labels are never cut off in any
+            // language ("Установить Stremio"). The setup tile, the first thing a new viewer needs, is the widest.
+            .width(
+                when (tile) {
+                    is AppTile.Installed -> TILE_WIDTH
+                    AppTile.SetAsHome -> SET_HOME_TILE_WIDTH
+                    else -> TEXT_TILE_WIDTH
+                },
+            )
             .height(TILE_WIDTH * 9 / 16),
         containerColor = ScaryColors.Crypt,
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
@@ -232,34 +240,44 @@ fun AppTileCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
-        } else if (tile is AppTile.SetAsHome) {
+        } else if (tile !is AppTile.Installed) {
             // Icon beside the text, so two full lines fit even at the largest system font.
             Row(
                 modifier = Modifier.align(Alignment.Center).padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
+                when (tile) {
+                    AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
+                    AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    else -> Box(
+                        Modifier
+                            .size(26.dp)
+                            .background(ScaryColors.Blood, RoundedCornerShape(7.dp)),
+                    )
+                }
                 BasicText(
                     text = label,
-                    style = ScaryType.Label,
+                    // "Install Disney+" must not become "+Install Disney" in the Hebrew UI.
+                    style = ScaryType.Label.copy(textDirection = TextDirection.Content),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
         } else {
+            // An installed app without a banner: its icon above its name. One line fits under the icon; the full name
+            // is in the tile's description for TalkBack.
             Column(
                 modifier = Modifier.align(Alignment.Center).padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                val icon = (tile as? AppTile.Installed)?.app?.icon
-                when {
-                    icon != null -> Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
-                    tile is AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
-                    tile is AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
-                    tile is AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(26.dp))
-                    else -> Box(
+                val icon = tile.app.icon
+                if (icon != null) {
+                    Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
+                } else {
+                    Box(
                         Modifier
                             .size(30.dp)
                             .background(ScaryColors.Blood, RoundedCornerShape(8.dp)),
@@ -269,7 +287,7 @@ fun AppTileCard(
                     text = label,
                     // App names are often English: "Disney+" must not become "+Disney" in the Hebrew UI.
                     style = ScaryType.Label.copy(textAlign = TextAlign.Center, textDirection = TextDirection.Content),
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -290,4 +308,5 @@ fun AppTileCard(
 }
 
 private val TILE_WIDTH = 136.dp
+private val TEXT_TILE_WIDTH = 200.dp
 private val SET_HOME_TILE_WIDTH = 240.dp

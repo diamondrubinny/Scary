@@ -71,9 +71,10 @@ fun LaunchOverlay(state: LaunchingState, language: Language, modifier: Modifier 
                     BasicText(
                         text = title,
                         // Its own direction for English titles, centred either way.
-                        style = ScaryType.Display.mixedLanguage().copy(textAlign = TextAlign.Center),
+                        style = ScaryType.DisplayFitting.mixedLanguage().copy(textAlign = TextAlign.Center),
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
+                        autoSize = ScaryType.DisplayFit,
                     )
                 }
                 if (logo != null) {

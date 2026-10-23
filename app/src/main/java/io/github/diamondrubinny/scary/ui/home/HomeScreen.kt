@@ -216,6 +216,7 @@ private fun Hero(
                 style = ScaryType.Display.mixedLanguage(),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                autoSize = ScaryType.DisplayFit,
                 modifier = Modifier.semantics { heading() },
             )
             MovieMeta(movie)

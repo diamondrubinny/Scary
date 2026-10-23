@@ -173,7 +173,7 @@ SCARY не транслирует и не хранит фильмы: выбра�
 CI (GitHub Actions) runs the tests, builds and lints the APK, builds the optimized release APK (R8), smoke-tests it on an Android TV emulator, captures these screenshots there, and only then publishes it to the `latest-build` pre-release.
 
 Plan and spec (Hebrew): [docs/PLAN.md](docs/PLAN.md).
-Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibility review and draft statement: [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md). Draft terms of use: [docs/TERMS.md](docs/TERMS.md). Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md). The privacy notice and accessibility statement are also in the app, under Settings → About.
+Privacy data map and draft policy: [docs/PRIVACY.md](docs/PRIVACY.md). Accessibility review and draft statement: [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md). Draft terms of use: [docs/TERMS.md](docs/TERMS.md). Release checklist: [docs/RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md). Quality report (tests, lint, security review, visual check): [docs/QA_REPORT.md](docs/QA_REPORT.md). The privacy notice and accessibility statement are also in the app, under Settings → About.
 
 ## Privacy and credits
 
