@@ -23,9 +23,16 @@ adb shell svc power stayon true || true
 if [ -f dist/scary-tests.apk ]; then
   adb install -r dist/scary-tests.apk
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 0; done
-  result=$(adb shell am instrument -w "$PKG.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')
+  # Raw mode (-r) reports each test's status, so tests skipped by an assumption (code -4) are counted, not hidden.
+  result=$(adb shell am instrument -w -r "$PKG.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 1; done
-  echo "$result" | tee "$OUT/ui-tests.txt"
+  skipped=$(echo "$result" | grep -B6 'INSTRUMENTATION_STATUS_CODE: -4' | grep 'INSTRUMENTATION_STATUS: test=' | sed 's/.*test=//' | sort -u | tr '\n' ' ' || true)
+  {
+    echo "$result" | grep -E '^(OK \(|FAILURES|Tests run:)' || echo "No test summary"
+    echo "Skipped by an assumption: ${skipped:-none}"
+  } > "$OUT/ui-tests.txt"
+  echo "$result"
+  cat "$OUT/ui-tests.txt"
   if ! echo "$result" | grep -q '^OK ('; then
     echo "UI tests failed."
     exit 1

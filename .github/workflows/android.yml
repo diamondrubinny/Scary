@@ -189,7 +189,7 @@ jobs:
         if: always()
         run: |
           if [ -f screenshots/ui-tests.txt ]; then
-            { echo "### UI tests"; echo '```'; tail -3 screenshots/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            { echo "### UI tests"; echo '```'; cat screenshots/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -f screenshots/startup.txt ]; then
             { echo "### Cold start (release)"; echo '```'; cat screenshots/startup.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
