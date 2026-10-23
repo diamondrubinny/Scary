@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core
 
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import org.junit.Assert.assertEquals
@@ -93,5 +94,20 @@ class CatalogParserTest {
         } catch (e: CatalogException) {
             assertTrue(e.problems.any { "unsupported catalog version" in it })
         }
+    }
+
+    @Test
+    fun everyCuratedMovieHasItsOwnSynopsisInEveryLanguage() {
+        val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+        val missing = catalog.movies.flatMap { movie ->
+            Language.entries.filter { language ->
+                when (language) {
+                    Language.HE -> movie.synopsisHe.isBlank()
+                    Language.EN -> movie.synopsisEn.isBlank()
+                    else -> movie.synopses[language.code].isNullOrBlank()
+                }
+            }.map { "${movie.id}: ${it.code}" }
+        }
+        assertTrue("Synopses missing (they would fall back to English):\n" + missing.joinToString("\n"), missing.isEmpty())
     }
 }

@@ -161,7 +161,7 @@ SCARY не транслирует и не хранит фильмы: выбра�
 |--------|-----------|
 | `core/` | Pure Kotlin/JVM: catalog model and validation, search, tonight's pick, Cinemeta and TMDB parsing, PIN hashing, deep links. Unit tested. |
 | `app/` | Android app: Jetpack Compose UI, HOME intent filter, Home-button accessibility service, installed apps, launching. |
-| `app/src/main/assets/catalog.json` | The curated library, with text in five languages (collection titles) and Hebrew and English synopses. Validated by the `core` tests on every build. |
+| `app/src/main/assets/catalog.json` | The curated library: synopses in Hebrew, English, Portuguese, Russian and Arabic, collection titles in all five. Validated by the `core` tests on every build. |
 
 ```bash
 ./gradlew :core:test          # unit tests

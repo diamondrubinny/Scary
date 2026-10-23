@@ -25,3 +25,11 @@ dependencies {
     api(libs.kotlinx.serialization.json)
     testImplementation(libs.junit)
 }
+
+// Tests read files outside this module (the bundled catalog, NOTICE and LICENSE) and core's own sources
+// (AndroidCompatibilityTest). Declared as inputs, so changing them reruns the tests instead of reusing old results.
+tasks.test {
+    inputs.file("../app/src/main/assets/catalog.json")
+    inputs.files("../NOTICE", "../LICENSE")
+    inputs.dir("src/main/kotlin")
+}
