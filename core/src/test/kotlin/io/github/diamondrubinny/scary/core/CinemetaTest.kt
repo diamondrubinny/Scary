@@ -10,6 +10,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.core.model.Catalog
 import org.junit.Assert.assertEquals
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import org.junit.Assert.assertFalse
@@ -174,5 +175,25 @@ class CinemetaCacheTest {
         // Decoding an old file without the field gives the old version.
         val old = CinemetaCache.decode("""{"fetchedAtMillis":$now,"metas":{},"rows":[]}""")!!
         assertTrue(old.isStale(now))
+    }
+
+    @Test
+    fun `extend adds a page to the end of an online row without duplicates`() {
+        fun meta(n: Int) = CinemetaMeta(imdbId = "tt%07d".format(n), name = "Movie $n", year = 2020, genres = listOf("Horror"))
+        val base = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.merge(
+            Catalog(1, emptyList(), emptyList()), emptyMap(),
+            listOf(OnlineRow("deep", "ע", "Deep", (1..5).map(::meta))),
+        )
+        val id = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.onlineCollectionId("deep")
+        val more = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, (4..8).map(::meta))
+        val row = more.collections.single { it.id == id }
+        assertEquals((1..8).map { "tt%07d".format(it) }, row.movieIds.map { more.movie(it)!!.imdbId })
+        assertEquals(8, more.movies.size)
+        // Unknown rows and empty pages change nothing; the cap holds.
+        assertEquals(base, io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, "online_none", (9..10).map(::meta)))
+        assertEquals(base, io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, emptyList()))
+        val capped = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, (6..20).map(::meta), maxRow = 7)
+        assertEquals(7, capped.collections.single { it.id == id }.movieIds.size)
+        assertEquals(7, capped.movies.size)
     }
 }

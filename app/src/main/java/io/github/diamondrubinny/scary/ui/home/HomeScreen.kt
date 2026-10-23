@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberUpdatedState
 import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -86,12 +89,17 @@ class HomeActions(
     val onSurprise: () -> Unit,
     /** Picks a mood in "What do you feel like tonight?", or clears it when chosen again. */
     val onMood: (Mood) -> Unit,
+    /** The viewer is near the end of a row; endless online rows load their next page. */
+    val onNearRowEnd: (rowKey: String) -> Unit = {},
 )
 
 val SidePadding = 48.dp
 
 /** The list of home rows, for UI tests. */
 const val HOME_ROWS_TAG = "homeRows"
+
+/** Test tag of a home row's list of cards. */
+fun rowTag(rowKey: String): String = "row:$rowKey"
 
 /** Key of the credit line at the end of the home rows. */
 const val CREDIT_KEY = "credit"
@@ -246,6 +254,15 @@ private fun HomeRowView(
         MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked)
         return
     }
+    if (row is HomeRow.Collection) {
+        // Endless online rows: ask for the next page while there are still a few cards to go.
+        val size by rememberUpdatedState(row.movies.size)
+        val onNearEnd by rememberUpdatedState(actions.onNearRowEnd)
+        LaunchedEffect(rowState, row.key) {
+            snapshotFlow { rowState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 }
+                .collect { last -> if (last >= 0 && last >= size - LOAD_AHEAD) onNearEnd(row.key) }
+        }
+    }
     val title = when (row) {
         is HomeRow.Recent -> stringResource(R.string.row_recent)
         is HomeRow.MyList -> stringResource(R.string.row_my_list)
@@ -264,6 +281,7 @@ private fun HomeRowView(
         )
         LazyRow(
             state = rowState,
+            modifier = Modifier.testTag(rowTag(row.key)),
             // Vertical padding leaves room for the focused card to grow without clipping.
             contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -406,6 +424,9 @@ fun LoadingView(modifier: Modifier = Modifier) {
 private fun SkeletonBlock(modifier: Modifier) {
     Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(6.dp)))
 }
+
+/** Cards from the end of a row at which its next page starts loading. */
+private const val LOAD_AHEAD = 8
 
 private const val SKELETON_ALPHA_MIN = 0.45f
 private const val SKELETON_ALPHA_MAX = 0.9f

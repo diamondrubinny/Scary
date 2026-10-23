@@ -4,6 +4,10 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.ui.home.rowTag
+import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
+import org.junit.Assume.assumeTrue
+import androidx.compose.ui.test.performScrollToIndex
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsNotSelected
@@ -158,6 +162,24 @@ class ScaryUiTest {
     }
 
     @Test
+    fun anEndlessOnlineRowLoadsMoreMoviesAtItsEnd() {
+        waitForHome()
+        val rowKey = "collection:" + Cinemeta.onlineCollectionId("horror_deep")
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+        // Online rows need Cinemeta; without the network the row is not there, and there is nothing to test.
+        val present = runCatching { rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey(rowKey) }.isSuccess } }.isSuccess
+        assumeTrue("Online rows are not available on this emulator", present)
+        val row = rule.onNodeWithTag(rowTag(rowKey))
+        // The daily refresh loads two pages (up to 60 movies); reaching the end asks for the next page.
+        row.performScrollToIndex(0)
+        rule.waitUntil(ONLINE_TIMEOUT_MS) {
+            runCatching { row.performScrollToIndex(BEYOND_FIRST_PAGES) }.isSuccess.also {
+                if (!it) runCatching { row.performScrollToIndex(LAST_OF_FIRST_PAGES) }
+            }
+        }
+    }
+
+    @Test
     fun familyNightShowsABadgeAndTurnsOffAgain() {
         waitForHome()
         val badge = hasText(text(R.string.family_night_badge))
@@ -183,5 +205,8 @@ class ScaryUiTest {
     private companion object {
         const val TIMEOUT_MS = 20_000L
         const val MAX_BACKS = 4
+        const val ONLINE_TIMEOUT_MS = 45_000L
+        const val LAST_OF_FIRST_PAGES = 50
+        const val BEYOND_FIRST_PAGES = 70
     }
 }

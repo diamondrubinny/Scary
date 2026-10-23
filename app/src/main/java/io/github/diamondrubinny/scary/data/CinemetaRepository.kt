@@ -8,6 +8,7 @@ import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -32,7 +33,8 @@ class CinemetaRepository(context: Context) {
     /**
      * One online row: a Cinemeta catalog ([catalog] "top" or "year"), its [genre] (a genre name or a year), and the
      * catalog pages to join ([skips], 50 movies each). Year catalogs mix every genre, so they keep only horror,
-     * thriller and mystery ([themedOnly]).
+     * thriller and mystery ([themedOnly]). An [endless] row keeps loading further pages while the viewer scrolls; the
+     * popular rows stay short, because the "deeper" rows continue them.
      */
     private data class RowSpec(
         val id: String,
@@ -41,6 +43,7 @@ class CinemetaRepository(context: Context) {
         val skips: List<Int>,
         val titles: Map<String, String>,
         val themedOnly: Boolean = false,
+        val endless: Boolean = false,
     )
 
     private val rowSpecs: List<RowSpec>
@@ -55,6 +58,7 @@ class CinemetaRepository(context: Context) {
                     "horror_new", "year", year.toString(), listOf(0, 50, 100),
                     titles("חדש השנה", "New this year", "Novos deste ano", "Новинки этого года", "جديد هذا العام"),
                     themedOnly = true,
+                    endless = true,
                 ),
                 RowSpec(
                     "thriller_popular", "top", "Thriller", listOf(0, 50),
@@ -63,22 +67,43 @@ class CinemetaRepository(context: Context) {
                 RowSpec(
                     "horror_deep", "top", "Horror", listOf(100, 150),
                     titles("עוד מהמרתף", "Deeper in the cellar", "Mais fundo no porão", "Глубже в подвал", "أعمق في القبو"),
+                    endless = true,
                 ),
                 RowSpec(
                     "mystery_popular", "top", "Mystery", listOf(0, 50),
                     titles("תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все", "ألغاز يشاهدها الجميع"),
+                    endless = true,
                 ),
                 RowSpec(
                     "horror_last_year", "year", (year - 1).toString(), listOf(0, 50, 100),
                     titles("הפחדים של שנה שעברה", "Last year's scares", "Os sustos do ano passado", "Страхи прошлого года", "مخاوف العام الماضي"),
                     themedOnly = true,
+                    endless = true,
                 ),
                 RowSpec(
                     "thriller_deep", "top", "Thriller", listOf(100),
                     titles("עוד מותחנים", "More thrillers", "Mais suspenses", "Ещё триллеры", "مزيد من الإثارة"),
+                    endless = true,
                 ),
             )
         }
+
+    /** One more page of an endless row: [rawSize] movies came back, [movies] are the ones the row keeps. */
+    data class Page(val rawSize: Int, val movies: List<CinemetaMeta>)
+
+    /** Where an endless row continues after the pages loaded with the daily refresh; null for rows that do not. */
+    fun endlessStart(rowId: String): Int? =
+        rowSpecs.firstOrNull { it.id == rowId && it.endless }?.let { it.skips.last() + Cinemeta.PAGE_SIZE }
+
+    /**
+     * The catalog page at [skip] for the endless row [rowId], loaded while the viewer scrolls. Kept in memory only.
+     * Null when the TV is offline or the service is down; never throws.
+     */
+    suspend fun loadPage(rowId: String, skip: Int): Page? = withContext(Dispatchers.IO) {
+        val spec = rowSpecs.firstOrNull { it.id == rowId && it.endless } ?: return@withContext null
+        val metas = fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip))?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        Page(metas.size, if (spec.themedOnly) Cinemeta.themed(metas) else metas)
+    }
 
     private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
         mapOf("he" to he, "en" to en, "pt" to pt, "ru" to ru, "ar" to ar)

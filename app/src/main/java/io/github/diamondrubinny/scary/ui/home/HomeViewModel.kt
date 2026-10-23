@@ -82,6 +82,9 @@ class HomeViewModel(
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     private val heroId = MutableStateFlow<String?>(null)
     private val mood = MutableStateFlow<Mood?>(null)
+
+    /** Pages of endless online rows loaded while scrolling, by row id. In memory only; gone when SCARY restarts. */
+    private val extraPages = MutableStateFlow<Map<String, List<CinemetaMeta>>>(emptyMap())
     private val language = MutableStateFlow(Language.HE)
 
     /** The UI language; online text (TMDB) is fetched in it. */
@@ -127,10 +130,10 @@ class HomeViewModel(
     val uiState: StateFlow<HomeUiState> = combine(
         catalog,
         installedApps,
-        combine(heroId, mood, ::Pair),
+        combine(heroId, mood, extraPages, ::Triple),
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, (hero, selectedMood), prefs, unlocked ->
+    ) { catalogState, apps, (hero, selectedMood, extras), prefs, unlocked ->
         val tiles = appTiles(apps, prefs)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -143,7 +146,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(visible(catalogState.catalog, prefs), tiles, drawer, hero, selectedMood, prefs)
+            is CatalogState.Ready -> buildState(shown(catalogState.catalog, extras, prefs), tiles, drawer, hero, selectedMood, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -295,7 +298,63 @@ class HomeViewModel(
         if (prefs?.familyNight == true) FamilyNight.filter(catalog) else catalog
 
     private fun visibleCatalog(): Catalog? =
-        (catalog.value as? CatalogState.Ready)?.catalog?.let { visible(it, latestPrefs) }
+        (catalog.value as? CatalogState.Ready)?.catalog?.let { shown(it, extraPages.value, latestPrefs) }
+
+    /** The catalog with the pages loaded while scrolling, then filtered for family night. */
+    private fun shown(catalog: Catalog, extras: Map<String, List<CinemetaMeta>>, prefs: LauncherPrefs?): Catalog {
+        val extended = if (prefs?.onlineEnabled == false) {
+            catalog
+        } else {
+            extras.entries.fold(catalog) { acc, (rowId, metas) -> Cinemeta.extend(acc, Cinemeta.onlineCollectionId(rowId), metas) }
+        }
+        return visible(extended, prefs)
+    }
+
+    private class RowPaging(var nextSkip: Int, var loading: Boolean = false, var done: Boolean = false)
+
+    private val paging = HashMap<String, RowPaging>()
+
+    /**
+     * The viewer is near the end of a home row: an endless online row loads its next page (50 movies). Pages without a
+     * single movie the row keeps (a year page of comedies) are skipped, a few at a time. Offline, nothing happens, and
+     * the next scroll tries again.
+     */
+    fun onNearRowEnd(rowKey: String) {
+        val rowId = rowKey.removePrefix("collection:" + Cinemeta.onlineCollectionId(""))
+        if (rowId == rowKey || latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
+        val start = cinemeta.endlessStart(rowId) ?: return
+        val state = paging.getOrPut(rowId) { RowPaging(start) }
+        if (state.loading || state.done) return
+        if (extraPages.value[rowId].orEmpty().size >= Cinemeta.MAX_ENDLESS_ROW_MOVIES) {
+            state.done = true
+            return
+        }
+        state.loading = true
+        viewModelScope.launch {
+            try {
+                var found = emptyList<CinemetaMeta>()
+                var attempts = 0
+                while (found.isEmpty() && attempts < MAX_EMPTY_PAGES) {
+                    val page = cinemeta.loadPage(rowId, state.nextSkip) ?: return@launch
+                    attempts++
+                    if (page.rawSize == 0) {
+                        state.done = true
+                        break
+                    }
+                    state.nextSkip += Cinemeta.PAGE_SIZE
+                    found = page.movies
+                }
+                if (found.isNotEmpty()) {
+                    extraPages.update { pages ->
+                        val merged = (pages[rowId].orEmpty() + found).distinctBy { it.imdbId }.take(Cinemeta.MAX_ENDLESS_ROW_MOVIES)
+                        pages + (rowId to merged)
+                    }
+                }
+            } finally {
+                state.loading = false
+            }
+        }
+    }
 
     /** Movies from web search open only outside family night (they have no fear level to check). */
     private fun webMovieIfAllowed(id: String): Movie? =
@@ -738,6 +797,7 @@ class HomeViewModel(
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
+        private const val MAX_EMPTY_PAGES = 4
         private const val GOOGLE_TV_LABEL = "Google TV"
         private const val LAUNCH_STILL_MS = 400L
         private const val LAUNCH_CLEAR_MS = 1_500L

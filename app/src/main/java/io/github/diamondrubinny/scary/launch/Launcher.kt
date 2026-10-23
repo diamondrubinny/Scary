@@ -9,6 +9,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import android.provider.Settings
 import android.util.Log
 import io.github.diamondrubinny.scary.core.links.KnownPackages
@@ -39,7 +40,7 @@ class Launcher(
 
     fun openInStremio(movie: Movie): LaunchResult {
         if (!apps.isInstalled(KnownPackages.STREMIO)) return openStoreFor(KnownPackages.STREMIO, STREMIO_LABEL)
-        val deepLink = Intent(Intent.ACTION_VIEW, Uri.parse(Links.stremioMovie(movie.imdbId)))
+        val deepLink = Intent(Intent.ACTION_VIEW, Links.stremioMovie(movie.imdbId).toUri())
             .setPackage(KnownPackages.STREMIO)
         if (start(deepLink)) return LaunchResult.Opened
         return when (launchApp(KnownPackages.STREMIO, STREMIO_LABEL)) {
@@ -52,7 +53,7 @@ class Launcher(
         // The exact trailer when Cinemeta supplied one, otherwise a YouTube search.
         val link = movie.trailerYoutubeId?.let { runCatching { Links.youTubeVideo(it) }.getOrNull() }
             ?: Links.youTubeTrailerSearch(movie.title, movie.year)
-        val uri = Uri.parse(link)
+        val uri = link.toUri()
         val viaApp = Intent(Intent.ACTION_VIEW, uri).setPackage(KnownPackages.YOUTUBE_TV)
         if (apps.isInstalled(KnownPackages.YOUTUBE_TV) && start(viaApp)) return LaunchResult.Opened
         return if (start(Intent(Intent.ACTION_VIEW, uri))) LaunchResult.Opened else LaunchResult.Failed(YOUTUBE_LABEL)
@@ -64,7 +65,7 @@ class Launcher(
      */
     fun canSearchIn(packageName: String): Boolean {
         if (packageName == KnownPackages.YOUTUBE_TV) {
-            val results = Intent(Intent.ACTION_VIEW, Uri.parse(Links.youTubeSearch("scary"))).setPackage(packageName)
+            val results = Intent(Intent.ACTION_VIEW, Links.youTubeSearch("scary").toUri()).setPackage(packageName)
             if (resolves(results)) return true
         }
         return resolves(Intent(Intent.ACTION_SEARCH).setPackage(packageName))
@@ -77,7 +78,7 @@ class Launcher(
     fun searchIn(packageName: String, label: String, movie: Movie): LaunchResult {
         val query = StreamingApps.query(movie.title)
         if (packageName == KnownPackages.YOUTUBE_TV) {
-            val results = Intent(Intent.ACTION_VIEW, Uri.parse(Links.youTubeSearch(StreamingApps.youTubeQuery(movie.title, movie.year))))
+            val results = Intent(Intent.ACTION_VIEW, Links.youTubeSearch(StreamingApps.youTubeQuery(movie.title, movie.year)).toUri())
                 .setPackage(packageName)
             if (start(results)) return LaunchResult.Opened
         }
@@ -106,8 +107,8 @@ class Launcher(
     }
 
     fun openStoreFor(packageName: String, label: String): LaunchResult {
-        val market = Intent(Intent.ACTION_VIEW, Uri.parse(Links.playStoreMarket(packageName)))
-        val web = Intent(Intent.ACTION_VIEW, Uri.parse(Links.playStoreWeb(packageName)))
+        val market = Intent(Intent.ACTION_VIEW, Links.playStoreMarket(packageName).toUri())
+        val web = Intent(Intent.ACTION_VIEW, Links.playStoreWeb(packageName).toUri())
         return if (start(market) || start(web)) LaunchResult.OpenedStoreInstead(label) else LaunchResult.Failed(label)
     }
 

@@ -68,7 +68,13 @@ object Cinemeta {
     private const val MIN_SEARCH_LENGTH = 3
     private const val MAX_SEARCH_LENGTH = 60
     private const val MAX_SEARCH_RESULTS = 20
-    private const val MAX_SKIP = 1_000
+    private const val MAX_SKIP = 10_000
+
+    /** Movies in one catalog page. */
+    const val PAGE_SIZE = 50
+
+    /** An endless row stops growing here, to keep memory in check on 2 GB TV boxes. */
+    const val MAX_ENDLESS_ROW_MOVIES = 1_000
 
     /** Movies an online row may hold: two or three catalog pages. */
     const val MAX_ROW_MOVIES = 60
@@ -232,6 +238,28 @@ object Cinemeta {
      * Combines the bundled catalog with online data: curated movies get artwork, and each online row becomes
      * a collection placed before the curated ones. Movies already in the library are reused, not duplicated.
      */
+    /**
+     * Adds a further page of movies to the end of the online row [collectionId] (an endless row). Movies already in the
+     * catalog are reused rather than duplicated; the row keeps its order and stops at [maxRow].
+     */
+    fun extend(base: Catalog, collectionId: String, metas: List<CinemetaMeta>, maxRow: Int = MAX_ENDLESS_ROW_MOVIES): Catalog {
+        val index = base.collections.indexOfFirst { it.id == collectionId }
+        if (index < 0 || metas.isEmpty()) return base
+        val collection = base.collections[index]
+        val byImdb = base.movies.associateByTo(HashMap()) { it.imdbId }
+        val added = mutableListOf<Movie>()
+        val newIds = metas.mapNotNull { meta ->
+            byImdb[meta.imdbId]?.id ?: toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
+        }
+        val ids = (collection.movieIds + newIds).distinct().take(maxRow)
+        val kept = ids.toHashSet()
+        val collections = base.collections.toMutableList().also { it[index] = collection.copy(movieIds = ids) }
+        return base.copy(movies = base.movies + added.filter { it.id in kept }, collections = collections)
+    }
+
+    /** The collection id an online row gets in the merged catalog. */
+    fun onlineCollectionId(rowId: String): String = "online_$rowId"
+
     fun merge(base: Catalog, metas: Map<String, CinemetaMeta>, rows: List<OnlineRow>, perRow: Int = MAX_ROW_MOVIES): Catalog {
         val curated = base.movies.map { m -> metas[m.imdbId]?.let { enrich(m, it) } ?: m }
         val byImdb = curated.associateBy { it.imdbId }.toMutableMap()
@@ -244,7 +272,7 @@ object Cinemeta {
                 .distinct()
                 .take(perRow)
                 .toList()
-            if (ids.size < MIN_ROW_SIZE) null else MovieCollection("online_${row.id}", row.titleHe, row.titleEn, ids, row.titles)
+            if (ids.size < MIN_ROW_SIZE) null else MovieCollection(onlineCollectionId(row.id), row.titleHe, row.titleEn, ids, row.titles)
         }
         return base.copy(movies = curated + added, collections = onlineCollections + base.collections)
     }
