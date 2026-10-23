@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.core.tmdb
 
+import io.github.diamondrubinny.scary.core.links.Links
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.model.Language
@@ -13,8 +18,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.longOrNull
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
 /** What TMDB adds to a movie: text in the UI language and higher-resolution art. */
@@ -50,10 +53,17 @@ sealed interface TmdbAuth {
 }
 
 /** Rows SCARY builds from TMDB's discover endpoint. Parameters are fixed here, never taken from input. */
-enum class TmdbRow(val id: String, val titleHe: String, val titleEn: String, val titlePt: String, val titleRu: String) {
-    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы"),
-    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам"),
-    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки"),
+enum class TmdbRow(
+    val id: String,
+    val titleHe: String,
+    val titleEn: String,
+    val titlePt: String,
+    val titleRu: String,
+    val titleAr: String,
+) {
+    NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы", "رعب جديد"),
+    TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам", "أعلى أفلام الرعب تقييمًا"),
+    PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки", "إثارة وغموض"),
 }
 
 /**
@@ -75,14 +85,16 @@ object Tmdb {
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val hebrew = Regex("[\\u0590-\\u05FF]")
     private val cyrillic = Regex("[\\u0400-\\u04FF]")
+    private val arabic = Regex("[\\u0600-\\u06FF]")
 
     /**
      * TMDB falls back to the original title when it has no translation, so text only counts as localized when
-     * it is in the right script (Hebrew, Russian) or differs from the original title (Portuguese).
+     * it is in the right script (Hebrew, Russian, Arabic) or differs from the original title (Portuguese).
      */
     private fun isLocalized(language: Language, text: String, original: String = ""): Boolean = when (language) {
         Language.HE -> hebrew.containsMatchIn(text)
         Language.RU -> cyrillic.containsMatchIn(text)
+        Language.AR -> arabic.containsMatchIn(text)
         Language.PT -> text.isNotBlank() && !text.equals(original, ignoreCase = true)
         Language.EN -> false
     }
@@ -132,7 +144,7 @@ object Tmdb {
                 "vote_count.gte" to "500",
             )
         } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to "1")
-        return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + URLEncoder.encode(v, StandardCharsets.UTF_8) }
+        return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
     }
 
     /** Adds the v3 key to a URL; v4 tokens go in the Authorization header instead. */
@@ -212,7 +224,7 @@ object Tmdb {
     }
 
     fun rowOf(row: TmdbRow, metas: List<CinemetaMeta>): OnlineRow =
-        OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu))
+        OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu, "ar" to row.titleAr))
 
     private fun root(text: String): JsonObject? =
         try {

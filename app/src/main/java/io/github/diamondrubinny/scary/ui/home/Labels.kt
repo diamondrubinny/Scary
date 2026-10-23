@@ -1,7 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.home
 
 import androidx.annotation.StringRes
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.Subgenre
 
@@ -25,4 +31,18 @@ fun Subgenre.labelRes(): Int = when (this) {
     Subgenre.SURVIVAL -> R.string.subgenre_survival
     Subgenre.MYSTERY -> R.string.subgenre_mystery
     Subgenre.CRIME -> R.string.subgenre_crime
+}
+
+fun Mood.labelRes(): Int = when (this) {
+    Mood.GENTLE -> R.string.mood_gentle
+    Mood.MIND_GAMES -> R.string.mood_mind_games
+    Mood.GHOSTS -> R.string.mood_ghosts
+    Mood.BLOOD -> R.string.mood_blood
+    Mood.CLASSICS -> R.string.mood_classics
+    Mood.RELENTLESS -> R.string.mood_relentless
+}
+
+fun Season.titleRes(): Int = when (this) {
+    Season.HALLOWEEN -> R.string.row_halloween
+    Season.FRIDAY_13TH -> R.string.row_friday_13th
 }

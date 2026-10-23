@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.data
 
 import android.content.Context
@@ -46,6 +50,10 @@ data class LauncherPrefs(
     val onlineEnabled: Boolean,
     /** The viewer's watchlist, newest first. */
     val myListIds: List<String> = emptyList(),
+    /** Only the gentlest curated movies (fear 1-2) appear anywhere, and no web search. */
+    val familyNight: Boolean = false,
+    /** Halloween and Friday the 13th rows around their dates. On by default. */
+    val seasonalRows: Boolean = true,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -68,6 +76,8 @@ class SettingsRepository(private val context: Context) {
                 soundsEnabled = p[SOUNDS] ?: false,
                 onlineEnabled = p[ONLINE] ?: true,
                 myListIds = RecentList.decode(p[MY_LIST]),
+                familyNight = p[FAMILY_NIGHT] ?: false,
+                seasonalRows = p[SEASONAL_ROWS] ?: true,
             )
         }
         .distinctUntilChanged()
@@ -123,6 +133,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setOnlineEnabled(enabled: Boolean) = edit { it[ONLINE] = enabled }
 
+    suspend fun setFamilyNight(enabled: Boolean) = edit { it[FAMILY_NIGHT] = enabled }
+
+    suspend fun setSeasonalRows(enabled: Boolean) = edit { it[SEASONAL_ROWS] = enabled }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -133,6 +147,9 @@ class SettingsRepository(private val context: Context) {
     }
 
     private fun systemAnimationsEnabled(): Boolean = systemAnimationsEnabled(context)
+
+    /** Whether the TV currently allows animations ("Remove animations" off). */
+    fun systemAnimationsOn(): Boolean = systemAnimationsEnabled(context)
 
     companion object {
         /** False when the TV's accessibility settings removed animations; that always stops decorative motion. */
@@ -152,6 +169,8 @@ class SettingsRepository(private val context: Context) {
         private val LOCK_FROM_FEAR = intPreferencesKey("parental_lock_from_fear")
         private val SOUNDS = booleanPreferencesKey("ambient_sounds")
         private val ONLINE = booleanPreferencesKey("online_artwork")
+        private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
+        private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

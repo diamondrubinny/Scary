@@ -28,12 +28,12 @@
     <string name="effects_off_description">אפקטי אווירה: כבויים</string>
     <string name="msg_effects_on">ערפל וגרעיניות פועלים</string>
     <string name="msg_effects_off">ערפל וגרעיניות כבויים</string>
+    <string name="msg_safe_mode">SCARY הופעלה מחדש אחרי שגיאות חוזרות. האפקטים והצלילים כובו, ואפשר להחזיר אותם בהגדרות.</string>
     <string name="system_settings">הגדרות</string>
     <string name="system_settings_description">פתיחת הגדרות המערכת</string>
     <string name="install_app">התקנת %1$s</string>
     <string name="msg_not_installed_store">%1$s לא מותקנת. פותח את חנות Play.</string>
     <string name="msg_open_failed">לא הצלחנו לפתוח את %1$s.</string>
-    <string name="msg_stremio_app_only">Stremio נפתחה. חפשו שם את %1$s.</string>
     <string name="msg_catalog_error">לא הצלחנו לטעון את מאגר הסרטים. התקנה מחדש של האפליקציה תפתור את זה.</string>
     <string name="loading">טוען…</string>
     <string name="all_apps">כל האפליקציות</string>
@@ -60,10 +60,10 @@
     <string name="settings_night_fear_value">עד מד פחד %1$d</string>
     <string name="settings_system">הגדרות המערכת של הטלוויזיה</string>
     <string name="settings_about">אודות</string>
-    <string name="settings_about_text">SCARY %1$s. אין חשבונות ואין מעקב. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant, Oswald, Rubik ו־Rubik Wet Paint ברישיון SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">‏SCARY %1$s. אין חשבונות ואין מעקב. ההעדפות שלך נשמרות רק בטלוויזיה הזו. גופנים: Karantina, Assistant, Oswald, Rubik,‏ Rubik Wet Paint,‏ Rakkas ו־Cairo ברישיון SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">‏SCARY לא מארחת סרטים, ולא מחפשת, שומרת או מקשרת לקובצי וידאו, חוקיים או לא. היא מציגה מידע ציבורי על סרטים ופותחת את הסרט באפליקציית צפייה שכבר מותקנת במכשיר הזה, כמו Stremio,‏ Netflix או YouTube. מה שהאפליקציות האלה מציגות הוא באחריותן ובאחריותכם.</string>
     <string name="search_title">חיפוש</string>
     <string name="search_hint">שם סרט, במאי, שנה או סוג אימה</string>
-    <string name="search_prompt">הקלידו או הכתיבו בקול כדי לחפש ב־%1$d סרטים.</string>
     <string name="search_no_results">לא מצאנו סרטים עבור %1$s.</string>
     <string name="search_count">תוצאות: %1$d</string>
     <string name="pin_title_verify">הזינו את קוד ההורים</string>
@@ -72,12 +72,10 @@
     <string name="pin_error_format">הקוד צריך להיות 4 עד 8 ספרות.</string>
     <string name="pin_error_mismatch">הקודים לא תואמים. בחרו קוד מחדש.</string>
     <string name="pin_error_wrong">קוד שגוי. נסו שוב.</string>
-    <string name="pin_error_wait">יותר מדי ניסיונות. נסו שוב בעוד %1$d שניות.</string>
     <string name="pin_delete">מחיקה</string>
     <string name="pin_ok">אישור</string>
     <string name="pin_cancel">ביטול</string>
     <string name="pin_checking">בודק…</string>
-    <string name="pin_entered_description">הוזנו %1$d ספרות</string>
     <string name="msg_pin_set">נעילת ההורים פועלת.</string>
     <string name="msg_pin_removed">נעילת ההורים כובתה.</string>
     <string name="settings_parental">נעילת הורים</string>
@@ -86,7 +84,6 @@
     <string name="settings_lock_level">נעילה מרמת פחד</string>
     <string name="settings_lock_level_value">%1$d ומעלה</string>
     <string name="settings_change_pin">החלפת הקוד</string>
-    <string name="settings_turn_off_lock">כיבוי הנעילה</string>
     <string name="settings_parental_note">הנעילה חלה על סרטים שנפתחים מ־SCARY ועל ההגדרות האלה. היא לא נועלת את Stremio או אפליקציות אחרות. שכחתם את הקוד? מחיקת הנתונים של SCARY בהגדרות המערכת של הטלוויזיה מאפסת אותו, יחד עם שאר ההעדפות.</string>
     <string name="settings_sounds">צלילי אווירה</string>
     <string name="locked_badge">נעול</string>
@@ -150,7 +147,7 @@
     <string name="document_hint">החצים למעלה ולמטה לקריאה. חזרה מחזירה להגדרות.</string>
     <string-array name="privacy_paragraphs">
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
-        <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
+        <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), זמני קריסות אחרונות (השעה בלבד), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB.</item>
@@ -161,10 +158,53 @@
     </string-array>
     <string-array name="accessibility_paragraphs">
         <item>SCARY שואפת לעמוד ב־WCAG 2.1 ברמה AA ובתקן הישראלי ת״י 5568. היא עדיין לא נבדקה על ידי יועץ נגישות, ולכן איננו טוענים להתאמה מלאה.</item>
-        <item>מה כבר קיים: כל מסך עובד עם החצים וכפתור OK של השלט, עם הילת פוקוס ברורה. לכרטיסים, לכפתורים ולהגדרות יש תוויות מוקראות ל־TalkBack, למסכים ולשורות יש כותרות, והודעות ושגיאות PIN מוכרזות. לחיצה ארוכה על OK בפוסטר מוסיפה אותו ל\"רשימה שלי\", ו־TalkBack מציע זאת כפעולה. בעברית הממשק מימין לשמאל.</item>
+        <item>מה כבר קיים: כל מסך עובד עם החצים וכפתור OK של השלט, עם הילת פוקוס ברורה. לכרטיסים, לכפתורים ולהגדרות יש תוויות מוקראות ל־TalkBack, למסכים ולשורות יש כותרות, והודעות ושגיאות PIN מוכרזות. לחיצה ארוכה על OK בפוסטר מוסיפה אותו ל\"רשימה שלי\", ו־TalkBack מציע זאת כפעולה. בעברית ובערבית הממשק מימין לשמאל.</item>
         <item>תנועה וצליל: אין הבהובים. הערפל והגרעיניות עדינים, ונעצרים כשמכבים את האפקטים או מפעילים \"הסרת אנימציות\" בהגדרות הנגישות של הטלוויזיה. צלילי האווירה כבויים כברירת מחדל.</item>
-        <item>מגבלות ידועות: פוסטרים מהרשת מתוארים רק בשם ובשנה; התרגומים לפורטוגזית ולרוסית לא נבדקו על ידי דוברי השפה; גודל גופן מערכת גדול מאוד עלול לקצר טקסט בחלק מהשורות; TalkBack נבדק עד עכשיו רק באמולטור.</item>
+        <item>מגבלות ידועות: פוסטרים מהרשת מתוארים רק בשם ובשנה; התרגומים לפורטוגזית, לרוסית ולערבית לא נבדקו על ידי דוברי השפה; גודל גופן מערכת גדול מאוד עלול לקצר טקסט בחלק מהשורות; TalkBack נבדק עד עכשיו רק באמולטור.</item>
         <item>נתקלתם בחסם? דווחו ב־github.com/diamondrubinny/Scary/issues ותארו את המסך ומה קרה. אנחנו שואפים להשיב בתוך 14 יום.</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי יועץ נגישות.</item>
     </string-array>
+    <string name="row_moods">מה בא לך הלילה?</string>
+    <string name="mood_gentle">מפחיד, אבל לא יותר מדי</string>
+    <string name="mood_mind_games">משחקי מוח</string>
+    <string name="mood_ghosts">רוחות ושדים</string>
+    <string name="mood_blood">דם וצרחות</string>
+    <string name="mood_classics">קלאסיקות של פעם</string>
+    <string name="mood_relentless">לא לישון הלילה</string>
+    <string name="row_halloween">הלואין מתקרב</string>
+    <string name="row_friday_13th">שישי ה־13</string>
+    <string name="settings_family_night">ערב משפחתי</string>
+    <string name="settings_family_night_note">רק הסרטים העדינים ביותר (פחד 1–2) מוצגים בכל מקום, והחיפוש באינטרנט כבוי. כדי לכבות נדרש PIN.</string>
+    <string name="settings_family_night_note_no_pin">רק הסרטים העדינים ביותר (פחד 1–2) מוצגים בכל מקום, והחיפוש באינטרנט כבוי. הגדירו PIN למעלה, כדי שרק מבוגר יוכל לכבות.</string>
+    <string name="msg_family_on">ערב משפחתי פעיל: רק סרטים עדינים</string>
+    <string name="msg_family_off">ערב משפחתי כבוי</string>
+    <string name="family_night_badge">ערב משפחתי</string>
+    <plurals name="search_prompt">
+        <item quantity="one">הקלידו או הכתיבו בקול כדי לחפש בסרט אחד.</item>
+        <item quantity="two">הקלידו או הכתיבו בקול כדי לחפש בשני סרטים.</item>
+        <item quantity="other">הקלידו או הכתיבו בקול כדי לחפש ב־%1$d סרטים.</item>
+    </plurals>
+    <plurals name="pin_error_wait">
+        <item quantity="one">יותר מדי ניסיונות. נסו שוב בעוד שנייה.</item>
+        <item quantity="two">יותר מדי ניסיונות. נסו שוב בעוד שתי שניות.</item>
+        <item quantity="other">יותר מדי ניסיונות. נסו שוב בעוד %1$d שניות.</item>
+    </plurals>
+    <plurals name="pin_entered_description">
+        <item quantity="one">הוזנה ספרה אחת</item>
+        <item quantity="two">הוזנו שתי ספרות</item>
+        <item quantity="other">הוזנו %1$d ספרות</item>
+    </plurals>
+    <string name="empty_search_title">שום דבר בחושך</string>
+    <string name="empty_search_body">נסו שם של במאי, שנה, או סוג אימה כמו רוחות או סלאשר.</string>
+    <string name="mood_empty_title">אין סרטים למצב הרוח הזה הלילה</string>
+    <string name="mood_empty_body">ערב משפחתי או נעילת ההורים מסתירים את הסרטים האלה. נסו מצב רוח אחר.</string>
+    <string name="catalog_error_title">ספריית הסרטים חסרה</string>
+    <string name="launch_opening">נפתח ב־%1$s…</string>
+    <string name="msg_app_only">%1$s פתוחה. חפשו שם את %2$s.</string>
+    <string name="watch_elsewhere">לחפש באפליקציות שלך</string>
+    <string name="search_in_app">חיפוש ב־%1$s</string>
+    <string name="open_app">פתיחת %1$s</string>
+    <string name="search_everywhere">חיפוש בכל הטלוויזיה</string>
+    <string name="watch_elsewhere_note">SCARY מחפשת לפי שם הסרט. היא לא יודעת אם הסרט זמין בכל אפליקציה.</string>
+    <string name="settings_seasonal">שורות עונתיות (הלואין, שישי ה־13)</string>
 </resources>

@@ -1,20 +1,29 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.launch
 
+import android.content.pm.PackageManager
+import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 import android.provider.Settings
 import android.util.Log
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.core.links.StreamingApps
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 
 sealed interface LaunchResult {
     data object Opened : LaunchResult
     data class OpenedStoreInstead(val appLabel: String) : LaunchResult
-    data class OpenedAppOnly(val movieTitle: String) : LaunchResult
+    /** The app opened, but not on the movie: the viewer searches there for [movieTitle]. */
+    data class OpenedAppOnly(val movieTitle: String, val appLabel: String = Launcher.STREMIO_LABEL) : LaunchResult
     data class Failed(val targetLabel: String) : LaunchResult
 }
 
@@ -32,7 +41,7 @@ class Launcher(
 
     fun openInStremio(movie: Movie): LaunchResult {
         if (!apps.isInstalled(KnownPackages.STREMIO)) return openStoreFor(KnownPackages.STREMIO, STREMIO_LABEL)
-        val deepLink = Intent(Intent.ACTION_VIEW, Uri.parse(Links.stremioMovie(movie.imdbId)))
+        val deepLink = Intent(Intent.ACTION_VIEW, Links.stremioMovie(movie.imdbId).toUri())
             .setPackage(KnownPackages.STREMIO)
         if (start(deepLink)) return LaunchResult.Opened
         return when (launchApp(KnownPackages.STREMIO, STREMIO_LABEL)) {
@@ -45,15 +54,63 @@ class Launcher(
         // The exact trailer when Cinemeta supplied one, otherwise a YouTube search.
         val link = movie.trailerYoutubeId?.let { runCatching { Links.youTubeVideo(it) }.getOrNull() }
             ?: Links.youTubeTrailerSearch(movie.title, movie.year)
-        val uri = Uri.parse(link)
+        val uri = link.toUri()
         val viaApp = Intent(Intent.ACTION_VIEW, uri).setPackage(KnownPackages.YOUTUBE_TV)
         if (apps.isInstalled(KnownPackages.YOUTUBE_TV) && start(viaApp)) return LaunchResult.Opened
         return if (start(Intent(Intent.ACTION_VIEW, uri))) LaunchResult.Opened else LaunchResult.Failed(YOUTUBE_LABEL)
     }
 
+    /**
+     * Whether [searchIn] can hand [packageName] the movie's title: YouTube through its results page, other apps through
+     * a search request (ACTION_SEARCH). Kept in step with [searchIn], so the button says "Search" only when it does.
+     */
+    fun canSearchIn(packageName: String): Boolean {
+        if (packageName == KnownPackages.YOUTUBE_TV) {
+            val results = Intent(Intent.ACTION_VIEW, Links.youTubeSearch("scary").toUri()).setPackage(packageName)
+            if (resolves(results)) return true
+        }
+        return resolves(Intent(Intent.ACTION_SEARCH).setPackage(packageName))
+    }
+
+    /**
+     * Looks for the movie in another app: its own search when it has one, YouTube's results page for YouTube, and
+     * otherwise just opens the app and says what to search for. Only the title (and for YouTube the year) is passed.
+     */
+    fun searchIn(packageName: String, label: String, movie: Movie): LaunchResult {
+        val query = StreamingApps.query(movie.title)
+        if (packageName == KnownPackages.YOUTUBE_TV) {
+            val results = Intent(Intent.ACTION_VIEW, Links.youTubeSearch(StreamingApps.youTubeQuery(movie.title, movie.year)).toUri())
+                .setPackage(packageName)
+            if (start(results)) return LaunchResult.Opened
+        }
+        val search = Intent(Intent.ACTION_SEARCH)
+            .setPackage(packageName)
+            .putExtra(SearchManager.QUERY, query)
+        if (start(search)) return LaunchResult.Opened
+        return when (launchApp(packageName, label)) {
+            LaunchResult.Opened -> LaunchResult.OpenedAppOnly(query, label)
+            else -> LaunchResult.Failed(label)
+        }
+    }
+
+    /** Google TV's own search, which lists the apps on this TV that have the movie. */
+    fun canSearchEverywhere(): Boolean = resolves(Intent(GLOBAL_SEARCH))
+
+    fun searchEverywhere(movie: Movie, label: String): LaunchResult {
+        val intent = Intent(GLOBAL_SEARCH).putExtra(SearchManager.QUERY, StreamingApps.query(movie.title))
+        return if (start(intent)) LaunchResult.Opened else LaunchResult.Failed(label)
+    }
+
+    private fun resolves(intent: Intent): Boolean = try {
+        // MATCH_DEFAULT_ONLY: startActivity with an implicit intent only reaches activities with CATEGORY_DEFAULT.
+        context.packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY).isNotEmpty()
+    } catch (e: RuntimeException) {
+        false
+    }
+
     fun openStoreFor(packageName: String, label: String): LaunchResult {
-        val market = Intent(Intent.ACTION_VIEW, Uri.parse(Links.playStoreMarket(packageName)))
-        val web = Intent(Intent.ACTION_VIEW, Uri.parse(Links.playStoreWeb(packageName)))
+        val market = Intent(Intent.ACTION_VIEW, Links.playStoreMarket(packageName).toUri())
+        val web = Intent(Intent.ACTION_VIEW, Links.playStoreWeb(packageName).toUri())
         return if (start(market) || start(web)) LaunchResult.OpenedStoreInstead(label) else LaunchResult.Failed(label)
     }
 
@@ -79,6 +136,7 @@ class Launcher(
     companion object {
         private const val TAG = "Launcher"
         const val STREMIO_LABEL = "Stremio"
+        private const val GLOBAL_SEARCH = "android.search.action.GLOBAL_SEARCH"
         private const val YOUTUBE_LABEL = "YouTube"
     }
 }

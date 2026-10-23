@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui
 
+import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
 import android.app.Activity
 import android.content.Context
 import android.content.ActivityNotFoundException
@@ -65,6 +70,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val screen by viewModel.screen.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
     val resets by viewModel.homeResets.collectAsStateWithLifecycle()
+    val scrollToRow by viewModel.scrollToRow.collectAsStateWithLifecycle()
+    val launching by viewModel.launching.collectAsStateWithLifecycle()
+    val watchOptions by viewModel.watchOptions.collectAsStateWithLifecycle()
+    val canSearchEverywhere by viewModel.canSearchEverywhere.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
@@ -128,6 +137,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onOpenSearch = viewModel::openSearch,
             onToggleMyList = { viewModel.toggleMyList(it, language) },
             onSurprise = viewModel::surprise,
+            onMood = viewModel::toggleMood,
+            onNearRowEnd = viewModel::onNearRowEnd,
         )
     }
     val allAppsActions = remember(viewModel) {
@@ -156,6 +167,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
+        onToggleFamilyNight = viewModel::toggleFamilyNight,
+        onToggleSeasonalRows = viewModel::toggleSeasonalRows,
         onToggleOnline = viewModel::toggleOnline,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
@@ -186,7 +199,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
-            MovieBackdrop(if (current == Screen.Home || details != null) details?.movie ?: state.hero else null)
+            val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
+            // A locked movie's art stays off the screen, as on its card.
+            MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it })
             Atmosphere(animate = !LocalReduceMotion.current)
 
             when {
@@ -199,6 +214,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     language = language,
                     isLocked = state::isLocked,
                     webSearch = webSearch,
+                    onSurprise = viewModel::surprise,
                 )
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
@@ -209,6 +225,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     soundsEnabled = state.soundsEnabled,
                     parentalEnabled = state.parentalEnabled,
                     lockFromFear = state.lockFromFear,
+                    familyNight = state.familyNight,
+                    seasonalRows = state.seasonalRows,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
@@ -226,6 +244,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     isLocked = state::isLocked,
                     inMyList = details.movie.id in state.myListIds,
                     onToggleMyList = { viewModel.toggleMyList(it, language) },
+                    watchOptions = watchOptions,
+                    canSearchEverywhere = canSearchEverywhere,
+                    onSearchIn = viewModel::searchIn,
+                    onSearchEverywhere = viewModel::searchEverywhere,
                 )
                 else -> HomeScreen(
                     state = state,
@@ -236,6 +258,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     resets = resets,
                     actions = actions,
                     showSetHome = launcherStatus.needsSetup,
+                    scrollToRow = scrollToRow,
+                    onScrolledToRow = viewModel::onScrolledToRow,
                 )
             }
 
@@ -249,6 +273,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                 )
             }
 
+            launching?.let { LaunchOverlay(it, language) }
             pinDialog?.let { dialog ->
                 PinDialog(state = dialog, onSubmit = viewModel::submitPin, onDismiss = viewModel::dismissPin)
             }

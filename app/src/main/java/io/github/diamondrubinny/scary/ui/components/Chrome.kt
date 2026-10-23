@@ -1,5 +1,12 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.foundation.layout.Column
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.core.brand.Credit
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -42,9 +49,24 @@ fun TopBar(
     onOpenSearch: () -> Unit,
     onSurprise: () -> Unit,
     modifier: Modifier = Modifier,
+    familyNight: Boolean = false,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+        Column {
+            BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+            CreditLine(short = true)
+        }
+        if (familyNight) {
+            // Not just a color: the badge says it in words.
+            BasicText(
+                stringResource(R.string.family_night_badge),
+                style = ScaryType.Label.copy(color = ScaryColors.Void),
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .background(ScaryColors.Candle, RoundedCornerShape(50))
+                    .padding(horizontal = 14.dp, vertical = 5.dp),
+            )
+        }
         Spacer(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             Clock()
@@ -93,8 +115,10 @@ fun Clock(modifier: Modifier = Modifier) {
 @Composable
 fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Modifier = Modifier) {
     if (message == null) return
+    val text = stringResource(message.text, *message.args.toTypedArray())
     LaunchedEffect(message.id) {
-        delay(MESSAGE_DURATION_MS)
+        // Longer messages stay longer, so there is time to read them (WCAG 2.2.1).
+        delay((MESSAGE_DURATION_MS + text.length * MESSAGE_MS_PER_CHAR).coerceAtMost(MESSAGE_MAX_MS))
         onDismiss(message.id)
     }
     Box(
@@ -105,9 +129,24 @@ fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Mo
             .padding(horizontal = 22.dp, vertical = 12.dp)
             .semantics { liveRegion = LiveRegionMode.Polite },
     ) {
-        BasicText(stringResource(message.text, *message.args.toTypedArray()), style = ScaryType.BodyStrong)
+        BasicText(text, style = ScaryType.BodyStrong)
     }
 }
 
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val MESSAGE_DURATION_MS = 4_000L
+private const val MESSAGE_MS_PER_CHAR = 50L
+private const val MESSAGE_MAX_MS = 12_000L
+
+/**
+ * "Powered by SCARY · Open source". Required by the NOTICE file (Apache License 2.0, section 4(d)); see core Credit.
+ * Its own text direction, so the parts keep their order inside right-to-left screens.
+ */
+@Composable
+fun CreditLine(modifier: Modifier = Modifier, short: Boolean = false) {
+    BasicText(
+        text = if (short) Credit.SHORT else Credit.LINE,
+        style = ScaryType.Caption.mixedLanguage(),
+        modifier = modifier,
+    )
+}

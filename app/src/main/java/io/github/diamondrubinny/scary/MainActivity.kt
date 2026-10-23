@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary
 
 import android.content.Context
@@ -12,10 +16,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
+import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
+import io.github.diamondrubinny.scary.stability.CrashGuard
 import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -41,6 +47,7 @@ class MainActivity : ComponentActivity() {
         val language = LanguageStore.read(this)
         ScaryFonts.useFor(language)
         viewModel.setLanguage(language)
+        if (savedInstanceState == null && CrashGuard.consumeCrashLoop(this)) viewModel.enterSafeMode()
         setContent { ScaryRoot(viewModel) }
         handleDebugIntent(intent)
 
@@ -109,6 +116,14 @@ class MainActivity : ComponentActivity() {
             target == "pin" -> viewModel.startPinSetup()
             target == "home" -> viewModel.onHomePressed()
             target == "surprise" -> viewModel.surprise()
+            target == "family" -> viewModel.toggleFamilyNight()
+            // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
+            // is chosen and its chip focused.
+            target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)
+            target.startsWith("mood:") -> Mood.fromKey(target.removePrefix("mood:"))?.let { mood ->
+                viewModel.toggleMood(mood)
+                viewModel.debugShowRow("moods", focusKey = "moods:chip:${mood.key}")
+            }
             target == "privacy" || target == "accessibility" -> {
                 viewModel.openSettings()
                 viewModel.openDocument(if (target == "privacy") DocumentKind.Privacy else DocumentKind.Accessibility)
@@ -125,6 +140,8 @@ class MainActivity : ComponentActivity() {
                 viewModel.openTmdbDialog()
             }
             target.startsWith("details:") -> viewModel.openDetails(target.removePrefix("details:"))
+            // A real uncaught crash, so CI can check that three in a row start SCARY in safe mode.
+            target == "crash" -> throw IllegalStateException("Debug crash")
         }
     }
 

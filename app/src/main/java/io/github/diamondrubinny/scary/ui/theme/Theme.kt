@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.theme
 
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -35,7 +40,8 @@ object ScaryColors {
 }
 
 /**
- * Karantina and Assistant have no Cyrillic, so Russian switches to Oswald (condensed headings) and Rubik (text).
+ * Karantina and Assistant have no Cyrillic or Arabic, so Russian switches to Oswald (condensed headings) and Rubik
+ * (text), and Arabic to Rakkas (dramatic headings) and Cairo (text).
  * Set once per Activity before setContent; a language change recreates the Activity.
  */
 object ScaryFonts {
@@ -50,6 +56,12 @@ object ScaryFonts {
         Font(R.font.rubik_bold, FontWeight.Bold),
     )
 
+    private val rakkas = FontFamily(Font(R.font.rakkas_regular, FontWeight.Bold))
+    private val cairo = FontFamily(
+        Font(R.font.cairo_regular, FontWeight.Normal),
+        Font(R.font.cairo_bold, FontWeight.Bold),
+    )
+
     var Display: FontFamily = karantina
         private set
     var Body: FontFamily = assistant
@@ -57,9 +69,16 @@ object ScaryFonts {
     val Logo = FontFamily(Font(R.font.rubik_wet_paint, FontWeight.Normal))
 
     fun useFor(language: Language) {
-        val cyrillic = language == Language.RU
-        Display = if (cyrillic) oswald else karantina
-        Body = if (cyrillic) rubik else assistant
+        Display = when (language) {
+            Language.RU -> oswald
+            Language.AR -> rakkas
+            else -> karantina
+        }
+        Body = when (language) {
+            Language.RU -> rubik
+            Language.AR -> cairo
+            else -> assistant
+        }
     }
 }
 
@@ -82,6 +101,12 @@ object ScaryType {
     val Caption: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Normal, fontSize = 14.sp, lineHeight = 20.sp, color = ScaryColors.Ash)
     val Eyebrow: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 14.sp, letterSpacing = 0.18.em, color = ScaryColors.Candle)
     val RowTitle: TextStyle get() = TextStyle(fontFamily = ScaryFonts.Body, fontWeight = FontWeight.Bold, fontSize = 17.sp, color = ScaryColors.Bone)
+
+    /** Movie titles in [Display]: a long one ("The Texas Chain Saw Massacre") shrinks to fit before it is cut off. */
+    val DisplayFit: TextAutoSize = TextAutoSize.StepBased(minFontSize = 34.sp, maxFontSize = 60.sp, stepSize = 2.sp)
+
+    /** [Display] with a line height that follows the size [DisplayFit] picks, for titles on two lines. */
+    val DisplayFitting: TextStyle get() = Display.copy(lineHeight = 0.9.em)
 }
 
 /**

@@ -1,6 +1,13 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import androidx.annotation.StringRes
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import io.github.diamondrubinny.scary.data.InstalledApp
@@ -26,8 +33,10 @@ data class HomeUiState(
     val onlineEnabled: Boolean = true,
     /** Ids on "My list", for the add/remove button on a movie's page. */
     val myListIds: Set<String> = emptySet(),
+    val familyNight: Boolean = false,
+    val seasonalRows: Boolean = true,
 ) {
-    fun isLocked(movie: Movie): Boolean = parentalEnabled && !sessionUnlocked && movie.fearForLock >= lockFromFear
+    fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
 }
 
 /** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */
@@ -53,6 +62,8 @@ sealed interface GatedAction {
     data class Details(val movieId: String) : GatedAction
     data class Watch(val movie: Movie) : GatedAction
     data class Trailer(val movie: Movie) : GatedAction
+    data class SearchIn(val movie: Movie, val app: WatchOption) : GatedAction
+    data class SearchEverywhere(val movie: Movie) : GatedAction
     data object Settings : GatedAction
 }
 
@@ -88,6 +99,16 @@ sealed interface HomeRow {
 
     data class Collection(val collection: MovieCollection, val movies: List<Movie>) : HomeRow {
         override val key = "collection:${collection.id}"
+    }
+
+    /** Shown only around its dates (Halloween, Friday the 13th). */
+    data class Seasonal(val season: Season, val movies: List<Movie>) : HomeRow {
+        override val key = "season:${season.key}"
+    }
+
+    /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
+    data class Moods(val selected: Mood?, val movies: List<Movie>) : HomeRow {
+        override val key = "moods"
     }
 }
 
@@ -129,5 +150,14 @@ sealed interface Screen {
     data object Search : Screen
     data class Document(val kind: DocumentKind) : Screen
 }
+
+/**
+ * A streaming app on this TV that a movie page can send the viewer to. [canSearch]: it accepts the title as a search;
+ * otherwise SCARY only opens it. Nothing here says the movie is available in that app.
+ */
+data class WatchOption(val packageName: String, val label: String, val canSearch: Boolean)
+
+/** The short shiver screen between pressing Watch and the other app coming up. */
+data class LaunchingState(val movie: Movie, val appLabel: String)
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())

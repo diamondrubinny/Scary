@@ -1,23 +1,27 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
     namespace = "io.github.diamondrubinny.scary"
-    compileSdk = 35
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.diamondrubinny.scary"
         // Android 8.0+. Covers Xiaomi Mi Box S / Mi TV Stick (Android TV 9+) and Google TV models.
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         // CI run number, so every build installs over the previous one.
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
         versionName = "0.4.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     // A dedicated release key, when one is provided (CI secret or local environment). Without it the release build
@@ -53,6 +57,14 @@ android {
         buildConfig = false
     }
 
+    // SCARY switches its language inside the app (LocaleOverride), so an app bundle must ship every language:
+    // split by language, Google Play would install only the TV's own and the in-app choice would break.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
+
     lint {
         abortOnError = true
         warningsAsErrors = false
@@ -84,4 +96,11 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
+    // UI tests, run on the TV emulator in CI (.github/scripts/screenshots.sh).
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.androidx.test.ext.junit)
 }

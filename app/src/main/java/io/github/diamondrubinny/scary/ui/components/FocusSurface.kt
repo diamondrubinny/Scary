@@ -1,8 +1,14 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
@@ -10,6 +16,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,8 +43,9 @@ import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 
 /**
- * Base for everything the remote can land on: grows, gets a candlelight border and a warm glow when focused.
- * D-pad center and Enter trigger [onClick]; holding them triggers [onLongClick] when given.
+ * Base for everything the remote can land on: springs forward, gets a candlelight border and a warm glow when
+ * focused, and dips slightly while OK is held. D-pad center and Enter trigger [onClick]; holding them triggers
+ * [onLongClick] when given.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -57,13 +65,19 @@ fun FocusSurface(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
+    val pressed by interactionSource.collectIsPressedAsState()
     val latestOnFocusChanged by rememberUpdatedState(onFocusChanged)
     LaunchedEffect(focused) { latestOnFocusChanged(focused) }
 
     val reduceMotion = LocalReduceMotion.current
     val scale by animateFloatAsState(
-        targetValue = if (focused) focusedScale else 1f,
-        animationSpec = if (reduceMotion) snap() else tween(DURATION_MS),
+        targetValue = when {
+            pressed -> 1f + (focusedScale - 1f) * PRESSED_FRACTION
+            focused -> focusedScale
+            else -> 1f
+        },
+        // A small overshoot makes focus feel physical; it settles in about a quarter second.
+        animationSpec = if (reduceMotion) snap() else spring(dampingRatio = SPRING_DAMPING, stiffness = Spring.StiffnessMedium),
         label = "focusScale",
     )
     val glow by animateFloatAsState(
@@ -121,3 +135,6 @@ fun FocusSurface(
 }
 
 private const val DURATION_MS = 160
+private const val SPRING_DAMPING = 0.62f
+/** While pressed, the card keeps this share of its focus growth. */
+private const val PRESSED_FRACTION = 0.35f

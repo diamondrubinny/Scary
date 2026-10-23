@@ -1,5 +1,11 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.settings
 
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.core.brand.Credit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
@@ -78,11 +84,13 @@ fun DocumentScreen(kind: DocumentKind) {
         paragraphs.forEachIndexed { index, text ->
             Paragraph(text, if (index == 0) Modifier.focusRequester(firstFocus) else Modifier)
         }
+        // Focusable like the paragraphs, so the remote scrolls it into view at the end.
+        Paragraph(Credit.LINE, mixed = true)
     }
 }
 
 @Composable
-private fun Paragraph(text: String, modifier: Modifier = Modifier) {
+private fun Paragraph(text: String, modifier: Modifier = Modifier, mixed: Boolean = false) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
     val shape = RoundedCornerShape(8.dp)
@@ -96,6 +104,7 @@ private fun Paragraph(text: String, modifier: Modifier = Modifier) {
             .semantics(mergeDescendants = true) { }
             .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
-        BasicText(text, style = ScaryType.Body.copy(fontSize = 17.sp, lineHeight = 26.sp, color = ScaryColors.Bone))
+        val style = ScaryType.Body.copy(fontSize = 17.sp, lineHeight = 26.sp, color = ScaryColors.Bone)
+        BasicText(text, style = if (mixed) style.mixedLanguage() else style)
     }
 }

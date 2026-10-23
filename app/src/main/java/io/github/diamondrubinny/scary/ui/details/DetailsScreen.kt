@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.details
 
+import io.github.diamondrubinny.scary.ui.home.WatchOption
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +19,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +43,7 @@ import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
 import androidx.compose.ui.layout.ContentScale
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
@@ -40,6 +51,8 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.fx.chill
+import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 @Composable
@@ -52,6 +65,10 @@ fun DetailsScreen(
     isLocked: (Movie) -> Boolean = { false },
     inMyList: Boolean = false,
     onToggleMyList: (Movie) -> Unit = {},
+    watchOptions: List<WatchOption> = emptyList(),
+    canSearchEverywhere: Boolean = false,
+    onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
+    onSearchEverywhere: (Movie) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -60,20 +77,14 @@ fun DetailsScreen(
         runCatching { watchFocus.requestFocus() }
     }
 
-    Column(Modifier.fillMaxSize().padding(top = 36.dp)) {
+    Column(Modifier.fillMaxSize().riseIn(movie.id).padding(top = 36.dp)) {
         Row(
             modifier = Modifier.padding(horizontal = SidePadding),
             horizontalArrangement = Arrangement.spacedBy(36.dp),
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
-                BasicText(
-                    text = movie.displayTitle(language),
-                    style = ScaryType.Display,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.semantics { heading() },
-                )
+                MovieTitle(movie, language)
                 if (movie.displayTitle(language) != movie.title) {
                     BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
                 }
@@ -86,7 +97,14 @@ fun DetailsScreen(
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
-                BasicText(movie.synopsis(language), style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(), maxLines = 5, overflow = TextOverflow.Ellipsis)
+                val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
+                // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
+                BasicText(
+                    movie.synopsis(language),
+                    style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                    maxLines = if (elsewhere) 3 else 5,
+                    overflow = TextOverflow.Ellipsis,
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
                     ScaryButton(
                         text = stringResource(R.string.action_watch_stremio),
@@ -99,6 +117,9 @@ fun DetailsScreen(
                         text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                         onClick = { onToggleMyList(movie) },
                     )
+                }
+                if (elsewhere) {
+                    WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
                 }
             }
             Box(
@@ -113,7 +134,7 @@ fun DetailsScreen(
                 } else {
                     BasicText(
                         text = movie.title,
-                        style = ScaryType.Title,
+                        style = ScaryType.Title.mixedLanguage(),
                         maxLines = 3,
                         modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
                     )
@@ -143,5 +164,83 @@ fun DetailsScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * The movie's logo art when Cinemeta has one and the title is shown in its original language (a translated title
+ * would contradict an English logo). The text title shows until the logo arrives, and whenever it cannot load.
+ */
+@Composable
+private fun MovieTitle(movie: Movie, language: Language) {
+    val title = movie.displayTitle(language)
+    val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
+    // Keyed on the logo itself: when the title changes language and the logo goes, the text title comes back.
+    var logoShown by remember(movie.id, logo) { mutableStateOf(false) }
+    // The title shivers as it comes out of the dark; again when the logo art arrives and replaces the text.
+    Box(Modifier.semantics(mergeDescendants = true) { heading(); contentDescription = title }.chill(movie.id to logoShown)) {
+        if (!logoShown) {
+            BasicText(
+                text = title,
+                style = ScaryType.DisplayFitting.mixedLanguage(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                autoSize = ScaryType.DisplayFit,
+            )
+        }
+        if (logo != null) {
+            AsyncImage(
+                model = logo,
+                contentDescription = null,
+                contentScale = ContentScale.Fit,
+                alignment = Alignment.CenterStart,
+                onSuccess = { logoShown = true },
+                onError = { logoShown = false },
+                modifier = Modifier.heightIn(max = LOGO_MAX_HEIGHT).widthIn(max = LOGO_MAX_WIDTH),
+            )
+        }
+    }
+}
+
+private val LOGO_MAX_HEIGHT = 110.dp
+private val LOGO_MAX_WIDTH = 480.dp
+
+/**
+ * "Look for it in your apps": a button per streaming app on this TV (search when the app accepts one, otherwise just
+ * open it), and Google TV's own search when there is one. SCARY does not know where a movie is available, and the note
+ * says so.
+ */
+@Composable
+private fun WatchElsewhere(
+    movie: Movie,
+    options: List<WatchOption>,
+    canSearchEverywhere: Boolean,
+    onSearchIn: (Movie, WatchOption) -> Unit,
+    onSearchEverywhere: (Movie) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
+        BasicText(
+            stringResource(R.string.watch_elsewhere),
+            style = ScaryType.Eyebrow,
+            modifier = Modifier.semantics { heading() },
+        )
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            // Room for the focused button to grow.
+            contentPadding = PaddingValues(vertical = 6.dp, horizontal = 4.dp),
+        ) {
+            if (canSearchEverywhere) {
+                item(key = "everywhere") {
+                    ScaryButton(stringResource(R.string.search_everywhere), onClick = { onSearchEverywhere(movie) })
+                }
+            }
+            items(options, key = { it.packageName }) { app ->
+                ScaryButton(
+                    text = stringResource(if (app.canSearch) R.string.search_in_app else R.string.open_app, app.label),
+                    onClick = { onSearchIn(movie, app) },
+                )
+            }
+        }
+        BasicText(stringResource(R.string.watch_elsewhere_note), style = ScaryType.Caption)
     }
 }

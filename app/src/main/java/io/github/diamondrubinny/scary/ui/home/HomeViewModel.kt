@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.links.StreamingApps
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -16,6 +21,10 @@ import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
+import io.github.diamondrubinny.scary.core.catalog.FamilyNight
+import io.github.diamondrubinny.scary.core.security.ParentalGate
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -35,6 +44,7 @@ import io.github.diamondrubinny.scary.launch.Launcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,6 +53,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -72,6 +83,10 @@ class HomeViewModel(
     private val catalog = MutableStateFlow<CatalogState>(CatalogState.Loading)
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     private val heroId = MutableStateFlow<String?>(null)
+    private val mood = MutableStateFlow<Mood?>(null)
+
+    /** Pages of endless online rows loaded while scrolling, by row id. In memory only; gone when SCARY restarts. */
+    private val extraPages = MutableStateFlow<Map<String, List<CinemetaMeta>>>(emptyMap())
     private val language = MutableStateFlow(Language.HE)
 
     /** The UI language; online text (TMDB) is fetched in it. */
@@ -92,6 +107,21 @@ class HomeViewModel(
     var lastFocusedKey: String? = null
         private set
 
+    private val _scrollToRow = MutableStateFlow<String?>(null)
+
+    /** A home row to bring into view, then focus [lastFocusedKey] in it. Set only by debug intents. */
+    val scrollToRow: StateFlow<String?> = _scrollToRow.asStateFlow()
+
+    /** Debug builds only (via MainActivity): shows [rowKey] with the card [focusKey] focused, for screenshots. */
+    fun debugShowRow(rowKey: String, focusKey: String?) {
+        lastFocusedKey = focusKey
+        _scrollToRow.value = rowKey
+    }
+
+    fun onScrolledToRow() {
+        _scrollToRow.value = null
+    }
+
     val message: StateFlow<UserMessage?> = _message.asStateFlow()
     val homeResets: StateFlow<Int> = _homeResets.asStateFlow()
 
@@ -99,13 +129,26 @@ class HomeViewModel(
         .map { it.last() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, Screen.Home)
 
-    val uiState: StateFlow<HomeUiState> = combine(
+    /**
+     * The catalog as shown: online pages loaded while scrolling merged in, filtered for family night. Rebuilt only when
+     * one of those changes, and off the main thread: with endless rows it can hold thousands of movies.
+     */
+    private val shownCatalog: StateFlow<CatalogState> = combine(
         catalog,
+        extraPages,
+        settings.prefs.map { it.onlineEnabled to it.familyNight }.distinctUntilChanged(),
+    ) { state, extras, (online, family) ->
+        if (state is CatalogState.Ready) CatalogState.Ready(shown(state.catalog, extras, online, family)) else state
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, CatalogState.Loading)
+
+    /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
+    private val homeBase: Flow<HomeUiState> = combine(
+        shownCatalog,
         installedApps,
-        heroId,
+        mood,
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, hero, prefs, unlocked ->
+    ) { catalogState, apps, selectedMood, prefs, unlocked ->
         val tiles = appTiles(apps, prefs)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -118,7 +161,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, hero, prefs)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -126,7 +169,15 @@ class HomeViewModel(
             soundsEnabled = prefs.soundsEnabled,
             onlineEnabled = prefs.onlineEnabled,
             myListIds = prefs.myListIds.toSet(),
+            familyNight = prefs.familyNight,
+            seasonalRows = prefs.seasonalRows,
         )
+    }.flowOn(Dispatchers.Default)
+
+    /** The home screen: the base above, with the focused card's movie as the hero (tonight's pick otherwise). */
+    val uiState: StateFlow<HomeUiState> = combine(homeBase, heroId) { base, hero ->
+        val focused = hero?.let { id -> (shownCatalog.value as? CatalogState.Ready)?.catalog?.movie(id) }
+        if (focused == null || base.loading) base else base.copy(hero = focused)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HomeUiState())
 
     private var appsJob: Job? = null
@@ -175,14 +226,39 @@ class HomeViewModel(
 
     fun refreshApps() {
         if (appsJob?.isActive == true) return
-        appsJob = viewModelScope.launch { installedApps.value = appsRepository.load() }
+        appsJob = viewModelScope.launch {
+            val apps = appsRepository.load()
+            installedApps.value = apps
+            _watchOptions.value = withContext(Dispatchers.IO) {
+                apps.mapNotNull { app ->
+                    StreamingApps.match(app.packageName, app.label)?.let {
+                        WatchOption(app.packageName, app.label, launcher.canSearchIn(app.packageName))
+                    }
+                }.sortedBy { it.label.lowercase() }
+            }
+            _canSearchEverywhere.value = withContext(Dispatchers.IO) { launcher.canSearchEverywhere() }
+        }
     }
+
+    private val _watchOptions = MutableStateFlow<List<WatchOption>>(emptyList())
+
+    /** Streaming apps on this TV, for "Search in …" on movie pages. Refreshed with the app list. */
+    val watchOptions: StateFlow<List<WatchOption>> = _watchOptions.asStateFlow()
+
+    private val _canSearchEverywhere = MutableStateFlow(false)
+
+    /** Whether this TV has a system-wide search (Google TV) that lists where a movie is. */
+    val canSearchEverywhere: StateFlow<Boolean> = _canSearchEverywhere.asStateFlow()
+
+    fun searchIn(movie: Movie, app: WatchOption) = guard(movie, GatedAction.SearchIn(movie, app))
+
+    fun searchEverywhere(movie: Movie) = guard(movie, GatedAction.SearchEverywhere(movie))
 
     private fun buildState(
         catalog: Catalog,
         tiles: List<AppTile>,
         drawer: List<DrawerApp>,
-        heroId: String?,
+        selectedMood: Mood?,
         prefs: LauncherPrefs,
     ): HomeUiState {
         val nightPick = NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
@@ -190,14 +266,23 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
+            if (prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
+                val movies = season.pick(catalog.movies)
+                if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
+            }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
-            catalog.collections.forEach { add(HomeRow.Collection(it, catalog.moviesOf(it))) }
+            add(HomeRow.Moods(selectedMood, selectedMood?.pick(catalog.movies).orEmpty()))
+            catalog.collections.forEach { collection ->
+                // Family night can empty a row; an empty row is not shown.
+                val movies = catalog.moviesOf(collection)
+                if (movies.isNotEmpty()) add(HomeRow.Collection(collection, movies))
+            }
         }
         return HomeUiState(
             loading = false,
             nightPick = nightPick,
-            hero = heroId?.let(catalog::movie) ?: nightPick,
+            hero = nightPick,
             rows = rows,
             effectsEnabled = prefs.effectsEnabled,
             drawer = drawer,
@@ -222,11 +307,83 @@ class HomeViewModel(
         AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned)
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
+    /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
+    private var detailsCache: Triple<String, Catalog, MovieDetails>? = null
+
+    /** Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. */
     fun details(movieId: String): MovieDetails? {
-        val ready = catalog.value as? CatalogState.Ready ?: return null
-        val movie = ready.catalog.movie(movieId) ?: webMovies[movieId] ?: return null
-        return MovieDetails(movie, Similar.find(ready.catalog.movies, movie))
+        val shown = visibleCatalog() ?: return null
+        detailsCache?.let { (id, catalog, details) -> if (id == movieId && catalog === shown) return details }
+        val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
+        return MovieDetails(movie, Similar.find(shown.movies, movie)).also { detailsCache = Triple(movieId, shown, it) }
     }
+
+    /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
+    private fun visibleCatalog(): Catalog? = (shownCatalog.value as? CatalogState.Ready)?.catalog
+
+    /** The catalog with the pages loaded while scrolling, then filtered for family night. */
+    private fun shown(catalog: Catalog, extras: Map<String, List<CinemetaMeta>>, online: Boolean, familyNight: Boolean): Catalog {
+        val extended = if (!online) {
+            catalog
+        } else {
+            extras.entries.fold(catalog) { acc, (rowId, metas) -> Cinemeta.extend(acc, Cinemeta.onlineCollectionId(rowId), metas) }
+        }
+        return if (familyNight) FamilyNight.filter(extended) else extended
+    }
+
+    private class RowPaging(var nextSkip: Int, var loading: Boolean = false, var done: Boolean = false)
+
+    private val paging = HashMap<String, RowPaging>()
+
+    /**
+     * The viewer is near the end of a home row: an endless online row loads its next page (50 movies). Pages without a
+     * single movie the row keeps (a year page of comedies) are skipped, a few at a time. Offline, nothing happens, and
+     * the next scroll tries again.
+     */
+    fun onNearRowEnd(rowKey: String) {
+        val rowId = rowKey.removePrefix("collection:" + Cinemeta.onlineCollectionId(""))
+        if (rowId == rowKey || latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
+        val start = cinemeta.endlessStart(rowId) ?: return
+        val state = paging.getOrPut(rowId) { RowPaging(start) }
+        if (state.loading || state.done) return
+        if (extraPages.value[rowId].orEmpty().size >= Cinemeta.MAX_ENDLESS_ROW_MOVIES) {
+            state.done = true
+            return
+        }
+        state.loading = true
+        viewModelScope.launch {
+            try {
+                var found = emptyList<CinemetaMeta>()
+                var attempts = 0
+                while (found.isEmpty() && attempts < MAX_EMPTY_PAGES) {
+                    if (state.nextSkip > Cinemeta.MAX_SKIP) {
+                        state.done = true
+                        break
+                    }
+                    val page = cinemeta.loadPage(rowId, state.nextSkip) ?: return@launch
+                    attempts++
+                    if (page.rawSize == 0) {
+                        state.done = true
+                        break
+                    }
+                    state.nextSkip += Cinemeta.PAGE_SIZE
+                    found = page.movies
+                }
+                if (found.isNotEmpty()) {
+                    extraPages.update { pages ->
+                        val merged = (pages[rowId].orEmpty() + found).distinctBy { it.imdbId }.take(Cinemeta.MAX_ENDLESS_ROW_MOVIES)
+                        pages + (rowId to merged)
+                    }
+                }
+            } finally {
+                state.loading = false
+            }
+        }
+    }
+
+    /** Movies from web search open only outside family night (they have no fear level to check). */
+    private fun webMovieIfAllowed(id: String): Movie? =
+        if (latestPrefs?.familyNight == true) null else webMovies[id]
 
     fun onCardFocused(key: String, movieId: String?) {
         lastFocusedKey = key
@@ -268,7 +425,8 @@ class HomeViewModel(
         if (_webSearch.value.query == q && !_webSearch.value.failed && q.isNotEmpty()) return
         webJob?.cancel()
         val online = latestPrefs?.onlineEnabled ?: false
-        if (!online || Cinemeta.searchUrl(q) == null) {
+        val family = latestPrefs?.familyNight ?: false
+        if (!online || family || Cinemeta.searchUrl(q) == null) {
             _webSearch.value = WebSearchState()
             return
         }
@@ -285,14 +443,14 @@ class HomeViewModel(
 
     /** "Surprise me": a random curated movie within tonight's fear level that the parental lock allows. */
     fun surprise() {
-        val ready = catalog.value as? CatalogState.Ready ?: return
+        val shown = visibleCatalog() ?: return
         val prefs = latestPrefs ?: return
         val pick = NightPick.surprise(
-            movies = ready.catalog.movies,
+            movies = shown.movies,
             maxFear = prefs.nightMaxFear,
             random = Random.Default,
             exclude = heroId.value,
-            isLocked = { prefs.parentalEnabled && !isSessionUnlocked() && it.fearForLock >= prefs.lockFromFear },
+            isLocked = { ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, it) },
         )
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
@@ -303,6 +461,11 @@ class HomeViewModel(
 
     /** Returns false when already on the home screen, so Back does nothing there. */
     fun back(): Boolean {
+        // Back during the shiver screen cancels opening the movie, and stays on this screen.
+        if (_launching.value != null) {
+            cancelLaunch()
+            return true
+        }
         if (backStack.value.size <= 1) return false
         backStack.update { it.dropLast(1) }
         return true
@@ -311,9 +474,47 @@ class HomeViewModel(
     /** Bumped whenever dialogs are closed, so PIN or TMDB work still running cannot act afterwards. */
     private var dialogGeneration = 0L
 
+    private val _launching = MutableStateFlow<LaunchingState?>(null)
+
+    /** Set while the shiver screen shows, just before another app opens a movie. */
+    val launching: StateFlow<LaunchingState?> = _launching.asStateFlow()
+    private var launchJob: Job? = null
+
+    /**
+     * Shows the movie's title shivering for a moment, then opens it in [appLabel]. Shorter and still when motion is
+     * reduced. Home cancels it; the screen clears once the other app is in front.
+     */
+    private fun launchWithShiver(movie: Movie, appLabel: String, open: () -> LaunchResult) {
+        launchJob?.cancel()
+        val generation = dialogGeneration
+        _launching.value = LaunchingState(movie, appLabel)
+        val motion = latestPrefs?.effectsEnabled != false && settings.systemAnimationsOn()
+        val job = viewModelScope.launch {
+            try {
+                delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
+                if (generation != dialogGeneration) return@launch
+                report(open())
+                // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
+                delay(LAUNCH_CLEAR_MS)
+            } finally {
+                // Whatever ends it (done, cancelled, or a dialog closed meanwhile), the dark screen goes with it,
+                // unless a newer launch has taken its place.
+                if (launchJob === coroutineContext[Job]) _launching.value = null
+            }
+        }
+        launchJob = job
+    }
+
+    private fun cancelLaunch() {
+        launchJob?.cancel()
+        launchJob = null
+        _launching.value = null
+    }
+
     fun onHomePressed() {
         // Home always lands on a clean home screen: no dialog left floating over it.
         dialogGeneration++
+        cancelLaunch()
         _pinDialog.value = null
         _tmdbDialog.value = null
         backStack.value = listOf(Screen.Home)
@@ -335,14 +536,13 @@ class HomeViewModel(
 
     fun trailer(movie: Movie) = guard(movie, GatedAction.Trailer(movie))
 
-    private fun movieById(id: String): Movie? =
-        (catalog.value as? CatalogState.Ready)?.catalog?.movie(id) ?: webMovies[id]
+    private fun movieById(id: String): Movie? = visibleCatalog()?.movie(id) ?: webMovieIfAllowed(id)
 
     /** Runs [action] now, or asks for the PIN first when the parental lock covers it. */
     private fun guard(movie: Movie?, action: GatedAction) {
         val prefs = latestPrefs
-        val needsPin = prefs != null && prefs.parentalEnabled && !isSessionUnlocked() &&
-            (movie == null || movie.fearForLock >= prefs.lockFromFear)
+        val needsPin = prefs != null &&
+            ParentalGate.needsPin(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, movie)
         if (needsPin) _pinDialog.value = PinDialogState(PinStep.Verify(action)) else perform(action)
     }
 
@@ -354,15 +554,24 @@ class HomeViewModel(
                     settings.pushRecent(action.movie.id)
                     savedMovies.save(action.movie, language.value)
                 }
-                report(launcher.openInStremio(action.movie))
+                launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
+            is GatedAction.SearchIn -> {
+                viewModelScope.launch { settings.pushRecent(action.movie.id) }
+                launchWithShiver(action.movie, action.app.label) {
+                    launcher.searchIn(action.app.packageName, action.app.label, action.movie)
+                }
+            }
+            is GatedAction.SearchEverywhere -> launchWithShiver(action.movie, GOOGLE_TV_LABEL) {
+                launcher.searchEverywhere(action.movie, GOOGLE_TV_LABEL)
+            }
             GatedAction.Settings -> push(Screen.Settings)
         }
     }
 
     private fun isSessionUnlocked(): Boolean {
-        if (sessionUnlocked.value && System.currentTimeMillis() - unlockedAtMillis > UNLOCK_WINDOW_MS) {
+        if (sessionUnlocked.value && !ParentalGate.stillUnlocked(unlockedAtMillis, System.currentTimeMillis())) {
             sessionUnlocked.value = false
         }
         return sessionUnlocked.value
@@ -371,6 +580,9 @@ class HomeViewModel(
     /** Called when the launcher leaves the screen: the next protected action asks for the PIN again. */
     fun onBackgrounded() {
         sessionUnlocked.value = false
+        // The other app is in front (or SCARY was left before it opened): coming back shows SCARY, not the shiver
+        // screen, and nothing opens by surprise later.
+        cancelLaunch()
     }
 
     fun startPinSetup() {
@@ -422,7 +634,8 @@ class HomeViewModel(
         }
         val now = System.currentTimeMillis()
         if (PinLockout.remainingWaitMillis(prefs.lockout, now) > 0) {
-            _pinDialog.value = dialog.copy(error = R.string.pin_error_wait, lockedUntilMillis = prefs.lockout.lockedUntilMillis)
+            // The wait itself (lockedUntilMillis) is what the dialog shows, counting down.
+            _pinDialog.value = dialog.copy(error = null, lockedUntilMillis = prefs.lockout.lockedUntilMillis)
             return
         }
         _pinDialog.value = dialog.copy(busy = true, error = null)
@@ -442,7 +655,7 @@ class HomeViewModel(
                 if (generation != dialogGeneration) return@launch
                 _pinDialog.value = dialog.copy(
                     busy = false,
-                    error = if (next.lockedUntilMillis > 0) R.string.pin_error_wait else R.string.pin_error_wrong,
+                    error = if (next.lockedUntilMillis > 0) null else R.string.pin_error_wrong,
                     lockedUntilMillis = next.lockedUntilMillis,
                 )
             }
@@ -565,6 +778,40 @@ class HomeViewModel(
         }
     }
 
+    fun toggleSeasonalRows() {
+        viewModelScope.launch {
+            settings.setSeasonalRows(!settings.prefs.first().seasonalRows)
+        }
+    }
+
+    /**
+     * Turning family night on also ends any PIN unlock, so turning it off again (in Settings) asks for the PIN.
+     * Without a PIN, anyone can turn it off; the setting's note says so.
+     */
+    fun toggleFamilyNight() {
+        viewModelScope.launch {
+            val enabled = !settings.prefs.first().familyNight
+            if (enabled) sessionUnlocked.value = false
+            settings.setFamilyNight(enabled)
+            _webSearch.value = WebSearchState()
+            show(if (enabled) R.string.msg_family_on else R.string.msg_family_off)
+        }
+    }
+
+    /** Picks a mood, or clears it when the same mood is chosen again. */
+    fun toggleMood(selected: Mood) {
+        mood.update { if (it == selected) null else selected }
+    }
+
+    /** After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) and says so. */
+    fun enterSafeMode() {
+        viewModelScope.launch {
+            settings.setEffectsEnabled(false)
+            settings.setSoundsEnabled(false)
+            show(R.string.msg_safe_mode)
+        }
+    }
+
     fun consumeMessage(id: Long) {
         _message.update { if (it?.id == id) null else it }
     }
@@ -572,7 +819,7 @@ class HomeViewModel(
     private fun report(result: LaunchResult) {
         when (result) {
             LaunchResult.Opened -> Unit
-            is LaunchResult.OpenedAppOnly -> show(R.string.msg_stremio_app_only, result.movieTitle)
+            is LaunchResult.OpenedAppOnly -> show(R.string.msg_app_only, result.appLabel, result.movieTitle)
             is LaunchResult.OpenedStoreInstead -> show(R.string.msg_not_installed_store, result.appLabel)
             is LaunchResult.Failed -> show(R.string.msg_open_failed, result.targetLabel)
         }
@@ -585,8 +832,12 @@ class HomeViewModel(
     companion object {
         private const val TAG = "HomeViewModel"
         private const val STOP_TIMEOUT_MS = 5_000L
+        private const val LAUNCH_SHIVER_MS = 1_600L
+        private const val MAX_EMPTY_PAGES = 4
+        private const val GOOGLE_TV_LABEL = "Google TV"
+        private const val LAUNCH_STILL_MS = 400L
+        private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80
-        private const val UNLOCK_WINDOW_MS = 30 * 60_000L
         private const val WEB_SEARCH_DELAY_MS = 700L
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {

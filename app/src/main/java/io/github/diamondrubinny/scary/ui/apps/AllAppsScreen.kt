@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.apps
 
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +47,7 @@ import io.github.diamondrubinny.scary.ui.home.DrawerApp
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 class AllAppsActions(
     val onLaunch: (InstalledApp) -> Unit,
@@ -114,6 +120,7 @@ fun AllAppsScreen(apps: List<DrawerApp>, actions: AllAppsActions) {
                 )
             }
         }
+        CreditLine(Modifier.padding(horizontal = SidePadding, vertical = 10.dp))
     }
 
     val selected = apps.firstOrNull { it.app.packageName == optionsFor }
@@ -149,7 +156,7 @@ private fun AppOptionsDialog(
                 .padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            BasicText(app.label, style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            BasicText(app.label, style = ScaryType.Title.mixedLanguage(), modifier = Modifier.semantics { heading() })
             OptionButton(stringResource(R.string.app_option_open), Modifier.focusRequester(firstOption)) {
                 onDismiss()
                 actions.onLaunch(app)

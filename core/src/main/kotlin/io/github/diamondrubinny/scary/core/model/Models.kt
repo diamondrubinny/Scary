@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.core.model
 
 import kotlinx.serialization.SerialName
@@ -8,7 +12,8 @@ enum class Language(val code: String, val nativeName: String, val tmdbTag: Strin
     HE("he", "עברית", "he-IL", true),
     EN("en", "English", "en-US", false),
     PT("pt", "Português", "pt-BR", false),
-    RU("ru", "Русский", "ru-RU", false);
+    RU("ru", "Русский", "ru-RU", false),
+    AR("ar", "العربية", "ar-SA", true);
 
     fun next(): Language = entries[(ordinal + 1) % entries.size]
 
@@ -18,6 +23,7 @@ enum class Language(val code: String, val nativeName: String, val tmdbTag: Strin
             "he", "iw" -> HE
             "pt" -> PT
             "ru" -> RU
+            "ar" -> AR
             else -> EN
         }
     }

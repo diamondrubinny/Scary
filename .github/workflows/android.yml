@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 name: Android CI
 
 on:
@@ -20,10 +23,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Powered by SCARY · Open source: the Apache License 2.0 NOTICE requires the credit; the build fails without it.
+      - name: SCARY credit check
+        run: bash .github/scripts/check-credit.sh
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       - uses: gradle/actions/setup-gradle@v4
 
@@ -40,6 +47,9 @@ jobs:
 
       - name: Build debug APK
         run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: Build UI test APK
+        run: ./gradlew --no-daemon :app:assembleDebugAndroidTest
 
       - name: Lint
         run: ./gradlew --no-daemon :app:lintDebug
@@ -69,6 +79,7 @@ jobs:
           mkdir -p dist
           cp app/build/outputs/apk/debug/app-debug.apk "dist/scary-debug-${GITHUB_RUN_NUMBER}.apk"
           cp app/build/outputs/apk/release/app-release.apk "dist/scary-release-${GITHUB_RUN_NUMBER}.apk"
+          cp app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk "dist/scary-tests-${GITHUB_RUN_NUMBER}.apk"
           ls -l dist
           sha256sum dist/*.apk
 
@@ -154,6 +165,7 @@ jobs:
         run: |
           cp dist/scary-debug-*.apk dist/scary.apk
           cp dist/scary-release-*.apk dist/scary-release.apk
+          cp dist/scary-tests-*.apk dist/scary-tests.apk
 
       - name: Enable KVM
         run: |
@@ -172,6 +184,21 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           script: bash .github/scripts/screenshots.sh
 
+      # Cold start and UI test results in the run summary; a warning (not a failure) when start-up gets slow.
+      - name: Start-up time and UI tests
+        if: always()
+        run: |
+          if [ -f screenshots/ui-tests.txt ]; then
+            { echo "### UI tests"; echo '```'; cat screenshots/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f screenshots/startup.txt ]; then
+            { echo "### Cold start (release)"; echo '```'; cat screenshots/startup.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            median=$(grep '^speed-profile:' screenshots/startup.txt | cut -d: -f2 | tr ' ' '\n' | sed '/^$/d' | sort -n | sed -n 2p)
+            if [ -n "$median" ] && [ "$median" -gt 2500 ]; then
+              echo "::warning::Release cold start is ${median} ms on the emulator (limit 2500 ms). Check what slowed it down."
+            fi
+          fi
+
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         with:
@@ -183,6 +210,7 @@ jobs:
         run: |
           git init -q out && cd out
           cp ../screenshots/*.png .
+          cp ../screenshots/startup.txt ../screenshots/ui-tests.txt . 2>/dev/null || true
           printf 'SCARY screenshots from an Android TV emulator, build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
           git add .
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Screenshots for build ${GITHUB_RUN_NUMBER}"

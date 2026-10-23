@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.components
 
 import androidx.compose.foundation.Image
@@ -20,8 +24,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -33,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,6 +47,7 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 /** Image request with a short crossfade; Coil caches it in memory and on disk. */
 @Composable
@@ -103,10 +110,11 @@ fun PosterCard(
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
-        // The generated art stays underneath: it shows while the poster loads, offline, or if it fails.
-        var posterShown by remember(movie.posterUrl) { mutableStateOf(false) }
+        // The generated art stays underneath: it shows while the poster loads, offline, or if it fails. A locked movie
+        // shows only that art: its real poster could be exactly what the lock is meant to keep off the screen.
+        var posterShown by remember(movie.posterUrl, locked) { mutableStateOf(false) }
         PosterArt(movie, Modifier.fillMaxSize())
-        rememberArtwork(movie.posterUrl)?.let { request ->
+        rememberArtwork(movie.posterUrl.takeUnless { locked })?.let { request ->
             AsyncImage(
                 model = request,
                 contentDescription = null,
@@ -123,7 +131,7 @@ fun PosterCard(
             )
             BasicText(
                 text = movie.title,
-                style = ScaryType.CardTitle,
+                style = ScaryType.CardTitle.mixedLanguage(),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp, vertical = 7.dp),
@@ -154,7 +162,7 @@ fun WideMovieCard(
         onFocusChanged = { if (it) onFocused() },
     ) {
         PosterArt(movie, Modifier.fillMaxSize())
-        rememberArtwork(movie.backgroundUrl)?.let { request ->
+        rememberArtwork(movie.backgroundUrl.takeUnless { locked })?.let { request ->
             AsyncImage(model = request, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
             Box(
                 Modifier
@@ -164,7 +172,7 @@ fun WideMovieCard(
         }
         if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
-            BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize).mixedLanguage(), maxLines = 1, overflow = TextOverflow.Ellipsis)
             BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
         }
     }
@@ -208,8 +216,15 @@ fun AppTileCard(
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
-            // The setup tile is the first thing a new viewer needs; it is wider so its label is never cut off.
-            .width(if (tile is AppTile.SetAsHome) SET_HOME_TILE_WIDTH else TILE_WIDTH)
+            // SCARY's own tiles carry text, not a banner: they are wider, so their labels are never cut off in any
+            // language ("Установить Stremio"). The setup tile, the first thing a new viewer needs, is the widest.
+            .width(
+                when (tile) {
+                    is AppTile.Installed -> TILE_WIDTH
+                    AppTile.SetAsHome -> SET_HOME_TILE_WIDTH
+                    else -> TEXT_TILE_WIDTH
+                },
+            )
             .height(TILE_WIDTH * 9 / 16),
         containerColor = ScaryColors.Crypt,
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
@@ -225,34 +240,44 @@ fun AppTileCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize(),
             )
-        } else if (tile is AppTile.SetAsHome) {
+        } else if (tile !is AppTile.Installed) {
             // Icon beside the text, so two full lines fit even at the largest system font.
             Row(
                 modifier = Modifier.align(Alignment.Center).padding(horizontal = 14.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
+                when (tile) {
+                    AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
+                    AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    else -> Box(
+                        Modifier
+                            .size(26.dp)
+                            .background(ScaryColors.Blood, RoundedCornerShape(7.dp)),
+                    )
+                }
                 BasicText(
                     text = label,
-                    style = ScaryType.Label,
+                    // "Install Disney+" must not become "+Install Disney" in the Hebrew UI.
+                    style = ScaryType.Label.copy(textDirection = TextDirection.Content),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
         } else {
+            // An installed app without a banner: its icon above its name. One line fits under the icon; the full name
+            // is in the tile's description for TalkBack.
             Column(
                 modifier = Modifier.align(Alignment.Center).padding(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(5.dp),
             ) {
-                val icon = (tile as? AppTile.Installed)?.app?.icon
-                when {
-                    icon != null -> Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
-                    tile is AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
-                    tile is AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
-                    tile is AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(26.dp))
-                    else -> Box(
+                val icon = tile.app.icon
+                if (icon != null) {
+                    Image(bitmap = icon, contentDescription = null, modifier = Modifier.size(34.dp))
+                } else {
+                    Box(
                         Modifier
                             .size(30.dp)
                             .background(ScaryColors.Blood, RoundedCornerShape(8.dp)),
@@ -260,8 +285,9 @@ fun AppTileCard(
                 }
                 BasicText(
                     text = label,
-                    style = ScaryType.Label.copy(textAlign = TextAlign.Center),
-                    maxLines = 2,
+                    // App names are often English: "Disney+" must not become "+Disney" in the Hebrew UI.
+                    style = ScaryType.Label.copy(textAlign = TextAlign.Center, textDirection = TextDirection.Content),
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
             }
@@ -282,4 +308,5 @@ fun AppTileCard(
 }
 
 private val TILE_WIDTH = 136.dp
+private val TEXT_TILE_WIDTH = 200.dp
 private val SET_HOME_TILE_WIDTH = 240.dp

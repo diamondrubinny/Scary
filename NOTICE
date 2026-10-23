@@ -1,0 +1,17 @@
+SCARY
+Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+Copyright 2026 diamondrubinny
+
+This product is SCARY, a horror and psychological thriller launcher for Android TV,
+licensed under the Apache License, Version 2.0 (see LICENSE).
+
+Under section 4(d) of the license, any redistribution or derivative work must keep
+this NOTICE file and show the attribution above wherever such notices normally
+appear, including inside the app ("Powered by SCARY · Open source").
+
+Third-party material:
+- Fonts Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo:
+  SIL Open Font License 1.1.
+- AndroidX, Jetpack Compose, Kotlin, kotlinx, Coil and OkHttp: Apache License 2.0.
+- This product uses the TMDB API but is not endorsed or certified by TMDB.
+- Movie metadata and images come from Cinemeta (Stremio) and belong to their owners.

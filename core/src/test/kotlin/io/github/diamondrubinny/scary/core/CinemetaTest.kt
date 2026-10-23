@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
@@ -6,7 +10,11 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.core.model.Catalog
 import org.junit.Assert.assertEquals
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -81,6 +89,11 @@ class CinemetaTest {
     fun `urls are validated`() {
         assertEquals("https://v3-cinemeta.strem.io/meta/movie/tt0081505.json", Cinemeta.metaUrl("tt0081505"))
         assertEquals("https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror.json", Cinemeta.catalogUrl("top", "Horror"))
+        assertEquals("https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror&skip=50.json", Cinemeta.catalogUrl("top", "Horror", 50))
+        assertEquals("https://v3-cinemeta.strem.io/catalog/movie/year/genre=2026.json", Cinemeta.catalogUrl("year", "2026"))
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top", "Horror&skip=1") }
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top", "Horror", -50) }
+        assertThrows(IllegalArgumentException::class.java) { Cinemeta.catalogUrl("top/../x", "Horror") }
         assertEquals("https://www.youtube.com/watch?v=jAE7dNurHR4", Links.youTubeVideo("jAE7dNurHR4"))
     }
 
@@ -108,10 +121,15 @@ class CinemetaTest {
             {"id":"tt9000003","name":"No Genres","releaseInfo":"2019"},
             {"id":"tt9000004","name":"No Year","genres":["Thriller"]}
         ]}"""
-        val results = Cinemeta.searchResults(text, catalog)
-        assertEquals(listOf("Ghost House", "No Genres"), results.map { it.title })
+        val metas = Cinemeta.parseCatalog(text)
+        // Results without genres are not shown as they are: their genres are looked up first.
+        assertEquals(listOf("tt9000003"), Cinemeta.needsGenres(metas, catalog))
+        val results = Cinemeta.searchResults(metas, catalog)
+        assertEquals(listOf("Ghost House"), results.map { it.title })
         assertTrue(results.none { it.curated })
-        assertEquals(1, Cinemeta.searchResults(text, catalog, limit = 1).size)
+        val looked = metas.map { if (it.imdbId == "tt9000003") it.copy(genres = listOf("Mystery")) else it }
+        assertEquals(listOf("Ghost House", "No Genres"), Cinemeta.searchResults(looked, catalog).map { it.title })
+        assertEquals(1, Cinemeta.searchResults(looked, catalog, limit = 1).size)
     }
 
     @Test
@@ -129,6 +147,7 @@ class CinemetaCacheTest {
         val meta = CinemetaMeta("tt0081505", "The Shining", 1980, background = "https://x/b")
         val cache = io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache(
             1_000L, mapOf(meta.imdbId to meta), listOf(OnlineRow("r", "ש", "R", listOf(meta))),
+            io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.ROWS_VERSION,
         )
         val back = io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.decode(cache.encode())!!
         assertEquals(cache, back)
@@ -136,5 +155,76 @@ class CinemetaCacheTest {
         assertTrue(back.isStale(1_000L + 25L * 60 * 60 * 1000))
         assertTrue(back.isStale(0L)) // clock went backwards
         assertNull(io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache.decode("{broken"))
+    }
+
+    @Test
+    fun `themed keeps horror, thriller and mystery but not documentaries`() {
+        fun meta(id: String, vararg genres: String) = CinemetaMeta(imdbId = id, name = id, genres = genres.toList())
+        val kept = Cinemeta.themed(
+            listOf(
+                meta("tt0000001", "Horror"),
+                meta("tt0000002", "Comedy"),
+                meta("tt0000003", "Documentary", "Thriller"),
+                meta("tt0000004", "Drama", "mystery"),
+                meta("tt0000005"),
+            ),
+        )
+        assertEquals(listOf("tt0000001", "tt0000004"), kept.map { it.imdbId })
+    }
+
+    @Test
+    fun `a cache from an older set of rows is stale at once`() {
+        val now = 1_000_000L
+        assertTrue(CinemetaCache(now, emptyMap(), emptyList()).isStale(now))
+        assertFalse(CinemetaCache(now, emptyMap(), emptyList(), CinemetaCache.ROWS_VERSION).isStale(now))
+        // Decoding an old file without the field gives the old version.
+        val old = CinemetaCache.decode("""{"fetchedAtMillis":$now,"metas":{},"rows":[]}""")!!
+        assertTrue(old.isStale(now))
+    }
+
+    @Test
+    fun `extend adds a page to the end of an online row without duplicates`() {
+        fun meta(n: Int) = CinemetaMeta(imdbId = "tt%07d".format(n), name = "Movie $n", year = 2020, genres = listOf("Horror"))
+        val base = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.merge(
+            Catalog(1, emptyList(), emptyList()), emptyMap(),
+            listOf(OnlineRow("deep", "ע", "Deep", (1..5).map(::meta))),
+        )
+        val id = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.onlineCollectionId("deep")
+        val more = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, (4..8).map(::meta))
+        val row = more.collections.single { it.id == id }
+        assertEquals((1..8).map { "tt%07d".format(it) }, row.movieIds.map { more.movie(it)!!.imdbId })
+        assertEquals(8, more.movies.size)
+        // Unknown rows and empty pages change nothing; the cap holds.
+        assertEquals(base, io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, "online_none", (9..10).map(::meta)))
+        assertEquals(base, io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, emptyList()))
+        val capped = io.github.diamondrubinny.scary.core.cinemeta.Cinemeta.extend(base, id, (6..20).map(::meta), maxRow = 7)
+        assertEquals(7, capped.collections.single { it.id == id }.movieIds.size)
+        assertEquals(7, capped.movies.size)
+    }
+
+    @Test
+    fun `titles that announce adult content are dropped, whole words only`() {
+        val text = """{"metas":[
+            {"id":"tt0000021","name":"Shining Sex","genres":["Thriller"],"releaseInfo":"1977"},
+            {"id":"tt0000022","name":"XXX Horror Night","genres":["Horror"],"releaseInfo":"2001"},
+            {"id":"tt0000023","name":"The Essex Murders","genres":["Thriller"],"releaseInfo":"2001"},
+            {"id":"tt0000024","name":"Sexton's Grave","genres":["Horror"],"releaseInfo":"2001"}
+        ]}"""
+        assertEquals(listOf("The Essex Murders", "Sexton's Grave"), Cinemeta.parseCatalog(text).map { it.name })
+    }
+
+    @Test
+    fun `children's titles and documentaries never pass, even when tagged thriller`() {
+        fun meta(id: String, vararg genres: String) = CinemetaMeta(imdbId = id, name = id, year = 2000, genres = genres.toList())
+        val kept = Cinemeta.searchResults(
+            listOf(
+                meta("tt0000011", "TV Movie", "Family", "Fantasy"),
+                meta("tt0000012", "Documentary", "Horror"),
+                meta("tt0000013", "Animation", "Thriller"),
+                meta("tt0000014", "Drama", "Romance", "Thriller"),
+            ),
+            Catalog(1, emptyList(), emptyList()),
+        )
+        assertEquals(listOf("tt0000014"), kept.map { it.imdbId })
     }
 }

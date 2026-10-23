@@ -1,6 +1,16 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -298,5 +308,33 @@ fun GearIcon(color: Color, modifier: Modifier = Modifier) {
         }
         // A thick ring leaves the hub hole transparent without needing a blend mode.
         drawCircle(color, radius = r * 0.5f, style = Stroke(width = r * 0.44f))
+    }
+}
+
+/**
+ * What to show when there is nothing to show: a framed note that says why, and a way forward when there is one.
+ * Announced politely by TalkBack when it appears.
+ */
+@Composable
+fun EmptyState(
+    title: String,
+    body: String,
+    modifier: Modifier = Modifier,
+    actionLabel: String? = null,
+    onAction: () -> Unit = {},
+) {
+    Column(
+        modifier = modifier
+            .border(1.dp, ScaryColors.Bone.copy(alpha = 0.18f), RoundedCornerShape(10.dp))
+            .background(ScaryColors.Void.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
+            .padding(horizontal = 24.dp, vertical = 18.dp)
+            .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BasicText(title, style = ScaryType.BodyStrong)
+        BasicText(body, style = ScaryType.Body.copy(color = ScaryColors.Ash))
+        if (actionLabel != null) {
+            ScaryButton(text = actionLabel, onClick = onAction, modifier = Modifier.padding(top = 6.dp))
+        }
     }
 }

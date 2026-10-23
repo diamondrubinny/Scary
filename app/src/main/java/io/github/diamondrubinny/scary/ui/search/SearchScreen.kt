@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.search
 
 import android.app.Activity
@@ -41,8 +45,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
@@ -57,6 +63,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.IconCircleButton
 import io.github.diamondrubinny.scary.ui.components.MicIcon
+import io.github.diamondrubinny.scary.ui.components.EmptyState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.SearchIcon
 import io.github.diamondrubinny.scary.ui.home.SidePadding
@@ -78,9 +85,10 @@ fun SearchScreen(
     language: Language,
     isLocked: (Movie) -> Boolean = { false },
     webSearch: WebSearchState = WebSearchState(),
+    onSurprise: () -> Unit = {},
 ) {
     val context = LocalContext.current
-    val resources = context.resources
+    val resources = LocalResources.current
     val results = remember(movies, query, resources) {
         // Genre names in the current language, so "רוחות" or "ghosts" both work.
         Search.query(movies, query, labels = { movie ->
@@ -164,7 +172,7 @@ fun SearchScreen(
         }
 
         val status = when {
-            query.isBlank() -> stringResource(R.string.search_prompt, movies.size)
+            query.isBlank() -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
             results.isEmpty() -> stringResource(R.string.search_no_results, query.trim())
             else -> stringResource(R.string.search_count, results.size)
         }
@@ -183,6 +191,19 @@ fun SearchScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp),
             modifier = Modifier.weight(1f),
         ) {
+            // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
+            val webDone = webSearch.query != query.trim() || !webSearch.loading
+            val webEmpty = webSearch.query != query.trim() || webSearch.results.isEmpty()
+            if (query.isNotBlank() && results.isEmpty() && webDone && webEmpty) {
+                item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
+                    EmptyState(
+                        title = stringResource(R.string.empty_search_title),
+                        body = stringResource(R.string.empty_search_body),
+                        actionLabel = stringResource(R.string.surprise_me),
+                        onAction = onSurprise,
+                    )
+                }
+            }
             items(results, key = { it.id }) { movie ->
                 PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
             }

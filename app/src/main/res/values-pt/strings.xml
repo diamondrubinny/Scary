@@ -28,12 +28,12 @@
     <string name="effects_off_description">Efeitos de atmosfera: desligados</string>
     <string name="msg_effects_on">Névoa e granulação ligadas</string>
     <string name="msg_effects_off">Névoa e granulação desligadas</string>
+    <string name="msg_safe_mode">O SCARY reiniciou após erros repetidos. Efeitos e sons foram desligados; você pode religá-los nas Configurações.</string>
     <string name="system_settings">Configurações</string>
     <string name="system_settings_description">Abrir as configurações do sistema</string>
     <string name="install_app">Instalar %1$s</string>
     <string name="msg_not_installed_store">%1$s não está instalado. Abrindo o Google Play.</string>
     <string name="msg_open_failed">Não foi possível abrir %1$s.</string>
-    <string name="msg_stremio_app_only">O Stremio está aberto. Procure lá por %1$s.</string>
     <string name="msg_catalog_error">Não foi possível carregar a biblioteca de filmes. Reinstale o app para corrigir.</string>
     <string name="loading">Carregando…</string>
     <string name="all_apps">Todos os apps</string>
@@ -60,10 +60,10 @@
     <string name="settings_night_fear_value">Até o nível de medo %1$d</string>
     <string name="settings_system">Configurações do sistema da TV</string>
     <string name="settings_about">Sobre</string>
-    <string name="settings_about_text">SCARY %1$s. Sem contas e sem rastreamento. As suas preferências ficam nesta TV. Fontes: Karantina, Assistant, Oswald, Rubik e Rubik Wet Paint, sob a SIL Open Font License 1.1.</string>
+    <string name="settings_about_text">SCARY %1$s. Sem contas e sem rastreamento. As suas preferências ficam nesta TV. Fontes: Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas e Cairo, sob a SIL Open Font License 1.1.</string>
+    <string name="settings_content_notice">O SCARY não hospeda filmes e não procura, guarda nem indica arquivos de vídeo, legais ou não. Ele mostra informações públicas sobre filmes e abre o filme em um app de streaming já instalado neste aparelho, como Stremio, Netflix ou YouTube. O que esses apps reproduzem é responsabilidade deles e sua.</string>
     <string name="search_title">Buscar</string>
     <string name="search_hint">Título, diretor, ano ou tipo de terror</string>
-    <string name="search_prompt">Digite ou dite para buscar entre %1$d filmes.</string>
     <string name="search_no_results">Nenhum filme encontrado para %1$s.</string>
     <string name="search_count">Resultados: %1$d</string>
     <string name="pin_title_verify">Digite o PIN dos pais</string>
@@ -72,12 +72,10 @@
     <string name="pin_error_format">O PIN precisa ter de 4 a 8 dígitos.</string>
     <string name="pin_error_mismatch">Os PINs não coincidem. Escolha um PIN de novo.</string>
     <string name="pin_error_wrong">PIN incorreto. Tente de novo.</string>
-    <string name="pin_error_wait">Tentativas demais. Tente de novo em %1$d segundos.</string>
     <string name="pin_delete">Apagar</string>
     <string name="pin_ok">OK</string>
     <string name="pin_cancel">Cancelar</string>
     <string name="pin_checking">Verificando…</string>
-    <string name="pin_entered_description">%1$d dígitos digitados</string>
     <string name="msg_pin_set">O bloqueio dos pais está ligado.</string>
     <string name="msg_pin_removed">O bloqueio dos pais está desligado.</string>
     <string name="settings_parental">Bloqueio dos pais</string>
@@ -86,7 +84,6 @@
     <string name="settings_lock_level">Bloquear a partir do nível de medo</string>
     <string name="settings_lock_level_value">%1$d ou mais</string>
     <string name="settings_change_pin">Trocar o PIN</string>
-    <string name="settings_turn_off_lock">Desligar o bloqueio</string>
     <string name="settings_parental_note">O bloqueio vale para filmes abertos pelo SCARY e para estas configurações. Ele não bloqueia o Stremio nem outros apps. Esqueceu o PIN? Limpar os dados do SCARY nas configurações do sistema da TV o redefine, junto com as outras preferências.</string>
     <string name="settings_sounds">Sons de ambiente</string>
     <string name="locked_badge">Bloqueado</string>
@@ -150,7 +147,7 @@
     <string name="document_hint">Use as setas para cima e para baixo para ler. Voltar retorna às configurações.</string>
     <string-array name="privacy_paragraphs">
         <item>O SCARY não tem contas, anúncios, análises nem cookies, e não existe um servidor do SCARY. Nada do que você faz no launcher é enviado para nós.</item>
-        <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
+        <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si), os horários de falhas recentes (só o horário) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB.</item>
@@ -161,10 +158,53 @@
     </string-array>
     <string-array name="accessibility_paragraphs">
         <item>O SCARY busca atender às WCAG 2.1 nível AA e à norma israelense IS 5568. Ainda não passou por auditoria de um consultor de acessibilidade, por isso não declara conformidade total.</item>
-        <item>Já incluído: todas as telas funcionam com as setas e o botão OK do controle, com um brilho de foco claro. Cartões, botões e configurações têm rótulos falados para o TalkBack, telas e fileiras têm títulos, e mensagens e erros de PIN são anunciados. Segurar OK em um pôster o adiciona à Minha lista, e o TalkBack oferece isso como ação. O hebraico usa layout da direita para a esquerda.</item>
+        <item>Já incluído: todas as telas funcionam com as setas e o botão OK do controle, com um brilho de foco claro. Cartões, botões e configurações têm rótulos falados para o TalkBack, telas e fileiras têm títulos, e mensagens e erros de PIN são anunciados. Segurar OK em um pôster o adiciona à Minha lista, e o TalkBack oferece isso como ação. O hebraico e o árabe usam layout da direita para a esquerda.</item>
         <item>Movimento e som: não há piscadas. A névoa e o granulado são suaves e param quando você desliga os efeitos ou ativa Remover animações nas configurações de acessibilidade da TV. Os sons ambientes vêm desligados.</item>
-        <item>Limitações conhecidas: pôsteres on-line são descritos só por título e ano; as traduções para português e russo não foram revisadas por falantes nativos; fontes do sistema muito grandes podem encurtar textos em algumas fileiras; o TalkBack só foi testado em emulador até agora.</item>
+        <item>Limitações conhecidas: pôsteres on-line são descritos só por título e ano; as traduções para português, russo e árabe não foram revisadas por falantes nativos; fontes do sistema muito grandes podem encurtar textos em algumas fileiras; o TalkBack só foi testado em emulador até agora.</item>
         <item>Encontrou uma barreira? Informe em github.com/diamondrubinny/Scary/issues, descrevendo a tela e o que aconteceu. Procuramos responder em até 14 dias.</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um consultor de acessibilidade.</item>
     </string-array>
+    <string name="row_moods">O que você quer ver hoje à noite?</string>
+    <string name="mood_gentle">Medo, mas não demais</string>
+    <string name="mood_mind_games">Jogos mentais</string>
+    <string name="mood_ghosts">Fantasmas e demônios</string>
+    <string name="mood_blood">Sangue e gritos</string>
+    <string name="mood_classics">Clássicos de outros tempos</string>
+    <string name="mood_relentless">Hoje ninguém dorme</string>
+    <string name="row_halloween">O Halloween está chegando</string>
+    <string name="row_friday_13th">Sexta-feira 13</string>
+    <string name="settings_family_night">Noite em família</string>
+    <string name="settings_family_night_note">Só os filmes mais leves (medo 1–2) aparecem, e a busca na web fica desligada. Para desligar, é preciso o PIN.</string>
+    <string name="settings_family_night_note_no_pin">Só os filmes mais leves (medo 1–2) aparecem, e a busca na web fica desligada. Defina um PIN acima para que só um adulto possa desligar.</string>
+    <string name="msg_family_on">Noite em família ligada: só filmes leves</string>
+    <string name="msg_family_off">Noite em família desligada</string>
+    <string name="family_night_badge">Noite em família</string>
+    <plurals name="search_prompt">
+        <item quantity="one">Digite ou dite para buscar entre %1$d filme.</item>
+        <item quantity="many">Digite ou dite para buscar entre %1$d filmes.</item>
+        <item quantity="other">Digite ou dite para buscar entre %1$d filmes.</item>
+    </plurals>
+    <plurals name="pin_error_wait">
+        <item quantity="one">Tentativas demais. Tente de novo em %1$d segundo.</item>
+        <item quantity="many">Tentativas demais. Tente de novo em %1$d segundos.</item>
+        <item quantity="other">Tentativas demais. Tente de novo em %1$d segundos.</item>
+    </plurals>
+    <plurals name="pin_entered_description">
+        <item quantity="one">%1$d dígito digitado</item>
+        <item quantity="many">%1$d dígitos digitados</item>
+        <item quantity="other">%1$d dígitos digitados</item>
+    </plurals>
+    <string name="empty_search_title">Nada no escuro</string>
+    <string name="empty_search_body">Tente um diretor, um ano ou um tipo de terror, como fantasmas ou slasher.</string>
+    <string name="mood_empty_title">Nada para este clima hoje</string>
+    <string name="mood_empty_body">A noite em família ou o controle dos pais escondem estes filmes. Tente outro clima.</string>
+    <string name="catalog_error_title">A biblioteca está faltando</string>
+    <string name="launch_opening">Abrindo no %1$s…</string>
+    <string name="msg_app_only">%1$s está aberto. Procure lá por %2$s.</string>
+    <string name="watch_elsewhere">Procurar nos seus apps</string>
+    <string name="search_in_app">Buscar no %1$s</string>
+    <string name="open_app">Abrir %1$s</string>
+    <string name="search_everywhere">Buscar em toda a TV</string>
+    <string name="watch_elsewhere_note">O SCARY busca pelo título. Ele não sabe se o filme está disponível em cada app.</string>
+    <string name="settings_seasonal">Fileiras sazonais (Halloween, sexta-feira 13)</string>
 </resources>

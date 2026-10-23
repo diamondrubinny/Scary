@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.dream
 
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.graphics.Color
@@ -17,11 +22,14 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.asDrawable
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ScaryApplication
+import io.github.diamondrubinny.scary.core.brand.Credit
+import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.data.LanguageStore
@@ -41,7 +49,8 @@ import kotlin.random.Random
  * SCARY's screensaver: backdrops from the library fade in one after another, each with its title.
  *
  * No flashing: a 1.5 second crossfade every 12 seconds and a slow 8% zoom, both skipped when the TV's
- * "Remove animations" is on. With the parental lock on, only movies below the lock level appear.
+ * "Remove animations" is on. With the parental lock on, only movies below the lock level appear; on family night,
+ * only the gentlest ones.
  * Only the curated horror library appears. Offline it falls back to those movies' own tints, so it never shows a
  * blank screen.
  */
@@ -117,7 +126,10 @@ class ScaryDream : DreamService() {
                 .collect { catalog ->
                     // Only the hand-picked library: the online "popular" rows can include plain action movies.
                     val allowed = catalog.movies.filter {
-                        it.curated && (!prefs.parentalEnabled || it.fearForLock < prefs.lockFromFear)
+                        it.curated &&
+                            // The screensaver never unlocks: it shows only what needs no PIN.
+                            !ParentalGate.isLocked(prefs.parentalEnabled, unlocked = false, prefs.lockFromFear, it) &&
+                            (!prefs.familyNight || FamilyNight.allows(it))
                     }
                     val withArt = allowed.filter { it.backgroundUrl != null }
                     val next = withArt.ifEmpty { allowed }
@@ -138,7 +150,7 @@ class ScaryDream : DreamService() {
         val back = layers[1 - front]
         val image = movie.backgroundUrl?.let { url ->
             val request = ImageRequest.Builder(this).data(url).build()
-            (imageLoader.execute(request) as? SuccessResult)?.drawable
+            (imageLoader.execute(request) as? SuccessResult)?.image?.asDrawable(resources)
         }
         back.setImageDrawable(image ?: tintFor(movie))
         back.scaleX = 1f
@@ -203,20 +215,31 @@ class ScaryDream : DreamService() {
             GradientDrawable.Orientation.TOP_BOTTOM,
             intArrayOf(Color.argb(90, 0, 0, 0), Color.TRANSPARENT, Color.argb(235, 0, 0, 0)),
         )
-        val cyrillic = language == Language.RU
         val text = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(64), 0, dp(64), dp(56))
         }
         title = TextView(this).apply {
-            typeface = font(if (cyrillic) R.font.oswald_semibold else R.font.karantina_bold)
+            typeface = font(
+                when (language) {
+                    Language.RU -> R.font.oswald_semibold
+                    Language.AR -> R.font.rakkas_regular
+                    else -> R.font.karantina_bold
+                },
+            )
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 64f)
             setTextColor(BONE)
             maxLines = 2
             textAlignment = View.TEXT_ALIGNMENT_VIEW_START
         }
         meta = TextView(this).apply {
-            typeface = font(if (cyrillic) R.font.rubik_regular else R.font.assistant_regular)
+            typeface = font(
+                when (language) {
+                    Language.RU -> R.font.rubik_regular
+                    Language.AR -> R.font.cairo_regular
+                    else -> R.font.assistant_regular
+                },
+            )
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             setTextColor(ASH)
             textAlignment = View.TEXT_ALIGNMENT_VIEW_START
@@ -234,8 +257,22 @@ class ScaryDream : DreamService() {
             setTextColor(BLOOD)
             setPadding(dp(48), dp(36), dp(48), 0)
         }
+        val credit = TextView(this).apply {
+            this.text = Credit.SHORT
+            typeface = font(R.font.assistant_regular)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            setTextColor(ASH)
+            textDirection = View.TEXT_DIRECTION_LTR
+            setPadding(dp(48), 0, dp(48), 0)
+        }
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.END
+            addView(logo)
+            addView(credit)
+        }
         overlay.addView(
-            logo,
+            brand,
             FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP or Gravity.END),
         )
         root.addView(overlay, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))

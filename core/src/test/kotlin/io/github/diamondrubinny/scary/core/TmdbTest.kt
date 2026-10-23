@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
@@ -54,6 +58,23 @@ class TmdbTest {
         assertTrue(info.overview.startsWith("ג'ק"))
         assertEquals("https://image.tmdb.org/t/p/w500/abcDEF123.jpg", info.poster)
         assertEquals("https://image.tmdb.org/t/p/w1280/back_drop-9.jpg", info.backdrop)
+    }
+
+    @Test
+    fun `arabic counts only when the text is in arabic script`() {
+        val arabic = Tmdb.parseFind(
+            """{"movie_results":[{"id":7,"title":"البريق","original_title":"The Shining","overview":"كاتب يقبل وظيفة حارس فندق معزول في الشتاء."}]}""",
+            Language.AR,
+        )!!
+        assertEquals("البريق", arabic.title)
+        assertEquals("ar", arabic.language)
+        assertTrue(arabic.overview.isNotBlank())
+        val untranslated = Tmdb.parseFind(
+            """{"movie_results":[{"id":7,"title":"The Shining","original_title":"The Shining","overview":"A writer takes a job."}]}""",
+            Language.AR,
+        )!!
+        assertEquals("", untranslated.title)
+        assertEquals("", untranslated.overview)
     }
 
     @Test
@@ -147,8 +168,11 @@ class TmdbTest {
 
     @Test
     fun `languages cycle and map from android codes`() {
-        assertEquals(listOf(Language.HE, Language.EN, Language.PT, Language.RU), Language.entries.toList())
-        assertEquals(Language.HE, Language.RU.next())
+        assertEquals(listOf(Language.HE, Language.EN, Language.PT, Language.RU, Language.AR), Language.entries.toList())
+        assertEquals(Language.AR, Language.RU.next())
+        assertEquals(Language.HE, Language.AR.next())
+        assertEquals(Language.AR, Language.fromCode("ar"))
+        assertTrue(Language.AR.rtl)
         assertEquals(Language.PT, Language.fromCode("pt"))
         assertEquals(Language.RU, Language.fromCode("ru"))
         assertEquals(Language.HE, Language.fromCode("iw"))

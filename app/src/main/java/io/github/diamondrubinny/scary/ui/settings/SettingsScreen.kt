@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.settings
 
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,11 +41,13 @@ class SettingsActions(
     val onToggleLanguage: () -> Unit,
     val onToggleEffects: () -> Unit,
     val onCycleNightFear: () -> Unit,
+    val onToggleSeasonalRows: () -> Unit,
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onSetupPin: () -> Unit,
     val onCycleLockLevel: () -> Unit,
     val onTurnOffLock: () -> Unit,
+    val onToggleFamilyNight: () -> Unit,
     val onToggleOnline: () -> Unit,
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
@@ -58,6 +65,8 @@ fun SettingsScreen(
     soundsEnabled: Boolean,
     parentalEnabled: Boolean,
     lockFromFear: Int,
+    familyNight: Boolean,
+    seasonalRows: Boolean,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -140,6 +149,11 @@ fun SettingsScreen(
             trailing = { FearMeter(nightMaxFear) },
         )
         SettingRow(
+            label = stringResource(R.string.settings_seasonal),
+            value = stringResource(if (seasonalRows) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleSeasonalRows,
+        )
+        SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
@@ -170,6 +184,15 @@ fun SettingsScreen(
         }
         BasicText(stringResource(R.string.settings_parental_note), style = ScaryType.Caption)
         SettingRow(
+            label = stringResource(R.string.settings_family_night),
+            value = stringResource(if (familyNight) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleFamilyNight,
+        )
+        BasicText(
+            stringResource(if (parentalEnabled) R.string.settings_family_night_note else R.string.settings_family_night_note_no_pin),
+            style = ScaryType.Caption,
+        )
+        SettingRow(
             label = stringResource(R.string.settings_system),
             value = null,
             onClick = actions.onSystemSettings,
@@ -180,6 +203,9 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
+        BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
+        CreditLine()
         SettingRow(
             label = stringResource(R.string.settings_privacy),
             value = null,

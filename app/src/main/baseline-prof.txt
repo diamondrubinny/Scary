@@ -1,0 +1,5 @@
+# SCARY's own code is small, so all of it is compiled ahead of time on install (via profileinstaller), next to the
+# profiles that Compose and the other AndroidX libraries already ship. This speeds up the first launch and the first
+# scrolls on slow TV boxes, before ART has collected its own profile.
+HSPLio/github/diamondrubinny/scary/**->**(**)**
+Lio/github/diamondrubinny/scary/**;

@@ -1,5 +1,10 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.core
 
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import org.junit.Assert.assertEquals
@@ -13,7 +18,7 @@ class CatalogParserTest {
     private fun movieJson(id: String, imdb: String = "tt0000001", fear: Int = 3) = """
         {"id":"$id","imdbId":"$imdb","title":"T","year":2000,"director":"D","runtimeMin":90,
          "genre":"horror","subgenres":["ghost"],"fear":$fear,"hue":10,
-         "synopsisHe":"ת","synopsisEn":"s","synopses":{"pt":"p","ru":"р"}}
+         "synopsisHe":"ת","synopsisEn":"s","synopses":{"pt":"p","ru":"р","ar":"ع"}}
     """.trimIndent()
 
     private fun catalogJson(movies: String, collections: String = "[]") =
@@ -73,11 +78,12 @@ class CatalogParserTest {
     }
 
     @Test
-    fun `requires portuguese and russian translations for curated entries`() {
-        val text = catalogJson(movieJson("a").replace(""","synopses":{"pt":"p","ru":"р"}""", ""))
+    fun `requires a synopsis in every further UI language for curated entries`() {
+        val text = catalogJson(movieJson("a").replace(""","synopses":{"pt":"p","ru":"р","ar":"ع"}""", ""))
         val problems = problemsOf(text)
         assertTrue(problems.any { "missing pt synopsis" in it })
         assertTrue(problems.any { "missing ru synopsis" in it })
+        assertTrue(problems.any { "missing ar synopsis" in it })
     }
 
     @Test
@@ -89,5 +95,20 @@ class CatalogParserTest {
         } catch (e: CatalogException) {
             assertTrue(e.problems.any { "unsupported catalog version" in it })
         }
+    }
+
+    @Test
+    fun everyCuratedMovieHasItsOwnSynopsisInEveryLanguage() {
+        val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+        val missing = catalog.movies.flatMap { movie ->
+            Language.entries.filter { language ->
+                when (language) {
+                    Language.HE -> movie.synopsisHe.isBlank()
+                    Language.EN -> movie.synopsisEn.isBlank()
+                    else -> movie.synopses[language.code].isNullOrBlank()
+                }
+            }.map { "${movie.id}: ${it.code}" }
+        }
+        assertTrue("Synopses missing (they would fall back to English):\n" + missing.joinToString("\n"), missing.isEmpty())
     }
 }

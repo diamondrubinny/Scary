@@ -1,3 +1,7 @@
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
 package io.github.diamondrubinny.scary.ui.pin
 
 import androidx.compose.foundation.background
@@ -33,6 +37,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.key.utf16CodePoint
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -115,7 +120,7 @@ fun PinDialog(state: PinDialogState, onSubmit: (String) -> Unit, onDismiss: () -
                 modifier = Modifier.semantics { heading() },
             )
 
-            val enteredDescription = stringResource(R.string.pin_entered_description, entered.length)
+            val enteredDescription = pluralStringResource(R.plurals.pin_entered_description, entered.length, entered.length)
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.clearAndSetSemantics { contentDescription = enteredDescription },
@@ -131,8 +136,8 @@ fun PinDialog(state: PinDialogState, onSubmit: (String) -> Unit, onDismiss: () -
 
             val message = when {
                 state.busy -> stringResource(R.string.pin_checking)
-                waitSeconds > 0 -> stringResource(R.string.pin_error_wait, waitSeconds)
-                state.error != null && state.error != R.string.pin_error_wait -> stringResource(state.error)
+                waitSeconds > 0 -> pluralStringResource(R.plurals.pin_error_wait, waitSeconds.toInt(), waitSeconds)
+                state.error != null -> stringResource(state.error)
                 else -> null
             }
             BasicText(
