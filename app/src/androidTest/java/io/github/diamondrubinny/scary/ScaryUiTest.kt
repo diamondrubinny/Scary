@@ -77,7 +77,19 @@ class ScaryUiTest {
 
     private fun waitForHome() = waitFor(hasText(text(R.string.row_apps)))
 
-    private fun onHome(): Boolean = rule.onAllNodes(hasText(text(R.string.row_apps))).fetchSemanticsNodes().isNotEmpty()
+    /** On the home screen, whatever row it is scrolled to (the apps row is not composed once it scrolls away). */
+    private fun onHome(): Boolean = rule.onAllNodes(hasTestTag(HOME_ROWS_TAG)).fetchSemanticsNodes().isNotEmpty()
+
+    /** Runs [test], then [cleanup]; a failing cleanup never hides the test's own failure. */
+    private fun withCleanup(test: () -> Unit, cleanup: () -> Unit) {
+        try {
+            test()
+        } catch (failure: Throwable) {
+            runCatching(cleanup)
+            throw failure
+        }
+        cleanup()
+    }
 
     /** Back until the home screen shows: the first Back may only close the on-screen keyboard. */
     private fun backToHome() {
@@ -85,7 +97,7 @@ class ScaryUiTest {
             if (onHome()) return
             pressBack()
         }
-        waitForHome()
+        rule.waitUntil(TIMEOUT_MS) { onHome() }
     }
 
     @Test
@@ -158,16 +170,19 @@ class ScaryUiTest {
         waitForHome()
         val first = bundledMovies().first { it.title == "The Shining" }
         val second = bundledMovies().first { it.title == "Hereditary" }
-        try {
-            setInMyList(first, wanted = true)
-            setInMyList(second, wanted = true)
-            assertMyListRow(present = listOf(first, second))
-            setInMyList(first, wanted = false)
-            assertMyListRow(present = listOf(second), absent = listOf(first))
-        } finally {
-            setInMyList(first, wanted = false)
-            setInMyList(second, wanted = false)
-        }
+        withCleanup(
+            test = {
+                setInMyList(first, wanted = true)
+                setInMyList(second, wanted = true)
+                assertMyListRow(present = listOf(first, second))
+                setInMyList(first, wanted = false)
+                assertMyListRow(present = listOf(second), absent = listOf(first))
+            },
+            cleanup = {
+                setInMyList(first, wanted = false)
+                setInMyList(second, wanted = false)
+            },
+        )
     }
 
     @Test
@@ -186,7 +201,7 @@ class ScaryUiTest {
         waitFor(card)
         rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
         rule.waitForIdle()
-        try {
+        withCleanup(test = {
             longPressOk()
             // The movie page must not open on the way.
             assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
@@ -200,9 +215,7 @@ class ScaryUiTest {
             longPressOk()
             assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
             waitForGone(inList)
-        } finally {
-            setInMyList(movie, wanted = false)
-        }
+        }, cleanup = { setInMyList(movie, wanted = false) })
     }
 
     /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */
