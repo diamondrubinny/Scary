@@ -580,6 +580,7 @@ class HomeViewModel(
     fun toggleMyList(movie: Movie, language: Language) {
         viewModelScope.launch {
             val added = settings.toggleMyList(movie.id)
+            if (Log.isLoggable(KEY_LOG_TAG, Log.DEBUG)) Log.d(KEY_LOG_TAG, "My list: ${movie.id} added=$added")
             if (added) savedMovies.save(movie, language, keptOnline())
             show(if (added) R.string.msg_my_list_added else R.string.msg_my_list_removed, movie.displayTitle(language))
         }
@@ -916,6 +917,8 @@ class HomeViewModel(
 
     companion object {
         private const val TAG = "HomeViewModel"
+        /** Off unless "setprop log.tag.ScaryKeys DEBUG", as in FocusSurface: lets a failed UI test show what happened. */
+        private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 4

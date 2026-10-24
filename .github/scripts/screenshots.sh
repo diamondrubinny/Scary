@@ -24,7 +24,11 @@ if [ -f dist/scary-tests.apk ]; then
   adb install -r dist/scary-tests.apk
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 0; done
   # Raw mode (-r) reports each test's status, so tests skipped by an assumption (code -4) are counted, not hidden.
+  # The app logs each OK press it handles under this tag (off by default); printed below if a test fails.
+  adb shell setprop log.tag.ScaryKeys DEBUG
+  adb logcat -c || true
   result=$(adb shell am instrument -w -r "$PKG.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')
+  adb shell setprop log.tag.ScaryKeys INFO
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 1; done
   skipped=$(echo "$result" | grep -B6 'INSTRUMENTATION_STATUS_CODE: -4' | grep 'INSTRUMENTATION_STATUS: test=' | sed 's/.*test=//' | sort -u | tr '\n' ' ' || true)
   {
@@ -34,6 +38,8 @@ if [ -f dist/scary-tests.apk ]; then
   echo "$result"
   cat "$OUT/ui-tests.txt"
   if ! echo "$result" | grep -q '^OK ('; then
+    echo "OK key events the app handled (last 200):"
+    adb logcat -d -s ScaryKeys:D | tail -200 || true
     echo "UI tests failed."
     exit 1
   fi

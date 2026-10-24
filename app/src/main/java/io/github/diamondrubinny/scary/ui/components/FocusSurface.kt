@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -134,7 +135,7 @@ fun FocusSurface(
             .background(container)
             .border(2.dp, if (focused) focusedBorderColor else borderColor, shape)
             .onPreviewKeyEvent { event ->
-                keyHold.handle(event, interactionSource, onClick = { latestOnClick() }, onLongClick = latestOnLongClick)
+                keyHold.handle(event, interactionSource, contentDescription, onClick = { latestOnClick() }, onLongClick = latestOnLongClick)
             }
             .combinedClickable(
                 interactionSource = interactionSource,
@@ -168,11 +169,16 @@ private class KeyHold {
     fun handle(
         event: KeyEvent,
         interactions: MutableInteractionSource,
+        label: String?,
         onClick: () -> Unit,
         onLongClick: (() -> Unit)?,
     ): Boolean {
         if (event.key !in SELECT_KEYS) return false
         val native = event.nativeKeyEvent
+        // Off unless "setprop log.tag.ScaryKeys DEBUG" (CI's UI tests): what each OK event did, to read a failed run.
+        if (Log.isLoggable(KEY_LOG_TAG, Log.DEBUG)) {
+            Log.d(KEY_LOG_TAG, "${native.action} repeat=${native.repeatCount} longPress=${native.isLongPress} started=$started long=$longPressed on=$label")
+        }
         when (event.type) {
             KeyEventType.KeyDown -> {
                 if (native.repeatCount == 0) {
@@ -205,6 +211,8 @@ private class KeyHold {
 
 /** The keys that "click", as combinedClickable counts them on a TV: D-pad center and the Enter keys. */
 private val SELECT_KEYS = setOf(Key.DirectionCenter, Key.Enter, Key.NumPadEnter)
+
+private const val KEY_LOG_TAG = "ScaryKeys"
 
 private const val DURATION_MS = 160
 private const val SPRING_DAMPING = 0.62f

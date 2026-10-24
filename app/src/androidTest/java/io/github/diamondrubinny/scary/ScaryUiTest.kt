@@ -9,6 +9,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsFocused
@@ -337,9 +338,11 @@ class ScaryUiTest {
     private fun longPressOk() {
         // Read the command's output to the end: that waits for it to finish. Closing the pipe at once could stop it
         // half way, after "down" but before the held repeat and "up", and the press then never completed.
+        Log.d("ScaryKeys", "test: holding OK")
         val output = InstrumentationRegistry.getInstrumentation().uiAutomation
             .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER")
         ParcelFileDescriptor.AutoCloseInputStream(output).use { it.readBytes() }
+        Log.d("ScaryKeys", "test: OK released")
         rule.waitForIdle()
     }
 
