@@ -8,7 +8,11 @@ import io.github.diamondrubinny.scary.ui.home.rowTag
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
-import android.os.ParcelFileDescriptor
+import android.os.SystemClock
+import android.view.ViewConfiguration
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
@@ -345,15 +349,44 @@ class ScaryUiTest {
     }
 
     /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */
+    /**
+     * Holds the remote's OK the way a TV remote does: a press, the held repeat flagged as a long press, then the
+     * release. The events are injected from here, synchronously, so each one has reached the window before the next.
+     * A key only reaches the app while its window has the input focus and no on-screen keyboard is up (the keyboard
+     * takes the remote's keys first), so both are waited for, and logged for CI.
+     */
     private fun longPressOk() {
-        // Read the command's output to the end: that waits for it to finish. Closing the pipe at once could stop it
-        // half way, after "down" but before the held repeat and "up", and the press then never completed.
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        waitUntilOrDescribe("the window to take the remote's keys") { readyForKeys() }
         Log.d("ScaryKeys", "test: holding OK")
-        val output = InstrumentationRegistry.getInstrumentation().uiAutomation
-            .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER")
-        ParcelFileDescriptor.AutoCloseInputStream(output).use { it.readBytes() }
+        val down = SystemClock.uptimeMillis()
+        instrumentation.sendKeySync(KeyEvent(down, down, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 0))
+        SystemClock.sleep(ViewConfiguration.getLongPressTimeout().toLong())
+        val held = SystemClock.uptimeMillis()
+        instrumentation.sendKeySync(
+            KeyEvent.changeFlags(
+                KeyEvent(down, held, KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_CENTER, 1),
+                KeyEvent.FLAG_LONG_PRESS,
+            ),
+        )
+        instrumentation.sendKeySync(
+            KeyEvent(down, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DPAD_CENTER, 0),
+        )
         Log.d("ScaryKeys", "test: OK released")
         rule.waitForIdle()
+    }
+
+    /** True when the activity's window has the input focus and no on-screen keyboard is showing; hides one that is. */
+    private fun readyForKeys(): Boolean {
+        var ready = false
+        rule.runOnUiThread {
+            val view = rule.activity.window.decorView
+            val keyboard = ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) == true
+            if (keyboard) WindowCompat.getInsetsController(rule.activity.window, view).hide(WindowInsetsCompat.Type.ime())
+            ready = view.hasWindowFocus() && !keyboard
+            if (!ready) Log.d("ScaryKeys", "test: not ready, windowFocus=${view.hasWindowFocus()} keyboard=$keyboard")
+        }
+        return ready
     }
 
     /** Opens [movie] through search, puts it in or out of My list with the movie page's button, and goes home. */
