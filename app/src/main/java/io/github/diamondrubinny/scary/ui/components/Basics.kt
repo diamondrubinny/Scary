@@ -28,6 +28,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -206,6 +207,21 @@ fun LockIcon(color: Color, modifier: Modifier = Modifier) {
             size = Size(w * 0.8f, h * 0.58f),
             cornerRadius = CornerRadius(w * 0.12f),
         )
+    }
+}
+
+/** A check mark: "watched". */
+@Composable
+fun CheckIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(14.dp)) {
+        val w = size.width
+        val h = size.height
+        val path = Path().apply {
+            moveTo(w * 0.12f, h * 0.52f)
+            lineTo(w * 0.4f, h * 0.8f)
+            lineTo(w * 0.88f, h * 0.22f)
+        }
+        drawPath(path, color, style = Stroke(width = w * 0.16f, cap = StrokeCap.Round, join = StrokeJoin.Round))
     }
 }
 

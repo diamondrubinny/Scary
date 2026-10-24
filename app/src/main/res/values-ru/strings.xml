@@ -214,4 +214,13 @@
     <string name="donate_title">Поддержите SCARY</string>
     <string name="donate_body">Наведите камеру телефона, чтобы пожертвовать через PayPal. SCARY остаётся бесплатным, пожертвование — по желанию.</string>
     <string name="donate_qr_description">QR-код для пожертвования SCARY через PayPal</string>
+    <string name="action_mark_watched">Отметить просмотренным</string>
+    <string name="action_watched">✓ Просмотрено</string>
+    <string name="watched_badge">просмотрено</string>
+    <string name="msg_marked_watched">«%1$s» отмечен как просмотренный</string>
+    <string name="msg_unmarked_watched">«%1$s» больше не отмечен как просмотренный</string>
+    <string name="msg_auto_watched">С возвращением. «%1$s» отмечен как просмотренный; это можно изменить на странице фильма.</string>
+    <string name="settings_auto_watched">Отмечать просмотренным после просмотра</string>
+    <string name="settings_auto_watched_note">Если вы вернулись в SCARY после большей части фильма, он отмечается как просмотренный. SCARY не видит, что происходит в других приложениях, поэтому судит только по времени; это всегда можно изменить на странице фильма.</string>
+    <string name="my_list_hint">Удерживайте OK на постере, чтобы убрать его</string>
 </resources>

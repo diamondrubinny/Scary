@@ -65,6 +65,9 @@ fun DetailsScreen(
     isLocked: (Movie) -> Boolean = { false },
     inMyList: Boolean = false,
     onToggleMyList: (Movie) -> Unit = {},
+    watched: Boolean = false,
+    isWatched: (Movie) -> Boolean = { false },
+    onToggleWatched: (Movie) -> Unit = {},
     watchOptions: List<WatchOption> = emptyList(),
     canSearchEverywhere: Boolean = false,
     onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
@@ -117,6 +120,10 @@ fun DetailsScreen(
                         text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                         onClick = { onToggleMyList(movie) },
                     )
+                    ScaryButton(
+                        text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
+                        onClick = { onToggleWatched(movie) },
+                    )
                 }
                 if (elsewhere) {
                     WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
@@ -160,6 +167,7 @@ fun DetailsScreen(
                         onFocused = {},
                         width = 92.dp,
                         locked = isLocked(similar),
+                        watched = isWatched(similar),
                     )
                 }
             }

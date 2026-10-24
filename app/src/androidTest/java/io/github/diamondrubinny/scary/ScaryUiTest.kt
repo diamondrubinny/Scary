@@ -10,6 +10,7 @@ import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
@@ -201,6 +202,8 @@ class ScaryUiTest {
         waitFor(card)
         rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
         rule.waitForIdle()
+        // Holding OK acts on the focused card; make sure that is this one.
+        rule.onNode(card).assertIsFocused()
         withCleanup(test = {
             longPressOk()
             // The movie page must not open on the way.
@@ -212,10 +215,55 @@ class ScaryUiTest {
             rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
             rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
             rule.waitForIdle()
+            rule.onNode(card).assertIsFocused()
             longPressOk()
             assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
             waitForGone(inList)
         }, cleanup = { setInMyList(movie, wanted = false) })
+    }
+
+    @Test
+    fun markingAMovieAsWatchedShowsOnItsCardAndCanBeUndone() {
+        waitForHome()
+        val movie = bundledMovies().first { it.title == "Hereditary" }
+        val mark = hasText(text(R.string.action_mark_watched))
+        val watched = hasText(text(R.string.action_watched))
+        withCleanup(
+            test = {
+                openViaSearch(movie)
+                waitFor(mark or watched)
+                if (rule.onAllNodes(watched).fetchSemanticsNodes().isEmpty()) rule.onNode(mark).performClick()
+                waitFor(watched)
+                // Its card now says so, for TalkBack too (search results show the same card as the rows).
+                backToHome()
+                rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+                waitFor(hasSetTextAction())
+                rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+                waitFor(hasContentDescription("${movie.title}, ${movie.year}, ${text(R.string.watched_badge)}", substring = true))
+                backToHome()
+                openViaSearch(movie)
+                rule.onNode(watched).performClick()
+                waitFor(mark)
+                backToHome()
+            },
+            cleanup = {
+                backToHome()
+                openViaSearch(movie)
+                waitFor(mark or watched)
+                if (rule.onAllNodes(watched).fetchSemanticsNodes().isNotEmpty()) rule.onNode(watched).performClick()
+                backToHome()
+            },
+        )
+    }
+
+    private fun openViaSearch(movie: Movie) {
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+        val result = hasContentDescription("${movie.title}, ${movie.year}", substring = true)
+        waitFor(result)
+        rule.onAllNodes(result)[0].performClick()
+        waitFor(hasText(text(R.string.row_more_like)))
     }
 
     /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */

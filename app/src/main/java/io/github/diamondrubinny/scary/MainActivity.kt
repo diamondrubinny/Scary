@@ -72,6 +72,8 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // Apps may have been installed or removed while another app was in front.
         viewModel.refreshApps()
+        // Back from a movie in Stremio (or another app): it may count as watched.
+        viewModel.onResumed()
         viewModel.updateLauncherStatus(
             LauncherStatus(HomeRole.isDefaultHome(this), HomeRole.isHomeButtonServiceOn(this)),
         )

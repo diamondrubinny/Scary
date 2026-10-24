@@ -84,6 +84,7 @@ fun SearchScreen(
     onOpenMovie: (Movie) -> Unit,
     language: Language,
     isLocked: (Movie) -> Boolean = { false },
+    isWatched: (Movie) -> Boolean = { false },
     webSearch: WebSearchState = WebSearchState(),
     onSurprise: () -> Unit = {},
 ) {
@@ -205,7 +206,7 @@ fun SearchScreen(
                 }
             }
             items(results, key = { it.id }) { movie ->
-                PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
+                PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie), watched = isWatched(movie))
             }
             // Web results only for the query on screen, and without movies the library already found.
             if (webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
@@ -215,7 +216,7 @@ fun SearchScreen(
                     WebHeader(webSearch, web.isEmpty())
                 }
                 items(web, key = { "web:" + it.id }) { movie ->
-                    PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie))
+                    PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie), watched = isWatched(movie))
                 }
             }
         }

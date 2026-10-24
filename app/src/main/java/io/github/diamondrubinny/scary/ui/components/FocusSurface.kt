@@ -18,6 +18,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
@@ -46,6 +53,10 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
  * Base for everything the remote can land on: springs forward, gets a candlelight border and a warm glow when
  * focused, and dips slightly while OK is held. D-pad center and Enter trigger [onClick]; holding them triggers
  * [onLongClick] when given.
+ *
+ * Holding OK is handled here rather than by combinedClickable: a TV remote sends the held key as a stream of repeated
+ * key-downs, and combinedClickable alone did not turn that into a long click on the TV (the "hold OK to add to
+ * My list" gesture did nothing). The click fires when OK is released, unless the hold already counted as a long press.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -68,6 +79,10 @@ fun FocusSurface(
     val pressed by interactionSource.collectIsPressedAsState()
     val latestOnFocusChanged by rememberUpdatedState(onFocusChanged)
     LaunchedEffect(focused) { latestOnFocusChanged(focused) }
+
+    val keyHold = remember { KeyHold() }
+    val latestOnClick by rememberUpdatedState(onClick)
+    val latestOnLongClick by rememberUpdatedState(onLongClick)
 
     val reduceMotion = LocalReduceMotion.current
     val scale by animateFloatAsState(
@@ -116,6 +131,15 @@ fun FocusSurface(
             .clip(shape)
             .background(container)
             .border(2.dp, if (focused) focusedBorderColor else borderColor, shape)
+            .then(
+                if (onLongClick == null) {
+                    Modifier
+                } else {
+                    Modifier.onPreviewKeyEvent { event ->
+                        keyHold.handle(event, interactionSource, onClick = { latestOnClick() }, onLongClick = { latestOnLongClick?.invoke() })
+                    }
+                },
+            )
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -133,6 +157,54 @@ fun FocusSurface(
         content(focused)
     }
 }
+
+/**
+ * One OK press on a card that has a long-press action: down starts the press (the card dips), a repeat of the held key
+ * (or the system's long-press flag) fires the long press once, and the release fires the click only if no long press
+ * came first. Every OK event is consumed, so combinedClickable never sees them and nothing fires twice.
+ */
+private class KeyHold {
+    private var press: PressInteraction.Press? = null
+    private var longPressed = false
+
+    fun handle(
+        event: KeyEvent,
+        interactions: MutableInteractionSource,
+        onClick: () -> Unit,
+        onLongClick: () -> Unit,
+    ): Boolean {
+        if (event.key !in SELECT_KEYS) return false
+        val native = event.nativeKeyEvent
+        when (event.type) {
+            KeyEventType.KeyDown -> {
+                if (native.repeatCount == 0) {
+                    longPressed = false
+                    release(interactions)
+                    press = PressInteraction.Press(Offset.Zero).also(interactions::tryEmit)
+                } else if (!longPressed && (native.isLongPress || native.repeatCount > 0)) {
+                    longPressed = true
+                    release(interactions)
+                    onLongClick()
+                }
+            }
+            KeyEventType.KeyUp -> {
+                release(interactions)
+                if (!longPressed && !native.isCanceled) onClick()
+                longPressed = false
+            }
+            else -> return false
+        }
+        return true
+    }
+
+    private fun release(interactions: MutableInteractionSource) {
+        press?.let { interactions.tryEmit(PressInteraction.Release(it)) }
+        press = null
+    }
+}
+
+/** The keys that "click", as combinedClickable counts them on a TV: D-pad center and the Enter keys. */
+private val SELECT_KEYS = setOf(Key.DirectionCenter, Key.Enter, Key.NumPadEnter)
 
 private const val DURATION_MS = 160
 private const val SPRING_DAMPING = 0.62f

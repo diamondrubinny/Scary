@@ -176,7 +176,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
+                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome)
             }
             item(key = CREDIT_KEY) {
                 Column(
@@ -256,10 +256,11 @@ private fun HomeRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
     showSetHome: Boolean,
 ) {
     if (row is HomeRow.Moods) {
-        MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked)
+        MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
         return
     }
     if (row is HomeRow.Collection) {
@@ -280,13 +281,15 @@ private fun HomeRowView(
         is HomeRow.Moods -> stringResource(R.string.row_moods)
     }
     Column {
-        BasicText(
-            text = title,
-            style = ScaryType.RowTitle,
-            modifier = Modifier
-                .padding(horizontal = SidePadding)
-                .semantics { heading() },
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = SidePadding),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            BasicText(text = title, style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            // The only row a movie leaves by holding OK: say so where it matters.
+            if (row is HomeRow.MyList) BasicText(stringResource(R.string.my_list_hint), style = ScaryType.Caption)
+        }
         LazyRow(
             state = rowState,
             modifier = Modifier.testTag(rowTag(row.key)),
@@ -300,6 +303,7 @@ private fun HomeRowView(
                     WideMovieCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
@@ -311,6 +315,7 @@ private fun HomeRowView(
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
@@ -338,6 +343,7 @@ private fun HomeRowView(
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
@@ -453,6 +459,7 @@ private fun MoodsRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
 ) {
     val movieState = rememberLazyListState()
     LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
@@ -499,6 +506,7 @@ private fun MoodsRowView(
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },

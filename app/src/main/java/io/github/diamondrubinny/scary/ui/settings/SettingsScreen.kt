@@ -44,6 +44,7 @@ class SettingsActions(
     val onToggleEffects: () -> Unit,
     val onCycleNightFear: () -> Unit,
     val onToggleSeasonalRows: () -> Unit,
+    val onToggleAutoWatched: () -> Unit,
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onSetupPin: () -> Unit,
@@ -69,6 +70,7 @@ fun SettingsScreen(
     lockFromFear: Int,
     familyNight: Boolean,
     seasonalRows: Boolean,
+    autoWatched: Boolean,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -155,6 +157,12 @@ fun SettingsScreen(
             value = stringResource(if (seasonalRows) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSeasonalRows,
         )
+        SettingRow(
+            label = stringResource(R.string.settings_auto_watched),
+            value = stringResource(if (autoWatched) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleAutoWatched,
+        )
+        BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),

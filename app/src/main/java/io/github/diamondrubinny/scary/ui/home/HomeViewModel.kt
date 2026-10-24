@@ -23,7 +23,9 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
+import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
@@ -171,6 +173,8 @@ class HomeViewModel(
             myListIds = prefs.myListIds.toSet(),
             familyNight = prefs.familyNight,
             seasonalRows = prefs.seasonalRows,
+            watchedIds = prefs.watchedIds.toSet(),
+            autoWatched = prefs.autoWatched,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -261,7 +265,10 @@ class HomeViewModel(
         selectedMood: Mood?,
         prefs: LauncherPrefs,
     ): HomeUiState {
-        val nightPick = NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
+        // Tonight's pick is one not seen yet, as long as any is left.
+        val watched = prefs.watchedIds.toHashSet()
+        val nightPick = NightPick.pick(catalog.movies.filter { it.id !in watched }, today(), prefs.nightMaxFear)
+            ?: NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
         val rows = buildList {
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
@@ -451,6 +458,7 @@ class HomeViewModel(
             random = Random.Default,
             exclude = heroId.value,
             isLocked = { ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, it) },
+            watched = prefs.watchedIds.toHashSet(),
         )
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
@@ -493,7 +501,9 @@ class HomeViewModel(
             try {
                 delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
                 if (generation != dialogGeneration) return@launch
-                report(open())
+                val result = open()
+                report(result)
+                if (result is LaunchResult.Opened || result is LaunchResult.OpenedAppOnly) rememberWatching(movie)
                 // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
                 delay(LAUNCH_CLEAR_MS)
             } finally {
@@ -503,6 +513,47 @@ class HomeViewModel(
             }
         }
         launchJob = job
+    }
+
+    /**
+     * Remembers the movie now playing elsewhere, so the return to SCARY can mark it as watched. A coroutine of its own:
+     * leaving SCARY cancels the launch job right after this.
+     */
+    private fun rememberWatching(movie: Movie) {
+        viewModelScope.launch { settings.setPendingWatch(PendingWatch(movie.id, System.currentTimeMillis())) }
+    }
+
+    /**
+     * SCARY is on screen again. If a movie was handed to another app and the time away looks like a viewing, it is
+     * marked as watched (when the viewer allows it), and a message says so and how to undo it.
+     */
+    fun onResumed() {
+        viewModelScope.launch {
+            val pending = settings.takePendingWatch() ?: return@launch
+            val prefs = settings.prefs.first()
+            if (!prefs.autoWatched || pending.movieId in prefs.watchedIds) return@launch
+            val catalog = (shownCatalog.first { it !is CatalogState.Loading } as? CatalogState.Ready)?.catalog
+            val movie = catalog?.movie(pending.movieId) ?: webMovieIfAllowed(pending.movieId)
+            val away = System.currentTimeMillis() - pending.startedAtMillis
+            if (!AutoWatched.counts(away, movie?.runtimeMin ?: 0)) return@launch
+            if (settings.setWatched(pending.movieId, watched = true) && movie != null) {
+                show(R.string.msg_auto_watched, movie.displayTitle(language.value))
+            }
+        }
+    }
+
+    /** Marks a movie as watched or not, from its page, and says which. Not PIN-gated: it opens nothing. */
+    fun toggleWatched(movie: Movie, language: Language) {
+        viewModelScope.launch {
+            val watched = movie.id !in settings.prefs.first().watchedIds
+            settings.setWatched(movie.id, watched)
+            if (watched) savedMovies.save(movie, language)
+            show(if (watched) R.string.msg_marked_watched else R.string.msg_unmarked_watched, movie.displayTitle(language))
+        }
+    }
+
+    fun toggleAutoWatched() {
+        viewModelScope.launch { settings.setAutoWatched(!settings.prefs.first().autoWatched) }
     }
 
     private fun cancelLaunch() {
@@ -558,7 +609,11 @@ class HomeViewModel(
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
             is GatedAction.SearchIn -> {
-                viewModelScope.launch { settings.pushRecent(action.movie.id) }
+                viewModelScope.launch {
+                    settings.pushRecent(action.movie.id)
+                    // Online movies are kept, so Recently opened still finds them after they leave the online rows.
+                    savedMovies.save(action.movie, language.value)
+                }
                 launchWithShiver(action.movie, action.app.label) {
                     launcher.searchIn(action.app.packageName, action.app.label, action.movie)
                 }

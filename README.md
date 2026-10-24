@@ -57,7 +57,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 👨‍👩‍👧 **Family night**: only the gentlest films, everywhere, and leaving it takes a PIN.
 - 🎲 **"Surprise me"**: a random film at the fear level you choose.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
-- ⭐ **My list**: hold OK on any poster to keep it.
+- ⭐ **My list and Watched**: hold OK on any poster to keep it (hold again to remove it), and mark what you have seen. Come back from a movie and SCARY marks it as watched for you.
 - 🌫️ **Atmosphere**: fog, film grain and an ambient drone (all can be turned off), and a screensaver of horror backdrops.
 - 🔒 **Parental lock** with a PIN, by fear level. Locked films show no poster or backdrop.
 - 🕯️ **Privacy**: no account, no ads, no tracking. Everything stays on your TV.
@@ -105,7 +105,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 👨‍👩‍👧 **ערב משפחתי**: רק הסרטים העדינים ביותר, בכל מקום, והיציאה דורשת PIN.
 - 🎲 **"הפתע אותי"**: סרט אקראי ברמת הפחד שבחרתם.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
-- ⭐ **"הרשימה שלי"**: לחיצה ארוכה על פוסטר שומרת אותו.
+- ⭐ **"הרשימה שלי" ו"נצפה"**: לחיצה ארוכה על פוסטר שומרת אותו (לחיצה ארוכה נוספת מסירה), ואפשר לסמן מה כבר ראיתם. כשחוזרים מסרט, SCARY מסמנת אותו כנצפה בעצמה.
 - 🌫️ **אווירה**: ערפל, גרעיניות קולנועית וצלילי רקע (אפשר לכבות), ושומר מסך עם רקעים מסרטי אימה.
 - 🔒 **נעילת הורים** בקוד PIN, לפי רמת הפחד. סרט נעול מוצג בלי פוסטר ורקע.
 - 🕯️ **פרטיות**: בלי חשבון, בלי פרסומות ובלי מעקב. הכל נשמר בטלוויזיה.
@@ -155,7 +155,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 👨‍👩‍👧 **سهرة عائلية**: أخف الأفلام فقط في كل مكان، والخروج منها يتطلب رمز PIN.
 - 🎲 **«فاجئني»**: فيلم عشوائي ضمن مستوى الرعب الذي تختاره.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
-- ⭐ **«قائمتي»**: ضغطة مطوّلة على أي ملصق تحفظه.
+- ⭐ **«قائمتي» و«شوهد»**: ضغطة مطوّلة على أي ملصق تحفظه (وضغطة أخرى تزيله)، ويمكنك وضع علامة على ما شاهدته. وعند عودتك من فيلم، يضع SCARY عليه علامة «شوهد» بنفسه.
 - 🌫️ **أجواء**: ضباب وحبيبات سينمائية وأصوات خلفية (يمكن إيقافها)، وشاشة توقف بخلفيات من أفلام الرعب.
 - 🔒 **قفل أبوي** برمز PIN حسب مستوى الرعب. الفيلم المقفل يظهر بلا ملصق وبلا خلفية.
 - 🕯️ **الخصوصية**: بلا حساب وبلا إعلانات وبلا تتبع. كل شيء يُحفظ على التلفاز.
@@ -203,7 +203,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - 👨‍👩‍👧 **Noite em família**: só os filmes mais leves, em todo lugar, e para sair é preciso o PIN.
 - 🎲 **"Surpreenda-me"**: um filme aleatório no nível de medo que você escolher.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
-- ⭐ **Minha lista**: segure OK em qualquer pôster para guardá-lo.
+- ⭐ **Minha lista e Visto**: segure OK em qualquer pôster para guardá-lo (segure de novo para tirar) e marque o que você já viu. Ao voltar de um filme, o SCARY o marca como visto sozinho.
 - 🌫️ **Atmosfera**: névoa, granulado de cinema e som ambiente (tudo pode ser desligado), e um protetor de tela com fundos de filmes de terror.
 - 🔒 **Controle dos pais** com PIN, por nível de medo. Filmes bloqueados aparecem sem pôster e sem fundo.
 - 🕯️ **Privacidade**: sem conta, sem anúncios e sem rastreamento. Tudo fica na sua TV.
@@ -249,7 +249,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 👨‍👩‍👧 **Семейный вечер**: везде только самые мягкие фильмы, выход — по PIN-коду.
 - 🎲 **«Удиви меня»**: случайный фильм в пределах выбранного уровня страха.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
-- ⭐ **«Мой список»**: удерживайте OK на постере, чтобы сохранить фильм.
+- ⭐ **«Мой список» и «Просмотрено»**: удерживайте OK на постере, чтобы сохранить фильм (ещё раз — чтобы убрать), и отмечайте просмотренное. Когда вы возвращаетесь после фильма, SCARY сам отмечает его просмотренным.
 - 🌫️ **Атмосфера**: туман, киноплёночное зерно и фоновые звуки (можно отключить), а также заставка с кадрами из фильмов ужасов.
 - 🔒 **Родительский замок** с PIN-кодом по уровню страха. Заблокированные фильмы показываются без постера и фона.
 - 🕯️ **Приватность**: без аккаунта, без рекламы и без слежки. Всё хранится на телевизоре.

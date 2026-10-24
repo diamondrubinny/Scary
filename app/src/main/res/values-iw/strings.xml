@@ -211,4 +211,13 @@
     <string name="donate_title">תמיכה ב־SCARY</string>
     <string name="donate_body">סרקו בטלפון כדי לתרום ב־PayPal. ‏SCARY נשארת חינמית, והתרומה היא רשות.</string>
     <string name="donate_qr_description">קוד QR לתרומה ל־SCARY ב־PayPal</string>
+    <string name="action_mark_watched">סימון כנצפה</string>
+    <string name="action_watched">✓ נצפה</string>
+    <string name="watched_badge">נצפה</string>
+    <string name="msg_marked_watched">%1$s סומן כנצפה</string>
+    <string name="msg_unmarked_watched">%1$s כבר לא מסומן כנצפה</string>
+    <string name="msg_auto_watched">ברוכים השבים. %1$s סומן כנצפה, ואפשר לשנות את זה בעמוד הסרט.</string>
+    <string name="settings_auto_watched">סימון כנצפה אחרי צפייה</string>
+    <string name="settings_auto_watched_note">כשחוזרים ל־SCARY אחרי רוב אורך הסרט, הוא מסומן כנצפה. ‏SCARY לא רואה מה קורה באפליקציות אחרות, ולכן היא מחליטה לפי הזמן בלבד. תמיד אפשר לשנות את זה בעמוד הסרט.</string>
+    <string name="my_list_hint">לחיצה ארוכה על OK מסירה סרט מהרשימה</string>
 </resources>

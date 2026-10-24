@@ -22,7 +22,8 @@ object NightPick {
 
     /**
      * "Surprise me": a random curated movie at or below [maxFear], skipping [exclude] (the one on screen) and any
-     * movie [isLocked] rejects, so the button never lands on a PIN prompt. Null when nothing qualifies.
+     * movie [isLocked] rejects, so the button never lands on a PIN prompt. Movies not in [watched] come first, while
+     * any are left. Null when nothing qualifies.
      */
     fun surprise(
         movies: List<Movie>,
@@ -30,9 +31,11 @@ object NightPick {
         random: kotlin.random.Random,
         exclude: String? = null,
         isLocked: (Movie) -> Boolean = { false },
+        watched: Set<String> = emptySet(),
     ): Movie? {
         val pool = movies.filter { m -> m.curated && m.fear != null && m.fear <= maxFear && !isLocked(m) }
-        return pool.filter { it.id != exclude }.ifEmpty { pool }.randomOrNull(random)
+        val fresh = pool.filter { it.id != exclude }.ifEmpty { pool }
+        return fresh.filter { it.id !in watched }.ifEmpty { fresh }.randomOrNull(random)
     }
 }
 
