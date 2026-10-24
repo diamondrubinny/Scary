@@ -65,6 +65,7 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
+import io.github.diamondrubinny.scary.ui.components.DataCredit
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
@@ -178,7 +179,13 @@ fun HomeScreen(
                 HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
             }
             item(key = CREDIT_KEY) {
-                CreditLine(Modifier.padding(horizontal = SidePadding, vertical = 12.dp))
+                Column(
+                    Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CreditLine()
+                    DataCredit()
+                }
             }
         }
     }

@@ -23,6 +23,8 @@ kotlin {
 dependencies {
     // Exposed because CinemetaCache is serializable and the app stores it.
     api(libs.kotlinx.serialization.json)
+    // QR codes (the donation code in settings). Pure Java, Apache-2.0; only its encoder ships, the tests also decode.
+    implementation(libs.zxing.core)
     testImplementation(libs.junit)
 }
 

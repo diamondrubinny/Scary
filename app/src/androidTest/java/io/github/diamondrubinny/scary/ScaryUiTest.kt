@@ -91,21 +91,26 @@ class ScaryUiTest {
     }
 
     @Test
-    fun theCreditShowsUnderTheLogoAndAtTheEndOfTheRows() {
+    fun theCreditsShowUnderTheLogoAndAtTheEndOfTheRows() {
         waitForHome()
         // Required by the NOTICE file (Apache License 2.0); the build fails if it disappears from the screen.
         rule.onNode(hasText(Credit.SHORT)).assertExists()
         rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(CREDIT_KEY)
         waitFor(hasText(Credit.LINE))
+        // Beside it, where the movie information and pictures come from (TMDB's API terms).
+        waitFor(hasText(text(R.string.data_credit)))
     }
 
     @Test
-    fun settingsSayThatScaryHoldsNoVideoAndOnlyOpensInstalledApps() {
+    fun settingsSayWhereMoviesComeFromAndOfferTheDonationCode() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         val notice = hasText(text(R.string.settings_content_notice))
         waitFor(notice)
         rule.onNode(notice).performScrollTo().assertExists()
+        // The movie data credit (TMDB's terms) and the donation code are in the same About section.
+        rule.onNode(hasText(text(R.string.data_credit))).performScrollTo().assertExists()
+        rule.onNodeWithContentDescription(text(R.string.donate_qr_description)).performScrollTo().assertExists()
         backToHome()
     }
 

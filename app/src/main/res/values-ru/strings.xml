@@ -210,4 +210,8 @@
     <string name="search_everywhere">Искать по всему ТВ</string>
     <string name="watch_elsewhere_note">SCARY ищет по названию. Он не знает, доступен ли фильм в каждом приложении.</string>
     <string name="settings_seasonal">Сезонные ряды (Хэллоуин, пятница 13-е)</string>
+    <string name="data_credit">Информация о фильмах и изображения: TMDB и Cinemeta</string>
+    <string name="donate_title">Поддержите SCARY</string>
+    <string name="donate_body">Наведите камеру телефона, чтобы пожертвовать через PayPal. SCARY остаётся бесплатным, пожертвование — по желанию.</string>
+    <string name="donate_qr_description">QR-код для пожертвования SCARY через PayPal</string>
 </resources>

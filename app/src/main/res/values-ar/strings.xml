@@ -217,4 +217,8 @@
     <string name="search_everywhere">البحث في التلفزيون كله</string>
     <string name="watch_elsewhere_note">يبحث SCARY باسم الفيلم، ولا يعرف إن كان الفيلم متاحًا في كل تطبيق.</string>
     <string name="settings_seasonal">صفوف موسمية (الهالوين، الجمعة 13)</string>
+    <string name="data_credit">معلومات الأفلام وصورها: TMDB وCinemeta</string>
+    <string name="donate_title">ادعم SCARY</string>
+    <string name="donate_body">امسح الرمز بهاتفك للتبرع عبر PayPal. يبقى SCARY مجانيًا، والتبرع اختياري.</string>
+    <string name="donate_qr_description">رمز QR للتبرع لـ SCARY عبر PayPal</string>
 </resources>

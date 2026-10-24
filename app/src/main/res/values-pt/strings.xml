@@ -207,4 +207,8 @@
     <string name="search_everywhere">Buscar em toda a TV</string>
     <string name="watch_elsewhere_note">O SCARY busca pelo título. Ele não sabe se o filme está disponível em cada app.</string>
     <string name="settings_seasonal">Fileiras sazonais (Halloween, sexta-feira 13)</string>
+    <string name="data_credit">Informações e imagens dos filmes: TMDB e Cinemeta</string>
+    <string name="donate_title">Apoie o SCARY</string>
+    <string name="donate_body">Aponte a câmera do celular para doar pelo PayPal. O SCARY continua grátis; doar é opcional.</string>
+    <string name="donate_qr_description">Código QR para doar ao SCARY pelo PayPal</string>
 </resources>

@@ -207,4 +207,8 @@
     <string name="search_everywhere">חיפוש בכל הטלוויזיה</string>
     <string name="watch_elsewhere_note">SCARY מחפשת לפי שם הסרט. היא לא יודעת אם הסרט זמין בכל אפליקציה.</string>
     <string name="settings_seasonal">שורות עונתיות (הלואין, שישי ה־13)</string>
+    <string name="data_credit">מידע ותמונות של סרטים: TMDB ו־Cinemeta</string>
+    <string name="donate_title">תמיכה ב־SCARY</string>
+    <string name="donate_body">סרקו בטלפון כדי לתרום ב־PayPal. ‏SCARY נשארת חינמית, והתרומה היא רשות.</string>
+    <string name="donate_qr_description">קוד QR לתרומה ל־SCARY ב־PayPal</string>
 </resources>

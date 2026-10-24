@@ -206,4 +206,8 @@
     <string name="search_everywhere">Search the whole TV</string>
     <string name="watch_elsewhere_note">SCARY searches by title. It cannot tell whether the movie is available in each app.</string>
     <string name="settings_seasonal">Seasonal rows (Halloween, Friday the 13th)</string>
+    <string name="data_credit">Movie information and images: TMDB and Cinemeta</string>
+    <string name="donate_title">Support SCARY</string>
+    <string name="donate_body">Scan with your phone to donate with PayPal. SCARY stays free; giving is optional.</string>
+    <string name="donate_qr_description">QR code to donate to SCARY with PayPal</string>
 </resources>

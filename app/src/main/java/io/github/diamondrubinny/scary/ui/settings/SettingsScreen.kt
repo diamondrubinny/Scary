@@ -5,6 +5,8 @@
 package io.github.diamondrubinny.scary.ui.settings
 
 import io.github.diamondrubinny.scary.ui.components.CreditLine
+import io.github.diamondrubinny.scary.ui.components.DataCredit
+import io.github.diamondrubinny.scary.ui.components.SupportScary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -206,6 +208,8 @@ fun SettingsScreen(
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
         BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
+        DataCredit()
+        SupportScary(Modifier.padding(vertical = 8.dp))
         SettingRow(
             label = stringResource(R.string.settings_privacy),
             value = null,
