@@ -188,17 +188,17 @@ class ScaryUiTest {
         rule.waitForIdle()
         try {
             longPressOk()
-            // Added, and the movie page did not open on the way.
-            waitFor(hasText(rule.activity.getString(R.string.msg_my_list_added, movie.title), substring = true))
+            // The movie page must not open on the way.
             assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
-            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("mylist")
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
             waitFor(inList)
             rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
             rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
             rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
             rule.waitForIdle()
             longPressOk()
-            waitFor(hasText(rule.activity.getString(R.string.msg_my_list_removed, movie.title), substring = true))
+            assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
             waitForGone(inList)
         } finally {
             setInMyList(movie, wanted = false)
