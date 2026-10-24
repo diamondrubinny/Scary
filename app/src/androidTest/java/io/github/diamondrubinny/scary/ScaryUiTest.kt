@@ -42,6 +42,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
 import org.junit.Assert.assertTrue
+import androidx.compose.ui.test.ComposeTimeoutException
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToString
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +61,24 @@ class ScaryUiTest {
     private fun text(id: Int): String = rule.activity.getString(id)
 
     private fun waitFor(matcher: SemanticsMatcher, timeoutMillis: Long = TIMEOUT_MS) {
-        rule.waitUntil(timeoutMillis) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        waitUntilOrDescribe("${matcher.description} on screen", timeoutMillis) {
+            rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /** Like waitUntil, but a timeout says what was on screen and what had the focus, so CI failures can be read. */
+    private fun waitUntilOrDescribe(what: String, timeoutMillis: Long = TIMEOUT_MS, condition: () -> Boolean) {
+        try {
+            rule.waitUntil(timeoutMillis, condition)
+        } catch (timeout: ComposeTimeoutException) {
+            val focused = runCatching {
+                rule.onAllNodes(isFocused()).fetchSemanticsNodes().joinToString { node ->
+                    node.config.toString().take(FOCUS_DESCRIPTION_CHARS)
+                }
+            }.getOrDefault("?")
+            val screen = runCatching { rule.onRoot().printToString(maxDepth = SCREEN_DEPTH) }.getOrDefault("?")
+            throw AssertionError("Timed out waiting for $what.\nFocused: $focused\nScreen:\n${screen.take(SCREEN_CHARS)}", timeout)
+        }
     }
 
     private fun waitForGone(matcher: SemanticsMatcher) {
@@ -99,7 +119,7 @@ class ScaryUiTest {
             if (onHome()) return
             pressBack()
         }
-        rule.waitUntil(TIMEOUT_MS) { onHome() }
+        waitUntilOrDescribe("the home screen") { onHome() }
     }
 
     @Test
@@ -210,7 +230,7 @@ class ScaryUiTest {
             // The movie page must not open on the way.
             assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
             val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
-            rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+            waitUntilOrDescribe("the My list row") { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
             waitFor(inList)
             rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
             rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
@@ -422,5 +442,8 @@ class ScaryUiTest {
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
         const val LONG_PRESS_SETTLE_MS = 2_500L
+        const val SCREEN_DEPTH = 6
+        const val SCREEN_CHARS = 6_000
+        const val FOCUS_DESCRIPTION_CHARS = 300
     }
 }
