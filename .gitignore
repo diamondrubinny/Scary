@@ -9,3 +9,7 @@ captures/
 *.keystore
 *.jks
 dist/
+
+# Python (tools/promo)
+__pycache__/
+*.pyc
