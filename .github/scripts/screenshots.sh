@@ -171,7 +171,7 @@ shot 43-en-my-list 4
 open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 44-en-surprise 6
-# English versions of the moods, family night, rows and shiver screens, for the English video ad (tools/promo).
+# English versions of the moods, family night and shiver screens, for the English video ad (tools/promo).
 open --es scary.debug.open home
 open --es scary.debug.open mood:relentless
 shot 55-en-moods 5
@@ -181,14 +181,7 @@ shot 56-en-family-night 6
 open --es scary.debug.open family
 sleep 3
 open --es scary.debug.open home
-sleep 4
-key KEYCODE_DPAD_DOWN
-key KEYCODE_DPAD_DOWN
-key KEYCODE_DPAD_LEFT
-key KEYCODE_DPAD_LEFT
-key KEYCODE_DPAD_DOWN
-key KEYCODE_DPAD_DOWN
-shot 57-en-rows 3
+sleep 3
 open --es scary.debug.open details:the_shining
 sleep 6
 key KEYCODE_DPAD_CENTER
