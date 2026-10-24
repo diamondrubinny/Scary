@@ -47,6 +47,7 @@ import org.junit.Assert.assertTrue
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.printToString
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -59,6 +60,15 @@ import org.junit.runner.RunWith
 class ScaryUiTest {
     @get:Rule
     val rule = createAndroidComposeRule<MainActivity>()
+
+    /**
+     * A TV is never in touch mode, but the test runner starts activities in it; the first remote key would then only
+     * take the window out of it (Android swallows that key), so OK presses would not behave as on a TV.
+     */
+    @Before
+    fun likeATv() {
+        InstrumentationRegistry.getInstrumentation().setInTouchMode(false)
+    }
 
     private fun text(id: Int): String = rule.activity.getString(id)
 

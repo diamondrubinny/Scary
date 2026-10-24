@@ -186,8 +186,12 @@ private class KeyHold {
                     longPressed = false
                     release(interactions)
                     press = PressInteraction.Press(Offset.Zero).also(interactions::tryEmit)
-                } else if (started && !longPressed && onLongClick != null) {
+                } else if (!longPressed && onLongClick != null && (started || !heldAfterLongPress)) {
+                    // Without "started", the press began unseen: Android swallows the first remote key that takes
+                    // the window out of touch mode. It still counts, unless it is the leftover of a long press that
+                    // already fired on another element (that element's dialog now has the focus).
                     longPressed = true
+                    heldAfterLongPress = true
                     release(interactions)
                     onLongClick()
                 }
@@ -197,10 +201,16 @@ private class KeyHold {
                 if (started && !longPressed && !native.isCanceled) onClick()
                 started = false
                 longPressed = false
+                heldAfterLongPress = false
             }
             else -> return false
         }
         return true
+    }
+
+    private companion object {
+        /** A long press fired and OK is not released yet: its repeats, wherever the focus went, are leftovers. */
+        var heldAfterLongPress = false
     }
 
     private fun release(interactions: MutableInteractionSource) {

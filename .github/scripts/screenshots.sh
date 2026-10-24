@@ -37,9 +37,9 @@ if [ -f dist/scary-tests.apk ]; then
   } > "$OUT/ui-tests.txt"
   echo "$result"
   cat "$OUT/ui-tests.txt"
+  echo "OK key events the app handled during the tests (last 200):"
+  adb logcat -d -s ScaryKeys:D | tail -200 || true
   if ! echo "$result" | grep -q '^OK ('; then
-    echo "OK key events the app handled (last 200):"
-    adb logcat -d -s ScaryKeys:D | tail -200 || true
     echo "UI tests failed."
     exit 1
   fi
