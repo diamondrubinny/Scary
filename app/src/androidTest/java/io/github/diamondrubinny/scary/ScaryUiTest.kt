@@ -99,6 +99,16 @@ class ScaryUiTest {
 
     private fun waitForHome() = waitFor(hasText(text(R.string.row_apps)))
 
+    /**
+     * Home sends the focus to "watch tonight's pick" one frame after it shows. A test that moves the focus itself waits
+     * for that first, or the hero takes the focus back and the remote's OK lands there instead.
+     */
+    private fun waitForHomeFocus() {
+        waitForHome()
+        waitUntilOrDescribe("the first focus on the home screen") { rule.onAllNodes(isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitForIdle()
+    }
+
     /** On the home screen, whatever row it is scrolled to (the apps row is not composed once it scrolls away). */
     private fun onHome(): Boolean = rule.onAllNodes(hasTestTag(HOME_ROWS_TAG)).fetchSemanticsNodes().isNotEmpty()
 
@@ -118,6 +128,8 @@ class ScaryUiTest {
         repeat(MAX_BACKS) {
             if (onHome()) return
             pressBack()
+            // Let the screen change land before deciding whether another Back is needed.
+            rule.waitForIdle()
         }
         waitUntilOrDescribe("the home screen") { onHome() }
     }
@@ -209,7 +221,7 @@ class ScaryUiTest {
 
     @Test
     fun holdingOkOnAPosterAddsItToMyListAndHoldingAgainRemovesIt() {
-        waitForHome()
+        waitForHomeFocus()
         val catalog = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
         val collection = catalog.collections.first()
         val movie = catalog.moviesOf(collection).first()
@@ -299,8 +311,9 @@ class ScaryUiTest {
                 // Added second, so it comes first in the row (newest first).
                 setInMyList(first, wanted = true)
                 setInMyList(second, wanted = true)
+                waitForHomeFocus()
                 val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
-                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+                waitUntilOrDescribe("the My list row") { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
                 waitFor(inMyList(second))
                 rule.onNode(inMyList(second)).performSemanticsAction(SemanticsActions.RequestFocus)
                 rule.waitForIdle()
@@ -308,9 +321,7 @@ class ScaryUiTest {
                 longPressOk()
                 waitForGone(inMyList(second))
                 // The card that took its place has the focus, so holding OK again removes it too.
-                rule.waitUntil(TIMEOUT_MS) {
-                    rule.onAllNodes(inMyList(first) and isFocused()).fetchSemanticsNodes().isNotEmpty()
-                }
+                waitFor(inMyList(first) and isFocused())
                 longPressOk()
                 waitForGone(inMyList(first))
             },
@@ -437,7 +448,8 @@ class ScaryUiTest {
 
     private companion object {
         const val TIMEOUT_MS = 20_000L
-        const val MAX_BACKS = 4
+        // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
+        const val MAX_BACKS = 6
         const val ONLINE_TIMEOUT_MS = 45_000L
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
