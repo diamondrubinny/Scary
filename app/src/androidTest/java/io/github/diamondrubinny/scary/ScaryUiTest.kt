@@ -34,6 +34,12 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -148,6 +154,99 @@ class ScaryUiTest {
     }
 
     @Test
+    fun myListKeepsSeveralMoviesAndEachCanBeRemoved() {
+        waitForHome()
+        val first = bundledMovies().first { it.title == "The Shining" }
+        val second = bundledMovies().first { it.title == "Hereditary" }
+        try {
+            setInMyList(first, wanted = true)
+            setInMyList(second, wanted = true)
+            assertMyListRow(present = listOf(first, second))
+            setInMyList(first, wanted = false)
+            assertMyListRow(present = listOf(second), absent = listOf(first))
+        } finally {
+            setInMyList(first, wanted = false)
+            setInMyList(second, wanted = false)
+        }
+    }
+
+    @Test
+    fun holdingOkOnAPosterAddsItToMyListAndHoldingAgainRemovesIt() {
+        waitForHome()
+        val catalog = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
+        val collection = catalog.collections.first()
+        val movie = catalog.moviesOf(collection).first()
+        val rowKey = "collection:${collection.id}"
+        val card = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag(rowKey)))
+        val inList = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag("mylist")))
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+        rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+        waitFor(card)
+        rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
+        rule.waitForIdle()
+        try {
+            longPressOk()
+            // Added, and the movie page did not open on the way.
+            waitFor(hasText(rule.activity.getString(R.string.msg_my_list_added, movie.title), substring = true))
+            assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("mylist")
+            waitFor(inList)
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+            rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+            rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
+            rule.waitForIdle()
+            longPressOk()
+            waitFor(hasText(rule.activity.getString(R.string.msg_my_list_removed, movie.title), substring = true))
+            waitForGone(inList)
+        } finally {
+            setInMyList(movie, wanted = false)
+        }
+    }
+
+    /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */
+    private fun longPressOk() {
+        InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER").close()
+        // The shell command returns before the events arrive.
+        Thread.sleep(LONG_PRESS_SETTLE_MS)
+        rule.waitForIdle()
+    }
+
+    /** Opens [movie] through search, puts it in or out of My list with the movie page's button, and goes home. */
+    private fun setInMyList(movie: Movie, wanted: Boolean) {
+        backToHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        // Search keeps its last query when it comes back; replace it rather than adding to it.
+        rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+        val result = hasContentDescription("${movie.title}, ${movie.year}", substring = true)
+        waitFor(result)
+        rule.onAllNodes(result)[0].performClick()
+        val add = hasText(text(R.string.action_add_my_list))
+        val inList = hasText(text(R.string.action_in_my_list))
+        waitFor(add or inList)
+        val isIn = rule.onAllNodes(inList).fetchSemanticsNodes().isNotEmpty()
+        if (isIn != wanted) {
+            rule.onNode(if (isIn) inList else add).performClick()
+            waitFor(if (wanted) inList else add)
+        }
+        backToHome()
+    }
+
+    private fun assertMyListRow(present: List<Movie>, absent: List<Movie> = emptyList()) {
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+        rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+        for (movie in present) {
+            waitFor(hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist"))))
+        }
+        for (movie in absent) {
+            waitForGone(hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist"))))
+        }
+    }
+
+    @Test
     fun aSearchWithNoMatchSaysSoAndOffersSurpriseMe() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
@@ -226,5 +325,6 @@ class ScaryUiTest {
         const val ONLINE_TIMEOUT_MS = 45_000L
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
+        const val LONG_PRESS_SETTLE_MS = 2_500L
     }
 }
