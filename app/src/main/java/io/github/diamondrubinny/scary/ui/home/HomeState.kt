@@ -35,8 +35,13 @@ data class HomeUiState(
     val myListIds: Set<String> = emptySet(),
     val familyNight: Boolean = false,
     val seasonalRows: Boolean = true,
+    /** Ids the viewer has seen, for the badge on cards and the button on a movie's page. */
+    val watchedIds: Set<String> = emptySet(),
+    val autoWatched: Boolean = true,
 ) {
     fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
+
+    fun isWatched(movie: Movie): Boolean = movie.id in watchedIds
 }
 
 /** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */

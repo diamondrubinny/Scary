@@ -207,4 +207,17 @@
     <string name="search_everywhere">Buscar em toda a TV</string>
     <string name="watch_elsewhere_note">O SCARY busca pelo título. Ele não sabe se o filme está disponível em cada app.</string>
     <string name="settings_seasonal">Fileiras sazonais (Halloween, sexta-feira 13)</string>
+    <string name="data_credit">Informações e imagens dos filmes: TMDB e Cinemeta</string>
+    <string name="donate_title">Apoie o SCARY</string>
+    <string name="donate_body">Aponte a câmera do celular para doar pelo PayPal. O SCARY continua grátis; doar é opcional.</string>
+    <string name="donate_qr_description">Código QR para doar ao SCARY pelo PayPal</string>
+    <string name="action_mark_watched">Marcar como visto</string>
+    <string name="action_watched">✓ Visto</string>
+    <string name="watched_badge">visto</string>
+    <string name="msg_marked_watched">%1$s marcado como visto</string>
+    <string name="msg_unmarked_watched">%1$s não está mais marcado como visto</string>
+    <string name="msg_auto_watched">Bem-vindo de volta. %1$s foi marcado como visto; você pode mudar isso na página do filme.</string>
+    <string name="settings_auto_watched">Marcar como visto depois de assistir</string>
+    <string name="settings_auto_watched_note">Quando você volta ao SCARY depois da maior parte da duração do filme, ele é marcado como visto. O SCARY não vê o que acontece em outros apps, então decide só pelo tempo; você sempre pode mudar isso na página do filme.</string>
+    <string name="my_list_hint">Segure OK em um pôster para removê-lo</string>
 </resources>

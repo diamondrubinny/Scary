@@ -217,4 +217,17 @@
     <string name="search_everywhere">البحث في التلفزيون كله</string>
     <string name="watch_elsewhere_note">يبحث SCARY باسم الفيلم، ولا يعرف إن كان الفيلم متاحًا في كل تطبيق.</string>
     <string name="settings_seasonal">صفوف موسمية (الهالوين، الجمعة 13)</string>
+    <string name="data_credit">معلومات الأفلام وصورها: TMDB وCinemeta</string>
+    <string name="donate_title">ادعم SCARY</string>
+    <string name="donate_body">امسح الرمز بهاتفك للتبرع عبر PayPal. يبقى SCARY مجانيًا، والتبرع اختياري.</string>
+    <string name="donate_qr_description">رمز QR للتبرع لـ SCARY عبر PayPal</string>
+    <string name="action_mark_watched">وضع علامة «شوهد»</string>
+    <string name="action_watched">✓ شوهد</string>
+    <string name="watched_badge">شوهد</string>
+    <string name="msg_marked_watched">وُضعت علامة «شوهد» على %1$s</string>
+    <string name="msg_unmarked_watched">أُزيلت علامة «شوهد» عن %1$s</string>
+    <string name="msg_auto_watched">أهلًا بعودتك. وُضعت علامة «شوهد» على %1$s، ويمكنك تغييرها من صفحة الفيلم.</string>
+    <string name="settings_auto_watched">وضع علامة «شوهد» بعد المشاهدة</string>
+    <string name="settings_auto_watched_note">عندما تعود إلى SCARY بعد معظم مدة الفيلم، توضع عليه علامة «شوهد». لا يرى SCARY ما يجري داخل التطبيقات الأخرى، لذلك يحكم بالوقت فقط، ويمكنك دائمًا تغيير ذلك من صفحة الفيلم.</string>
+    <string name="my_list_hint">اضغط مطولًا على OK فوق الملصق لإزالته</string>
 </resources>

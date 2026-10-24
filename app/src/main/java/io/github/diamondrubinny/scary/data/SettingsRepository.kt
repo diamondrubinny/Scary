@@ -19,7 +19,9 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
 import io.github.diamondrubinny.scary.core.catalog.MyList
+import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.RecentList
+import io.github.diamondrubinny.scary.core.catalog.WatchedList
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.security.LockoutState
 import io.github.diamondrubinny.scary.core.security.PinHash
@@ -54,6 +56,10 @@ data class LauncherPrefs(
     val familyNight: Boolean = false,
     /** Halloween and Friday the 13th rows around their dates. On by default. */
     val seasonalRows: Boolean = true,
+    /** Movies the viewer has seen, newest first: marked by hand or after a viewing. */
+    val watchedIds: List<String> = emptyList(),
+    /** Mark a movie as watched after time away that looks like a viewing ([io.github.diamondrubinny.scary.core.catalog.AutoWatched]). */
+    val autoWatched: Boolean = true,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -78,6 +84,8 @@ class SettingsRepository(private val context: Context) {
                 myListIds = RecentList.decode(p[MY_LIST]),
                 familyNight = p[FAMILY_NIGHT] ?: false,
                 seasonalRows = p[SEASONAL_ROWS] ?: true,
+                watchedIds = RecentList.decode(p[WATCHED]),
+                autoWatched = p[AUTO_WATCHED] ?: true,
             )
         }
         .distinctUntilChanged()
@@ -97,6 +105,32 @@ class SettingsRepository(private val context: Context) {
             it[MY_LIST] = RecentList.encode(MyList.toggle(current, movieId))
         }
         return added
+    }
+
+    /** Marks the movie as watched, or not. Returns true when this changed anything. */
+    suspend fun setWatched(movieId: String, watched: Boolean): Boolean {
+        var changed = false
+        edit {
+            val current = RecentList.decode(it[WATCHED])
+            changed = (movieId in current) != watched
+            if (changed) it[WATCHED] = RecentList.encode(if (watched) WatchedList.add(current, movieId) else WatchedList.remove(current, movieId))
+        }
+        return changed
+    }
+
+    suspend fun setAutoWatched(enabled: Boolean) = edit { it[AUTO_WATCHED] = enabled }
+
+    /** Remembers that [pending] was handed to another app; SCARY judges the viewing when it is back on screen. */
+    suspend fun setPendingWatch(pending: PendingWatch) = edit { it[PENDING_WATCH] = pending.encode() }
+
+    /** The movie handed to another app, if any, forgotten as it is read: each return to SCARY judges it once. */
+    suspend fun takePendingWatch(): PendingWatch? {
+        var pending: PendingWatch? = null
+        edit {
+            pending = PendingWatch.decode(it[PENDING_WATCH])
+            it.remove(PENDING_WATCH)
+        }
+        return pending
     }
 
     suspend fun togglePinned(packageName: String) = editPinned { PinnedList.toggle(it, packageName) }
@@ -171,6 +205,9 @@ class SettingsRepository(private val context: Context) {
         private val ONLINE = booleanPreferencesKey("online_artwork")
         private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
         private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")
+        private val WATCHED = stringPreferencesKey("watched_movie_ids")
+        private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
+        private val PENDING_WATCH = stringPreferencesKey("pending_watch")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

@@ -97,16 +97,19 @@ fun PosterCard(
     width: Dp = 104.dp,
     focusRequester: FocusRequester? = null,
     locked: Boolean = false,
+    watched: Boolean = false,
     onLongClick: (() -> Unit)? = null,
 ) {
     val lockedLabel = stringResource(R.string.locked_badge)
+    val watchedLabel = stringResource(R.string.watched_badge)
     FocusSurface(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(width)
             .aspectRatio(2f / 3f),
-        contentDescription = if (locked) "${movie.title}, ${movie.year}, $lockedLabel" else "${movie.title}, ${movie.year}",
+        contentDescription = listOfNotNull("${movie.title}, ${movie.year}", watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked })
+            .joinToString(", "),
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
@@ -137,7 +140,7 @@ fun PosterCard(
                 modifier = Modifier.align(Alignment.BottomStart).padding(horizontal = 8.dp, vertical = 7.dp),
             )
         }
-        if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
+        CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
     }
 }
 
@@ -149,15 +152,17 @@ fun WideMovieCard(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester? = null,
     locked: Boolean = false,
+    watched: Boolean = false,
     onLongClick: (() -> Unit)? = null,
 ) {
+    val watchedLabel = stringResource(R.string.watched_badge)
     FocusSurface(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(176.dp)
             .aspectRatio(16f / 9f),
-        contentDescription = "${movie.title}, ${movie.year}",
+        contentDescription = if (watched) "${movie.title}, ${movie.year}, $watchedLabel" else "${movie.title}, ${movie.year}",
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
@@ -170,23 +175,33 @@ fun WideMovieCard(
                     .background(Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)))),
             )
         }
-        if (locked) LockBadge(Modifier.align(Alignment.TopEnd))
+        CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
             BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize).mixedLanguage(), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
+            // Online movies often have no runtime: no "0 min", as on the movie page.
+            if (movie.runtimeMin > 0) BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
         }
     }
 }
 
+/** The corner badges of a movie card: seen (a check) and locked (a padlock). Their meaning is in the card's description. */
 @Composable
-private fun LockBadge(modifier: Modifier = Modifier) {
+private fun CardBadges(locked: Boolean, watched: Boolean, modifier: Modifier = Modifier) {
+    if (!locked && !watched) return
+    Row(modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (watched) Badge { CheckIcon(ScaryColors.Candle) }
+        if (locked) Badge { LockIcon(ScaryColors.Candle) }
+    }
+}
+
+@Composable
+private fun Badge(icon: @Composable () -> Unit) {
     Box(
-        modifier
-            .padding(6.dp)
+        Modifier
             .background(ScaryColors.Void.copy(alpha = 0.8f), RoundedCornerShape(4.dp))
             .padding(4.dp),
     ) {
-        LockIcon(ScaryColors.Candle)
+        icon()
     }
 }
 

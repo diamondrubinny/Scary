@@ -5,6 +5,8 @@
 package io.github.diamondrubinny.scary.ui.settings
 
 import io.github.diamondrubinny.scary.ui.components.CreditLine
+import io.github.diamondrubinny.scary.ui.components.DataCredit
+import io.github.diamondrubinny.scary.ui.components.SupportScary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,6 +44,7 @@ class SettingsActions(
     val onToggleEffects: () -> Unit,
     val onCycleNightFear: () -> Unit,
     val onToggleSeasonalRows: () -> Unit,
+    val onToggleAutoWatched: () -> Unit,
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onSetupPin: () -> Unit,
@@ -67,6 +70,7 @@ fun SettingsScreen(
     lockFromFear: Int,
     familyNight: Boolean,
     seasonalRows: Boolean,
+    autoWatched: Boolean,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -154,6 +158,12 @@ fun SettingsScreen(
             onClick = actions.onToggleSeasonalRows,
         )
         SettingRow(
+            label = stringResource(R.string.settings_auto_watched),
+            value = stringResource(if (autoWatched) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleAutoWatched,
+        )
+        BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
+        SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
@@ -206,6 +216,8 @@ fun SettingsScreen(
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
         BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
+        DataCredit()
+        SupportScary(Modifier.padding(vertical = 8.dp))
         SettingRow(
             label = stringResource(R.string.settings_privacy),
             value = null,

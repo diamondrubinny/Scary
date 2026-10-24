@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -65,6 +66,9 @@ fun DetailsScreen(
     isLocked: (Movie) -> Boolean = { false },
     inMyList: Boolean = false,
     onToggleMyList: (Movie) -> Unit = {},
+    watched: Boolean = false,
+    isWatched: (Movie) -> Boolean = { false },
+    onToggleWatched: (Movie) -> Unit = {},
     watchOptions: List<WatchOption> = emptyList(),
     canSearchEverywhere: Boolean = false,
     onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
@@ -84,7 +88,7 @@ fun DetailsScreen(
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
-                MovieTitle(movie, language)
+                MovieTitle(movie, language, locked = isLocked(movie))
                 if (movie.displayTitle(language) != movie.title) {
                     BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
                 }
@@ -105,7 +109,13 @@ fun DetailsScreen(
                     maxLines = if (elsewhere) 3 else 5,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 8.dp)) {
+                // Four buttons: in a long language, or at a large system font, the last ones wrap to a second line
+                // instead of being cut.
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
                     ScaryButton(
                         text = stringResource(R.string.action_watch_stremio),
                         onClick = { onWatch(movie) },
@@ -116,6 +126,10 @@ fun DetailsScreen(
                     ScaryButton(
                         text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                         onClick = { onToggleMyList(movie) },
+                    )
+                    ScaryButton(
+                        text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
+                        onClick = { onToggleWatched(movie) },
                     )
                 }
                 if (elsewhere) {
@@ -128,7 +142,8 @@ fun DetailsScreen(
                     .clip(RoundedCornerShape(8.dp)),
             ) {
                 PosterArt(movie, Modifier.fillMaxSize())
-                val poster = rememberArtwork(movie.posterUrl)
+                // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
                 if (poster != null) {
                     AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 } else {
@@ -160,6 +175,7 @@ fun DetailsScreen(
                         onFocused = {},
                         width = 92.dp,
                         locked = isLocked(similar),
+                        watched = isWatched(similar),
                     )
                 }
             }
@@ -172,9 +188,9 @@ fun DetailsScreen(
  * would contradict an English logo). The text title shows until the logo arrives, and whenever it cannot load.
  */
 @Composable
-private fun MovieTitle(movie: Movie, language: Language) {
+private fun MovieTitle(movie: Movie, language: Language, locked: Boolean) {
     val title = movie.displayTitle(language)
-    val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title })
+    val logo = rememberArtwork(movie.logoUrl.takeIf { title == movie.title && !locked })
     // Keyed on the logo itself: when the title changes language and the logo goes, the text title comes back.
     var logoShown by remember(movie.id, logo) { mutableStateOf(false) }
     // The title shivers as it comes out of the dark; again when the logo art arrives and replaces the text.

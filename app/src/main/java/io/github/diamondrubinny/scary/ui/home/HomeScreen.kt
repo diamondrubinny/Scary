@@ -42,6 +42,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
@@ -65,6 +69,8 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
+import io.github.diamondrubinny.scary.ui.components.DataCredit
+import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
@@ -119,6 +125,16 @@ fun HomeScreen(
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
+    // Set when the last movie of My list is removed from its own row: the row goes away, and focus with it.
+    var heroAfterMyList by remember { mutableStateOf(false) }
+    val hasMyList = state.rows.any { it is HomeRow.MyList }
+    LaunchedEffect(hasMyList, heroAfterMyList) {
+        if (heroAfterMyList && !hasMyList) {
+            withFrameNanos { }
+            heroFocus.tryRequestFocus()
+            heroAfterMyList = false
+        }
+    }
 
     // Debug intents only: bring a row into view and focus the requested card in it.
     LaunchedEffect(scrollToRow, state.loading) {
@@ -136,8 +152,9 @@ fun HomeScreen(
     LaunchedEffect(state.loading, resets) {
         if (state.loading) return@LaunchedEffect
         withFrameNanos { }
-        val restored = restoreKey != null && runCatching { restoreFocus.requestFocus() }.isSuccess
-        if (!restored) runCatching { heroFocus.requestFocus() }
+        // The card may be gone (removed from My list, filtered by family night, scrolled out of a mood row): then the hero.
+        val restored = restoreKey != null && restoreFocus.tryRequestFocus()
+        if (!restored) heroFocus.tryRequestFocus()
     }
 
     Column(Modifier.fillMaxSize()) {
@@ -175,10 +192,18 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, showSetHome)
+                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
+                    heroAfterMyList = true
+                }
             }
             item(key = CREDIT_KEY) {
-                CreditLine(Modifier.padding(horizontal = SidePadding, vertical = 12.dp))
+                Column(
+                    Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    CreditLine()
+                    DataCredit()
+                }
             }
         }
     }
@@ -249,10 +274,27 @@ private fun HomeRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
     showSetHome: Boolean,
+    onMyListEmptied: () -> Unit,
 ) {
+    // Holding OK on a My list card removes it: the card that takes its place gets the focus, so the next one can go too.
+    val neighbourFocus = remember { FocusRequester() }
+    var removedAt by remember { mutableIntStateOf(-1) }
+    var refocusAt by remember { mutableIntStateOf(-1) }
+    if (row is HomeRow.MyList) {
+        val ids = row.movies.map { it.id }
+        LaunchedEffect(ids) {
+            if (removedAt < 0) return@LaunchedEffect
+            refocusAt = removedAt.coerceAtMost(ids.lastIndex)
+            removedAt = -1
+            withFrameNanos { }
+            neighbourFocus.tryRequestFocus()
+            refocusAt = -1
+        }
+    }
     if (row is HomeRow.Moods) {
-        MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked)
+        MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
         return
     }
     if (row is HomeRow.Collection) {
@@ -273,13 +315,15 @@ private fun HomeRowView(
         is HomeRow.Moods -> stringResource(R.string.row_moods)
     }
     Column {
-        BasicText(
-            text = title,
-            style = ScaryType.RowTitle,
-            modifier = Modifier
-                .padding(horizontal = SidePadding)
-                .semantics { heading() },
-        )
+        Row(
+            modifier = Modifier.padding(horizontal = SidePadding),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            BasicText(text = title, style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            // The only row a movie leaves by holding OK: say so where it matters.
+            if (row is HomeRow.MyList) BasicText(stringResource(R.string.my_list_hint), style = ScaryType.Caption)
+        }
         LazyRow(
             state = rowState,
             modifier = Modifier.testTag(rowTag(row.key)),
@@ -293,21 +337,30 @@ private fun HomeRowView(
                     WideMovieCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.MyList -> items(row.movies, key = { it.id }) { movie ->
+                is HomeRow.MyList -> itemsIndexed(row.movies, key = { _, movie -> movie.id }) { index, movie ->
                     val key = "${row.key}:${movie.id}"
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
-                        onLongClick = { actions.onToggleMyList(movie) },
+                        onLongClick = {
+                            if (row.movies.size == 1) onMyListEmptied() else removedAt = index
+                            actions.onToggleMyList(movie)
+                        },
                         onFocused = { actions.onCardFocused(key, movie.id) },
-                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                        focusRequester = when {
+                            index == refocusAt -> neighbourFocus
+                            key == restoreKey -> restoreFocus
+                            else -> null
+                        },
                     )
                 }
                 is HomeRow.Apps -> items(
@@ -331,6 +384,7 @@ private fun HomeRowView(
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },
@@ -446,6 +500,7 @@ private fun MoodsRowView(
     restoreFocus: FocusRequester,
     actions: HomeActions,
     isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
 ) {
     val movieState = rememberLazyListState()
     LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
@@ -492,6 +547,7 @@ private fun MoodsRowView(
                     PosterCard(
                         movie = movie,
                         locked = isLocked(movie),
+                        watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
                         onFocused = { actions.onCardFocused(key, movie.id) },

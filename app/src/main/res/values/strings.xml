@@ -206,4 +206,17 @@
     <string name="search_everywhere">Search the whole TV</string>
     <string name="watch_elsewhere_note">SCARY searches by title. It cannot tell whether the movie is available in each app.</string>
     <string name="settings_seasonal">Seasonal rows (Halloween, Friday the 13th)</string>
+    <string name="data_credit">Movie information and images: TMDB and Cinemeta</string>
+    <string name="donate_title">Support SCARY</string>
+    <string name="donate_body">Scan with your phone to donate with PayPal. SCARY stays free; giving is optional.</string>
+    <string name="donate_qr_description">QR code to donate to SCARY with PayPal</string>
+    <string name="action_mark_watched">Mark as watched</string>
+    <string name="action_watched">✓ Watched</string>
+    <string name="watched_badge">watched</string>
+    <string name="msg_marked_watched">%1$s marked as watched</string>
+    <string name="msg_unmarked_watched">%1$s is no longer marked as watched</string>
+    <string name="msg_auto_watched">Welcome back. %1$s is marked as watched; you can change that on its page.</string>
+    <string name="settings_auto_watched">Mark as watched after viewing</string>
+    <string name="settings_auto_watched_note">When you come back to SCARY after most of a movie\'s length, it is marked as watched. SCARY cannot see inside other apps, so it judges by time alone; you can always change it on the movie\'s page.</string>
+    <string name="my_list_hint">Hold OK on a poster to remove it</string>
 </resources>

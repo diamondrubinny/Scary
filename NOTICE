@@ -12,6 +12,8 @@ appear, including inside the app ("Powered by SCARY · Open source").
 Third-party material:
 - Fonts Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo:
   SIL Open Font License 1.1.
-- AndroidX, Jetpack Compose, Kotlin, kotlinx, Coil and OkHttp: Apache License 2.0.
+- AndroidX, Jetpack Compose, Kotlin, kotlinx, Coil, OkHttp and ZXing: Apache License 2.0.
 - This product uses the TMDB API but is not endorsed or certified by TMDB.
+- The TMDB logo (app/src/main/res/drawable/tmdb_logo.xml, docs/tmdb-logo.svg) is a trademark of TMDB, used
+  unaltered and only to credit TMDB as a source of movie information and images.
 - Movie metadata and images come from Cinemeta (Stremio) and belong to their owners.

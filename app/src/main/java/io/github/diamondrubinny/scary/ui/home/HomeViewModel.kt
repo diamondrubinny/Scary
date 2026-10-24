@@ -23,7 +23,9 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
+import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
@@ -95,6 +97,7 @@ class HomeViewModel(
     }
     private val sessionUnlocked = MutableStateFlow(false)
     private var unlockedAtMillis = 0L
+    private var unlockExpiry: Job? = null
     private var latestPrefs: LauncherPrefs? = null
     private val _pinDialog = MutableStateFlow<PinDialogState?>(null)
     val pinDialog: StateFlow<PinDialogState?> = _pinDialog.asStateFlow()
@@ -171,6 +174,8 @@ class HomeViewModel(
             myListIds = prefs.myListIds.toSet(),
             familyNight = prefs.familyNight,
             seasonalRows = prefs.seasonalRows,
+            watchedIds = prefs.watchedIds.toSet(),
+            autoWatched = prefs.autoWatched,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -261,7 +266,10 @@ class HomeViewModel(
         selectedMood: Mood?,
         prefs: LauncherPrefs,
     ): HomeUiState {
-        val nightPick = NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
+        // Tonight's pick is one not seen yet, as long as any is left.
+        val watched = prefs.watchedIds.toHashSet()
+        val nightPick = NightPick.pick(catalog.movies.filter { it.id !in watched }, today(), prefs.nightMaxFear)
+            ?: NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
         val rows = buildList {
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
@@ -451,6 +459,7 @@ class HomeViewModel(
             random = Random.Default,
             exclude = heroId.value,
             isLocked = { ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, it) },
+            watched = prefs.watchedIds.toHashSet(),
         )
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
@@ -493,7 +502,10 @@ class HomeViewModel(
             try {
                 delay(if (motion) LAUNCH_SHIVER_MS else LAUNCH_STILL_MS)
                 if (generation != dialogGeneration) return@launch
-                report(open())
+                val result = open()
+                report(result)
+                // Only when the movie itself opened (or a search for it): an app that merely opened says nothing about it.
+                if (result is LaunchResult.Opened) rememberWatching(movie)
                 // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
                 delay(LAUNCH_CLEAR_MS)
             } finally {
@@ -503,6 +515,47 @@ class HomeViewModel(
             }
         }
         launchJob = job
+    }
+
+    /**
+     * Remembers the movie now playing elsewhere, so the return to SCARY can mark it as watched. A coroutine of its own:
+     * leaving SCARY cancels the launch job right after this.
+     */
+    private fun rememberWatching(movie: Movie) {
+        viewModelScope.launch { settings.setPendingWatch(PendingWatch(movie.id, System.currentTimeMillis())) }
+    }
+
+    /**
+     * SCARY is on screen again. If a movie was handed to another app and the time away looks like a viewing, it is
+     * marked as watched (when the viewer allows it), and a message says so and how to undo it.
+     */
+    fun onResumed() {
+        viewModelScope.launch {
+            val pending = settings.takePendingWatch() ?: return@launch
+            val prefs = settings.prefs.first()
+            if (!prefs.autoWatched || pending.movieId in prefs.watchedIds) return@launch
+            val catalog = (shownCatalog.first { it !is CatalogState.Loading } as? CatalogState.Ready)?.catalog
+            val movie = catalog?.movie(pending.movieId) ?: webMovieIfAllowed(pending.movieId)
+            val away = System.currentTimeMillis() - pending.startedAtMillis
+            if (!AutoWatched.counts(away, movie?.runtimeMin ?: 0)) return@launch
+            if (settings.setWatched(pending.movieId, watched = true) && movie != null) {
+                show(R.string.msg_auto_watched, movie.displayTitle(language.value))
+            }
+        }
+    }
+
+    /** Marks a movie as watched or not, from its page, and says which. Not PIN-gated: it opens nothing. */
+    fun toggleWatched(movie: Movie, language: Language) {
+        viewModelScope.launch {
+            val watched = movie.id !in settings.prefs.first().watchedIds
+            settings.setWatched(movie.id, watched)
+            if (watched) savedMovies.save(movie, language, keptOnline())
+            show(if (watched) R.string.msg_marked_watched else R.string.msg_unmarked_watched, movie.displayTitle(language))
+        }
+    }
+
+    fun toggleAutoWatched() {
+        viewModelScope.launch { settings.setAutoWatched(!settings.prefs.first().autoWatched) }
     }
 
     private fun cancelLaunch() {
@@ -527,9 +580,16 @@ class HomeViewModel(
     fun toggleMyList(movie: Movie, language: Language) {
         viewModelScope.launch {
             val added = settings.toggleMyList(movie.id)
-            if (added) savedMovies.save(movie, language)
+            if (Log.isLoggable(KEY_LOG_TAG, Log.DEBUG)) Log.d(KEY_LOG_TAG, "My list: ${movie.id} added=$added")
+            if (added) savedMovies.save(movie, language, keptOnline())
             show(if (added) R.string.msg_my_list_added else R.string.msg_my_list_removed, movie.displayTitle(language))
         }
+    }
+
+    /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
+    private suspend fun keptOnline(): Set<String> {
+        val prefs = settings.prefs.first()
+        return (prefs.myListIds + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
@@ -552,13 +612,17 @@ class HomeViewModel(
             is GatedAction.Watch -> {
                 viewModelScope.launch {
                     settings.pushRecent(action.movie.id)
-                    savedMovies.save(action.movie, language.value)
+                    savedMovies.save(action.movie, language.value, keptOnline())
                 }
                 launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
             is GatedAction.SearchIn -> {
-                viewModelScope.launch { settings.pushRecent(action.movie.id) }
+                viewModelScope.launch {
+                    settings.pushRecent(action.movie.id)
+                    // Online movies are kept, so Recently opened still finds them after they leave the online rows.
+                    savedMovies.save(action.movie, language.value, keptOnline())
+                }
                 launchWithShiver(action.movie, action.app.label) {
                     launcher.searchIn(action.app.packageName, action.app.label, action.movie)
                 }
@@ -579,6 +643,8 @@ class HomeViewModel(
 
     /** Called when the launcher leaves the screen: the next protected action asks for the PIN again. */
     fun onBackgrounded() {
+        unlockExpiry?.cancel()
+        unlockExpiry = null
         sessionUnlocked.value = false
         // The other app is in front (or SCARY was left before it opened): coming back shows SCARY, not the shiver
         // screen, and nothing opens by surprise later.
@@ -665,6 +731,23 @@ class HomeViewModel(
     private fun unlockSession() {
         unlockedAtMillis = System.currentTimeMillis()
         sessionUnlocked.value = true
+        // The unlock ends on its own after the window, even if nobody touches the remote: locked movies hide their art
+        // again, and open settings close.
+        unlockExpiry?.cancel()
+        unlockExpiry = viewModelScope.launch {
+            delay(ParentalGate.UNLOCK_WINDOW_MS)
+            lockSession()
+        }
+    }
+
+    /** Ends the PIN unlock. Settings need the PIN, so when the lock is on they close as well. */
+    private fun lockSession() {
+        unlockExpiry?.cancel()
+        unlockExpiry = null
+        sessionUnlocked.value = false
+        if (latestPrefs?.parentalEnabled == true && Screen.Settings in backStack.value) {
+            backStack.value = listOf(Screen.Home)
+        }
     }
 
     fun turnOffParental() {
@@ -790,9 +873,12 @@ class HomeViewModel(
      */
     fun toggleFamilyNight() {
         viewModelScope.launch {
-            val enabled = !settings.prefs.first().familyNight
-            if (enabled) sessionUnlocked.value = false
+            val prefs = settings.prefs.first()
+            val enabled = !prefs.familyNight
             settings.setFamilyNight(enabled)
+            // With a PIN, family night is for handing over the remote: settings close, so turning it off (or removing
+            // the lock) asks for the PIN again. Without one, the setting's note says anyone can turn it off.
+            if (enabled) lockSession()
             _webSearch.value = WebSearchState()
             show(if (enabled) R.string.msg_family_on else R.string.msg_family_off)
         }
@@ -831,6 +917,8 @@ class HomeViewModel(
 
     companion object {
         private const val TAG = "HomeViewModel"
+        /** Off unless "setprop log.tag.ScaryKeys DEBUG", as in FocusSurface: lets a failed UI test show what happened. */
+        private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 4

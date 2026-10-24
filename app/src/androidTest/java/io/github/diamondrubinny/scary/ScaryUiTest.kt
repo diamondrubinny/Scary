@@ -8,14 +8,18 @@ import io.github.diamondrubinny.scary.ui.home.rowTag
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
+import android.os.ParcelFileDescriptor
+import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotSelected
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -34,6 +38,16 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.performTextReplacement
+import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.semantics.SemanticsActions
+import org.junit.Assert.assertTrue
+import androidx.compose.ui.test.ComposeTimeoutException
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToString
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,10 +61,36 @@ class ScaryUiTest {
     @get:Rule
     val rule = createAndroidComposeRule<MainActivity>()
 
+    /**
+     * A TV is never in touch mode, but the test runner starts activities in it; the first remote key would then only
+     * take the window out of it (Android swallows that key), so OK presses would not behave as on a TV.
+     */
+    @Before
+    fun likeATv() {
+        InstrumentationRegistry.getInstrumentation().setInTouchMode(false)
+    }
+
     private fun text(id: Int): String = rule.activity.getString(id)
 
     private fun waitFor(matcher: SemanticsMatcher, timeoutMillis: Long = TIMEOUT_MS) {
-        rule.waitUntil(timeoutMillis) { rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty() }
+        waitUntilOrDescribe("${matcher.description} on screen", timeoutMillis) {
+            rule.onAllNodes(matcher).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    /** Like waitUntil, but a timeout says what was on screen and what had the focus, so CI failures can be read. */
+    private fun waitUntilOrDescribe(what: String, timeoutMillis: Long = TIMEOUT_MS, condition: () -> Boolean) {
+        try {
+            rule.waitUntil(timeoutMillis, condition)
+        } catch (timeout: ComposeTimeoutException) {
+            val focused = runCatching {
+                rule.onAllNodes(isFocused()).fetchSemanticsNodes().joinToString { node ->
+                    node.config.toString().take(FOCUS_DESCRIPTION_CHARS)
+                }
+            }.getOrDefault("?")
+            val screen = runCatching { rule.onRoot().printToString(maxDepth = SCREEN_DEPTH) }.getOrDefault("?")
+            throw AssertionError("Timed out waiting for $what.\nFocused: $focused\nScreen:\n${screen.take(SCREEN_CHARS)}", timeout)
+        }
     }
 
     private fun waitForGone(matcher: SemanticsMatcher) {
@@ -71,15 +111,39 @@ class ScaryUiTest {
 
     private fun waitForHome() = waitFor(hasText(text(R.string.row_apps)))
 
-    private fun onHome(): Boolean = rule.onAllNodes(hasText(text(R.string.row_apps))).fetchSemanticsNodes().isNotEmpty()
+    /**
+     * Home sends the focus to "watch tonight's pick" one frame after it shows. A test that moves the focus itself waits
+     * for that first, or the hero takes the focus back and the remote's OK lands there instead.
+     */
+    private fun waitForHomeFocus() {
+        waitForHome()
+        waitUntilOrDescribe("the first focus on the home screen") { rule.onAllNodes(isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        rule.waitForIdle()
+    }
+
+    /** On the home screen, whatever row it is scrolled to (the apps row is not composed once it scrolls away). */
+    private fun onHome(): Boolean = rule.onAllNodes(hasTestTag(HOME_ROWS_TAG)).fetchSemanticsNodes().isNotEmpty()
+
+    /** Runs [test], then [cleanup]; a failing cleanup never hides the test's own failure. */
+    private fun withCleanup(test: () -> Unit, cleanup: () -> Unit) {
+        try {
+            test()
+        } catch (failure: Throwable) {
+            runCatching(cleanup)
+            throw failure
+        }
+        cleanup()
+    }
 
     /** Back until the home screen shows: the first Back may only close the on-screen keyboard. */
     private fun backToHome() {
         repeat(MAX_BACKS) {
             if (onHome()) return
             pressBack()
+            // Let the screen change land before deciding whether another Back is needed.
+            rule.waitForIdle()
         }
-        waitForHome()
+        waitUntilOrDescribe("the home screen") { onHome() }
     }
 
     @Test
@@ -91,21 +155,26 @@ class ScaryUiTest {
     }
 
     @Test
-    fun theCreditShowsUnderTheLogoAndAtTheEndOfTheRows() {
+    fun theCreditsShowUnderTheLogoAndAtTheEndOfTheRows() {
         waitForHome()
         // Required by the NOTICE file (Apache License 2.0); the build fails if it disappears from the screen.
         rule.onNode(hasText(Credit.SHORT)).assertExists()
         rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(CREDIT_KEY)
         waitFor(hasText(Credit.LINE))
+        // Beside it, where the movie information and pictures come from (TMDB's API terms).
+        waitFor(hasText(text(R.string.data_credit)))
     }
 
     @Test
-    fun settingsSayThatScaryHoldsNoVideoAndOnlyOpensInstalledApps() {
+    fun settingsSayWhereMoviesComeFromAndOfferTheDonationCode() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         val notice = hasText(text(R.string.settings_content_notice))
         waitFor(notice)
         rule.onNode(notice).performScrollTo().assertExists()
+        // The movie data credit (TMDB's terms) and the donation code are in the same About section.
+        rule.onNode(hasText(text(R.string.data_credit))).performScrollTo().assertExists()
+        rule.onNodeWithContentDescription(text(R.string.donate_qr_description)).performScrollTo().assertExists()
         backToHome()
     }
 
@@ -140,6 +209,183 @@ class ScaryUiTest {
         }
 
         backToHome()
+    }
+
+    @Test
+    fun myListKeepsSeveralMoviesAndEachCanBeRemoved() {
+        waitForHome()
+        val first = bundledMovies().first { it.title == "The Shining" }
+        val second = bundledMovies().first { it.title == "Hereditary" }
+        withCleanup(
+            test = {
+                setInMyList(first, wanted = true)
+                setInMyList(second, wanted = true)
+                assertMyListRow(present = listOf(first, second))
+                setInMyList(first, wanted = false)
+                assertMyListRow(present = listOf(second), absent = listOf(first))
+            },
+            cleanup = {
+                setInMyList(first, wanted = false)
+                setInMyList(second, wanted = false)
+            },
+        )
+    }
+
+    @Test
+    fun holdingOkOnAPosterAddsItToMyListAndHoldingAgainRemovesIt() {
+        waitForHomeFocus()
+        val catalog = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
+        val collection = catalog.collections.first()
+        val movie = catalog.moviesOf(collection).first()
+        val rowKey = "collection:${collection.id}"
+        val card = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag(rowKey)))
+        val inList = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag("mylist")))
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+        rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+        waitFor(card)
+        rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
+        rule.waitForIdle()
+        // Holding OK acts on the focused card; make sure that is this one.
+        rule.onNode(card).assertIsFocused()
+        withCleanup(test = {
+            longPressOk()
+            // The movie page must not open on the way.
+            assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+            waitUntilOrDescribe("the My list row") { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+            waitFor(inList)
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+            rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+            rule.onNode(card).performSemanticsAction(SemanticsActions.RequestFocus)
+            rule.waitForIdle()
+            rule.onNode(card).assertIsFocused()
+            longPressOk()
+            assertTrue("Holding OK opened the movie page", rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
+            waitForGone(inList)
+        }, cleanup = { setInMyList(movie, wanted = false) })
+    }
+
+    @Test
+    fun markingAMovieAsWatchedShowsOnItsCardAndCanBeUndone() {
+        waitForHome()
+        val movie = bundledMovies().first { it.title == "Hereditary" }
+        val mark = hasText(text(R.string.action_mark_watched))
+        val watched = hasText(text(R.string.action_watched))
+        withCleanup(
+            test = {
+                openViaSearch(movie)
+                waitFor(mark or watched)
+                if (rule.onAllNodes(watched).fetchSemanticsNodes().isEmpty()) rule.onNode(mark).performClick()
+                waitFor(watched)
+                // Its card now says so, for TalkBack too (search results show the same card as the rows).
+                backToHome()
+                rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+                waitFor(hasSetTextAction())
+                rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+                waitFor(hasContentDescription("${movie.title}, ${movie.year}, ${text(R.string.watched_badge)}", substring = true))
+                backToHome()
+                openViaSearch(movie)
+                rule.onNode(watched).performClick()
+                waitFor(mark)
+                backToHome()
+            },
+            cleanup = {
+                backToHome()
+                openViaSearch(movie)
+                waitFor(mark or watched)
+                if (rule.onAllNodes(watched).fetchSemanticsNodes().isNotEmpty()) rule.onNode(watched).performClick()
+                backToHome()
+            },
+        )
+    }
+
+    private fun openViaSearch(movie: Movie) {
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+        val result = hasContentDescription("${movie.title}, ${movie.year}", substring = true)
+        waitFor(result)
+        rule.onAllNodes(result)[0].performClick()
+        waitFor(hasText(text(R.string.row_more_like)))
+    }
+
+    @Test
+    fun holdingOkInMyListRemovesTheMovieAndTheNextOneTakesTheFocus() {
+        waitForHome()
+        val first = bundledMovies().first { it.title == "The Shining" }
+        val second = bundledMovies().first { it.title == "Hereditary" }
+        fun inMyList(movie: Movie) =
+            hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist")))
+        withCleanup(
+            test = {
+                // Added second, so it comes first in the row (newest first).
+                setInMyList(first, wanted = true)
+                setInMyList(second, wanted = true)
+                waitForHomeFocus()
+                val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+                waitUntilOrDescribe("the My list row") { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+                waitFor(inMyList(second))
+                rule.onNode(inMyList(second)).performSemanticsAction(SemanticsActions.RequestFocus)
+                rule.waitForIdle()
+                rule.onNode(inMyList(second)).assertIsFocused()
+                longPressOk()
+                waitForGone(inMyList(second))
+                // The card that took its place has the focus, so holding OK again removes it too.
+                waitFor(inMyList(first) and isFocused())
+                longPressOk()
+                waitForGone(inMyList(first))
+            },
+            cleanup = {
+                setInMyList(first, wanted = false)
+                setInMyList(second, wanted = false)
+            },
+        )
+    }
+
+    /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */
+    private fun longPressOk() {
+        // Read the command's output to the end: that waits for it to finish. Closing the pipe at once could stop it
+        // half way, after "down" but before the held repeat and "up", and the press then never completed.
+        Log.d("ScaryKeys", "test: holding OK")
+        val output = InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER")
+        ParcelFileDescriptor.AutoCloseInputStream(output).use { it.readBytes() }
+        Log.d("ScaryKeys", "test: OK released")
+        rule.waitForIdle()
+    }
+
+    /** Opens [movie] through search, puts it in or out of My list with the movie page's button, and goes home. */
+    private fun setInMyList(movie: Movie, wanted: Boolean) {
+        backToHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        // Search keeps its last query when it comes back; replace it rather than adding to it.
+        rule.onNode(hasSetTextAction()).performTextReplacement(movie.title)
+        val result = hasContentDescription("${movie.title}, ${movie.year}", substring = true)
+        waitFor(result)
+        rule.onAllNodes(result)[0].performClick()
+        val add = hasText(text(R.string.action_add_my_list))
+        val inList = hasText(text(R.string.action_in_my_list))
+        waitFor(add or inList)
+        val isIn = rule.onAllNodes(inList).fetchSemanticsNodes().isNotEmpty()
+        if (isIn != wanted) {
+            rule.onNode(if (isIn) inList else add).performClick()
+            waitFor(if (wanted) inList else add)
+        }
+        backToHome()
+    }
+
+    private fun assertMyListRow(present: List<Movie>, absent: List<Movie> = emptyList()) {
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+        rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+        for (movie in present) {
+            waitFor(hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist"))))
+        }
+        for (movie in absent) {
+            waitForGone(hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist"))))
+        }
     }
 
     @Test
@@ -217,9 +463,13 @@ class ScaryUiTest {
 
     private companion object {
         const val TIMEOUT_MS = 20_000L
-        const val MAX_BACKS = 4
+        // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
+        const val MAX_BACKS = 6
         const val ONLINE_TIMEOUT_MS = 45_000L
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
+        const val SCREEN_DEPTH = 6
+        const val SCREEN_CHARS = 6_000
+        const val FOCUS_DESCRIPTION_CHARS = 300
     }
 }

@@ -92,6 +92,9 @@ object Cinemeta {
      * fetched is dropped (endless rows continue right after their last page).
      */
     const val MAX_ROW_MOVIES = 150
+
+    /** Movies from Cinemeta have ids "cm_" + IMDb id, so they never clash with the curated library's. */
+    const val ID_PREFIX = "cm_"
     private val THEME_GENRES = listOf("Horror", "Thriller", "Mystery")
 
     /** Never on SCARY's shelves even when also tagged as a thriller: documentaries and titles for children. */
@@ -243,7 +246,7 @@ object Cinemeta {
     fun toMovie(meta: CinemetaMeta): Movie? {
         val year = meta.year ?: return null
         return Movie(
-            id = "cm_" + meta.imdbId,
+            id = ID_PREFIX + meta.imdbId,
             imdbId = meta.imdbId,
             title = meta.name,
             titles = localized(meta.localLanguage, meta.localName),

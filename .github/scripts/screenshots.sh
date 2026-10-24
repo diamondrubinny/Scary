@@ -24,7 +24,11 @@ if [ -f dist/scary-tests.apk ]; then
   adb install -r dist/scary-tests.apk
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 0; done
   # Raw mode (-r) reports each test's status, so tests skipped by an assumption (code -4) are counted, not hidden.
+  # The app logs each OK press it handles under this tag (off by default); printed below if a test fails.
+  adb shell setprop log.tag.ScaryKeys DEBUG
+  adb logcat -c || true
   result=$(adb shell am instrument -w -r "$PKG.test/androidx.test.runner.AndroidJUnitRunner" | tr -d '\r')
+  adb shell setprop log.tag.ScaryKeys INFO
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 1; done
   skipped=$(echo "$result" | grep -B6 'INSTRUMENTATION_STATUS_CODE: -4' | grep 'INSTRUMENTATION_STATUS: test=' | sed 's/.*test=//' | sort -u | tr '\n' ' ' || true)
   {
@@ -33,6 +37,8 @@ if [ -f dist/scary-tests.apk ]; then
   } > "$OUT/ui-tests.txt"
   echo "$result"
   cat "$OUT/ui-tests.txt"
+  echo "OK key events the app handled during the tests (last 200):"
+  adb logcat -d -s ScaryKeys:D | tail -200 || true
   if ! echo "$result" | grep -q '^OK ('; then
     echo "UI tests failed."
     exit 1
@@ -171,6 +177,23 @@ shot 43-en-my-list 4
 open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 44-en-surprise 6
+# English versions of the moods, family night and shiver screens, for the English video ad (tools/promo).
+open --es scary.debug.open home
+open --es scary.debug.open mood:relentless
+shot 55-en-moods 5
+open --es scary.debug.open home
+open --es scary.debug.open family
+shot 56-en-family-night 6
+open --es scary.debug.open family
+sleep 3
+open --es scary.debug.open home
+sleep 3
+open --es scary.debug.open details:the_shining
+sleep 6
+key KEYCODE_DPAD_CENTER
+shot 58-en-shiver 1
+sleep 4
+adb shell am force-stop com.android.vending || true
 open --es scary.debug.open apps
 shot 45-en-all-apps 4
 open --es scary.debug.open settings
