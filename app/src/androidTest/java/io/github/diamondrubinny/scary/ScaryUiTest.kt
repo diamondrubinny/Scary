@@ -8,6 +8,7 @@ import io.github.diamondrubinny.scary.ui.home.rowTag
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
+import android.os.ParcelFileDescriptor
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsFocused
@@ -334,10 +335,11 @@ class ScaryUiTest {
 
     /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */
     private fun longPressOk() {
-        InstrumentationRegistry.getInstrumentation().uiAutomation
-            .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER").close()
-        // The shell command returns before the events arrive.
-        Thread.sleep(LONG_PRESS_SETTLE_MS)
+        // Read the command's output to the end: that waits for it to finish. Closing the pipe at once could stop it
+        // half way, after "down" but before the held repeat and "up", and the press then never completed.
+        val output = InstrumentationRegistry.getInstrumentation().uiAutomation
+            .executeShellCommand("input keyevent --longpress KEYCODE_DPAD_CENTER")
+        ParcelFileDescriptor.AutoCloseInputStream(output).use { it.readBytes() }
         rule.waitForIdle()
     }
 
@@ -453,7 +455,6 @@ class ScaryUiTest {
         const val ONLINE_TIMEOUT_MS = 45_000L
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
-        const val LONG_PRESS_SETTLE_MS = 2_500L
         const val SCREEN_DEPTH = 6
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
