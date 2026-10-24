@@ -97,6 +97,7 @@ class HomeViewModel(
     }
     private val sessionUnlocked = MutableStateFlow(false)
     private var unlockedAtMillis = 0L
+    private var unlockExpiry: Job? = null
     private var latestPrefs: LauncherPrefs? = null
     private val _pinDialog = MutableStateFlow<PinDialogState?>(null)
     val pinDialog: StateFlow<PinDialogState?> = _pinDialog.asStateFlow()
@@ -503,7 +504,8 @@ class HomeViewModel(
                 if (generation != dialogGeneration) return@launch
                 val result = open()
                 report(result)
-                if (result is LaunchResult.Opened || result is LaunchResult.OpenedAppOnly) rememberWatching(movie)
+                // Only when the movie itself opened (or a search for it): an app that merely opened says nothing about it.
+                if (result is LaunchResult.Opened) rememberWatching(movie)
                 // Kept a little longer, so the dark screen covers the moment the other app takes to appear.
                 delay(LAUNCH_CLEAR_MS)
             } finally {
@@ -547,7 +549,7 @@ class HomeViewModel(
         viewModelScope.launch {
             val watched = movie.id !in settings.prefs.first().watchedIds
             settings.setWatched(movie.id, watched)
-            if (watched) savedMovies.save(movie, language)
+            if (watched) savedMovies.save(movie, language, keptOnline())
             show(if (watched) R.string.msg_marked_watched else R.string.msg_unmarked_watched, movie.displayTitle(language))
         }
     }
@@ -578,9 +580,15 @@ class HomeViewModel(
     fun toggleMyList(movie: Movie, language: Language) {
         viewModelScope.launch {
             val added = settings.toggleMyList(movie.id)
-            if (added) savedMovies.save(movie, language)
+            if (added) savedMovies.save(movie, language, keptOnline())
             show(if (added) R.string.msg_my_list_added else R.string.msg_my_list_removed, movie.displayTitle(language))
         }
+    }
+
+    /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
+    private suspend fun keptOnline(): Set<String> {
+        val prefs = settings.prefs.first()
+        return (prefs.myListIds + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
@@ -603,7 +611,7 @@ class HomeViewModel(
             is GatedAction.Watch -> {
                 viewModelScope.launch {
                     settings.pushRecent(action.movie.id)
-                    savedMovies.save(action.movie, language.value)
+                    savedMovies.save(action.movie, language.value, keptOnline())
                 }
                 launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
             }
@@ -612,7 +620,7 @@ class HomeViewModel(
                 viewModelScope.launch {
                     settings.pushRecent(action.movie.id)
                     // Online movies are kept, so Recently opened still finds them after they leave the online rows.
-                    savedMovies.save(action.movie, language.value)
+                    savedMovies.save(action.movie, language.value, keptOnline())
                 }
                 launchWithShiver(action.movie, action.app.label) {
                     launcher.searchIn(action.app.packageName, action.app.label, action.movie)
@@ -634,6 +642,8 @@ class HomeViewModel(
 
     /** Called when the launcher leaves the screen: the next protected action asks for the PIN again. */
     fun onBackgrounded() {
+        unlockExpiry?.cancel()
+        unlockExpiry = null
         sessionUnlocked.value = false
         // The other app is in front (or SCARY was left before it opened): coming back shows SCARY, not the shiver
         // screen, and nothing opens by surprise later.
@@ -720,6 +730,23 @@ class HomeViewModel(
     private fun unlockSession() {
         unlockedAtMillis = System.currentTimeMillis()
         sessionUnlocked.value = true
+        // The unlock ends on its own after the window, even if nobody touches the remote: locked movies hide their art
+        // again, and open settings close.
+        unlockExpiry?.cancel()
+        unlockExpiry = viewModelScope.launch {
+            delay(ParentalGate.UNLOCK_WINDOW_MS)
+            lockSession()
+        }
+    }
+
+    /** Ends the PIN unlock. Settings need the PIN, so when the lock is on they close as well. */
+    private fun lockSession() {
+        unlockExpiry?.cancel()
+        unlockExpiry = null
+        sessionUnlocked.value = false
+        if (latestPrefs?.parentalEnabled == true && Screen.Settings in backStack.value) {
+            backStack.value = listOf(Screen.Home)
+        }
     }
 
     fun turnOffParental() {
@@ -845,9 +872,12 @@ class HomeViewModel(
      */
     fun toggleFamilyNight() {
         viewModelScope.launch {
-            val enabled = !settings.prefs.first().familyNight
-            if (enabled) sessionUnlocked.value = false
+            val prefs = settings.prefs.first()
+            val enabled = !prefs.familyNight
             settings.setFamilyNight(enabled)
+            // With a PIN, family night is for handing over the remote: settings close, so turning it off (or removing
+            // the lock) asks for the PIN again. Without one, the setting's note says anyone can turn it off.
+            if (enabled) lockSession()
             _webSearch.value = WebSearchState()
             show(if (enabled) R.string.msg_family_on else R.string.msg_family_off)
         }

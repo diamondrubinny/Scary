@@ -17,6 +17,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotSelected
+import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -264,6 +265,40 @@ class ScaryUiTest {
         waitFor(result)
         rule.onAllNodes(result)[0].performClick()
         waitFor(hasText(text(R.string.row_more_like)))
+    }
+
+    @Test
+    fun holdingOkInMyListRemovesTheMovieAndTheNextOneTakesTheFocus() {
+        waitForHome()
+        val first = bundledMovies().first { it.title == "The Shining" }
+        val second = bundledMovies().first { it.title == "Hereditary" }
+        fun inMyList(movie: Movie) =
+            hasContentDescription("${movie.title}, ${movie.year}", substring = true) and hasAnyAncestor(hasTestTag(rowTag("mylist")))
+        withCleanup(
+            test = {
+                // Added second, so it comes first in the row (newest first).
+                setInMyList(first, wanted = true)
+                setInMyList(second, wanted = true)
+                val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("mylist") }.isSuccess }
+                waitFor(inMyList(second))
+                rule.onNode(inMyList(second)).performSemanticsAction(SemanticsActions.RequestFocus)
+                rule.waitForIdle()
+                rule.onNode(inMyList(second)).assertIsFocused()
+                longPressOk()
+                waitForGone(inMyList(second))
+                // The card that took its place has the focus, so holding OK again removes it too.
+                rule.waitUntil(TIMEOUT_MS) {
+                    rule.onAllNodes(inMyList(first) and isFocused()).fetchSemanticsNodes().isNotEmpty()
+                }
+                longPressOk()
+                waitForGone(inMyList(first))
+            },
+            cleanup = {
+                setInMyList(first, wanted = false)
+                setInMyList(second, wanted = false)
+            },
+        )
     }
 
     /** A real long press of the remote's OK button, as the system delivers it (repeats and the long-press flag). */

@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
+import io.github.diamondrubinny.scary.core.catalog.KeptList
 import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.WatchedList
@@ -66,6 +67,17 @@ class WatchedTest {
             assertEquals("m5", NightPick.surprise(movies, maxFear = 5, random = Random(seed), watched = watched)?.id)
         }
         assertTrue(NightPick.surprise(movies, maxFear = 5, random = Random(1), watched = movies.map { it.id }.toSet()) != null)
+    }
+
+    @Test
+    fun `a capped list drops its oldest, but never one it must keep`() {
+        val items = (1..10).map { "m$it" } // newest first
+        assertEquals((1..6).map { "m$it" }, KeptList.trim(items, max = 6) { false })
+        // m9 and m10 are on My list: they stay, and older ones still within the cap go instead.
+        assertEquals(listOf("m1", "m2", "m3", "m4", "m9", "m10"), KeptList.trim(items, max = 6) { it == "m9" || it == "m10" })
+        // Everything kept: it stays over the cap rather than losing any.
+        assertEquals(items, KeptList.trim(items, max = 3) { true })
+        assertEquals(items.take(3), KeptList.trim(items.take(3), max = 6) { false })
     }
 
     @Test

@@ -46,3 +46,18 @@ data class PendingWatch(val movieId: String, val startedAtMillis: Long) {
         }
     }
 }
+
+/** Caps a newest-first list without dropping what must stay. */
+object KeptList {
+    /** Drops from the old end until [max] remain, never an item [isKept] accepts (so it may stay a little over [max]). */
+    fun <T> trim(items: List<T>, max: Int, isKept: (T) -> Boolean): List<T> {
+        if (items.size <= max) return items
+        val result = items.toMutableList()
+        var i = result.lastIndex
+        while (result.size > max && i >= 0) {
+            if (!isKept(result[i])) result.removeAt(i)
+            i--
+        }
+        return result
+    }
+}

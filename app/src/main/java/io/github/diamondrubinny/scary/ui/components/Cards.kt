@@ -178,7 +178,8 @@ fun WideMovieCard(
         CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
             BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize).mixedLanguage(), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
+            // Online movies often have no runtime: no "0 min", as on the movie page.
+            if (movie.runtimeMin > 0) BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Caption)
         }
     }
 }

@@ -214,7 +214,7 @@
     <string name="donate_title">Поддержите SCARY</string>
     <string name="donate_body">Наведите камеру телефона, чтобы пожертвовать через PayPal. SCARY остаётся бесплатным, пожертвование — по желанию.</string>
     <string name="donate_qr_description">QR-код для пожертвования SCARY через PayPal</string>
-    <string name="action_mark_watched">Отметить просмотренным</string>
+    <string name="action_mark_watched">+ Просмотрено</string>
     <string name="action_watched">✓ Просмотрено</string>
     <string name="watched_badge">просмотрено</string>
     <string name="msg_marked_watched">«%1$s» отмечен как просмотренный</string>

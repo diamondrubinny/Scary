@@ -54,9 +54,11 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
  * focused, and dips slightly while OK is held. D-pad center and Enter trigger [onClick]; holding them triggers
  * [onLongClick] when given.
  *
- * Holding OK is handled here rather than by combinedClickable: a TV remote sends the held key as a stream of repeated
- * key-downs, and combinedClickable alone did not turn that into a long click on the TV (the "hold OK to add to
- * My list" gesture did nothing). The click fires when OK is released, unless the hold already counted as a long press.
+ * OK is handled here rather than by combinedClickable: a TV remote sends a held key as a stream of repeated key-downs,
+ * and combinedClickable alone did not turn that into a long click on the TV (the "hold OK to add to My list" gesture
+ * did nothing). The click fires when OK is released, unless the hold already counted as a long press, and only for a
+ * press that started here: a key still held from a long press on another element (whose dialog then took the focus)
+ * never clicks this one.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -131,15 +133,9 @@ fun FocusSurface(
             .clip(shape)
             .background(container)
             .border(2.dp, if (focused) focusedBorderColor else borderColor, shape)
-            .then(
-                if (onLongClick == null) {
-                    Modifier
-                } else {
-                    Modifier.onPreviewKeyEvent { event ->
-                        keyHold.handle(event, interactionSource, onClick = { latestOnClick() }, onLongClick = { latestOnLongClick?.invoke() })
-                    }
-                },
-            )
+            .onPreviewKeyEvent { event ->
+                keyHold.handle(event, interactionSource, onClick = { latestOnClick() }, onLongClick = latestOnLongClick)
+            }
             .combinedClickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -159,29 +155,32 @@ fun FocusSurface(
 }
 
 /**
- * One OK press on a card that has a long-press action: down starts the press (the card dips), a repeat of the held key
- * (or the system's long-press flag) fires the long press once, and the release fires the click only if no long press
- * came first. Every OK event is consumed, so combinedClickable never sees them and nothing fires twice.
+ * One OK press: a fresh key-down starts it (the element dips), a repeat of the held key (or the system's long-press
+ * flag) fires the long press once when there is one, and the release fires the click only if this element saw the
+ * press start and no long press came first. Every OK event is consumed, so combinedClickable never sees them and
+ * nothing fires twice.
  */
 private class KeyHold {
     private var press: PressInteraction.Press? = null
+    private var started = false
     private var longPressed = false
 
     fun handle(
         event: KeyEvent,
         interactions: MutableInteractionSource,
         onClick: () -> Unit,
-        onLongClick: () -> Unit,
+        onLongClick: (() -> Unit)?,
     ): Boolean {
         if (event.key !in SELECT_KEYS) return false
         val native = event.nativeKeyEvent
         when (event.type) {
             KeyEventType.KeyDown -> {
                 if (native.repeatCount == 0) {
+                    started = true
                     longPressed = false
                     release(interactions)
                     press = PressInteraction.Press(Offset.Zero).also(interactions::tryEmit)
-                } else if (!longPressed && (native.isLongPress || native.repeatCount > 0)) {
+                } else if (started && !longPressed && onLongClick != null) {
                     longPressed = true
                     release(interactions)
                     onLongClick()
@@ -189,7 +188,8 @@ private class KeyHold {
             }
             KeyEventType.KeyUp -> {
                 release(interactions)
-                if (!longPressed && !native.isCanceled) onClick()
+                if (started && !longPressed && !native.isCanceled) onClick()
+                started = false
                 longPressed = false
             }
             else -> return false

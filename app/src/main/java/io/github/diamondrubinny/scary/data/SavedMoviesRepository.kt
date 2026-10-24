@@ -6,6 +6,9 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import android.util.Log
+import io.github.diamondrubinny.scary.core.catalog.KeptList
+import io.github.diamondrubinny.scary.core.catalog.MyList
+import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.model.Language
@@ -40,13 +43,17 @@ class SavedMoviesRepository(context: Context) {
 
     suspend fun load() = mutex.withLock { loadLocked() }
 
-    /** Keeps an online movie; curated movies are always in the bundled library and are not stored. */
-    suspend fun save(movie: Movie, language: Language) {
+    /**
+     * Keeps an online movie; curated movies are always in the bundled library and are not stored. Past [MAX_SIZE] the
+     * oldest go first, but never one in [keep] (IMDb ids of My list and Recently opened): without its details a movie
+     * would vanish from My list and could not even be opened to take it off.
+     */
+    suspend fun save(movie: Movie, language: Language, keep: Set<String> = emptySet()) {
         if (movie.curated) return
         mutex.withLock {
             loadLocked()
             val meta = Cinemeta.fromMovie(movie, language.code)
-            val next = (listOf(meta) + _items.value.filter { it.imdbId != meta.imdbId }).take(MAX_SIZE)
+            val next = trim(listOf(meta) + _items.value.filter { it.imdbId != meta.imdbId }, keep + meta.imdbId)
             if (next == _items.value) return@withLock
             _items.value = next
             withContext(Dispatchers.IO) {
@@ -61,6 +68,10 @@ class SavedMoviesRepository(context: Context) {
         }
     }
 
+    // My list (100) and Recent (12) fit well inside MAX_SIZE, so the cap still holds in practice.
+    private fun trim(items: List<CinemetaMeta>, keep: Set<String>): List<CinemetaMeta> =
+        KeptList.trim(items, MAX_SIZE) { it.imdbId in keep }
+
     private suspend fun loadLocked() {
         if (loaded) return
         loaded = true
@@ -74,7 +85,8 @@ class SavedMoviesRepository(context: Context) {
                     // The file is ours, but it is still re-validated as untrusted input.
                     .map { it.copy(poster = Cinemeta.safeImage(it.poster), background = Cinemeta.safeImage(it.background), logo = Cinemeta.safeImage(it.logo)) }
                     .filter { Cinemeta.toMovie(it) != null }
-                    .take(MAX_SIZE)
+                    // Bounded by save(); a little over MAX_SIZE is the movies it had to keep.
+                    .take(MAX_SIZE + MAX_KEPT)
             }
         }
     }
@@ -82,5 +94,6 @@ class SavedMoviesRepository(context: Context) {
     private companion object {
         const val TAG = "SavedMovies"
         const val MAX_SIZE = 150
+        const val MAX_KEPT = MyList.MAX_SIZE + RecentList.MAX_SIZE
     }
 }

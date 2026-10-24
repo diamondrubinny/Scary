@@ -34,6 +34,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -87,6 +90,9 @@ fun SearchScreen(
     isWatched: (Movie) -> Boolean = { false },
     webSearch: WebSearchState = WebSearchState(),
     onSurprise: () -> Unit = {},
+    gridState: LazyGridState = rememberLazyGridState(),
+    /** The movie opened from these results, if any: coming back from it, focus lands on its card. */
+    returnTo: String? = null,
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -116,10 +122,15 @@ fun SearchScreen(
         if (result.resultCode == Activity.RESULT_OK && !spoken.isNullOrEmpty()) onQueryChange(spoken)
     }
 
+    val returnFocus = remember { FocusRequester() }
+    val firstResultFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        // Coming back from a movie keeps the query; only an empty search starts in the text field.
-        if (query.isEmpty()) runCatching { fieldFocus.requestFocus() }
+        // An empty search starts in the text field. Coming back from a movie keeps the query, and focus goes back to
+        // that movie's card (or the first result, or the field), so the remote is never left pointing at nothing.
+        if (query.isEmpty() || !(returnFocus.tryRequestFocus() || firstResultFocus.tryRequestFocus())) {
+            fieldFocus.tryRequestFocus()
+        }
     }
 
     Column(Modifier.fillMaxSize().padding(top = 28.dp)) {
@@ -191,6 +202,7 @@ fun SearchScreen(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp),
             modifier = Modifier.weight(1f),
+            state = gridState,
         ) {
             // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
             val webDone = webSearch.query != query.trim() || !webSearch.loading
@@ -206,7 +218,18 @@ fun SearchScreen(
                 }
             }
             items(results, key = { it.id }) { movie ->
-                PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie), watched = isWatched(movie))
+                PosterCard(
+                    movie = movie,
+                    onClick = { onOpenMovie(movie) },
+                    onFocused = {},
+                    locked = isLocked(movie),
+                    watched = isWatched(movie),
+                    focusRequester = when {
+                        movie.id == returnTo -> returnFocus
+                        movie === results.first() -> firstResultFocus
+                        else -> null
+                    },
+                )
             }
             // Web results only for the query on screen, and without movies the library already found.
             if (webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
@@ -216,7 +239,14 @@ fun SearchScreen(
                     WebHeader(webSearch, web.isEmpty())
                 }
                 items(web, key = { "web:" + it.id }) { movie ->
-                    PosterCard(movie = movie, onClick = { onOpenMovie(movie) }, onFocused = {}, locked = isLocked(movie), watched = isWatched(movie))
+                    PosterCard(
+                        movie = movie,
+                        onClick = { onOpenMovie(movie) },
+                        onFocused = {},
+                        locked = isLocked(movie),
+                        watched = isWatched(movie),
+                        focusRequester = returnFocus.takeIf { movie.id == returnTo },
+                    )
                 }
             }
         }

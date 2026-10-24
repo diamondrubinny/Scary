@@ -41,6 +41,7 @@ import androidx.compose.ui.window.Dialog
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
+import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.home.DrawerApp
@@ -70,7 +71,7 @@ fun AllAppsScreen(apps: List<DrawerApp>, actions: AllAppsActions) {
 
     LaunchedEffect(Unit) {
         withFrameNanos { }
-        if (runCatching { firstFocus.requestFocus() }.isFailure) runCatching { editFocus.requestFocus() }
+        if (!firstFocus.tryRequestFocus()) editFocus.tryRequestFocus()
     }
 
     Column(Modifier.fillMaxSize().padding(top = 28.dp)) {

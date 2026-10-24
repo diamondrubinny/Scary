@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -85,6 +86,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
 
     // Scroll positions survive a trip to the details screen and back.
     val homeListState = rememberLazyListState()
+    // Search keeps its scroll position and the movie it opened, so Back from that movie lands on it again.
+    val searchGrid = rememberLazyGridState()
+    var searchOpenedId by remember { mutableStateOf<String?>(null) }
     val rowStates = remember { mutableMapOf<String, LazyListState>() }
     LaunchedEffect(resets) {
         if (resets == 0) return@LaunchedEffect
@@ -211,10 +215,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     movies = state.movies,
                     query = searchQuery,
                     onQueryChange = viewModel::setSearchQuery,
-                    onOpenMovie = { viewModel.openDetails(it.id) },
+                    onOpenMovie = {
+                        searchOpenedId = it.id
+                        viewModel.openDetails(it.id)
+                    },
                     language = language,
                     isLocked = state::isLocked,
                     isWatched = state::isWatched,
+                    gridState = searchGrid,
+                    returnTo = searchOpenedId,
                     webSearch = webSearch,
                     onSurprise = viewModel::surprise,
                 )
