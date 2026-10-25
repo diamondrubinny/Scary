@@ -278,8 +278,11 @@ class ScaryDream : DreamService() {
         val brand = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.END
-            addView(logo)
-            addView(credit)
+            // Wrap content: by default a vertical LinearLayout stretches text to match the widest fixed-size child,
+            // and the QR code would then cut "SCARY" short.
+            val wrap = { LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT) }
+            addView(logo, wrap())
+            addView(credit, wrap())
             addView(
                 donate,
                 LinearLayout.LayoutParams(dp(DONATE_QR_DP), dp(DONATE_QR_DP)).apply { setMargins(dp(48), dp(10), dp(48), 0) },
