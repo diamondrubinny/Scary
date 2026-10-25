@@ -55,6 +55,7 @@ fun TopBar(
         Column {
             BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
             CreditLine(short = true)
+            DonateMini(Modifier.padding(top = 8.dp))
         }
         if (familyNight) {
             // Not just a color: the badge says it in words.

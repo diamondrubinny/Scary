@@ -146,6 +146,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onToggleMyList = { viewModel.toggleMyList(it, language) },
             onSurprise = viewModel::surprise,
             onMood = viewModel::toggleMood,
+            onDecade = viewModel::toggleDecade,
             onNearRowEnd = viewModel::onNearRowEnd,
         )
     }

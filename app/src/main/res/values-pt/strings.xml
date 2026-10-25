@@ -211,6 +211,7 @@
     <string name="donate_title">Apoie o SCARY</string>
     <string name="donate_body">Aponte a câmera do celular para doar pelo PayPal. O SCARY continua grátis; doar é opcional.</string>
     <string name="donate_qr_description">Código QR para doar ao SCARY pelo PayPal</string>
+    <string name="donate_mini">Escaneie para doar</string>
     <string name="action_mark_watched">Marcar como visto</string>
     <string name="action_watched">✓ Visto</string>
     <string name="watched_badge">visto</string>
@@ -246,4 +247,14 @@
     <string name="country_dialog_title">País para alugar e comprar</string>
     <string name="country_auto">Automático, pelo aparelho (%1$s)</string>
     <string name="country_auto_unknown">Automático, pelo aparelho</string>
+    <!-- New subgenres, moods and decades. -->
+    <string name="subgenre_zombie">Zumbis</string>
+    <string name="subgenre_vampire">Vampiros</string>
+    <string name="subgenre_body">Horror corporal</string>
+    <string name="subgenre_haunted_house">Casa assombrada</string>
+    <string name="mood_short">Curto e afiado</string>
+    <string name="mood_slow_burn">Terror em fogo lento</string>
+    <string name="row_decades">Ou escolha uma década</string>
+    <string name="decade_label">Anos %1$d</string>
+    <string name="mood_empty_combo">Nenhum filme da coleção tem este clima e esta década. Tente outra década.</string>
 </resources>

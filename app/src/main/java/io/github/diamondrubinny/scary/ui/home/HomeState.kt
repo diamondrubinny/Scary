@@ -113,7 +113,14 @@ sealed interface HomeRow {
     }
 
     /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
-    data class Moods(val selected: Mood?, val movies: List<Movie>) : HomeRow {
+    data class Moods(
+        val selected: Mood?,
+        val movies: List<Movie>,
+        /** The chosen decade (1980 for the 1980s), or null. */
+        val decade: Int? = null,
+        /** Decades offered as chips, oldest first. */
+        val decades: List<Int> = emptyList(),
+    ) : HomeRow {
         override val key = "moods"
     }
 }

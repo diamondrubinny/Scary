@@ -214,6 +214,7 @@
     <string name="donate_title">Поддержите SCARY</string>
     <string name="donate_body">Наведите камеру телефона, чтобы пожертвовать через PayPal. SCARY остаётся бесплатным, пожертвование — по желанию.</string>
     <string name="donate_qr_description">QR-код для пожертвования SCARY через PayPal</string>
+    <string name="donate_mini">Сканируйте, чтобы поддержать</string>
     <string name="action_mark_watched">+ Просмотрено</string>
     <string name="action_watched">✓ Просмотрено</string>
     <string name="watched_badge">просмотрено</string>
@@ -249,4 +250,14 @@
     <string name="country_dialog_title">Страна для аренды и покупки</string>
     <string name="country_auto">Автоматически, по устройству (%1$s)</string>
     <string name="country_auto_unknown">Автоматически, по устройству</string>
+    <!-- New subgenres, moods and decades. -->
+    <string name="subgenre_zombie">Зомби</string>
+    <string name="subgenre_vampire">Вампиры</string>
+    <string name="subgenre_body">Боди-хоррор</string>
+    <string name="subgenre_haunted_house">Дом с привидениями</string>
+    <string name="mood_short">Коротко и остро</string>
+    <string name="mood_slow_burn">Медленно нарастающий ужас</string>
+    <string name="row_decades">Или выберите десятилетие</string>
+    <string name="decade_label">%1$d-е</string>
+    <string name="mood_empty_combo">В коллекции нет фильма с этим настроением из этого десятилетия. Попробуйте другое десятилетие.</string>
 </resources>

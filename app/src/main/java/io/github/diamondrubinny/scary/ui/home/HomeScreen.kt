@@ -95,6 +95,7 @@ class HomeActions(
     val onSurprise: () -> Unit,
     /** Picks a mood in "What do you feel like tonight?", or clears it when chosen again. */
     val onMood: (Mood) -> Unit,
+    val onDecade: (Int) -> Unit,
     /** The viewer is near the end of a row; endless online rows load their next page. */
     val onNearRowEnd: (rowKey: String) -> Unit = {},
 )
@@ -489,8 +490,8 @@ private const val SKELETON_PULSE_MS = 700
 private const val SKELETON_CARDS = 12
 
 /**
- * "What do you feel like tonight?": a row of mood chips; once one is chosen, its movies appear in a row below.
- * Choosing the same mood again closes the row.
+ * "What do you feel like tonight?": a row of mood chips, and under it the decades. Choosing a mood, a decade or
+ * both shows their movies in a row below; choosing the same chip again clears it.
  */
 @Composable
 private fun MoodsRowView(
@@ -503,7 +504,8 @@ private fun MoodsRowView(
     isWatched: (Movie) -> Boolean,
 ) {
     val movieState = rememberLazyListState()
-    LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
+    LaunchedEffect(row.selected, row.decade) { movieState.scrollToItem(0) }
+    val anyChosen = row.selected != null || row.decade != null
     Column {
         BasicText(
             text = stringResource(R.string.row_moods),
@@ -528,15 +530,38 @@ private fun MoodsRowView(
                 )
             }
         }
-        if (row.selected != null && row.movies.isEmpty()) {
-            // Family night or the parental limits can leave a mood with nothing to show.
+        if (row.decades.isNotEmpty()) {
+            BasicText(
+                text = stringResource(R.string.row_decades),
+                style = ScaryType.Caption,
+                modifier = Modifier.padding(horizontal = SidePadding),
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(row.decades, key = { it }) { decade ->
+                    val key = "${row.key}:decade:$decade"
+                    MoodChip(
+                        label = stringResource(R.string.decade_label, decade),
+                        selected = decade == row.decade,
+                        onClick = { actions.onDecade(decade) },
+                        onFocused = { actions.onCardFocused(key, null) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+            }
+        }
+        if (anyChosen && row.movies.isEmpty()) {
+            // Family night or the parental limits can leave a mood with nothing to show; so can a mood and a decade
+            // that share no movie.
             EmptyState(
                 title = stringResource(R.string.mood_empty_title),
-                body = stringResource(R.string.mood_empty_body),
+                body = stringResource(if (row.selected != null && row.decade != null) R.string.mood_empty_combo else R.string.mood_empty_body),
                 modifier = Modifier.padding(horizontal = SidePadding, vertical = 8.dp),
             )
         }
-        if (row.selected != null && row.movies.isNotEmpty()) {
+        if (anyChosen && row.movies.isNotEmpty()) {
             LazyRow(
                 state = movieState,
                 contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),

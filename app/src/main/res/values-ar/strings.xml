@@ -221,6 +221,7 @@
     <string name="donate_title">ادعم SCARY</string>
     <string name="donate_body">امسح الرمز بهاتفك للتبرع عبر PayPal. يبقى SCARY مجانيًا، والتبرع اختياري.</string>
     <string name="donate_qr_description">رمز QR للتبرع لـ SCARY عبر PayPal</string>
+    <string name="donate_mini">امسح للتبرع</string>
     <string name="action_mark_watched">وضع علامة «شوهد»</string>
     <string name="action_watched">✓ شوهد</string>
     <string name="watched_badge">شوهد</string>
@@ -256,4 +257,14 @@
     <string name="country_dialog_title">البلد للاستئجار والشراء</string>
     <string name="country_auto">تلقائي، حسب هذا الجهاز (%1$s)</string>
     <string name="country_auto_unknown">تلقائي، حسب هذا الجهاز</string>
+    <!-- New subgenres, moods and decades. -->
+    <string name="subgenre_zombie">زومبي</string>
+    <string name="subgenre_vampire">مصاصو دماء</string>
+    <string name="subgenre_body">رعب الجسد</string>
+    <string name="subgenre_haunted_house">بيت مسكون</string>
+    <string name="mood_short">قصير وحاد</string>
+    <string name="mood_slow_burn">رعب يتصاعد ببطء</string>
+    <string name="row_decades">أو اختر عقدًا</string>
+    <string name="decade_label">عقد %1$d</string>
+    <string name="mood_empty_combo">لا يوجد في المكتبة فيلم يجمع هذا المزاج وهذا العقد. جرّب عقدًا آخر.</string>
 </resources>

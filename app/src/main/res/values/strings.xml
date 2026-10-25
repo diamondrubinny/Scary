@@ -210,6 +210,7 @@
     <string name="donate_title">Support SCARY</string>
     <string name="donate_body">Scan with your phone to donate with PayPal. SCARY stays free; giving is optional.</string>
     <string name="donate_qr_description">QR code to donate to SCARY with PayPal</string>
+    <string name="donate_mini">Scan to donate</string>
     <string name="action_mark_watched">Mark as watched</string>
     <string name="action_watched">✓ Watched</string>
     <string name="watched_badge">watched</string>
@@ -245,4 +246,14 @@
     <string name="country_dialog_title">Country for rent and buy</string>
     <string name="country_auto">Automatic, from this device (%1$s)</string>
     <string name="country_auto_unknown">Automatic, from this device</string>
+    <!-- New subgenres, moods and decades. -->
+    <string name="subgenre_zombie">Zombies</string>
+    <string name="subgenre_vampire">Vampires</string>
+    <string name="subgenre_body">Body horror</string>
+    <string name="subgenre_haunted_house">Haunted house</string>
+    <string name="mood_short">Short and sharp</string>
+    <string name="mood_slow_burn">Slow-burn dread</string>
+    <string name="row_decades">Or choose a decade</string>
+    <string name="decade_label">%1$ds</string>
+    <string name="mood_empty_combo">No movie in the library has both this mood and this decade. Try another decade.</string>
 </resources>

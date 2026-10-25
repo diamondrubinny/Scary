@@ -75,6 +75,24 @@ fun SupportScary(modifier: Modifier = Modifier) {
 }
 
 /**
+ * The small donation code that sits under the logo wherever it is shown. Small enough not to crowd the screen; a
+ * phone reads it from about an arm's length, and the large code is in Settings, under About.
+ */
+@Composable
+fun DonateMini(modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        QrImage(
+            code = remember { Donation.qr() },
+            size = MINI_QR_SIZE,
+            description = stringResource(R.string.donate_qr_description),
+        )
+        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption)
+    }
+}
+
+private val MINI_QR_SIZE = 64.dp
+
+/**
  * Dark modules on white with the quiet zone around them: phone cameras read that reliably, where a light code on
  * SCARY's dark background would fail on many of them.
  */

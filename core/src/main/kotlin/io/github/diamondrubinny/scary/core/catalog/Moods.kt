@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.core.catalog
 
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.model.MovieTag
 import io.github.diamondrubinny.scary.core.model.Subgenre
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -17,7 +18,11 @@ enum class Mood(val key: String) {
     GHOSTS("ghosts"),
     BLOOD("blood"),
     CLASSICS("classics"),
-    RELENTLESS("relentless");
+    RELENTLESS("relentless"),
+
+    // Newer moods come last, so the chips people know keep their place.
+    SHORT("short"),
+    SLOW_BURN("slow_burn");
 
     fun matches(movie: Movie): Boolean {
         val fear = movie.fear ?: return false
@@ -26,21 +31,28 @@ enum class Mood(val key: String) {
             MIND_GAMES -> movie.subgenres.any { it == Subgenre.PSYCHOLOGICAL || it == Subgenre.MYSTERY }
             GHOSTS -> movie.subgenres.any { it in SPIRITS }
             BLOOD -> fear >= 3 && movie.subgenres.any { it in VISCERAL }
+            SHORT -> movie.runtimeMin in 1..SHORT_MAX_MIN
+            SLOW_BURN -> MovieTag.SLOW_BURN in movie.tags
             CLASSICS -> movie.year < CLASSIC_BEFORE
             RELENTLESS -> fear >= 4
         }
     }
 
-    /** Matching curated movies; the scariest first for [RELENTLESS], otherwise the library's own order. */
+    /** Matching curated movies; the scariest first for [RELENTLESS], the shortest first for [SHORT], otherwise the library's own order. */
     fun pick(movies: List<Movie>): List<Movie> {
         val matching = movies.filter { it.curated && matches(it) }
-        return if (this == RELENTLESS) matching.sortedByDescending { it.fear } else matching
+        return when (this) {
+            RELENTLESS -> matching.sortedByDescending { it.fear }
+            SHORT -> matching.sortedBy { it.runtimeMin }
+            else -> matching
+        }
     }
 
     companion object {
         private const val CLASSIC_BEFORE = 1990
-        private val SPIRITS = setOf(Subgenre.SUPERNATURAL, Subgenre.POSSESSION, Subgenre.GHOST, Subgenre.FOLK)
-        private val VISCERAL = setOf(Subgenre.SLASHER, Subgenre.CREATURE, Subgenre.SURVIVAL)
+        private const val SHORT_MAX_MIN = 90
+        private val SPIRITS = setOf(Subgenre.SUPERNATURAL, Subgenre.POSSESSION, Subgenre.GHOST, Subgenre.FOLK, Subgenre.HAUNTED_HOUSE)
+        private val VISCERAL = setOf(Subgenre.SLASHER, Subgenre.CREATURE, Subgenre.SURVIVAL, Subgenre.ZOMBIE, Subgenre.BODY, Subgenre.VAMPIRE)
 
         fun fromKey(key: String?): Mood? = entries.firstOrNull { it.key == key }
     }
@@ -68,6 +80,7 @@ enum class Season(val key: String) {
         private const val LEAD_DAYS = 6
         private val HALLOWEEN_SUBGENRES = setOf(
             Subgenre.SUPERNATURAL, Subgenre.POSSESSION, Subgenre.GHOST, Subgenre.FOLK, Subgenre.SLASHER, Subgenre.CREATURE,
+            Subgenre.ZOMBIE, Subgenre.VAMPIRE, Subgenre.HAUNTED_HOUSE,
         )
         private val FRIDAY_SUBGENRES = setOf(Subgenre.SLASHER, Subgenre.SURVIVAL, Subgenre.CREATURE)
 
@@ -78,4 +91,28 @@ enum class Season(val key: String) {
             if (date.month == Month.OCTOBER) add(HALLOWEEN)
         }
     }
+}
+
+/** "Or choose a decade": the curated library by the decade a movie came out in, alone or with a mood. */
+object Decades {
+    /** 1987 is in the 1980s. */
+    fun of(movie: Movie): Int = movie.year / 10 * 10
+
+    /** Decades with at least [minMovies] curated movies, oldest first, so no chip leads to a near-empty row. */
+    fun available(movies: List<Movie>, minMovies: Int = MIN_MOVIES): List<Int> =
+        movies.filter { it.curated }.groupingBy(::of).eachCount()
+            .filterValues { it >= minMovies }.keys.sorted()
+
+    /**
+     * Curated movies for a mood, a decade, or both. Nothing is chosen: nothing to show. With a decade alone, the
+     * decade's movies in order of year.
+     */
+    fun pick(movies: List<Movie>, mood: Mood?, decade: Int?): List<Movie> = when {
+        mood == null && decade == null -> emptyList()
+        mood == null -> movies.filter { it.curated && of(it) == decade }.sortedBy { it.year }
+        decade == null -> mood.pick(movies)
+        else -> mood.pick(movies).filter { of(it) == decade }
+    }
+
+    private const val MIN_MOVIES = 3
 }

@@ -211,6 +211,7 @@
     <string name="donate_title">תמיכה ב־SCARY</string>
     <string name="donate_body">סרקו בטלפון כדי לתרום ב־PayPal. ‏SCARY נשארת חינמית, והתרומה היא רשות.</string>
     <string name="donate_qr_description">קוד QR לתרומה ל־SCARY ב־PayPal</string>
+    <string name="donate_mini">‏סרקו לתרומה</string>
     <string name="action_mark_watched">סימון כנצפה</string>
     <string name="action_watched">✓ נצפה</string>
     <string name="watched_badge">נצפה</string>
@@ -246,4 +247,14 @@
     <string name="country_dialog_title">‏מדינה לשכירה ולקנייה</string>
     <string name="country_auto">‏אוטומטי, לפי המכשיר (%1$s)</string>
     <string name="country_auto_unknown">‏אוטומטי, לפי המכשיר</string>
+    <!-- New subgenres, moods and decades. -->
+    <string name="subgenre_zombie">‏זומבים</string>
+    <string name="subgenre_vampire">‏ערפדים</string>
+    <string name="subgenre_body">‏אימת הגוף</string>
+    <string name="subgenre_haunted_house">‏בית רדוף</string>
+    <string name="mood_short">‏קצר וחד</string>
+    <string name="mood_slow_burn">‏אימה שמתבשלת לאט</string>
+    <string name="row_decades">‏או בחרו עשור</string>
+    <string name="decade_label">‏שנות ה־%1$d</string>
+    <string name="mood_empty_combo">‏אין במאגר סרט עם מצב הרוח הזה מהעשור הזה. נסו עשור אחר.</string>
 </resources>

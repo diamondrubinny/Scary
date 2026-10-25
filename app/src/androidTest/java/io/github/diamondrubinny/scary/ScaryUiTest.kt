@@ -37,6 +37,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
+import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -467,6 +468,21 @@ class ScaryUiTest {
         // The home state is built off the main thread, so idle Compose does not mean the new state has arrived yet.
         waitFor(chip and isNotSelected())
         rule.onNode(chip).assertIsNotSelected()
+    }
+
+    @Test
+    fun choosingADecadeShowsItsMoviesOldestFirst() {
+        waitForHome()
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("moods")
+        val chip = hasText(rule.activity.getString(R.string.decade_label, 1980))
+        waitFor(chip)
+        rule.onNode(chip).performClick()
+        waitFor(chip and isSelected())
+        val first = Decades.pick(bundledMovies(), null, 1980).first()
+        assertTrue(first.year in 1980..1989)
+        waitFor(hasContentDescription("${first.title}, ${first.year}", substring = true))
+        rule.onNode(chip).performClick()
+        waitFor(chip and isNotSelected())
     }
 
     @Test

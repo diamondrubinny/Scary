@@ -1,4 +1,5 @@
 <p align="center"><img src="app/src/main/res/drawable-xhdpi/banner.png" alt="SCARY" width="320"></p>
+<p align="center"><a href="https://www.paypal.com/donate/?hosted_button_id=U8CEQ95ECPP9J"><img src="docs/donate-qr.png" alt="QR code to donate to SCARY with PayPal" width="84"></a><br><sub>Scan to donate · סרקו לתרומה</sub></p>
 
 <h1 align="center">SCARY</h1>
 
@@ -22,7 +23,7 @@
 <td width="33%"><img src="docs/screenshots/shiver.jpg" alt="Dark launch screen with the movie's logo trembling before Stremio opens" width="100%"><br><b>The shiver</b> · the title trembles in the dark before the movie opens</td>
 </tr>
 <tr>
-<td><img src="docs/screenshots/moods.jpg" alt="Mood chips with Don't sleep tonight chosen and its movies below (Hebrew interface)" width="100%"><br><b>What do you feel like tonight?</b> · six moods, from mind games to no sleep</td>
+<td><img src="docs/screenshots/moods.jpg" alt="Mood chips with Don't sleep tonight chosen and its movies below (Hebrew interface)" width="100%"><br><b>What do you feel like tonight?</b> · eight moods, from mind games to no sleep</td>
 <td><img src="docs/screenshots/family-night.jpg" alt="Home screen in family night mode with a badge in the top bar (Hebrew interface)" width="100%"><br><b>Family night</b> · only the gentlest films, PIN to leave</td>
 <td><img src="docs/screenshots/en-search-web.jpg" alt="Search for conjuring with library and web results" width="100%"><br><b>Search</b> · by text or voice, in the library and across the web</td>
 </tr>
@@ -50,8 +51,9 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 
 **Why SCARY?**
 
-- 🩸 **52 hand-picked films** with a fear meter (1–5), plus 7 rows from the web (popular, new this year, thrillers, mysteries) that keep loading as you scroll: thousands of films, refreshed every day.
-- 🌙 **"What do you feel like tonight?"**: six moods, from mind games to "no sleep tonight", plus special rows for Halloween and Friday the 13th.
+- 🩸 **170 hand-picked films** with a fear meter (1–5), plus 7 rows from the web (popular, new this year, thrillers, mysteries) that keep loading as you scroll: thousands of films, refreshed every day.
+- 🌙 **"What do you feel like tonight?"**: eight moods, from mind games and "short and sharp" to "slow-burn dread" and "no sleep tonight", or pick a decade, alone or with a mood. "Surprise me" picks from your choice. Plus special rows for Halloween and Friday the 13th.
+- 🧟 **Rows for every kind of fear**: found footage, folk horror, Asian horror, zombies, vampires, body horror, haunted houses and creatures, next to the classics, slashers and psychological thrillers.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
 - 📺 **Where to watch**: search the movie in the apps you have (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex and more) and in Google TV search.
 - 🛒 **Didn't find it? Rent or buy**: with a TMDB key, the movie page lists the stores that rent or sell it in your country, and the services that include it. Your country comes from the TV's settings, never from your location. Data by JustWatch.
@@ -99,8 +101,9 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **למה SCARY?**
 
-- 🩸 **52 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 7 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות) שממשיכות להיטען כשגוללים: אלפי סרטים שמתעדכנים כל יום.
-- 🌙 **"מה בא לך הלילה?"**: שישה מצבי רוח, ממשחקי מוח ועד "לא לישון הלילה", ושורות מיוחדות להלואין ולשישי ה־13.
+- 🩸 **170 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 7 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות) שממשיכות להיטען כשגוללים: אלפי סרטים שמתעדכנים כל יום.
+- 🌙 **"מה בא לך הלילה?"**: שמונה מצבי רוח, ממשחקי מוח ו"קצר וחד" ועד "אימה שמתבשלת לאט" ו"לא לישון הלילה", או בחירת עשור, לבד או יחד עם מצב רוח. "הפתע אותי" בוחר מתוך הבחירה שלכם. ושורות מיוחדות להלואין ולשישי ה־13.
+- 🧟 **שורה לכל סוג של פחד**: פוטג' שנמצא, אימה פולקלורית, אימה אסייתית, זומבים, ערפדים, אימת הגוף, בתים רדופים ויצורים, לצד הקלאסיקות, הסלאשרים והמותחנים הפסיכולוגיים.
 - 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
 - 📺 **איפה לצפות**: חיפוש הסרט באפליקציות שמותקנות אצלכם (Netflix, ‏Apple TV, ‏yes, ‏HOT, סלקום TV, פרטנר TV ועוד) ובחיפוש של Google TV.
 - 🛒 **לא מצאתם? אפשר לשכור או לקנות**: עם מפתח TMDB, עמוד הסרט מציג את החנויות שמשכירות או מוכרות אותו במדינה שלכם, ואת השירותים שבהם הוא כלול במנוי. המדינה נלקחת מהגדרות הטלוויזיה, אף פעם לא מהמיקום. הנתונים של JustWatch.
@@ -150,8 +153,9 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **لماذا SCARY؟**
 
-- 🩸 **52 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و7 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض) تواصل التحميل كلما تابعت التمرير: آلاف الأفلام التي تتجدد يوميًا.
-- 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ستة أمزجة من ألعاب العقل إلى «لا نوم الليلة»، وصفوف خاصة بالهالوين والجمعة 13.
+- 🩸 **170 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و7 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض) تواصل التحميل كلما تابعت التمرير: آلاف الأفلام التي تتجدد يوميًا.
+- 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ثمانية أمزجة من ألعاب العقل و«قصير وحاد» إلى «رعب يتصاعد ببطء» و«لا نوم الليلة»، أو اختر عقدًا وحده أو مع مزاج. و«فاجئني» يختار من اختيارك. وصفوف خاصة بالهالوين والجمعة 13.
+- 🧟 **صف لكل نوع من الخوف**: لقطات عُثر عليها، رعب فولكلوري، رعب آسيوي، زومبي، مصاصو دماء، رعب الجسد، بيوت مسكونة ومخلوقات، إلى جانب الكلاسيكيات وأفلام القتلة والإثارة النفسية.
 - 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.
 - 📺 **أين تشاهد**: البحث عن الفيلم في التطبيقات المثبتة لديك (Netflix وApple TV وغيرها) وفي بحث Google TV.
 - 🛒 **لم تجده؟ استأجره أو اشترِه**: مع مفتاح TMDB، تعرض صفحة الفيلم المتاجر التي تؤجّره أو تبيعه في بلدك، والخدمات التي يشملها اشتراكها. يُؤخذ البلد من إعدادات التلفاز، وليس من موقعك أبدًا. البيانات من JustWatch.
@@ -199,8 +203,9 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 
 **Por que o SCARY?**
 
-- 🩸 **52 filmes escolhidos a dedo** com medidor de medo (1–5), e mais 7 fileiras da internet (populares, lançamentos do ano, suspense, mistério) que continuam carregando conforme você rola: milhares de filmes, atualizados todos os dias.
-- 🌙 **"O que você quer ver hoje à noite?"**: seis climas, de jogos mentais a "hoje ninguém dorme", e fileiras especiais para o Halloween e a sexta-feira 13.
+- 🩸 **170 filmes escolhidos a dedo** com medidor de medo (1–5), e mais 7 fileiras da internet (populares, lançamentos do ano, suspense, mistério) que continuam carregando conforme você rola: milhares de filmes, atualizados todos os dias.
+- 🌙 **"O que você quer ver hoje à noite?"**: oito climas, de jogos mentais e "curto e afiado" a "terror em fogo lento" e "hoje ninguém dorme", ou escolha uma década, sozinha ou com um clima. O "Surpreenda-me" escolhe dentro da sua escolha. E fileiras especiais para o Halloween e a sexta-feira 13.
+- 🧟 **Uma fileira para cada tipo de medo**: found footage, terror folclórico, terror asiático, zumbis, vampiros, horror corporal, casas assombradas e criaturas, ao lado dos clássicos, slashers e thrillers psicológicos.
 - 😱 **O arrepio**: o logo do filme treme e pisca como uma lâmpada morrendo, e a tela escurece logo antes de o filme abrir.
 - 📺 **Onde assistir**: busque o filme nos apps que você tem (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex e outros) e na busca do Google TV.
 - 🛒 **Não encontrou? Alugue ou compre**: com uma chave do TMDB, a página do filme mostra as lojas que o alugam ou vendem no seu país e os serviços que o incluem na assinatura. O país vem das configurações da TV, nunca da sua localização. Dados da JustWatch.
@@ -246,8 +251,9 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 
 **Почему SCARY?**
 
-- 🩸 **52 отобранных вручную фильма** со шкалой страха (1–5) и 7 рядов из интернета (популярное, новинки года, триллеры, загадки), которые подгружаются по мере прокрутки: тысячи фильмов, обновляемых каждый день.
-- 🌙 **«Что посмотреть сегодня ночью?»**: шесть настроений, от «Игр разума» до «Сегодня не уснуть», и особые ряды к Хэллоуину и пятнице 13-го.
+- 🩸 **170 отобранных вручную фильмов** со шкалой страха (1–5) и 7 рядов из интернета (популярное, новинки года, триллеры, загадки), которые подгружаются по мере прокрутки: тысячи фильмов, обновляемых каждый день.
+- 🌙 **«Что посмотреть сегодня ночью?»**: восемь настроений, от «Игр разума» и «Коротко и остро» до «Медленно нарастающего ужаса» и «Сегодня не уснуть», или выберите десятилетие, отдельно или вместе с настроением. «Удиви меня» выбирает из вашего выбора. И особые ряды к Хэллоуину и пятнице 13-го.
+- 🧟 **Ряд для каждого вида страха**: найденная плёнка, фолк-хоррор, азиатские ужасы, зомби, вампиры, боди-хоррор, дома с привидениями и чудовища, рядом с классикой, слэшерами и психологическими триллерами.
 - 😱 **Дрожь**: логотип фильма дрожит и мерцает, как умирающая лампа, а перед запуском фильма экран темнеет.
 - 📺 **Где смотреть**: поиск фильма в установленных приложениях (Netflix, Apple TV и другие) и в поиске Google TV.
 - 🛒 **Не нашли? Арендуйте или купите**: с ключом TMDB страница фильма показывает магазины, которые сдают его в аренду или продают в вашей стране, и сервисы, где он входит в подписку. Страна берётся из настроек телевизора, никогда не из местоположения. Данные JustWatch.
