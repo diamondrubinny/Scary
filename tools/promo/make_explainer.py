@@ -64,16 +64,20 @@ def script() -> list[Segment]:
                           Line("Some home screens should come with a warning."),
                           Line("This one is called SCARY.")], chapter="Meet SCARY"),
         Segment("screen", [Line("SCARY is a free, open source home screen for Android TV, made for people who love to be scared."),
-                           Line("Every evening, a new film for tonight fills the screen.")],
+                           Line("Every evening, a brand new film for tonight fills the screen.")],
                 shot="40-en-home", label="Tonight's pick", chapter="Tonight's pick and 170 films", focus=(0.3, 0.35)),
-        Segment("screen", [Line("Below it, a hundred and seventy hand-picked horror films and thrillers, each with a fear meter from one to five.",
-                                "Below it: 170 hand-picked horror films and thrillers, each with a fear meter from 1 to 5."),
+        # Piper's "joe" voice says "fear meter" like "fair meter", and blurs "hand-picked" in a long sentence: these
+        # lines are worded so a listener (and a speech recogniser) hears them right.
+        Segment("screen", [Line("Below it, a hundred and seventy horror films and thrillers, all picked by hand.",
+                                "Below it: 170 horror films and thrillers, all picked by hand."),
+                           Line("Each one is rated from one to five, on how scary it is.",
+                                "Each one is rated from 1 to 5 on how scary it is."),
                            Line("And there's a row for every kind of fear: found footage, folk horror, Asian horror, zombies, vampires and haunted houses.")],
                 shot="43-en-my-list", label="170 hand-picked films", focus=(0.4, 0.75)),
         Segment("screen", [Line("Not sure what you feel like tonight? Pick a mood, from short and sharp to don't sleep tonight, or pick a decade."),
                            Line("Still can't decide? Press Surprise me, and I'll choose for you.")],
                 shot="55-en-moods", label="What do you feel like tonight?", chapter="Moods, decades and Surprise me", focus=(0.3, 0.9)),
-        Segment("screen", [Line("Every film has its own page, with the fear meter, the cast and a trailer."),
+        Segment("screen", [Line("Every film has its own page: how scary it is, the cast, and a trailer."),
                            Line("Press Watch to open it in Stremio, or search for it in the apps you already have."),
                            Line("Hold O K on any poster to add it to My list.", "Hold OK on any poster to add it to My list.")],
                 shot="41-en-details", label="Movie pages", chapter="Movie pages, rent or buy", focus=(0.3, 0.3)),
@@ -93,7 +97,7 @@ def script() -> list[Segment]:
                 shot="47-en-privacy", label="Private by design", chapter="Privacy, languages, download", focus=(0.3, 0.3)),
         Segment("languages", [Line("It speaks English, Hebrew, Arabic, Portuguese and Russian.")], label="Five languages"),
         Segment("outro", [Line("Get it free at scary dot network.", "Get it free at scary.network"),
-                          Line("If it scared you just right, scan the code and buy us some popcorn."),
+                          Line("If it gave you the right kind of chills, scan the code and buy us some popcorn."),
                           Line("Sleep well. If you can.")]),
     ]
 
@@ -425,10 +429,11 @@ Made with real screenshots of the app. Boo's voice is synthetic (Piper, CC0 voic
 
 def thumbnail(shots: Shots, path: Path) -> None:
     img = backdrop(shots.get("40-en-home"))
-    shot = shots.get("40-en-home").resize((1100, 619), Image.LANCZOS)
+    # The screenshot starts right of the headline, so the two never touch.
+    shot = shots.get("40-en-home").resize((1010, 568), Image.LANCZOS)
     mask = Image.new("L", shot.size, 0)
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, shot.width - 1, shot.height - 1), 22, fill=255)
-    img.paste(shot.rotate(0), (720, 300), mask)
+    img.paste(shot, (W - 1010 - 60, 400), mask)
     draw_text(img, (90, 300), "SCARY", font("rubik_wet_paint.ttf", 230), BLOOD, 1.0, "ls", EN, shadow=(0, 0, 0), shadow_offset=(0, 8))
     draw_text(img, (100, 420), "Horror home screen", font("oswald_semibold.ttf", 92), BONE, 1.0, "ls", EN, shadow=(0, 0, 0))
     draw_text(img, (100, 520), "for Android TV", font("oswald_semibold.ttf", 92), CANDLE, 1.0, "ls", EN, shadow=(0, 0, 0))
