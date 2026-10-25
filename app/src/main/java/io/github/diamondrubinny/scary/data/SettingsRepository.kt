@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.links.Region
 import android.content.Context
 import android.provider.Settings
 import androidx.datastore.core.DataStore
@@ -60,6 +61,8 @@ data class LauncherPrefs(
     val watchedIds: List<String> = emptyList(),
     /** Mark a movie as watched after time away that looks like a viewing ([io.github.diamondrubinny.scary.core.catalog.AutoWatched]). */
     val autoWatched: Boolean = true,
+    /** ISO country chosen for rent and buy offers; null follows the device ([io.github.diamondrubinny.scary.core.links.Region]). */
+    val rentBuyCountry: String? = null,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -86,6 +89,7 @@ class SettingsRepository(private val context: Context) {
                 seasonalRows = p[SEASONAL_ROWS] ?: true,
                 watchedIds = RecentList.decode(p[WATCHED]),
                 autoWatched = p[AUTO_WATCHED] ?: true,
+                rentBuyCountry = Region.normalize(p[RENT_BUY_COUNTRY]),
             )
         }
         .distinctUntilChanged()
@@ -119,6 +123,12 @@ class SettingsRepository(private val context: Context) {
     }
 
     suspend fun setAutoWatched(enabled: Boolean) = edit { it[AUTO_WATCHED] = enabled }
+
+    /** Null goes back to the device's own country. */
+    suspend fun setRentBuyCountry(code: String?) = edit {
+        val country = Region.normalize(code)
+        if (country == null) it.remove(RENT_BUY_COUNTRY) else it[RENT_BUY_COUNTRY] = country
+    }
 
     /** Remembers that [pending] was handed to another app; SCARY judges the viewing when it is back on screen. */
     suspend fun setPendingWatch(pending: PendingWatch) = edit { it[PENDING_WATCH] = pending.encode() }
@@ -208,6 +218,7 @@ class SettingsRepository(private val context: Context) {
         private val WATCHED = stringPreferencesKey("watched_movie_ids")
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val PENDING_WATCH = stringPreferencesKey("pending_watch")
+        private val RENT_BUY_COUNTRY = stringPreferencesKey("rent_buy_country")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

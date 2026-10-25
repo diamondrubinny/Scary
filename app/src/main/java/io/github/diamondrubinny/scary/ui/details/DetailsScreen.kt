@@ -45,6 +45,14 @@ import io.github.diamondrubinny.scary.ui.components.PosterArt
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
+import io.github.diamondrubinny.scary.ui.home.ProviderOffer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
@@ -56,6 +64,7 @@ import io.github.diamondrubinny.scary.ui.fx.chill
 import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailsScreen(
     details: MovieDetails,
@@ -73,6 +82,12 @@ fun DetailsScreen(
     canSearchEverywhere: Boolean = false,
     onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
     onSearchEverywhere: (Movie) -> Unit = {},
+    rentOrBuy: RentOrBuyState? = null,
+    countryName: (String) -> String = { it },
+    onOffer: (Movie, ProviderOffer) -> Unit = { _, _ -> },
+    onLoadOffers: (Movie) -> Unit = {},
+    /** Changes when the TMDB key, the country or online data change, so the offers load again. */
+    offersKey: Any? = null,
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -80,105 +95,135 @@ fun DetailsScreen(
         withFrameNanos { }
         runCatching { watchFocus.requestFocus() }
     }
+    LaunchedEffect(movie.id, offersKey) { onLoadOffers(movie) }
 
-    Column(Modifier.fillMaxSize().riseIn(movie.id).padding(top = 36.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = SidePadding),
-            horizontalArrangement = Arrangement.spacedBy(36.dp),
-        ) {
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
-                MovieTitle(movie, language, locked = isLocked(movie))
-                if (movie.displayTitle(language) != movie.title) {
-                    BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
-                }
-                MovieMeta(movie)
-                if (movie.cast.isNotEmpty()) {
-                    BasicText(
-                        stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
-                        style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
-                // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
-                BasicText(
-                    movie.synopsis(language),
-                    style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
-                    maxLines = if (elsewhere) 3 else 5,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                // Four buttons: in a long language, or at a large system font, the last ones wrap to a second line
-                // instead of being cut.
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.padding(top = 8.dp),
+    // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
+    // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
+    // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour.
+    val rowsScroll = LocalBringIntoViewSpec.current
+    CompositionLocalProvider(LocalBringIntoViewSpec provides OnlyWhenNeeded) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
+            CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
+                Row(
+                    modifier = Modifier.padding(horizontal = SidePadding),
+                    horizontalArrangement = Arrangement.spacedBy(36.dp),
                 ) {
-                    ScaryButton(
-                        text = stringResource(R.string.action_watch_stremio),
-                        onClick = { onWatch(movie) },
-                        primary = true,
-                        focusRequester = watchFocus,
-                    )
-                    ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
-                    ScaryButton(
-                        text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
-                        onClick = { onToggleMyList(movie) },
-                    )
-                    ScaryButton(
-                        text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
-                        onClick = { onToggleWatched(movie) },
-                    )
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
+                        MovieTitle(movie, language, locked = isLocked(movie))
+                        if (movie.displayTitle(language) != movie.title) {
+                            BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
+                        }
+                        MovieMeta(movie)
+                        if (movie.cast.isNotEmpty()) {
+                            BasicText(
+                                stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
+                                style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                        val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
+                        // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
+                        BasicText(
+                            movie.synopsis(language),
+                            style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                            maxLines = if (elsewhere) 3 else 5,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        // Four buttons: in a long language, or at a large system font, the last ones wrap to a second line
+                        // instead of being cut.
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier.padding(top = 8.dp),
+                        ) {
+                            ScaryButton(
+                                text = stringResource(R.string.action_watch_stremio),
+                                onClick = { onWatch(movie) },
+                                primary = true,
+                                focusRequester = watchFocus,
+                            )
+                            ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
+                            ScaryButton(
+                                text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
+                                onClick = { onToggleMyList(movie) },
+                            )
+                            ScaryButton(
+                                text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
+                                onClick = { onToggleWatched(movie) },
+                            )
+                        }
+                        if (elsewhere) {
+                            WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
+                        }
+                        // A locked movie shows no store either, as it shows no art.
+                        if (rentOrBuy != null && !isLocked(movie)) {
+                            RentOrBuy(
+                                state = rentOrBuy,
+                                countryName = countryName,
+                                onOffer = { onOffer(movie, it) },
+                            )
+                        }
+                    }
+                    Box(
+                        Modifier
+                            .size(width = 150.dp, height = 225.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                    ) {
+                        PosterArt(movie, Modifier.fillMaxSize())
+                        // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                        val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
+                        if (poster != null) {
+                            AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                        } else {
+                            BasicText(
+                                text = movie.title,
+                                style = ScaryType.Title.mixedLanguage(),
+                                maxLines = 3,
+                                modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                            )
+                        }
+                    }
                 }
-                if (elsewhere) {
-                    WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
-                }
-            }
-            Box(
-                Modifier
-                    .size(width = 150.dp, height = 225.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-            ) {
-                PosterArt(movie, Modifier.fillMaxSize())
-                // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
-                val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
-                if (poster != null) {
-                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                } else {
+                if (details.similar.isNotEmpty()) {
                     BasicText(
-                        text = movie.title,
-                        style = ScaryType.Title.mixedLanguage(),
-                        maxLines = 3,
-                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                        text = stringResource(R.string.row_more_like),
+                        style = ScaryType.RowTitle,
+                        modifier = Modifier
+                            .padding(start = SidePadding, end = SidePadding, top = 20.dp)
+                            .semantics { heading() },
                     )
+                    LazyRow(
+                        contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        items(details.similar, key = { it.id }) { similar ->
+                            PosterCard(
+                                movie = similar,
+                                onClick = { onOpenSimilar(similar) },
+                                onFocused = {},
+                                width = 92.dp,
+                                locked = isLocked(similar),
+                                watched = isWatched(similar),
+                            )
+                        }
+                    }
                 }
             }
         }
-        if (details.similar.isNotEmpty()) {
-            BasicText(
-                text = stringResource(R.string.row_more_like),
-                style = ScaryType.RowTitle,
-                modifier = Modifier
-                    .padding(start = SidePadding, end = SidePadding, top = 20.dp)
-                    .semantics { heading() },
-            )
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
-                horizontalArrangement = Arrangement.spacedBy(14.dp),
-            ) {
-                items(details.similar, key = { it.id }) { similar ->
-                    PosterCard(
-                        movie = similar,
-                        onClick = { onOpenSimilar(similar) },
-                        onFocused = {},
-                        width = 92.dp,
-                        locked = isLocked(similar),
-                        watched = isWatched(similar),
-                    )
-                }
-            }
+    }
+}
+
+/** Scrolls only when the focused item is partly out of view, and then just enough to show it. */
+@OptIn(ExperimentalFoundationApi::class)
+private val OnlyWhenNeeded = object : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
+        val trailingEdge = offset + size
+        return when {
+            offset >= 0f && trailingEdge <= containerSize -> 0f
+            offset < 0f || size > containerSize -> offset
+            else -> trailingEdge - containerSize
         }
     }
 }

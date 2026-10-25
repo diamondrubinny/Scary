@@ -50,6 +50,7 @@ import io.github.diamondrubinny.scary.ui.settings.SettingsActions
 import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.settings.TmdbKeyDialog
+import io.github.diamondrubinny.scary.ui.settings.CountryPicker
 import io.github.diamondrubinny.scary.ui.components.MessageBanner
 import io.github.diamondrubinny.scary.ui.details.DetailsScreen
 import io.github.diamondrubinny.scary.ui.fx.Atmosphere
@@ -81,6 +82,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val tmdbKeyMask by viewModel.tmdbKeyMask.collectAsStateWithLifecycle()
     val tmdbDialog by viewModel.tmdbDialog.collectAsStateWithLifecycle()
     val webSearch by viewModel.webSearch.collectAsStateWithLifecycle()
+    val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
+    val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
+    var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
@@ -142,6 +146,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onToggleMyList = { viewModel.toggleMyList(it, language) },
             onSurprise = viewModel::surprise,
             onMood = viewModel::toggleMood,
+            onDecade = viewModel::toggleDecade,
             onNearRowEnd = viewModel::onNearRowEnd,
         )
     }
@@ -178,6 +183,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
         onOpenTmdb = viewModel::openTmdbDialog,
+        onOpenRentCountry = { countryPicker = true },
         onOpenScreensaver = {
             try {
                 context.startActivity(Intent(Settings.ACTION_DREAM_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
@@ -243,6 +249,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
                     tmdbKeyMask = tmdbKeyMask,
+                    rentCountryName = rentCountry?.let { viewModel.countryName(it.code, language) },
+                    rentCountryAutomatic = rentCountry?.automatic ?: true,
                     versionName = versionName,
                     actions = settingsActions,
                     returningFrom = lastDocument,
@@ -263,6 +271,11 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     canSearchEverywhere = canSearchEverywhere,
                     onSearchIn = viewModel::searchIn,
                     onSearchEverywhere = viewModel::searchEverywhere,
+                    rentOrBuy = rentOrBuy?.takeIf { it.movieId == details.movie.id }?.state,
+                    countryName = { viewModel.countryName(it, language) },
+                    onOffer = viewModel::openOffer,
+                    onLoadOffers = viewModel::loadRentOrBuy,
+                    offersKey = listOf(tmdbKeyMask, rentCountry, state.onlineEnabled),
                 )
                 else -> HomeScreen(
                     state = state,
@@ -275,6 +288,20 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     showSetHome = launcherStatus.needsSetup,
                     scrollToRow = scrollToRow,
                     onScrolledToRow = viewModel::onScrolledToRow,
+                )
+            }
+
+            if (countryPicker) {
+                CountryPicker(
+                    countries = remember(language) { viewModel.rentCountries(language) },
+                    current = rentCountry?.takeUnless { it.automatic }?.code,
+                    detected = remember(rentCountry) { viewModel.detectedCountry() }?.let { viewModel.countryName(it, language) },
+                    countryName = { viewModel.countryName(it, language) },
+                    onPick = { code ->
+                        viewModel.setRentBuyCountry(code)
+                        countryPicker = false
+                    },
+                    onDismiss = { countryPicker = false },
                 )
             }
 

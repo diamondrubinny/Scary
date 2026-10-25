@@ -72,7 +72,8 @@ enum class TmdbRow(
  */
 object Tmdb {
     const val API_HOST = "api.themoviedb.org"
-    private const val API = "https://$API_HOST/3"
+    const val API_BASE = "https://$API_HOST/3"
+    private const val API = API_BASE
     private const val IMAGES = "https://image.tmdb.org/t/p"
     const val HORROR = 27
     const val THRILLER = 53

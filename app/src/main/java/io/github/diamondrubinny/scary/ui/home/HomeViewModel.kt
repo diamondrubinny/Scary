@@ -5,6 +5,9 @@
 package io.github.diamondrubinny.scary.ui.home
 
 import io.github.diamondrubinny.scary.core.links.StreamingApps
+import io.github.diamondrubinny.scary.core.links.ResolvedCountry
+import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
+import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -24,6 +27,7 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
+import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.Season
@@ -37,6 +41,7 @@ import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
+import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.data.TmdbKeyResult
@@ -73,6 +78,7 @@ class HomeViewModel(
     private val tmdb: TmdbRepository,
     private val savedMovies: SavedMoviesRepository,
     private val cinemeta: CinemetaRepository,
+    private val regionDetector: RegionDetector,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -86,6 +92,7 @@ class HomeViewModel(
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     private val heroId = MutableStateFlow<String?>(null)
     private val mood = MutableStateFlow<Mood?>(null)
+    private val decade = MutableStateFlow<Int?>(null)
 
     /** Pages of endless online rows loaded while scrolling, by row id. In memory only; gone when SCARY restarts. */
     private val extraPages = MutableStateFlow<Map<String, List<CinemetaMeta>>>(emptyMap())
@@ -148,10 +155,10 @@ class HomeViewModel(
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
         installedApps,
-        mood,
+        combine(mood, decade) { m, d -> m to d },
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, selectedMood, prefs, unlocked ->
+    ) { catalogState, apps, (selectedMood, selectedDecade), prefs, unlocked ->
         val tiles = appTiles(apps, prefs)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -164,7 +171,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, prefs)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, selectedDecade, prefs)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -257,6 +264,98 @@ class HomeViewModel(
 
     fun searchIn(movie: Movie, app: WatchOption) = guard(movie, GatedAction.SearchIn(movie, app))
 
+    private sealed interface RentPhase {
+        data object Hidden : RentPhase
+        data object NeedsKey : RentPhase
+        data object NoCountry : RentPhase
+        data class Loading(val country: String) : RentPhase
+        data class Loaded(val offers: RegionOffers) : RentPhase
+    }
+
+    private val rentPhase = MutableStateFlow<Pair<String, RentPhase>?>(null)
+    private var rentJob: Job? = null
+
+    /** Rent, buy and subscription offers for the open movie page, matched to the apps on this TV. */
+    val rentOrBuy: StateFlow<RentOrBuyUi?> = combine(rentPhase, _watchOptions) { phase, options ->
+        phase?.let { (movieId, p) -> RentOrBuyUi(movieId, p.toUi(options)) }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** The country rent and buy offers are for: the one chosen in settings, or the device's. */
+    val rentCountry: StateFlow<ResolvedCountry?> = settings.prefs
+        .map { regionDetector.resolve(it.rentBuyCountry) }
+        .distinctUntilChanged()
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** Loads the offers for a movie page. The page calls it again when the key, the country or online data change. */
+    fun loadRentOrBuy(movie: Movie) {
+        rentJob?.cancel()
+        rentJob = viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            val country = withContext(Dispatchers.Default) { regionDetector.resolve(prefs.rentBuyCountry) }?.code
+            val early = when {
+                !prefs.onlineEnabled -> RentPhase.Hidden
+                tmdb.keyMask.value == null -> RentPhase.NeedsKey
+                country == null -> RentPhase.NoCountry
+                else -> null
+            }
+            if (early != null || country == null) {
+                rentPhase.value = movie.id to (early ?: RentPhase.NoCountry)
+                return@launch
+            }
+            rentPhase.value = movie.id to RentPhase.Loading(country)
+            val all = tmdb.watchProviders(movie.imdbId)
+            // A failed request hides the section quietly: the movie page itself still works.
+            rentPhase.value = movie.id to
+                if (all == null) RentPhase.Hidden else RentPhase.Loaded(all[country] ?: RegionOffers(country, emptyList(), null))
+        }
+    }
+
+    private fun RentPhase.toUi(options: List<WatchOption>): RentOrBuyState = when (this) {
+        RentPhase.Hidden -> RentOrBuyState.Hidden
+        RentPhase.NeedsKey -> RentOrBuyState.NeedsKey
+        RentPhase.NoCountry -> RentOrBuyState.NoCountry
+        is RentPhase.Loading -> RentOrBuyState.Loading(country)
+        is RentPhase.Loaded -> RentOrBuyState.Ready(
+            country = offers.country,
+            rentOrBuy = offers.rentOrBuy.map { offer(it, options) },
+            included = offers.included.map { offer(it, options) },
+            link = offers.link,
+        )
+    }
+
+    /** Search in the store's app when it is here, open its store page when it is known, otherwise nothing to open. */
+    private fun offer(provider: WatchProvider, options: List<WatchOption>): ProviderOffer {
+        val app = StreamingApps.matchProvider(provider.name)
+        val installed = app?.let { known -> options.firstOrNull { StreamingApps.match(it.packageName, it.label)?.key == known.key } }
+        val action = when {
+            installed != null -> OfferAction.Search(installed)
+            app != null && app.packages.isNotEmpty() -> OfferAction.Store(app.packages.first())
+            else -> OfferAction.None
+        }
+        return ProviderOffer(provider, action)
+    }
+
+    fun openOffer(movie: Movie, offer: ProviderOffer) {
+        when (val action = offer.action) {
+            is OfferAction.Search -> searchIn(movie, action.option)
+            is OfferAction.Store -> report(launcher.openStoreFor(action.packageName, offer.provider.name))
+            OfferAction.None -> Unit
+        }
+    }
+
+    /** Null follows the device again. */
+    fun setRentBuyCountry(code: String?) {
+        viewModelScope.launch { settings.setRentBuyCountry(code) }
+    }
+
+    fun rentCountries(language: Language): List<String> = regionDetector.countries(language)
+
+    /** What "Automatic" would pick: the device's country, ignoring the one chosen in settings. */
+    fun detectedCountry(): String? = regionDetector.resolve(null)?.code
+
+    fun countryName(code: String, language: Language): String = regionDetector.displayName(code, language)
+
     fun searchEverywhere(movie: Movie) = guard(movie, GatedAction.SearchEverywhere(movie))
 
     private fun buildState(
@@ -264,6 +363,7 @@ class HomeViewModel(
         tiles: List<AppTile>,
         drawer: List<DrawerApp>,
         selectedMood: Mood?,
+        selectedDecade: Int?,
         prefs: LauncherPrefs,
     ): HomeUiState {
         // Tonight's pick is one not seen yet, as long as any is left.
@@ -280,7 +380,14 @@ class HomeViewModel(
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
-            add(HomeRow.Moods(selectedMood, selectedMood?.pick(catalog.movies).orEmpty()))
+            add(
+                HomeRow.Moods(
+                    selected = selectedMood,
+                    movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
+                    decade = selectedDecade,
+                    decades = Decades.available(catalog.movies),
+                ),
+            )
             catalog.collections.forEach { collection ->
                 // Family night can empty a row; an empty row is not shown.
                 val movies = catalog.moviesOf(collection)
@@ -453,14 +560,17 @@ class HomeViewModel(
     fun surprise() {
         val shown = visibleCatalog() ?: return
         val prefs = latestPrefs ?: return
-        val pick = NightPick.surprise(
-            movies = shown.movies,
+        val watched = prefs.watchedIds.toHashSet()
+        fun surpriseFrom(movies: List<Movie>) = NightPick.surprise(
+            movies = movies,
             maxFear = prefs.nightMaxFear,
             random = Random.Default,
             exclude = heroId.value,
             isLocked = { ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, it) },
-            watched = prefs.watchedIds.toHashSet(),
+            watched = watched,
         )
+        // With a mood or a decade chosen, the surprise comes from those movies; the whole library when none of them fits.
+        val pick = surpriseFrom(Decades.pick(shown.movies, mood.value, decade.value)) ?: surpriseFrom(shown.movies)
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
 
@@ -889,6 +999,11 @@ class HomeViewModel(
         mood.update { if (it == selected) null else selected }
     }
 
+    /** Picks a decade (1980 for the 1980s), or clears it when the same one is chosen again. */
+    fun toggleDecade(selected: Int) {
+        decade.update { if (it == selected) null else selected }
+    }
+
     /** After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) and says so. */
     fun enterSafeMode() {
         viewModelScope.launch {
@@ -938,6 +1053,7 @@ class HomeViewModel(
                     container.tmdbRepository,
                     container.savedMoviesRepository,
                     container.cinemetaRepository,
+                    container.regionDetector,
                 )
             }
         }

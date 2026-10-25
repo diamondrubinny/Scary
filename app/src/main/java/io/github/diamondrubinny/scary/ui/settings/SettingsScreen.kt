@@ -55,6 +55,7 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
     val onOpenAccessibilityStatement: () -> Unit,
@@ -75,6 +76,9 @@ fun SettingsScreen(
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
     tmdbKeyMask: String?,
+    /** The country rent and buy offers are for; null when neither the settings nor the device name one. */
+    rentCountryName: String?,
+    rentCountryAutomatic: Boolean,
     versionName: String,
     actions: SettingsActions,
     returningFrom: DocumentKind? = null,
@@ -136,6 +140,16 @@ fun SettingsScreen(
         )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
+        SettingRow(
+            label = stringResource(R.string.settings_rent_country),
+            value = when {
+                rentCountryName == null -> stringResource(R.string.value_country_unknown)
+                rentCountryAutomatic -> stringResource(R.string.value_country_auto, rentCountryName)
+                else -> rentCountryName
+            },
+            onClick = actions.onOpenRentCountry,
+        )
+        BasicText(stringResource(R.string.settings_rent_country_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_language),
             value = language.nativeName,

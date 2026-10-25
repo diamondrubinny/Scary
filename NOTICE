@@ -14,6 +14,7 @@ Third-party material:
   SIL Open Font License 1.1.
 - AndroidX, Jetpack Compose, Kotlin, kotlinx, Coil, OkHttp and ZXing: Apache License 2.0.
 - This product uses the TMDB API but is not endorsed or certified by TMDB.
+- Rent, buy and subscription availability on movie pages is data by JustWatch, provided through TMDB.
 - The TMDB logo (app/src/main/res/drawable/tmdb_logo.xml, docs/tmdb-logo.svg) is a trademark of TMDB, used
   unaltered and only to credit TMDB as a source of movie information and images.
 - Movie metadata and images come from Cinemeta (Stremio) and belong to their owners.

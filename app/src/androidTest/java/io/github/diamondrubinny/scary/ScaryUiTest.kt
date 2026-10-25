@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -36,6 +37,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
+import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -316,6 +318,22 @@ class ScaryUiTest {
     }
 
     @Test
+    fun withoutATmdbKeyAMoviePageSaysHowToSeeWhereToRentOrBuyIt() {
+        // CI has no TMDB key; on a device that has one, the stores themselves show instead.
+        waitForHome()
+        // The key is read at start-up, before the home screen shows.
+        val app = rule.activity.application as ScaryApplication
+        assumeTrue(app.container.tmdbRepository.keyMask.value == null)
+        openViaSearch(bundledMovies().first { it.title == "Hereditary" })
+        val hint = hasText(text(R.string.rent_buy_needs_key))
+        waitFor(hint)
+        rule.onNode(hasText(text(R.string.rent_buy_title_plain))).assertExists()
+        // The page scrolls to it: nothing on the movie page is out of reach.
+        rule.onNode(hint).performScrollTo().assertIsDisplayed()
+        backToHome()
+    }
+
+    @Test
     fun holdingOkInMyListRemovesTheMovieAndTheNextOneTakesTheFocus() {
         waitForHome()
         val first = bundledMovies().first { it.title == "The Shining" }
@@ -450,6 +468,21 @@ class ScaryUiTest {
         // The home state is built off the main thread, so idle Compose does not mean the new state has arrived yet.
         waitFor(chip and isNotSelected())
         rule.onNode(chip).assertIsNotSelected()
+    }
+
+    @Test
+    fun choosingADecadeShowsItsMoviesOldestFirst() {
+        waitForHome()
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("moods")
+        val chip = hasText(rule.activity.getString(R.string.decade_label, 1980))
+        waitFor(chip)
+        rule.onNode(chip).performClick()
+        waitFor(chip and isSelected())
+        val first = Decades.pick(bundledMovies(), null, 1980).first()
+        assertTrue(first.year in 1980..1989)
+        waitFor(hasContentDescription("${first.title}, ${first.year}", substring = true))
+        rule.onNode(chip).performClick()
+        waitFor(chip and isNotSelected())
     }
 
     @Test

@@ -50,7 +50,10 @@ class SearchTest {
     @Test
     fun `uses localized labels from the ui`() {
         val labels: (Movie) -> List<String> = { m -> if (Subgenre.FOLK in m.subgenres) listOf("אימה פולקלורית") else emptyList() }
-        assertEquals(setOf("the_witch", "midsommar"), ids("פולקלור", labels).toSet())
+        // Every folk horror movie, found by the Hebrew label alone (no title or synopsis says "folklore").
+        val folk = catalog.movies.filter { Subgenre.FOLK in it.subgenres }.map { it.id }.toSet()
+        assertTrue(folk.containsAll(setOf("the_witch", "midsommar", "wicker_man")))
+        assertEquals(folk, ids("פולקלור", labels).toSet())
     }
 
     @Test

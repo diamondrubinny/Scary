@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.dream
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
@@ -22,6 +23,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.scale
 import coil3.asDrawable
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -29,6 +31,8 @@ import coil3.request.SuccessResult
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.core.brand.Credit
+import io.github.diamondrubinny.scary.core.brand.Donation
+import io.github.diamondrubinny.scary.core.brand.QrCode
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -265,11 +269,24 @@ class ScaryDream : DreamService() {
             textDirection = View.TEXT_DIRECTION_LTR
             setPadding(dp(48), 0, dp(48), 0)
         }
+        // The small donation code under the logo, as on the home screen. Dark on white, so phone cameras read it.
+        val donate = ImageView(this).apply {
+            setImageBitmap(qrBitmap(Donation.qr()))
+            contentDescription = getString(R.string.donate_qr_description)
+            scaleType = ImageView.ScaleType.FIT_CENTER
+        }
         val brand = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.END
-            addView(logo)
-            addView(credit)
+            // Wrap content: by default a vertical LinearLayout stretches text to match the widest fixed-size child,
+            // and the QR code would then cut "SCARY" short.
+            val wrap = { LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT) }
+            addView(logo, wrap())
+            addView(credit, wrap())
+            addView(
+                donate,
+                LinearLayout.LayoutParams(dp(DONATE_QR_DP), dp(DONATE_QR_DP)).apply { setMargins(dp(48), dp(10), dp(48), 0) },
+            )
         }
         overlay.addView(
             brand,
@@ -277,6 +294,20 @@ class ScaryDream : DreamService() {
         )
         root.addView(overlay, FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT))
         return root
+    }
+
+    /** One pixel per module, quiet zone included; the view scales it up without smoothing. */
+    private fun qrBitmap(code: QrCode): Bitmap {
+        val side = code.size + 2 * QrCode.QUIET_ZONE
+        val pixels = IntArray(side * side) { Color.WHITE }
+        for (y in 0 until code.size) {
+            for (x in 0 until code.size) {
+                if (code.isDark(x, y)) pixels[(y + QrCode.QUIET_ZONE) * side + x + QrCode.QUIET_ZONE] = Color.BLACK
+            }
+        }
+        val small = Bitmap.createBitmap(pixels, side, side, Bitmap.Config.ARGB_8888)
+        // Scaled here with filtering off, so the modules stay sharp squares.
+        return small.scale(side * QR_SCALE, side * QR_SCALE, filter = false)
     }
 
     private fun font(id: Int): Typeface? = runCatching { ResourcesCompat.getFont(this, id) }.getOrNull()
@@ -289,6 +320,8 @@ class ScaryDream : DreamService() {
         const val FADE_MS = 1_500L
         const val WAIT_MS = 300L
         const val ZOOM = 1.08f
+        const val DONATE_QR_DP = 72
+        const val QR_SCALE = 8
         val BONE = Color.rgb(0xE9, 0xE1, 0xCF)
         val ASH = Color.rgb(0xA3, 0x9E, 0x92)
         val BLOOD = Color.rgb(0xD9, 0x40, 0x40)

@@ -49,6 +49,17 @@ enum class Subgenre {
     @SerialName("survival") SURVIVAL,
     @SerialName("mystery") MYSTERY,
     @SerialName("crime") CRIME,
+    @SerialName("zombie") ZOMBIE,
+    @SerialName("vampire") VAMPIRE,
+    @SerialName("body") BODY,
+    @SerialName("haunted_house") HAUNTED_HOUSE,
+}
+
+/** Editorial notes on how a movie feels, for moods that subgenres alone cannot tell. */
+@Serializable
+enum class MovieTag {
+    /** Dread that builds slowly rather than a run of shocks. */
+    @SerialName("slow_burn") SLOW_BURN,
 }
 
 @Serializable
@@ -83,6 +94,7 @@ data class Movie(
     val synopses: Map<String, String> = emptyMap(),
     /** True for the hand-picked library, false for rows pulled from Cinemeta. */
     val curated: Boolean = true,
+    val tags: List<MovieTag> = emptyList(),
 ) {
     fun displayTitle(language: Language): String =
         titles[language.code]?.takeIf(String::isNotBlank)
