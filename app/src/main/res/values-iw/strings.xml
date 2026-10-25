@@ -150,10 +150,10 @@
         <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), זמני קריסות אחרונות (השעה בלבד), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
-        <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB.</item>
+        <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>
-        <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: github.com/diamondrubinny/Scary/issues</item>
+        <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי עורך דין.</item>
     </string-array>
     <string-array name="accessibility_paragraphs">
@@ -220,4 +220,30 @@
     <string name="settings_auto_watched">סימון כנצפה אחרי צפייה</string>
     <string name="settings_auto_watched_note">כשחוזרים ל־SCARY אחרי רוב אורך הסרט, הוא מסומן כנצפה. ‏SCARY לא רואה מה קורה באפליקציות אחרות, ולכן היא מחליטה לפי הזמן בלבד. תמיד אפשר לשנות את זה בעמוד הסרט.</string>
     <string name="my_list_hint">לחיצה ארוכה על OK מסירה סרט מהרשימה</string>
+    <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
+    <string name="rent_buy_title">‏לא מצאתם? אפשר לשכור או לקנות · %1$s</string>
+    <string name="rent_buy_title_plain">‏לא מצאתם? אפשר לשכור או לקנות</string>
+    <string name="rent_buy_needs_key">‏הוסיפו מפתח TMDB בהגדרות כדי לראות איפה אפשר לשכור או לקנות את הסרט במדינה שלכם.</string>
+    <string name="rent_buy_no_country">‏בחרו מדינה בהגדרות כדי לראות איפה אפשר לשכור או לקנות את הסרט.</string>
+    <string name="rent_buy_loading">‏מחפשים חנויות ב%1$s…</string>
+    <string name="rent_buy_none">‏כרגע אין חנות שמשכירה או מוכרת את הסרט ב%1$s.</string>
+    <string name="rent_buy_included">‏כלול במנוי</string>
+    <string name="offer_rent">‏שכירה</string>
+    <string name="offer_buy">‏קנייה</string>
+    <string name="offer_rent_buy">‏שכירה · קנייה</string>
+    <string name="offer_included">‏כלול במנוי</string>
+    <string name="offer_search_cd">‏%1$s, %2$s. מחפש את הסרט באפליקציה</string>
+    <string name="offer_store_cd">‏%1$s, %2$s. פותח את עמוד האפליקציה בחנות</string>
+    <string name="offer_info_cd">‏%1$s, %2$s</string>
+    <string name="rent_buy_qr">‏סרקו בטלפון למחירים ולקישורים</string>
+    <string name="rent_buy_qr_description">‏קוד QR עם קישורים לחנויות של הסרט ב%1$s</string>
+    <string name="rent_buy_credit">‏נתוני זמינות: JustWatch, דרך TMDB</string>
+    <string name="rent_buy_note">‏המחירים והזמינות נקבעים בידי כל חנות ועשויים להשתנות. SCARY לא מוכרת כלום ולא מקבלת עמלה.</string>
+    <string name="settings_rent_country">‏מדינה לשכירה ולקנייה</string>
+    <string name="value_country_auto">‏אוטומטי (%1$s)</string>
+    <string name="value_country_unknown">‏לא נקבעה</string>
+    <string name="settings_rent_country_note">‏נלקחת מהגדרת האזור של הטלוויזיה (ובטלפון מהרשת הסלולרית), אף פעם לא מהמיקום שלכם. אם היא שגויה, בחרו מדינה אחרת.</string>
+    <string name="country_dialog_title">‏מדינה לשכירה ולקנייה</string>
+    <string name="country_auto">‏אוטומטי, לפי המכשיר (%1$s)</string>
+    <string name="country_auto_unknown">‏אוטומטי, לפי המכשיר</string>
 </resources>

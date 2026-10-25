@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat
 import android.util.Log
 import android.view.KeyEvent
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -313,6 +314,22 @@ class ScaryUiTest {
         waitFor(result)
         rule.onAllNodes(result)[0].performClick()
         waitFor(hasText(text(R.string.row_more_like)))
+    }
+
+    @Test
+    fun withoutATmdbKeyAMoviePageSaysHowToSeeWhereToRentOrBuyIt() {
+        // CI has no TMDB key; on a device that has one, the stores themselves show instead.
+        waitForHome()
+        // The key is read at start-up, before the home screen shows.
+        val app = rule.activity.application as ScaryApplication
+        assumeTrue(app.container.tmdbRepository.keyMask.value == null)
+        openViaSearch(bundledMovies().first { it.title == "Hereditary" })
+        val hint = hasText(text(R.string.rent_buy_needs_key))
+        waitFor(hint)
+        rule.onNode(hasText(text(R.string.rent_buy_title_plain))).assertExists()
+        // The page scrolls to it: nothing on the movie page is out of reach.
+        rule.onNode(hint).performScrollTo().assertIsDisplayed()
+        backToHome()
     }
 
     @Test

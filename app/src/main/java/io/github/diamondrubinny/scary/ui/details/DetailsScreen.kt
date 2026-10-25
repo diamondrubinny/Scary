@@ -45,6 +45,10 @@ import io.github.diamondrubinny.scary.ui.components.PosterArt
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
+import io.github.diamondrubinny.scary.ui.home.ProviderOffer
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
@@ -73,6 +77,12 @@ fun DetailsScreen(
     canSearchEverywhere: Boolean = false,
     onSearchIn: (Movie, WatchOption) -> Unit = { _, _ -> },
     onSearchEverywhere: (Movie) -> Unit = {},
+    rentOrBuy: RentOrBuyState? = null,
+    countryName: (String) -> String = { it },
+    onOffer: (Movie, ProviderOffer) -> Unit = { _, _ -> },
+    onLoadOffers: (Movie) -> Unit = {},
+    /** Changes when the TMDB key, the country or online data change, so the offers load again. */
+    offersKey: Any? = null,
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -80,8 +90,10 @@ fun DetailsScreen(
         withFrameNanos { }
         runCatching { watchFocus.requestFocus() }
     }
+    LaunchedEffect(movie.id, offersKey) { onLoadOffers(movie) }
 
-    Column(Modifier.fillMaxSize().riseIn(movie.id).padding(top = 36.dp)) {
+    // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it.
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
         Row(
             modifier = Modifier.padding(horizontal = SidePadding),
             horizontalArrangement = Arrangement.spacedBy(36.dp),
@@ -134,6 +146,14 @@ fun DetailsScreen(
                 }
                 if (elsewhere) {
                     WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
+                }
+                // A locked movie shows no store either, as it shows no art.
+                if (rentOrBuy != null && !isLocked(movie)) {
+                    RentOrBuy(
+                        state = rentOrBuy,
+                        countryName = countryName,
+                        onOffer = { onOffer(movie, it) },
+                    )
                 }
             }
             Box(

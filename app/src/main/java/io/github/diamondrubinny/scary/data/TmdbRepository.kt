@@ -11,6 +11,8 @@ import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import io.github.diamondrubinny.scary.core.tmdb.TmdbAuth
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCache
 import io.github.diamondrubinny.scary.core.tmdb.TmdbRow
+import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
+import io.github.diamondrubinny.scary.core.tmdb.WatchProviders
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -106,6 +108,35 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         }
     }
 
+    /** IMDb id to TMDB id, so a movie page opened again needs one request, not two. */
+    private val tmdbIds = HashMap<String, Long>()
+
+    /** Watch providers by TMDB id, every country, newest last. In memory only, for [PROVIDERS_MAX_AGE_MS]. */
+    private val providers = object : LinkedHashMap<Long, Pair<Long, Map<String, RegionOffers>>>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, Pair<Long, Map<String, RegionOffers>>>) =
+            size > PROVIDERS_KEPT
+    }
+
+    /**
+     * Where the movie can be rented, bought or streamed, in every country (data by JustWatch, via TMDB). The request
+     * carries only the movie's id: the viewer's country is picked on the device. Null without a key or when offline.
+     */
+    suspend fun watchProviders(imdbId: String): Map<String, RegionOffers>? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val tmdbId = synchronized(tmdbIds) { tmdbIds[imdbId] } ?: run {
+            val url = runCatching { Tmdb.findUrl(imdbId, Language.EN) }.getOrNull() ?: return@withContext null
+            val found = body(url, key)?.let { Tmdb.parseFind(it, Language.EN) }?.tmdbId ?: return@withContext null
+            synchronized(tmdbIds) { tmdbIds[imdbId] = found }
+            found
+        }
+        val now = System.currentTimeMillis()
+        synchronized(providers) { providers[tmdbId]?.takeIf { now - it.first < PROVIDERS_MAX_AGE_MS }?.second }
+            ?.let { return@withContext it }
+        val offers = body(WatchProviders.url(tmdbId), key)?.let(WatchProviders::parse) ?: return@withContext null
+        synchronized(providers) { providers[tmdbId] = now to offers }
+        offers
+    }
+
     private data class Response(val code: Int, val body: String?)
 
     private fun body(url: String, auth: TmdbAuth): String? = get(url, auth)?.takeIf { it.code == HttpURLConnection.HTTP_OK }?.body
@@ -157,5 +188,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val PARALLEL_REQUESTS = 4
         const val ROW_SIZE = 20
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
+        const val PROVIDERS_KEPT = 40
+        const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
     }
 }

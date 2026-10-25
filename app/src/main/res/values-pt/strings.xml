@@ -150,10 +150,10 @@
         <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si), os horários de falhas recentes (só o horário) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
-        <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB.</item>
+        <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
-        <item>Dúvidas, correções ou pedidos sobre seus dados: github.com/diamondrubinny/Scary/issues</item>
+        <item>Dúvidas, correções ou pedidos sobre seus dados: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
     </string-array>
     <string-array name="accessibility_paragraphs">
@@ -220,4 +220,30 @@
     <string name="settings_auto_watched">Marcar como visto depois de assistir</string>
     <string name="settings_auto_watched_note">Quando você volta ao SCARY depois da maior parte da duração do filme, ele é marcado como visto. O SCARY não vê o que acontece em outros apps, então decide só pelo tempo; você sempre pode mudar isso na página do filme.</string>
     <string name="my_list_hint">Segure OK em um pôster para removê-lo</string>
+    <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
+    <string name="rent_buy_title">Não encontrou? Alugue ou compre · %1$s</string>
+    <string name="rent_buy_title_plain">Não encontrou? Alugue ou compre</string>
+    <string name="rent_buy_needs_key">Adicione sua chave do TMDB nas Configurações para ver onde alugar ou comprar este filme no seu país.</string>
+    <string name="rent_buy_no_country">Escolha seu país nas Configurações para ver onde alugar ou comprar este filme.</string>
+    <string name="rent_buy_loading">Procurando lojas em %1$s…</string>
+    <string name="rent_buy_none">Nenhuma loja aluga ou vende este filme em %1$s agora.</string>
+    <string name="rent_buy_included">Incluído em uma assinatura</string>
+    <string name="offer_rent">Alugar</string>
+    <string name="offer_buy">Comprar</string>
+    <string name="offer_rent_buy">Alugar · Comprar</string>
+    <string name="offer_included">Incluído</string>
+    <string name="offer_search_cd">%1$s, %2$s. Busca o filme no app</string>
+    <string name="offer_store_cd">%1$s, %2$s. Abre a página do app na loja</string>
+    <string name="offer_info_cd">%1$s, %2$s</string>
+    <string name="rent_buy_qr">Escaneie no celular para ver preços e links</string>
+    <string name="rent_buy_qr_description">Código QR com os links das lojas deste filme em %1$s</string>
+    <string name="rent_buy_credit">Dados de disponibilidade: JustWatch, via TMDB</string>
+    <string name="rent_buy_note">Preços e disponibilidade são definidos por cada loja e podem mudar. O SCARY não vende nada e não ganha comissão.</string>
+    <string name="settings_rent_country">País para alugar e comprar</string>
+    <string name="value_country_auto">Automático (%1$s)</string>
+    <string name="value_country_unknown">Não definido</string>
+    <string name="settings_rent_country_note">Vem da configuração de região da TV (no celular, da rede), nunca da sua localização. Escolha outro país se estiver errado.</string>
+    <string name="country_dialog_title">País para alugar e comprar</string>
+    <string name="country_auto">Automático, pelo aparelho (%1$s)</string>
+    <string name="country_auto_unknown">Automático, pelo aparelho</string>
 </resources>

@@ -151,10 +151,10 @@
         <item>يُخزَّن على هذا التلفزيون فقط: إعداداتك ولغتك، والتطبيقات المثبّتة في المقدمة والمخفية، وآخر 12 فيلمًا فتحتها، وقائمتك، ورمز PIN للرقابة الأبوية بصيغة hash مع salt (وليس الرمز نفسه أبدًا)، وأوقات الأعطال الأخيرة (الوقت فقط)، ومعلومات الأفلام والصور المخزنة مؤقتًا. إلغاء تثبيت SCARY أو مسح بياناته من إعدادات التلفزيون يحذف كل ذلك. SCARY مستثنى من النسخ الاحتياطي في Android.</item>
         <item>تُقرأ قائمة التطبيقات المثبتة على هذا التلفزيون لعرضها، ولا تغادره أبدًا.</item>
         <item>بيانات الأفلام عبر الإنترنت، ويمكنك إيقافها من الإعدادات: يطلب SCARY من Cinemeta، خدمة البيانات الوصفية العامة لـ Stremio، الملصقات والخلفيات والتقييمات وطاقم التمثيل. لا يُرسل سوى معرّفات أفلام IMDb العامة، ونص البحث عندما تبحث. تُحمَّل الصور من عناوين HTTPS التي يقدّمها Cinemeta، ومعظمها من images.metahub.space. وكأي موقع ويب، ترى هذه الخدمات عنوان IP الخاص بتلفزيونك. تُخزَّن المعلومات مؤقتًا لمدة 24 ساعة.</item>
-        <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة.</item>
+        <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة. تأتي عروض الاستئجار والشراء في صفحات الأفلام من TMDB (بيانات JustWatch): يحمل الطلب معرّف الفيلم فقط، ويُحدَّد بلدك على التلفاز من إعداد المنطقة أو من اختيارك في الإعدادات، وليس من موقعك أبدًا.</item>
         <item>يُسلِّم البحث الصوتي المهمة إلى أداة التعرف على الكلام في هذا التلفزيون (عادةً Google). يذهب التسجيل إلى تلك الخدمة وليس إلى SCARY، ولا يتلقى SCARY سوى النص المُتعرَّف عليه.</item>
         <item>المشاهدة والإعلانات والمتجر تفتح Stremio أو YouTube أو Google Play. ومن تلك اللحظة تسري سياسات الخصوصية الخاصة بها.</item>
-        <item>للأسئلة أو التصحيحات أو الطلبات المتعلقة ببياناتك: github.com/diamondrubinny/Scary/issues</item>
+        <item>للأسئلة أو التصحيحات أو الطلبات المتعلقة ببياناتك: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>آخر تحديث: أكتوبر 2026. هذه مسودة لم يراجعها محامٍ بعد.</item>
     </string-array>
     <string-array name="accessibility_paragraphs">
@@ -230,4 +230,30 @@
     <string name="settings_auto_watched">وضع علامة «شوهد» بعد المشاهدة</string>
     <string name="settings_auto_watched_note">عندما تعود إلى SCARY بعد معظم مدة الفيلم، توضع عليه علامة «شوهد». لا يرى SCARY ما يجري داخل التطبيقات الأخرى، لذلك يحكم بالوقت فقط، ويمكنك دائمًا تغيير ذلك من صفحة الفيلم.</string>
     <string name="my_list_hint">اضغط مطولًا على OK فوق الملصق لإزالته</string>
+    <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
+    <string name="rent_buy_title">لم تجده؟ استأجره أو اشترِه · %1$s</string>
+    <string name="rent_buy_title_plain">لم تجده؟ استأجره أو اشترِه</string>
+    <string name="rent_buy_needs_key">أضف مفتاح TMDB في الإعدادات لترى أين يمكن استئجار هذا الفيلم أو شراؤه في بلدك.</string>
+    <string name="rent_buy_no_country">اختر بلدك في الإعدادات لترى أين يمكن استئجار هذا الفيلم أو شراؤه.</string>
+    <string name="rent_buy_loading">جارٍ البحث عن متاجر في %1$s…</string>
+    <string name="rent_buy_none">لا يوجد حاليًا متجر يؤجّر هذا الفيلم أو يبيعه في %1$s.</string>
+    <string name="rent_buy_included">مشمول في اشتراك</string>
+    <string name="offer_rent">استئجار</string>
+    <string name="offer_buy">شراء</string>
+    <string name="offer_rent_buy">استئجار · شراء</string>
+    <string name="offer_included">مشمول</string>
+    <string name="offer_search_cd">%1$s، %2$s. يبحث عن الفيلم في التطبيق</string>
+    <string name="offer_store_cd">%1$s، %2$s. يفتح صفحة التطبيق في المتجر</string>
+    <string name="offer_info_cd">%1$s، %2$s</string>
+    <string name="rent_buy_qr">امسح بهاتفك لرؤية الأسعار والروابط</string>
+    <string name="rent_buy_qr_description">رمز QR يحوي روابط متاجر هذا الفيلم في %1$s</string>
+    <string name="rent_buy_credit">بيانات التوفر: JustWatch عبر TMDB</string>
+    <string name="rent_buy_note">يحدد كل متجر الأسعار والتوفر وقد تتغير. لا يبيع SCARY أي شيء ولا يتقاضى أي عمولة.</string>
+    <string name="settings_rent_country">البلد للاستئجار والشراء</string>
+    <string name="value_country_auto">تلقائي (%1$s)</string>
+    <string name="value_country_unknown">غير محدد</string>
+    <string name="settings_rent_country_note">يؤخذ من إعداد المنطقة في التلفاز (وفي الهاتف من شبكة الجوال)، وليس من موقعك أبدًا. اختر بلدًا آخر إذا كان خاطئًا.</string>
+    <string name="country_dialog_title">البلد للاستئجار والشراء</string>
+    <string name="country_auto">تلقائي، حسب هذا الجهاز (%1$s)</string>
+    <string name="country_auto_unknown">تلقائي، حسب هذا الجهاز</string>
 </resources>

@@ -23,9 +23,9 @@ object StreamingApps {
     val KNOWN: List<StreamingApp> = listOf(
         StreamingApp("netflix", setOf("com.netflix.ninja", "com.netflix.mediaclient"), listOf("netflix")),
         StreamingApp("disney", setOf("com.disney.disneyplus"), listOf("disney+", "disney plus")),
-        StreamingApp("prime", setOf("com.amazon.amazonvideo.livingroom", "com.amazon.avod.thirdpartyclient"), listOf("prime video")),
+        StreamingApp("prime", setOf("com.amazon.amazonvideo.livingroom", "com.amazon.avod.thirdpartyclient"), listOf("prime video", "amazon video", "amazon channel")),
         StreamingApp("apple_tv", setOf("com.apple.atve.androidtv.appletv"), listOf("apple tv")),
-        StreamingApp("max", setOf("com.wbd.stream", "com.hbo.hbonow"), listOf("hbo max", "hbo")),
+        StreamingApp("max", setOf("com.wbd.stream", "com.hbo.hbonow"), listOf("hbo max", "hbo"), exactNames = setOf("max")),
         StreamingApp("paramount", setOf("com.cbs.ott"), listOf("paramount+", "paramount plus")),
         StreamingApp("youtube", setOf(KnownPackages.YOUTUBE_TV), listOf("youtube")),
         StreamingApp("google_tv", setOf("com.google.android.videos"), listOf("google tv", "play movies")),
@@ -34,6 +34,7 @@ object StreamingApps {
         StreamingApp("tubi", setOf("com.tubitv"), listOf("tubi")),
         StreamingApp("pluto", nameHints = listOf("pluto tv")),
         StreamingApp("mubi", nameHints = listOf("mubi")),
+        StreamingApp("rakuten", nameHints = listOf("rakuten tv")),
         // Israeli TV services: package names are not published, so only their names identify them.
         StreamingApp("yes", nameHints = listOf("yes+", "yes plus", "STINGTV", "sting tv")),
         StreamingApp("hot", nameHints = listOf("הוט", "next tv by hot"), exactNames = setOf("hot", "hot tv", "hot next", "next tv")),
@@ -55,6 +56,19 @@ object StreamingApps {
     fun match(packageName: String, label: String): StreamingApp? {
         if (packageName in EXCLUDED || excludedWord.containsMatchIn(label)) return null
         KNOWN.firstOrNull { packageName in it.packages }?.let { return it }
+        return byName(label)
+    }
+
+    /**
+     * Which known app a store or service from TMDB's watch providers is ("Amazon Video", "Google Play Movies"), so a
+     * rent or buy offer can open that app when it is installed, or its store page when it is not.
+     */
+    fun matchProvider(providerName: String): StreamingApp? {
+        if (providerName.isBlank() || excludedWord.containsMatchIn(providerName)) return null
+        return byName(providerName)
+    }
+
+    private fun byName(label: String): StreamingApp? {
         val name = label.trim()
         return KNOWN.firstOrNull { app ->
             app.exactNames.any { it.equals(name, ignoreCase = true) } || hintPatterns.getValue(app).any { it.containsMatchIn(name) }

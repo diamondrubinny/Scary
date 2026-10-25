@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import io.github.diamondrubinny.scary.data.InstalledApp
 
@@ -161,6 +162,45 @@ sealed interface Screen {
  * otherwise SCARY only opens it. Nothing here says the movie is available in that app.
  */
 data class WatchOption(val packageName: String, val label: String, val canSearch: Boolean)
+
+/** What pressing a store or service on a movie page does. */
+sealed interface OfferAction {
+    /** The app is on this device: search the movie in it. */
+    data class Search(val option: WatchOption) : OfferAction
+
+    /** The app is known but not installed: open its page in the store. */
+    data class Store(val packageName: String) : OfferAction
+
+    /** Nothing to open on this device; the QR code leads to the store instead. */
+    data object None : OfferAction
+}
+
+data class ProviderOffer(val provider: WatchProvider, val action: OfferAction)
+
+/** "Didn't find it? Rent or buy" on a movie page. */
+sealed interface RentOrBuyState {
+    /** Online data is off, or loading failed: the section stays out of the way. */
+    data object Hidden : RentOrBuyState
+
+    /** Store data comes from TMDB, which needs the viewer's own key. */
+    data object NeedsKey : RentOrBuyState
+
+    /** Neither the settings nor the device name a country. */
+    data object NoCountry : RentOrBuyState
+
+    data class Loading(val country: String) : RentOrBuyState
+
+    data class Ready(
+        val country: String,
+        val rentOrBuy: List<ProviderOffer>,
+        val included: List<ProviderOffer>,
+        /** TMDB's page for the movie in [country], shown as a QR code. */
+        val link: String?,
+    ) : RentOrBuyState
+}
+
+/** [RentOrBuyState] for one movie, so a page never shows the offers of the one before it. */
+data class RentOrBuyUi(val movieId: String, val state: RentOrBuyState)
 
 /** The short shiver screen between pressing Watch and the other app coming up. */
 data class LaunchingState(val movie: Movie, val appLabel: String)

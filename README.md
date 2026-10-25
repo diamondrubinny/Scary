@@ -54,6 +54,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 🌙 **"What do you feel like tonight?"**: six moods, from mind games to "no sleep tonight", plus special rows for Halloween and Friday the 13th.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
 - 📺 **Where to watch**: search the movie in the apps you have (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex and more) and in Google TV search.
+- 🛒 **Didn't find it? Rent or buy**: with a TMDB key, the movie page lists the stores that rent or sell it in your country, and the services that include it. Your country comes from the TV's settings, never from your location. Data by JustWatch.
 - 👨‍👩‍👧 **Family night**: only the gentlest films, everywhere, and leaving it takes a PIN.
 - 🎲 **"Surprise me"**: a random film at the fear level you choose.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
@@ -102,6 +103,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🌙 **"מה בא לך הלילה?"**: שישה מצבי רוח, ממשחקי מוח ועד "לא לישון הלילה", ושורות מיוחדות להלואין ולשישי ה־13.
 - 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
 - 📺 **איפה לצפות**: חיפוש הסרט באפליקציות שמותקנות אצלכם (Netflix, ‏Apple TV, ‏yes, ‏HOT, סלקום TV, פרטנר TV ועוד) ובחיפוש של Google TV.
+- 🛒 **לא מצאתם? אפשר לשכור או לקנות**: עם מפתח TMDB, עמוד הסרט מציג את החנויות שמשכירות או מוכרות אותו במדינה שלכם, ואת השירותים שבהם הוא כלול במנוי. המדינה נלקחת מהגדרות הטלוויזיה, אף פעם לא מהמיקום. הנתונים של JustWatch.
 - 👨‍👩‍👧 **ערב משפחתי**: רק הסרטים העדינים ביותר, בכל מקום, והיציאה דורשת PIN.
 - 🎲 **"הפתע אותי"**: סרט אקראי ברמת הפחד שבחרתם.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
@@ -152,6 +154,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ستة أمزجة من ألعاب العقل إلى «لا نوم الليلة»، وصفوف خاصة بالهالوين والجمعة 13.
 - 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.
 - 📺 **أين تشاهد**: البحث عن الفيلم في التطبيقات المثبتة لديك (Netflix وApple TV وغيرها) وفي بحث Google TV.
+- 🛒 **لم تجده؟ استأجره أو اشترِه**: مع مفتاح TMDB، تعرض صفحة الفيلم المتاجر التي تؤجّره أو تبيعه في بلدك، والخدمات التي يشملها اشتراكها. يُؤخذ البلد من إعدادات التلفاز، وليس من موقعك أبدًا. البيانات من JustWatch.
 - 👨‍👩‍👧 **سهرة عائلية**: أخف الأفلام فقط في كل مكان، والخروج منها يتطلب رمز PIN.
 - 🎲 **«فاجئني»**: فيلم عشوائي ضمن مستوى الرعب الذي تختاره.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
@@ -200,6 +203,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - 🌙 **"O que você quer ver hoje à noite?"**: seis climas, de jogos mentais a "hoje ninguém dorme", e fileiras especiais para o Halloween e a sexta-feira 13.
 - 😱 **O arrepio**: o logo do filme treme e pisca como uma lâmpada morrendo, e a tela escurece logo antes de o filme abrir.
 - 📺 **Onde assistir**: busque o filme nos apps que você tem (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex e outros) e na busca do Google TV.
+- 🛒 **Não encontrou? Alugue ou compre**: com uma chave do TMDB, a página do filme mostra as lojas que o alugam ou vendem no seu país e os serviços que o incluem na assinatura. O país vem das configurações da TV, nunca da sua localização. Dados da JustWatch.
 - 👨‍👩‍👧 **Noite em família**: só os filmes mais leves, em todo lugar, e para sair é preciso o PIN.
 - 🎲 **"Surpreenda-me"**: um filme aleatório no nível de medo que você escolher.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
@@ -246,6 +250,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 🌙 **«Что посмотреть сегодня ночью?»**: шесть настроений, от «Игр разума» до «Сегодня не уснуть», и особые ряды к Хэллоуину и пятнице 13-го.
 - 😱 **Дрожь**: логотип фильма дрожит и мерцает, как умирающая лампа, а перед запуском фильма экран темнеет.
 - 📺 **Где смотреть**: поиск фильма в установленных приложениях (Netflix, Apple TV и другие) и в поиске Google TV.
+- 🛒 **Не нашли? Арендуйте или купите**: с ключом TMDB страница фильма показывает магазины, которые сдают его в аренду или продают в вашей стране, и сервисы, где он входит в подписку. Страна берётся из настроек телевизора, никогда не из местоположения. Данные JustWatch.
 - 👨‍👩‍👧 **Семейный вечер**: везде только самые мягкие фильмы, выход — по PIN-коду.
 - 🎲 **«Удиви меня»**: случайный фильм в пределах выбранного уровня страха.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.

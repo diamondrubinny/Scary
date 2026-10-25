@@ -26,6 +26,8 @@
 | PIN הורים | המשתמש | נעילת הורים | האפליקציה | hash מסוג PBKDF2-HMAC-SHA256 עם salt אקראי. ה־PIN עצמו לא נשמר | אין | עד כיבוי הנעילה | כיבוי נעילה / ניקוי נתונים |
 | מצב נעילה אחרי ניסיונות כושלים | שימוש | הגנה מניחוש | האפליקציה | DataStore | אין | עד הצלחה | אוטומטי |
 | מפתח TMDB | המשתמש (אופציונלי) | גישה ל־TMDB | האפליקציה | AES-256-GCM, מפתח ב־Android Keystore | נשלח ל־TMDB בלבד | עד מחיקה | "מחיקת מפתח" בהגדרות |
+| מדינה לשכירה ולקנייה | בחירת המשתמש, או הגדרת האזור של המכשיר / מדינת הרשת והסים (בלי הרשאה) | הצגת חנויות במדינה הנכונה | האפליקציה | DataStore (רק אם נבחרה ידנית); הזיהוי האוטומטי לא נשמר | אין: TMDB מחזירה את כל המדינות והסינון נעשה במכשיר | עד שינוי | "אוטומטי" בהגדרות / ניקוי נתונים |
+| זמינות לשכירה ולקנייה (נתוני JustWatch דרך TMDB) | TMDB | "לא מצאתם? אפשר לשכור או לקנות" | האפליקציה | בזיכרון בלבד, 40 סרטים אחרונים | TMDB (רק עם מפתח; נשלחים מזהה הסרט והמפתח) | עד 24 שעות או עד סגירת האפליקציה | אוטומטי |
 | מטמון Cinemeta / TMDB | השירותים | הצגת מידע ללא רשת | האפליקציה | קבצי JSON ב־`filesDir` | — | רענון כל 24 שעות | מחיקת מפתח (TMDB) / ניקוי נתונים |
 | מטמון תמונות | השירותים | ביצועים | האפליקציה | Coil disk cache | — | עד 128MB, הישנות נמחקות ראשונות | ניקוי מטמון / נתונים |
 | זמני קריסה (שעה בלבד, בלי פרטי השגיאה) | האפליקציה | זיהוי קריסות חוזרות ומעבר למצב בטוח | האפליקציה בלבד | SharedPreferences במכשיר | אין, לא נשלח לשום מקום | 3 האחרונים, רק מ־2 הדקות האחרונות; נמחק כשנכנסים למצב בטוח | אוטומטי / ניקוי נתונים |
@@ -57,10 +59,10 @@
 3. **מה נשמר בטלוויזיה שלכם בלבד.** הגדרות ושפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, "הרשימה שלי", קוד PIN של נעילת הורים כ־hash עם salt (לא הקוד עצמו), ומטמון של מידע ותמונות על סרטים. הסרת האפליקציה או ניקוי הנתונים שלה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.
 4. **אפליקציות מותקנות.** הרשימה נקראת בטלוויזיה כדי להציג ולהפעיל אותן, ולא יוצאת ממנה.
 5. **מידע על סרטים מהרשת** (אפשר לכבות בהגדרות). SCARY פונה ל־Cinemeta, שירות המטא־דאטה הציבורי של Stremio, ושולחת רק מזהי IMDb ציבוריים, ובחיפוש גם את טקסט החיפוש. התמונות נטענות מהכתובות ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים רואים את כתובת ה־IP של הטלוויזיה.
-6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון.
+6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם. SCARY לא מבקשת הרשאת מיקום.
 7. **חיפוש קולי.** כפתור המיקרופון מעביר את הבקשה לשירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה. SCARY לא מבקשת הרשאת מיקרופון.
 8. **אפליקציות אחרות.** צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play, ומאותו רגע חלה מדיניות הפרטיות שלהן.
-9. **זכויותיכם.** כל המידע נמצא אצלכם ונמחק בניקוי הנתונים. לשאלות ובקשות: github.com/diamondrubinny/Scary/issues.
+9. **זכויותיכם.** כל המידע נמצא אצלכם ונמחק בניקוי הנתונים. לשאלות ובקשות: d@rubinny.net או github.com/diamondrubinny/Scary/issues.
 10. **שינויים.** שינוי מהותי יופיע במסמך זה עם תאריך עדכון.
 
 ### English
@@ -72,10 +74,10 @@
 3. **What stays on your TV only.** Settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling the app or clearing its data deletes everything. SCARY is excluded from Android backup.
 4. **Installed apps.** The list is read on the TV to show and open them, and never leaves it.
 5. **Online movie data** (can be turned off in settings). SCARY contacts Cinemeta, Stremio's public metadata service, sending only public IMDb IDs, plus the search text when you search; images load from the addresses it supplies, mostly images.metahub.space. Like any website, these services see your TV's IP address.
-6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache.
+6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache. Rent and buy offers on movie pages come from TMDB (data by JustWatch): the request carries only the movie's ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location. SCARY asks for no location permission.
 7. **Voice search.** The microphone button hands the request to the TV's speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text and asks for no microphone permission.
 8. **Other apps.** Watching, trailers and the store open Stremio, YouTube or Google Play; their privacy policies apply from then on.
-9. **Your rights.** All data is on your device and is erased when you clear the app's data. Questions and requests: github.com/diamondrubinny/Scary/issues.
+9. **Your rights.** All data is on your device and is erased when you clear the app's data. Questions and requests: d@rubinny.net or github.com/diamondrubinny/Scary/issues.
 10. **Changes.** Material changes will appear here with a new date.
 
 ## 5. נושאים לבדיקה משפטית
