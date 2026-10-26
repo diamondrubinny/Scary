@@ -61,58 +61,56 @@ class Segment:
 
 
 def script() -> list[Segment]:
-    # Synthetic voices blur some words ("fear meter" sounds like "fair meter", spelled-out acronyms garble): the lines
-    # are worded so a listener, and a speech recogniser, hears them right. Pauses come from full stops.
+    # The voice garbles one-word sentences ("Zombies. Vampires.") and some words ("gentlest", "pick a decade"): every
+    # line is a full sentence, checked with a speech recogniser, and the dramatic pauses are the gaps between lines.
     return [
-        Segment("intro", [Line("Hi. I'm Vesper. Vesper Static.", "Hi. I'm Vesper Static."),
-                          Line("I live inside your TV. And tonight. I've been watching you.",
-                               "I live inside your TV. And tonight... I've been watching you."),
+        Segment("intro", [Line("Hello there. My name is Vesper Static."),
+                          Line("I live inside your TV."),
+                          Line("And tonight, I've been watching you."),
                           Line("Some home screens should come with a warning."),
                           Line("This one is called SCARY.")], chapter="Meet SCARY"),
-        Segment("screen", [Line("SCARY is a free, open source home screen for Android TV. Made for people who love to be scared."),
-                           Line("Every night, a new film is waiting for you. Tonight's pick.")],
+        Segment("screen", [Line("SCARY is a free, open source home screen for Android TV, made for people who love to be scared."),
+                           Line("Every night, a brand new film is waiting just for you.")],
                 shot="40-en-home", label="Tonight's pick", chapter="Tonight's pick and 170 films", focus=(0.3, 0.35)),
-        Segment("screen", [Line("Below it, a hundred and seventy horror films and thrillers. All picked by hand.",
-                                "Below it: 170 horror films and thrillers. All picked by hand."),
+        Segment("screen", [Line("Below it, a hundred and seventy horror films and thrillers, all picked by hand.",
+                                "Below it: 170 horror films and thrillers, all picked by hand."),
                            Line("Each one is rated from one to five, on how scary it is.",
                                 "Each one is rated from 1 to 5 on how scary it is."),
-                           Line("And there's a row for every kind of fear. Found footage. Folk horror. Asian horror. Zombies. Vampires. And haunted houses.")],
+                           Line("And there's a row for every kind of fear: found footage, folk horror, Asian horror, zombies, vampires, and haunted houses.")],
                 shot="43-en-my-list", label="170 hand-picked films", focus=(0.4, 0.75)),
-        Segment("screen", [Line("Not sure what you're in the mood for tonight? Pick a mood, from short and sharp, to don't sleep tonight. Or pick a decade."),
-                           Line("Still can't decide? Press Surprise me. And let me choose for you.")],
+        Segment("screen", [Line("Not sure what you're in the mood for tonight? Pick a mood, from short and sharp, to don't sleep tonight, or choose a decade."),
+                           Line("Still can't decide? Press Surprise me, and let me choose for you.")],
                 shot="55-en-moods", label="What do you feel like tonight?", chapter="Moods, decades and Surprise me", focus=(0.3, 0.9)),
         Segment("screen", [Line("Every film gets its own page, with how scary it is, the cast, and a trailer."),
-                           Line("Press Watch to open it in Stremio, or search for it in the apps you already have."),
+                           Line("Press Watch, and it opens in Stremio, or search for it in the apps you already have."),
                            Line("Hold O K on any poster to add it to My list.", "Hold OK on any poster to add it to My list.")],
                 shot="41-en-details", label="Movie pages", chapter="Movie pages, rent or buy", focus=(0.3, 0.3)),
-        Segment("screen", [Line("Not in your apps? Add a free key from The Movie Database, and SCARY shows where to rent or buy it in your country.",
-                                "Not in your apps? Add a free key from The Movie Database (TMDB), and SCARY shows where to rent or buy it in your country.")],
+        Segment("screen", [Line("Not there? Get a free key from The Movie Database, and SCARY shows where to rent or buy it in your country.",
+                                "Not there? Get a free key from The Movie Database (TMDB), and SCARY shows where to rent or buy it in your country.")],
                 shot="41-en-details", label="Didn't find it? Rent or buy", focus=(0.25, 0.72), zoom=0.22),
-        Segment("screen", [Line("And when the film opens. Its title shivers in the dark. Just for a moment.",
-                                "And when the film opens, its title shivers in the dark. Just for a moment.")],
+        Segment("screen", [Line("And when the film opens, its title shivers in the dark, just for a moment.")],
                 shot="58-en-shiver", label="The shiver", chapter="The shiver, search, family night", focus=(0.5, 0.45)),
         Segment("screen", [Line("You can search by typing, or by voice, in the library and across the web.")],
                 shot="42-en-search-web", label="Search", focus=(0.3, 0.3)),
-        Segment("screen", [Line("Watching with the kids? Family night shows only the gentlest films. And leaving it takes your pin code.",
-                                "Watching with the kids? Family night shows only the gentlest films. And leaving it takes your PIN.")],
+        Segment("screen", [Line("Watching with the kids? Family night shows only the mildest films, and to leave it, you need your pin code.",
+                                "Watching with the kids? Family night shows only the mildest films, and to leave it, you need your PIN.")],
                 shot="56-en-family-night", label="Family night", focus=(0.3, 0.3)),
-        Segment("screen", [Line("And when the TV sits idle. The screensaver fills the dark with horror.",
-                                "And when the TV sits idle, the screensaver fills the dark with horror.")],
+        Segment("screen", [Line("And when nobody is watching, the screensaver fills the room with fear.")],
                 shot="48-en-screensaver", label="Horror screensaver", focus=(0.45, 0.5)),
-        Segment("screen", [Line("No account. No ads. No tracking. Your lists stay on your TV."),
-                           Line("And to be clear: SCARY doesn't host or stream any video. It opens films in the streaming apps you already have.")],
+        Segment("screen", [Line("There is no account, no ads, and no tracking. Your lists stay on your TV."),
+                           Line("And to be clear, SCARY does not host or stream any video. It opens films in the streaming apps you already have.")],
                 shot="47-en-privacy", label="Private by design", chapter="Privacy, languages, download", focus=(0.3, 0.3)),
         Segment("languages", [Line("It speaks English, Hebrew, Arabic, Portuguese and Russian.")], label="Five languages"),
-        Segment("outro", [Line("Download it free at scary dot network.", "Download it free at scary.network"),
-                          Line("If it gave you goosebumps, scan the code and buy us some popcorn."),
-                          Line("Sleep well. If you can.")]),
+        Segment("outro", [Line("Download it free, at scary dot network.", "Download it free at scary.network"),
+                          Line("If it gave you goosebumps, just scan this code and buy us some popcorn."),
+                          Line("Sleep well, if you can.")]),
     ]
 
 
 LANGUAGE_CUTS = [("40-en-home", "English"), ("01-home", "עברית"), ("50-ar-home", "العربية"), ("14-home-pt", "Português"),
                  ("17-home-ru", "Русский")]
 
-GAP_LINE = 0.28
+GAP_LINE = 0.42
 GAP_SEGMENT = 0.75
 LEAD_IN = 0.6
 

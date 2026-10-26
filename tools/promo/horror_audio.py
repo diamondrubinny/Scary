@@ -21,14 +21,14 @@ _WHISPER = ("afftfilt=real='hypot(re,im)*cos((random(0)*2-1)*2*3.14)':"
             "imag='hypot(re,im)*sin((random(1)*2-1)*2*3.14)':win_size=512:overlap=0.75")
 
 
-def voice_fx(src: Path, dst: Path, depth: float = 0.86) -> None:
+def voice_fx(src: Path, dst: Path, depth: float = 0.91) -> None:
     """[src] (any rate) to [dst] (44.1 kHz mono): pitch and formants down by [depth], a whisper under it, an echo."""
     rate = int(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=sample_rate", "-of", "csv=p=0", str(src)],
                               capture_output=True, text=True, check=True).stdout.strip())
     graph = (f"[0]asetrate={rate}*{depth},aresample={RATE},atempo={1 / depth:.5f},asplit=2[a][b];"
-             f"[b]{_WHISPER},highpass=f=1500,volume=0.35,adelay=25|25[w];"
+             f"[b]{_WHISPER},highpass=f=1500,volume=0.24,adelay=25|25[w];"
              "[a][w]amix=inputs=2:weights=1 1:normalize=0,"
-             "aecho=0.8:0.6:70|140|260:0.3|0.18|0.1,lowpass=f=9000,"
+             "aecho=0.8:0.6:70|140|260:0.24|0.14|0.08,lowpass=f=9000,"
              "acompressor=threshold=-20dB:ratio=3:attack=5:release=120")
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(src), "-filter_complex", graph, "-ac", "1", "-ar", str(RATE),
                     str(dst)], check=True)
@@ -155,5 +155,5 @@ def score(total: float, voice_track: np.ndarray, cuts: list[float], box_spans: l
     env = np.convolve(np.abs(voice_track[:n]), np.ones(4410) / 4410, mode="same") if voice_track.size else np.zeros(n)
     if env.size < n:
         env = np.pad(env, (0, n - env.size))
-    duck = 1 - 0.6 * np.clip(env / (env.max() * 0.25 + 1e-9), 0, 1)
+    duck = 1 - 0.7 * np.clip(env / (env.max() * 0.25 + 1e-9), 0, 1)
     return np.tanh(mix * duck * 0.9) * 0.42
