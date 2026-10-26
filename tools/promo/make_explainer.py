@@ -3,13 +3,14 @@
 # Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
 # Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 """
-Renders SCARY's YouTube explainer: Boo, a cartoon ghost, presents the app over the real CI screenshots.
+Renders SCARY's YouTube explainer: Vesper Static, a haunted TV set, presents the app over the real CI screenshots.
 
-The narration is synthesized with Piper and a CC0 voice (en_US-joe-medium), Boo's mouth follows its loudness, and the
+The narration is synthesized with Piper and a public-domain voice (en_GB-cori-high), her sound-wave mouth follows its
+loudness, and the
 music bed is the same drone as the app's DroneSynth, so the video holds no third-party footage, music or voices.
 Writes the video, an .srt file, a thumbnail and the YouTube description with chapters.
 
-    python3 tools/promo/make_explainer.py --piper PATH/TO/piper --voice en_US-joe-medium.onnx --out scary-explainer.mp4
+    python3 tools/promo/make_explainer.py --piper PATH/TO/piper --voice en_GB-cori-high.onnx --out scary-explainer.mp4
 
 Screenshots come from the `screenshots` branch (git fetch origin screenshots), or from --shots DIR.
 """
@@ -60,13 +61,13 @@ class Segment:
 
 def script() -> list[Segment]:
     return [
-        Segment("intro", [Line("Hi. I'm Boo, and I live inside your TV."),
+        Segment("intro", [Line("Hi. I'm Vesper Static, and I live inside your TV."),
                           Line("Some home screens should come with a warning."),
                           Line("This one is called SCARY.")], chapter="Meet SCARY"),
         Segment("screen", [Line("SCARY is a free, open source home screen for Android TV, made for people who love to be scared."),
                            Line("Every evening, a brand new film for tonight fills the screen.")],
                 shot="40-en-home", label="Tonight's pick", chapter="Tonight's pick and 170 films", focus=(0.3, 0.35)),
-        # Piper's "joe" voice says "fear meter" like "fair meter", and blurs "hand-picked" in a long sentence: these
+        # Synthetic voices say "fear meter" like "fair meter", and blur "hand-picked" in a long sentence: these
         # lines are worded so a listener (and a speech recogniser) hears them right.
         Segment("screen", [Line("Below it, a hundred and seventy horror films and thrillers, all picked by hand.",
                                 "Below it: 170 horror films and thrillers, all picked by hand."),
@@ -81,14 +82,15 @@ def script() -> list[Segment]:
                            Line("Press Watch to open it in Stremio, or search for it in the apps you already have."),
                            Line("Hold O K on any poster to add it to My list.", "Hold OK on any poster to add it to My list.")],
                 shot="41-en-details", label="Movie pages", chapter="Movie pages, rent or buy", focus=(0.3, 0.3)),
-        Segment("screen", [Line("Not in your apps? Add a free T M D B key, and SCARY shows where to rent or buy it in your country.",
-                                "Not in your apps? Add a free TMDB key, and SCARY shows where to rent or buy it in your country.")],
+        Segment("screen", [Line("Not in your apps? Add a free key from T M D B, and SCARY shows where to rent or buy it in your country.",
+                                "Not in your apps? Add a free key from TMDB, and SCARY shows where to rent or buy it in your country.")],
                 shot="41-en-details", label="Didn't find it? Rent or buy", focus=(0.25, 0.72), zoom=0.22),
         Segment("screen", [Line("And when the film opens, its title shivers in the dark. Just for a moment.")],
                 shot="58-en-shiver", label="The shiver", chapter="The shiver, search, family night", focus=(0.5, 0.45)),
         Segment("screen", [Line("Search by typing or by voice, in the library and across the web.")],
                 shot="42-en-search-web", label="Search", focus=(0.3, 0.3)),
-        Segment("screen", [Line("Watching with the kids? Family night shows only the gentlest films, and leaving it takes your PIN.")],
+        Segment("screen", [Line("Watching with the kids? Family night shows only the gentlest films, and leaving it takes your pin code.",
+                                "Watching with the kids? Family night shows only the gentlest films, and leaving it takes your PIN.")],
                 shot="56-en-family-night", label="Family night", focus=(0.3, 0.3)),
         Segment("screen", [Line("When the TV sits idle, the screensaver fills it with horror.")],
                 shot="48-en-screensaver", label="Horror screensaver", focus=(0.45, 0.5)),
@@ -145,7 +147,7 @@ def narrate(segments: list[Segment], piper: str, voice: str, work: Path) -> np.n
 
 
 def mouth_curve(voice_track: np.ndarray, frames: int) -> np.ndarray:
-    """How open Boo's mouth is in each frame (0..1): the voice's loudness, with a quick open and a softer close."""
+    """How loud her sound-wave mouth is in each frame (0..1): the voice's loudness, with a quick open and a softer close."""
     hop = RATE // FPS
     rms = np.array([np.sqrt(np.mean(voice_track[k * hop:(k + 1) * hop] ** 2) + 1e-12) for k in range(frames)])
     peak = np.percentile(rms[rms > 1e-4], 95) if np.any(rms > 1e-4) else 1.0
@@ -169,88 +171,118 @@ def music(total: float, voice_track: np.ndarray) -> np.ndarray:
     gust = 0.5 + 0.5 * np.sin(2 * np.pi * t / 17.0 + 1.3)
     bed = (tone * swell * 0.55 + brown * gust * 0.6) * 0.5
     bed *= np.clip(t / 2.0, 0, 1) * np.clip((total - t) / 2.0, 0, 1)
-    # The music steps back while Boo talks.
+    # The music steps back while Vesper talks.
     env = np.convolve(np.abs(voice_track[: t.size]), np.ones(4410) / 4410, mode="same")
     duck = 1 - 0.6 * np.clip(env / (env.max() * 0.25 + 1e-9), 0, 1)
     return bed * duck * 0.22
 
 
-# ---------- Boo ----------
+# ---------- Vesper Static ----------
 
-GHOST_W, GHOST_H = 600, 720
+PW, PH = 640, 760
 SS = 2  # drawn at twice the size, then scaled down: smooth edges
+PHOSPHOR = (190, 255, 215)
 
 
-def ghost(t: float, mouth: float, talking: bool, look: float = -1.0) -> Image.Image:
-    """Boo at time t: floats, waves its hem, blinks, looks toward the screen (look < 0 is left), talks."""
+def presenter(t: float, mouth: float, talking: bool, look: float = -1.0) -> Image.Image:
+    """Vesper Static, a haunted TV set: a face of light on a screen of static, a sound-wave mouth, twitching antennas."""
     s = SS
-    img = Image.new("RGBA", (GHOST_W * s, GHOST_H * s), (0, 0, 0, 0))
-    body = Image.new("L", img.size, 0)
-    d = ImageDraw.Draw(body)
-    cx, top, r = 300 * s, 70 * s, 210 * s
-    d.ellipse((cx - r, top, cx + r, top + 2 * r), fill=255)
-    hem_y = 600 * s
-    points = [(cx - r, top + r)]
-    steps = 48
-    for k in range(steps + 1):
-        x = cx - r + 2 * r * k / steps
-        wave_y = hem_y + 34 * s * math.sin(k / steps * 4 * math.pi + t * 3.2) - 10 * s * math.cos(k / steps * 2 * math.pi)
-        points.append((x, wave_y))
-    points.append((cx + r, top + r))
-    d.polygon(points, fill=255)
-    # A little arm toward the screen, waving a bit while Boo talks.
-    wave_arm = math.sin(t * 5.0) * (10 if talking else 3)
-    ax = cx - r - 10 * s if look < 0 else cx + r + 10 * s
-    ay = 390 * s + wave_arm * s
-    d.ellipse((ax - 62 * s, ay - 38 * s, ax + 62 * s, ay + 38 * s), fill=255)
+    img = Image.new("RGBA", (PW * s, PH * s), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    u = lambda *v: tuple(x * s for x in v)  # noqa: E731
 
-    glow = Image.new("RGBA", img.size, (190, 225, 255, 0))
-    glow.putalpha(body.filter(ImageFilter.GaussianBlur(28 * s)).point(lambda v: int(v * 0.55)))
-    img.alpha_composite(glow)
-    sheet = Image.new("RGBA", img.size, (244, 240, 232, 255))
-    shade = Image.new("L", img.size, 0)
-    ImageDraw.Draw(shade).ellipse((cx - r * 1.3, top + r * 1.1, cx + r * 1.3, hem_y + 120 * s), fill=70)
-    sheet = Image.composite(Image.new("RGBA", img.size, (200, 200, 212, 255)), sheet, shade.filter(ImageFilter.GaussianBlur(40 * s)))
-    sheet.putalpha(body)
-    img.alpha_composite(sheet)
+    # Antennas, twitching more while she talks.
+    twitch = 9 if talking else 4
+    for base_angle, speed, phase in ((-122, 2.3, 0.0), (-58, 2.9, 1.0)):
+        angle = math.radians(base_angle + twitch * math.sin(t * speed + phase))
+        x0, y0 = 320, 214
+        x1, y1 = x0 + 175 * math.cos(angle), y0 + 175 * math.sin(angle)
+        d.line(u(x0, y0, x1, y1), fill=(150, 150, 162, 255), width=7 * s)
+        d.ellipse(u(x1 - 11, y1 - 11, x1 + 11, y1 + 11), fill=(176, 48, 48, 255))
+    d.ellipse(u(286, 196, 354, 230), fill=(34, 24, 20, 255))
+    # Legs.
+    for x0, x1 in ((205, 178), (435, 462)):
+        d.line(u(x0, 640, x1, 728), fill=(40, 26, 20, 255), width=20 * s)
+    # The cabinet, the bezel and the side panel.
+    d.rounded_rectangle(u(90, 214, 550, 652), 48 * s, fill=(78, 48, 33, 255), outline=(46, 28, 20, 255), width=6 * s)
+    d.line(u(130, 228, 510, 228), fill=(120, 80, 56, 255), width=4 * s)
+    d.rounded_rectangle(u(122, 248, 448, 618), 60 * s, fill=(20, 20, 22, 255))
+    for k, cy in enumerate((330, 412)):
+        d.ellipse(u(470, cy - 26, 522, cy + 26), fill=(30, 20, 16, 255), outline=(150, 110, 80, 255), width=3 * s)
+        turn = math.radians(t * (40 if k else -25))
+        d.line(u(496, cy, 496 + 20 * math.cos(turn), cy + 20 * math.sin(turn)), fill=(200, 170, 120, 255), width=4 * s)
+    for gy in range(470, 600, 14):
+        d.line(u(472, gy, 520, gy), fill=(36, 24, 18, 255), width=5 * s)
 
-    f = ImageDraw.Draw(img)
-    blink = (t % 3.7) < 0.13
-    gaze = 12 * s * look
-    for ex in (cx - 78 * s, cx + 78 * s):
-        ey = 255 * s
-        h = 6 * s if blink else 44 * s
-        f.ellipse((ex - 28 * s + gaze, ey - h, ex + 28 * s + gaze, ey + h), fill=(18, 14, 16, 255))
+    # The screen: dark phosphor, live static, scanlines.
+    sx0, sy0, sx1, sy1 = 140, 266, 430, 600
+    sw, sh = (sx1 - sx0) * s, (sy1 - sy0) * s
+    frame_seed = int(t * FPS)
+    noise = np.random.default_rng(frame_seed).integers(0, 255, (sh // 6, sw // 6), dtype=np.uint8)
+    static = Image.fromarray(noise).resize((sw, sh), Image.NEAREST)
+    screen = Image.new("RGBA", (sw, sh), (14, 28, 24, 255))
+    screen.alpha_composite(Image.merge("RGBA", (static, static, static, static.point(lambda v: v // 7))))
+    lines = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    ld = ImageDraw.Draw(lines)
+    for y in range(0, sh, 6 * s):
+        ld.line((0, y, sw, y), fill=(0, 0, 0, 60), width=2 * s)
+    screen.alpha_composite(lines)
+
+    face = Image.new("RGBA", (sw, sh), (0, 0, 0, 0))
+    fd = ImageDraw.Draw(face)
+    fx = lambda x: (x - sx0) * s  # noqa: E731
+    fy = lambda y: (y - sy0) * s  # noqa: E731
+    blink = (t % 4.1) < 0.14
+    gaze = 10 * look
+    for ex in (238, 332):
+        ry = 5 if blink else 40
+        fd.ellipse((fx(ex - 30), fy(388 - ry), fx(ex + 30), fy(388 + ry)), fill=PHOSPHOR + (255,))
         if not blink:
-            f.ellipse((ex - 12 * s + gaze, ey - 28 * s, ex + 2 * s + gaze, ey - 12 * s), fill=(255, 255, 255, 230))
-    for chx in (cx - 140 * s, cx + 140 * s):
-        f.ellipse((chx - 30 * s, 330 * s, chx + 30 * s, 352 * s), fill=(235, 150, 150, 70))
-    my = 380 * s
-    if mouth < 0.07:
-        f.arc((cx - 40 * s, my - 26 * s, cx + 40 * s, my + 12 * s), 20, 160, fill=(18, 14, 16, 255), width=7 * s)
-    else:
-        mw, mh = (34 + 18 * mouth) * s, (10 + 52 * mouth) * s
-        f.ellipse((cx - mw, my - mh * 0.45, cx + mw, my + mh), fill=(40, 10, 14, 255))
-        if mouth > 0.45:
-            f.ellipse((cx - mw * 0.55, my + mh * 0.35, cx + mw * 0.55, my + mh * 0.95), fill=(170, 60, 70, 255))
-    return img.resize((GHOST_W, GHOST_H), Image.LANCZOS)
+            fd.ellipse((fx(ex - 12 + gaze), fy(390), fx(ex + 12 + gaze), fy(414)), fill=(10, 30, 24, 255))
+    # The mouth is a sound wave: flat when quiet, a wave as loud as her voice.
+    amp = 3 + 34 * mouth
+    points = []
+    for k in range(61):
+        x = 205 + 160 * k / 60
+        env = math.sin(math.pi * k / 60)
+        wave_y = 505 + (amp * env * (0.7 * math.sin(k * 0.55 + t * 18) + 0.3 * math.sin(k * 1.3 - t * 11)) if mouth > 0.05
+                        else 505 + 6 * math.sin(math.pi * k / 60))
+        points.append((fx(x), fy(wave_y)))
+    fd.line(points, fill=PHOSPHOR + (255,), width=6 * s, joint="curve")
+    glow = face.filter(ImageFilter.GaussianBlur(9 * s))
+    screen.alpha_composite(glow)
+    screen.alpha_composite(face)
+    # Now and then the picture tears.
+    if (t % 4.7) < 0.12:
+        band_y = int(sh * (0.3 + 0.4 * ((t * 7) % 1)))
+        band = screen.crop((0, band_y, sw, band_y + 40 * s))
+        screen.paste(band, (int(14 * s * math.sin(t * 50)), band_y))
+    mask = Image.new("L", (sw, sh), 0)
+    ImageDraw.Draw(mask).rounded_rectangle((0, 0, sw - 1, sh - 1), 52 * s, fill=255)
+    halo = Image.new("RGBA", img.size, (120, 255, 190, 0))
+    halo_mask = Image.new("L", img.size, 0)
+    halo_mask.paste(mask, (sx0 * s, sy0 * s))
+    halo.putalpha(halo_mask.filter(ImageFilter.GaussianBlur(26 * s)).point(lambda v: int(v * 0.35)))
+    img.alpha_composite(halo)
+    img.paste(screen, (sx0 * s, sy0 * s), mask)
+    return img.resize((PW, PH), Image.LANCZOS)
 
 
-def place_ghost(img: Image.Image, t: float, mouth: float, talking: bool, cx: float, base_y: float, scale: float,
-                look: float = -1.0, alpha: float = 1.0) -> None:
-    g = ghost(t, mouth, talking, look)
-    bob = math.sin(t * 1.7) * 14
-    tilt = math.sin(t * 1.1) * 2.2
+def place_presenter(img: Image.Image, t: float, mouth: float, talking: bool, cx: float, base_y: float, scale: float,
+                    look: float = -1.0, alpha: float = 1.0) -> None:
+    g = presenter(t, mouth, talking, look)
+    hop = abs(math.sin(t * 2.2)) * (7 if talking else 3)
+    tilt = math.sin(t * 1.1) * 1.6
     g = g.rotate(tilt, resample=Image.BICUBIC, expand=False)
-    w, h = int(GHOST_W * scale), int(GHOST_H * scale)
+    w, h = int(PW * scale), int(PH * scale)
     g = g.resize((w, h), Image.LANCZOS)
     if alpha < 1:
         g.putalpha(g.getchannel("A").point(lambda v: int(v * alpha)))
     shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
-    sw = w * (0.55 - 0.04 * math.sin(t * 1.7))
-    ImageDraw.Draw(shadow).ellipse((cx - sw / 2, base_y - 16, cx + sw / 2, base_y + 16), fill=(0, 0, 0, int(120 * alpha)))
+    sw = w * 0.62
+    ImageDraw.Draw(shadow).ellipse((cx - sw / 2, base_y - 14, cx + sw / 2, base_y + 14), fill=(0, 0, 0, int(140 * alpha)))
     img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(10)))
-    img.alpha_composite(g, (int(cx - w / 2), int(base_y - h - 30 + bob)))
+    img.alpha_composite(g, (int(cx - w / 2), int(base_y - h + 8 - hop)))
 
 
 # ---------- Frames ----------
@@ -335,12 +367,12 @@ def render_frame(seg: Segment, now: float, shots: Shots, mouth: float, qr_img: I
         if a > 0:
             draw_text(img, (W / 2, 190), "SCARY", font("rubik_wet_paint.ttf", 190), BLOOD, a, "ms", EN, shadow=(0, 0, 0))
             draw_text(img, (W / 2, 250), "The horror home screen for Android TV", font("assistant_regular.ttf", 40), ASH, a, "ms", EN)
-        place_ghost(img, now, mouth, talking, W / 2, 870, 0.7, look=0.0)
+        place_presenter(img, now, mouth, talking, W / 2, 870, 0.7, look=0.0)
         subtitle(img, text, 1.0, box_w=1300, x=(W - 1300) // 2, y=900)
         return img.convert("RGB")
     if seg.kind == "outro":
         img = backdrop(None)
-        place_ghost(img, now, mouth, talking, 470, 900, 0.9, look=1.0)
+        place_presenter(img, now, mouth, talking, 470, 900, 0.9, look=1.0)
         a = ease(local / 0.8)
         draw_text(img, (1250, 250), "SCARY", font("rubik_wet_paint.ttf", 170), BLOOD, a, "ms", EN, shadow=(0, 0, 0))
         draw_text(img, (1250, 320), "Free · Open source · Android TV", font("assistant_regular.ttf", 40), ASH, a, "ms", EN)
@@ -366,14 +398,14 @@ def render_frame(seg: Segment, now: float, shots: Shots, mouth: float, qr_img: I
         kw = {"direction": "rtl", "language": "he"} if label == "עברית" else ({"direction": "rtl", "language": "ar"} if label == "العربية" else EN)
         face = "cairo_bold.ttf" if label == "العربية" else ("assistant_bold.ttf" if label == "עברית" else "oswald_semibold.ttf")
         draw_text(img, (SCREEN[0] + SCREEN[2], 80), label, font(face, 56), BONE, 1.0, "rs", kw)
-        place_ghost(img, now, mouth, talking, 1630, 860, 0.62)
+        place_presenter(img, now, mouth, talking, 1630, 860, 0.62)
         subtitle(img, text, 1.0)
         return img.convert("RGB")
     shot = shots.get(seg.shot)
     img = backdrop(shot)
     screen_layer(img, shot, p, seg.focus, seg.zoom)
     eyebrow(img, seg.label, ease(local / 0.5))
-    place_ghost(img, now, mouth, talking, 1630, 860, 0.62)
+    place_presenter(img, now, mouth, talking, 1630, 860, 0.62)
     subtitle(img, text, 1.0)
     return img.convert("RGB")
 
@@ -409,7 +441,7 @@ def write_description(segments: list[Segment], path: Path, total: float) -> None
     chapters = [f"{stamp(seg.start)} {seg.chapter}" for seg in segments if seg.chapter]
     text = f"""SCARY: the horror home screen for Android TV (free and open source)
 
-Boo the ghost shows you around SCARY, a free, open-source home screen (launcher) for Android TV, made for people who love to be scared: a new film for tonight every evening, 170 hand-picked horror films and thrillers with a fear meter, moods and decades, family night, a horror screensaver, and all your streaming apps in one place. No account, no ads, no tracking.
+Vesper Static, a haunted TV set, shows you around SCARY, a free, open-source home screen (launcher) for Android TV, made for people who love to be scared: a new film for tonight every evening, 170 hand-picked horror films and thrillers with a fear meter, moods and decades, family night, a horror screensaver, and all your streaming apps in one place. No account, no ads, no tracking.
 
 Download: https://scary.network
 Source code: https://github.com/diamondrubinny/Scary
@@ -420,7 +452,7 @@ Chapters
 
 Good to know: SCARY does not host, stream or link to video files. It shows public movie information and opens movies in the streaming apps already installed on your device. Movie information and images come from TMDB and Cinemeta and belong to their owners; this product uses the TMDB API but is not endorsed or certified by TMDB.
 
-Made with real screenshots of the app. Boo's voice is synthetic (Piper, CC0 voice "joe"); the music is generated.
+Made with real screenshots of the app. Vesper's voice is synthetic (Piper, public-domain voice "cori"); the music is generated.
 
 #AndroidTV #HorrorMovies #GoogleTV #Launcher #OpenSource
 """
@@ -437,14 +469,14 @@ def thumbnail(shots: Shots, path: Path) -> None:
     draw_text(img, (90, 300), "SCARY", font("rubik_wet_paint.ttf", 230), BLOOD, 1.0, "ls", EN, shadow=(0, 0, 0), shadow_offset=(0, 8))
     draw_text(img, (100, 420), "Horror home screen", font("oswald_semibold.ttf", 92), BONE, 1.0, "ls", EN, shadow=(0, 0, 0))
     draw_text(img, (100, 520), "for Android TV", font("oswald_semibold.ttf", 92), CANDLE, 1.0, "ls", EN, shadow=(0, 0, 0))
-    place_ghost(img, 0.7, 0.6, True, 420, 1060, 0.62, look=1.0)
+    place_presenter(img, 0.7, 0.6, True, 420, 1060, 0.62, look=1.0)
     img.convert("RGB").resize((1280, 720), Image.LANCZOS).save(path, quality=90)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--piper", required=True, help="the piper executable")
-    parser.add_argument("--voice", required=True, help="the .onnx voice (en_US-joe-medium, CC0)")
+    parser.add_argument("--voice", required=True, help="the .onnx voice (en_GB-cori-high, public domain)")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--shots", type=Path, help="directory with the CI screenshots (PNG); default: git branch")
     args = parser.parse_args()
