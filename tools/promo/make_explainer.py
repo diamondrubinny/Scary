@@ -62,7 +62,7 @@ class Segment:
 def script() -> list[Segment]:
     return [
         Segment("intro", [Line("Hi. I'm Vesper Static, and I live inside your TV."),
-                          Line("Some home screens should come with a warning."),
+                          Line("Some home screens really should come with a warning."),
                           Line("This one is called SCARY.")], chapter="Meet SCARY"),
         Segment("screen", [Line("SCARY is a free, open source home screen for Android TV, made for people who love to be scared."),
                            Line("Every evening, a brand new film for tonight fills the screen.")],
@@ -78,7 +78,7 @@ def script() -> list[Segment]:
         Segment("screen", [Line("Not sure what you feel like tonight? Pick a mood, from short and sharp to don't sleep tonight, or pick a decade."),
                            Line("Still can't decide? Press Surprise me, and I'll choose for you.")],
                 shot="55-en-moods", label="What do you feel like tonight?", chapter="Moods, decades and Surprise me", focus=(0.3, 0.9)),
-        Segment("screen", [Line("Every film has its own page: how scary it is, the cast, and a trailer."),
+        Segment("screen", [Line("Every film gets its own page, with how scary it is, the cast, and a trailer."),
                            Line("Press Watch to open it in Stremio, or search for it in the apps you already have."),
                            Line("Hold O K on any poster to add it to My list.", "Hold OK on any poster to add it to My list.")],
                 shot="41-en-details", label="Movie pages", chapter="Movie pages, rent or buy", focus=(0.3, 0.3)),
@@ -87,7 +87,7 @@ def script() -> list[Segment]:
                 shot="41-en-details", label="Didn't find it? Rent or buy", focus=(0.25, 0.72), zoom=0.22),
         Segment("screen", [Line("And when the film opens, its title shivers in the dark. Just for a moment.")],
                 shot="58-en-shiver", label="The shiver", chapter="The shiver, search, family night", focus=(0.5, 0.45)),
-        Segment("screen", [Line("Search by typing or by voice, in the library and across the web.")],
+        Segment("screen", [Line("You can search by typing, or by voice, in the library and across the web.")],
                 shot="42-en-search-web", label="Search", focus=(0.3, 0.3)),
         Segment("screen", [Line("Watching with the kids? Family night shows only the gentlest films, and leaving it takes your pin code.",
                                 "Watching with the kids? Family night shows only the gentlest films, and leaving it takes your PIN.")],
@@ -98,8 +98,8 @@ def script() -> list[Segment]:
                            Line("And to be clear: SCARY doesn't host or stream any video. It opens films in the streaming apps you already have.")],
                 shot="47-en-privacy", label="Private by design", chapter="Privacy, languages, download", focus=(0.3, 0.3)),
         Segment("languages", [Line("It speaks English, Hebrew, Arabic, Portuguese and Russian.")], label="Five languages"),
-        Segment("outro", [Line("Get it free at scary dot network.", "Get it free at scary.network"),
-                          Line("If it gave you the right kind of chills, scan the code and buy us some popcorn."),
+        Segment("outro", [Line("Download it free at scary dot network.", "Download it free at scary.network"),
+                          Line("If it gave you goosebumps, scan the code and buy us some popcorn."),
                           Line("Sleep well. If you can.")]),
     ]
 
@@ -173,7 +173,7 @@ def music(total: float, voice_track: np.ndarray) -> np.ndarray:
     bed *= np.clip(t / 2.0, 0, 1) * np.clip((total - t) / 2.0, 0, 1)
     # The music steps back while Vesper talks.
     env = np.convolve(np.abs(voice_track[: t.size]), np.ones(4410) / 4410, mode="same")
-    duck = 1 - 0.6 * np.clip(env / (env.max() * 0.25 + 1e-9), 0, 1)
+    duck = 1 - 0.72 * np.clip(env / (env.max() * 0.25 + 1e-9), 0, 1)
     return bed * duck * 0.22
 
 
