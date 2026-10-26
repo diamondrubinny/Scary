@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
@@ -65,6 +66,8 @@ import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
+import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 
 @Composable
 fun ScaryRoot(viewModel: HomeViewModel) {
@@ -84,6 +87,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val webSearch by viewModel.webSearch.collectAsStateWithLifecycle()
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
+    val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -173,6 +177,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onCycleNightFear = { viewModel.setNightMaxFear(state.nightMaxFear % SettingsRepository.MAX_FEAR + 1) },
         onSystemSettings = { viewModel.openTile(AppTile.SystemSettings, settingsLabel) },
         onToggleSounds = viewModel::toggleSounds,
+        onToggleTrailerAutoplay = viewModel::toggleTrailerAutoplay,
+        onToggleTrailerSound = viewModel::toggleTrailerSound,
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -205,6 +211,21 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     // Re-read on every lifecycle change, so turning off animations in the TV settings applies on return.
     val lifecycleState by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
     val systemAnimations = remember(lifecycleState) { SettingsRepository.systemAnimationsEnabled(context) }
+
+    // Trailers play by themselves only while SCARY is in front and nothing is over the screen. Not offline, not in
+    // family night (YouTube may show ads and suggestions), and not when the TV's "Remove animations" is on.
+    val trailersEnabled = state.trailerAutoplay && state.onlineEnabled && !state.familyNight && systemAnimations &&
+        lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
+        launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro
+    val trailerSettings = remember(viewModel, trailersEnabled, state.trailerSound, state.trailerIntroSeen) {
+        TrailerSettings(
+            enabled = trailersEnabled,
+            muted = !state.trailerSound,
+            introSeen = state.trailerIntroSeen,
+            onNeedIntro = viewModel::requestTrailerIntro,
+            onAudible = viewModel::setTrailerAudible,
+        )
+    }
 
     ScaryTheme(reduceMotion = !state.effectsEnabled || !systemAnimations) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
@@ -240,6 +261,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     effectsEnabled = state.effectsEnabled,
                     nightMaxFear = state.nightMaxFear,
                     soundsEnabled = state.soundsEnabled,
+                    trailerAutoplay = state.trailerAutoplay,
+                    trailerSound = state.trailerSound,
                     parentalEnabled = state.parentalEnabled,
                     lockFromFear = state.lockFromFear,
                     familyNight = state.familyNight,
@@ -276,6 +299,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onOffer = viewModel::openOffer,
                     onLoadOffers = viewModel::loadRentOrBuy,
                     offersKey = listOf(tmdbKeyMask, rentCountry, state.onlineEnabled),
+                    trailer = trailerSettings,
                 )
                 else -> HomeScreen(
                     state = state,
@@ -288,6 +312,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     showSetHome = launcherStatus.needsSetup,
                     scrollToRow = scrollToRow,
                     onScrolledToRow = viewModel::onScrolledToRow,
+                    trailer = trailerSettings,
                 )
             }
 
@@ -312,6 +337,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onSubmit = viewModel::submitTmdbKey,
                     onDelete = viewModel::clearTmdbKey,
                     onDismiss = viewModel::dismissTmdbDialog,
+                )
+            }
+
+            if (trailerIntro) {
+                TrailerIntroDialog(
+                    onPlay = { viewModel.answerTrailerIntro(true) },
+                    onTurnOff = { viewModel.answerTrailerIntro(false) },
+                    onDismiss = viewModel::dismissTrailerIntro,
                 )
             }
 

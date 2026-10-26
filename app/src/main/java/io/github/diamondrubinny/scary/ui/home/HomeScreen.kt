@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -64,8 +65,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
@@ -123,6 +127,7 @@ fun HomeScreen(
     showSetHome: Boolean = false,
     scrollToRow: String? = null,
     onScrolledToRow: () -> Unit = {},
+    trailer: TrailerSettings = TrailerSettings.Off,
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
@@ -174,6 +179,8 @@ fun HomeScreen(
             language = language,
             primaryFocus = heroFocus,
             actions = actions,
+            locked = state.hero?.let(state::isLocked) ?: false,
+            trailer = trailer,
         )
         if (state.catalogError) {
             EmptyState(
@@ -217,12 +224,40 @@ private fun Hero(
     language: Language,
     primaryFocus: FocusRequester,
     actions: HomeActions,
+    locked: Boolean,
+    trailer: TrailerSettings,
 ) {
-    Column(
+    // The trailer window sits on the far side from the text (right in English, left in Hebrew and Arabic), so nothing
+    // ever covers it, as YouTube requires.
+    Row(
         modifier = Modifier
             .padding(horizontal = SidePadding)
-            .fillMaxWidth(0.62f)
+            .fillMaxWidth()
             .height(212.dp),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.fillMaxWidth(0.62f))
+        Spacer(Modifier.weight(1f))
+        if (movie != null) {
+            AutoTrailer(movie = movie, locked = locked, settings = trailer, playerSize = HeroTrailerSize)
+        }
+    }
+}
+
+/** 16:9, and 608 x 342 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
+private val HeroTrailerSize = DpSize(304.dp, 171.dp)
+
+@Composable
+private fun HeroText(
+    movie: Movie?,
+    isNightPick: Boolean,
+    language: Language,
+    primaryFocus: FocusRequester,
+    actions: HomeActions,
+    modifier: Modifier,
+) {
+    Column(
+        modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
     ) {
         if (movie == null) return@Column

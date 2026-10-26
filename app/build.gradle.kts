@@ -97,6 +97,8 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+    // WebMessageListener: the trailer page reports playing, ended and error from one fixed origin only.
+    implementation(libs.androidx.webkit)
 
     // UI tests, run on the TV emulator in CI (.github/scripts/screenshots.sh).
     androidTestImplementation(platform(libs.compose.bom))

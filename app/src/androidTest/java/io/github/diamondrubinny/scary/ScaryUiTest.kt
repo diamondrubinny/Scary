@@ -5,9 +5,12 @@
 package io.github.diamondrubinny.scary
 
 import io.github.diamondrubinny.scary.ui.home.rowTag
+import io.github.diamondrubinny.scary.ui.settings.TRAILER_AUTOPLAY_ROW_TAG
+import io.github.diamondrubinny.scary.ui.trailer.TRAILER_INTRO_TAG
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import org.junit.Assume.assumeTrue
 import androidx.compose.ui.test.performScrollToIndex
+import android.content.Intent
 import android.os.SystemClock
 import android.view.ViewConfiguration
 import androidx.core.view.ViewCompat
@@ -517,6 +520,48 @@ class ScaryUiTest {
         waitForGone(badge)
     }
 
+    @Test
+    fun trailersThatPlayByThemselvesCanBeTurnedOffAndOnAgain() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(TRAILER_AUTOPLAY_ROW_TAG)
+        val label = text(R.string.settings_trailer_autoplay)
+        val on = hasContentDescription("$label: ${text(R.string.value_on)}")
+        val off = hasContentDescription("$label: ${text(R.string.value_off)}")
+        val sound = hasText(text(R.string.settings_trailer_sound))
+        waitFor(row)
+        withCleanup({
+            // On by default, with its sound setting below it; off hides the sound setting.
+            waitFor(on)
+            rule.onNode(sound).assertExists()
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(off)
+            waitForGone(sound)
+        }) {
+            if (rule.onAllNodes(off).fetchSemanticsNodes().isNotEmpty()) rule.onNode(row).performScrollTo().performClick()
+            waitFor(on)
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theFirstTimeTrailerQuestionExplainsYouTubeAndBackPutsItOff() {
+        waitForHomeFocus()
+        // The question SCARY asks before the first trailer would play by itself (trailers never start in these tests:
+        // system animations are off while they run), opened through the debug intent CI uses for its screenshot.
+        rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "trailer-intro"))
+        val dialog = hasTestTag(TRAILER_INTRO_TAG)
+        waitFor(dialog)
+        rule.onNode(hasText(text(R.string.trailer_intro_privacy))).assertExists()
+        rule.onNode(hasText(text(R.string.trailer_intro_off))).assertExists()
+        // Back goes to the window with the focus: wait until the dialog has it ("Play trailers" is focused first).
+        waitFor(hasText(text(R.string.trailer_intro_play)) and isFocused())
+        rule.waitForIdle()
+        pressBack()
+        waitForGone(dialog)
+        waitUntilOrDescribe("the home screen") { onHome() }
+    }
+
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
@@ -529,6 +574,7 @@ class ScaryUiTest {
 
     private companion object {
         const val TIMEOUT_MS = 20_000L
+        const val DEBUG_OPEN = "scary.debug.open"
         // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
         const val MAX_BACKS = 6
         const val ONLINE_TIMEOUT_MS = 45_000L

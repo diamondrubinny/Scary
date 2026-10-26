@@ -183,6 +183,9 @@ class HomeViewModel(
             seasonalRows = prefs.seasonalRows,
             watchedIds = prefs.watchedIds.toSet(),
             autoWatched = prefs.autoWatched,
+            trailerAutoplay = prefs.trailerAutoplay,
+            trailerSound = prefs.trailerSound,
+            trailerIntroSeen = prefs.trailerIntroSeen,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -640,6 +643,8 @@ class HomeViewModel(
      * marked as watched (when the viewer allows it), and a message says so and how to undo it.
      */
     fun onResumed() {
+        // Back on the trailer question put it off only while SCARY stayed in front.
+        trailerIntroPutOff = false
         viewModelScope.launch {
             val pending = settings.takePendingWatch() ?: return@launch
             val prefs = settings.prefs.first()
@@ -680,6 +685,7 @@ class HomeViewModel(
         cancelLaunch()
         _pinDialog.value = null
         _tmdbDialog.value = null
+        _trailerIntro.value = false
         backStack.value = listOf(Screen.Home)
         heroId.value = null
         lastFocusedKey = null
@@ -969,6 +975,61 @@ class HomeViewModel(
             settings.setEffectsEnabled(enabled)
             show(if (enabled) R.string.msg_effects_on else R.string.msg_effects_off)
         }
+    }
+
+    private val _trailerIntro = MutableStateFlow(false)
+
+    /** The first-time explanation of trailers that play by themselves, before any of them reaches YouTube. */
+    val trailerIntro: StateFlow<Boolean> = _trailerIntro.asStateFlow()
+
+    private val _trailerAudible = MutableStateFlow(false)
+
+    /** A trailer is playing with sound: the ambient sounds step aside meanwhile. */
+    val trailerAudible: StateFlow<Boolean> = _trailerAudible.asStateFlow()
+
+    // Back on the explanation puts it off until SCARY comes back to the front, rather than asking on every movie.
+    private var trailerIntroPutOff = false
+
+    fun requestTrailerIntro() {
+        if (latestPrefs?.trailerIntroSeen != true && !trailerIntroPutOff) _trailerIntro.value = true
+    }
+
+    /** [play]: keep trailers playing by themselves; false turns them off. Either way the question is not asked again. */
+    fun answerTrailerIntro(play: Boolean) {
+        _trailerIntro.value = false
+        viewModelScope.launch {
+            settings.answerTrailerIntro(play)
+            if (!play) show(R.string.msg_trailers_off)
+        }
+    }
+
+    /** Debug builds (CI screenshots and tests): the explanation, whatever was answered before. */
+    fun debugShowTrailerIntro() {
+        _trailerIntro.value = true
+    }
+
+    /** Debug builds (CI screenshots): trailers on or off as if answered, so screenshots never catch one playing. */
+    fun debugSetTrailers(enabled: Boolean) {
+        viewModelScope.launch { settings.answerTrailerIntro(enabled) }
+    }
+
+    /** Back on the explanation: nothing plays, and it is asked again once SCARY comes back to the front. */
+    fun dismissTrailerIntro() {
+        trailerIntroPutOff = true
+        _trailerIntro.value = false
+    }
+
+    fun setTrailerAudible(audible: Boolean) {
+        _trailerAudible.value = audible
+    }
+
+    /** Changing the setting by hand also answers the first-time question. */
+    fun toggleTrailerAutoplay() {
+        viewModelScope.launch { settings.answerTrailerIntro(!settings.prefs.first().trailerAutoplay) }
+    }
+
+    fun toggleTrailerSound() {
+        viewModelScope.launch { settings.setTrailerSound(!settings.prefs.first().trailerSound) }
     }
 
     fun toggleSeasonalRows() {

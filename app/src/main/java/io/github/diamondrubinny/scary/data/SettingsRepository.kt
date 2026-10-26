@@ -63,6 +63,12 @@ data class LauncherPrefs(
     val autoWatched: Boolean = true,
     /** ISO country chosen for rent and buy offers; null follows the device ([io.github.diamondrubinny.scary.core.links.Region]). */
     val rentBuyCountry: String? = null,
+    /** A trailer plays by itself next to a movie the focus rests on. On by default, after [trailerIntroSeen]. */
+    val trailerAutoplay: Boolean = true,
+    /** Trailers that play by themselves start muted unless this is on. */
+    val trailerSound: Boolean = false,
+    /** The viewer has read what playing trailers here means (YouTube) and chosen to keep them or turn them off. */
+    val trailerIntroSeen: Boolean = false,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -90,6 +96,9 @@ class SettingsRepository(private val context: Context) {
                 watchedIds = RecentList.decode(p[WATCHED]),
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 rentBuyCountry = Region.normalize(p[RENT_BUY_COUNTRY]),
+                trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
+                trailerSound = p[TRAILER_SOUND] ?: false,
+                trailerIntroSeen = p[TRAILER_INTRO_SEEN] ?: false,
             )
         }
         .distinctUntilChanged()
@@ -181,6 +190,16 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSeasonalRows(enabled: Boolean) = edit { it[SEASONAL_ROWS] = enabled }
 
+    suspend fun setTrailerAutoplay(enabled: Boolean) = edit { it[TRAILER_AUTOPLAY] = enabled }
+
+    suspend fun setTrailerSound(enabled: Boolean) = edit { it[TRAILER_SOUND] = enabled }
+
+    /** The answer to the first-time explanation: it is not asked again, and [enabled] becomes the setting. */
+    suspend fun answerTrailerIntro(enabled: Boolean) = edit {
+        it[TRAILER_INTRO_SEEN] = true
+        it[TRAILER_AUTOPLAY] = enabled
+    }
+
     private suspend fun editPinned(change: (List<String>) -> List<String>) = edit {
         val current = it[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED
         it[PINNED] = RecentList.encode(change(current))
@@ -219,6 +238,9 @@ class SettingsRepository(private val context: Context) {
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val PENDING_WATCH = stringPreferencesKey("pending_watch")
         private val RENT_BUY_COUNTRY = stringPreferencesKey("rent_buy_country")
+        private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")
+        private val TRAILER_SOUND = booleanPreferencesKey("trailer_sound")
+        private val TRAILER_INTRO_SEEN = booleanPreferencesKey("trailer_intro_seen")
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

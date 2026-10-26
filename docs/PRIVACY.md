@@ -6,7 +6,11 @@
 ## 1. עקרונות
 
 - אין חשבונות, אין שרת SCARY, אין אנליטיקה, אין פרסום ואין SDK של צד שלישי.
-- אין עוגיות ואין trackers: זו אפליקציית Android נייטיב ללא WebView. לכן אין באנר עוגיות. אם תתווסף בעתיד אנליטיקה, היא תיטען רק אחרי הסכמה מפורשת, עם אפשרות משיכה (ראו `PLAN.md` סעיף 13).
+- אין עוגיות ואין trackers של SCARY. אפליקציית Android נייטיב, ו־WebView משמש רק לנגן הטריילרים של YouTube (ראו `TRAILER_AUTOPLAY_PLAN.md`):
+  - העוגיות בו חסומות, ואחסון הרשת שלו נמחק כשהנגן נסגר.
+  - הוא לא נטען לפני שהמשתמש ענה "לנגן טריילרים" בשאלה של הפעם הראשונה, ואפשר לכבות אותו בכל רגע בהגדרות.
+  - לכן אין באנר עוגיות. **דורש בדיקה משפטית:** האם השאלה הזו מספיקה כהסכמה לפי ePrivacy (סעיף 5(3)).
+  - אם תתווסף בעתיד אנליטיקה, היא תיטען רק אחרי הסכמה מפורשת, עם אפשרות משיכה (ראו `PLAN.md` סעיף 13).
 - המידע נשמר מקומית בלבד. `android:allowBackup="false"`, כך שהוא לא עובר לגיבוי של Google.
 - הרשת: HTTPS בלבד (`network_security_config`, ללא cleartext). בקשות API נשלחות רק ל־Cinemeta ול־TMDB. תמונות נטענות מכתובות HTTPS שהשירותים מחזירים (בעיקר `images.metahub.space` ו־`image.tmdb.org`).
 
@@ -28,6 +32,8 @@
 | מפתח TMDB | המשתמש (אופציונלי) | גישה ל־TMDB | האפליקציה | AES-256-GCM, מפתח ב־Android Keystore | נשלח ל־TMDB בלבד | עד מחיקה | "מחיקת מפתח" בהגדרות |
 | מדינה לשכירה ולקנייה | בחירת המשתמש, או הגדרת האזור של המכשיר / מדינת הרשת והסים (בלי הרשאה) | הצגת חנויות במדינה הנכונה | האפליקציה | DataStore (רק אם נבחרה ידנית); הזיהוי האוטומטי לא נשמר | אין: TMDB מחזירה את כל המדינות והסינון נעשה במכשיר | עד שינוי | "אוטומטי" בהגדרות / ניקוי נתונים |
 | זמינות לשכירה ולקנייה (נתוני JustWatch דרך TMDB) | TMDB | "לא מצאתם? אפשר לשכור או לקנות" | האפליקציה | בזיכרון בלבד, 40 סרטים אחרונים | TMDB (רק עם מפתח; נשלחים מזהה הסרט והמפתח) | עד 24 שעות או עד סגירת האפליקציה | אוטומטי |
+| הגדרות טריילרים (ניגון אוטומטי, קול, האם נענתה השאלה הראשונה) | המשתמש | תפעול | האפליקציה | DataStore | אין | עד שינוי | הגדרות / ניקוי נתונים |
+| ניגון טריילר (מזהה הסרטון ב־YouTube) | Cinemeta | טריילר שמתנגן מעצמו ליד סרט | נגן YouTube בתוך SCARY | בזיכרון בלבד; אחסון הרשת של הנגן נמחק בסגירה, עוגיות חסומות | YouTube / Google: מזהה הסרטון, IP, פרטי מכשיר ודפדפן, נתוני ניגון | לא נשמר אצלנו; אצל Google לפי המדיניות שלה | כיבוי "ניגון אוטומטי של טריילרים" בהגדרות. **דורש בדיקה משפטית** |
 | מטמון Cinemeta / TMDB | השירותים | הצגת מידע ללא רשת | האפליקציה | קבצי JSON ב־`filesDir` | — | רענון כל 24 שעות | מחיקת מפתח (TMDB) / ניקוי נתונים |
 | מטמון תמונות | השירותים | ביצועים | האפליקציה | Coil disk cache | — | עד 128MB, הישנות נמחקות ראשונות | ניקוי מטמון / נתונים |
 | זמני קריסה (שעה בלבד, בלי פרטי השגיאה) | האפליקציה | זיהוי קריסות חוזרות ומעבר למצב בטוח | האפליקציה בלבד | SharedPreferences במכשיר | אין, לא נשלח לשום מקום | 3 האחרונים, רק מ־2 הדקות האחרונות; נמחק כשנכנסים למצב בטוח | אוטומטי / ניקוי נתונים |
@@ -44,6 +50,7 @@
 | מארחי תמונות (בעיקר `images.metahub.space`; כל כתובת HTTPS ש־Cinemeta מחזירה) | כנ״ל | בקשות תמונה, IP | תמונות | כנ״ל | כנ״ל. אפשר לשקול רשימת מארחים מותרים |
 | TMDB (`api.themoviedb.org`, `image.tmdb.org`) | רק עם מפתח שהמשתמש הזין | המפתח, מזהי סרטים, שפה, IP | שמות ותקצירים בשפה, שורות נוספות | המשתמש בוחר להזין מפתח | תנאי TMDB (אישי/מסחרי), קרדיט חובה מוצג |
 | שירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google) | רק כשהמשתמש לוחץ על המיקרופון בחיפוש | ההקלטה עצמה (SCARY לא ניגשת אליה), שפת הממשק | הפיכת דיבור לטקסט | פעולה יזומה; ההרשאות של השירות עצמו | מדיניות הספק, מיקום עיבוד |
+| נגן YouTube מוטמע (`www.youtube.com/iframe_api`, `www.youtube-nocookie.com`) | רק אחרי "לנגן טריילרים" בשאלה הראשונה; כשהפוקוס נשאר 1.5 שניות על סרט שיש לו טריילר; לא בלי רשת, לא בערב משפחתי, לא בסרט נעול, לא כש"הסרת אנימציות" פעיל | מזהה הסרטון, IP, User-Agent, Referer עם מזהה האפליקציה (נדרש בתנאי YouTube), נתוני ניגון | טריילר ליד הסרט | השאלה בפעם הראשונה (opt-in), וכיבוי בהגדרות. **דורש בדיקה משפטית** | תנאי YouTube API Services ו־Required Minimum Functionality, ‏Google Privacy Policy, ‏DPA / העברה בינלאומית |
 | Stremio / YouTube / Google Play | כשהמשתמש בוחר לצפות, טריילר או חנות | Intent עם מזהה סרט או חיפוש | העברה לאפליקציה אחרת | פעולה יזומה | המדיניות שלהם חלה מאותו רגע |
 | PayPal (`www.paypal.com`) | רק אם המשתמש סורק את קוד התרומה בטלפון שלו | כלום מ־SCARY: הקישור נפתח בטלפון, לא בטלוויזיה | תרומה (רשות) | פעולה יזומה בטלפון | מדיניות הפרטיות של PayPal חלה מאותו רגע. SCARY לא יודעת מי תרם |
 | אפליקציות צפייה מותקנות (Netflix, Apple TV, yes, HOT, סלקום TV ועוד) וחיפוש Google TV | רק כשהמשתמש לוחץ "חיפוש ב־X" בעמוד סרט | שם הסרט המקורי בלבד (ב־YouTube גם השנה) | חיפוש הסרט באפליקציה | פעולה יזומה | המדיניות של כל אפליקציה חלה מאותו רגע. SCARY רק בודקת במכשיר אילו אפליקציות מותקנות, ולא שולחת את הרשימה לשום מקום |
@@ -61,9 +68,14 @@
 5. **מידע על סרטים מהרשת** (אפשר לכבות בהגדרות). SCARY פונה ל־Cinemeta, שירות המטא־דאטה הציבורי של Stremio, ושולחת רק מזהי IMDb ציבוריים, ובחיפוש גם את טקסט החיפוש. התמונות נטענות מהכתובות ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים רואים את כתובת ה־IP של הטלוויזיה.
 6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם. SCARY לא מבקשת הרשאת מיקום.
 7. **חיפוש קולי.** כפתור המיקרופון מעביר את הבקשה לשירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה. SCARY לא מבקשת הרשאת מיקרופון.
-8. **אפליקציות אחרות.** צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play, ומאותו רגע חלה מדיניות הפרטיות שלהן.
-9. **זכויותיכם.** כל המידע נמצא אצלכם ונמחק בניקוי הנתונים. לשאלות ובקשות: d@rubinny.net או github.com/diamondrubinny/Scary/issues.
-10. **שינויים.** שינוי מהותי יופיע במסמך זה עם תאריך עדכון.
+8. **טריילרים שמתנגנים מעצמם** (רק אחרי שהסכמתם בשאלה של הפעם הראשונה; אפשר לכבות בהגדרות).
+   - **הנגן:** הנגן של YouTube, במצב הפרטיות המשופרת (youtube-nocookie.com).
+   - **מה YouTube ‏(Google) מקבלת כשטריילר מתנגן:** את כתובת ה־IP של הטלוויזיה, פרטי המכשיר והדפדפן ואת מזהה הטריילר, לפי מדיניות הפרטיות של Google.
+   - **עוגיות ואחסון:** SCARY חוסמת עוגיות בנגן ומוחקת את האחסון שלו כשהוא נסגר.
+   - **מתי לא מתנגנים:** בלי רשת או בערב משפחתי.
+9. **אפליקציות אחרות.** צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play, ומאותו רגע חלה מדיניות הפרטיות שלהן.
+10. **זכויותיכם.** כל המידע נמצא אצלכם ונמחק בניקוי הנתונים. לשאלות ובקשות: d@rubinny.net או github.com/diamondrubinny/Scary/issues.
+11. **שינויים.** שינוי מהותי יופיע במסמך זה עם תאריך עדכון.
 
 ### English
 
@@ -76,9 +88,14 @@
 5. **Online movie data** (can be turned off in settings). SCARY contacts Cinemeta, Stremio's public metadata service, sending only public IMDb IDs, plus the search text when you search; images load from the addresses it supplies, mostly images.metahub.space. Like any website, these services see your TV's IP address.
 6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache. Rent and buy offers on movie pages come from TMDB (data by JustWatch): the request carries only the movie's ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location. SCARY asks for no location permission.
 7. **Voice search.** The microphone button hands the request to the TV's speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text and asks for no microphone permission.
-8. **Other apps.** Watching, trailers and the store open Stremio, YouTube or Google Play; their privacy policies apply from then on.
-9. **Your rights.** All data is on your device and is erased when you clear the app's data. Questions and requests: d@rubinny.net or github.com/diamondrubinny/Scary/issues.
-10. **Changes.** Material changes will appear here with a new date.
+8. **Trailers that play by themselves** (only once you agree when first asked; you can turn them off in settings).
+   - **The player:** YouTube's player, in its privacy-enhanced mode (youtube-nocookie.com).
+   - **What YouTube (Google) receives when a trailer plays:** your TV's IP address, device and browser details and the trailer's ID, under Google's privacy policy.
+   - **Cookies and storage:** SCARY blocks cookies in the player and deletes its storage when it closes.
+   - **When none play:** offline or in family night.
+9. **Other apps.** Watching, trailers and the store open Stremio, YouTube or Google Play; their privacy policies apply from then on.
+10. **Your rights.** All data is on your device and is erased when you clear the app's data. Questions and requests: d@rubinny.net or github.com/diamondrubinny/Scary/issues.
+11. **Changes.** Material changes will appear here with a new date.
 
 ## 5. נושאים לבדיקה משפטית
 
@@ -87,3 +104,6 @@
 - תנאי השימוש של Cinemeta ושל TMDB, וזכויות בתמונות. **דורש בדיקה משפטית.**
 - פרסום ב־Google Play: טופס Data safety, הצהרת `<queries>` / גישה לרשימת אפליקציות, ומדיניות לאנצ׳רים. **דורש אימות מול מדיניות Google Play.**
 - תנאי שימוש: טיוטה ב־`TERMS.md`. דורשת בדיקה משפטית.
+- טריילרים שמתנגנים מעצמם (נגן YouTube מוטמע):
+  - האם השאלה בפעם הראשונה ("לנגן טריילרים" / "לכבות") היא הסכמה מספיקה לפי ePrivacy/GDPR ולפי תיקון 13, כולל לגבי אחסון הרשת שהנגן משתמש בו עד שהוא נסגר. **דורש בדיקה משפטית.**
+  - עמידה בתנאי YouTube API Services וב־Required Minimum Functionality (Referer עם מזהה האפליקציה, גודל מינימלי, בלי שכבות מעל הנגן, נגן אוטומטי אחד). **דורש אימות מחדש מול התיעוד הרשמי לפני כל שחרור.**

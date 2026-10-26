@@ -39,6 +39,9 @@ data class HomeUiState(
     /** Ids the viewer has seen, for the badge on cards and the button on a movie's page. */
     val watchedIds: Set<String> = emptySet(),
     val autoWatched: Boolean = true,
+    val trailerAutoplay: Boolean = true,
+    val trailerSound: Boolean = false,
+    val trailerIntroSeen: Boolean = false,
 ) {
     fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
 

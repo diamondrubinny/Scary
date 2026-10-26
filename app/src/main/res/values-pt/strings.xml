@@ -152,6 +152,7 @@
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
+        <item>Trailers que tocam sozinhos (ligados depois que você concorda na primeira pergunta; dá para desligar nas configurações): o player é o do YouTube, no modo de privacidade aprimorada (youtube-nocookie.com). Quando um trailer toca, o YouTube (Google) recebe o endereço IP da sua TV, dados do aparelho e do navegador e o ID do trailer, conforme a política de privacidade do Google. O SCARY bloqueia cookies no player e apaga o armazenamento dele ao fechar. Nenhum trailer toca off-line ou na noite em família.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
         <item>Dúvidas, correções ou pedidos sobre seus dados: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
@@ -257,4 +258,13 @@
     <string name="row_decades">Ou escolha uma década</string>
     <string name="decade_label">Anos %1$d</string>
     <string name="mood_empty_combo">Nenhum filme da coleção tem este clima e esta década. Tente outra década.</string>
+    <string name="trailer_intro_title">Trailers que tocam sozinhos</string>
+    <string name="trailer_intro_body">Pare num filme por um instante e o trailer dele toca ao lado, sem som. Mude de filme e ele para. Você pode desligar isso, ou ligar o som, nas configurações.</string>
+    <string name="trailer_intro_privacy">Os trailers vêm do YouTube. Enquanto um toca, o YouTube (Google) recebe o endereço IP da sua TV, dados do aparelho e qual trailer está tocando, conforme a política de privacidade do Google. O SCARY bloqueia cookies no player e apaga o armazenamento dele ao fechar.</string>
+    <string name="trailer_intro_play">Tocar trailers</string>
+    <string name="trailer_intro_off">Desligar</string>
+    <string name="settings_trailer_autoplay">Trailers tocam sozinhos</string>
+    <string name="settings_trailer_sound">Som dos trailers</string>
+    <string name="settings_trailer_note">Os trailers vêm do YouTube, que vê o endereço IP da sua TV enquanto um toca. Eles nunca tocam off-line, na noite em família, num filme bloqueado ou com as animações da TV desligadas.</string>
+    <string name="msg_trailers_off">Os trailers não vão tocar sozinhos. Você pode ligá-los de novo nas configurações.</string>
 </resources>
