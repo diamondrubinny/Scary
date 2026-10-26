@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -47,6 +48,8 @@ class SettingsActions(
     val onToggleAutoWatched: () -> Unit,
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
+    val onToggleTrailerAutoplay: () -> Unit,
+    val onToggleTrailerSound: () -> Unit,
     val onSetupPin: () -> Unit,
     val onCycleLockLevel: () -> Unit,
     val onTurnOffLock: () -> Unit,
@@ -67,6 +70,8 @@ fun SettingsScreen(
     effectsEnabled: Boolean,
     nightMaxFear: Int,
     soundsEnabled: Boolean,
+    trailerAutoplay: Boolean,
+    trailerSound: Boolean,
     parentalEnabled: Boolean,
     lockFromFear: Int,
     familyNight: Boolean,
@@ -183,6 +188,20 @@ fun SettingsScreen(
             onClick = actions.onToggleSounds,
         )
         SettingRow(
+            label = stringResource(R.string.settings_trailer_autoplay),
+            value = stringResource(if (trailerAutoplay) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleTrailerAutoplay,
+            modifier = Modifier.testTag(TRAILER_AUTOPLAY_ROW_TAG),
+        )
+        if (trailerAutoplay) {
+            SettingRow(
+                label = stringResource(R.string.settings_trailer_sound),
+                value = stringResource(if (trailerSound) R.string.value_on else R.string.value_off),
+                onClick = actions.onToggleTrailerSound,
+            )
+        }
+        BasicText(stringResource(R.string.settings_trailer_note), style = ScaryType.Caption)
+        SettingRow(
             label = stringResource(R.string.settings_screensaver),
             value = stringResource(R.string.value_screensaver),
             onClick = actions.onOpenScreensaver,
@@ -246,6 +265,9 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Test tag of the "Play trailers by themselves" row. */
+const val TRAILER_AUTOPLAY_ROW_TAG = "trailerAutoplayRow"
 
 @Composable
 private fun SettingRow(

@@ -45,6 +45,12 @@ if [ -f dist/scary-tests.apk ]; then
   fi
 fi
 
+# Trailers that play by themselves: the question asked before the first one, answered "Play trailers" (it has the
+# focus) at a fixed point, so it never pops up over a later screenshot.
+open --es scary.debug.open trailer-intro
+shot 59-trailer-intro 8
+key KEYCODE_DPAD_CENTER
+
 open
 shot 01-home 25
 

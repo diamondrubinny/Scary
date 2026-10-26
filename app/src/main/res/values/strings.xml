@@ -154,6 +154,7 @@
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
+        <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
@@ -256,4 +257,13 @@
     <string name="row_decades">Or choose a decade</string>
     <string name="decade_label">%1$ds</string>
     <string name="mood_empty_combo">No movie in the library has both this mood and this decade. Try another decade.</string>
+    <string name="trailer_intro_title">Trailers play by themselves</string>
+    <string name="trailer_intro_body">Rest on a movie for a moment and its trailer plays next to it, muted. Move on and it stops. You can turn this off, or turn the sound on, in Settings.</string>
+    <string name="trailer_intro_privacy">Trailers come from YouTube. While one plays, YouTube (Google) receives your TV\'s IP address, device details and which trailer it is, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes.</string>
+    <string name="trailer_intro_play">Play trailers</string>
+    <string name="trailer_intro_off">Turn off</string>
+    <string name="settings_trailer_autoplay">Play trailers by themselves</string>
+    <string name="settings_trailer_sound">Trailer sound</string>
+    <string name="settings_trailer_note">Trailers come from YouTube, which sees your TV\'s IP address while one plays. They never play offline, in family night, for a locked movie, or when the TV\'s animations are turned off.</string>
+    <string name="msg_trailers_off">Trailers won\'t play by themselves. You can turn them back on in Settings.</string>
 </resources>

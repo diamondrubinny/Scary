@@ -36,8 +36,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
@@ -88,6 +91,7 @@ fun DetailsScreen(
     onLoadOffers: (Movie) -> Unit = {},
     /** Changes when the TMDB key, the country or online data change, so the offers load again. */
     offersKey: Any? = null,
+    trailer: TrailerSettings = TrailerSettings.Off,
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -166,23 +170,26 @@ fun DetailsScreen(
                             )
                         }
                     }
-                    Box(
-                        Modifier
-                            .size(width = 150.dp, height = 225.dp)
-                            .clip(RoundedCornerShape(8.dp)),
-                    ) {
-                        PosterArt(movie, Modifier.fillMaxSize())
-                        // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
-                        val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
-                        if (poster != null) {
-                            AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                        } else {
-                            BasicText(
-                                text = movie.title,
-                                style = ScaryType.Title.mixedLanguage(),
-                                maxLines = 3,
-                                modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                            )
+                    // The trailer takes the poster's place while it plays, and gives it back when it ends.
+                    AutoTrailer(movie = movie, locked = isLocked(movie), settings = trailer, playerSize = DetailsTrailerSize) {
+                        Box(
+                            Modifier
+                                .size(width = 150.dp, height = 225.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                        ) {
+                            PosterArt(movie, Modifier.fillMaxSize())
+                            // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                            val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
+                            if (poster != null) {
+                                AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                            } else {
+                                BasicText(
+                                    text = movie.title,
+                                    style = ScaryType.Title.mixedLanguage(),
+                                    maxLines = 3,
+                                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                                )
+                            }
                         }
                     }
                 }
@@ -305,3 +312,6 @@ private fun WatchElsewhere(
         BasicText(stringResource(R.string.watch_elsewhere_note), style = ScaryType.Caption)
     }
 }
+
+/** 16:9, and 640 x 360 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
+private val DetailsTrailerSize = DpSize(320.dp, 180.dp)

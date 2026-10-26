@@ -59,6 +59,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 🛒 **Didn't find it? Rent or buy**: with a TMDB key, the movie page lists the stores that rent or sell it in your country, and the services that include it. Your country comes from the TV's settings, never from your location. Data by JustWatch.
 - 👨‍👩‍👧 **Family night**: only the gentlest films, everywhere, and leaving it takes a PIN.
 - 🎲 **"Surprise me"**: a random film at the fear level you choose.
+- 🎞️ **Trailers that play by themselves**: rest on a film and its trailer plays next to it, muted (sound is a setting). It comes from YouTube, so SCARY asks first, and you can turn it off any time.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
 - ⭐ **My list and Watched**: hold OK on any poster to keep it (hold again to remove it), and mark what you have seen. Come back from a movie and SCARY marks it as watched for you.
 - 🌫️ **Atmosphere**: fog, film grain and an ambient drone (all can be turned off), and a screensaver of horror backdrops.
@@ -109,6 +110,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🛒 **לא מצאתם? אפשר לשכור או לקנות**: עם מפתח TMDB, עמוד הסרט מציג את החנויות שמשכירות או מוכרות אותו במדינה שלכם, ואת השירותים שבהם הוא כלול במנוי. המדינה נלקחת מהגדרות הטלוויזיה, אף פעם לא מהמיקום. הנתונים של JustWatch.
 - 👨‍👩‍👧 **ערב משפחתי**: רק הסרטים העדינים ביותר, בכל מקום, והיציאה דורשת PIN.
 - 🎲 **"הפתע אותי"**: סרט אקראי ברמת הפחד שבחרתם.
+- 🎞️ **טריילר שמתנגן מעצמו**: נעצרים על סרט, והטריילר שלו מתנגן לידו בלי קול (אפשר להפעיל קול בהגדרות). הטריילרים מגיעים מ־YouTube, ולכן SCARY שואלת קודם, ואפשר לכבות בכל רגע.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
 - ⭐ **"הרשימה שלי" ו"נצפה"**: לחיצה ארוכה על פוסטר שומרת אותו (לחיצה ארוכה נוספת מסירה), ואפשר לסמן מה כבר ראיתם. כשחוזרים מסרט, SCARY מסמנת אותו כנצפה בעצמה.
 - 🌫️ **אווירה**: ערפל, גרעיניות קולנועית וצלילי רקע (אפשר לכבות), ושומר מסך עם רקעים מסרטי אימה.
@@ -161,6 +163,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🛒 **لم تجده؟ استأجره أو اشترِه**: مع مفتاح TMDB، تعرض صفحة الفيلم المتاجر التي تؤجّره أو تبيعه في بلدك، والخدمات التي يشملها اشتراكها. يُؤخذ البلد من إعدادات التلفاز، وليس من موقعك أبدًا. البيانات من JustWatch.
 - 👨‍👩‍👧 **سهرة عائلية**: أخف الأفلام فقط في كل مكان، والخروج منها يتطلب رمز PIN.
 - 🎲 **«فاجئني»**: فيلم عشوائي ضمن مستوى الرعب الذي تختاره.
+- 🎞️ **إعلانات ترويجية تُعرض تلقائيًا**: توقّف عند فيلم فيُعرض إعلانه الترويجي بجانبه بلا صوت (الصوت خيار في الإعدادات). يأتي من YouTube، لذا يسألك SCARY أولًا، ويمكنك إيقافه في أي وقت.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
 - ⭐ **«قائمتي» و«شوهد»**: ضغطة مطوّلة على أي ملصق تحفظه (وضغطة أخرى تزيله)، ويمكنك وضع علامة على ما شاهدته. وعند عودتك من فيلم، يضع SCARY عليه علامة «شوهد» بنفسه.
 - 🌫️ **أجواء**: ضباب وحبيبات سينمائية وأصوات خلفية (يمكن إيقافها)، وشاشة توقف بخلفيات من أفلام الرعب.
@@ -211,6 +214,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - 🛒 **Não encontrou? Alugue ou compre**: com uma chave do TMDB, a página do filme mostra as lojas que o alugam ou vendem no seu país e os serviços que o incluem na assinatura. O país vem das configurações da TV, nunca da sua localização. Dados da JustWatch.
 - 👨‍👩‍👧 **Noite em família**: só os filmes mais leves, em todo lugar, e para sair é preciso o PIN.
 - 🎲 **"Surpreenda-me"**: um filme aleatório no nível de medo que você escolher.
+- 🎞️ **Trailers que tocam sozinhos**: pare num filme e o trailer dele toca ao lado, sem som (o som é uma opção). Ele vem do YouTube, por isso o SCARY pergunta antes, e dá para desligar quando quiser.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
 - ⭐ **Minha lista e Visto**: segure OK em qualquer pôster para guardá-lo (segure de novo para tirar) e marque o que você já viu. Ao voltar de um filme, o SCARY o marca como visto sozinho.
 - 🌫️ **Atmosfera**: névoa, granulado de cinema e som ambiente (tudo pode ser desligado), e um protetor de tela com fundos de filmes de terror.
@@ -259,6 +263,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 🛒 **Не нашли? Арендуйте или купите**: с ключом TMDB страница фильма показывает магазины, которые сдают его в аренду или продают в вашей стране, и сервисы, где он входит в подписку. Страна берётся из настроек телевизора, никогда не из местоположения. Данные JustWatch.
 - 👨‍👩‍👧 **Семейный вечер**: везде только самые мягкие фильмы, выход — по PIN-коду.
 - 🎲 **«Удиви меня»**: случайный фильм в пределах выбранного уровня страха.
+- 🎞️ **Трейлеры запускаются сами**: задержитесь на фильме, и рядом без звука пойдёт его трейлер (звук включается в настройках). Он берётся с YouTube, поэтому SCARY сначала спрашивает, и это можно выключить в любой момент.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
 - ⭐ **«Мой список» и «Просмотрено»**: удерживайте OK на постере, чтобы сохранить фильм (ещё раз — чтобы убрать), и отмечайте просмотренное. Когда вы возвращаетесь после фильма, SCARY сам отмечает его просмотренным.
 - 🌫️ **Атмосфера**: туман, киноплёночное зерно и фоновые звуки (можно отключить), а также заставка с кадрами из фильмов ужасов.

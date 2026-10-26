@@ -23,6 +23,7 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
 import io.github.diamondrubinny.scary.stability.CrashGuard
 import io.github.diamondrubinny.scary.ui.home.LauncherStatus
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -55,9 +56,10 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             // Sound only while the launcher is visible; leaving for Stremio stops it.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                settings.prefs.map { it.soundsEnabled }.distinctUntilChanged().collect { enabled ->
-                    if (enabled) ambient.start() else ambient.stop()
-                }
+                // A trailer playing with sound has the room to itself meanwhile.
+                combine(settings.prefs.map { it.soundsEnabled }, viewModel.trailerAudible) { sounds, trailer -> sounds && !trailer }
+                    .distinctUntilChanged()
+                    .collect { enabled -> if (enabled) ambient.start() else ambient.stop() }
             }
         }
     }
@@ -119,6 +121,7 @@ class MainActivity : ComponentActivity() {
             target == "home" -> viewModel.onHomePressed()
             target == "surprise" -> viewModel.surprise()
             target == "family" -> viewModel.toggleFamilyNight()
+            target == "trailer-intro" -> viewModel.debugShowTrailerIntro()
             // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
             // is chosen and its chip focused.
             target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)
