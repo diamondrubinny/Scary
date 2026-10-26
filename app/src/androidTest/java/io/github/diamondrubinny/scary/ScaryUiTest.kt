@@ -553,8 +553,10 @@ class ScaryUiTest {
         val dialog = hasTestTag(TRAILER_INTRO_TAG)
         waitFor(dialog)
         rule.onNode(hasText(text(R.string.trailer_intro_privacy))).assertExists()
-        rule.onNode(hasText(text(R.string.trailer_intro_play))).assertExists()
         rule.onNode(hasText(text(R.string.trailer_intro_off))).assertExists()
+        // Back goes to the window with the focus: wait until the dialog has it ("Play trailers" is focused first).
+        waitFor(hasText(text(R.string.trailer_intro_play)) and isFocused())
+        rule.waitForIdle()
         pressBack()
         waitForGone(dialog)
         waitUntilOrDescribe("the home screen") { onHome() }

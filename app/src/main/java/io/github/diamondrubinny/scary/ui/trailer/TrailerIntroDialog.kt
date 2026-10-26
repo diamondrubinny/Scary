@@ -37,7 +37,8 @@ const val TRAILER_INTRO_TAG = "trailerIntro"
 
 /**
  * Asked once, before the first trailer would play by itself: what it means (YouTube, Google's privacy policy, muted
- * unless chosen otherwise) and the choice to keep it or turn it off. Back answers neither; it is asked again later.
+ * unless chosen otherwise) and the choice to keep it or turn it off. Back answers neither: it is asked again once SCARY
+ * comes back to the front.
  */
 @Composable
 fun TrailerIntroDialog(onPlay: () -> Unit, onTurnOff: () -> Unit, onDismiss: () -> Unit) {

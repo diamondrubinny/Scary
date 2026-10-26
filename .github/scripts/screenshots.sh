@@ -45,11 +45,12 @@ if [ -f dist/scary-tests.apk ]; then
   fi
 fi
 
-# Trailers that play by themselves: the question asked before the first one, answered "Play trailers" (it has the
-# focus) at a fixed point, so it never pops up over a later screenshot.
+# Trailers that play by themselves: the question asked before the first one. Then trailers are turned off, as if
+# answered, so the question never pops up over a later screenshot and no shot catches a trailer half loaded.
 open --es scary.debug.open trailer-intro
 shot 59-trailer-intro 8
-key KEYCODE_DPAD_CENTER
+open --es scary.debug.open trailers:off
+sleep 2
 
 open
 shot 01-home 25

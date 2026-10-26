@@ -22,9 +22,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.runtime.withFrameNanos
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -106,7 +110,13 @@ fun DetailsScreen(
     // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour.
     val rowsScroll = LocalBringIntoViewSpec.current
     CompositionLocalProvider(LocalBringIntoViewSpec provides OnlyWhenNeeded) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
+        val pageScroll = rememberScrollState()
+        // The trailer stops once the page scrolls more than half of it out of view (YouTube: only while visible).
+        val halfTrailerPx = with(LocalDensity.current) { (DetailsTrailerSize.height / 2).toPx() }
+        val trailerOnScreen by remember(pageScroll, halfTrailerPx) { derivedStateOf { pageScroll.value < halfTrailerPx } }
+        // Room for the trailer is kept from the start, so text and buttons never move under the focus when it starts.
+        val trailerSlot = canAutoTrailer(movie, isLocked(movie), trailer, DetailsTrailerSize)
+        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                 Row(
                     modifier = Modifier.padding(horizontal = SidePadding),
@@ -171,7 +181,14 @@ fun DetailsScreen(
                         }
                     }
                     // The trailer takes the poster's place while it plays, and gives it back when it ends.
-                    AutoTrailer(movie = movie, locked = isLocked(movie), settings = trailer, playerSize = DetailsTrailerSize) {
+                    AutoTrailer(
+                        movie = movie,
+                        locked = isLocked(movie),
+                        settings = trailer,
+                        playerSize = DetailsTrailerSize,
+                        modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
+                        visible = trailerOnScreen,
+                    ) {
                         Box(
                             Modifier
                                 .size(width = 150.dp, height = 225.dp)

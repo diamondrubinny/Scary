@@ -122,6 +122,7 @@ class MainActivity : ComponentActivity() {
             target == "surprise" -> viewModel.surprise()
             target == "family" -> viewModel.toggleFamilyNight()
             target == "trailer-intro" -> viewModel.debugShowTrailerIntro()
+            target == "trailers:off" || target == "trailers:on" -> viewModel.debugSetTrailers(target == "trailers:on")
             // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
             // is chosen and its chip focused.
             target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)

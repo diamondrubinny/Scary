@@ -643,6 +643,8 @@ class HomeViewModel(
      * marked as watched (when the viewer allows it), and a message says so and how to undo it.
      */
     fun onResumed() {
+        // Back on the trailer question put it off only while SCARY stayed in front.
+        trailerIntroPutOff = false
         viewModelScope.launch {
             val pending = settings.takePendingWatch() ?: return@launch
             val prefs = settings.prefs.first()
@@ -985,7 +987,7 @@ class HomeViewModel(
     /** A trailer is playing with sound: the ambient sounds step aside meanwhile. */
     val trailerAudible: StateFlow<Boolean> = _trailerAudible.asStateFlow()
 
-    // Back on the explanation puts it off until SCARY starts again, rather than asking on every movie.
+    // Back on the explanation puts it off until SCARY comes back to the front, rather than asking on every movie.
     private var trailerIntroPutOff = false
 
     fun requestTrailerIntro() {
@@ -1006,7 +1008,12 @@ class HomeViewModel(
         _trailerIntro.value = true
     }
 
-    /** Back on the explanation: nothing plays, and it is asked again the next time SCARY starts. */
+    /** Debug builds (CI screenshots): trailers on or off as if answered, so screenshots never catch one playing. */
+    fun debugSetTrailers(enabled: Boolean) {
+        viewModelScope.launch { settings.answerTrailerIntro(enabled) }
+    }
+
+    /** Back on the explanation: nothing plays, and it is asked again once SCARY comes back to the front. */
     fun dismissTrailerIntro() {
         trailerIntroPutOff = true
         _trailerIntro.value = false
