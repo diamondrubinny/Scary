@@ -216,10 +216,10 @@ def frame_tall(seg: Segment, k: int, now: float, shots: Shots, mouth: float) -> 
         a = slam(local)
         draw_text(img, (VW / 2, 470), "SCARY", font("rubik_wet_paint.ttf", 230), (196, 30, 28), a, "ms", EN, shadow=(0, 0, 0))
         draw_text(img, (VW / 2, 560), "Free · Android TV", font("assistant_regular.ttf", 50), ASH, a, "ms", EN)
-        place_presenter(img, now, mouth, talking, VW / 2, 1220, 0.95, look=0.0)
+        place_presenter(img, now, mouth, talking, VW / 2, 1300, 0.85, look=0.0)
         b = slam(now - seg.timings[-1][0])
-        draw_text(img, (VW / 2, 1360), "scary.network", font("oswald_semibold.ttf", 128), CANDLE, b, "ms", EN, shadow=(0, 0, 0))
-        caption(img, text, VW / 2, 1420, 980, 58)
+        draw_text(img, (VW / 2, 1440), "scary.network", font("oswald_semibold.ttf", 128), CANDLE, b, "ms", EN, shadow=(0, 0, 0))
+        caption(img, text, VW / 2, 1490, 980, 58)
         return img
     shot = shots.get(seg.shot)
     bg = cover(shot.resize((W // 6, H // 6)).filter(ImageFilter.GaussianBlur(4)), size)
