@@ -298,3 +298,14 @@ shot 33-safe-mode 7
 adb shell am force-stop "$PKG"
 
 ls -la "$OUT"
+
+# A real trailer on the emulator: turned on, a movie page opened, then what YouTube answered (the app logs it under
+# ScaryTrailer, with the page's console in debug builds). Turned off again afterwards.
+open --es scary.debug.open trailers:on
+sleep 2
+open --es scary.debug.open details:hereditary
+shot 61-trailer-loading 4
+shot 62-trailer-playing 10
+adb logcat -d -s ScaryTrailer:V chromium:I cr_AwContents:I > "$OUT/trailer-log.txt" 2>/dev/null || true
+echo "Trailer log:"; tail -40 "$OUT/trailer-log.txt" || true
+open --es scary.debug.open trailers:off

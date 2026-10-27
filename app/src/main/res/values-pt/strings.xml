@@ -267,4 +267,5 @@
     <string name="settings_trailer_sound">Som dos trailers</string>
     <string name="settings_trailer_note">Os trailers vêm do YouTube, que vê o endereço IP da sua TV enquanto um toca. Eles nunca tocam off-line, na noite em família, num filme bloqueado ou com as animações da TV desligadas.</string>
     <string name="msg_trailers_off">Os trailers não vão tocar sozinhos. Você pode ligá-los de novo nas configurações.</string>
+    <string name="settings_trailer_last">Último trailer: %1$s</string>
 </resources>

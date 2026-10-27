@@ -277,4 +277,5 @@
     <string name="settings_trailer_sound">صوت الإعلانات الترويجية</string>
     <string name="settings_trailer_note">تأتي الإعلانات الترويجية من YouTube، الذي يرى عنوان IP الخاص بتلفزيونك أثناء عرض أحدها. لا تُعرض أبدًا دون اتصال بالإنترنت، ولا في السهرة العائلية، ولا لفيلم مقفل، ولا عند إيقاف الرسوم المتحركة في التلفزيون.</string>
     <string name="msg_trailers_off">لن تُعرض الإعلانات الترويجية تلقائيًا. يمكنك تشغيلها مجددًا من الإعدادات.</string>
+    <string name="settings_trailer_last">آخر إعلان ترويجي: %1$s</string>
 </resources>

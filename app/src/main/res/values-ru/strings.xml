@@ -270,4 +270,5 @@
     <string name="settings_trailer_sound">Звук трейлеров</string>
     <string name="settings_trailer_note">Трейлеры берутся с YouTube, который видит IP-адрес телевизора, пока трейлер идёт. Они не запускаются без сети, в семейный вечер, для заблокированного фильма и при отключённой анимации на телевизоре.</string>
     <string name="msg_trailers_off">Трейлеры не будут запускаться сами. Их можно снова включить в настройках.</string>
+    <string name="settings_trailer_last">Последний трейлер: %1$s</string>
 </resources>

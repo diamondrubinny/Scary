@@ -266,4 +266,5 @@
     <string name="settings_trailer_sound">Trailer sound</string>
     <string name="settings_trailer_note">Trailers come from YouTube, which sees your TV\'s IP address while one plays. They never play offline, in family night, for a locked movie, or when the TV\'s animations are turned off.</string>
     <string name="msg_trailers_off">Trailers won\'t play by themselves. You can turn them back on in Settings.</string>
+    <string name="settings_trailer_last">Last trailer: %1$s</string>
 </resources>

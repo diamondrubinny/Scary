@@ -7,14 +7,24 @@ package io.github.diamondrubinny.scary.core.trailer
 import java.security.MessageDigest
 import java.util.Base64
 
-/** What the trailer page reports back to the app. Anything else it might send is ignored. */
+/**
+ * What the trailer page reports back to the app. Anything else it might send is ignored. An error may carry YouTube's
+ * error code ("error:150") or "api" when YouTube's script could not load, for the diagnostics in settings.
+ */
 enum class TrailerEvent(val wire: String) {
+    READY("ready"),
     PLAYING("playing"),
     ENDED("ended"),
     ERROR("error");
 
     companion object {
-        fun parse(message: String?): TrailerEvent? = entries.firstOrNull { it.wire == message }
+        private val errorPattern = Regex("^error(?::(\\d{1,4}|api))?$")
+
+        fun parse(message: String?): TrailerEvent? =
+            if (message != null && errorPattern.matches(message)) ERROR else entries.firstOrNull { it.wire == message }
+
+        /** "150" for "error:150", "api" for "error:api"; null for anything else. */
+        fun errorDetail(message: String?): String? = message?.let { errorPattern.matchEntire(it) }?.groupValues?.get(1)?.ifEmpty { null }
     }
 }
 
@@ -51,8 +61,9 @@ object TrailerEmbed {
           var muted = holder.getAttribute('data-muted') === '1';
           var reported = {};
           function report(event) {
-            if (reported[event] || !window.$CHANNEL) return;
-            reported[event] = true;
+            var kind = event.split(':')[0];
+            if (reported[kind] || !window.$CHANNEL) return;
+            reported[kind] = true;
             window.$CHANNEL.postMessage(event);
           }
           window.onYouTubeIframeAPIReady = function () {
@@ -68,19 +79,20 @@ object TrailerEmbed {
               events: {
                 onReady: function (e) {
                   if (muted) { e.target.mute(); } else { e.target.unMute(); }
+                  report('ready');
                   e.target.playVideo();
                 },
                 onStateChange: function (e) {
                   if (e.data === YT.PlayerState.PLAYING) report('playing');
                   if (e.data === YT.PlayerState.ENDED) report('ended');
                 },
-                onError: function () { report('error'); }
+                onError: function (e) { report('error:' + e.data); }
               }
             });
           };
           var api = document.createElement('script');
           api.src = 'https://www.youtube.com/iframe_api';
-          api.onerror = function () { report('error'); };
+          api.onerror = function () { report('error:api'); };
           document.head.appendChild(api);
         })();
     """.trimIndent()

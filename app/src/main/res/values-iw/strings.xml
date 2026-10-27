@@ -267,4 +267,5 @@
     <string name="settings_trailer_sound">קול בטריילרים</string>
     <string name="settings_trailer_note">הטריילרים מגיעים מ־YouTube, שרואה את כתובת ה־IP של הטלוויזיה בזמן שטריילר מתנגן. הם לא מתנגנים בלי רשת, בערב משפחתי, בסרט נעול או כשהאנימציות בטלוויזיה כבויות.</string>
     <string name="msg_trailers_off">טריילרים לא יתנגנו מעצמם. אפשר להפעיל אותם שוב בהגדרות.</string>
+    <string name="settings_trailer_last">הטריילר האחרון: %1$s</string>
 </resources>
