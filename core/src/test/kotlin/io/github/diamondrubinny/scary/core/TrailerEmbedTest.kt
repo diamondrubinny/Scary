@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.trailer.TrailerEmbed
 import io.github.diamondrubinny.scary.core.trailer.TrailerEvent
+import io.github.diamondrubinny.scary.core.trailer.TrailerHost
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -36,7 +37,8 @@ class TrailerEmbedTest {
         val muted = TrailerEmbed.html("V6wWKNij_1M", muted = true)
         assertTrue(muted.contains("data-video=\"V6wWKNij_1M\""))
         assertTrue(muted.contains("data-muted=\"1\""))
-        assertTrue(muted.contains("https://www.youtube-nocookie.com"))
+        assertTrue(muted.contains("data-host=\"https://www.youtube-nocookie.com\""))
+        assertTrue(TrailerEmbed.html("V6wWKNij_1M", muted = true, TrailerHost.YOUTUBE).contains("data-host=\"https://www.youtube.com\""))
         assertTrue(muted.contains("https://www.youtube.com/iframe_api"))
         assertFalse("never loops", muted.contains("loop"))
         assertTrue(TrailerEmbed.html("V6wWKNij_1M", muted = false).contains("data-muted=\"0\""))
@@ -63,6 +65,14 @@ class TrailerEmbedTest {
         assertEquals(TrailerEvent.PLAYING, TrailerEvent.parse("playing"))
         assertEquals(TrailerEvent.ENDED, TrailerEvent.parse("ended"))
         assertEquals(TrailerEvent.ERROR, TrailerEvent.parse("error"))
+        assertEquals(TrailerEvent.READY, TrailerEvent.parse("ready"))
+        assertEquals(TrailerEvent.ERROR, TrailerEvent.parse("error:150"))
+        assertEquals(TrailerEvent.ERROR, TrailerEvent.parse("error:api"))
+        assertEquals("150", TrailerEvent.errorDetail("error:150"))
+        assertEquals("api", TrailerEvent.errorDetail("error:api"))
+        assertNull(TrailerEvent.errorDetail("error"))
+        assertNull(TrailerEvent.parse("error:<script>"))
+        assertNull(TrailerEvent.parse("error:12345"))
         assertNull(TrailerEvent.parse("PLAYING"))
         assertNull(TrailerEvent.parse("open:https://evil"))
         assertNull(TrailerEvent.parse(null))

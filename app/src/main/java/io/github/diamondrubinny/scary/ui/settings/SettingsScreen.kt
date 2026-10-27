@@ -19,6 +19,8 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -39,6 +41,7 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -201,6 +204,11 @@ fun SettingsScreen(
             )
         }
         BasicText(stringResource(R.string.settings_trailer_note), style = ScaryType.Caption)
+        // What happened to the last trailer, for when they don't play (the TV's WebView, or YouTube's answer).
+        val lastTrailer by TrailerDiagnostics.last.collectAsState()
+        lastTrailer?.let { status ->
+            BasicText(stringResource(R.string.settings_trailer_last, status), style = ScaryType.Caption.mixedLanguage())
+        }
         SettingRow(
             label = stringResource(R.string.settings_screensaver),
             value = stringResource(R.string.value_screensaver),

@@ -83,3 +83,55 @@ Free, open source, no ads, no tracking.
 ## תגיות
 
 #AndroidTV #HorrorMovies #Launcher #OpenSource #סרטיאימה #GoogleTV
+
+## Teaser (30 s): descriptions with hashtags
+
+**YouTube Shorts (9:16)**
+Title: `Your TV has been watching you 👁️ #shorts`
+
+Don't look now… your TV has been watching you.
+
+SCARY is a free horror home screen for Android TV. Every night it picks a new horror film for you, from 170 hand-picked horror movies with a fear meter. Tell it how scared you want to be, and it finds the film.
+
+👁️ Free & open source · No account · No ads · No tracking
+📺 Download: https://scary.network
+
+SCARY does not host or stream any video. It opens films in the streaming apps you already have.
+
+#shorts #horror #AndroidTV #GoogleTV #HorrorMovies #ScaryMovies #HorrorTok
+
+**Instagram Reels**
+
+Don't look now… your TV has been watching you. 👁️📺
+
+SCARY turns your Android TV into a horror home screen: a new nightmare every night, 170 hand-picked horror movies, and a fear meter so you pick how scared you want to be.
+
+Free. Open source. No ads. No tracking.
+🔗 scary.network (link in bio)
+
+#horror #horrormovies #androidtv #googletv #scarymovies #horrorfans #halloween #movienight #horrorcommunity #opensource
+
+**TikTok**
+
+your TV has been watching you 👁️ free horror home screen for Android TV → scary.network
+
+#horror #horrortok #scary #androidtv #googletv #horrormovies #movienight #halloween #fyp
+
+**YouTube (16:9)**
+Title: `SCARY – Your TV Has Been Watching You | Free Horror Home Screen for Android TV`
+
+Don't look now… but your TV has been watching you.
+
+SCARY is a free, open-source horror home screen (launcher) for Android TV, made for people who love to be scared:
+- 🩸 A new horror film picked for you every night
+- 🎬 170 hand-picked horror movies and thrillers, each with a fear meter (1–5)
+- 😱 Pick your fear: moods from "short and sharp" to "don't sleep tonight", or choose a decade
+- 📺 A horror screensaver that keeps watching when you look away
+- 🔒 No account, no ads, no tracking — your lists stay on your TV
+- 🌍 English, Hebrew, Arabic, Portuguese and Russian
+
+Download: https://scary.network · Source code: https://github.com/diamondrubinny/Scary
+
+Good to know: SCARY does not host, stream or link to video files. It shows public movie information and opens movies in the streaming apps already installed on your device. Voice: synthetic (Piper, public-domain voice). Music and sound: generated.
+
+#horror #AndroidTV #GoogleTV #HorrorMovies #OpenSource

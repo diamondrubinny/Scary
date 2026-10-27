@@ -298,3 +298,20 @@ shot 33-safe-mode 7
 adb shell am force-stop "$PKG"
 
 ls -la "$OUT"
+
+# Real trailers on the emulator: turned on, six movie pages opened in turn, then what YouTube answered for each try
+# (the app logs it under ScaryTrailer, with the page's console in debug builds). Turned off again afterwards.
+open --es scary.debug.open trailers:on
+sleep 2
+adb logcat -c || true
+open --es scary.debug.open details:hereditary
+shot 61-trailer-loading 5
+shot 62-trailer-playing 12
+for movie in the_shining halloween get_out it_follows scream; do
+  open --es scary.debug.open "details:$movie"
+  sleep 16
+done
+shot 63-trailer-last 1
+adb logcat -d -s ScaryTrailer:V > "$OUT/trailer-log.txt" 2>/dev/null || true
+echo "Trailer log:"; cat "$OUT/trailer-log.txt" || true
+open --es scary.debug.open trailers:off

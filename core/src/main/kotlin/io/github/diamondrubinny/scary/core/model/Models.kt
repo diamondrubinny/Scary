@@ -89,6 +89,11 @@ data class Movie(
     val imdbRating: Double? = null,
     val cast: List<String> = emptyList(),
     val trailerYoutubeId: String? = null,
+    /**
+     * Other trailers of the same movie, in Cinemeta's order: many studio trailers may not play inside apps (YouTube
+     * error 150), so the player tries these next.
+     */
+    val trailerAlternates: List<String> = emptyList(),
     /** Titles and synopses in other languages, keyed by [Language.code] (curated translations or TMDB). */
     val titles: Map<String, String> = emptyMap(),
     val synopses: Map<String, String> = emptyMap(),
@@ -106,6 +111,9 @@ data class Movie(
         synopses[language.code]?.takeIf(String::isNotBlank)
             ?: synopsisHe.takeIf { language == Language.HE && it.isNotBlank() }
             ?: synopsisEn.ifBlank { synopsisHe }
+
+    /** Every known trailer, the main one first. */
+    val trailerIds: List<String> get() = (listOfNotNull(trailerYoutubeId) + trailerAlternates).distinct()
 
     /** Unknown fear counts as the maximum for the parental lock, so unrated movies stay behind the PIN. */
     val fearForLock: Int get() = fear ?: 5

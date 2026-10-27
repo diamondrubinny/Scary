@@ -17,6 +17,7 @@ Screenshots come from the `screenshots` branch (git fetch origin screenshots), o
 from __future__ import annotations
 
 import argparse
+import functools
 import math
 import subprocess
 import sys
@@ -448,34 +449,42 @@ def render_frame(seg: Segment, now: float, shots: Shots, mouth: float, qr_img: I
 
 # ---------- The haunting: grade, flicker, scanlines, heartbeat vignette, glitches ----------
 
-_YY, _XX = np.mgrid[0:H, 0:W].astype(np.float32)
-_RADIUS = ((_XX - W / 2) / (W / 2)) ** 2 + ((_YY - H / 2) / (H / 2)) ** 2
-_VIGNETTE = np.clip(1 - 0.34 * _RADIUS, 0.25, 1)[..., None]
-_SCANLINES = np.where(np.arange(H) % 3 == 0, 0.9, 1.0).astype(np.float32)[:, None, None]
 _TINT = np.array([1.06, 0.96, 0.93], dtype=np.float32)  # blood in the highlights, cold in the shadows
-_GRAIN = [np.random.default_rng(k).normal(0, 9, (H // 2, W // 2, 1)).astype(np.float32).repeat(2, 0).repeat(2, 1)
-          for k in range(8)]
+
+
+@functools.lru_cache(maxsize=4)
+def _haunt_maps(h: int, w: int) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
+    """Vignette, scanlines and grain for a frame of h x w pixels (the explainer is 1920 x 1080, a Short 1080 x 1920)."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    radius = ((xx - w / 2) / (w / 2)) ** 2 + ((yy - h / 2) / (h / 2)) ** 2
+    vignette = np.clip(1 - 0.34 * radius, 0.25, 1)[..., None]
+    scanlines = np.where(np.arange(h) % 3 == 0, 0.9, 1.0).astype(np.float32)[:, None, None]
+    grain = [np.random.default_rng(k).normal(0, 9, (h // 2, w // 2, 1)).astype(np.float32).repeat(2, 0).repeat(2, 1)
+             for k in range(8)]
+    return vignette, scanlines, grain
 
 
 def haunt(img: Image.Image, k: int, now: float, brightness: float, glitch: float, pulse: float) -> bytes:
     """The finished frame: a horror grade, a flickering tube, VHS scanlines, a vignette that tightens with each
     heartbeat ([pulse] 0..1), and on cuts and hits a [glitch] (0..1) that splits the colours and tears the picture."""
     a = np.asarray(img.convert("RGB"), dtype=np.float32)
+    h, w = a.shape[:2]
+    vignette_map, scanlines, grain = _haunt_maps(h, w)
     luma = a.mean(axis=2, keepdims=True)
     a = luma + (a - luma) * 0.78  # drained colour
     a = 255 * (np.clip(a, 0, 255) / 255) ** 1.08 * _TINT  # deeper shadows
     rng = np.random.default_rng(k)
     flicker = 0.94 + 0.05 * rng.random() - (0.22 if rng.random() < 0.015 else 0)
-    vignette = _VIGNETTE ** (1 + 1.4 * pulse)
-    a = a * vignette * _SCANLINES * (brightness * flicker) + _GRAIN[k % len(_GRAIN)]
+    vignette = vignette_map ** (1 + 1.4 * pulse)
+    a = a * vignette * scanlines * (brightness * flicker) + grain[k % len(grain)]
     if glitch > 0.02:
         shift = int(16 * glitch)
         a[..., 0] = np.roll(a[..., 0], shift, axis=1)
         a[..., 2] = np.roll(a[..., 2], -shift, axis=1)
         for _ in range(int(2 + 6 * glitch)):
-            y = int(rng.integers(0, H - 40))
-            h = int(rng.integers(6, 40))
-            a[y:y + h] = np.roll(a[y:y + h], int(rng.integers(-60, 60) * glitch), axis=1)
+            y = int(rng.integers(0, h - 40))
+            band = int(rng.integers(6, 40))
+            a[y:y + band] = np.roll(a[y:y + band], int(rng.integers(-60, 60) * glitch), axis=1)
     return np.clip(a, 0, 255).astype(np.uint8).tobytes()
 
 

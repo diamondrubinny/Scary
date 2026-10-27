@@ -50,7 +50,7 @@
 | מארחי תמונות (בעיקר `images.metahub.space`; כל כתובת HTTPS ש־Cinemeta מחזירה) | כנ״ל | בקשות תמונה, IP | תמונות | כנ״ל | כנ״ל. אפשר לשקול רשימת מארחים מותרים |
 | TMDB (`api.themoviedb.org`, `image.tmdb.org`) | רק עם מפתח שהמשתמש הזין | המפתח, מזהי סרטים, שפה, IP | שמות ותקצירים בשפה, שורות נוספות | המשתמש בוחר להזין מפתח | תנאי TMDB (אישי/מסחרי), קרדיט חובה מוצג |
 | שירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google) | רק כשהמשתמש לוחץ על המיקרופון בחיפוש | ההקלטה עצמה (SCARY לא ניגשת אליה), שפת הממשק | הפיכת דיבור לטקסט | פעולה יזומה; ההרשאות של השירות עצמו | מדיניות הספק, מיקום עיבוד |
-| נגן YouTube מוטמע (`www.youtube.com/iframe_api`, `www.youtube-nocookie.com`) | רק אחרי "לנגן טריילרים" בשאלה הראשונה; כשהפוקוס נשאר 1.5 שניות על סרט שיש לו טריילר; לא בלי רשת, לא בערב משפחתי, לא בסרט נעול, לא כש"הסרת אנימציות" פעיל | מזהה הסרטון, IP, User-Agent, Referer עם מזהה האפליקציה (נדרש בתנאי YouTube), נתוני ניגון | טריילר ליד הסרט | השאלה בפעם הראשונה (opt-in), וכיבוי בהגדרות. **דורש בדיקה משפטית** | תנאי YouTube API Services ו־Required Minimum Functionality, ‏Google Privacy Policy, ‏DPA / העברה בינלאומית |
+| נגן YouTube מוטמע (`www.youtube.com/iframe_api`, `www.youtube-nocookie.com`, ו־`www.youtube.com` כניסיון אחרון) | רק אחרי "לנגן טריילרים" בשאלה הראשונה; כשהפוקוס נשאר 1.5 שניות על סרט שיש לו טריילר; לא בלי רשת, לא בערב משפחתי, לא בסרט נעול, לא כש"הסרת אנימציות" פעיל | מזהה הסרטון, IP, User-Agent, Referer עם מזהה האפליקציה (נדרש בתנאי YouTube), נתוני ניגון | טריילר ליד הסרט | השאלה בפעם הראשונה (opt-in), וכיבוי בהגדרות. **דורש בדיקה משפטית** | תנאי YouTube API Services ו־Required Minimum Functionality, ‏Google Privacy Policy, ‏DPA / העברה בינלאומית |
 | Stremio / YouTube / Google Play | כשהמשתמש בוחר לצפות, טריילר או חנות | Intent עם מזהה סרט או חיפוש | העברה לאפליקציה אחרת | פעולה יזומה | המדיניות שלהם חלה מאותו רגע |
 | PayPal (`www.paypal.com`) | רק אם המשתמש סורק את קוד התרומה בטלפון שלו | כלום מ־SCARY: הקישור נפתח בטלפון, לא בטלוויזיה | תרומה (רשות) | פעולה יזומה בטלפון | מדיניות הפרטיות של PayPal חלה מאותו רגע. SCARY לא יודעת מי תרם |
 | אפליקציות צפייה מותקנות (Netflix, Apple TV, yes, HOT, סלקום TV ועוד) וחיפוש Google TV | רק כשהמשתמש לוחץ "חיפוש ב־X" בעמוד סרט | שם הסרט המקורי בלבד (ב־YouTube גם השנה) | חיפוש הסרט באפליקציה | פעולה יזומה | המדיניות של כל אפליקציה חלה מאותו רגע. SCARY רק בודקת במכשיר אילו אפליקציות מותקנות, ולא שולחת את הרשימה לשום מקום |
@@ -69,7 +69,7 @@
 6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם. SCARY לא מבקשת הרשאת מיקום.
 7. **חיפוש קולי.** כפתור המיקרופון מעביר את הבקשה לשירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה. SCARY לא מבקשת הרשאת מיקרופון.
 8. **טריילרים שמתנגנים מעצמם** (רק אחרי שהסכמתם בשאלה של הפעם הראשונה; אפשר לכבות בהגדרות).
-   - **הנגן:** הנגן של YouTube, במצב הפרטיות המשופרת (youtube-nocookie.com).
+   - **הנגן:** הנגן של YouTube, במצב הפרטיות המשופרת (youtube-nocookie.com). אם טריילר לא מתנגן שם, נעשה ניסיון אחרון ב־youtube.com, גם הוא בלי עוגיות.
    - **מה YouTube ‏(Google) מקבלת כשטריילר מתנגן:** את כתובת ה־IP של הטלוויזיה, פרטי המכשיר והדפדפן ואת מזהה הטריילר, לפי מדיניות הפרטיות של Google.
    - **עוגיות ואחסון:** SCARY חוסמת עוגיות בנגן ומוחקת את האחסון שלו כשהוא נסגר.
    - **מתי לא מתנגנים:** בלי רשת או בערב משפחתי.
@@ -89,7 +89,7 @@
 6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache. Rent and buy offers on movie pages come from TMDB (data by JustWatch): the request carries only the movie's ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location. SCARY asks for no location permission.
 7. **Voice search.** The microphone button hands the request to the TV's speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text and asks for no microphone permission.
 8. **Trailers that play by themselves** (only once you agree when first asked; you can turn them off in settings).
-   - **The player:** YouTube's player, in its privacy-enhanced mode (youtube-nocookie.com).
+   - **The player:** YouTube's player, in its privacy-enhanced mode (youtube-nocookie.com); when a trailer will not play there, a last try uses youtube.com, also without cookies.
    - **What YouTube (Google) receives when a trailer plays:** your TV's IP address, device and browser details and the trailer's ID, under Google's privacy policy.
    - **Cookies and storage:** SCARY blocks cookies in the player and deletes its storage when it closes.
    - **When none play:** offline or in family night.
