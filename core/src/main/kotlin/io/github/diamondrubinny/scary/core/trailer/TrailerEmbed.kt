@@ -28,6 +28,12 @@ enum class TrailerEvent(val wire: String) {
     }
 }
 
+/** Where the player comes from: privacy-enhanced mode first; the regular player only as a last try. */
+enum class TrailerHost(val origin: String) {
+    NOCOOKIE("https://www.youtube-nocookie.com"),
+    YOUTUBE("https://www.youtube.com"),
+}
+
 /**
  * The page that plays a trailer inside SCARY through YouTube's IFrame Player API, in privacy-enhanced mode
  * (youtube-nocookie.com).
@@ -59,6 +65,7 @@ object TrailerEmbed {
           var holder = document.getElementById('player');
           var videoId = holder.getAttribute('data-video');
           var muted = holder.getAttribute('data-muted') === '1';
+          var host = holder.getAttribute('data-host');
           var reported = {};
           function report(event) {
             var kind = event.split(':')[0];
@@ -68,7 +75,7 @@ object TrailerEmbed {
           }
           window.onYouTubeIframeAPIReady = function () {
             new YT.Player('player', {
-              host: 'https://www.youtube-nocookie.com',
+              host: host,
               videoId: videoId,
               width: '100%',
               height: '100%',
@@ -108,7 +115,7 @@ object TrailerEmbed {
             "img-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'"
 
     /** The page for [videoId]; throws for anything but an 11-character YouTube id, so nothing else reaches the HTML. */
-    fun html(videoId: String, muted: Boolean): String {
+    fun html(videoId: String, muted: Boolean, host: TrailerHost = TrailerHost.NOCOOKIE): String {
         require(isValidVideoId(videoId)) { "invalid YouTube id" }
         return listOf(
             "<!doctype html>",
@@ -121,7 +128,7 @@ object TrailerEmbed {
             "<style>html, body, #player { margin: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }</style>",
             "</head>",
             "<body>",
-            "<div id=\"player\" data-video=\"$videoId\" data-muted=\"${if (muted) "1" else "0"}\"></div>",
+            "<div id=\"player\" data-video=\"$videoId\" data-muted=\"${if (muted) "1" else "0"}\" data-host=\"${host.origin}\"></div>",
             "<script>$script</script>",
             "</body>",
             "</html>",

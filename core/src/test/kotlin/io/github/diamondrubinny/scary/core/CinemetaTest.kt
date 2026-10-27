@@ -38,6 +38,21 @@ class CinemetaTest {
     }
 
     @Test
+    fun `keeps every valid trailer, the first as the main one, for when one may not play in apps`() {
+        val meta = Cinemeta.parseMeta(
+            """{"meta":{"imdb_id":"tt7784604","name":"Hereditary","year":"2018",
+               "trailerStreams":[{"ytId":"MJNR58zaStE"},{"ytId":"bad id"},{"ytId":"V6wWKNij_1M"}],
+               "trailers":[{"source":"V6wWKNij_1M"},{"source":"aaaaaaaaaaa"},{"source":"bbbbbbbbbbb"},{"source":"ccccccccccc"}]}}""",
+        )!!
+        assertEquals("MJNR58zaStE", meta.trailerYoutubeId)
+        assertEquals(listOf("V6wWKNij_1M", "aaaaaaaaaaa", "bbbbbbbbbbb"), meta.trailerAlternates)
+        val movie = Cinemeta.toMovie(meta)!!
+        assertEquals(listOf("MJNR58zaStE", "V6wWKNij_1M", "aaaaaaaaaaa", "bbbbbbbbbbb"), movie.trailerIds)
+        val curated = Cinemeta.enrich(catalog.movie("hereditary")!!, meta)
+        assertEquals(movie.trailerIds, curated.trailerIds)
+    }
+
+    @Test
     fun `rejects unsafe or malformed input`() {
         assertNull(Cinemeta.parseMeta("not json"))
         assertNull(Cinemeta.parseMeta("""{"meta":{"imdb_id":"nm1","name":"x"}}"""))

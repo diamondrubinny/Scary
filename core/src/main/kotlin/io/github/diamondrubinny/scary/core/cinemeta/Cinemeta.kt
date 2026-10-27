@@ -33,6 +33,8 @@ data class CinemetaMeta(
     val imdbRating: Double? = null,
     val runtimeMin: Int? = null,
     val trailerYoutubeId: String? = null,
+    /** More trailers of the same movie, for when the first may not play inside an app. */
+    val trailerAlternates: List<String> = emptyList(),
     /** Title and description in [localLanguage] (a Language.code), when the row comes from TMDB. */
     val localName: String = "",
     val localDescription: String = "",
@@ -75,6 +77,7 @@ object Cinemeta {
     private const val MAX_URL_LENGTH = 512
     private const val MAX_TEXT_LENGTH = 1_500
     private const val MAX_CAST = 6
+    private const val MAX_TRAILERS = 4
     private const val MIN_SEARCH_LENGTH = 3
     private const val MAX_SEARCH_LENGTH = 60
     private const val MAX_SEARCH_RESULTS = 20
@@ -185,6 +188,7 @@ object Cinemeta {
         imdbRating = movie.imdbRating,
         runtimeMin = movie.runtimeMin.takeIf { it > 0 },
         trailerYoutubeId = movie.trailerYoutubeId,
+        trailerAlternates = movie.trailerAlternates,
         localName = movie.titles[language].orEmpty(),
         localDescription = movie.synopses[language].orEmpty(),
         localLanguage = language.takeIf { movie.titles.containsKey(it) || movie.synopses.containsKey(it) }.orEmpty(),
@@ -208,8 +212,10 @@ object Cinemeta {
         val name = o.str("name")?.trim()?.take(200)?.takeIf(String::isNotEmpty) ?: return null
         if (adultTitle.containsMatchIn(name)) return null
         val year = (o.str("year") ?: o.str("releaseInfo"))?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
-        val trailer = (o["trailerStreams"] as? JsonArray)?.firstNotNullOfOrNull { (it as? JsonObject)?.str("ytId") }
-            ?: (o["trailers"] as? JsonArray)?.firstNotNullOfOrNull { (it as? JsonObject)?.str("source") }
+        val trailers = (
+            (o["trailerStreams"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("ytId") }.orEmpty() +
+                (o["trailers"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("source") }.orEmpty()
+            ).filter(youtubePattern::matches).distinct().take(MAX_TRAILERS)
         return CinemetaMeta(
             imdbId = imdbId,
             name = name,
@@ -223,7 +229,8 @@ object Cinemeta {
             genres = (o.strList("genres").ifEmpty { o.strList("genre") }).take(8),
             imdbRating = o.str("imdbRating")?.toDoubleOrNull()?.takeIf { it in 0.0..10.0 },
             runtimeMin = o.str("runtime")?.substringBefore(' ')?.toIntOrNull()?.takeIf { it in 1..600 },
-            trailerYoutubeId = trailer?.takeIf(youtubePattern::matches),
+            trailerYoutubeId = trailers.firstOrNull(),
+            trailerAlternates = trailers.drop(1),
         )
     }
 
@@ -239,6 +246,7 @@ object Cinemeta {
         imdbRating = meta.imdbRating ?: movie.imdbRating,
         cast = meta.cast.ifEmpty { movie.cast },
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
+        trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
     )
 
@@ -263,6 +271,7 @@ object Cinemeta {
             imdbRating = meta.imdbRating,
             cast = meta.cast,
             trailerYoutubeId = meta.trailerYoutubeId,
+            trailerAlternates = meta.trailerAlternates,
             curated = false,
         )
     }
@@ -341,8 +350,11 @@ data class CinemetaCache(
 
     companion object {
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
-        /** Bumped whenever the online rows change (3: popular rows one page, deeper rows right after them). */
-        const val ROWS_VERSION = 3
+        /**
+         * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
+         * 4: every trailer of a movie, not only the first).
+         */
+        const val ROWS_VERSION = 4
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

@@ -55,6 +55,7 @@ import androidx.webkit.WebViewFeature
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.trailer.TrailerEmbed
 import io.github.diamondrubinny.scary.core.trailer.TrailerEvent
+import io.github.diamondrubinny.scary.core.trailer.TrailerHost
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -88,8 +89,23 @@ fun canAutoTrailer(movie: Movie, locked: Boolean, settings: TrailerSettings, pla
     val bigEnough = with(LocalDensity.current) {
         playerSize.width.toPx() >= MIN_PLAYER_PX && playerSize.height.toPx() >= MIN_PLAYER_PX
     }
-    return settings.enabled && !locked && bigEnough && TrailerEmbed.isValidVideoId(movie.trailerYoutubeId) && TrailerWebViews.available
+    return settings.enabled && !locked && bigEnough && attempts(movie).isNotEmpty() && TrailerWebViews.available
 }
+
+/** One try at playing: which trailer, from which player host. */
+private data class Attempt(val videoId: String, val host: TrailerHost)
+
+/**
+ * Every trailer of the movie in privacy-enhanced mode, then the first one from the regular player: many studio
+ * trailers may not play inside apps at all (YouTube error 150), and another upload of the same trailer often can.
+ */
+private fun attempts(movie: Movie): List<Attempt> {
+    val ids = movie.trailerIds.filter(TrailerEmbed::isValidVideoId)
+    return ids.map { Attempt(it, TrailerHost.NOCOOKIE) } + listOfNotNull(ids.firstOrNull()?.let { Attempt(it, TrailerHost.YOUTUBE) })
+}
+
+/** YouTube errors that another trailer can get past: not found (100), and may not play in embedded players (101, 150). */
+private val NEXT_TRAILER_ERRORS = setOf("100", "101", "150")
 
 /**
  * The trailer of [movie], played by itself in a [playerSize] window once the focus has rested on the movie for a
@@ -110,9 +126,11 @@ fun AutoTrailer(
     visible: Boolean = true,
     idle: @Composable () -> Unit = {},
 ) {
-    val videoId = movie.trailerYoutubeId?.takeIf(TrailerEmbed::isValidVideoId)
+    val tries = remember(movie.id, movie.trailerIds) { attempts(movie) }
     val canPlay = visible && canAutoTrailer(movie, locked, settings, playerSize)
     var phase by remember(movie.id) { mutableStateOf(Phase.IDLE) }
+    // Which of [tries] is playing; the next one is tried when YouTube refuses this one.
+    var attempt by remember(movie.id) { mutableIntStateOf(0) }
     // Bumped when SCARY is paused under a playing trailer, so it starts again once SCARY is back in front.
     var interruptions by remember(movie.id) { mutableIntStateOf(0) }
     val needIntro by rememberUpdatedState(settings.onNeedIntro)
@@ -126,9 +144,15 @@ fun AutoTrailer(
             needIntro()
             return@LaunchedEffect
         }
+        attempt = 0
         phase = Phase.LOADING
+    }
+
+    // Each try gets its own time to start. Still not playing: a slow network or a stuck player. The window goes rather
+    // than stay black.
+    LaunchedEffect(movie.id, phase == Phase.LOADING, attempt) {
+        if (phase != Phase.LOADING) return@LaunchedEffect
         delay(LOAD_TIMEOUT_MS)
-        // Still not playing: a slow network or a stuck player. The window goes rather than stay black.
         if (phase == Phase.LOADING) {
             TrailerDiagnostics.note(if (TrailerDiagnostics.wasReady) "YouTube was ready but did not play within 15 s" else "no answer from YouTube within 15 s")
             phase = Phase.DONE
@@ -145,20 +169,25 @@ fun AutoTrailer(
     // No animated resizing: it would clip the player while it grows, and nothing may cover any part of it. [idle] keeps
     // to the end side of a wider slot, by the screen's edge.
     Box(modifier, contentAlignment = Alignment.TopEnd) {
-        if (videoId != null && (phase == Phase.LOADING || phase == Phase.PLAYING)) {
-            key(videoId) {
+        val current = tries.getOrNull(attempt)
+        if (current != null && (phase == Phase.LOADING || phase == Phase.PLAYING)) {
+            key(current) {
                 TrailerWebView(
-                    videoId = videoId,
+                    videoId = current.videoId,
+                    host = current.host,
                     muted = settings.muted,
                     onMessage = { message ->
                         val event = TrailerEvent.parse(message)
                         // Only the player on screen may move things on; a late event from one already closed may not.
-                        if (event != null && (phase == Phase.LOADING || phase == Phase.PLAYING)) {
-                            TrailerDiagnostics.event(event, TrailerEvent.errorDetail(message))
-                            phase = when (event) {
-                                TrailerEvent.READY -> phase
-                                TrailerEvent.PLAYING -> Phase.PLAYING
-                                TrailerEvent.ENDED, TrailerEvent.ERROR -> Phase.DONE
+                        if (event != null && (phase == Phase.LOADING || phase == Phase.PLAYING) && tries.getOrNull(attempt) == current) {
+                            val detail = TrailerEvent.errorDetail(message)
+                            TrailerDiagnostics.event(event, detail, "${attempt + 1}/${tries.size} ${current.videoId} ${current.host.name.lowercase()}")
+                            when {
+                                event == TrailerEvent.READY -> Unit
+                                event == TrailerEvent.PLAYING -> phase = Phase.PLAYING
+                                event == TrailerEvent.ERROR && phase == Phase.LOADING && detail in NEXT_TRAILER_ERRORS && attempt + 1 < tries.size ->
+                                    attempt++
+                                else -> phase = Phase.DONE
                             }
                         }
                     },
@@ -187,6 +216,7 @@ fun AutoTrailer(
 @Composable
 private fun TrailerWebView(
     videoId: String,
+    host: TrailerHost,
     muted: Boolean,
     onMessage: (String) -> Unit,
     onPaused: () -> Unit,
@@ -211,7 +241,7 @@ private fun TrailerWebView(
     }
     AndroidView(
         factory = { context ->
-            TrailerWebViews.create(context, videoId, muted) { latestOnMessage(it) }?.also { holder[0] = it }
+            TrailerWebViews.create(context, videoId, host, muted) { latestOnMessage(it) }?.also { holder[0] = it }
                 ?: View(context).also { view -> view.post { latestOnMessage(TrailerEvent.ERROR.wire) } }
         },
         onRelease = { view ->
@@ -232,7 +262,7 @@ private object TrailerWebViews {
     // JavaScript: the page is SCARY's own (TrailerEmbed), and the YouTube player needs it. The bridge (below) takes
     // four words and nothing else.
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface", "AddJavascriptInterface")
-    fun create(context: Context, videoId: String, muted: Boolean, onMessage: (String) -> Unit): WebView? {
+    fun create(context: Context, videoId: String, host: TrailerHost, muted: Boolean, onMessage: (String) -> Unit): WebView? {
         if (!available) return null
         var web: WebView? = null
         return try {
@@ -285,7 +315,7 @@ private object TrailerWebViews {
                     return true
                 }
             }
-            view.loadDataWithBaseURL(TrailerEmbed.BASE_URL, TrailerEmbed.html(videoId, muted), "text/html", "utf-8", null)
+            view.loadDataWithBaseURL(TrailerEmbed.BASE_URL, TrailerEmbed.html(videoId, muted, host), "text/html", "utf-8", null)
             view
         } catch (e: RuntimeException) {
             // No WebView installed, or one that is being updated (MissingWebViewPackageException and friends).
@@ -358,10 +388,10 @@ object TrailerDiagnostics {
         note("loading")
     }
 
-    fun event(event: TrailerEvent, detail: String?) {
+    fun event(event: TrailerEvent, detail: String?, which: String) {
         if (event == TrailerEvent.READY) wasReady = true
         note(
-            when (event) {
+            "trailer $which: " + when (event) {
                 TrailerEvent.READY -> "YouTube player ready"
                 TrailerEvent.PLAYING -> "playing"
                 TrailerEvent.ENDED -> "played to the end"
