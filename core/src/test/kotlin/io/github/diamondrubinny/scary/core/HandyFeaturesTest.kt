@@ -134,6 +134,8 @@ class HandyFeaturesTest {
     @Test
     fun `open on your phone leads to the IMDb page, and only for a real IMDb id`() {
         assertEquals("https://www.imdb.com/title/tt0081505/", Links.imdbTitle("tt0081505"))
+        // A short, plain link: the smallest code that holds it (no character-set marker), easy to scan from the sofa.
+        assertEquals(29, io.github.diamondrubinny.scary.core.brand.Donation.qr(Links.imdbTitle("tt0081505")).size)
         assertThrows(IllegalArgumentException::class.java) { Links.imdbTitle("tt0081505/../x") }
     }
 }
