@@ -149,7 +149,7 @@
         <item>O SCARY não tem contas, anúncios, análises nem cookies, e não existe um servidor do SCARY. Nada do que você faz no launcher é enviado para nós.</item>
         <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si), os horários de falhas recentes (só o horário) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
-        <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" e o dia em que marcou cada filme como assistido. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre a página dele no IMDb no seu celular; a TV não envia nada.</item>
+        <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" e o dia em que marcou cada filme como assistido. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre no seu celular a página de compartilhamento do SCARY (no GitHub Pages), com o nome do filme no link; o GitHub, que a hospeda, vê o endereço IP do celular. A TV não envia nada.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
@@ -288,8 +288,8 @@
     <string name="coming_on">Nos cinemas %1$s</string>
     <string name="coming_on_long">Nos cinemas em %1$s</string>
     <string name="tv_input_description">Entrada da TV: %1$s</string>
-    <string name="open_on_phone">Abra no celular</string>
-    <string name="open_on_phone_description">Código QR: a página do IMDb de %1$s. Escaneie com a câmera do celular.</string>
+    <string name="share_scan">Escaneie para compartilhar o filme</string>
+    <string name="share_scan_description">Código QR para compartilhar %1$s: escaneie com a câmera do celular para enviar aos amigos.</string>
     <string name="settings_sleep_timer">Timer de sono</string>
     <string name="sleep_left">Faltam %1$d min</string>
     <string name="sleep_off">Desligado</string>

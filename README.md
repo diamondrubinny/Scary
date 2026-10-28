@@ -62,7 +62,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 🎞️ **Trailers that play by themselves**: rest on a film and its trailer plays next to it, muted (sound is a setting). It comes from YouTube, so SCARY asks first, and you can turn it off any time.
 - ⏱️ **"How much time do you have?"**: up to 90 minutes, an evening, a double feature or a marathon, with the films numbered in the order to watch them.
 - ❤️ **Loved it / Not for me**: love a film and "Because you loved it" brings more like it; "not for me" keeps a film out of every suggestion. **"Your year in fear"** sums up what you watched.
-- 🎟️ **Coming soon to cinemas** (with a TMDB key), and a QR code on every film page that opens it on your phone.
+- 🎟️ **Coming soon to cinemas** (with a TMDB key), and **scan to share**: a QR code on every film page opens a share page on your phone, ready for WhatsApp, Telegram or any app.
 - 📡 **HDMI and live TV** tiles on TVs with inputs, and a **sleep timer** that pauses whatever plays.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
 - ⭐ **My list and Watched**: hold OK on any poster to keep it (hold again to remove it), and mark what you have seen. Come back from a movie and SCARY marks it as watched for you.
@@ -117,7 +117,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🎞️ **טריילר שמתנגן מעצמו**: נעצרים על סרט, והטריילר שלו מתנגן לידו בלי קול (אפשר להפעיל קול בהגדרות). הטריילרים מגיעים מ־YouTube, ולכן SCARY שואלת קודם, ואפשר לכבות בכל רגע.
 - ⏱️ **"כמה זמן יש לך?"**: עד 90 דקות, ערב, סרט כפול או מרתון, עם הסרטים ממוספרים לפי סדר הצפייה.
 - ❤️ **אהבתי / לא בשבילי**: אהבתם סרט, ו"כי אהבת" מביא עוד כמוהו; "לא בשבילי" מוציא סרט מכל ההצעות. **"השנה שלך בפחד"** מסכמת מה ראיתם.
-- 🎟️ **בקרוב בקולנוע** (עם מפתח TMDB), וקוד QR בכל עמוד סרט שפותח אותו בטלפון.
+- 🎟️ **בקרוב בקולנוע** (עם מפתח TMDB), ו**סריקה לשיתוף**: קוד QR בכל עמוד סרט פותח בטלפון דף שיתוף, מוכן ל־WhatsApp, ל־Telegram או לכל אפליקציה.
 - 📡 **אריחי HDMI וטלוויזיה בשידור חי** בטלוויזיות עם כניסות, ו**טיימר שינה** שעוצר את מה שמתנגן.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
 - ⭐ **"הרשימה שלי" ו"נצפה"**: לחיצה ארוכה על פוסטר שומרת אותו (לחיצה ארוכה נוספת מסירה), ואפשר לסמן מה כבר ראיתם. כשחוזרים מסרט, SCARY מסמנת אותו כנצפה בעצמה.
@@ -174,7 +174,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 🎞️ **إعلانات ترويجية تُعرض تلقائيًا**: توقّف عند فيلم فيُعرض إعلانه الترويجي بجانبه بلا صوت (الصوت خيار في الإعدادات). يأتي من YouTube، لذا يسألك SCARY أولًا، ويمكنك إيقافه في أي وقت.
 - ⏱️ **"كم لديك من الوقت؟"**: حتى 90 دقيقة، أو أمسية، أو فيلمان متتاليان، أو ماراثون، مع ترقيم الأفلام بترتيب المشاهدة.
 - ❤️ **أحببته / ليس لي**: أحببت فيلمًا؟ "لأنك أحببت" يجلب أفلامًا مثله؛ و"ليس لي" يُخرج الفيلم من كل الاقتراحات. **"عامك في الخوف"** يلخّص ما شاهدته.
-- 🎟️ **قريبًا في السينما** (مع مفتاح TMDB)، ورمز QR في كل صفحة فيلم يفتحه على هاتفك.
+- 🎟️ **قريبًا في السينما** (مع مفتاح TMDB)، و**امسح للمشاركة**: رمز QR في كل صفحة فيلم يفتح على هاتفك صفحة مشاركة جاهزة لـ WhatsApp أو Telegram أو أي تطبيق.
 - 📡 **مربعات HDMI والبث المباشر** في أجهزة التلفاز ذات المداخل، و**مؤقت نوم** يوقف ما يُعرض مؤقتًا.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
 - ⭐ **«قائمتي» و«شوهد»**: ضغطة مطوّلة على أي ملصق تحفظه (وضغطة أخرى تزيله)، ويمكنك وضع علامة على ما شاهدته. وعند عودتك من فيلم، يضع SCARY عليه علامة «شوهد» بنفسه.
@@ -229,7 +229,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - 🎞️ **Trailers que tocam sozinhos**: pare num filme e o trailer dele toca ao lado, sem som (o som é uma opção). Ele vem do YouTube, por isso o SCARY pergunta antes, e dá para desligar quando quiser.
 - ⏱️ **"Quanto tempo você tem?"**: até 90 minutos, uma noite, sessão dupla ou maratona, com os filmes numerados na ordem de assistir.
 - ❤️ **Amei / Não é pra mim**: ame um filme e "Porque você amou" traz outros parecidos; "não é pra mim" tira o filme de todas as sugestões. **"Seu ano no medo"** resume o que você assistiu.
-- 🎟️ **Em breve nos cinemas** (com uma chave TMDB), e um código QR em cada página de filme que o abre no celular.
+- 🎟️ **Em breve nos cinemas** (com uma chave TMDB), e **escaneie para compartilhar**: um código QR em cada página de filme abre no celular uma página pronta para WhatsApp, Telegram ou qualquer app.
 - 📡 **Blocos de HDMI e TV ao vivo** em TVs com entradas, e um **timer de sono** que pausa o que estiver tocando.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
 - ⭐ **Minha lista e Visto**: segure OK em qualquer pôster para guardá-lo (segure de novo para tirar) e marque o que você já viu. Ao voltar de um filme, o SCARY o marca como visto sozinho.
@@ -282,7 +282,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 🎞️ **Трейлеры запускаются сами**: задержитесь на фильме, и рядом без звука пойдёт его трейлер (звук включается в настройках). Он берётся с YouTube, поэтому SCARY сначала спрашивает, и это можно выключить в любой момент.
 - ⏱️ **«Сколько у вас времени?»**: до 90 минут, вечер, двойной сеанс или марафон, с фильмами, пронумерованными в порядке просмотра.
 - ❤️ **Понравилось / Не моё**: отметьте фильм, и «Потому что вам понравился» подберёт похожие; «не моё» убирает фильм из всех подсказок. **«Ваш год страха»** подводит итоги просмотренного.
-- 🎟️ **Скоро в кино** (с ключом TMDB) и QR-код на странице каждого фильма, который открывает его на телефоне.
+- 🎟️ **Скоро в кино** (с ключом TMDB) и **сканируйте, чтобы поделиться**: QR-код на странице каждого фильма открывает на телефоне страницу, готовую для WhatsApp, Telegram или любого приложения.
 - 📡 **Плитки HDMI и эфирного ТВ** на телевизорах со входами и **таймер сна**, который ставит воспроизведение на паузу.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
 - ⭐ **«Мой список» и «Просмотрено»**: удерживайте OK на постере, чтобы сохранить фильм (ещё раз — чтобы убрать), и отмечайте просмотренное. Когда вы возвращаетесь после фильма, SCARY сам отмечает его просмотренным.

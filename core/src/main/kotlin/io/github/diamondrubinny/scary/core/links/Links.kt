@@ -41,11 +41,45 @@ object Links {
 
     private val youtubePattern = Regex("^[A-Za-z0-9_-]{11}$")
 
-    /** A movie's IMDb page, for "open on your phone" (a QR code on the movie page). */
+    /** A movie's IMDb page. */
     fun imdbTitle(imdbId: String): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
         return "https://www.imdb.com/title/$imdbId/"
     }
+
+    /** SCARY's share page (GitHub Pages, site/share): a static page, so the film travels in the link itself. */
+    const val SHARE_PAGE = "https://diamondrubinny.github.io/Scary/share/"
+
+    /**
+     * The title's most characters in the link, once encoded (a Hebrew letter takes 6): longer ones are cut, so the QR
+     * code stays coarse enough to scan from the sofa.
+     */
+    const val SHARE_TITLE_MAX_ENCODED = 120
+
+    /**
+     * "Scan to share this movie": the share page for a film, with its title in the UI's language (the page has no
+     * server to look it up) and [languageCode] for the page's own words. Nothing is sent from the TV: the phone opens it.
+     */
+    fun sharePage(imdbId: String, title: String, year: Int, languageCode: String): String {
+        require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
+        var shortTitle = title.trim()
+        if (urlEncode(shortTitle).length > SHARE_TITLE_MAX_ENCODED) {
+            // Whole characters off the end until it fits with the ellipsis.
+            var end = shortTitle.length
+            do {
+                end = shortTitle.offsetByCodePoints(end, -1)
+            } while (end > 0 && urlEncode(shortTitle.substring(0, end).trimEnd() + "…").length > SHARE_TITLE_MAX_ENCODED)
+            shortTitle = shortTitle.substring(0, end).trimEnd() + "…"
+        }
+        return buildString {
+            append(SHARE_PAGE).append("?i=").append(imdbId)
+            if (shortTitle.isNotEmpty()) append("&t=").append(urlEncode(shortTitle))
+            if (year in 1870..2100) append("&y=").append(year)
+            if (languageCode.matches(languagePattern)) append("&l=").append(languageCode)
+        }
+    }
+
+    private val languagePattern = Regex("^[a-z]{2}$")
 
     fun youTubeVideo(videoId: String): String {
         require(youtubePattern.matches(videoId)) { "invalid YouTube id" }

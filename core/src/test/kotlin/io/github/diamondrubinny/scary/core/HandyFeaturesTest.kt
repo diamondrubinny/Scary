@@ -132,7 +132,31 @@ class HandyFeaturesTest {
     }
 
     @Test
-    fun `open on your phone leads to the IMDb page, and only for a real IMDb id`() {
+    fun `the share code leads to SCARY's share page with the film in the link`() {
+        assertEquals(
+            "https://diamondrubinny.github.io/Scary/share/?i=tt0081505&t=The+Shining&y=1980&l=en",
+            Links.sharePage("tt0081505", "The Shining", 1980, "en"),
+        )
+        // Hebrew is percent-encoded, and "&" in a title cannot add a parameter.
+        val hebrew = Links.sharePage("tt7784604", "תורשה & אימה", 2018, "he")
+        assertTrue(hebrew.contains("&t=%D7%AA%D7%95%D7%A8%D7%A9%D7%94+%26+"))
+        assertEquals(4, hebrew.substringAfter('?').split('&').size)
+        // A long title is cut, by whole characters, and the code stays small enough to scan from across the room.
+        for (letter in listOf("א", "a", "😱")) {
+            val long = Links.sharePage("tt0081505", letter.repeat(200), 1980, "he")
+            val encoded = long.substringAfter("&t=").substringBefore('&')
+            val title = java.net.URLDecoder.decode(encoded, "UTF-8")
+            assertTrue(encoded.length <= Links.SHARE_TITLE_MAX_ENCODED)
+            assertTrue(title.endsWith("…") && title.removeSuffix("…").replace(letter, "").isEmpty())
+            assertTrue(io.github.diamondrubinny.scary.core.brand.Donation.qr(long).size <= 57)
+        }
+        // Bad parts are left out; a bad id is refused.
+        assertEquals("https://diamondrubinny.github.io/Scary/share/?i=tt0081505", Links.sharePage("tt0081505", " ", 0, "../x"))
+        assertThrows(IllegalArgumentException::class.java) { Links.sharePage("tt0081505\"><script>", "x", 2000, "en") }
+    }
+
+    @Test
+    fun `the IMDb link is built only for a real IMDb id`() {
         assertEquals("https://www.imdb.com/title/tt0081505/", Links.imdbTitle("tt0081505"))
         assertThrows(IllegalArgumentException::class.java) { Links.imdbTitle("tt0081505/../x") }
     }
