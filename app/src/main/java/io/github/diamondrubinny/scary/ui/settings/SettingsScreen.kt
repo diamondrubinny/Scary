@@ -22,7 +22,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import io.github.diamondrubinny.scary.ui.components.minutesLeft
+import io.github.diamondrubinny.scary.ui.components.minutesShown
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.withFrameNanos
@@ -97,17 +97,20 @@ fun SettingsScreen(
     versionName: String,
     actions: SettingsActions,
     returningFrom: DocumentKind? = null,
+    returningFromStats: Boolean = false,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
     val statementFocus = remember { FocusRequester() }
+    val statsFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         // Back from a document lands on the row that opened it, not at the top.
-        val target = when (returningFrom) {
-            DocumentKind.Privacy -> privacyFocus
-            DocumentKind.Accessibility -> statementFocus
-            null -> firstFocus
+        val target = when {
+            returningFromStats -> statsFocus
+            returningFrom == DocumentKind.Privacy -> privacyFocus
+            returningFrom == DocumentKind.Accessibility -> statementFocus
+            else -> firstFocus
         }
         runCatching { target.requestFocus() }
     }
@@ -196,7 +199,7 @@ fun SettingsScreen(
             label = stringResource(R.string.settings_stats),
             value = null,
             onClick = actions.onOpenStats,
-            modifier = Modifier.testTag(STATS_ROW_TAG),
+            modifier = Modifier.focusRequester(statsFocus).testTag(STATS_ROW_TAG),
         )
         SettingRow(
             label = stringResource(R.string.settings_sounds),
@@ -229,9 +232,9 @@ fun SettingsScreen(
         )
         BasicText(stringResource(R.string.settings_screensaver_note), style = ScaryType.Caption)
         // The countdown refreshes on its own while settings stay open.
-        val sleepMinutes by produceState(sleepAtMillis?.let(::minutesLeft) ?: 0, sleepAtMillis) {
+        val sleepMinutes by produceState(sleepAtMillis?.let(::minutesShown) ?: 0, sleepAtMillis) {
             while (true) {
-                value = sleepAtMillis?.let(::minutesLeft) ?: 0
+                value = sleepAtMillis?.let(::minutesShown) ?: 0
                 delay(30_000)
             }
         }

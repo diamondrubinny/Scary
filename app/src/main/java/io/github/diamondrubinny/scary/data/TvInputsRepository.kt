@@ -28,10 +28,12 @@ class TvInputsRepository(private val context: Context) {
             val manager = context.getSystemService(Context.TV_INPUT_SERVICE) as? TvInputManager ?: return@withContext emptyList()
             manager.tvInputList
                 .filter { !it.isHidden(context) && it.parentId == null }
-                .map { info ->
+                .mapNotNull { info ->
+                    // Apps' own channel inputs (free streaming channels and the like) are apps, not inputs: left out.
+                    val kind = kindOf(info) ?: return@mapNotNull null
                     val label = info.loadCustomLabel(context)?.toString()?.takeIf(String::isNotBlank)
                         ?: info.loadLabel(context).toString()
-                    TvInput(info.id, label.take(MAX_LABEL), kindOf(info), info.serviceInfo.packageName)
+                    TvInput(info.id, label.take(MAX_LABEL), kind, info.serviceInfo.packageName)
                 }
                 .sortedWith(compareBy<TvInput>({ it.kind != TvInput.Kind.TUNER }, { it.label }))
         } catch (e: RuntimeException) {
@@ -41,10 +43,12 @@ class TvInputsRepository(private val context: Context) {
         }
     }
 
-    private fun kindOf(info: TvInputInfo): TvInput.Kind = when {
+    /** HDMI, the antenna (tuner), or another hardware input (composite, component...); null for anything else. */
+    private fun kindOf(info: TvInputInfo): TvInput.Kind? = when {
         info.type == TvInputInfo.TYPE_HDMI -> TvInput.Kind.HDMI
-        info.type == TvInputInfo.TYPE_TUNER || !info.isPassthroughInput -> TvInput.Kind.TUNER
-        else -> TvInput.Kind.OTHER
+        info.type == TvInputInfo.TYPE_TUNER -> TvInput.Kind.TUNER
+        info.isPassthroughInput -> TvInput.Kind.OTHER
+        else -> null
     }
 
     private companion object {

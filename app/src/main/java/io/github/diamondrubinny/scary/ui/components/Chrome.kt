@@ -120,13 +120,12 @@ fun Clock(modifier: Modifier = Modifier) {
 /** The sleep timer at a glance: a moon and the minutes left. Not focusable; its words are read with the top bar. */
 @Composable
 fun SleepCountdown(endsAtMillis: Long, modifier: Modifier = Modifier) {
-    val minutes by produceState(minutesLeft(endsAtMillis), endsAtMillis) {
+    val minutes by produceState(minutesShown(endsAtMillis), endsAtMillis) {
         while (true) {
-            value = minutesLeft(endsAtMillis)
+            value = minutesShown(endsAtMillis)
             delay(MILLIS_PER_MINUTE / 2)
         }
     }
-    if (minutes <= 0) return
     val text = stringResource(R.string.sleep_left, minutes)
     Row(
         modifier.semantics(mergeDescendants = true) { contentDescription = text },
@@ -140,6 +139,12 @@ fun SleepCountdown(endsAtMillis: Long, modifier: Modifier = Modifier) {
 
 /** Whole minutes until [endsAtMillis], rounded up, so "1 min" shows until the very end. */
 fun minutesLeft(endsAtMillis: Long): Int = ((endsAtMillis - System.currentTimeMillis() + 59_999) / 60_000).toInt().coerceAtLeast(0)
+
+/**
+ * The minutes the countdown shows: never under 1 while the timer is on. The system may run the alarm a few minutes
+ * late (an inexact alarm on Android 12+), and the timer stays on until it has paused playback.
+ */
+fun minutesShown(endsAtMillis: Long): Int = minutesLeft(endsAtMillis).coerceAtLeast(1)
 
 /** Short status line at the bottom of the screen, announced politely by TalkBack. */
 @Composable

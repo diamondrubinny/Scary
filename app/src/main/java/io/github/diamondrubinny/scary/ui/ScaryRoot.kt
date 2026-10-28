@@ -175,8 +175,13 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     }
     // Which document settings opened last, so focus can return to its row. Forgotten once settings close.
     var lastDocument by remember { mutableStateOf<DocumentKind?>(null) }
+    // The same for "Your year in fear".
+    var fromStats by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
-        if (screen != Screen.Settings && screen !is Screen.Document) lastDocument = null
+        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats) {
+            lastDocument = null
+            fromStats = false
+        }
     }
     val settingsActions = SettingsActions(
         onToggleLanguage = {
@@ -199,7 +204,11 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                 viewModel.setSleepAt(SleepTimer.start(context, next))
             }
         },
-        onOpenStats = viewModel::openStats,
+        onOpenStats = {
+            lastDocument = null
+            fromStats = true
+            viewModel.openStats()
+        },
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -220,10 +229,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         },
         onOpenPrivacy = {
             lastDocument = DocumentKind.Privacy
+            fromStats = false
             viewModel.openDocument(DocumentKind.Privacy)
         },
         onOpenAccessibilityStatement = {
             lastDocument = DocumentKind.Accessibility
+            fromStats = false
             viewModel.openDocument(DocumentKind.Accessibility)
         },
     )
@@ -299,6 +310,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     versionName = versionName,
                     actions = settingsActions,
                     returningFrom = lastDocument,
+                    returningFromStats = fromStats,
                 )
                 details != null -> DetailsScreen(
                     details = details,

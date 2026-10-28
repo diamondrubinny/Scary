@@ -10,6 +10,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
+import android.os.Build
 import android.os.SystemClock
 import android.util.Log
 import android.view.KeyEvent
@@ -23,8 +24,8 @@ import kotlinx.coroutines.launch
  * the TV goes idle and its own screensaver and standby take over. Switching the TV off outright needs system rights a
  * launcher does not have.
  *
- * The alarm wakes SCARY even when another app is in front or SCARY's process is gone. It is a windowed alarm (within a
- * minute), which needs no exact-alarm permission.
+ * The alarm wakes SCARY even when another app is in front or SCARY's process is gone. It is exact where the system
+ * allows it, and otherwise a windowed alarm, which the system may run a few minutes late.
  */
 object SleepTimer {
     /** The choices offered in settings, in minutes; 0 is off. */
@@ -50,15 +51,27 @@ object SleepTimer {
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE,
     ) != null
 
-    /** Starts (or restarts) the timer; returns when it ends, in wall-clock milliseconds, for the countdown. */
+    /**
+     * Starts (or restarts) the timer; returns when it ends, in wall-clock milliseconds, for the countdown. On time where
+     * exact alarms are allowed (always before Android 12; on 12 and 13 by default); otherwise the system may run it up
+     * to 10 minutes late.
+     */
     fun start(context: Context, minutes: Int): Long {
         val delay = minutes * 60_000L
-        alarms(context).setWindow(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + delay,
-            WINDOW_MS,
-            pendingIntent(context),
-        )
+        val at = SystemClock.elapsedRealtime() + delay
+        val alarms = alarms(context)
+        val pending = pendingIntent(context)
+        val exact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarms.canScheduleExactAlarms()
+        try {
+            if (exact) {
+                alarms.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, at, pending)
+            } else {
+                alarms.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, at, WINDOW_MS, pending)
+            }
+        } catch (e: SecurityException) {
+            // The exact-alarm permission was taken back in between.
+            alarms.setWindow(AlarmManager.ELAPSED_REALTIME_WAKEUP, at, WINDOW_MS, pending)
+        }
         return System.currentTimeMillis() + delay
     }
 

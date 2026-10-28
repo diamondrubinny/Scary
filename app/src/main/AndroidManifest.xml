@@ -3,6 +3,9 @@
 
     <!-- Only for movie artwork and info from Cinemeta (can be turned off in SCARY settings). HTTPS only. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- The sleep timer pauses playback on time. Without it (the default from Android 14) the timer may end a few
+         minutes late. No data is involved. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <uses-feature
         android:name="android.software.leanback"

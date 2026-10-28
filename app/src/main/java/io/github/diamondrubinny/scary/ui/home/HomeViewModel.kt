@@ -202,7 +202,8 @@ class HomeViewModel(
             trailerIntroSeen = prefs.trailerIntroSeen,
             lovedIds = prefs.lovedIds.toSet(),
             dislikedIds = prefs.dislikedIds.toSet(),
-            sleepAtMillis = prefs.sleepAtMillis?.takeIf { it > System.currentTimeMillis() },
+            // On until SleepTimerReceiver has paused playback and cleared it (or a restart of the TV dropped the alarm).
+            sleepAtMillis = prefs.sleepAtMillis,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -458,14 +459,23 @@ class HomeViewModel(
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
     /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
-    private var detailsCache: Triple<String, Catalog, MovieDetails>? = null
+    private var detailsCache: DetailsCacheEntry? = null
 
-    /** Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. */
+    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val disliked: List<String>, val details: MovieDetails)
+
+    /**
+     * Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. Films
+     * marked "not for me" are never in it.
+     */
     fun details(movieId: String): MovieDetails? {
         val shown = visibleCatalog() ?: return null
-        detailsCache?.let { (id, catalog, details) -> if (id == movieId && catalog === shown) return details }
+        val disliked = latestPrefs?.dislikedIds.orEmpty()
+        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.disliked == disliked) return it.details }
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        return MovieDetails(movie, Similar.find(shown.movies, movie)).also { detailsCache = Triple(movieId, shown, it) }
+        val dislikedSet = disliked.toHashSet()
+        val candidates = if (dislikedSet.isEmpty()) shown.movies else shown.movies.filter { it.id !in dislikedSet }
+        return MovieDetails(movie, Similar.find(candidates, movie))
+            .also { detailsCache = DetailsCacheEntry(movieId, shown, disliked, it) }
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -740,7 +750,7 @@ class HomeViewModel(
     /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
     private suspend fun keptOnline(): Set<String> {
         val prefs = settings.prefs.first()
-        return (prefs.myListIds + prefs.recentIds + prefs.lovedIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        return (prefs.myListIds + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
@@ -1112,7 +1122,6 @@ class HomeViewModel(
             }
             val next = rating.takeIf { it != current }
             settings.setRating(movie.id, next)
-            if (next != null) savedMovies.save(movie, language, keptOnline())
             show(
                 when (next) {
                     Rating.LOVED -> R.string.msg_loved
@@ -1136,13 +1145,26 @@ class HomeViewModel(
      */
     suspend fun fearStats(): Pair<FearStats, FearStats> {
         val prefs = settings.prefs.first()
-        val watched = prefs.watchedIds.mapNotNull(::movieById)
         val year = today().year
-        val thisYear = watched.filter { movie ->
-            prefs.watchedDays[movie.id]?.let { LocalDate.ofEpochDay(it).year == year } == true
+        val inYear = { id: String -> prefs.watchedDays[id]?.let { LocalDate.ofEpochDay(it).year == year } == true }
+        val thisYearIds = prefs.watchedIds.filter(inYear)
+        // The whole library, not only what family night shows; a film no longer at hand still counts, without details.
+        val whole = (catalog.value as? CatalogState.Ready)?.catalog?.let { raw ->
+            withContext(Dispatchers.Default) { shown(raw, extraPages.value, prefs.onlineEnabled, familyNight = false) }
         }
-        return FearStats.of(thisYear, prefs.lovedIds.count { id -> prefs.watchedDays[id]?.let { LocalDate.ofEpochDay(it).year == year } == true }) to
-            FearStats.of(watched, prefs.lovedIds.size).copy(watchedCount = prefs.watchedIds.size)
+        val lookUp = { id: String -> whole?.movie(id) ?: webMovies[id] }
+        // A locked film, or any film on family night, is not named.
+        val hideScariest = { stats: FearStats ->
+            val scariest = stats.scariest
+            if (scariest != null && (prefs.familyNight || ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, scariest))) {
+                stats.copy(scariest = null)
+            } else {
+                stats
+            }
+        }
+        val thisYear = FearStats.of(thisYearIds.mapNotNull(lookUp), prefs.lovedIds.count(inYear)).copy(watchedCount = thisYearIds.size)
+        val allTime = FearStats.of(prefs.watchedIds.mapNotNull(lookUp), prefs.lovedIds.size).copy(watchedCount = prefs.watchedIds.size)
+        return hideScariest(thisYear) to hideScariest(allTime)
     }
 
     /** Picks a mood, or clears it when the same mood is chosen again. */

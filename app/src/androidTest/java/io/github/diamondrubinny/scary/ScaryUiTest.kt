@@ -55,6 +55,8 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import org.junit.Assert.assertTrue
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onRoot
@@ -635,11 +637,14 @@ class ScaryUiTest {
     @Test
     fun theSleepTimerStepsThroughItsChoicesAndTurnsOff() {
         waitForHome()
-        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         val row = hasTestTag(SLEEP_ROW_TAG)
         val label = text(R.string.settings_sleep_timer)
         val off = hasContentDescription("$label: ${text(R.string.sleep_off)}")
-        waitFor(row)
+        fun openSettings() {
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            waitFor(row)
+        }
+        openSettings()
         withCleanup({
             waitFor(off)
             for (minutes in listOf(30, 60, 90, 120)) {
@@ -649,16 +654,19 @@ class ScaryUiTest {
             // The countdown shows in the top bar too, on the home screen.
             backToHome()
             waitFor(hasContentDescription(rule.activity.getString(R.string.sleep_left, 120)))
-            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
-            waitFor(row)
+            openSettings()
             rule.onNode(row).performScrollTo().performClick()
             waitFor(off)
         }) {
-            // Never leave an alarm behind: step on until the timer is off.
+            // Never leave an alarm behind: from settings, step on until the timer is off, one saved step at a time.
+            backToHome()
+            openSettings()
             repeat(SLEEP_CHOICES) {
-                if (rule.onAllNodes(off).fetchSemanticsNodes().isEmpty()) {
-                    rule.onNode(row).performScrollTo().performClick()
-                    rule.waitForIdle()
+                if (rule.onAllNodes(off).fetchSemanticsNodes().isNotEmpty()) return@repeat
+                val before = rule.onNode(row).fetchSemanticsNode().config.getOrNull(SemanticsProperties.ContentDescription)
+                rule.onNode(row).performScrollTo().performClick()
+                rule.waitUntil(TIMEOUT_MS) {
+                    rule.onNode(row).fetchSemanticsNode().config.getOrNull(SemanticsProperties.ContentDescription) != before
                 }
             }
             waitFor(off)
