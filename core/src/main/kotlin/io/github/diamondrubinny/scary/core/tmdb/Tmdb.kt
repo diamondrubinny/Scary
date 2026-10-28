@@ -44,6 +44,8 @@ data class TmdbResult(
     val backdrop: String?,
     val rating: Double?,
     val genreIds: List<Int>,
+    /** ISO date (2026-11-14), when TMDB gives a valid one. */
+    val releaseDate: String? = null,
 )
 
 /** How a key is sent: a v4 read-access token goes in a header, a v3 key in the query string. */
@@ -64,6 +66,9 @@ enum class TmdbRow(
     NEW_HORROR("tmdb_new_horror", "אימה חדשה", "New horror", "Terror recente", "Новые ужасы", "رعب جديد"),
     TOP_HORROR("tmdb_top_horror", "הכי מדורגים באימה", "Top rated horror", "Terror mais bem avaliado", "Лучшие ужасы по оценкам", "أعلى أفلام الرعب تقييمًا"),
     PSYCH_THRILLER("tmdb_psych_thriller", "מתח ותעלומה", "Thrillers and mysteries", "Suspense e mistério", "Триллеры и загадки", "إثارة وغموض"),
+
+    /** Horror films out in the next six months, most anticipated first. */
+    COMING_SOON("tmdb_coming_soon", "בקרוב בקולנוע", "Coming soon to cinemas", "Em breve nos cinemas", "Скоро в кино", "قريبًا في السينما"),
 }
 
 /**
@@ -84,6 +89,7 @@ object Tmdb {
     private val v4Token = Regex("^eyJ[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]+\\.[A-Za-z0-9_\\-]+$")
     private val imagePath = Regex("^/[A-Za-z0-9_\\-]{5,64}\\.(jpg|jpeg|png|webp)$")
     private val imdbPattern = Regex("^tt\\d{7,8}$")
+    private val isoDate = Regex("^\\d{4}-\\d{2}-\\d{2}$")
     private val hebrew = Regex("[\\u0590-\\u05FF]")
     private val cyrillic = Regex("[\\u0400-\\u04FF]")
     private val arabic = Regex("[\\u0600-\\u06FF]")
@@ -144,6 +150,12 @@ object Tmdb {
                 "sort_by" to "popularity.desc",
                 "vote_count.gte" to "500",
             )
+            TmdbRow.COMING_SOON -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "popularity.desc",
+                "primary_release_date.gte" to today.plusDays(1).toString(),
+                "primary_release_date.lte" to today.plusMonths(6).toString(),
+            )
         } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to "1")
         return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
     }
@@ -195,6 +207,7 @@ object Tmdb {
         localName = localTitle,
         localDescription = localOverview,
         localLanguage = if (localTitle.isBlank() && localOverview.isBlank()) "" else language.code,
+        releaseDate = result.releaseDate.orEmpty(),
         genres = buildList {
             if (HORROR in result.genreIds) add("Horror")
             if (THRILLER in result.genreIds) add("Thriller")
@@ -247,6 +260,7 @@ object Tmdb {
             backdrop = (o["backdrop_path"] as? JsonPrimitive)?.contentOrNull,
             rating = (o["vote_average"] as? JsonPrimitive)?.doubleOrNull?.takeIf { it in 0.0..10.0 },
             genreIds = (o["genre_ids"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull() }.orEmpty(),
+            releaseDate = o.text("release_date").takeIf(isoDate::matches),
         )
     }
 

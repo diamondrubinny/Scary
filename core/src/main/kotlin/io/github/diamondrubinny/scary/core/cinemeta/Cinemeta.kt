@@ -35,6 +35,8 @@ data class CinemetaMeta(
     val trailerYoutubeId: String? = null,
     /** More trailers of the same movie, for when the first may not play inside an app. */
     val trailerAlternates: List<String> = emptyList(),
+    /** ISO release date, for films not out yet (TMDB's coming-soon row); empty otherwise. */
+    val releaseDate: String = "",
     /** Title and description in [localLanguage] (a Language.code), when the row comes from TMDB. */
     val localName: String = "",
     val localDescription: String = "",
@@ -272,6 +274,7 @@ object Cinemeta {
             cast = meta.cast,
             trailerYoutubeId = meta.trailerYoutubeId,
             trailerAlternates = meta.trailerAlternates,
+            releaseDate = meta.releaseDate.ifBlank { null },
             curated = false,
         )
     }

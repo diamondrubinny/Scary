@@ -94,6 +94,8 @@ data class Movie(
      * error 150), so the player tries these next.
      */
     val trailerAlternates: List<String> = emptyList(),
+    /** ISO release date of a film not out yet (from TMDB's coming-soon row); null otherwise. */
+    val releaseDate: String? = null,
     /** Titles and synopses in other languages, keyed by [Language.code] (curated translations or TMDB). */
     val titles: Map<String, String> = emptyMap(),
     val synopses: Map<String, String> = emptyMap(),
@@ -111,6 +113,10 @@ data class Movie(
         synopses[language.code]?.takeIf(String::isNotBlank)
             ?: synopsisHe.takeIf { language == Language.HE && it.isNotBlank() }
             ?: synopsisEn.ifBlank { synopsisHe }
+
+    /** The release date when it is after [today]: the film is coming soon. */
+    fun comingOn(today: java.time.LocalDate): java.time.LocalDate? =
+        releaseDate?.let { runCatching { java.time.LocalDate.parse(it) }.getOrNull() }?.takeIf { it.isAfter(today) }
 
     /** Every known trailer, the main one first. */
     val trailerIds: List<String> get() = (listOfNotNull(trailerYoutubeId) + trailerAlternates).distinct()
