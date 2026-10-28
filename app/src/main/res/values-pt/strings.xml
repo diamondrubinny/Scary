@@ -149,6 +149,7 @@
         <item>O SCARY não tem contas, anúncios, análises nem cookies, e não existe um servidor do SCARY. Nada do que você faz no launcher é enviado para nós.</item>
         <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si), os horários de falhas recentes (só o horário) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
+        <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" e o dia em que marcou cada filme como assistido. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre a página dele no IMDb no seu celular; a TV não envia nada.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
@@ -268,4 +269,43 @@
     <string name="settings_trailer_note">Os trailers vêm do YouTube, que vê o endereço IP da sua TV enquanto um toca. Eles nunca tocam off-line, na noite em família, num filme bloqueado ou com as animações da TV desligadas.</string>
     <string name="msg_trailers_off">Os trailers não vão tocar sozinhos. Você pode ligá-los de novo nas configurações.</string>
     <string name="settings_trailer_last">Último trailer: %1$s</string>
+    <string name="row_time">Quanto tempo você tem?</string>
+    <string name="time_quick">Até 90 minutos</string>
+    <string name="time_evening">Uma noite (até 2 horas)</string>
+    <string name="time_double">Sessão dupla</string>
+    <string name="time_marathon">Maratona</string>
+    <string name="time_empty">Nenhum filme da biblioteca cabe neste tempo agora. Tente outro.</string>
+    <string name="time_lineup">Assista nesta ordem. Juntos: %1$s</string>
+    <string name="time_order">Filme %1$d</string>
+    <string name="row_because_loved">Porque você amou %1$s</string>
+    <string name="action_love">Amei</string>
+    <string name="action_loved">Amado</string>
+    <string name="action_not_for_me">Não é pra mim</string>
+    <string name="action_not_for_me_on">Marcado: não é pra mim</string>
+    <string name="msg_loved">Amado. Filmes parecidos vão aparecer na tela inicial.</string>
+    <string name="msg_not_for_me">Marcado como não é pra você. Não será sugerido de novo.</string>
+    <string name="msg_rating_cleared">Avaliação removida.</string>
+    <string name="coming_on">Nos cinemas %1$s</string>
+    <string name="coming_on_long">Nos cinemas em %1$s</string>
+    <string name="tv_input_description">Entrada da TV: %1$s</string>
+    <string name="open_on_phone">Abra no celular</string>
+    <string name="open_on_phone_description">Código QR: a página do IMDb de %1$s. Escaneie com a câmera do celular.</string>
+    <string name="settings_sleep_timer">Timer de sono</string>
+    <string name="sleep_left">Faltam %1$d min</string>
+    <string name="sleep_off">Desligado</string>
+    <string name="settings_sleep_timer_note">Quando o tempo acaba, o que estiver tocando é pausado, e o protetor de tela e o modo de espera da TV assumem. Pressione OK para mudar.</string>
+    <string name="settings_stats">Seu ano no medo</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">Desde sempre</string>
+    <string name="stats_empty_title">Ainda sem medo</string>
+    <string name="stats_empty_body">Marque filmes como assistidos ou amados, e seu ano no medo vai aparecer aqui.</string>
+    <string name="stats_none_yet">Nenhum filme assistido ainda.</string>
+    <string name="stats_note">Calculado nesta TV a partir das suas listas de assistidos e amados. Nada é enviado a lugar nenhum.</string>
+    <string name="stats_watched">Filmes assistidos</string>
+    <string name="stats_hours">Horas de medo</string>
+    <string name="stats_average_fear">Medo médio</string>
+    <string name="stats_scariest">O mais assustador</string>
+    <string name="stats_favorite_subgenre">Subgênero favorito</string>
+    <string name="stats_favorite_decade">Década favorita</string>
+    <string name="stats_loved">Filmes amados</string>
 </resources>

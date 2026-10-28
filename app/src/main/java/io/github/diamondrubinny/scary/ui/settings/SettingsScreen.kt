@@ -22,6 +22,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import io.github.diamondrubinny.scary.ui.components.minutesLeft
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,8 @@ class SettingsActions(
     val onToggleSounds: () -> Unit,
     val onToggleTrailerAutoplay: () -> Unit,
     val onToggleTrailerSound: () -> Unit,
+    val onCycleSleepTimer: () -> Unit,
+    val onOpenStats: () -> Unit,
     val onSetupPin: () -> Unit,
     val onCycleLockLevel: () -> Unit,
     val onTurnOffLock: () -> Unit,
@@ -75,6 +80,8 @@ fun SettingsScreen(
     soundsEnabled: Boolean,
     trailerAutoplay: Boolean,
     trailerSound: Boolean,
+    /** When the sleep timer ends (wall clock), or null when it is off. */
+    sleepAtMillis: Long?,
     parentalEnabled: Boolean,
     lockFromFear: Int,
     familyNight: Boolean,
@@ -186,6 +193,12 @@ fun SettingsScreen(
         )
         BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
         SettingRow(
+            label = stringResource(R.string.settings_stats),
+            value = null,
+            onClick = actions.onOpenStats,
+            modifier = Modifier.testTag(STATS_ROW_TAG),
+        )
+        SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
@@ -215,6 +228,20 @@ fun SettingsScreen(
             onClick = actions.onOpenScreensaver,
         )
         BasicText(stringResource(R.string.settings_screensaver_note), style = ScaryType.Caption)
+        // The countdown refreshes on its own while settings stay open.
+        val sleepMinutes by produceState(sleepAtMillis?.let(::minutesLeft) ?: 0, sleepAtMillis) {
+            while (true) {
+                value = sleepAtMillis?.let(::minutesLeft) ?: 0
+                delay(30_000)
+            }
+        }
+        SettingRow(
+            label = stringResource(R.string.settings_sleep_timer),
+            value = if (sleepMinutes > 0) stringResource(R.string.sleep_left, sleepMinutes) else stringResource(R.string.sleep_off),
+            onClick = actions.onCycleSleepTimer,
+            modifier = Modifier.testTag(SLEEP_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_sleep_timer_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_parental),
             value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),
@@ -273,6 +300,10 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Test tags of the sleep timer and "Your year in fear" rows. */
+const val SLEEP_ROW_TAG = "sleepTimerRow"
+const val STATS_ROW_TAG = "statsRow"
 
 /** Test tag of the "Play trailers by themselves" row. */
 const val TRAILER_AUTOPLAY_ROW_TAG = "trailerAutoplayRow"

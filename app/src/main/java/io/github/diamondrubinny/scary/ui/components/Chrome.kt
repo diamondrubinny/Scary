@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,6 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.home.UserMessage
@@ -50,6 +53,7 @@ fun TopBar(
     onSurprise: () -> Unit,
     modifier: Modifier = Modifier,
     familyNight: Boolean = false,
+    sleepAtMillis: Long? = null,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
@@ -70,6 +74,7 @@ fun TopBar(
         }
         Spacer(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
             Clock()
             Spacer(Modifier.width(4.dp))
             IconCircleButton(
@@ -111,6 +116,30 @@ fun Clock(modifier: Modifier = Modifier) {
     }
     BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier)
 }
+
+/** The sleep timer at a glance: a moon and the minutes left. Not focusable; its words are read with the top bar. */
+@Composable
+fun SleepCountdown(endsAtMillis: Long, modifier: Modifier = Modifier) {
+    val minutes by produceState(minutesLeft(endsAtMillis), endsAtMillis) {
+        while (true) {
+            value = minutesLeft(endsAtMillis)
+            delay(MILLIS_PER_MINUTE / 2)
+        }
+    }
+    if (minutes <= 0) return
+    val text = stringResource(R.string.sleep_left, minutes)
+    Row(
+        modifier.semantics(mergeDescendants = true) { contentDescription = text },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        MoonIcon(ScaryColors.Candle, Modifier.size(18.dp))
+        BasicText(text, style = ScaryType.Label.copy(color = ScaryColors.Candle))
+    }
+}
+
+/** Whole minutes until [endsAtMillis], rounded up, so "1 min" shows until the very end. */
+fun minutesLeft(endsAtMillis: Long): Int = ((endsAtMillis - System.currentTimeMillis() + 59_999) / 60_000).toInt().coerceAtLeast(0)
 
 /** Short status line at the bottom of the screen, announced politely by TalkBack. */
 @Composable

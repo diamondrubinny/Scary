@@ -28,6 +28,13 @@ import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Decades
+import io.github.diamondrubinny.scary.data.TvInputsRepository
+import io.github.diamondrubinny.scary.data.TvInput
+import io.github.diamondrubinny.scary.data.Rating
+import io.github.diamondrubinny.scary.core.catalog.TimePlan
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.catalog.Recommender
+import io.github.diamondrubinny.scary.core.catalog.FearStats
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.Season
@@ -79,6 +86,7 @@ class HomeViewModel(
     private val savedMovies: SavedMoviesRepository,
     private val cinemeta: CinemetaRepository,
     private val regionDetector: RegionDetector,
+    private val tvInputs: TvInputsRepository,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -90,6 +98,12 @@ class HomeViewModel(
 
     private val catalog = MutableStateFlow<CatalogState>(CatalogState.Loading)
     private val installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
+
+    /** The TV's own inputs (HDMI, antenna), refreshed with the apps; none on streaming boxes. */
+    private val inputs = MutableStateFlow<List<TvInput>>(emptyList())
+
+    /** "How much time do you have?": the chosen budget, or null. */
+    private val timeBudget = MutableStateFlow<TimeBudget?>(null)
     private val heroId = MutableStateFlow<String?>(null)
     private val mood = MutableStateFlow<Mood?>(null)
     private val decade = MutableStateFlow<Int?>(null)
@@ -154,12 +168,12 @@ class HomeViewModel(
     /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
-        installedApps,
-        combine(mood, decade) { m, d -> m to d },
+        combine(installedApps, inputs) { a, i -> a to i },
+        combine(mood, decade, timeBudget) { m, d, t -> Triple(m, d, t) },
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, apps, (selectedMood, selectedDecade), prefs, unlocked ->
-        val tiles = appTiles(apps, prefs)
+    ) { catalogState, (apps, tvInputList), (selectedMood, selectedDecade, budget), prefs, unlocked ->
+        val tiles = appTiles(apps, prefs, tvInputList)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
             CatalogState.Loading -> HomeUiState(loading = true, effectsEnabled = prefs.effectsEnabled)
@@ -171,7 +185,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, selectedDecade, prefs)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, selectedDecade, budget, prefs, unlocked)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -186,6 +200,9 @@ class HomeViewModel(
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
+            lovedIds = prefs.lovedIds.toSet(),
+            dislikedIds = prefs.dislikedIds.toSet(),
+            sleepAtMillis = prefs.sleepAtMillis?.takeIf { it > System.currentTimeMillis() },
         )
     }.flowOn(Dispatchers.Default)
 
@@ -244,6 +261,7 @@ class HomeViewModel(
         appsJob = viewModelScope.launch {
             val apps = appsRepository.load()
             installedApps.value = apps
+            inputs.value = tvInputs.load()
             _watchOptions.value = withContext(Dispatchers.IO) {
                 apps.mapNotNull { app ->
                     StreamingApps.match(app.packageName, app.label)?.let {
@@ -367,12 +385,17 @@ class HomeViewModel(
         drawer: List<DrawerApp>,
         selectedMood: Mood?,
         selectedDecade: Int?,
+        budget: TimeBudget?,
         prefs: LauncherPrefs,
+        unlocked: Boolean,
     ): HomeUiState {
-        // Tonight's pick is one not seen yet, as long as any is left.
+        // Tonight's pick is one not seen yet, as long as any is left, and never one marked "not for me".
         val watched = prefs.watchedIds.toHashSet()
-        val nightPick = NightPick.pick(catalog.movies.filter { it.id !in watched }, today(), prefs.nightMaxFear)
-            ?: NightPick.pick(catalog.movies, today(), prefs.nightMaxFear)
+        val disliked = prefs.dislikedIds.toHashSet()
+        val liked = catalog.movies.filter { it.id !in disliked }.ifEmpty { catalog.movies }
+        val nightPick = NightPick.pick(liked.filter { it.id !in watched }, today(), prefs.nightMaxFear)
+            ?: NightPick.pick(liked, today(), prefs.nightMaxFear)
+        val isLocked = { movie: Movie -> ParentalGate.isLocked(prefs.parentalEnabled, unlocked, prefs.lockFromFear, movie) }
         val rows = buildList {
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
@@ -383,12 +406,20 @@ class HomeViewModel(
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
+            Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
+                ?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
             add(
                 HomeRow.Moods(
                     selected = selectedMood,
                     movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
                     decade = selectedDecade,
                     decades = Decades.available(catalog.movies),
+                ),
+            )
+            add(
+                HomeRow.TimePlan(
+                    selected = budget,
+                    plan = budget?.let { TimePlan.plan(catalog.movies, it, today(), exclude = disliked, watched = watched, isLocked = isLocked) },
                 ),
             )
             catalog.collections.forEach { collection ->
@@ -409,7 +440,7 @@ class HomeViewModel(
         )
     }
 
-    private fun appTiles(apps: List<InstalledApp>, prefs: LauncherPrefs): List<AppTile> {
+    private fun appTiles(apps: List<InstalledApp>, prefs: LauncherPrefs, tvInputList: List<TvInput>): List<AppTile> {
         val installed = AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned, prefs.hidden)
             .map { AppTile.Installed(it) }
         val stremioInstalled = apps.any { it.packageName == KnownPackages.STREMIO }
@@ -418,7 +449,8 @@ class HomeViewModel(
         } else {
             listOf(AppTile.Suggestion(KnownPackages.STREMIO, Launcher.STREMIO_LABEL))
         }
-        return suggestions + installed + AppTile.AllApps + AppTile.SystemSettings
+        // A TV's own inputs come first: on a TV with screen, the HDMI devices and the antenna are where many evenings start.
+        return tvInputList.map { AppTile.Input(it) } + suggestions + installed + AppTile.AllApps + AppTile.SystemSettings
     }
 
     private fun drawerApps(apps: List<InstalledApp>, prefs: LauncherPrefs): List<DrawerApp> =
@@ -573,7 +605,10 @@ class HomeViewModel(
             watched = watched,
         )
         // With a mood or a decade chosen, the surprise comes from those movies; the whole library when none of them fits.
-        val pick = surpriseFrom(Decades.pick(shown.movies, mood.value, decade.value)) ?: surpriseFrom(shown.movies)
+        // Never a film marked "not for me".
+        val disliked = prefs.dislikedIds.toHashSet()
+        val candidates = shown.movies.filter { it.id !in disliked }
+        val pick = surpriseFrom(Decades.pick(candidates, mood.value, decade.value)) ?: surpriseFrom(candidates)
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
 
@@ -705,7 +740,7 @@ class HomeViewModel(
     /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
     private suspend fun keptOnline(): Set<String> {
         val prefs = settings.prefs.first()
-        return (prefs.myListIds + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        return (prefs.myListIds + prefs.recentIds + prefs.lovedIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
@@ -943,6 +978,7 @@ class HomeViewModel(
         when (tile) {
             is AppTile.Installed -> report(launcher.launchApp(tile.app.packageName, tile.app.label))
             is AppTile.Suggestion -> report(launcher.openStoreFor(tile.packageName, tile.label))
+            is AppTile.Input -> report(launcher.openInput(tile.input))
             AppTile.AllApps -> openAllApps()
             AppTile.SetAsHome -> Unit // Needs an Activity result; ScaryRoot handles it.
             AppTile.SystemSettings -> report(launcher.openSystemSettings(settingsLabel))
@@ -1055,6 +1091,60 @@ class HomeViewModel(
         }
     }
 
+    /** Picks a time budget, or clears it when the same one is chosen again. */
+    fun toggleTimeBudget(selected: TimeBudget) {
+        timeBudget.update { if (it == selected) null else selected }
+    }
+
+    /** "Loved it" on a film's page; pressed again, it is taken back. */
+    fun toggleLoved(movie: Movie, language: Language) = rate(movie, Rating.LOVED, language)
+
+    /** "Not for me" on a film's page: it is no longer suggested; pressed again, it is taken back. */
+    fun toggleNotForMe(movie: Movie, language: Language) = rate(movie, Rating.NOT_FOR_ME, language)
+
+    private fun rate(movie: Movie, rating: Rating, language: Language) {
+        viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            val current = when (movie.id) {
+                in prefs.lovedIds -> Rating.LOVED
+                in prefs.dislikedIds -> Rating.NOT_FOR_ME
+                else -> null
+            }
+            val next = rating.takeIf { it != current }
+            settings.setRating(movie.id, next)
+            if (next != null) savedMovies.save(movie, language, keptOnline())
+            show(
+                when (next) {
+                    Rating.LOVED -> R.string.msg_loved
+                    Rating.NOT_FOR_ME -> R.string.msg_not_for_me
+                    null -> R.string.msg_rating_cleared
+                },
+            )
+        }
+    }
+
+    /** The sleep timer was started (ending at [endsAtMillis]) or turned off (null), by ScaryRoot through SleepTimer. */
+    fun setSleepAt(endsAtMillis: Long?) {
+        viewModelScope.launch { settings.setSleepAt(endsAtMillis) }
+    }
+
+    fun openStats() = push(Screen.Stats)
+
+    /**
+     * "Your year in fear": this calendar year (films marked as watched with a date) and all time. Watched films no
+     * longer in the library are left out of the details but still counted.
+     */
+    suspend fun fearStats(): Pair<FearStats, FearStats> {
+        val prefs = settings.prefs.first()
+        val watched = prefs.watchedIds.mapNotNull(::movieById)
+        val year = today().year
+        val thisYear = watched.filter { movie ->
+            prefs.watchedDays[movie.id]?.let { LocalDate.ofEpochDay(it).year == year } == true
+        }
+        return FearStats.of(thisYear, prefs.lovedIds.count { id -> prefs.watchedDays[id]?.let { LocalDate.ofEpochDay(it).year == year } == true }) to
+            FearStats.of(watched, prefs.lovedIds.size).copy(watchedCount = prefs.watchedIds.size)
+    }
+
     /** Picks a mood, or clears it when the same mood is chosen again. */
     fun toggleMood(selected: Mood) {
         mood.update { if (it == selected) null else selected }
@@ -1115,6 +1205,7 @@ class HomeViewModel(
                     container.savedMoviesRepository,
                     container.cinemetaRepository,
                     container.regionDetector,
+                    container.tvInputsRepository,
                 )
             }
         }

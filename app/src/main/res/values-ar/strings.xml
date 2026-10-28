@@ -150,6 +150,7 @@
         <item>لا يحتوي SCARY على حسابات ولا إعلانات ولا تحليلات ولا ملفات تعريف ارتباط، ولا يوجد خادم لـ SCARY. لا يُرسل إلينا أي شيء تفعله في الواجهة.</item>
         <item>يُخزَّن على هذا التلفزيون فقط: إعداداتك ولغتك، والتطبيقات المثبّتة في المقدمة والمخفية، وآخر 12 فيلمًا فتحتها، وقائمتك، ورمز PIN للرقابة الأبوية بصيغة hash مع salt (وليس الرمز نفسه أبدًا)، وأوقات الأعطال الأخيرة (الوقت فقط)، ومعلومات الأفلام والصور المخزنة مؤقتًا. إلغاء تثبيت SCARY أو مسح بياناته من إعدادات التلفزيون يحذف كل ذلك. SCARY مستثنى من النسخ الاحتياطي في Android.</item>
         <item>تُقرأ قائمة التطبيقات المثبتة على هذا التلفزيون لعرضها، ولا تغادره أبدًا.</item>
+        <item>ويُخزَّن أيضًا على هذا التلفزيون فقط: الأفلام التي علّمتها \"أحببته\" أو \"ليس لي\"، واليوم الذي علّمت فيه كل فيلم كمُشاهَد. منها تُبنى \"لأنك أحببت\" و\"كم لديك من الوقت؟\" و\"عامك في الخوف\"، ويجري الحساب على التلفزيون. مؤقت النوم منبّه على التلفزيون يوقف ما يُعرض مؤقتًا. تُقرأ مداخل التلفزيون (HDMI، الهوائي) على التلفزيون لعرضها. رمز QR في صفحة الفيلم يفتح صفحته على IMDb في هاتفك، ولا يرسل التلفزيون شيئًا.</item>
         <item>بيانات الأفلام عبر الإنترنت، ويمكنك إيقافها من الإعدادات: يطلب SCARY من Cinemeta، خدمة البيانات الوصفية العامة لـ Stremio، الملصقات والخلفيات والتقييمات وطاقم التمثيل. لا يُرسل سوى معرّفات أفلام IMDb العامة، ونص البحث عندما تبحث. تُحمَّل الصور من عناوين HTTPS التي يقدّمها Cinemeta، ومعظمها من images.metahub.space. وكأي موقع ويب، ترى هذه الخدمات عنوان IP الخاص بتلفزيونك. تُخزَّن المعلومات مؤقتًا لمدة 24 ساعة.</item>
         <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة. تأتي عروض الاستئجار والشراء في صفحات الأفلام من TMDB (بيانات JustWatch): يحمل الطلب معرّف الفيلم فقط، ويُحدَّد بلدك على التلفاز من إعداد المنطقة أو من اختيارك في الإعدادات، وليس من موقعك أبدًا.</item>
         <item>يُسلِّم البحث الصوتي المهمة إلى أداة التعرف على الكلام في هذا التلفزيون (عادةً Google). يذهب التسجيل إلى تلك الخدمة وليس إلى SCARY، ولا يتلقى SCARY سوى النص المُتعرَّف عليه.</item>
@@ -278,4 +279,43 @@
     <string name="settings_trailer_note">تأتي الإعلانات الترويجية من YouTube، الذي يرى عنوان IP الخاص بتلفزيونك أثناء عرض أحدها. لا تُعرض أبدًا دون اتصال بالإنترنت، ولا في السهرة العائلية، ولا لفيلم مقفل، ولا عند إيقاف الرسوم المتحركة في التلفزيون.</string>
     <string name="msg_trailers_off">لن تُعرض الإعلانات الترويجية تلقائيًا. يمكنك تشغيلها مجددًا من الإعدادات.</string>
     <string name="settings_trailer_last">آخر إعلان ترويجي: %1$s</string>
+    <string name="row_time">كم لديك من الوقت؟</string>
+    <string name="time_quick">حتى 90 دقيقة</string>
+    <string name="time_evening">أمسية (حتى ساعتين)</string>
+    <string name="time_double">فيلمان متتاليان</string>
+    <string name="time_marathon">ماراثون</string>
+    <string name="time_empty">لا يوجد في المكتبة الآن فيلم يناسب هذا الوقت. جرّب وقتًا آخر.</string>
+    <string name="time_lineup">شاهدها بهذا الترتيب. المجموع: %1$s</string>
+    <string name="time_order">الفيلم %1$d</string>
+    <string name="row_because_loved">لأنك أحببت %1$s</string>
+    <string name="action_love">أحببته</string>
+    <string name="action_loved">أحببته ✓</string>
+    <string name="action_not_for_me">ليس لي</string>
+    <string name="action_not_for_me_on">مُعلَّم: ليس لي</string>
+    <string name="msg_loved">أحببته. ستظهر أفلام مشابهة في الشاشة الرئيسية.</string>
+    <string name="msg_not_for_me">عُلِّم بأنه ليس لك. لن يُقترح مرة أخرى.</string>
+    <string name="msg_rating_cleared">أُزيل التقييم.</string>
+    <string name="coming_on">في السينما %1$s</string>
+    <string name="coming_on_long">في السينما في %1$s</string>
+    <string name="tv_input_description">مدخل التلفاز: %1$s</string>
+    <string name="open_on_phone">افتح على هاتفك</string>
+    <string name="open_on_phone_description">رمز QR: صفحة IMDb لفيلم %1$s. امسحه بكاميرا الهاتف.</string>
+    <string name="settings_sleep_timer">مؤقت النوم</string>
+    <string name="sleep_left">متبقٍّ %1$d دقيقة</string>
+    <string name="sleep_off">متوقف</string>
+    <string name="settings_sleep_timer_note">عند انتهاء الوقت، يتوقف ما يُعرض مؤقتًا، ويتولى شاشة التوقف ووضع الاستعداد في التلفاز الأمر. اضغط OK للتغيير.</string>
+    <string name="settings_stats">عامك في الخوف</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">كل الأوقات</string>
+    <string name="stats_empty_title">لا خوف بعد</string>
+    <string name="stats_empty_body">علّم الأفلام كمُشاهَدة أو محبوبة، وسيظهر عامك في الخوف هنا.</string>
+    <string name="stats_none_yet">لم تُشاهَد أفلام بعد.</string>
+    <string name="stats_note">يُحسب على هذا التلفاز من قائمتي المُشاهَدة والمحبوبة. لا يُرسَل شيء إلى أي مكان.</string>
+    <string name="stats_watched">أفلام شوهدت</string>
+    <string name="stats_hours">ساعات الخوف</string>
+    <string name="stats_average_fear">متوسط الخوف</string>
+    <string name="stats_scariest">الأكثر رعبًا</string>
+    <string name="stats_favorite_subgenre">النوع الفرعي المفضل</string>
+    <string name="stats_favorite_decade">العقد المفضل</string>
+    <string name="stats_loved">أفلام محبوبة</string>
 </resources>

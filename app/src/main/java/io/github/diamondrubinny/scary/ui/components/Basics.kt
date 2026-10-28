@@ -289,6 +289,31 @@ fun MicIcon(color: Color, modifier: Modifier = Modifier) {
     }
 }
 
+/** A screen on a stand with a plug: one of the TV's inputs (HDMI, the antenna). */
+@Composable
+fun InputIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val w = size.width
+        val h = size.height
+        drawRoundRect(color, topLeft = Offset(w * 0.04f, h * 0.12f), size = Size(w * 0.92f, h * 0.6f), cornerRadius = CornerRadius(w * 0.08f), style = Stroke(width = w * 0.1f))
+        drawRect(color, topLeft = Offset(w * 0.44f, h * 0.72f), size = Size(w * 0.12f, h * 0.14f))
+        drawRect(color, topLeft = Offset(w * 0.26f, h * 0.84f), size = Size(w * 0.48f, h * 0.1f))
+    }
+}
+
+/** A crescent moon: the sleep timer. */
+@Composable
+fun MoonIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val r = size.minDimension / 2
+        val moon = Path().apply {
+            addOval(androidx.compose.ui.geometry.Rect(center, r * 0.92f))
+            op(this, Path().apply { addOval(androidx.compose.ui.geometry.Rect(Offset(center.x + r * 0.45f, center.y - r * 0.35f), r * 0.8f)) }, androidx.compose.ui.graphics.PathOperation.Difference)
+        }
+        drawPath(moon, color)
+    }
+}
+
 @Composable
 fun GridIcon(color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier.size(20.dp)) {

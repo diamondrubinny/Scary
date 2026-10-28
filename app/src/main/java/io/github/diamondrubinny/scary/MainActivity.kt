@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import io.github.diamondrubinny.scary.ui.ScaryRoot
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
+import io.github.diamondrubinny.scary.ui.home.Screen
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
 
 class MainActivity : ComponentActivity() {
 
@@ -122,6 +124,16 @@ class MainActivity : ComponentActivity() {
             target == "surprise" -> viewModel.surprise()
             target == "family" -> viewModel.toggleFamilyNight()
             target == "trailer-intro" -> viewModel.debugShowTrailerIntro()
+            target == "stats" -> {
+                viewModel.openSettings()
+                // Only through settings: with a PIN set, settings asks for it first.
+                if (viewModel.screen.value == Screen.Settings) viewModel.openStats()
+            }
+            // "How much time do you have?" with a budget chosen, e.g. "time:double".
+            target.startsWith("time:") -> TimeBudget.fromKey(target.removePrefix("time:"))?.let { budget ->
+                viewModel.toggleTimeBudget(budget)
+                viewModel.debugShowRow("time", focusKey = "time:chip:${budget.key}")
+            }
             target == "trailers:off" || target == "trailers:on" -> viewModel.debugSetTrailers(target == "trailers:on")
             // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
             // is chosen and its chip focused.

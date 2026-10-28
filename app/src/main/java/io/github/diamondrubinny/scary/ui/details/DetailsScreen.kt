@@ -42,6 +42,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.components.QrImage
+import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.core.brand.Donation
+import androidx.compose.ui.platform.LocalConfiguration
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
@@ -96,6 +103,10 @@ fun DetailsScreen(
     /** Changes when the TMDB key, the country or online data change, so the offers load again. */
     offersKey: Any? = null,
     trailer: TrailerSettings = TrailerSettings.Off,
+    loved: Boolean = false,
+    notForMe: Boolean = false,
+    onToggleLoved: (Movie) -> Unit = {},
+    onToggleNotForMe: (Movie) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -129,6 +140,13 @@ fun DetailsScreen(
                             BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
                         }
                         MovieMeta(movie)
+                        // Not out yet (TMDB's coming-soon row).
+                        movie.comingOn(LocalDate.now())?.let { date ->
+                            BasicText(
+                                stringResource(R.string.coming_on_long, longDate(date)),
+                                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                            )
+                        }
                         if (movie.cast.isNotEmpty()) {
                             BasicText(
                                 stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
@@ -167,6 +185,15 @@ fun DetailsScreen(
                                 text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
                                 onClick = { onToggleWatched(movie) },
                             )
+                            // "Loved it" feeds "Because you loved"; "Not for me" keeps the film out of every suggestion.
+                            ScaryButton(
+                                text = stringResource(if (loved) R.string.action_loved else R.string.action_love),
+                                onClick = { onToggleLoved(movie) },
+                            )
+                            ScaryButton(
+                                text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
+                                onClick = { onToggleNotForMe(movie) },
+                            )
                         }
                         if (elsewhere) {
                             WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
@@ -180,34 +207,37 @@ fun DetailsScreen(
                             )
                         }
                     }
-                    // The trailer takes the poster's place while it plays, and gives it back when it ends.
-                    AutoTrailer(
-                        movie = movie,
-                        locked = isLocked(movie),
-                        settings = trailer,
-                        playerSize = DetailsTrailerSize,
-                        modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
-                        visible = trailerOnScreen,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(width = 150.dp, height = 225.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // The trailer takes the poster's place while it plays, and gives it back when it ends.
+                        AutoTrailer(
+                            movie = movie,
+                            locked = isLocked(movie),
+                            settings = trailer,
+                            playerSize = DetailsTrailerSize,
+                            modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
+                            visible = trailerOnScreen,
                         ) {
-                            PosterArt(movie, Modifier.fillMaxSize())
-                            // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
-                            val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
-                            if (poster != null) {
-                                AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                            } else {
-                                BasicText(
-                                    text = movie.title,
-                                    style = ScaryType.Title.mixedLanguage(),
-                                    maxLines = 3,
-                                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                                )
+                            Box(
+                                Modifier
+                                    .size(width = 150.dp, height = 225.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                            ) {
+                                PosterArt(movie, Modifier.fillMaxSize())
+                                // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                                val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
+                                if (poster != null) {
+                                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                                } else {
+                                    BasicText(
+                                        text = movie.title,
+                                        style = ScaryType.Title.mixedLanguage(),
+                                        maxLines = 3,
+                                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                                    )
+                                }
                             }
                         }
+                        if (!isLocked(movie)) OpenOnPhone(movie)
                     }
                 }
                 if (details.similar.isNotEmpty()) {
@@ -332,3 +362,25 @@ private fun WatchElsewhere(
 
 /** 16:9, and 640 x 360 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
 private val DetailsTrailerSize = DpSize(320.dp, 180.dp)
+
+/** A QR code to the film's IMDb page: reviews, cast and sharing on the phone, without typing. Nothing leaves the TV. */
+@Composable
+private fun OpenOnPhone(movie: Movie) {
+    val link = remember(movie.imdbId) { runCatching { Links.imdbTitle(movie.imdbId) }.getOrNull() } ?: return
+    val code = remember(link) { Donation.qr(link) }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        BasicText(
+            stringResource(R.string.open_on_phone),
+            style = ScaryType.Caption,
+            modifier = Modifier.width(120.dp),
+        )
+        QrImage(code = code, size = 84.dp, description = stringResource(R.string.open_on_phone_description, movie.title))
+    }
+}
+
+/** "14 November 2026" in the UI's language. */
+@Composable
+private fun longDate(date: LocalDate): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(date, locale) { date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
+}

@@ -151,6 +151,7 @@
         <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
         <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), the times of recent crashes (only the time), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
+        <item>Also only on this TV: the films you marked \"Loved it\" or \"Not for me\" and the day you marked each film as watched. They power \"Because you loved\", \"How much time do you have?\" and \"Your year in fear\", which are worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing. The TV\'s own inputs (HDMI, antenna) are read on the TV to show them. The QR code on a film\'s page opens its IMDb page on your phone; the TV sends nothing.</item>
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
@@ -267,4 +268,43 @@
     <string name="settings_trailer_note">Trailers come from YouTube, which sees your TV\'s IP address while one plays. They never play offline, in family night, for a locked movie, or when the TV\'s animations are turned off.</string>
     <string name="msg_trailers_off">Trailers won\'t play by themselves. You can turn them back on in Settings.</string>
     <string name="settings_trailer_last">Last trailer: %1$s</string>
+    <string name="row_time">How much time do you have?</string>
+    <string name="time_quick">Up to 90 minutes</string>
+    <string name="time_evening">An evening (up to 2 hours)</string>
+    <string name="time_double">Double feature</string>
+    <string name="time_marathon">Marathon</string>
+    <string name="time_empty">Nothing in the library fits this time right now. Try another one.</string>
+    <string name="time_lineup">Watch in this order. Together: %1$s</string>
+    <string name="time_order">Film %1$d</string>
+    <string name="row_because_loved">Because you loved %1$s</string>
+    <string name="action_love">Loved it</string>
+    <string name="action_loved">Loved</string>
+    <string name="action_not_for_me">Not for me</string>
+    <string name="action_not_for_me_on">Marked: not for me</string>
+    <string name="msg_loved">Loved. Similar films will show up on the home screen.</string>
+    <string name="msg_not_for_me">Marked as not for me. It won\'t be suggested again.</string>
+    <string name="msg_rating_cleared">Rating removed.</string>
+    <string name="coming_on">In cinemas %1$s</string>
+    <string name="coming_on_long">In cinemas on %1$s</string>
+    <string name="tv_input_description">TV input: %1$s</string>
+    <string name="open_on_phone">Open on your phone</string>
+    <string name="open_on_phone_description">QR code: the IMDb page of %1$s. Scan it with the phone\'s camera.</string>
+    <string name="settings_sleep_timer">Sleep timer</string>
+    <string name="sleep_left">%1$d min left</string>
+    <string name="sleep_off">Off</string>
+    <string name="settings_sleep_timer_note">When the time is up, whatever is playing pauses, and the TV\'s own screensaver and standby take over. Press OK to change it.</string>
+    <string name="settings_stats">Your year in fear</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">All time</string>
+    <string name="stats_empty_title">No fear yet</string>
+    <string name="stats_empty_body">Mark films as watched or loved, and your year in fear will show up here.</string>
+    <string name="stats_none_yet">Nothing watched yet.</string>
+    <string name="stats_note">Worked out on this TV from your watched and loved lists. Nothing is sent anywhere.</string>
+    <string name="stats_watched">Films watched</string>
+    <string name="stats_hours">Hours of fear</string>
+    <string name="stats_average_fear">Average fear</string>
+    <string name="stats_scariest">Scariest</string>
+    <string name="stats_favorite_subgenre">Favorite subgenre</string>
+    <string name="stats_favorite_decade">Favorite decade</string>
+    <string name="stats_loved">Films loved</string>
 </resources>

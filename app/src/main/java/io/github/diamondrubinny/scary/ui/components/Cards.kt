@@ -22,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
@@ -102,13 +105,15 @@ fun PosterCard(
 ) {
     val lockedLabel = stringResource(R.string.locked_badge)
     val watchedLabel = stringResource(R.string.watched_badge)
+    val comingOn = remember(movie.releaseDate) { movie.comingOn(LocalDate.now()) }
+    val comingLabel = comingOn?.let { stringResource(R.string.coming_on, shortDate(it)) }
     FocusSurface(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(width)
             .aspectRatio(2f / 3f),
-        contentDescription = listOfNotNull("${movie.title}, ${movie.year}", watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked })
+        contentDescription = listOfNotNull("${movie.title}, ${movie.year}", comingLabel, watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked })
             .joinToString(", "),
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
@@ -141,7 +146,27 @@ fun PosterCard(
             )
         }
         CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
+        // Not out yet (TMDB's coming-soon row): the date, in words as well as on the card.
+        if (comingLabel != null) {
+            BasicText(
+                text = comingLabel,
+                style = ScaryType.Caption.copy(color = ScaryColors.Void),
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(6.dp)
+                    .background(ScaryColors.Candle, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
     }
+}
+
+/** "14 Nov" in the UI's language. */
+@Composable
+fun shortDate(date: LocalDate): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(date, locale) { date.format(DateTimeFormatter.ofPattern("d MMM", locale)) }
 }
 
 @Composable
@@ -218,6 +243,7 @@ fun AppTileCard(
 ) {
     val label = when (tile) {
         is AppTile.Installed -> tile.app.label
+        is AppTile.Input -> tile.input.label
         is AppTile.Suggestion -> stringResource(R.string.install_app, tile.label)
         AppTile.AllApps -> stringResource(R.string.all_apps)
         AppTile.SetAsHome -> stringResource(R.string.tile_set_home)
@@ -225,6 +251,7 @@ fun AppTileCard(
     }
     val description = when {
         tile is AppTile.SystemSettings -> stringResource(R.string.system_settings_description)
+        tile is AppTile.Input -> stringResource(R.string.tv_input_description, tile.input.label)
         badge != null -> "$label, $badge"
         else -> label
     }
@@ -266,6 +293,7 @@ fun AppTileCard(
                     AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
                     AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
                     AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    is AppTile.Input -> InputIcon(ScaryColors.Candle, Modifier.size(26.dp))
                     else -> Box(
                         Modifier
                             .size(26.dp)

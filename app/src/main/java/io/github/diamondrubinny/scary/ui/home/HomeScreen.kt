@@ -69,6 +69,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -102,6 +103,8 @@ class HomeActions(
     val onDecade: (Int) -> Unit,
     /** The viewer is near the end of a row; endless online rows load their next page. */
     val onNearRowEnd: (rowKey: String) -> Unit = {},
+    /** Picks a time budget in "How much time do you have?", or clears it when chosen again. */
+    val onTimeBudget: (TimeBudget) -> Unit = {},
 )
 
 val SidePadding = 48.dp
@@ -172,6 +175,7 @@ fun HomeScreen(
             onSurprise = actions.onSurprise,
             modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
             familyNight = state.familyNight,
+            sleepAtMillis = state.sleepAtMillis,
         )
         Hero(
             movie = state.hero,
@@ -333,6 +337,10 @@ private fun HomeRowView(
         MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
         return
     }
+    if (row is HomeRow.TimePlan) {
+        TimePlanRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
+        return
+    }
     if (row is HomeRow.Collection) {
         // Endless online rows: ask for the next page while there are still a few cards to go.
         val size by rememberUpdatedState(row.movies.size)
@@ -349,6 +357,8 @@ private fun HomeRowView(
         is HomeRow.Collection -> row.collection.title(language)
         is HomeRow.Seasonal -> stringResource(row.season.titleRes())
         is HomeRow.Moods -> stringResource(R.string.row_moods)
+        is HomeRow.TimePlan -> stringResource(R.string.row_time)
+        is HomeRow.BecauseYouLoved -> stringResource(R.string.row_because_loved, row.because.displayTitle(language))
     }
     Column {
         Row(
@@ -411,9 +421,13 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Moods -> Unit
-                is HomeRow.Collection, is HomeRow.Seasonal -> items(
-                    if (row is HomeRow.Collection) row.movies else (row as HomeRow.Seasonal).movies,
+                is HomeRow.Moods, is HomeRow.TimePlan -> Unit
+                is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved -> items(
+                    when (row) {
+                        is HomeRow.Collection -> row.movies
+                        is HomeRow.BecauseYouLoved -> row.movies
+                        else -> (row as HomeRow.Seasonal).movies
+                    },
                     key = { it.id },
                 ) { movie ->
                     val key = "${row.key}:${movie.id}"
@@ -618,6 +632,96 @@ private fun MoodsRowView(
         }
     }
 }
+
+/**
+ * "How much time do you have?": four chips, and for the chosen one the films that fit (up to 90 minutes, up to two
+ * hours), or a lineup to watch in order (a double feature, a marathon) with its total length.
+ */
+@Composable
+private fun TimePlanRowView(
+    row: HomeRow.TimePlan,
+    chipState: LazyListState,
+    restoreKey: String?,
+    restoreFocus: FocusRequester,
+    actions: HomeActions,
+    isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
+) {
+    val movieState = rememberLazyListState()
+    LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
+    val plan = row.plan
+    Column {
+        BasicText(
+            text = stringResource(R.string.row_time),
+            style = ScaryType.RowTitle,
+            modifier = Modifier
+                .padding(horizontal = SidePadding)
+                .semantics { heading() },
+        )
+        LazyRow(
+            state = chipState,
+            contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(TimeBudget.entries, key = { it.key }) { budget ->
+                val key = "${row.key}:chip:${budget.key}"
+                MoodChip(
+                    label = stringResource(budget.labelRes()),
+                    selected = budget == row.selected,
+                    onClick = { actions.onTimeBudget(budget) },
+                    onFocused = { actions.onCardFocused(key, null) },
+                    focusRequester = restoreFocus.takeIf { key == restoreKey },
+                )
+            }
+        }
+        if (plan != null && plan.movies.isEmpty()) {
+            EmptyState(
+                title = stringResource(R.string.mood_empty_title),
+                body = stringResource(R.string.time_empty),
+                modifier = Modifier.padding(horizontal = SidePadding, vertical = 8.dp),
+            )
+        }
+        if (plan != null && plan.movies.isNotEmpty()) {
+            if (plan.budget.isLineup) {
+                BasicText(
+                    text = stringResource(R.string.time_lineup, hoursAndMinutes(plan.totalMinutes)),
+                    style = ScaryType.Caption,
+                    modifier = Modifier.padding(horizontal = SidePadding),
+                )
+            }
+            LazyRow(
+                state = movieState,
+                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                itemsIndexed(plan.movies, key = { _, movie -> movie.id }) { index, movie ->
+                    val key = "${row.key}:${movie.id}"
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        // A lineup is watched in order: the number says which comes when.
+                        if (plan.budget.isLineup) {
+                            BasicText(
+                                text = stringResource(R.string.time_order, index + 1),
+                                style = ScaryType.Label.copy(color = ScaryColors.Candle),
+                            )
+                        }
+                        PosterCard(
+                            movie = movie,
+                            locked = isLocked(movie),
+                            watched = isWatched(movie),
+                            onClick = { actions.onOpenDetails(movie) },
+                            onLongClick = { actions.onToggleMyList(movie) },
+                            onFocused = { actions.onCardFocused(key, movie.id) },
+                            focusRequester = restoreFocus.takeIf { key == restoreKey },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 292 minutes as "4:52". */
+fun hoursAndMinutes(minutes: Int): String = "%d:%02d".format(java.util.Locale.ROOT, minutes / 60, minutes % 60)
 
 @Composable
 private fun MoodChip(

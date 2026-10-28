@@ -12,6 +12,9 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import io.github.diamondrubinny.scary.data.InstalledApp
+import io.github.diamondrubinny.scary.data.TvInput
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.catalog.TimePlanResult
 
 data class HomeUiState(
     val loading: Boolean = true,
@@ -42,6 +45,10 @@ data class HomeUiState(
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
+    val lovedIds: Set<String> = emptySet(),
+    val dislikedIds: Set<String> = emptySet(),
+    /** When the sleep timer ends (wall clock), or null when it is off. */
+    val sleepAtMillis: Long? = null,
 ) {
     fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
 
@@ -115,6 +122,16 @@ sealed interface HomeRow {
         override val key = "season:${season.key}"
     }
 
+    /** "Because you loved X": films like one the viewer loved. */
+    data class BecauseYouLoved(val because: Movie, val movies: List<Movie>) : HomeRow {
+        override val key = "because"
+    }
+
+    /** "How much time do you have?": the budget chips, and once one is picked, the films or the lineup for it. */
+    data class TimePlan(val selected: TimeBudget?, val plan: TimePlanResult?) : HomeRow {
+        override val key = "time"
+    }
+
     /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
     data class Moods(
         val selected: Mood?,
@@ -138,6 +155,11 @@ sealed interface AppTile {
     /** A pinned app that is not installed yet; selecting it opens Google Play. */
     data class Suggestion(val packageName: String, val label: String) : AppTile {
         override val key = "suggest:$packageName"
+    }
+
+    /** One of the TV's own inputs: HDMI 1, the antenna... */
+    data class Input(val input: TvInput) : AppTile {
+        override val key = "input:${input.id}"
     }
 
     data object SetAsHome : AppTile {
@@ -165,6 +187,7 @@ sealed interface Screen {
     data object Settings : Screen
     data object Search : Screen
     data class Document(val kind: DocumentKind) : Screen
+    data object Stats : Screen
 }
 
 /**

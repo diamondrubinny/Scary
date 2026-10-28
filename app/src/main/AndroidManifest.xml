@@ -108,5 +108,9 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+        <!-- The sleep timer's end: reached only by SCARY's own alarm. -->
+        <receiver
+            android:name=".system.SleepTimerReceiver"
+            android:exported="false" />
     </application>
 </manifest>

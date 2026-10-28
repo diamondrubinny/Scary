@@ -47,6 +47,9 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
+import io.github.diamondrubinny.scary.ui.settings.SLEEP_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.STATS_ROW_TAG
+import io.github.diamondrubinny.scary.ui.stats.STATS_SCREEN_TAG
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performTextReplacement
@@ -562,6 +565,107 @@ class ScaryUiTest {
         waitUntilOrDescribe("the home screen") { onHome() }
     }
 
+    @Test
+    fun choosingHowMuchTimeYouHaveShowsANumberedLineupAndChoosingItAgainClosesIt() {
+        waitForHome()
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("time")
+        val chip = hasText(text(R.string.time_double))
+        val first = hasText(rule.activity.getString(R.string.time_order, 1))
+        val second = hasText(rule.activity.getString(R.string.time_order, 2))
+        waitFor(chip)
+        rule.onNode(chip).assertIsNotSelected()
+        rule.onNode(chip).performClick()
+        waitFor(chip and isSelected())
+        // A double feature is two films, numbered in the order to watch them.
+        waitFor(first)
+        rule.onNode(second).assertExists()
+        rule.onNode(chip).performClick()
+        waitFor(chip and isNotSelected())
+        waitForGone(first)
+    }
+
+    @Test
+    fun lovingAFilmBringsBecauseYouLovedAndCanBeTakenBack() {
+        waitForHome()
+        val movie = bundledMovies().first { it.title == "Hereditary" }
+        val love = hasText(text(R.string.action_love))
+        val loved = hasText(text(R.string.action_loved))
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+        withCleanup(
+            test = {
+                openViaSearch(movie)
+                waitFor(love or loved)
+                if (rule.onAllNodes(loved).fetchSemanticsNodes().isEmpty()) rule.onNode(love).performScrollTo().performClick()
+                waitFor(loved)
+                backToHome()
+                // Films like it get a row of their own on the home screen.
+                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("because") }.isSuccess }
+                waitFor(hasText(rule.activity.getString(R.string.row_because_loved, movie.title)))
+                openViaSearch(movie)
+                rule.onNode(loved).performScrollTo().performClick()
+                waitFor(love)
+                backToHome()
+                // The home state is built off the main thread: the row goes once the new state arrives.
+                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("because") }.isFailure }
+            },
+            cleanup = {
+                backToHome()
+                openViaSearch(movie)
+                waitFor(love or loved)
+                if (rule.onAllNodes(loved).fetchSemanticsNodes().isNotEmpty()) rule.onNode(loved).performScrollTo().performClick()
+                waitFor(love)
+                backToHome()
+            },
+        )
+    }
+
+    @Test
+    fun yourYearInFearOpensFromSettings() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(STATS_ROW_TAG)
+        waitFor(row)
+        rule.onNode(row).performScrollTo().performClick()
+        waitFor(hasTestTag(STATS_SCREEN_TAG))
+        // A fresh emulator has watched nothing yet; either way, the screen says what it shows.
+        waitFor(hasText(text(R.string.stats_empty_title)) or hasText(text(R.string.stats_all_time)))
+        backToHome()
+    }
+
+    @Test
+    fun theSleepTimerStepsThroughItsChoicesAndTurnsOff() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(SLEEP_ROW_TAG)
+        val label = text(R.string.settings_sleep_timer)
+        val off = hasContentDescription("$label: ${text(R.string.sleep_off)}")
+        waitFor(row)
+        withCleanup({
+            waitFor(off)
+            for (minutes in listOf(30, 60, 90, 120)) {
+                rule.onNode(row).performScrollTo().performClick()
+                waitFor(hasContentDescription("$label: ${rule.activity.getString(R.string.sleep_left, minutes)}"))
+            }
+            // The countdown shows in the top bar too, on the home screen.
+            backToHome()
+            waitFor(hasContentDescription(rule.activity.getString(R.string.sleep_left, 120)))
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            waitFor(row)
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(off)
+        }) {
+            // Never leave an alarm behind: step on until the timer is off.
+            repeat(SLEEP_CHOICES) {
+                if (rule.onAllNodes(off).fetchSemanticsNodes().isEmpty()) {
+                    rule.onNode(row).performScrollTo().performClick()
+                    rule.waitForIdle()
+                }
+            }
+            waitFor(off)
+            backToHome()
+        }
+    }
+
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
@@ -581,6 +685,7 @@ class ScaryUiTest {
         val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
         const val BEYOND_FIRST_PAGES = 120
         const val SCREEN_DEPTH = 6
+        const val SLEEP_CHOICES = 5
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }

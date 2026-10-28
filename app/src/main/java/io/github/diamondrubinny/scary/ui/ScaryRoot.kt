@@ -67,6 +67,9 @@ import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
+import io.github.diamondrubinny.scary.ui.stats.StatsScreen
+import io.github.diamondrubinny.scary.system.SleepTimer
+import io.github.diamondrubinny.scary.ui.components.minutesLeft
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 
 @Composable
@@ -108,6 +111,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     BackHandler { viewModel.back() }
 
     val context = LocalContext.current
+
+    // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
+    val sleepSaved = state.sleepAtMillis != null
+    LaunchedEffect(sleepSaved) {
+        if (sleepSaved && !SleepTimer.isSet(context)) viewModel.setSleepAt(null)
+    }
 
     // Becoming the home screen: the system dialog where the TV offers it, otherwise the Home button service.
     fun refreshLauncherStatus() = viewModel.updateLauncherStatus(
@@ -152,6 +161,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onMood = viewModel::toggleMood,
             onDecade = viewModel::toggleDecade,
             onNearRowEnd = viewModel::onNearRowEnd,
+            onTimeBudget = viewModel::toggleTimeBudget,
         )
     }
     val allAppsActions = remember(viewModel) {
@@ -179,6 +189,17 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleSounds = viewModel::toggleSounds,
         onToggleTrailerAutoplay = viewModel::toggleTrailerAutoplay,
         onToggleTrailerSound = viewModel::toggleTrailerSound,
+        onCycleSleepTimer = {
+            // Off, 30, 60, 90, 120 minutes, then off again: the next choice above the minutes left.
+            val next = SleepTimer.next(state.sleepAtMillis?.let(::minutesLeft) ?: 0)
+            if (next == 0) {
+                SleepTimer.cancel(context)
+                viewModel.setSleepAt(null)
+            } else {
+                viewModel.setSleepAt(SleepTimer.start(context, next))
+            }
+        },
+        onOpenStats = viewModel::openStats,
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -263,6 +284,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     soundsEnabled = state.soundsEnabled,
                     trailerAutoplay = state.trailerAutoplay,
                     trailerSound = state.trailerSound,
+                    sleepAtMillis = state.sleepAtMillis,
                     parentalEnabled = state.parentalEnabled,
                     lockFromFear = state.lockFromFear,
                     familyNight = state.familyNight,
@@ -300,7 +322,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onLoadOffers = viewModel::loadRentOrBuy,
                     offersKey = listOf(tmdbKeyMask, rentCountry, state.onlineEnabled),
                     trailer = trailerSettings,
+                    loved = details.movie.id in state.lovedIds,
+                    notForMe = details.movie.id in state.dislikedIds,
+                    onToggleLoved = { viewModel.toggleLoved(it, language) },
+                    onToggleNotForMe = { viewModel.toggleNotForMe(it, language) },
                 )
+                current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
                 else -> HomeScreen(
                     state = state,
                     language = language,

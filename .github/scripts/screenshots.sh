@@ -160,6 +160,15 @@ open --es scary.debug.open mood:relentless
 shot 35-moods 5
 open --es scary.debug.open home
 
+# "How much time do you have?" with a double feature, and "Your year in fear" from settings.
+open --es scary.debug.open home
+sleep 3
+open --es scary.debug.open time:double
+shot 60-time-double 5
+open --es scary.debug.open stats
+shot 61-stats 5
+open --es scary.debug.open home
+
 # Family night: only gentle movies and a badge in the top bar; then back to normal.
 open --es scary.debug.open family
 shot 36-family-night 6

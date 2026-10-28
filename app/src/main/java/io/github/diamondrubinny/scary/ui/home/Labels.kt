@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.ui.home
 import androidx.annotation.StringRes
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.Subgenre
@@ -51,4 +52,11 @@ fun Mood.labelRes(): Int = when (this) {
 fun Season.titleRes(): Int = when (this) {
     Season.HALLOWEEN -> R.string.row_halloween
     Season.FRIDAY_13TH -> R.string.row_friday_13th
+}
+
+fun TimeBudget.labelRes(): Int = when (this) {
+    TimeBudget.QUICK -> R.string.time_quick
+    TimeBudget.EVENING -> R.string.time_evening
+    TimeBudget.DOUBLE -> R.string.time_double
+    TimeBudget.MARATHON -> R.string.time_marathon
 }

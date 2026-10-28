@@ -149,6 +149,7 @@
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
         <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), זמני קריסות אחרונות (השעה בלבד), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
+        <item>גם אלה נשמרים רק בטלוויזיה הזו: הסרטים שסימנתם \"אהבתי\" או \"לא בשבילי\", והיום שבו סימנתם כל סרט כנצפה. מהם נבנים \"כי אהבת\", \"כמה זמן יש לך?\" ו\"השנה שלך בפחד\", והחישוב נעשה בטלוויזיה. טיימר השינה הוא התראה בטלוויזיה שעוצרת את מה שמתנגן. הכניסות של הטלוויזיה (HDMI, אנטנה) נקראות בטלוויזיה כדי להציג אותן. קוד ה־QR בעמוד סרט פותח את עמוד ה־IMDb שלו בטלפון שלכם, והטלוויזיה לא שולחת דבר.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
@@ -268,4 +269,43 @@
     <string name="settings_trailer_note">הטריילרים מגיעים מ־YouTube, שרואה את כתובת ה־IP של הטלוויזיה בזמן שטריילר מתנגן. הם לא מתנגנים בלי רשת, בערב משפחתי, בסרט נעול או כשהאנימציות בטלוויזיה כבויות.</string>
     <string name="msg_trailers_off">טריילרים לא יתנגנו מעצמם. אפשר להפעיל אותם שוב בהגדרות.</string>
     <string name="settings_trailer_last">הטריילר האחרון: %1$s</string>
+    <string name="row_time">כמה זמן יש לך?</string>
+    <string name="time_quick">עד 90 דקות</string>
+    <string name="time_evening">ערב (עד שעתיים)</string>
+    <string name="time_double">סרט כפול</string>
+    <string name="time_marathon">מרתון</string>
+    <string name="time_empty">אין כרגע סרט בספרייה שמתאים לזמן הזה. נסו זמן אחר.</string>
+    <string name="time_lineup">לצפייה לפי הסדר. ביחד: %1$s</string>
+    <string name="time_order">סרט %1$d</string>
+    <string name="row_because_loved">כי אהבת את %1$s</string>
+    <string name="action_love">אהבתי</string>
+    <string name="action_loved">אהבת</string>
+    <string name="action_not_for_me">לא בשבילי</string>
+    <string name="action_not_for_me_on">סומן: לא בשבילי</string>
+    <string name="msg_loved">אהבת. סרטים דומים יופיעו במסך הבית.</string>
+    <string name="msg_not_for_me">סומן כלא בשבילך. הוא לא יוצע שוב.</string>
+    <string name="msg_rating_cleared">הדירוג הוסר.</string>
+    <string name="coming_on">בקולנוע %1$s</string>
+    <string name="coming_on_long">בקולנוע ב־%1$s</string>
+    <string name="tv_input_description">כניסת טלוויזיה: %1$s</string>
+    <string name="open_on_phone">פתיחה בטלפון</string>
+    <string name="open_on_phone_description">קוד QR: עמוד ה־IMDb של %1$s. סרקו אותו במצלמת הטלפון.</string>
+    <string name="settings_sleep_timer">טיימר שינה</string>
+    <string name="sleep_left">נותרו %1$d דק׳</string>
+    <string name="sleep_off">כבוי</string>
+    <string name="settings_sleep_timer_note">כשהזמן נגמר, מה שמתנגן נעצר, ושומר המסך וההמתנה של הטלוויזיה נכנסים לפעולה. לחצו OK כדי לשנות.</string>
+    <string name="settings_stats">השנה שלך בפחד</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">מאז ומעולם</string>
+    <string name="stats_empty_title">עוד אין פחד</string>
+    <string name="stats_empty_body">סמנו סרטים כנצפו או כאהובים, והשנה שלך בפחד תופיע כאן.</string>
+    <string name="stats_none_yet">עוד לא נצפה אף סרט.</string>
+    <string name="stats_note">חושב בטלוויזיה הזו מרשימת הנצפים והאהובים שלך. שום דבר לא נשלח לשום מקום.</string>
+    <string name="stats_watched">סרטים שנצפו</string>
+    <string name="stats_hours">שעות של פחד</string>
+    <string name="stats_average_fear">פחד ממוצע</string>
+    <string name="stats_scariest">המפחיד ביותר</string>
+    <string name="stats_favorite_subgenre">תת־ז׳אנר אהוב</string>
+    <string name="stats_favorite_decade">עשור אהוב</string>
+    <string name="stats_loved">סרטים אהובים</string>
 </resources>

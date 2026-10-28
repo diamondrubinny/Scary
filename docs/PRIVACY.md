@@ -23,6 +23,10 @@
 | "נצפו לאחרונה" (מזהי סרטים) | שימוש | שורת "המשך מאיפה שעצרת" | האפליקציה | DataStore | אין | 12 האחרונים בלבד | כנ״ל |
 | "הרשימה שלי" (מזהי סרטים) | המשתמש | רשימת צפייה אישית | האפליקציה | DataStore | אין | עד 100, עד הסרה | הסרה מהרשימה / ניקוי נתונים |
 | "נצפה" (מזהי סרטים) | המשתמש, או סימון אוטומטי אחרי צפייה | תג "נצפה", והעדפת סרטים שלא נצפו ב"הסרט של הלילה" וב"הפתע אותי" | האפליקציה | DataStore | אין | עד 1,000, עד הסרה | ביטול הסימון בעמוד הסרט / ניקוי נתונים |
+| "אהבתי" ו"לא בשבילי" (מזהי סרטים) | המשתמש, בעמוד הסרט | "כי אהבת את X", והוצאת סרטים מ"הסרט של הלילה", "הפתע אותי" ו"כמה זמן יש לך?" | האפליקציה | DataStore | אין | עד 500 בכל רשימה, עד ביטול | לחיצה חוזרת על הכפתור / ניקוי נתונים |
+| יום הסימון כנצפה (מזהה סרט ותאריך, בלי שעה) | סימון "נצפה" | "השנה שלך בפחד" (מחושב בטלוויזיה) | האפליקציה | DataStore | אין | כמו רשימת "נצפה" (עד 1,000) | ביטול הסימון / ניקוי נתונים |
+| טיימר שינה (שעת הסיום) | המשתמש | ספירה לאחור ועצירת הניגון | האפליקציה; התראה (AlarmManager) במערכת | DataStore | אין | עד שהזמן נגמר, כיבוי או הפעלה מחדש של הטלוויזיה | אוטומטי / "כבוי" בהגדרות |
+| כניסות הטלוויזיה (HDMI, אנטנה: שם ומזהה) | המערכת (TvInputManager, בלי הרשאה) | אריחים בשורת האפליקציות | האפליקציה | זיכרון בלבד | אין | לא נשמר | — |
 | סרט שנפתח לצפייה (מזהה ושעת פתיחה) | שימוש | להחליט, כשחוזרים ל־SCARY, אם הסרט נצפה. SCARY לא רואה מה קורה באפליקציה האחרת ומחליטה לפי הזמן בלבד | האפליקציה | DataStore | אין | נמחק בחזרה הבאה ל־SCARY | אוטומטי; אפשר לכבות סימון אוטומטי בהגדרות |
 | סרטים שנשמרו מהרשת (פרטי סרט ציבוריים) | Cinemeta | שמירה ב"רשימה שלי" וב"נפתחו לאחרונה" גם אחרי שהם יוצאים מהשורות | האפליקציה | `saved_movies.json` במכשיר | אין | עד 150 | ניקוי נתונים |
 | טקסט חיפוש | המשתמש | חיפוש במאגר ובאינטרנט | האפליקציה, Cinemeta | בזיכרון בלבד, לא נשמר | Cinemeta (רק כש"מידע מהרשת" פעיל ובשאילתה של 3 תווים ומעלה) | לא נשמר אצלנו; אצל Cinemeta לפי המדיניות שלו | — |
@@ -48,10 +52,11 @@
 |---|---|---|---|---|---|
 | Cinemeta (`v3-cinemeta.strem.io`, `cinemeta-catalogs.strem.io`) | כש"מידע מהרשת" פעיל (ברירת מחדל: פעיל): רענון יומי, חיפוש, וטעינת עמוד נוסף כשגוללים לסוף שורה | מזהי IMDb ציבוריים, טקסט החיפוש (בחיפוש), מספר עמוד בקטלוג, IP, User-Agent | פוסטרים, רקעים, דירוג, שחקנים, שורות פופולריות, חיפוש ברשת | לא נדרשת לדעתנו (אין מידע אישי מעבר ל־IP). **דורש בדיקה משפטית** | תנאי שימוש, זכויות בתמונות, מיקום שרתים |
 | מארחי תמונות (בעיקר `images.metahub.space`; כל כתובת HTTPS ש־Cinemeta מחזירה) | כנ״ל | בקשות תמונה, IP | תמונות | כנ״ל | כנ״ל. אפשר לשקול רשימת מארחים מותרים |
-| TMDB (`api.themoviedb.org`, `image.tmdb.org`) | רק עם מפתח שהמשתמש הזין | המפתח, מזהי סרטים, שפה, IP | שמות ותקצירים בשפה, שורות נוספות | המשתמש בוחר להזין מפתח | תנאי TMDB (אישי/מסחרי), קרדיט חובה מוצג |
+| TMDB (`api.themoviedb.org`, `image.tmdb.org`) | רק עם מפתח שהמשתמש הזין | המפתח, מזהי סרטים, שפה, IP (בשורת "בקרוב בקולנוע" גם טווח תאריכים: מחר עד עוד חצי שנה) | שמות ותקצירים בשפה, שורות נוספות | המשתמש בוחר להזין מפתח | תנאי TMDB (אישי/מסחרי), קרדיט חובה מוצג |
 | שירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google) | רק כשהמשתמש לוחץ על המיקרופון בחיפוש | ההקלטה עצמה (SCARY לא ניגשת אליה), שפת הממשק | הפיכת דיבור לטקסט | פעולה יזומה; ההרשאות של השירות עצמו | מדיניות הספק, מיקום עיבוד |
 | נגן YouTube מוטמע (`www.youtube.com/iframe_api`, `www.youtube-nocookie.com`, ו־`www.youtube.com` כניסיון אחרון) | רק אחרי "לנגן טריילרים" בשאלה הראשונה; כשהפוקוס נשאר 1.5 שניות על סרט שיש לו טריילר; לא בלי רשת, לא בערב משפחתי, לא בסרט נעול, לא כש"הסרת אנימציות" פעיל | מזהה הסרטון, IP, User-Agent, Referer עם מזהה האפליקציה (נדרש בתנאי YouTube), נתוני ניגון | טריילר ליד הסרט | השאלה בפעם הראשונה (opt-in), וכיבוי בהגדרות. **דורש בדיקה משפטית** | תנאי YouTube API Services ו־Required Minimum Functionality, ‏Google Privacy Policy, ‏DPA / העברה בינלאומית |
 | Stremio / YouTube / Google Play | כשהמשתמש בוחר לצפות, טריילר או חנות | Intent עם מזהה סרט או חיפוש | העברה לאפליקציה אחרת | פעולה יזומה | המדיניות שלהם חלה מאותו רגע |
+| IMDb (`www.imdb.com`) | רק אם המשתמש סורק את קוד ה־QR בעמוד סרט בטלפון שלו | כלום מ־SCARY: הקישור (מזהה IMDb ציבורי) נפתח בטלפון | פרטים, ביקורות ושיתוף בטלפון | פעולה יזומה בטלפון | מדיניות הפרטיות של IMDb חלה מאותו רגע |
 | PayPal (`www.paypal.com`) | רק אם המשתמש סורק את קוד התרומה בטלפון שלו | כלום מ־SCARY: הקישור נפתח בטלפון, לא בטלוויזיה | תרומה (רשות) | פעולה יזומה בטלפון | מדיניות הפרטיות של PayPal חלה מאותו רגע. SCARY לא יודעת מי תרם |
 | אפליקציות צפייה מותקנות (Netflix, Apple TV, yes, HOT, סלקום TV ועוד) וחיפוש Google TV | רק כשהמשתמש לוחץ "חיפוש ב־X" בעמוד סרט | שם הסרט המקורי בלבד (ב־YouTube גם השנה) | חיפוש הסרט באפליקציה | פעולה יזומה | המדיניות של כל אפליקציה חלה מאותו רגע. SCARY רק בודקת במכשיר אילו אפליקציות מותקנות, ולא שולחת את הרשימה לשום מקום |
 
@@ -64,7 +69,9 @@
 1. **מי אנחנו.** SCARY היא אפליקציית מסך בית (לאנצ׳ר) ל־Android TV, בקוד פתוח: github.com/diamondrubinny/Scary.
 2. **מה איננו אוספים.** אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות. אין שרת של SCARY, ושום מידע על השימוש שלכם לא נשלח אלינו.
 3. **מה נשמר בטלוויזיה שלכם בלבד.** הגדרות ושפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, "הרשימה שלי", קוד PIN של נעילת הורים כ־hash עם salt (לא הקוד עצמו), ומטמון של מידע ותמונות על סרטים. הסרת האפליקציה או ניקוי הנתונים שלה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.
-4. **אפליקציות מותקנות.** הרשימה נקראת בטלוויזיה כדי להציג ולהפעיל אותן, ולא יוצאת ממנה.
+   - **גם אלה נשמרים רק בטלוויזיה:** הסרטים שסימנתם "אהבתי" או "לא בשבילי", והיום שבו סימנתם כל סרט כנצפה. מהם נבנים "כי אהבת", "כמה זמן יש לך?" ו"השנה שלך בפחד", והחישוב נעשה בטלוויזיה. טיימר השינה הוא התראה בטלוויזיה שעוצרת את מה שמתנגן.
+   - **קוד QR בעמוד סרט:** פותח את עמוד ה־IMDb של הסרט בטלפון שלכם. הטלוויזיה לא שולחת דבר.
+4. **אפליקציות מותקנות וכניסות הטלוויזיה.** הרשימות נקראות בטלוויזיה כדי להציג ולהפעיל אותן, ולא יוצאות ממנה.
 5. **מידע על סרטים מהרשת** (אפשר לכבות בהגדרות). SCARY פונה ל־Cinemeta, שירות המטא־דאטה הציבורי של Stremio, ושולחת רק מזהי IMDb ציבוריים, ובחיפוש גם את טקסט החיפוש. התמונות נטענות מהכתובות ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים רואים את כתובת ה־IP של הטלוויזיה.
 6. **TMDB** (רק אם הזנתם מפתח). הבקשות נשלחות ל־TMDB עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם. SCARY לא מבקשת הרשאת מיקום.
 7. **חיפוש קולי.** כפתור המיקרופון מעביר את הבקשה לשירות זיהוי הדיבור של הטלוויזיה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה. SCARY לא מבקשת הרשאת מיקרופון.
@@ -84,7 +91,9 @@
 1. **Who we are.** SCARY is an open-source home screen (launcher) for Android TV: github.com/diamondrubinny/Scary.
 2. **What we do not collect.** No accounts, no ads, no analytics, no cookies. There is no SCARY server, and nothing about your use is sent to us.
 3. **What stays on your TV only.** Settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), and cached movie information and images. Uninstalling the app or clearing its data deletes everything. SCARY is excluded from Android backup.
-4. **Installed apps.** The list is read on the TV to show and open them, and never leaves it.
+   - **Also only on your TV:** the films you mark "Loved it" or "Not for me", and the day you mark each film as watched. They power "Because you loved", "How much time do you have?" and "Your year in fear", worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing.
+   - **The QR code on a film's page** opens its IMDb page on your phone; the TV sends nothing.
+4. **Installed apps and the TV's inputs.** The lists are read on the TV to show and open them, and never leave it.
 5. **Online movie data** (can be turned off in settings). SCARY contacts Cinemeta, Stremio's public metadata service, sending only public IMDb IDs, plus the search text when you search; images load from the addresses it supplies, mostly images.metahub.space. Like any website, these services see your TV's IP address.
 6. **TMDB** (only if you enter a key). Requests go to TMDB with your key, movie IDs and the interface language. The key is encrypted on the TV and sent only to TMDB. Deleting the key also deletes the cache. Rent and buy offers on movie pages come from TMDB (data by JustWatch): the request carries only the movie's ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location. SCARY asks for no location permission.
 7. **Voice search.** The microphone button hands the request to the TV's speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text and asks for no microphone permission.
