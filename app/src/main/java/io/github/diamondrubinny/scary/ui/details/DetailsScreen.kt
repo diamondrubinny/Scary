@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -371,7 +372,8 @@ private fun OpenOnPhone(movie: Movie) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         BasicText(
             stringResource(R.string.open_on_phone),
-            style = ScaryType.Caption,
+            // Next to the code, whichever side it is on.
+            style = ScaryType.Caption.copy(textAlign = TextAlign.End),
             modifier = Modifier.width(120.dp),
         )
         QrImage(code = code, size = 84.dp, description = stringResource(R.string.open_on_phone_description, movie.title))
