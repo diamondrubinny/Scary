@@ -320,3 +320,14 @@ No accounts, no analytics. Online artwork can be switched off in settings; only 
 **Powered by SCARY · Open source · [github.com/diamondrubinny/Scary](https://github.com/diamondrubinny/Scary)**
 
 SCARY is licensed under the [Apache License 2.0](LICENSE). If you share a copy or build your own version, keep the [NOTICE](NOTICE) file and the "Powered by SCARY · Open source" credit in the app (Apache-2.0, section 4(d)). Every source file carries the credit, and CI fails without it.
+
+
+---
+
+## 💼 Commercial license & rights acquisition
+
+SCARY is free and open source under the Apache-2.0. If you are interested in a **commercial agreement** or custom licensing terms, **white-label / exclusive rights**, or **acquiring full rights to the code**, send your proposal to **[d@rubinny.net](mailto:d@rubinny.net)**.
+
+Please include: who you are (company / contact), how you intend to use the code, and your offer.
+
+> 🇮🇱 מעוניינים ברישיון מסחרי, בזכויות בלעדיות או ברכישת הזכויות בקוד? שלחו הצעה ל-**[d@rubinny.net](mailto:d@rubinny.net)** — כולל פרטי קשר, אופן השימוש המתוכנן וההצעה שלכם.
