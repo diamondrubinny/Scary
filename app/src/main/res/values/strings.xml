@@ -151,7 +151,7 @@
         <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
         <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), the times of recent crashes (only the time), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
-        <item>Also only on this TV: the films you marked \"Loved it\" or \"Not for me\" and the day you marked each film as watched. They power \"Because you loved\", \"How much time do you have?\" and \"Your year in fear\", which are worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing. The TV\'s own inputs (HDMI, antenna) are read on the TV to show them. The QR code on a film\'s page opens SCARY\'s share page (on GitHub Pages) on your phone, with the film\'s name in the link; GitHub, which hosts it, sees your phone\'s IP address. The TV sends nothing.</item>
+        <item>Also only on this TV: the films you marked \"Loved it\" or \"Not for me\" and the day you marked each film as watched. They power \"Because you loved\", \"How much time do you have?\" and \"Your year in fear\", which are worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing. The TV\'s own inputs (HDMI, antenna) are read on the TV to show them. The QR code on a film\'s page opens its IMDb page on your phone; the TV sends nothing.</item>
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
@@ -288,7 +288,7 @@
     <string name="coming_on_long">In cinemas on %1$s</string>
     <string name="tv_input_description">TV input: %1$s</string>
     <string name="share_scan">Scan to share this movie</string>
-    <string name="share_scan_description">QR code to share %1$s: scan it with the phone\'s camera to send it to friends.</string>
+    <string name="share_scan_description">QR code to the IMDb page of %1$s: scan it with the phone\'s camera to open and share it.</string>
     <string name="settings_sleep_timer">Sleep timer</string>
     <string name="sleep_left">%1$d min left</string>
     <string name="sleep_off">Off</string>

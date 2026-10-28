@@ -365,15 +365,12 @@ private fun WatchElsewhere(
 private val DetailsTrailerSize = DpSize(320.dp, 180.dp)
 
 /**
- * "Scan to share this movie": a QR code to SCARY's share page for the film (poster, title, a Share button for the
- * phone's share sheet, and its IMDb page). The TV sends nothing; the phone that scans it opens the page.
+ * "Scan to share this movie": a QR code to the film's IMDb page, which the phone opens and can pass on with its own
+ * share button. The TV sends nothing.
  */
 @Composable
 private fun ShareCode(movie: Movie, language: Language) {
-    val title = movie.displayTitle(language)
-    val link = remember(movie.imdbId, title, language) {
-        runCatching { Links.sharePage(movie.imdbId, title, movie.year, language.code) }.getOrNull()
-    } ?: return
+    val link = remember(movie.imdbId) { runCatching { Links.imdbTitle(movie.imdbId) }.getOrNull() } ?: return
     val code = remember(link) { Donation.qr(link) }
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         BasicText(
@@ -382,12 +379,9 @@ private fun ShareCode(movie: Movie, language: Language) {
             style = ScaryType.Caption.copy(textAlign = TextAlign.End),
             modifier = Modifier.width(120.dp),
         )
-        QrImage(code = code, size = ShareCodeSize, description = stringResource(R.string.share_scan_description, title))
+        QrImage(code = code, size = 96.dp, description = stringResource(R.string.share_scan_description, movie.displayTitle(language)))
     }
 }
-
-/** Large enough for a phone to read a code of up to 57 modules from the sofa. */
-private val ShareCodeSize = 120.dp
 
 /** "14 November 2026" in the UI's language. */
 @Composable
