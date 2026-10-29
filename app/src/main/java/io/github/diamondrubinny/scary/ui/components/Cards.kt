@@ -140,8 +140,8 @@ fun PosterCard(
         }
         if (!posterShown) {
             BasicText(
-                text = movie.year.toString(),
-                style = ScaryType.Caption,
+                text = movie.yearsLabel,
+                style = ScaryType.Caption.copy(textDirection = TextDirection.Ltr),
                 modifier = Modifier.align(Alignment.TopStart).padding(7.dp),
             )
             BasicText(

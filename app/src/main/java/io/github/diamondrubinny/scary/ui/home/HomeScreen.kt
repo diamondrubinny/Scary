@@ -401,7 +401,11 @@ private fun HeroText(
     ) {
         if (movie == null) return@Column
         BasicText(
-            text = if (isNightPick) stringResource(R.string.night_pick) else subgenreLine(movie),
+            text = when {
+                !isNightPick -> subgenreLine(movie)
+                movie.isSeries -> stringResource(R.string.night_pick_series)
+                else -> stringResource(R.string.night_pick)
+            },
             style = ScaryType.Eyebrow,
         )
         // The text block yields space first, so the buttons below always keep their full height,

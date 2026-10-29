@@ -352,4 +352,5 @@
     <string name="msg_bucket_cleared">A bucket list está vazia agora.</string>
     <string name="msg_bucket_empty">Escolha alguns filmes primeiro.</string>
     <string name="msg_bucket_done">Essa foi a bucket list inteira. Você sobreviveu!</string>
+    <string name="night_pick_series">A série desta noite</string>
 </resources>

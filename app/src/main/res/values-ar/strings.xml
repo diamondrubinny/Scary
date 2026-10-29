@@ -362,4 +362,5 @@
     <string name="msg_bucket_cleared">أصبحت Bucket list فارغة.</string>
     <string name="msg_bucket_empty">اختر بعض الأفلام أولًا.</string>
     <string name="msg_bucket_done">كانت هذه Bucket list كلها. نجوت!</string>
+    <string name="night_pick_series">مسلسل الليلة</string>
 </resources>

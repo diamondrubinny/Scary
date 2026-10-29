@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.foundation.Canvas
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.liveRegion
@@ -108,7 +109,8 @@ fun MovieMeta(movie: Movie, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BasicText(movie.yearsLabel, style = ScaryType.BodyStrong)
+        // Left to right always: in Hebrew or Arabic, "1990–1991" would otherwise read "1991–1990", and "2022–" "–2022".
+        BasicText(movie.yearsLabel, style = ScaryType.BodyStrong.copy(textDirection = TextDirection.Ltr))
         if (movie.director.isNotBlank()) {
             BasicText(movie.director, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
@@ -127,7 +129,7 @@ fun MovieMeta(movie: Movie, modifier: Modifier = Modifier) {
         }
         movie.fear?.let { fear ->
             FearMeter(fear)
-            BasicText(stringResource(R.string.fear_short, fear), style = ScaryType.Body.copy(color = ScaryColors.Ash))
+            BasicText(stringResource(R.string.fear_short, fear), style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1, softWrap = false)
         }
     }
 }

@@ -352,4 +352,5 @@
     <string name="msg_bucket_cleared">ה־Bucket list ריק עכשיו.</string>
     <string name="msg_bucket_empty">בחרו קודם כמה סרטים.</string>
     <string name="msg_bucket_done">זה היה כל ה־Bucket list. שרדתם!</string>
+    <string name="night_pick_series">הסדרה של הלילה</string>
 </resources>

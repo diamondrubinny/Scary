@@ -355,4 +355,5 @@
     <string name="msg_bucket_cleared">Bucket list теперь пуст.</string>
     <string name="msg_bucket_empty">Сначала выберите несколько фильмов.</string>
     <string name="msg_bucket_done">Это был весь bucket list. Вы выжили!</string>
+    <string name="night_pick_series">Сериал на вечер</string>
 </resources>
