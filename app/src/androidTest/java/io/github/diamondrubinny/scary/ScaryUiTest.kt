@@ -28,6 +28,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -674,6 +675,46 @@ class ScaryUiTest {
         }
     }
 
+    @Test
+    fun goingDownTheRowsShowsEachWholeRowWithItsTitleAndGoingUpBringsTheHeroBack() {
+        waitForHomeFocus()
+        val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
+        val donate = hasContentDescription(text(R.string.donate_qr_description))
+        waitFor(watch)
+        rule.onNode(donate).assertExists()
+        // Down from the hero into the rows: the top gives them room, and every focused row shows whole, title and all.
+        repeat(ROWS_TO_WALK) { step ->
+            pressKey(KeyEvent.KEYCODE_DPAD_DOWN)
+            if (step == 0) waitForGone(donate)
+            assertFocusedRowFullyShown()
+        }
+        // And back up to the hero, which comes back whole.
+        repeat(ROWS_TO_WALK + 1) {
+            if (rule.onAllNodes(watch).fetchSemanticsNodes().isEmpty()) pressKey(KeyEvent.KEYCODE_DPAD_UP)
+        }
+        waitFor(watch)
+        waitFor(donate)
+    }
+
+    private fun pressKey(keyCode: Int) {
+        waitUntilOrDescribe("the window to take the remote's keys") { readyForKeys() }
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(keyCode)
+        rule.waitForIdle()
+    }
+
+    /** The focused card lies wholly inside the rows, with a row title right above it, also inside the rows. */
+    private fun assertFocusedRowFullyShown() {
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+        waitUntilOrDescribe("a focused card wholly inside the rows") {
+            val focused = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .singleOrNull()?.boundsInRoot ?: return@waitUntilOrDescribe false
+            val titles = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .map { it.boundsInRoot }
+            focused.top >= rows.top && focused.bottom <= rows.bottom &&
+                titles.any { it.top >= rows.top && it.bottom <= focused.top && focused.top - it.bottom < MAX_TITLE_GAP_PX }
+        }
+    }
+
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
@@ -694,6 +735,9 @@ class ScaryUiTest {
         const val BEYOND_FIRST_PAGES = 120
         const val SCREEN_DEPTH = 6
         const val SLEEP_CHOICES = 5
+        const val ROWS_TO_WALK = 4
+        // A row's title sits just above its cards: the cards' top padding and the focused card's growth.
+        const val MAX_TITLE_GAP_PX = 120f
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }

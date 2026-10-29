@@ -18,6 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,12 +62,20 @@ fun TopBar(
     modifier: Modifier = Modifier,
     familyNight: Boolean = false,
     sleepAtMillis: Long? = null,
+    /** While the rows have the focus: the donation code steps aside so the rows get the room (it shows again above). */
+    compact: Boolean = false,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
             BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
             CreditLine(short = true)
-            DonateMini(Modifier.padding(top = 8.dp))
+            AnimatedVisibility(
+                visible = !compact,
+                enter = if (LocalReduceMotion.current) EnterTransition.None else fadeIn() + expandVertically(),
+                exit = if (LocalReduceMotion.current) ExitTransition.None else fadeOut() + shrinkVertically(),
+            ) {
+                DonateMini(Modifier.padding(top = 8.dp))
+            }
         }
         if (familyNight) {
             // Not just a color: the badge says it in words.

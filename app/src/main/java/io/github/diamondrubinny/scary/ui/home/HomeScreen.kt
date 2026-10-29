@@ -4,6 +4,14 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
@@ -118,6 +126,7 @@ fun rowTag(rowKey: String): String = "row:$rowKey"
 /** Key of the credit line at the end of the home rows. */
 const val CREDIT_KEY = "credit"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -166,6 +175,13 @@ fun HomeScreen(
         if (!restored) heroFocus.tryRequestFocus()
     }
 
+    // While the remote is in the rows, the top of the screen gives them room: the donation code steps aside and the hero
+    // drops its synopsis, so a whole row (title and cards) shows with the next one peeking below it.
+    var rowsFocused by remember { mutableStateOf(false) }
+    val rowsScroll = LocalBringIntoViewSpec.current
+    val pivot = with(LocalDensity.current) { RowPivot.toPx() }
+    val rowsPivot = remember(pivot) { FocusedRowPivot(pivot) }
+
     Column(Modifier.fillMaxSize()) {
         TopBar(
             effectsEnabled = state.effectsEnabled,
@@ -173,9 +189,10 @@ fun HomeScreen(
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
-            modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
+            modifier = Modifier.padding(horizontal = SidePadding, vertical = if (rowsFocused) 12.dp else 18.dp),
             familyNight = state.familyNight,
             sleepAtMillis = state.sleepAtMillis,
+            compact = rowsFocused,
         )
         Hero(
             movie = state.hero,
@@ -185,6 +202,7 @@ fun HomeScreen(
             actions = actions,
             locked = state.hero?.let(state::isLocked) ?: false,
             trailer = trailer,
+            compact = rowsFocused,
         )
         if (state.catalogError) {
             EmptyState(
@@ -193,32 +211,53 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
             )
         }
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .fadeTopEdge(72.dp)
-                .testTag(HOME_ROWS_TAG),
-            contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
-                    heroAfterMyList = true
+        // The focused row stays at the same height, its title in view; the cards inside keep the TV's own scrolling.
+        CompositionLocalProvider(LocalBringIntoViewSpec provides rowsPivot) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .onFocusChanged { rowsFocused = it.hasFocus }
+                    .fadeTopEdge(RowsFade)
+                    .testTag(HOME_ROWS_TAG),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                items(state.rows, key = { it.key }) { row ->
+                    CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
+                        HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
+                            heroAfterMyList = true
+                        }
+                    }
                 }
-            }
-            item(key = CREDIT_KEY) {
-                Column(
-                    Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CreditLine()
-                    DataCredit()
+                item(key = CREDIT_KEY) {
+                    Column(
+                        Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CreditLine()
+                        DataCredit()
+                    }
                 }
             }
         }
     }
+}
+
+/**
+ * Where a focused card's top settles in the rows: below its row's title and the faded top edge, so moving up or down
+ * always shows the whole row, and the next one peeks in below.
+ */
+private val RowPivot = 60.dp
+
+/** Rows scrolled past melt into the dark over this much, above the focused row's title. */
+private val RowsFade = 20.dp
+
+/** Scrolls the rows so the focused card's top sits [pivot] pixels below their top (as far as the list can scroll). */
+@OptIn(ExperimentalFoundationApi::class)
+private class FocusedRowPivot(private val pivot: Float) : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = offset - pivot
 }
 
 @Composable
@@ -230,26 +269,43 @@ private fun Hero(
     actions: HomeActions,
     locked: Boolean,
     trailer: TrailerSettings,
+    /** The rows have the focus: no synopsis and a smaller trailer, so the rows get the room. */
+    compact: Boolean = false,
 ) {
+    val height by animateDpAsState(
+        targetValue = if (compact) HeroCompactHeight else HeroHeight,
+        animationSpec = if (LocalReduceMotion.current) snap() else tween(HERO_RESIZE_MS),
+        label = "heroHeight",
+    )
     // The trailer window sits on the far side from the text (right in English, left in Hebrew and Arabic), so nothing
     // ever covers it, as YouTube requires.
     Row(
         modifier = Modifier
             .padding(horizontal = SidePadding)
             .fillMaxWidth()
-            .height(212.dp),
+            .height(height),
         verticalAlignment = Alignment.Bottom,
     ) {
-        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.fillMaxWidth(0.62f))
+        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.fillMaxWidth(0.62f), showSynopsis = !compact)
         Spacer(Modifier.weight(1f))
         if (movie != null) {
-            AutoTrailer(movie = movie, locked = locked, settings = trailer, playerSize = HeroTrailerSize)
+            AutoTrailer(movie = movie, locked = locked, settings = trailer, playerSize = if (compact) HeroTrailerCompactSize else HeroTrailerSize)
         }
     }
 }
 
+private val HeroHeight = 212.dp
+
+/** Title, details and buttons without the synopsis, beside the smaller trailer. */
+private val HeroCompactHeight = 164.dp
+
+private const val HERO_RESIZE_MS = 180
+
 /** 16:9, and 608 x 342 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
 private val HeroTrailerSize = DpSize(304.dp, 171.dp)
+
+/** 16:9 while the rows have the focus: 576 x 324 pixels at 1080p, 384 x 216 even on a 720p TV. */
+private val HeroTrailerCompactSize = DpSize(288.dp, 162.dp)
 
 @Composable
 private fun HeroText(
@@ -259,6 +315,7 @@ private fun HeroText(
     primaryFocus: FocusRequester,
     actions: HomeActions,
     modifier: Modifier,
+    showSynopsis: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxHeight(),
@@ -285,12 +342,15 @@ private fun HeroText(
                 modifier = Modifier.semantics { heading() },
             )
             MovieMeta(movie)
-            BasicText(
-                text = movie.synopsis(language),
-                style = ScaryType.Body.mixedLanguage(),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
+            // The film page always has it; here it gives way to the rows while they have the focus.
+            if (showSynopsis) {
+                BasicText(
+                    text = movie.synopsis(language),
+                    style = ScaryType.Body.mixedLanguage(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
             ScaryButton(
