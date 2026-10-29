@@ -778,8 +778,8 @@ class ScaryUiTest {
             waitFor(hasTestTag(BUCKET_SCREEN_TAG))
             assertBucketOrder(first.id, second.id)
             // The second film moves up: the order swaps.
-            rule.onNode(hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.displayTitle(Language.HE)), substring = false) or
-                hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.title))).performClick()
+            val uiLanguage = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+            rule.onNode(hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.displayTitle(uiLanguage)))).performClick()
             rule.waitUntil(TIMEOUT_MS) { runCatching { assertBucketOrder(second.id, first.id) }.isSuccess }
             // Clearing asks once more.
             rule.onNode(clear).performClick()
@@ -814,6 +814,8 @@ class ScaryUiTest {
         waitFor(prompt)
         rule.onNode(hasText(text(R.string.bucket_prompt_later))).assertExists()
         rule.onNode(hasText(text(R.string.bucket_prompt_note))).assertExists()
+        // Back goes to the window with the focus: wait until the dialog has it.
+        waitFor(isFocused() and hasAnyAncestor(prompt))
         rule.waitForIdle()
         pressBack()
         waitForGone(prompt)

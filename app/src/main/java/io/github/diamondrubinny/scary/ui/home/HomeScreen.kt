@@ -177,6 +177,13 @@ fun HomeScreen(
         onScrolledToRow()
     }
 
+    // Picking starts with "Done" focused: the banner arrives with the new state, which may come after the reset below.
+    LaunchedEffect(state.picking) {
+        if (!state.picking) return@LaunchedEffect
+        withFrameNanos { }
+        heroFocus.tryRequestFocus()
+    }
+
     // Focus lands on "watch tonight's pick" at start and after Home; on the last card when coming back from details.
     LaunchedEffect(state.loading, resets) {
         if (state.loading) return@LaunchedEffect

@@ -76,6 +76,10 @@ class SeriesBucketTest {
         assertEquals(MediaKind.MOVIE, film.kind)
         assertNull(film.endYear)
         assertNull(odd.endYear)
+        assertFalse(odd.ongoing)
+        // A blank "releaseInfo" leaves the year to the "year" field.
+        val blank = Cinemeta.parseCatalog("""{"metas":[{"id":"tt0000003","type":"series","name":"B","releaseInfo":"","year":"2019","genres":["Horror"]}]}""")
+        assertEquals(2019, blank.single().year)
         // Saved and rebuilt, a series stays one.
         assertEquals(ended, Cinemeta.toMovie(Cinemeta.fromMovie(ended)))
         assertEquals("https://v3-cinemeta.strem.io/meta/series/tt4574334.json", Cinemeta.metaUrl("tt4574334", MediaKind.SERIES))

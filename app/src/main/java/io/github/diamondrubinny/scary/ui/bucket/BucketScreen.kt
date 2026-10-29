@@ -24,6 +24,7 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -84,11 +86,26 @@ fun BucketScreen(
     actions: BucketActions,
 ) {
     val firstFocus = remember { FocusRequester() }
+    // Each row's remove button, so the focus can move to a neighbour when a row goes.
+    val removeFocus = remember { HashMap<String, FocusRequester>() }
+    var focusAfterRemove by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(ids.isEmpty()) {
         withFrameNanos { }
         runCatching { firstFocus.requestFocus() }
     }
+    LaunchedEffect(ids) {
+        val target = focusAfterRemove ?: return@LaunchedEffect
+        focusAfterRemove = null
+        withFrameNanos { }
+        // The next row (or the one before, at the end); Start when the list is now empty.
+        runCatching { (removeFocus[target]?.takeIf { target in ids } ?: firstFocus).requestFocus() }
+    }
     val films = ids.map { it to movieOf(it) }
+    val remove = { id: String ->
+        val index = ids.indexOf(id)
+        focusAfterRemove = ids.getOrNull(index + 1) ?: ids.getOrNull(index - 1) ?: ""
+        actions.onRemove(id)
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -114,6 +131,7 @@ fun BucketScreen(
                     body = stringResource(R.string.bucket_empty_body),
                     actionLabel = stringResource(R.string.bucket_pick),
                     onAction = actions.onPickMore,
+                    actionFocus = firstFocus,
                     modifier = Modifier.padding(top = 8.dp),
                 )
             }
@@ -141,6 +159,8 @@ fun BucketScreen(
             }
         }
         itemsIndexed(films, key = { _, (id, _) -> id }) { index, (id, movie) ->
+            val focus = remember(id) { FocusRequester() }
+            SideEffect { removeFocus[id] = focus }
             BucketRow(
                 number = index + 1,
                 id = id,
@@ -150,6 +170,8 @@ fun BucketScreen(
                 first = index == 0,
                 last = index == films.lastIndex,
                 actions = actions,
+                removeFocus = focus,
+                onRemove = remove,
             )
         }
     }
@@ -165,6 +187,8 @@ private fun BucketRow(
     first: Boolean,
     last: Boolean,
     actions: BucketActions,
+    removeFocus: FocusRequester,
+    onRemove: (String) -> Unit,
 ) {
     val title = movie?.displayTitle(language) ?: stringResource(R.string.bucket_unavailable)
     Row(
@@ -204,22 +228,22 @@ private fun BucketRow(
                 BasicText(meta, style = ScaryType.Caption)
             }
         }
-        // Up and down only where the film can move; remove always.
-        if (!first) {
-            IconCircleButton(
-                contentDescription = stringResource(R.string.bucket_move_up, title),
-                onClick = { actions.onMove(id, -1) },
-            ) { BasicText("↑", style = ScaryType.BodyStrong.copy(color = it)) }
-        }
-        if (!last) {
-            IconCircleButton(
-                contentDescription = stringResource(R.string.bucket_move_down, title),
-                onClick = { actions.onMove(id, 1) },
-            ) { BasicText("↓", style = ScaryType.BodyStrong.copy(color = it)) }
-        }
+        // Up and down stay in place at the ends, dimmed and doing nothing: a button that vanished would take the focus
+        // with it when its film reaches the top or the bottom.
+        IconCircleButton(
+            contentDescription = stringResource(R.string.bucket_move_up, title),
+            onClick = { if (!first) actions.onMove(id, -1) },
+            dimmed = first,
+        ) { BasicText("↑", style = ScaryType.BodyStrong.copy(color = it)) }
+        IconCircleButton(
+            contentDescription = stringResource(R.string.bucket_move_down, title),
+            onClick = { if (!last) actions.onMove(id, 1) },
+            dimmed = last,
+        ) { BasicText("↓", style = ScaryType.BodyStrong.copy(color = it)) }
         IconCircleButton(
             contentDescription = stringResource(R.string.bucket_remove, title),
-            onClick = { actions.onRemove(id) },
+            onClick = { onRemove(id) },
+            modifier = Modifier.focusRequester(removeFocus),
         ) { BasicText("✕", style = ScaryType.BodyStrong.copy(color = it)) }
     }
 }
@@ -269,7 +293,8 @@ fun BucketPromptDialog(
                 BasicText(stringResource(R.string.bucket_prompt_last), style = ScaryType.Body)
             }
             BasicText(stringResource(R.string.bucket_prompt_note), style = ScaryType.Caption)
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
+            // One under the other: each names a film, and titles can be long.
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(top = 4.dp)) {
                 // Back early, the film left comes first: most likely it was only paused or a stream was being chosen.
                 if (!prompt.finished) {
                     ScaryButton(

@@ -709,7 +709,13 @@ class HomeViewModel(
      * leaving SCARY cancels the launch job right after this.
      */
     private fun rememberWatching(movie: Movie) {
-        viewModelScope.launch { settings.setPendingWatch(PendingWatch(movie.id, System.currentTimeMillis())) }
+        // From the bucket list only if this very film was started from it: the return then asks about the next one.
+        val fromBucket = bucketLaunch == movie.id
+        bucketLaunch = null
+        viewModelScope.launch {
+            settings.setPendingWatch(PendingWatch(movie.id, System.currentTimeMillis()))
+            settings.setBucketPlaying(movie.id.takeIf { fromBucket })
+        }
     }
 
     /**
@@ -757,6 +763,7 @@ class HomeViewModel(
         launchJob?.cancel()
         launchJob = null
         _launching.value = null
+        bucketLaunch = null
     }
 
     fun onHomePressed() {
@@ -766,6 +773,8 @@ class HomeViewModel(
         _pinDialog.value = null
         _tmdbDialog.value = null
         _trailerIntro.value = false
+        // Home lands on a clean screen. Coming back from Stremio with Home, this runs before onResumed asks its question.
+        _bucketPrompt.value = null
         backStack.value = listOf(Screen.Home)
         heroId.value = null
         lastFocusedKey = null
@@ -789,7 +798,10 @@ class HomeViewModel(
         return (prefs.myListIds + prefs.recentIds + prefs.bucketIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
-    fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
+    fun watch(movie: Movie) {
+        bucketLaunch = null
+        guard(movie, GatedAction.Watch(movie))
+    }
 
     fun trailer(movie: Movie) = guard(movie, GatedAction.Trailer(movie))
 
@@ -855,6 +867,7 @@ class HomeViewModel(
     fun dismissPin() {
         dialogGeneration++
         _pinDialog.value = null
+        bucketLaunch = null
     }
 
     fun submitPin(pin: String) {
@@ -1192,7 +1205,12 @@ class HomeViewModel(
 
     /** The bucket list's screen, or picking straight away while it is empty. */
     fun openBucket() {
-        if (latestPrefs?.bucketIds.isNullOrEmpty()) startPicking() else push(Screen.Bucket)
+        if (latestPrefs?.bucketIds.isNullOrEmpty()) {
+            startPicking()
+        } else {
+            picking.value = false
+            push(Screen.Bucket)
+        }
     }
 
     /** Picking mode on the films tab: OK on a poster adds or removes it. Back or "Done" shows the list. */
@@ -1230,11 +1248,14 @@ class HomeViewModel(
             }
             val after = settings.updateBucket { BucketList.toggle(it, movie.id) }
             val place = after.indexOf(movie.id)
-            if (place >= 0) {
-                savedMovies.save(movie, language, keptOnline())
-                show(R.string.msg_bucket_added, title, (place + 1).toString())
-            } else {
-                show(R.string.msg_bucket_removed, title)
+            when {
+                place >= 0 -> {
+                    savedMovies.save(movie, language, keptOnline())
+                    show(R.string.msg_bucket_added, title, (place + 1).toString())
+                }
+                // Not in before, still not in: the list filled up in between.
+                movie.id !in before -> show(R.string.msg_bucket_full, BucketList.MAX_SIZE.toString())
+                else -> show(R.string.msg_bucket_removed, title)
             }
         }
     }
@@ -1264,11 +1285,15 @@ class HomeViewModel(
         if (first == null) show(R.string.msg_bucket_empty) else playFromBucket(first)
     }
 
+    /**
+     * The bucket-list film being opened, until it really opens in Stremio (then it is stored as bucketPlaying). A PIN
+     * left unanswered, a cancelled shiver or a missing Stremio leave nothing behind.
+     */
+    private var bucketLaunch: String? = null
+
     private fun playFromBucket(movie: Movie) {
-        viewModelScope.launch {
-            settings.setBucketPlaying(movie.id)
-            watch(movie)
-        }
+        guard(movie, GatedAction.Watch(movie))
+        bucketLaunch = movie.id
     }
 
     /**

@@ -232,13 +232,13 @@ object Cinemeta {
         val imdbId = (o.str("imdb_id") ?: o.str("id"))?.takeIf(imdbPattern::matches) ?: return null
         val name = o.str("name")?.trim()?.take(200)?.takeIf(String::isNotEmpty) ?: return null
         if (adultTitle.containsMatchIn(name)) return null
-        val years = o.str("releaseInfo") ?: o.str("year")
+        val years = o.str("releaseInfo")?.takeIf(String::isNotBlank) ?: o.str("year")
         val year = years?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
         val type = if (o.str("type") == CinemetaMeta.TYPE_SERIES) CinemetaMeta.TYPE_SERIES else CinemetaMeta.TYPE_MOVIE
         // A series' years: "2016–2025" (ended), "2022–" (running), "2018" (one season); either dash.
         val span = years?.trim()?.let(seriesYears::matchEntire)
         val endYear = span?.groupValues?.get(2)?.toIntOrNull()?.takeIf { year != null && it in year..2100 }
-        val ongoing = type == CinemetaMeta.TYPE_SERIES && span != null && span.groupValues[1].isNotEmpty() && endYear == null
+        val ongoing = type == CinemetaMeta.TYPE_SERIES && span != null && span.groupValues[1].isNotEmpty() && span.groupValues[2].isEmpty()
         val trailers = (
             (o["trailerStreams"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("ytId") }.orEmpty() +
                 (o["trailers"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("source") }.orEmpty()

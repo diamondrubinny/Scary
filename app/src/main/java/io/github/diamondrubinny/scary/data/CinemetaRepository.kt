@@ -133,7 +133,8 @@ class CinemetaRepository(context: Context) {
         val spec = rowSpecs.firstOrNull { it.id == rowId && it.endless } ?: return@withContext null
         val url = runCatching { Cinemeta.catalogUrl(spec.catalog, spec.genre, skip, spec.kind) }.getOrNull() ?: return@withContext null
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
-        Page(metas.size, if (spec.themedOnly) Cinemeta.themed(metas) else metas)
+        val ofKind = metas.filter { it.kind == spec.kind }
+        Page(metas.size, if (spec.themedOnly) Cinemeta.themed(ofKind) else ofKind)
     }
 
     private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
@@ -185,8 +186,10 @@ class CinemetaRepository(context: Context) {
         if (urls.isEmpty()) return@withContext null
         val pages = coroutineScope { urls.map { (kind, url) -> async { kind to fetch(url)?.let(Cinemeta::parseCatalog) } }.awaitAll() }
         if (pages.all { it.second == null }) return@withContext null
-        // Films first, then series; a result that does not say its type is the type it was searched as.
-        val metas = pages.flatMap { (kind, metas) -> metas.orEmpty().map { if (it.kind == kind) it else it.copy(type = CinemetaMeta.typeOf(kind)) } }
+        // Films and series take turns, so neither crowds out the other; a result that does not say its type is the
+        // type it was searched as.
+        val lists = pages.map { (kind, metas) -> metas.orEmpty().map { if (it.kind == kind) it else it.copy(type = CinemetaMeta.typeOf(kind)) } }
+        val metas = (0 until (lists.maxOfOrNull { it.size } ?: 0)).flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
         // The top results often come without genres: look them up (side by side), so the theme filter can judge them.
         val missing = Cinemeta.needsGenres(metas, known)
         val full = if (missing.isEmpty()) {

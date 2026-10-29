@@ -367,6 +367,8 @@ fun EmptyState(
     modifier: Modifier = Modifier,
     actionLabel: String? = null,
     onAction: () -> Unit = {},
+    /** For a screen whose only control is this action: it takes the focus. */
+    actionFocus: FocusRequester? = null,
 ) {
     Column(
         modifier = modifier
@@ -379,7 +381,7 @@ fun EmptyState(
         BasicText(title, style = ScaryType.BodyStrong)
         BasicText(body, style = ScaryType.Body.copy(color = ScaryColors.Ash))
         if (actionLabel != null) {
-            ScaryButton(text = actionLabel, onClick = onAction, modifier = Modifier.padding(top = 6.dp))
+            ScaryButton(text = actionLabel, onClick = onAction, modifier = Modifier.padding(top = 6.dp), focusRequester = actionFocus)
         }
     }
 }
