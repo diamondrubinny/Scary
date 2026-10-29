@@ -688,11 +688,14 @@ class ScaryUiTest {
             if (step == 0) waitForGone(donate)
             assertFocusedRowFullyShown()
         }
-        // And back up to the hero, which comes back whole.
+        // And back up to the hero (Up lands on its nearest button), which comes back whole.
+        val inRows = isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))
         repeat(ROWS_TO_WALK + 1) {
-            if (rule.onAllNodes(watch).fetchSemanticsNodes().isEmpty()) pressKey(KeyEvent.KEYCODE_DPAD_UP)
+            if (rule.onAllNodes(inRows).fetchSemanticsNodes().isNotEmpty()) pressKey(KeyEvent.KEYCODE_DPAD_UP)
         }
-        waitFor(watch)
+        val heroButton = listOf(R.string.action_watch_stremio, R.string.action_trailer, R.string.action_details)
+            .map { hasText(text(it)) }.reduce { a, b -> a or b }
+        waitFor(heroButton and isFocused())
         waitFor(donate)
     }
 
