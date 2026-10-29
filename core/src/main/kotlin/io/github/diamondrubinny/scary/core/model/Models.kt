@@ -55,6 +55,13 @@ enum class Subgenre {
     @SerialName("haunted_house") HAUNTED_HOUSE,
 }
 
+/** A film, or a series (whose runtime is an episode's, and whose page in Stremio lists the episodes). */
+@Serializable
+enum class MediaKind {
+    @SerialName("movie") MOVIE,
+    @SerialName("series") SERIES,
+}
+
 /** Editorial notes on how a movie feels, for moods that subgenres alone cannot tell. */
 @Serializable
 enum class MovieTag {
@@ -102,7 +109,23 @@ data class Movie(
     /** True for the hand-picked library, false for rows pulled from Cinemeta. */
     val curated: Boolean = true,
     val tags: List<MovieTag> = emptyList(),
+    /** A film or a series. Everything else in this class means the same for both; [runtimeMin] is one episode's. */
+    val kind: MediaKind = MediaKind.MOVIE,
+    /** A series' last year; null for films, for one-season series and for series still running ([ongoing]). */
+    val endYear: Int? = null,
+    /** A series still running: its years read "2022–". */
+    val ongoing: Boolean = false,
 ) {
+    val isSeries: Boolean get() = kind == MediaKind.SERIES
+
+    /** "1988" for a film or a single year, "2016–2025" for a series that ended, "2022–" for one still running. */
+    val yearsLabel: String get() = when {
+        !isSeries -> year.toString()
+        ongoing -> "$year–"
+        endYear != null && endYear > year -> "$year–$endYear"
+        else -> year.toString()
+    }
+
     fun displayTitle(language: Language): String =
         titles[language.code]?.takeIf(String::isNotBlank)
             ?: titleHe.takeIf { language == Language.HE && it.isNotBlank() }

@@ -1,0 +1,1130 @@
+{
+ "version": 1,
+ "movies": [
+  {
+   "id": "hill_house",
+   "imdbId": "tt6763664",
+   "title": "The Haunting of Hill House",
+   "year": 2018,
+   "director": "Mike Flanagan",
+   "runtimeMin": 57,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "haunted_house",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 210,
+   "saturation": 35,
+   "synopsisHe": "אחים בוגרים ששרדו ילדות בבית הרדוף המפורסם באמריקה נמשכים חזרה אליו, ואל מה שעדיין מחכה להם שם.",
+   "synopsisEn": "Grown siblings who survived a childhood in America's most famous haunted house are drawn back to it, and to what still waits there.",
+   "synopses": {
+    "pt": "Irmãos adultos que sobreviveram a uma infância na casa mal-assombrada mais famosa dos EUA são atraídos de volta a ela, e ao que ainda os espera lá.",
+    "ru": "Повзрослевшие братья и сёстры, пережившие детство в самом знаменитом доме с привидениями Америки, снова возвращаются туда — к тому, что их всё ещё ждёт.",
+    "ar": "إخوة بالغون نجوا من طفولة في أشهر بيت مسكون في أمريكا ينجذبون للعودة إليه، وإلى ما لا يزال ينتظرهم هناك."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "bly_manor",
+   "imdbId": "tt10970552",
+   "title": "The Haunting of Bly Manor",
+   "year": 2020,
+   "director": "Mike Flanagan",
+   "runtimeMin": 54,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "haunted_house"
+   ],
+   "fear": 3,
+   "hue": 190,
+   "saturation": 30,
+   "synopsisHe": "אומנת צעירה מקבלת עבודה בטיפול בשני ילדים יתומים באחוזה כפרית באנגליה, שרוחות הרפאים שלה אף פעם לא באמת עוזבות.",
+   "synopsisEn": "A young governess takes a job caring for two orphaned children at an English country estate whose ghosts never quite leave.",
+   "synopses": {
+    "pt": "Uma jovem governanta passa a cuidar de duas crianças órfãs numa propriedade rural inglesa cujos fantasmas nunca vão embora de verdade.",
+    "ru": "Молодая гувернантка берётся присматривать за двумя сиротами в английском поместье, призраки которого так и не уходят.",
+    "ar": "مربية شابة تعمل على رعاية طفلين يتيمين في عزبة ريفية إنجليزية لا يغادرها أشباحها أبدًا."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "midnight_mass",
+   "imdbId": "tt10574558",
+   "title": "Midnight Mass",
+   "year": 2021,
+   "director": "Mike Flanagan",
+   "runtimeMin": 65,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "vampire"
+   ],
+   "fear": 4,
+   "hue": 20,
+   "saturation": 45,
+   "synopsisHe": "כומר צעיר וכריזמטי מגיע לקהילה גוססת על אי מבודד, והניסים שבאים בעקבותיו גובים מחיר נורא.",
+   "synopsisEn": "A charismatic young priest arrives on a dying island community, and the miracles that follow come at a terrible price.",
+   "synopses": {
+    "pt": "Um jovem padre carismático chega a uma comunidade decadente numa ilha, e os milagres que vêm com ele cobram um preço terrível.",
+    "ru": "На умирающий остров приезжает харизматичный молодой священник, и чудеса, которые за ним следуют, обходятся страшной ценой.",
+    "ar": "يصل كاهن شاب ذو حضور آسر إلى مجتمع يحتضر على جزيرة نائية، والمعجزات التي تتبعه تأتي بثمن رهيب."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "house_of_usher",
+   "imdbId": "tt15567174",
+   "title": "The Fall of the House of Usher",
+   "year": 2023,
+   "director": "Mike Flanagan",
+   "runtimeMin": 62,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 55,
+   "synopsisHe": "יורשי שושלת תרופות חסרת רחמים מתחילים למות בזה אחר זה, בדרכים שמהדהדות את העסקה האפלה שמאחורי הון המשפחה.",
+   "synopsisEn": "The heirs of a ruthless pharmaceutical dynasty begin to die one by one, in ways that echo the dark bargain behind the family fortune.",
+   "synopses": {
+    "pt": "Os herdeiros de uma implacável dinastia farmacêutica começam a morrer um a um, de formas que ecoam o pacto sombrio por trás da fortuna da família.",
+    "ru": "Наследники безжалостной фармацевтической династии начинают умирать один за другим — так, будто им мстит тёмная сделка, на которой построено семейное состояние.",
+    "ar": "يبدأ ورثة سلالة دوائية قاسية بالموت واحدًا تلو الآخر، بطرق تردد صدى الصفقة المظلمة وراء ثروة العائلة."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "stranger_things",
+   "imdbId": "tt4574334",
+   "title": "Stranger Things",
+   "year": 2016,
+   "director": "Matt Duffer, Ross Duffer",
+   "runtimeMin": 65,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "supernatural"
+   ],
+   "fear": 2,
+   "hue": 350,
+   "saturation": 60,
+   "synopsisHe": "כשילד נעלם בעיירה קטנה בשנות ה־80, חבריו, משפחתו והמשטרה המקומית חושפים ניסויים סודיים וילדה עם כוחות מוזרים.",
+   "synopsisEn": "When a boy vanishes in a small 1980s town, his friends, family and the local police uncover secret experiments and a girl with strange powers.",
+   "synopses": {
+    "pt": "Quando um menino desaparece numa pequena cidade dos anos 80, seus amigos, a família e a polícia local descobrem experimentos secretos e uma garota com poderes estranhos.",
+    "ru": "Когда в маленьком городке 1980-х пропадает мальчик, его друзья, семья и местная полиция раскрывают тайные эксперименты и встречают девочку со странными способностями.",
+    "ar": "عندما يختفي صبي في بلدة صغيرة في الثمانينيات، يكتشف أصدقاؤه وعائلته والشرطة المحلية تجارب سرية وفتاة ذات قدرات غريبة."
+   },
+   "kind": "series",
+   "endYear": 2025
+  },
+  {
+   "id": "ahs",
+   "imdbId": "tt1844624",
+   "title": "American Horror Story",
+   "year": 2011,
+   "director": "Ryan Murphy, Brad Falchuk",
+   "runtimeMin": 43,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological",
+    "haunted_house"
+   ],
+   "fear": 4,
+   "hue": 320,
+   "saturation": 50,
+   "synopsisHe": "אנתולוגיה שבה כל עונה מספרת סיוט חדש: בית רצח, מוסד לחולי נפש, מסדר מכשפות, קרקס, מלון ועוד.",
+   "synopsisEn": "An anthology in which every season tells a new nightmare: a murder house, an asylum, a coven, a freak show, a hotel and more.",
+   "synopses": {
+    "pt": "Uma antologia em que cada temporada conta um novo pesadelo: uma casa assassina, um asilo, um clã de bruxas, um circo de horrores, um hotel e mais.",
+    "ru": "Антология, в которой каждый сезон — новый кошмар: дом-убийца, психиатрическая лечебница, ковен ведьм, цирк уродов, отель и многое другое.",
+    "ar": "مسلسل أنثولوجي يروي كل موسم فيه كابوسًا جديدًا: بيت قاتل، مصحة عقلية، جماعة ساحرات، سيرك غرائب، فندق والمزيد."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "walking_dead",
+   "imdbId": "tt1520211",
+   "title": "The Walking Dead",
+   "year": 2010,
+   "director": "Frank Darabont",
+   "runtimeMin": 46,
+   "genre": "horror",
+   "subgenres": [
+    "zombie",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 90,
+   "saturation": 25,
+   "synopsisHe": "סגן שריף מתעורר מתרדמת לעולם שהמתים השתלטו עליו, ומוביל קבוצת שורדים שעבורם החיים עלולים להיות מסוכנים יותר.",
+   "synopsisEn": "A sheriff's deputy wakes from a coma into a world overrun by the dead and leads a band of survivors for whom the living can be deadlier.",
+   "synopses": {
+    "pt": "Um policial acorda de um coma num mundo tomado pelos mortos e lidera um grupo de sobreviventes para quem os vivos podem ser ainda mais perigosos.",
+    "ru": "Помощник шерифа выходит из комы в мире, захваченном мертвецами, и ведёт группу выживших, для которых живые порой опаснее мёртвых.",
+    "ar": "يستيقظ نائب شريف من غيبوبة في عالم اجتاحه الموتى، ويقود مجموعة من الناجين قد يكون الأحياء بالنسبة إليهم أشد خطرًا."
+   },
+   "kind": "series",
+   "endYear": 2022
+  },
+  {
+   "id": "twin_peaks",
+   "imdbId": "tt0098936",
+   "title": "Twin Peaks",
+   "year": 1990,
+   "director": "Mark Frost, David Lynch",
+   "runtimeMin": 47,
+   "genre": "thriller",
+   "subgenres": [
+    "mystery",
+    "supernatural",
+    "crime"
+   ],
+   "fear": 3,
+   "hue": 140,
+   "saturation": 40,
+   "synopsisHe": "סוכן FBI אקסצנטרי חוקר את רצח מלכת הנשף בעיירת כורתי עצים שקטה, שמסתירה חלומות, כפילים ומשהו מרושע ביער.",
+   "synopsisEn": "An eccentric FBI agent investigates the murder of a homecoming queen in a quiet logging town that hides dreams, doubles and something evil in the woods.",
+   "synopses": {
+    "pt": "Um excêntrico agente do FBI investiga o assassinato de uma rainha do baile numa pacata cidade madeireira que esconde sonhos, sósias e algo maligno na floresta.",
+    "ru": "Эксцентричный агент ФБР расследует убийство королевы школьного бала в тихом лесном городке, где прячутся сны, двойники и зло в лесу.",
+    "ar": "عميل غريب الأطوار في مكتب التحقيقات الفيدرالي يحقق في مقتل ملكة حفل مدرسي في بلدة حطابين هادئة تخفي أحلامًا وأشباهًا وشرًا في الغابة."
+   },
+   "kind": "series",
+   "endYear": 1991
+  },
+  {
+   "id": "x_files",
+   "imdbId": "tt0106179",
+   "title": "The X-Files",
+   "year": 1993,
+   "director": "Chris Carter",
+   "runtimeMin": 45,
+   "genre": "thriller",
+   "subgenres": [
+    "supernatural",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 160,
+   "saturation": 35,
+   "synopsisHe": "שני סוכני FBI, מאמין וספקנית, חוקרים תיקים בלתי מוסברים בזמן שקנוניה עצומה פועלת לקבור את האמת.",
+   "synopsisEn": "Two FBI agents, a believer and a skeptic, investigate unexplained cases while a vast conspiracy works to bury the truth.",
+   "synopses": {
+    "pt": "Dois agentes do FBI, um crente e uma cética, investigam casos inexplicáveis enquanto uma vasta conspiração tenta enterrar a verdade.",
+    "ru": "Двое агентов ФБР — верящий и скептик — расследуют необъяснимые дела, пока огромный заговор пытается похоронить правду.",
+    "ar": "عميلان في مكتب التحقيقات الفيدرالي، مؤمن ومتشككة، يحققان في قضايا غامضة بينما تسعى مؤامرة ضخمة إلى دفن الحقيقة."
+   },
+   "kind": "series",
+   "endYear": 2018
+  },
+  {
+   "id": "black_mirror",
+   "imdbId": "tt2085059",
+   "title": "Black Mirror",
+   "year": 2011,
+   "director": "Charlie Brooker",
+   "runtimeMin": 59,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "social"
+   ],
+   "fear": 2,
+   "hue": 200,
+   "saturation": 15,
+   "synopsisHe": "סיפורים נפרדים על הצד האפל של הטכנולוגיה ושל האנשים שמשתמשים בה, כל אחד מהם קרוב מדי לבית.",
+   "synopsisEn": "Standalone stories about the dark side of technology and of the people who use it, each one a little too close to home.",
+   "synopses": {
+    "pt": "Histórias independentes sobre o lado sombrio da tecnologia e das pessoas que a usam, cada uma perto demais de casa.",
+    "ru": "Отдельные истории о тёмной стороне технологий и людей, которые ими пользуются, и каждая из них слишком близка к реальности.",
+    "ar": "قصص منفصلة عن الجانب المظلم للتكنولوجيا وللناس الذين يستخدمونها، كل واحدة منها قريبة أكثر مما ينبغي."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "dark",
+   "imdbId": "tt5753856",
+   "title": "Dark",
+   "year": 2017,
+   "director": "Baran bo Odar, Jantje Friese",
+   "runtimeMin": 56,
+   "genre": "thriller",
+   "subgenres": [
+    "mystery",
+    "supernatural"
+   ],
+   "fear": 2,
+   "hue": 40,
+   "saturation": 20,
+   "synopsisHe": "היעלמות של ילד בעיירה גרמנית חושפת את החיים הכפולים של ארבע משפחות, וסוד שנמתח על פני כמה דורות ועשורים.",
+   "synopsisEn": "A child's disappearance in a German town reveals the double lives of four families, and a secret that spans several generations and decades.",
+   "synopses": {
+    "pt": "O desaparecimento de uma criança numa cidade alemã revela a vida dupla de quatro famílias e um segredo que atravessa gerações e décadas.",
+    "ru": "Исчезновение ребёнка в немецком городке раскрывает двойную жизнь четырёх семей и тайну, растянувшуюся на поколения и десятилетия.",
+    "ar": "اختفاء طفل في بلدة ألمانية يكشف الحياة المزدوجة لأربع عائلات، وسرًا يمتد عبر أجيال وعقود."
+   },
+   "kind": "series",
+   "endYear": 2020
+  },
+  {
+   "id": "true_detective",
+   "imdbId": "tt2356777",
+   "title": "True Detective",
+   "year": 2014,
+   "director": "Nic Pizzolatto",
+   "runtimeMin": 61,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "mystery",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 30,
+   "synopsisHe": "בכל עונה בלשים רודפים אחרי רוצח בנוף רדוף, והתיק מפרק בדרך את חייהם שלהם.",
+   "synopsisEn": "Each season, detectives chase a killer through a haunted landscape, and the case takes apart their own lives along the way.",
+   "synopses": {
+    "pt": "A cada temporada, detetives perseguem um assassino por uma paisagem assombrada, e o caso desmonta a vida deles pelo caminho.",
+    "ru": "Каждый сезон детективы преследуют убийцу в мрачных, словно проклятых краях, и дело попутно разрушает их собственные жизни.",
+    "ar": "في كل موسم يطارد محققون قاتلًا عبر أرض موحشة، وتفكك القضية حياتهم الخاصة في الطريق."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "hannibal",
+   "imdbId": "tt2243973",
+   "title": "Hannibal",
+   "year": 2013,
+   "director": "Bryan Fuller",
+   "runtimeMin": 45,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "crime",
+    "body"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 65,
+   "synopsisHe": "פרופיילר מחונן ב־FBI שיודע לחשוב כמו הרוצחים שהוא צד מתקרב לפסיכיאטר שלו, ד\"ר חניבעל לקטר.",
+   "synopsisEn": "A gifted FBI profiler who can think like the killers he hunts grows close to his psychiatrist, Dr. Hannibal Lecter.",
+   "synopses": {
+    "pt": "Um talentoso perfilador do FBI, capaz de pensar como os assassinos que caça, se aproxima de seu psiquiatra, o Dr. Hannibal Lecter.",
+    "ru": "Одарённый профайлер ФБР, умеющий думать как убийцы, на которых охотится, сближается со своим психиатром — доктором Ганнибалом Лектером.",
+    "ar": "محلل سلوكي موهوب في مكتب التحقيقات الفيدرالي قادر على التفكير مثل القتلة الذين يطاردهم يقترب من طبيبه النفسي، الدكتور هانيبال ليكتر."
+   },
+   "kind": "series",
+   "endYear": 2015
+  },
+  {
+   "id": "penny_dreadful",
+   "imdbId": "tt2628232",
+   "title": "Penny Dreadful",
+   "year": 2014,
+   "director": "John Logan",
+   "runtimeMin": 60,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "vampire",
+    "possession"
+   ],
+   "fear": 3,
+   "hue": 280,
+   "saturation": 35,
+   "synopsisHe": "בלונדון הוויקטוריאנית, חוקר, אקדוחן ומדיום רדופה ניצבים מול המפלצות של הספרות הגותית.",
+   "synopsisEn": "In Victorian London, an explorer, a gunslinger and a haunted medium face the monsters of gothic literature.",
+   "synopses": {
+    "pt": "Na Londres vitoriana, um explorador, um pistoleiro e uma médium atormentada enfrentam os monstros da literatura gótica.",
+    "ru": "В викторианском Лондоне путешественник, стрелок и одержимая медиум сталкиваются с чудовищами готической литературы.",
+    "ar": "في لندن الفيكتورية يواجه مستكشف ومقاتل بارع بالمسدس ووسيطة روحانية مسكونة وحوش الأدب القوطي."
+   },
+   "kind": "series",
+   "endYear": 2016
+  },
+  {
+   "id": "the_terror",
+   "imdbId": "tt2708480",
+   "title": "The Terror",
+   "year": 2018,
+   "director": "David Kajganich, Max Borenstein",
+   "runtimeMin": 44,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "creature"
+   ],
+   "fear": 4,
+   "hue": 200,
+   "saturation": 25,
+   "synopsisHe": "צוותים של שתי ספינות בריטיות שנלכדו בקרח הארקטי נאבקים בקור, ברעב ובעצמם, בזמן שמשהו צד אותם על פני הים הקפוא.",
+   "synopsisEn": "The crews of two British ships trapped in Arctic ice fight cold, hunger and each other, while something stalks them across the frozen sea.",
+   "synopses": {
+    "pt": "As tripulações de dois navios britânicos presos no gelo do Ártico lutam contra o frio, a fome e uns aos outros, enquanto algo os persegue pelo mar congelado.",
+    "ru": "Экипажи двух британских кораблей, застрявших во льдах Арктики, борются с холодом, голодом и друг с другом, а по замёрзшему морю за ними охотится нечто.",
+    "ar": "طاقما سفينتين بريطانيتين عالقتين في جليد القطب الشمالي يصارعان البرد والجوع وبعضهما، بينما يطاردهما شيء عبر البحر المتجمد."
+   },
+   "kind": "series",
+   "endYear": 2026
+  },
+  {
+   "id": "from",
+   "imdbId": "tt9813792",
+   "title": "From",
+   "year": 2022,
+   "director": "John Griffin",
+   "runtimeMin": 51,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "creature",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 100,
+   "saturation": 30,
+   "synopsisHe": "משפחה בנסיעה בלב אמריקה מגיעה לעיירה שאיש לא יכול לעזוב, ושבה יצורים יוצאים בכל לילה.",
+   "synopsisEn": "A family driving through middle America ends up in a town that no one can leave, where creatures come out every night.",
+   "synopses": {
+    "pt": "Uma família em viagem pelo interior dos EUA vai parar numa cidade da qual ninguém consegue sair, onde criaturas aparecem toda noite.",
+    "ru": "Семья, путешествующая по глубинке Америки, попадает в городок, из которого никто не может выбраться и где каждую ночь выходят чудовища.",
+    "ar": "عائلة مسافرة عبر قلب أمريكا ينتهي بها المطاف في بلدة لا يستطيع أحد مغادرتها، وتخرج فيها مخلوقات كل ليلة."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "yellowjackets",
+   "imdbId": "tt11041332",
+   "title": "Yellowjackets",
+   "year": 2021,
+   "director": "Ashley Lyle, Bart Nickerson",
+   "runtimeMin": 57,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "psychological",
+    "folk"
+   ],
+   "fear": 3,
+   "hue": 50,
+   "saturation": 55,
+   "synopsisHe": "קבוצת כדורגל של נערות שורדת התרסקות מטוס בטבע הפראי; עשרים וחמש שנים אחר כך, מה שעשו כדי לשרוד חוזר אליהן.",
+   "synopsisEn": "A girls' soccer team survives a plane crash in the wilderness; twenty-five years later, what they did to stay alive comes back for them.",
+   "synopses": {
+    "pt": "Um time de futebol feminino sobrevive à queda de um avião na natureza selvagem; vinte e cinco anos depois, o que fizeram para sobreviver volta para assombrá-las.",
+    "ru": "Женская футбольная команда выживает после авиакатастрофы в глуши; спустя двадцать пять лет то, что они сделали ради выживания, настигает их.",
+    "ar": "فريق كرة قدم للفتيات ينجو من تحطم طائرة في البرية؛ وبعد خمس وعشرين سنة يعود إليهن ما فعلنه كي يبقين على قيد الحياة."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "mindhunter",
+   "imdbId": "tt5290382",
+   "title": "Mindhunter",
+   "year": 2017,
+   "director": "Joe Penhall",
+   "runtimeMin": 54,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 15,
+   "synopsisHe": "בסוף שנות ה־70, שני סוכני FBI מראיינים רוצחים סדרתיים כלואים כדי להבין איך הם חושבים, ולתפוס את הבאים בתור.",
+   "synopsisEn": "In the late 1970s, two FBI agents interview imprisoned serial killers to understand how they think, and to catch the next ones.",
+   "synopses": {
+    "pt": "No fim dos anos 70, dois agentes do FBI entrevistam assassinos em série presos para entender como pensam e pegar os próximos.",
+    "ru": "В конце 1970-х двое агентов ФБР беседуют с осуждёнными серийными убийцами, чтобы понять, как те думают, и поймать следующих.",
+    "ar": "في أواخر السبعينيات يجري عميلان في مكتب التحقيقات الفيدرالي مقابلات مع قتلة متسلسلين مسجونين لفهم طريقة تفكيرهم والقبض على من سيأتي بعدهم."
+   },
+   "kind": "series",
+   "endYear": 2019
+  },
+  {
+   "id": "kingdom",
+   "imdbId": "tt6611916",
+   "title": "Kingdom",
+   "year": 2019,
+   "director": "Kim Eun-hee",
+   "runtimeMin": 48,
+   "genre": "horror",
+   "subgenres": [
+    "zombie",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 15,
+   "saturation": 50,
+   "synopsisHe": "בקוריאה של תקופת ג'וסון, נסיך הכתר חושף מגפה שמקימה את המתים, וקנוניה שמגיעה עד הכס.",
+   "synopsisEn": "In Korea's Joseon era, a crown prince uncovers a plague that raises the dead, and a conspiracy that reaches the throne.",
+   "synopses": {
+    "pt": "Na Coreia da era Joseon, um príncipe herdeiro descobre uma praga que levanta os mortos e uma conspiração que chega ao trono.",
+    "ru": "В Корее эпохи Чосон наследный принц раскрывает чуму, поднимающую мёртвых, и заговор, который тянется к самому трону.",
+    "ar": "في كوريا عهد جوسون يكتشف ولي العهد وباءً يعيد الموتى إلى الحياة، ومؤامرة تصل إلى العرش."
+   },
+   "kind": "series",
+   "endYear": 2020
+  },
+  {
+   "id": "sweet_home",
+   "imdbId": "tt11612120",
+   "title": "Sweet Home",
+   "year": 2020,
+   "director": "Lee Eung-bok",
+   "runtimeMin": 58,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 260,
+   "saturation": 40,
+   "synopsisHe": "נער מסוגר ושכניו לכודים בבניין הדירות שלהם כשאנשים בכל מקום הופכים למפלצות שמעוצבות לפי התשוקות שלהם.",
+   "synopsisEn": "A withdrawn teenager and his neighbors are trapped in their apartment block as people everywhere turn into monsters shaped by their desires.",
+   "synopses": {
+    "pt": "Um adolescente recluso e seus vizinhos ficam presos no prédio enquanto pessoas por toda parte se transformam em monstros moldados por seus desejos.",
+    "ru": "Замкнутый подросток и его соседи оказываются заперты в многоквартирном доме, пока люди повсюду превращаются в чудовищ, порождённых их желаниями.",
+    "ar": "مراهق منطو وجيرانه محاصرون في مبنى شققهم بينما يتحول الناس في كل مكان إلى وحوش تشكلها رغباتهم."
+   },
+   "kind": "series",
+   "endYear": 2024
+  },
+  {
+   "id": "evil",
+   "imdbId": "tt9055008",
+   "title": "Evil",
+   "year": 2019,
+   "director": "Robert King, Michelle King",
+   "runtimeMin": 50,
+   "genre": "horror",
+   "subgenres": [
+    "possession",
+    "supernatural",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 330,
+   "saturation": 45,
+   "synopsisHe": "פסיכולוגית ספקנית מצטרפת לכומר בהכשרה ולמומחה טכנולוגיה כדי לחקור דיבוקים, ניסים ורדיפות רוחות עבור הכנסייה.",
+   "synopsisEn": "A skeptical psychologist joins a priest-in-training and a tech expert to investigate possessions, miracles and hauntings for the Church.",
+   "synopses": {
+    "pt": "Uma psicóloga cética se junta a um seminarista e a um especialista em tecnologia para investigar possessões, milagres e assombrações para a Igreja.",
+    "ru": "Психолог-скептик вместе с будущим священником и техническим экспертом расследует для Церкви случаи одержимости, чудеса и появления призраков.",
+    "ar": "تنضم أخصائية نفسية متشككة إلى كاهن تحت التدريب وخبير تقني للتحقيق في حالات المس والمعجزات والأماكن المسكونة لصالح الكنيسة."
+   },
+   "kind": "series",
+   "endYear": 2024
+  },
+  {
+   "id": "lovecraft_country",
+   "imdbId": "tt6905686",
+   "title": "Lovecraft Country",
+   "year": 2020,
+   "director": "Misha Green",
+   "runtimeMin": 59,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "social",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 280,
+   "saturation": 50,
+   "synopsisHe": "באמריקה של שנות ה־50, תחת ההפרדה הגזעית, חייל משוחרר שחור מחפש את אביו הנעדר ופוגש גם אימה גזענית וגם מפלצות בנוסח לאבקרפט.",
+   "synopsisEn": "In 1950s segregated America, a young Black veteran searches for his missing father and meets both racist terror and Lovecraftian monsters.",
+   "synopses": {
+    "pt": "Nos EUA segregados dos anos 50, um jovem veterano negro procura o pai desaparecido e enfrenta tanto o terror racista quanto monstros lovecraftianos.",
+    "ru": "В Америке 1950-х, разделённой сегрегацией, молодой чернокожий ветеран ищет пропавшего отца и сталкивается и с расистским террором, и с лавкрафтовскими чудовищами.",
+    "ar": "في أمريكا الخمسينيات المقسمة عنصريًا يبحث محارب قديم أسود شاب عن والده المفقود فيواجه الرعب العنصري ووحوشًا من عالم لافكرافت."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "the_outsider",
+   "imdbId": "tt8550800",
+   "title": "The Outsider",
+   "year": 2020,
+   "director": "Richard Price",
+   "runtimeMin": 55,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "crime",
+    "mystery"
+   ],
+   "fear": 4,
+   "hue": 60,
+   "saturation": 20,
+   "synopsisHe": "תיק אטום של בלש נגד אדם שנאשם ברצח ילד מתפרק כשהראיות מציבות את החשוד בשני מקומות בבת אחת.",
+   "synopsisEn": "A detective's airtight case against a man accused of a child's murder falls apart when evidence puts the suspect in two places at once.",
+   "synopses": {
+    "pt": "O caso sólido de um detetive contra um homem acusado do assassinato de uma criança desmorona quando as provas colocam o suspeito em dois lugares ao mesmo tempo.",
+    "ru": "Железное дело детектива против человека, обвинённого в убийстве ребёнка, разваливается, когда улики показывают, что подозреваемый был в двух местах одновременно.",
+    "ar": "تنهار قضية محقق محكمة ضد رجل متهم بقتل طفل عندما تضع الأدلة المشتبه به في مكانين في الوقت نفسه."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "bates_motel",
+   "imdbId": "tt2188671",
+   "title": "Bates Motel",
+   "year": 2013,
+   "director": "Carlton Cuse, Kerry Ehrin, Anthony Cipriano",
+   "runtimeMin": 45,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "slasher"
+   ],
+   "fear": 3,
+   "hue": 210,
+   "saturation": 25,
+   "synopsisHe": "פריקוול מודרני ל״פסיכו״: נורמן בייטס הנער ואמו נורמה עוברים לעיירה קטנה כדי לנהל מוטל, והחושך שבו הולך וגדל.",
+   "synopsisEn": "A modern prequel to Psycho: teenage Norman Bates and his mother Norma move to a small town to run a motel, and his darkness grows.",
+   "synopses": {
+    "pt": "Uma prequela moderna de Psicose: o adolescente Norman Bates e sua mãe Norma se mudam para uma cidadezinha para administrar um motel, e a escuridão dele cresce.",
+    "ru": "Современный приквел «Психо»: подросток Норман Бейтс и его мать Норма переезжают в маленький город, чтобы управлять мотелем, и тьма в нём растёт.",
+    "ar": "مقدمة حديثة لفيلم «سايكو»: ينتقل المراهق نورمان بيتس ووالدته نورما إلى بلدة صغيرة لإدارة نُزُل، ويكبر الظلام بداخله."
+   },
+   "kind": "series",
+   "endYear": 2017
+  },
+  {
+   "id": "exorcist_series",
+   "imdbId": "tt5368542",
+   "title": "The Exorcist",
+   "year": 2016,
+   "director": "Jeremy Slater",
+   "runtimeMin": 45,
+   "genre": "horror",
+   "subgenres": [
+    "possession",
+    "supernatural"
+   ],
+   "fear": 4,
+   "hue": 30,
+   "saturation": 40,
+   "synopsisHe": "שני כמרים שונים מאוד מתמודדים עם מקרים מפחידים של דיבוק שטני, עשרות שנים אחרי אירועי הסרט הקלאסי.",
+   "synopsisEn": "Two very different priests take on frightening cases of demonic possession, decades after the events of the classic film.",
+   "synopses": {
+    "pt": "Dois padres muito diferentes enfrentam casos assustadores de possessão demoníaca, décadas depois dos eventos do filme clássico.",
+    "ru": "Два совершенно разных священника берутся за пугающие случаи одержимости бесами спустя десятилетия после событий классического фильма.",
+    "ar": "كاهنان مختلفان تمامًا يتصديان لحالات مرعبة من المس الشيطاني، بعد عقود من أحداث الفيلم الكلاسيكي."
+   },
+   "kind": "series",
+   "endYear": 2018
+  },
+  {
+   "id": "sharp_objects",
+   "imdbId": "tt2649356",
+   "title": "Sharp Objects",
+   "year": 2018,
+   "director": "Marti Noxon",
+   "runtimeMin": 53,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "crime",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 350,
+   "saturation": 35,
+   "synopsisHe": "עיתונאית פגועה חוזרת לעיירת הולדתה הקטנה כדי לסקר את רציחתן של שתי נערות צעירות, ולהתמודד עם הסודות של משפחתה.",
+   "synopsisEn": "A troubled reporter returns to her small hometown to cover the murders of two young girls, and to face her own family's secrets.",
+   "synopses": {
+    "pt": "Uma repórter perturbada volta à sua pequena cidade natal para cobrir o assassinato de duas meninas e encarar os segredos da própria família.",
+    "ru": "Измученная журналистка возвращается в родной городок, чтобы написать об убийствах двух девочек, и сталкивается с тайнами собственной семьи.",
+    "ar": "صحفية مضطربة تعود إلى بلدتها الصغيرة لتغطية مقتل فتاتين صغيرتين، ولمواجهة أسرار عائلتها."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "severance",
+   "imdbId": "tt11280740",
+   "title": "Severance",
+   "year": 2022,
+   "director": "Dan Erickson",
+   "runtimeMin": 49,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "mystery",
+    "social"
+   ],
+   "fear": 1,
+   "hue": 190,
+   "saturation": 20,
+   "synopsisHe": "עובדי משרד שהזיכרונות שלהם מפוצלים בניתוח בין העבודה לבית מתחילים לגלות מה החברה שלהם באמת עושה.",
+   "synopsisEn": "Office workers whose memories are surgically split between work and home begin to uncover what their company really does.",
+   "synopses": {
+    "pt": "Funcionários de escritório cujas memórias são divididas cirurgicamente entre trabalho e casa começam a descobrir o que sua empresa realmente faz.",
+    "ru": "Офисные сотрудники, чья память хирургически разделена между работой и домом, начинают выяснять, чем на самом деле занимается их компания.",
+    "ar": "موظفو مكتب تُفصل ذكرياتهم جراحيًا بين العمل والمنزل يبدؤون في كشف ما تفعله شركتهم حقًا."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "twilight_zone",
+   "imdbId": "tt0052520",
+   "title": "The Twilight Zone",
+   "year": 1959,
+   "director": "Rod Serling",
+   "runtimeMin": 25,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "האנתולוגיה הקלאסית של רוד סרלינג על אנשים רגילים שחוצים לממד של גורלות מוזרים, תפניות אכזריות ואימה שקטה.",
+   "synopsisEn": "Rod Serling's classic anthology of ordinary people who cross into a dimension of strange fates, cruel twists and quiet terror.",
+   "synopses": {
+    "pt": "A antologia clássica de Rod Serling sobre pessoas comuns que atravessam para uma dimensão de destinos estranhos, reviravoltas cruéis e terror silencioso.",
+    "ru": "Классическая антология Рода Серлинга об обычных людях, попадающих в измерение странных судеб, жестоких поворотов и тихого ужаса.",
+    "ar": "مختارات رود سيرلنغ الكلاسيكية عن أناس عاديين يعبرون إلى بعد من المصائر الغريبة والتحولات القاسية والرعب الصامت."
+   },
+   "kind": "series",
+   "endYear": 1964
+  },
+  {
+   "id": "interview_vampire_series",
+   "imdbId": "tt14921986",
+   "title": "Interview with the Vampire",
+   "year": 2022,
+   "director": "Rolin Jones",
+   "runtimeMin": 53,
+   "genre": "horror",
+   "subgenres": [
+    "vampire",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 350,
+   "saturation": 55,
+   "synopsisHe": "הערפד לואי מספר לעיתונאי את סיפור חייו: האהבה והמלחמה שלו עם לסטאט, מניו אורלינס של שנות ה־1910 ועד היום.",
+   "synopsisEn": "The vampire Louis tells a journalist his life story: his love and war with Lestat, from 1910s New Orleans to the present.",
+   "synopses": {
+    "pt": "O vampiro Louis conta a um jornalista a história de sua vida: seu amor e sua guerra com Lestat, da Nova Orleans dos anos 1910 até hoje.",
+    "ru": "Вампир Луи рассказывает журналисту историю своей жизни: любовь и войну с Лестатом — от Нового Орлеана 1910-х до наших дней.",
+    "ar": "يروي مصاص الدماء لويس لصحفي قصة حياته: حبه وحربه مع ليستات، من نيو أورلينز في العقد الثاني من القرن العشرين حتى اليوم."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "archive_81",
+   "imdbId": "tt13365348",
+   "title": "Archive 81",
+   "year": 2022,
+   "director": "Rebecca Sonnenshine",
+   "runtimeMin": 53,
+   "genre": "horror",
+   "subgenres": [
+    "found_footage",
+    "supernatural",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 35,
+   "synopsisHe": "ארכיונאי שמשחזר קלטות וידאו שרופות נשאב לתעלומת היעלמותה של היוצרת שצילמה אותן, ושל הכת שתיעדה.",
+   "synopsisEn": "An archivist restoring burned videotapes is drawn into the disappearance of the filmmaker who recorded them, and the cult she was filming.",
+   "synopses": {
+    "pt": "Um arquivista que restaura fitas de vídeo queimadas é envolvido no desaparecimento da cineasta que as gravou e da seita que ela filmava.",
+    "ru": "Архивист, восстанавливающий обгоревшие видеокассеты, втягивается в тайну исчезновения снявшей их режиссёрки и секты, которую она снимала.",
+    "ar": "أمين أرشيف يرمم أشرطة فيديو محترقة ينجذب إلى لغز اختفاء صانعة الأفلام التي صورتها، وإلى الطائفة التي كانت تصورها."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "alice_borderland",
+   "imdbId": "tt10795658",
+   "title": "Alice in Borderland",
+   "year": 2020,
+   "director": "Shinsuke Sato",
+   "runtimeMin": 58,
+   "genre": "thriller",
+   "subgenres": [
+    "survival",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 60,
+   "synopsisHe": "גיימר וחבריו מוצאים את עצמם בטוקיו ריקה, שבה עליהם לנצח במשחקים קטלניים כדי להישאר בחיים.",
+   "synopsisEn": "A gamer and his friends find themselves in an empty Tokyo, where they must win deadly games to stay alive.",
+   "synopses": {
+    "pt": "Um gamer e seus amigos se veem numa Tóquio vazia, onde precisam vencer jogos mortais para continuar vivos.",
+    "ru": "Геймер и его друзья оказываются в опустевшем Токио, где, чтобы выжить, им нужно побеждать в смертельных играх.",
+    "ar": "لاعب ألعاب فيديو وأصدقاؤه يجدون أنفسهم في طوكيو خالية، حيث عليهم الفوز في ألعاب قاتلة كي يبقوا أحياء."
+   },
+   "kind": "series",
+   "endYear": 2025
+  },
+  {
+   "id": "all_of_us_dead",
+   "imdbId": "tt14169960",
+   "title": "All of Us Are Dead",
+   "year": 2022,
+   "director": "Lee Jae-kyoo",
+   "runtimeMin": 61,
+   "genre": "horror",
+   "subgenres": [
+    "zombie",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 120,
+   "saturation": 40,
+   "synopsisHe": "תיכון הופך למוקד של התפרצות זומבים, ותלמידים לכודים חייבים להילחם בדרכם החוצה או להידבק.",
+   "synopsisEn": "A high school becomes ground zero for a zombie outbreak, and trapped students must fight their way out or become infected.",
+   "synopses": {
+    "pt": "Uma escola vira o epicentro de um surto zumbi, e os alunos presos precisam lutar para sair ou acabarão infectados.",
+    "ru": "Школа становится эпицентром зомби-эпидемии, и запертым в ней ученикам приходится пробиваться наружу, пока их не заразили.",
+    "ar": "تتحول مدرسة ثانوية إلى بؤرة تفشٍّ للزومبي، وعلى الطلاب المحاصرين شق طريقهم إلى الخارج أو التعرض للعدوى."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "last_of_us",
+   "imdbId": "tt3581920",
+   "title": "The Last of Us",
+   "year": 2023,
+   "director": "Craig Mazin, Neil Druckmann",
+   "runtimeMin": 56,
+   "genre": "horror",
+   "subgenres": [
+    "zombie",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 80,
+   "saturation": 30,
+   "synopsisHe": "עשרים שנה אחרי שזיהום פטרייתי מוטט את הציוויליזציה, מבריח קשוח מלווה נערה, שאולי היא התקווה האחרונה של האנושות, לאורך אמריקה.",
+   "synopsisEn": "Twenty years after a fungal infection collapsed civilization, a hardened smuggler escorts a teenage girl who may be humanity's last hope across America.",
+   "synopses": {
+    "pt": "Vinte anos depois que uma infecção por fungos derrubou a civilização, um contrabandista calejado escolta pelos EUA uma adolescente que pode ser a última esperança da humanidade.",
+    "ru": "Через двадцать лет после того, как грибковая инфекция уничтожила цивилизацию, закалённый контрабандист сопровождает через Америку девочку-подростка, которая может быть последней надеждой человечества.",
+    "ar": "بعد عشرين عامًا من انهيار الحضارة بسبب عدوى فطرية، يرافق مهرب متمرس فتاة مراهقة قد تكون الأمل الأخير للبشرية عبر أمريكا."
+   },
+   "kind": "series",
+   "ongoing": true
+  },
+  {
+   "id": "cabinet_curiosities",
+   "imdbId": "tt8415836",
+   "title": "Guillermo del Toro's Cabinet of Curiosities",
+   "year": 2022,
+   "director": "Guillermo del Toro",
+   "runtimeMin": 56,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "creature"
+   ],
+   "fear": 4,
+   "hue": 30,
+   "saturation": 45,
+   "synopsisHe": "גיירמו דל טורו מציג שמונה סיפורים מקבריים נפרדים, שכל אחד מהם נוצר בידי יוצר אימה אחר.",
+   "synopsisEn": "Guillermo del Toro presents eight standalone tales of the macabre, each made by a different horror filmmaker.",
+   "synopses": {
+    "pt": "Guillermo del Toro apresenta oito contos macabros independentes, cada um feito por um diretor de terror diferente.",
+    "ru": "Гильермо дель Торо представляет восемь отдельных жутких историй, каждую из которых снял другой режиссёр хорроров.",
+    "ar": "يقدم غييرمو ديل تورو ثماني حكايات مروعة منفصلة، صنع كل واحدة منها مخرج رعب مختلف."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "marianne",
+   "imdbId": "tt10875696",
+   "title": "Marianne",
+   "year": 2019,
+   "director": "Samuel Bodin",
+   "runtimeMin": 45,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "possession"
+   ],
+   "fear": 5,
+   "hue": 0,
+   "saturation": 10,
+   "synopsisHe": "סופרת אימה חוזרת לעיירת החוף שבה גדלה ומגלה שהמכשפה מהסיוטים שלה, ומהספרים שלה, אמיתית.",
+   "synopsisEn": "A horror novelist returns to her seaside hometown and finds that the witch from her nightmares, and from her books, is real.",
+   "synopses": {
+    "pt": "Uma romancista de terror volta à cidade litorânea onde cresceu e descobre que a bruxa de seus pesadelos, e de seus livros, é real.",
+    "ru": "Писательница ужасов возвращается в родной приморский городок и узнаёт, что ведьма из её кошмаров — и из её книг — существует на самом деле.",
+    "ar": "تعود روائية رعب إلى بلدتها الساحلية لتكتشف أن الساحرة التي تسكن كوابيسها، وكتبها، حقيقية."
+   },
+   "kind": "series"
+  },
+  {
+   "id": "them",
+   "imdbId": "tt9064858",
+   "title": "Them",
+   "year": 2021,
+   "director": "Little Marvin",
+   "runtimeMin": 42,
+   "genre": "horror",
+   "subgenres": [
+    "social",
+    "supernatural",
+    "haunted_house"
+   ],
+   "fear": 5,
+   "hue": 40,
+   "saturation": 45,
+   "synopsisHe": "ב־1953 משפחה שחורה עוברת לשכונה לבנה כולה בלוס אנג'לס, שבה שכנים מלאי שנאה וכוחות מרושעים הופכים את ביתה לסיוט.",
+   "synopsisEn": "In 1953, a Black family moves into an all-white Los Angeles neighborhood, where hateful neighbors and malevolent forces turn their home into a nightmare.",
+   "synopses": {
+    "pt": "Em 1953, uma família negra se muda para um bairro só de brancos em Los Angeles, onde vizinhos cheios de ódio e forças malignas transformam a casa num pesadelo.",
+    "ru": "В 1953 году чернокожая семья переезжает в полностью белый район Лос-Анджелеса, где полные ненависти соседи и злые силы превращают их дом в кошмар.",
+    "ar": "في عام 1953 تنتقل عائلة سوداء إلى حي أبيض بالكامل في لوس أنجلوس، حيث يحول جيران حاقدون وقوى شريرة بيتها إلى كابوس."
+   },
+   "kind": "series",
+   "endYear": 2024
+  },
+  {
+   "id": "squid_game",
+   "imdbId": "tt10919420",
+   "title": "Squid Game",
+   "year": 2021,
+   "director": "Hwang Dong-hyuk",
+   "runtimeMin": 59,
+   "genre": "thriller",
+   "subgenres": [
+    "survival",
+    "social"
+   ],
+   "fear": 3,
+   "hue": 330,
+   "saturation": 60,
+   "synopsisHe": "מאות אנשים שקועים בחובות מקבלים הזמנה לשחק במשחקי ילדים על פרס כספי עצום, שבהם הפסד פירושו מוות.",
+   "synopsisEn": "Hundreds of people deep in debt accept an invitation to play children's games for a huge cash prize, where losing means dying.",
+   "synopses": {
+    "pt": "Centenas de pessoas endividadas aceitam um convite para disputar brincadeiras infantis por um prêmio enorme, em que perder significa morrer.",
+    "ru": "Сотни людей в долгах принимают приглашение сыграть в детские игры ради огромного денежного приза, где проигрыш означает смерть.",
+    "ar": "مئات الأشخاص الغارقين في الديون يقبلون دعوة للعب ألعاب أطفال مقابل جائزة مالية ضخمة، حيث تعني الخسارة الموت."
+   },
+   "kind": "series",
+   "endYear": 2025
+  },
+  {
+   "id": "you",
+   "imdbId": "tt7335184",
+   "title": "You",
+   "year": 2018,
+   "director": "Greg Berlanti, Sera Gamble",
+   "runtimeMin": 49,
+   "genre": "thriller",
+   "subgenres": [
+    "psychological",
+    "crime"
+   ],
+   "fear": 2,
+   "hue": 0,
+   "saturation": 35,
+   "synopsisHe": "מנהל חנות ספרים מקסים נעשה אובססיבי לנשים שהוא מתאהב בהן, ויעשה הכל, אפילו לרצוח, כדי להתקרב אליהן.",
+   "synopsisEn": "A charming bookstore manager becomes obsessed with the women he falls for, and will do anything, even kill, to get close to them.",
+   "synopses": {
+    "pt": "Um charmoso gerente de livraria fica obcecado pelas mulheres por quem se apaixona e fará qualquer coisa, até matar, para se aproximar delas.",
+    "ru": "Обаятельный управляющий книжным магазином одержим женщинами, в которых влюбляется, и готов на всё — даже на убийство, — чтобы быть к ним ближе.",
+    "ar": "مدير متجر كتب ساحر يصبح مهووسًا بالنساء اللواتي يقع في حبهن، ومستعد لفعل أي شيء، حتى القتل، ليقترب منهن."
+   },
+   "kind": "series",
+   "endYear": 2025
+  },
+  {
+   "id": "hellbound",
+   "imdbId": "tt12235718",
+   "title": "Hellbound",
+   "year": 2021,
+   "director": "Yeon Sang-ho",
+   "runtimeMin": 50,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "social"
+   ],
+   "fear": 4,
+   "hue": 10,
+   "saturation": 50,
+   "synopsisHe": "יצורים על־טבעיים מופיעים משום מקום כדי לגזור על אנשים גיהינום, וקבוצה דתית קנאית קמה כדי להסביר זאת.",
+   "synopsisEn": "Supernatural beings appear out of nowhere to condemn people to hell, and a fanatical religious group rises to explain it.",
+   "synopses": {
+    "pt": "Seres sobrenaturais surgem do nada para condenar pessoas ao inferno, e um grupo religioso fanático se ergue para explicar o fenômeno.",
+    "ru": "Сверхъестественные существа появляются из ниоткуда, чтобы обрекать людей на ад, а фанатичная религиозная группа берётся это объяснить.",
+    "ar": "تظهر كائنات خارقة من العدم لتحكم على الناس بالجحيم، وتنهض جماعة دينية متعصبة لتفسير ما يحدث."
+   },
+   "kind": "series",
+   "endYear": 2024
+  },
+  {
+   "id": "chucky",
+   "imdbId": "tt8388390",
+   "title": "Chucky",
+   "year": 2021,
+   "director": "Don Mancini",
+   "runtimeMin": 46,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 15,
+   "saturation": 60,
+   "synopsisHe": "בובת צ'אקי וינטג' צצה במכירת חצר בפרבר, ועד מהרה עיירה שקטה נקרעת בסדרת רציחות מזעזעות.",
+   "synopsisEn": "A vintage Chucky doll turns up at a suburban yard sale, and a quiet town is soon torn apart by a series of horrifying murders.",
+   "synopses": {
+    "pt": "Um boneco Chucky antigo aparece num bazar de garagem no subúrbio, e logo uma cidade tranquila é abalada por uma série de assassinatos horríveis.",
+    "ru": "Винтажная кукла Чаки появляется на дворовой распродаже в пригороде, и вскоре тихий городок сотрясает череда жутких убийств.",
+    "ar": "تظهر دمية تشاكي قديمة في سوق مستعملات في إحدى الضواحي، وسرعان ما تمزق بلدة هادئة سلسلة من جرائم القتل المروعة."
+   },
+   "kind": "series",
+   "endYear": 2024
+  }
+ ],
+ "collections": [
+  {
+   "id": "series_must",
+   "titleHe": "סדרות אימה שחובה לראות",
+   "titleEn": "Horror series you can't skip",
+   "movieIds": [
+    "hill_house",
+    "stranger_things",
+    "midnight_mass",
+    "house_of_usher",
+    "the_terror",
+    "from",
+    "walking_dead",
+    "hannibal",
+    "kingdom",
+    "last_of_us",
+    "yellowjackets",
+    "twilight_zone",
+    "evil",
+    "ahs"
+   ],
+   "titles": {
+    "pt": "Séries de terror imperdíveis",
+    "ru": "Хоррор-сериалы, которые нельзя пропустить",
+    "ar": "مسلسلات رعب لا تُفوَّت"
+   }
+  },
+  {
+   "id": "series_ghosts",
+   "titleHe": "רוחות, בתים רדופים ודיבוקים",
+   "titleEn": "Ghosts, haunted houses and possessions",
+   "movieIds": [
+    "hill_house",
+    "bly_manor",
+    "house_of_usher",
+    "marianne",
+    "them",
+    "exorcist_series",
+    "evil",
+    "ahs",
+    "penny_dreadful",
+    "cabinet_curiosities",
+    "midnight_mass",
+    "archive_81"
+   ],
+   "titles": {
+    "pt": "Fantasmas, casas assombradas e possessões",
+    "ru": "Призраки, дома с привидениями и одержимость",
+    "ar": "أشباح وبيوت مسكونة ومسّ"
+   }
+  },
+  {
+   "id": "series_mystery",
+   "titleHe": "תעלומות ומתח פסיכולוגי",
+   "titleEn": "Mysteries and psychological suspense",
+   "movieIds": [
+    "twin_peaks",
+    "dark",
+    "true_detective",
+    "mindhunter",
+    "sharp_objects",
+    "severance",
+    "black_mirror",
+    "x_files",
+    "the_outsider",
+    "bates_motel",
+    "you",
+    "yellowjackets"
+   ],
+   "titles": {
+    "pt": "Mistérios e suspense psicológico",
+    "ru": "Загадки и психологический триллер",
+    "ar": "ألغاز وتشويق نفسي"
+   }
+  },
+  {
+   "id": "series_monsters",
+   "titleHe": "זומבים, ערפדים ויצורים",
+   "titleEn": "Zombies, vampires and creatures",
+   "movieIds": [
+    "walking_dead",
+    "kingdom",
+    "all_of_us_dead",
+    "last_of_us",
+    "sweet_home",
+    "interview_vampire_series",
+    "stranger_things",
+    "from",
+    "lovecraft_country",
+    "the_terror",
+    "hellbound",
+    "chucky"
+   ],
+   "titles": {
+    "pt": "Zumbis, vampiros e criaturas",
+    "ru": "Зомби, вампиры и чудовища",
+    "ar": "زومبي ومصاصو دماء ومخلوقات"
+   }
+  },
+  {
+   "id": "series_games",
+   "titleHe": "משחקים קטלניים והישרדות",
+   "titleEn": "Deadly games and survival",
+   "movieIds": [
+    "squid_game",
+    "alice_borderland",
+    "yellowjackets",
+    "the_terror",
+    "from",
+    "sweet_home",
+    "all_of_us_dead",
+    "walking_dead"
+   ],
+   "titles": {
+    "pt": "Jogos mortais e sobrevivência",
+    "ru": "Смертельные игры и выживание",
+    "ar": "ألعاب قاتلة ونجاة"
+   }
+  }
+ ]
+}

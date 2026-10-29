@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.cinemeta
 
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import kotlinx.serialization.Serializable
@@ -41,7 +42,22 @@ data class CinemetaMeta(
     val localName: String = "",
     val localDescription: String = "",
     val localLanguage: String = "",
-)
+    /** "movie" or "series", as Cinemeta says. */
+    val type: String = TYPE_MOVIE,
+    /** A series' last year, from "2016–2025"; null when it ended the year it began or is still running. */
+    val endYear: Int? = null,
+    /** A series still running ("2022–"). */
+    val ongoing: Boolean = false,
+) {
+    val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
+
+    companion object {
+        const val TYPE_MOVIE = "movie"
+        const val TYPE_SERIES = "series"
+
+        fun typeOf(kind: MediaKind): String = if (kind == MediaKind.SERIES) TYPE_SERIES else TYPE_MOVIE
+    }
+}
 
 /** A row pulled from a Cinemeta catalog, such as popular horror. */
 @Serializable
@@ -108,18 +124,18 @@ object Cinemeta {
     /** Full metas fetched per search to learn the genres of results that came without them. */
     private const val MAX_GENRE_LOOKUPS = 12
 
-    fun metaUrl(imdbId: String): String {
+    fun metaUrl(imdbId: String, kind: MediaKind = MediaKind.MOVIE): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
-        return "$BASE_URL/meta/movie/$imdbId.json"
+        return "$BASE_URL/meta/${CinemetaMeta.typeOf(kind)}/$imdbId.json"
     }
 
     /** A catalog page; Cinemeta pages hold 50 movies, so [skip] moves in steps of 50. */
-    fun catalogUrl(catalogId: String, genre: String, skip: Int = 0): String {
+    fun catalogUrl(catalogId: String, genre: String, skip: Int = 0, kind: MediaKind = MediaKind.MOVIE): String {
         require(catalogIdPattern.matches(catalogId)) { "invalid catalog id" }
         require(genrePattern.matches(genre)) { "invalid genre" }
         require(skip in 0..MAX_SKIP) { "invalid skip" }
         val extra = if (skip > 0) "genre=$genre&skip=$skip" else "genre=$genre"
-        return "$BASE_URL/catalog/movie/$catalogId/$extra.json"
+        return "$BASE_URL/catalog/${CinemetaMeta.typeOf(kind)}/$catalogId/$extra.json"
     }
 
     /**
@@ -132,7 +148,7 @@ object Cinemeta {
      * Search in Cinemeta's "top" catalog, using the Stremio add-on "extra" path argument. Null when the query is too
      * short or too long; otherwise every character outside [A-Za-z0-9-_.~] is percent-encoded as UTF-8.
      */
-    fun searchUrl(query: String): String? {
+    fun searchUrl(query: String, kind: MediaKind = MediaKind.MOVIE): String? {
         val q = query.trim().replace(Regex("\\s+"), " ")
         if (q.length !in MIN_SEARCH_LENGTH..MAX_SEARCH_LENGTH) return null
         val encoded = buildString {
@@ -145,7 +161,7 @@ object Cinemeta {
                 }
             }
         }
-        return "$BASE_URL/catalog/movie/top/search=$encoded.json"
+        return "$BASE_URL/catalog/${CinemetaMeta.typeOf(kind)}/top/search=$encoded.json"
     }
 
     /**
@@ -194,6 +210,9 @@ object Cinemeta {
         localName = movie.titles[language].orEmpty(),
         localDescription = movie.synopses[language].orEmpty(),
         localLanguage = language.takeIf { movie.titles.containsKey(it) || movie.synopses.containsKey(it) }.orEmpty(),
+        type = CinemetaMeta.typeOf(movie.kind),
+        endYear = movie.endYear,
+        ongoing = movie.ongoing,
     )
 
     fun parseMeta(text: String): CinemetaMeta? =
@@ -213,7 +232,13 @@ object Cinemeta {
         val imdbId = (o.str("imdb_id") ?: o.str("id"))?.takeIf(imdbPattern::matches) ?: return null
         val name = o.str("name")?.trim()?.take(200)?.takeIf(String::isNotEmpty) ?: return null
         if (adultTitle.containsMatchIn(name)) return null
-        val year = (o.str("year") ?: o.str("releaseInfo"))?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
+        val years = o.str("releaseInfo") ?: o.str("year")
+        val year = years?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
+        val type = if (o.str("type") == CinemetaMeta.TYPE_SERIES) CinemetaMeta.TYPE_SERIES else CinemetaMeta.TYPE_MOVIE
+        // A series' years: "2016–2025" (ended), "2022–" (running), "2018" (one season); either dash.
+        val span = years?.trim()?.let(seriesYears::matchEntire)
+        val endYear = span?.groupValues?.get(2)?.toIntOrNull()?.takeIf { year != null && it in year..2100 }
+        val ongoing = type == CinemetaMeta.TYPE_SERIES && span != null && span.groupValues[1].isNotEmpty() && endYear == null
         val trailers = (
             (o["trailerStreams"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("ytId") }.orEmpty() +
                 (o["trailers"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("source") }.orEmpty()
@@ -233,8 +258,13 @@ object Cinemeta {
             runtimeMin = o.str("runtime")?.substringBefore(' ')?.toIntOrNull()?.takeIf { it in 1..600 },
             trailerYoutubeId = trailers.firstOrNull(),
             trailerAlternates = trailers.drop(1),
+            type = type,
+            endYear = endYear.takeIf { type == CinemetaMeta.TYPE_SERIES },
+            ongoing = ongoing,
         )
     }
+
+    private val seriesYears = Regex("^\\d{4}([–-])?(\\d{4})?$")
 
     /** Only https URLs of sane length; anything else (http, data:, file:, javascript:) is dropped. */
     fun safeImage(url: String?): String? =
@@ -250,6 +280,9 @@ object Cinemeta {
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
         trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
+        // A running series ends, or a new season starts: Cinemeta knows before the bundled library does.
+        endYear = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.endYear else movie.endYear,
+        ongoing = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.ongoing else movie.ongoing,
     )
 
     /** A movie that is only known from Cinemeta. Fear is unknown, so it stays null. */
@@ -276,6 +309,9 @@ object Cinemeta {
             trailerAlternates = meta.trailerAlternates,
             releaseDate = meta.releaseDate.ifBlank { null },
             curated = false,
+            kind = meta.kind,
+            endYear = meta.endYear,
+            ongoing = meta.ongoing,
         )
     }
 

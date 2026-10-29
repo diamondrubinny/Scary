@@ -29,6 +29,12 @@ object Links {
         return "stremio:///detail/movie/$imdbId/$imdbId"
     }
 
+    /** A series' page in Stremio, where its seasons and episodes are listed. Like [stremioMovie], to verify on the device. */
+    fun stremioSeries(imdbId: String): String {
+        require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
+        return "stremio:///detail/series/$imdbId"
+    }
+
     fun playStoreMarket(packageName: String): String {
         require(packagePattern.matches(packageName)) { "invalid package name" }
         return "market://details?id=$packageName"
