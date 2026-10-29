@@ -702,16 +702,17 @@ class ScaryUiTest {
         rule.waitForIdle()
     }
 
-    /** The focused card lies wholly inside the rows, with a row title right above it, also inside the rows. */
+    /** The focused card or chip lies wholly inside the rows, and so does its row's title (the nearest one above it). */
     private fun assertFocusedRowFullyShown() {
         val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
-        waitUntilOrDescribe("a focused card wholly inside the rows") {
+        waitUntilOrDescribe("a focused card wholly inside the rows, its row title in view") {
             val focused = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
                 .singleOrNull()?.boundsInRoot ?: return@waitUntilOrDescribe false
-            val titles = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+            val title = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
                 .map { it.boundsInRoot }
-            focused.top >= rows.top && focused.bottom <= rows.bottom &&
-                titles.any { it.top >= rows.top && it.bottom <= focused.top && focused.top - it.bottom < MAX_TITLE_GAP_PX }
+                .filter { it.bottom <= focused.top }
+                .maxByOrNull { it.bottom }
+            focused.top >= rows.top && focused.bottom <= rows.bottom && title != null && title.top >= rows.top
         }
     }
 
@@ -735,9 +736,7 @@ class ScaryUiTest {
         const val BEYOND_FIRST_PAGES = 120
         const val SCREEN_DEPTH = 6
         const val SLEEP_CHOICES = 5
-        const val ROWS_TO_WALK = 4
-        // A row's title sits just above its cards: the cards' top padding and the focused card's growth.
-        const val MAX_TITLE_GAP_PX = 120f
+        const val ROWS_TO_WALK = 6
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }

@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -179,8 +182,8 @@ fun HomeScreen(
     // drops its synopsis, so a whole row (title and cards) shows with the next one peeking below it.
     var rowsFocused by remember { mutableStateOf(false) }
     val rowsScroll = LocalBringIntoViewSpec.current
-    val pivot = with(LocalDensity.current) { RowPivot.toPx() }
-    val rowsPivot = remember(pivot) { FocusedRowPivot(pivot) }
+    val rowTop = with(LocalDensity.current) { RowTop.toPx() }
+    val rowsPivot = remember(rowTop) { WholeRowInView(rowTop) }
 
     Column(Modifier.fillMaxSize()) {
         TopBar(
@@ -211,7 +214,7 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
             )
         }
-        // The focused row stays at the same height, its title in view; the cards inside keep the TV's own scrolling.
+        // The focused row settles at the top of the rows, title and all; the cards inside keep the TV's own scrolling.
         CompositionLocalProvider(LocalBringIntoViewSpec provides rowsPivot) {
             LazyColumn(
                 state = listState,
@@ -226,8 +229,10 @@ fun HomeScreen(
             ) {
                 items(state.rows, key = { it.key }) { row ->
                     CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
-                        HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
-                            heroAfterMyList = true
+                        Box(Modifier.bringIntoViewResponder(FromRowTitle)) {
+                            HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
+                                heroAfterMyList = true
+                            }
                         }
                     }
                 }
@@ -245,19 +250,33 @@ fun HomeScreen(
     }
 }
 
-/**
- * Where a focused card's top settles in the rows: below its row's title and the faded top edge, so moving up or down
- * always shows the whole row, and the next one peeks in below.
- */
-private val RowPivot = 60.dp
+/** Where the focused row's top (its title) settles in the rows: just below the faded top edge. */
+private val RowTop = 24.dp
 
 /** Rows scrolled past melt into the dark over this much, above the focused row's title. */
 private val RowsFade = 20.dp
 
-/** Scrolls the rows so the focused card's top sits [pivot] pixels below their top (as far as the list can scroll). */
+/**
+ * A row asks the rows to show it from its title down to the focused card or chip, not the card alone: on a row with
+ * two lines (moods and decades), the second line would otherwise push the title out of view.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-private class FocusedRowPivot(private val pivot: Float) : BringIntoViewSpec {
-    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float = offset - pivot
+private object FromRowTitle : BringIntoViewResponder {
+    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, 0f, localRect.right, localRect.bottom)
+
+    // The row itself does not scroll vertically; its cards' own row handles the sideways part.
+    override suspend fun bringChildIntoView(localRect: () -> Rect?) = Unit
+}
+
+/**
+ * Scrolls the rows so the requested part (a row from its title down to the focus) starts [top] pixels below their
+ * top, and the next row peeks in below. A part taller than the rows is scrolled just enough to show its bottom, where
+ * the focus is.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private class WholeRowInView(private val top: Float) : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float =
+        if (size <= containerSize - top) offset - top else offset + size - containerSize
 }
 
 @Composable
