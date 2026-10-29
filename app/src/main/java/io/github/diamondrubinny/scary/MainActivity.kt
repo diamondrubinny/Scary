@@ -32,6 +32,7 @@ import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.model.MediaKind
 
 class MainActivity : ComponentActivity() {
 
@@ -135,6 +136,14 @@ class MainActivity : ComponentActivity() {
                 viewModel.debugShowRow("time", focusKey = "time:chip:${budget.key}")
             }
             target == "trailers:off" || target == "trailers:on" -> viewModel.debugSetTrailers(target == "trailers:on")
+            // Films or series: "tab:series", "tab:movie".
+            target.startsWith("tab:") -> MediaKind.entries.firstOrNull { it.name.equals(target.removePrefix("tab:"), ignoreCase = true) }
+                ?.let(viewModel::selectTab)
+            // The bucket list: three films in it ("bucket:fill"), its screen, picking mode, and the question on return.
+            target == "bucket:fill" -> viewModel.debugFillBucket()
+            target == "bucket" -> viewModel.openBucket()
+            target == "bucket:picking" -> viewModel.startPicking()
+            target == "bucket:prompt" -> viewModel.debugBucketPrompt()
             // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
             // is chosen and its chip focused.
             target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)

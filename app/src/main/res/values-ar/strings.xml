@@ -150,7 +150,7 @@
         <item>لا يحتوي SCARY على حسابات ولا إعلانات ولا تحليلات ولا ملفات تعريف ارتباط، ولا يوجد خادم لـ SCARY. لا يُرسل إلينا أي شيء تفعله في الواجهة.</item>
         <item>يُخزَّن على هذا التلفزيون فقط: إعداداتك ولغتك، والتطبيقات المثبّتة في المقدمة والمخفية، وآخر 12 فيلمًا فتحتها، وقائمتك، ورمز PIN للرقابة الأبوية بصيغة hash مع salt (وليس الرمز نفسه أبدًا)، وأوقات الأعطال الأخيرة (الوقت فقط)، ومعلومات الأفلام والصور المخزنة مؤقتًا. إلغاء تثبيت SCARY أو مسح بياناته من إعدادات التلفزيون يحذف كل ذلك. SCARY مستثنى من النسخ الاحتياطي في Android.</item>
         <item>تُقرأ قائمة التطبيقات المثبتة على هذا التلفزيون لعرضها، ولا تغادره أبدًا.</item>
-        <item>ويُخزَّن أيضًا على هذا التلفزيون فقط: الأفلام التي علّمتها \"أحببته\" أو \"ليس لي\"، واليوم الذي علّمت فيه كل فيلم كمُشاهَد. منها تُبنى \"لأنك أحببت\" و\"كم لديك من الوقت؟\" و\"عامك في الخوف\"، ويجري الحساب على التلفزيون. مؤقت النوم منبّه على التلفزيون يوقف ما يُعرض مؤقتًا. تُقرأ مداخل التلفزيون (HDMI، الهوائي) على التلفزيون لعرضها. رمز QR في صفحة الفيلم يفتح صفحته على IMDb في هاتفك، ولا يرسل التلفزيون شيئًا.</item>
+        <item>ويُخزَّن أيضًا على هذا التلفزيون فقط: الأفلام التي علّمتها \"أحببته\" أو \"ليس لي\"، واليوم الذي علّمت فيه كل فيلم كمُشاهَد، وقائمة Bucket list الخاصة بك. منها تُبنى \"لأنك أحببت\" و\"كم لديك من الوقت؟\" و\"عامك في الخوف\"، ويجري الحساب على التلفزيون. مؤقت النوم منبّه على التلفزيون يوقف ما يُعرض مؤقتًا. تُقرأ مداخل التلفزيون (HDMI، الهوائي) على التلفزيون لعرضها. رمز QR في صفحة الفيلم يفتح صفحته على IMDb في هاتفك، ولا يرسل التلفزيون شيئًا.</item>
         <item>بيانات الأفلام عبر الإنترنت، ويمكنك إيقافها من الإعدادات: يطلب SCARY من Cinemeta، خدمة البيانات الوصفية العامة لـ Stremio، الملصقات والخلفيات والتقييمات وطاقم التمثيل. لا يُرسل سوى معرّفات أفلام IMDb العامة، ونص البحث عندما تبحث. تُحمَّل الصور من عناوين HTTPS التي يقدّمها Cinemeta، ومعظمها من images.metahub.space. وكأي موقع ويب، ترى هذه الخدمات عنوان IP الخاص بتلفزيونك. تُخزَّن المعلومات مؤقتًا لمدة 24 ساعة.</item>
         <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة. تأتي عروض الاستئجار والشراء في صفحات الأفلام من TMDB (بيانات JustWatch): يحمل الطلب معرّف الفيلم فقط، ويُحدَّد بلدك على التلفاز من إعداد المنطقة أو من اختيارك في الإعدادات، وليس من موقعك أبدًا.</item>
         <item>يُسلِّم البحث الصوتي المهمة إلى أداة التعرف على الكلام في هذا التلفزيون (عادةً Google). يذهب التسجيل إلى تلك الخدمة وليس إلى SCARY، ولا يتلقى SCARY سوى النص المُتعرَّف عليه.</item>
@@ -318,4 +318,48 @@
     <string name="stats_favorite_subgenre">النوع الفرعي المفضل</string>
     <string name="stats_favorite_decade">العقد المفضل</string>
     <string name="stats_loved">أفلام محبوبة</string>
+    <string name="tab_movies">أفلام</string>
+    <string name="tab_series">مسلسلات</string>
+    <string name="series_tag">مسلسل</string>
+    <string name="minutes_episode">%1$d دقيقة للحلقة</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: الأفلام فيها: %1$d</string>
+    <string name="bucket_badge">رقم %1$d في Bucket list</string>
+    <string name="bucket_explainer">اختر أفلامًا لمشاهدتها واحدًا تلو الآخر. «ابدأ» يفتح الأول في Stremio، وفي كل مرة تعود فيها إلى SCARY يسألك إن كان سيُشغّل التالي.</string>
+    <string name="bucket_limits">يفتح SCARY صفحة الفيلم في Stremio، وهناك تختار المصدر وتضغط Play. لا يرى SCARY متى ينتهي الفيلم: العودة إليه (Home أو Back) هي العلامة، بحسب الوقت الذي مضى.</string>
+    <string name="bucket_empty_title">Bucket list فارغة</string>
+    <string name="bucket_empty_body">اختر بعض الأفلام لهذه الليلة، وسيرتبها SCARY في طابور.</string>
+    <string name="bucket_pick">اختيار الأفلام</string>
+    <string name="bucket_start">ابدأ</string>
+    <string name="bucket_pick_more">اختيار المزيد</string>
+    <string name="bucket_clear">مسح القائمة</string>
+    <string name="bucket_clear_confirm">اضغط مرة أخرى للمسح</string>
+    <string name="bucket_total">الأفلام في القائمة: %1$d · المدة الكلية: %2$s</string>
+    <string name="bucket_unavailable">غير متاح الآن</string>
+    <string name="bucket_move_up">تحريك %1$s لأعلى</string>
+    <string name="bucket_move_down">تحريك %1$s لأسفل</string>
+    <string name="bucket_remove">إزالة %1$s</string>
+    <string name="bucket_prompt_finished">هل أنهيت %1$s؟</string>
+    <string name="bucket_prompt_early">عدت مبكرًا من %1$s</string>
+    <string name="bucket_prompt_next">التالي: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">كان ذلك آخر فيلم في Bucket list.</string>
+    <string name="bucket_prompt_note">تبقى Bucket list كما هي حتى تغيّرها.</string>
+    <string name="bucket_prompt_back">العودة إلى %1$s</string>
+    <string name="bucket_prompt_play">تشغيل %1$s</string>
+    <string name="bucket_prompt_later">ليس الآن</string>
+    <string name="bucket_prompt_stop">توقف الآن</string>
+    <string name="action_add_bucket">إضافة إلى Bucket list</string>
+    <string name="action_in_bucket">في Bucket list</string>
+    <string name="picking_title">اختيار أفلام لـ Bucket list</string>
+    <string name="picking_hint">OK على الملصق يضيفه أو يزيله. Back أو «تم» عندما تكون جاهزًا.</string>
+    <string name="picking_count">الأفلام المختارة: %1$d</string>
+    <string name="picking_done">تم</string>
+    <string name="msg_bucket_films_only">الأفلام فقط يمكن أن تدخل Bucket list.</string>
+    <string name="msg_bucket_locked">%1$s مقفل: لا يمكن إضافته إلى Bucket list.</string>
+    <string name="msg_bucket_full">Bucket list ممتلئة (%1$s فيلمًا).</string>
+    <string name="msg_bucket_added">%1$s هو رقم %2$s في Bucket list.</string>
+    <string name="msg_bucket_removed">خرج %1$s من Bucket list.</string>
+    <string name="msg_bucket_cleared">أصبحت Bucket list فارغة.</string>
+    <string name="msg_bucket_empty">اختر بعض الأفلام أولًا.</string>
+    <string name="msg_bucket_done">كانت هذه Bucket list كلها. نجوت!</string>
 </resources>

@@ -391,9 +391,9 @@ data class CinemetaCache(
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
-         * 4: every trailer of a movie, not only the first).
+         * 4: every trailer of a movie, not only the first; 5: series and their rows).
          */
-        const val ROWS_VERSION = 4
+        const val ROWS_VERSION = 5
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

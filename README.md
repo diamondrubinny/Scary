@@ -64,6 +64,8 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - ❤️ **Loved it / Not for me**: love a film and "Because you loved it" brings more like it; "not for me" keeps a film out of every suggestion. **"Your year in fear"** sums up what you watched.
 - 🎟️ **Coming soon to cinemas** (with a TMDB key), and **scan to share**: a QR code on every film page opens its IMDb page on your phone, ready to share.
 - 📡 **HDMI and live TV** tiles on TVs with inputs, and a **sleep timer** that pauses whatever plays.
+- 📺 **Horror and thriller series**: a Series tab with 40 hand-picked shows (Hill House, Stranger Things, Dark, Kingdom…) and live rows of popular horror, thriller and mystery series.
+- 🍿 **Bucket list**: pick a few films, press Start, and they play one after another: each time you come back from Stremio, SCARY asks whether to play the next.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
 - ⭐ **My list and Watched**: hold OK on any poster to keep it (hold again to remove it), and mark what you have seen. Come back from a movie and SCARY marks it as watched for you.
 - 🌫️ **Atmosphere**: fog, film grain and an ambient drone (all can be turned off), and a screensaver of horror backdrops.
@@ -119,6 +121,8 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - ❤️ **אהבתי / לא בשבילי**: אהבתם סרט, ו"כי אהבת" מביא עוד כמוהו; "לא בשבילי" מוציא סרט מכל ההצעות. **"השנה שלך בפחד"** מסכמת מה ראיתם.
 - 🎟️ **בקרוב בקולנוע** (עם מפתח TMDB), ו**סריקה לשיתוף**: קוד QR בכל עמוד סרט פותח את עמוד ה־IMDb שלו בטלפון, מוכן לשיתוף.
 - 📡 **אריחי HDMI וטלוויזיה בשידור חי** בטלוויזיות עם כניסות, ו**טיימר שינה** שעוצר את מה שמתנגן.
+- 📺 **סדרות אימה ומתח**: טאב סדרות עם 40 סדרות שנבחרו ביד (Hill House, Stranger Things, Dark, Kingdom…) ושורות חיות של סדרות אימה, מתח ותעלומה פופולריות.
+- 🍿 **Bucket list**: בוחרים כמה סרטים, לוחצים "התחלה", והם מתנגנים אחד אחרי השני: בכל חזרה מ־Stremio,‏ SCARY שואלת אם לנגן את הבא.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
 - ⭐ **"הרשימה שלי" ו"נצפה"**: לחיצה ארוכה על פוסטר שומרת אותו (לחיצה ארוכה נוספת מסירה), ואפשר לסמן מה כבר ראיתם. כשחוזרים מסרט, SCARY מסמנת אותו כנצפה בעצמה.
 - 🌫️ **אווירה**: ערפל, גרעיניות קולנועית וצלילי רקע (אפשר לכבות), ושומר מסך עם רקעים מסרטי אימה.
@@ -176,6 +180,8 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - ❤️ **أحببته / ليس لي**: أحببت فيلمًا؟ "لأنك أحببت" يجلب أفلامًا مثله؛ و"ليس لي" يُخرج الفيلم من كل الاقتراحات. **"عامك في الخوف"** يلخّص ما شاهدته.
 - 🎟️ **قريبًا في السينما** (مع مفتاح TMDB)، و**امسح للمشاركة**: رمز QR في كل صفحة فيلم يفتح صفحته على IMDb في هاتفك، جاهزة للمشاركة.
 - 📡 **مربعات HDMI والبث المباشر** في أجهزة التلفاز ذات المداخل، و**مؤقت نوم** يوقف ما يُعرض مؤقتًا.
+- 📺 **مسلسلات رعب وإثارة**: تبويب للمسلسلات فيه 40 مسلسلًا مختارًا (Hill House وStranger Things وDark وKingdom…) وصفوف حية لمسلسلات الرعب والإثارة والغموض الرائجة.
+- 🍿 **Bucket list**: اختر بعض الأفلام، اضغط «ابدأ»، فتُعرض واحدًا تلو الآخر: في كل عودة من Stremio يسألك SCARY إن كان سيشغّل التالي.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
 - ⭐ **«قائمتي» و«شوهد»**: ضغطة مطوّلة على أي ملصق تحفظه (وضغطة أخرى تزيله)، ويمكنك وضع علامة على ما شاهدته. وعند عودتك من فيلم، يضع SCARY عليه علامة «شوهد» بنفسه.
 - 🌫️ **أجواء**: ضباب وحبيبات سينمائية وأصوات خلفية (يمكن إيقافها)، وشاشة توقف بخلفيات من أفلام الرعب.
@@ -231,6 +237,8 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - ❤️ **Amei / Não é pra mim**: ame um filme e "Porque você amou" traz outros parecidos; "não é pra mim" tira o filme de todas as sugestões. **"Seu ano no medo"** resume o que você assistiu.
 - 🎟️ **Em breve nos cinemas** (com uma chave TMDB), e **escaneie para compartilhar**: um código QR em cada página de filme abre a página dele no IMDb no celular, pronta para compartilhar.
 - 📡 **Blocos de HDMI e TV ao vivo** em TVs com entradas, e um **timer de sono** que pausa o que estiver tocando.
+- 📺 **Séries de terror e suspense**: uma aba de séries com 40 títulos escolhidos a dedo (Hill House, Stranger Things, Dark, Kingdom…) e fileiras ao vivo de séries populares de terror, suspense e mistério.
+- 🍿 **Bucket list**: escolha alguns filmes, aperte Começar e eles tocam um depois do outro: cada vez que você volta do Stremio, o SCARY pergunta se toca o próximo.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
 - ⭐ **Minha lista e Visto**: segure OK em qualquer pôster para guardá-lo (segure de novo para tirar) e marque o que você já viu. Ao voltar de um filme, o SCARY o marca como visto sozinho.
 - 🌫️ **Atmosfera**: névoa, granulado de cinema e som ambiente (tudo pode ser desligado), e um protetor de tela com fundos de filmes de terror.
@@ -284,6 +292,8 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - ❤️ **Понравилось / Не моё**: отметьте фильм, и «Потому что вам понравился» подберёт похожие; «не моё» убирает фильм из всех подсказок. **«Ваш год страха»** подводит итоги просмотренного.
 - 🎟️ **Скоро в кино** (с ключом TMDB) и **сканируйте, чтобы поделиться**: QR-код на странице каждого фильма открывает его страницу IMDb на телефоне, готовую, чтобы поделиться.
 - 📡 **Плитки HDMI и эфирного ТВ** на телевизорах со входами и **таймер сна**, который ставит воспроизведение на паузу.
+- 📺 **Хоррор- и триллер-сериалы**: вкладка сериалов с 40 отобранными вручную (Hill House, Stranger Things, Dark, Kingdom…) и живыми рядами популярных хоррор-, триллер- и детективных сериалов.
+- 🍿 **Bucket list**: выберите несколько фильмов, нажмите «Начать», и они пойдут один за другим: каждый раз, когда вы возвращаетесь из Stremio, SCARY спрашивает, включить ли следующий.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
 - ⭐ **«Мой список» и «Просмотрено»**: удерживайте OK на постере, чтобы сохранить фильм (ещё раз — чтобы убрать), и отмечайте просмотренное. Когда вы возвращаетесь после фильма, SCARY сам отмечает его просмотренным.
 - 🌫️ **Атмосфера**: туман, киноплёночное зерно и фоновые звуки (можно отключить), а также заставка с кадрами из фильмов ужасов.

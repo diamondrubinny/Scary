@@ -4,6 +4,12 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Column
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 import io.github.diamondrubinny.scary.core.brand.Credit
@@ -64,6 +70,12 @@ fun TopBar(
     sleepAtMillis: Long? = null,
     /** While the rows have the focus: the donation code steps aside so the rows get the room (it shows again above). */
     compact: Boolean = false,
+    /** The home screen's tabs (films, series); none on other screens. */
+    tab: MediaKind? = null,
+    onSelectTab: (MediaKind) -> Unit = {},
+    /** The bucket list's button, with how many films it holds; none when null. */
+    onOpenBucket: (() -> Unit)? = null,
+    bucketCount: Int = 0,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
@@ -88,11 +100,23 @@ fun TopBar(
                     .padding(horizontal = 14.dp, vertical = 5.dp),
             )
         }
+        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 28.dp))
         Spacer(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
             Clock()
             Spacer(Modifier.width(4.dp))
+            if (onOpenBucket != null) {
+                IconCircleButton(
+                    contentDescription = if (bucketCount > 0) {
+                        stringResource(R.string.bucket_button_count, bucketCount)
+                    } else {
+                        stringResource(R.string.bucket_title)
+                    },
+                    onClick = onOpenBucket,
+                    modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
+                ) { BucketIcon(it) }
+            }
             IconCircleButton(
                 contentDescription = stringResource(R.string.search_title),
                 onClick = onOpenSearch,
@@ -200,4 +224,39 @@ fun CreditLine(modifier: Modifier = Modifier, short: Boolean = false) {
         style = ScaryType.Caption.mixedLanguage(),
         modifier = modifier,
     )
+}
+
+/** Test tags of the bucket list's button and of the films and series tabs. */
+const val BUCKET_BUTTON_TAG = "bucketButton"
+fun tabTag(kind: MediaKind): String = "tab:${kind.name.lowercase()}"
+
+/** Films or series: two tabs beside the logo. The chosen one is filled, and says so to TalkBack. */
+@Composable
+private fun HomeTabs(selected: MediaKind, onSelect: (MediaKind) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        for (kind in MediaKind.entries) {
+            val chosen = kind == selected
+            FocusSurface(
+                onClick = { onSelect(kind) },
+                modifier = Modifier
+                    .testTag(tabTag(kind))
+                    .semantics {
+                        role = Role.Tab
+                        this.selected = chosen
+                    },
+                shape = RoundedCornerShape(50),
+                focusedScale = 1.06f,
+                containerColor = if (chosen) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.5f),
+                focusedContainerColor = ScaryColors.Bone,
+                borderColor = if (chosen) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
+            ) { focused ->
+                BasicText(
+                    text = stringResource(if (kind == MediaKind.SERIES) R.string.tab_series else R.string.tab_movies),
+                    style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+                    maxLines = 1,
+                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp, vertical = 9.dp),
+                )
+            }
+        }
+    }
 }

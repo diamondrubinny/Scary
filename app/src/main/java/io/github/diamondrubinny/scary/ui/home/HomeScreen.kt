@@ -4,6 +4,8 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.ui.components.LocalBucketNumber
 import androidx.compose.foundation.relocation.BringIntoViewResponder
 import androidx.compose.foundation.relocation.bringIntoViewResponder
 import androidx.compose.ui.geometry.Rect
@@ -116,6 +118,12 @@ class HomeActions(
     val onNearRowEnd: (rowKey: String) -> Unit = {},
     /** Picks a time budget in "How much time do you have?", or clears it when chosen again. */
     val onTimeBudget: (TimeBudget) -> Unit = {},
+    /** Films or series. */
+    val onSelectTab: (MediaKind) -> Unit = {},
+    /** The bucket list's button in the top bar. */
+    val onOpenBucket: () -> Unit = {},
+    /** "Done" while picking films for the bucket list. */
+    val onFinishPicking: () -> Unit = {},
 )
 
 val SidePadding = 48.dp
@@ -196,17 +204,26 @@ fun HomeScreen(
             familyNight = state.familyNight,
             sleepAtMillis = state.sleepAtMillis,
             compact = rowsFocused,
+            tab = state.tab,
+            onSelectTab = actions.onSelectTab,
+            onOpenBucket = actions.onOpenBucket,
+            bucketCount = state.bucketIds.size,
         )
-        Hero(
-            movie = state.hero,
-            isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
-            language = language,
-            primaryFocus = heroFocus,
-            actions = actions,
-            locked = state.hero?.let(state::isLocked) ?: false,
-            trailer = trailer,
-            compact = rowsFocused,
-        )
+        if (state.picking) {
+            // Picking films for the bucket list: the hero gives way to what OK does now, and how many are in.
+            PickingBanner(count = state.bucketIds.size, doneFocus = heroFocus, onDone = actions.onFinishPicking)
+        } else {
+            Hero(
+                movie = state.hero,
+                isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
+                language = language,
+                primaryFocus = heroFocus,
+                actions = actions,
+                locked = state.hero?.let(state::isLocked) ?: false,
+                trailer = trailer,
+                compact = rowsFocused,
+            )
+        }
         if (state.catalogError) {
             EmptyState(
                 title = stringResource(R.string.catalog_error_title),
@@ -215,7 +232,11 @@ fun HomeScreen(
             )
         }
         // The focused row settles at the top of the rows, title and all; the cards inside keep the TV's own scrolling.
-        CompositionLocalProvider(LocalBringIntoViewSpec provides rowsPivot) {
+        CompositionLocalProvider(
+            LocalBringIntoViewSpec provides rowsPivot,
+            // While picking, each poster shows its place in the bucket list.
+            LocalBucketNumber provides if (state.picking) state::bucketNumber else null,
+        ) {
             LazyColumn(
                 state = listState,
                 modifier = Modifier
@@ -247,6 +268,37 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+/** Test tag of the picking banner (bucket list). */
+const val PICKING_BANNER_TAG = "pickingBanner"
+
+/** In place of the hero while picking films for the bucket list: what OK does, how many are in, and "Done". */
+@Composable
+private fun PickingBanner(count: Int, doneFocus: FocusRequester, onDone: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = SidePadding, vertical = 8.dp)
+            .fillMaxWidth()
+            .testTag(PICKING_BANNER_TAG),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            BasicText(
+                stringResource(R.string.picking_title),
+                style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.6f),
+                modifier = Modifier.semantics { heading() },
+            )
+            BasicText(stringResource(R.string.picking_hint), style = ScaryType.Body)
+            BasicText(
+                stringResource(R.string.picking_count, count),
+                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+        }
+        ScaryButton(text = stringResource(R.string.picking_done), onClick = onDone, primary = true, focusRequester = doneFocus)
     }
 }
 
@@ -546,7 +598,9 @@ private fun Modifier.fadeTopEdge(height: Dp): Modifier = this
 fun subgenreLine(movie: Movie): String {
     val genre = stringResource(movie.genre.labelRes())
     val subs = movie.subgenres.map { stringResource(it.labelRes()) }
-    return (listOf(genre) + subs).joinToString(" · ")
+    // A series says so first: "Series · Horror · Ghost".
+    val kind = if (movie.isSeries) listOf(stringResource(R.string.series_tag)) else emptyList()
+    return (kind + listOf(genre) + subs).joinToString(" · ")
 }
 
 /**

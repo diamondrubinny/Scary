@@ -169,6 +169,29 @@ open --es scary.debug.open stats
 shot 61-stats 5
 open --es scary.debug.open home
 
+# The series tab, then the bucket list: picking (three films in, numbered), its screen, and the question on return.
+open --es scary.debug.open tab:series
+shot 62-series-tab 10
+key KEYCODE_DPAD_DOWN
+key KEYCODE_DPAD_DOWN
+shot 63-series-rows 4
+open --es scary.debug.open tab:movie
+sleep 3
+open --es scary.debug.open bucket:fill
+sleep 2
+open --es scary.debug.open bucket:picking
+sleep 3
+key KEYCODE_DPAD_DOWN
+key KEYCODE_DPAD_DOWN
+key KEYCODE_DPAD_DOWN
+shot 64-bucket-picking 4
+open --es scary.debug.open bucket
+shot 65-bucket-list 5
+open --es scary.debug.open bucket:prompt
+shot 66-bucket-prompt 4
+key KEYCODE_BACK
+open --es scary.debug.open home
+
 # Family night: only gentle movies and a badge in the top bar; then back to normal.
 open --es scary.debug.open family
 shot 36-family-night 6

@@ -43,7 +43,9 @@ class Launcher(
 
     fun openInStremio(movie: Movie): LaunchResult {
         if (!apps.isInstalled(KnownPackages.STREMIO)) return openStoreFor(KnownPackages.STREMIO, STREMIO_LABEL)
-        val deepLink = Intent(Intent.ACTION_VIEW, Links.stremioMovie(movie.imdbId).toUri())
+        // A series opens on its page in Stremio, where its seasons and episodes are.
+        val link = if (movie.isSeries) Links.stremioSeries(movie.imdbId) else Links.stremioMovie(movie.imdbId)
+        val deepLink = Intent(Intent.ACTION_VIEW, link.toUri())
             .setPackage(KnownPackages.STREMIO)
         if (start(deepLink)) return LaunchResult.Opened
         return when (launchApp(KnownPackages.STREMIO, STREMIO_LABEL)) {

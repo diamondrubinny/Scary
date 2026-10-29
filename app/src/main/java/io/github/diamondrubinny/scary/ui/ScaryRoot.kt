@@ -4,6 +4,11 @@
 
 package io.github.diamondrubinny.scary.ui
 
+import io.github.diamondrubinny.scary.ui.bucket.BucketActions
+import io.github.diamondrubinny.scary.ui.bucket.BucketScreen
+import io.github.diamondrubinny.scary.ui.bucket.BucketPromptDialog
+import io.github.diamondrubinny.scary.ui.components.LocalShowSeriesTag
+import androidx.compose.runtime.CompositionLocalProvider
 import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
 import android.app.Activity
 import android.content.Context
@@ -91,6 +96,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
+    val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -149,7 +155,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val actions = remember(viewModel, settingsLabel, language) {
         HomeActions(
             onCardFocused = viewModel::onCardFocused,
-            onOpenDetails = { viewModel.openDetails(it.id) },
+            // While picking films for the bucket list, OK on a poster adds or removes it instead of opening it.
+            onOpenDetails = { if (viewModel.uiState.value.picking) viewModel.toggleBucket(it, language) else viewModel.openDetails(it.id) },
             onWatch = viewModel::watch,
             onTrailer = viewModel::trailer,
             onTile = { tile -> if (tile == AppTile.SetAsHome) requestDefaultHome() else viewModel.openTile(tile, settingsLabel) },
@@ -162,7 +169,27 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onDecade = viewModel::toggleDecade,
             onNearRowEnd = viewModel::onNearRowEnd,
             onTimeBudget = viewModel::toggleTimeBudget,
+            onSelectTab = viewModel::selectTab,
+            onOpenBucket = viewModel::openBucket,
+            onFinishPicking = viewModel::finishPicking,
         )
+    }
+    val bucketActions = remember(viewModel) {
+        BucketActions(
+            onStart = viewModel::startBucket,
+            onPickMore = viewModel::startPicking,
+            onClear = viewModel::clearBucket,
+            onMove = viewModel::moveInBucket,
+            onRemove = viewModel::removeFromBucket,
+        )
+    }
+    // Films or series: a new tab starts its rows from the top (coming back from a movie page keeps the place).
+    var shownTab by remember { mutableStateOf(state.tab) }
+    LaunchedEffect(state.tab) {
+        if (state.tab == shownTab) return@LaunchedEffect
+        shownTab = state.tab
+        homeListState.scrollToItem(0)
+        rowStates.values.forEach { it.scrollToItem(0) }
     }
     val allAppsActions = remember(viewModel) {
         AllAppsActions(
@@ -248,7 +275,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     // family night (YouTube may show ads and suggestions), and not when the TV's "Remove animations" is on.
     val trailersEnabled = state.trailerAutoplay && state.onlineEnabled && !state.familyNight && systemAnimations &&
         lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
-        launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro
+        launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro && bucketPrompt == null &&
+        !state.picking
     val trailerSettings = remember(viewModel, trailersEnabled, state.trailerSound, state.trailerIntroSeen) {
         TrailerSettings(
             enabled = trailersEnabled,
@@ -270,22 +298,24 @@ fun ScaryRoot(viewModel: HomeViewModel) {
 
             when {
                 state.loading -> LoadingView()
-                current == Screen.Search -> SearchScreen(
-                    movies = state.movies,
-                    query = searchQuery,
-                    onQueryChange = viewModel::setSearchQuery,
-                    onOpenMovie = {
-                        searchOpenedId = it.id
-                        viewModel.openDetails(it.id)
-                    },
-                    language = language,
-                    isLocked = state::isLocked,
-                    isWatched = state::isWatched,
-                    gridState = searchGrid,
-                    returnTo = searchOpenedId,
-                    webSearch = webSearch,
-                    onSurprise = viewModel::surprise,
-                )
+                current == Screen.Search -> CompositionLocalProvider(LocalShowSeriesTag provides true) {
+                    SearchScreen(
+                        movies = state.movies,
+                        query = searchQuery,
+                        onQueryChange = viewModel::setSearchQuery,
+                        onOpenMovie = {
+                            searchOpenedId = it.id
+                            viewModel.openDetails(it.id)
+                        },
+                        language = language,
+                        isLocked = state::isLocked,
+                        isWatched = state::isWatched,
+                        gridState = searchGrid,
+                        returnTo = searchOpenedId,
+                        webSearch = webSearch,
+                        onSurprise = viewModel::surprise,
+                    )
+                }
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
@@ -338,8 +368,17 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     notForMe = details.movie.id in state.dislikedIds,
                     onToggleLoved = { viewModel.toggleLoved(it, language) },
                     onToggleNotForMe = { viewModel.toggleNotForMe(it, language) },
+                    inBucket = details.movie.id in state.bucketIds,
+                    onToggleBucket = { viewModel.toggleBucket(it, language) },
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
+                current == Screen.Bucket -> BucketScreen(
+                    ids = state.bucketIds,
+                    movieOf = viewModel::bucketMovie,
+                    language = language,
+                    isLocked = state::isLocked,
+                    actions = bucketActions,
+                )
                 else -> HomeScreen(
                     state = state,
                     language = language,
@@ -376,6 +415,16 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onSubmit = viewModel::submitTmdbKey,
                     onDelete = viewModel::clearTmdbKey,
                     onDismiss = viewModel::dismissTmdbDialog,
+                )
+            }
+
+            bucketPrompt?.let { prompt ->
+                BucketPromptDialog(
+                    prompt = prompt,
+                    language = language,
+                    onPlayNext = viewModel::playNextInBucket,
+                    onBackToFilm = viewModel::backToBucketFilm,
+                    onDismiss = viewModel::dismissBucketPrompt,
                 )
             }
 

@@ -175,4 +175,13 @@ data class Catalog(
     fun movie(id: String): Movie? = byId[id]
 
     fun moviesOf(collection: MovieCollection): List<Movie> = collection.movieIds.mapNotNull(::movie)
+
+    /** Films only, or series only (a tab of the home screen), with the rows that hold them. */
+    fun ofKind(kind: MediaKind): Catalog {
+        val kept = movies.filter { it.kind == kind }
+        val ids = kept.mapTo(HashSet()) { it.id }
+        return Catalog(version, kept, collections.mapNotNull { c ->
+            c.movieIds.filter(ids::contains).takeIf { it.isNotEmpty() }?.let { c.copy(movieIds = it) }
+        })
+    }
 }

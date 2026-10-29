@@ -149,7 +149,7 @@
         <item>O SCARY não tem contas, anúncios, análises nem cookies, e não existe um servidor do SCARY. Nada do que você faz no launcher é enviado para nós.</item>
         <item>Guardado apenas nesta TV: suas configurações e idioma, apps fixados e ocultos, os últimos 12 filmes abertos, sua Minha lista, o PIN do controle dos pais como hash com salt (nunca o PIN em si), os horários de falhas recentes (só o horário) e informações e imagens de filmes em cache. Desinstalar o SCARY ou limpar seus dados nas configurações da TV apaga tudo. O SCARY fica fora do backup do Android.</item>
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
-        <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" e o dia em que marcou cada filme como assistido. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre a página dele no IMDb no seu celular; a TV não envia nada.</item>
+        <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" o dia em que marcou cada filme como assistido e a sua bucket list. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre a página dele no IMDb no seu celular; a TV não envia nada.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
@@ -308,4 +308,48 @@
     <string name="stats_favorite_subgenre">Subgênero favorito</string>
     <string name="stats_favorite_decade">Década favorita</string>
     <string name="stats_loved">Filmes amados</string>
+    <string name="tab_movies">Filmes</string>
+    <string name="tab_series">Séries</string>
+    <string name="series_tag">Série</string>
+    <string name="minutes_episode">%1$d min por episódio</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: filmes nela: %1$d</string>
+    <string name="bucket_badge">Número %1$d da bucket list</string>
+    <string name="bucket_explainer">Escolha filmes para ver um depois do outro. Começar abre o primeiro no Stremio; cada vez que você volta ao SCARY, ele pergunta se deve tocar o próximo.</string>
+    <string name="bucket_limits">O SCARY abre a página de cada filme no Stremio, onde você escolhe uma fonte e aperta Play. Ele não vê quando um filme acaba: voltar ao SCARY (Home ou Voltar) é o sinal, julgado pelo tempo fora.</string>
+    <string name="bucket_empty_title">A bucket list está vazia</string>
+    <string name="bucket_empty_body">Escolha alguns filmes para hoje e o SCARY coloca todos na fila.</string>
+    <string name="bucket_pick">Escolher filmes</string>
+    <string name="bucket_start">Começar</string>
+    <string name="bucket_pick_more">Escolher mais</string>
+    <string name="bucket_clear">Limpar a lista</string>
+    <string name="bucket_clear_confirm">Aperte de novo para limpar</string>
+    <string name="bucket_total">Filmes na lista: %1$d · Tempo total: %2$s</string>
+    <string name="bucket_unavailable">Indisponível agora</string>
+    <string name="bucket_move_up">Subir %1$s</string>
+    <string name="bucket_move_down">Descer %1$s</string>
+    <string name="bucket_remove">Remover %1$s</string>
+    <string name="bucket_prompt_finished">Terminou %1$s?</string>
+    <string name="bucket_prompt_early">Voltou cedo de %1$s</string>
+    <string name="bucket_prompt_next">Próximo: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">Esse foi o último filme da bucket list.</string>
+    <string name="bucket_prompt_note">A bucket list fica como está até você mudar.</string>
+    <string name="bucket_prompt_back">Voltar para %1$s</string>
+    <string name="bucket_prompt_play">Tocar %1$s</string>
+    <string name="bucket_prompt_later">Agora não</string>
+    <string name="bucket_prompt_stop">Parar por agora</string>
+    <string name="action_add_bucket">Adicionar à bucket list</string>
+    <string name="action_in_bucket">Na bucket list</string>
+    <string name="picking_title">Escolha filmes para a bucket list</string>
+    <string name="picking_hint">OK num pôster adiciona ou tira. Voltar ou Pronto quando terminar.</string>
+    <string name="picking_count">Filmes escolhidos: %1$d</string>
+    <string name="picking_done">Pronto</string>
+    <string name="msg_bucket_films_only">Só filmes podem entrar na bucket list.</string>
+    <string name="msg_bucket_locked">%1$s está bloqueado: não pode entrar na bucket list.</string>
+    <string name="msg_bucket_full">A bucket list está cheia (%1$s filmes).</string>
+    <string name="msg_bucket_added">%1$s é o número %2$s da bucket list.</string>
+    <string name="msg_bucket_removed">%1$s saiu da bucket list.</string>
+    <string name="msg_bucket_cleared">A bucket list está vazia agora.</string>
+    <string name="msg_bucket_empty">Escolha alguns filmes primeiro.</string>
+    <string name="msg_bucket_done">Essa foi a bucket list inteira. Você sobreviveu!</string>
 </resources>

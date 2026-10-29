@@ -11,6 +11,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -45,6 +46,8 @@ class CinemetaRepository(context: Context) {
         val titles: Map<String, String>,
         val themedOnly: Boolean = false,
         val endless: Boolean = false,
+        /** Films, or series for the series tab. */
+        val kind: MediaKind = MediaKind.MOVIE,
     )
 
     private val rowSpecs: List<RowSpec>
@@ -86,6 +89,32 @@ class CinemetaRepository(context: Context) {
                     titles("עוד מותחנים", "More thrillers", "Mais suspenses", "Ещё триллеры", "مزيد من الإثارة"),
                     endless = true,
                 ),
+                // The series tab.
+                RowSpec(
+                    "series_horror", "top", "Horror", listOf(0, 50),
+                    titles("סדרות אימה פופולריות", "Popular horror series", "Séries de terror em alta", "Популярные хоррор-сериалы", "مسلسلات رعب رائجة"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_thriller", "top", "Thriller", listOf(0),
+                    titles("סדרות מתח פופולריות", "Popular thriller series", "Séries de suspense em alta", "Популярные сериалы-триллеры", "مسلسلات إثارة رائجة"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_mystery", "top", "Mystery", listOf(0),
+                    titles("סדרות תעלומה", "Mystery series", "Séries de mistério", "Сериалы-загадки", "مسلسلات غموض"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_new", "year", year.toString(), listOf(0, 50),
+                    titles("סדרות חדשות השנה", "New series this year", "Séries novas deste ano", "Новые сериалы этого года", "مسلسلات جديدة هذا العام"),
+                    themedOnly = true,
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
             )
         }
 
@@ -102,7 +131,7 @@ class CinemetaRepository(context: Context) {
      */
     suspend fun loadPage(rowId: String, skip: Int): Page? = withContext(Dispatchers.IO) {
         val spec = rowSpecs.firstOrNull { it.id == rowId && it.endless } ?: return@withContext null
-        val url = runCatching { Cinemeta.catalogUrl(spec.catalog, spec.genre, skip) }.getOrNull() ?: return@withContext null
+        val url = runCatching { Cinemeta.catalogUrl(spec.catalog, spec.genre, skip, spec.kind) }.getOrNull() ?: return@withContext null
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
         Page(metas.size, if (spec.themedOnly) Cinemeta.themed(metas) else metas)
     }
@@ -114,8 +143,11 @@ class CinemetaRepository(context: Context) {
         if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()
     }
 
-    /** Returns fresh data, or null when the TV is offline or the service is down. Never throws. */
-    suspend fun refresh(imdbIds: List<String>): CinemetaCache? = withContext(Dispatchers.IO) {
+    /**
+     * Returns fresh data for the library's films and series ([items], IMDb id and kind), or null when the TV is offline
+     * or the service is down. Never throws.
+     */
+    suspend fun refresh(items: List<Pair<String, MediaKind>>): CinemetaCache? = withContext(Dispatchers.IO) {
         // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
         // and the three popular rows queue first so whole rows of posters appear early.
         val pool = Semaphore(PARALLEL_REQUESTS)
@@ -124,16 +156,18 @@ class CinemetaRepository(context: Context) {
                 async {
                     // The pages of one row load side by side; a page that fails just leaves the row shorter.
                     val pages = spec.skips.map { skip ->
-                        async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip)) }?.let(Cinemeta::parseCatalog) }
+                        async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip, spec.kind)) }?.let(Cinemeta::parseCatalog) }
                     }.awaitAll().filterNotNull()
-                    val metas = pages.flatten().distinctBy { it.imdbId }.let { if (spec.themedOnly) Cinemeta.themed(it) else it }
+                    // A row keeps only its own kind, even if Cinemeta mixes one in.
+                    val metas = pages.flatten().distinctBy { it.imdbId }.filter { it.kind == spec.kind }
+                        .let { if (spec.themedOnly) Cinemeta.themed(it) else it }
                     metas.takeIf { it.isNotEmpty() }?.let {
                         OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
                     }
                 }
             }
-            val metas = imdbIds.distinct().map { id ->
-                async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }
+            val metas = items.distinctBy { it.first }.map { (id, kind) ->
+                async { pool.withPermit { fetch(Cinemeta.metaUrl(id, kind))?.let(Cinemeta::parseMeta) } }
             }
             metas.awaitAll() to rows.awaitAll().filterNotNull()
         }
@@ -143,12 +177,16 @@ class CinemetaRepository(context: Context) {
     }
 
     /**
-     * Web search in Cinemeta for the search screen. Only the query text and the TV's IP reach Cinemeta. Null when the
-     * query is invalid, the TV is offline or the service is down; never throws.
+     * Web search in Cinemeta for the search screen, films and series side by side. Only the query text and the TV's IP
+     * reach Cinemeta. Null when the query is invalid, the TV is offline or the service is down; never throws.
      */
     suspend fun search(query: String, known: Catalog): List<Movie>? = withContext(Dispatchers.IO) {
-        val url = Cinemeta.searchUrl(query) ?: return@withContext null
-        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        val urls = MediaKind.entries.mapNotNull { kind -> Cinemeta.searchUrl(query, kind)?.let { kind to it } }
+        if (urls.isEmpty()) return@withContext null
+        val pages = coroutineScope { urls.map { (kind, url) -> async { kind to fetch(url)?.let(Cinemeta::parseCatalog) } }.awaitAll() }
+        if (pages.all { it.second == null }) return@withContext null
+        // Films first, then series; a result that does not say its type is the type it was searched as.
+        val metas = pages.flatMap { (kind, metas) -> metas.orEmpty().map { if (it.kind == kind) it else it.copy(type = CinemetaMeta.typeOf(kind)) } }
         // The top results often come without genres: look them up (side by side), so the theme filter can judge them.
         val missing = Cinemeta.needsGenres(metas, known)
         val full = if (missing.isEmpty()) {
@@ -156,11 +194,12 @@ class CinemetaRepository(context: Context) {
         } else {
             val pool = Semaphore(PARALLEL_REQUESTS)
             coroutineScope {
-                missing.map { id -> async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } } }
+                val kinds = metas.associate { it.imdbId to it.kind }
+                missing.map { id -> async { pool.withPermit { fetch(Cinemeta.metaUrl(id, kinds[id] ?: MediaKind.MOVIE))?.let(Cinemeta::parseMeta) } } }
                     .awaitAll().filterNotNull().associateBy { it.imdbId }
             }
         }
-        Cinemeta.searchResults(metas.map { full[it.imdbId] ?: it }, known)
+        Cinemeta.searchResults(metas.map { meta -> full[meta.imdbId]?.copy(type = meta.type) ?: meta }, known)
     }
 
     private fun save(cache: CinemetaCache) {

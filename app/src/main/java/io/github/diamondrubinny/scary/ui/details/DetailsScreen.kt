@@ -105,6 +105,9 @@ fun DetailsScreen(
     offersKey: Any? = null,
     trailer: TrailerSettings = TrailerSettings.Off,
     loved: Boolean = false,
+    /** In the bucket list (films only), and its button. */
+    inBucket: Boolean = false,
+    onToggleBucket: ((Movie) -> Unit)? = null,
     notForMe: Boolean = false,
     onToggleLoved: (Movie) -> Unit = {},
     onToggleNotForMe: (Movie) -> Unit = {},
@@ -195,12 +198,19 @@ fun DetailsScreen(
                                 text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
                                 onClick = { onToggleNotForMe(movie) },
                             )
+                            // Films only: a series has no end for the next one to follow.
+                            if (onToggleBucket != null && !movie.isSeries) {
+                                ScaryButton(
+                                    text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
+                                    onClick = { onToggleBucket(movie) },
+                                )
+                            }
                         }
                         if (elsewhere) {
                             WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
                         }
-                        // A locked movie shows no store either, as it shows no art.
-                        if (rentOrBuy != null && !isLocked(movie)) {
+                        // A locked movie shows no store either, as it shows no art. Series: not yet (TMDB lists them apart).
+                        if (rentOrBuy != null && !isLocked(movie) && !movie.isSeries) {
                             RentOrBuy(
                                 state = rentOrBuy,
                                 countryName = countryName,

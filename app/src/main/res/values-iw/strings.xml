@@ -149,7 +149,7 @@
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
         <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), זמני קריסות אחרונות (השעה בלבד), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
-        <item>גם אלה נשמרים רק בטלוויזיה הזו: הסרטים שסימנתם \"אהבתי\" או \"לא בשבילי\", והיום שבו סימנתם כל סרט כנצפה. מהם נבנים \"כי אהבת\", \"כמה זמן יש לך?\" ו\"השנה שלך בפחד\", והחישוב נעשה בטלוויזיה. טיימר השינה הוא התראה בטלוויזיה שעוצרת את מה שמתנגן. הכניסות של הטלוויזיה (HDMI, אנטנה) נקראות בטלוויזיה כדי להציג אותן. קוד ה־QR בעמוד סרט פותח את עמוד ה־IMDb שלו בטלפון שלכם, והטלוויזיה לא שולחת דבר.</item>
+        <item>גם אלה נשמרים רק בטלוויזיה הזו: הסרטים שסימנתם \"אהבתי\" או \"לא בשבילי\", היום שבו סימנתם כל סרט כנצפה, וה־Bucket list שלכם. מהם נבנים \"כי אהבת\", \"כמה זמן יש לך?\" ו\"השנה שלך בפחד\", והחישוב נעשה בטלוויזיה. טיימר השינה הוא התראה בטלוויזיה שעוצרת את מה שמתנגן. הכניסות של הטלוויזיה (HDMI, אנטנה) נקראות בטלוויזיה כדי להציג אותן. קוד ה־QR בעמוד סרט פותח את עמוד ה־IMDb שלו בטלפון שלכם, והטלוויזיה לא שולחת דבר.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
@@ -308,4 +308,48 @@
     <string name="stats_favorite_subgenre">תת־ז׳אנר אהוב</string>
     <string name="stats_favorite_decade">עשור אהוב</string>
     <string name="stats_loved">סרטים אהובים</string>
+    <string name="tab_movies">סרטים</string>
+    <string name="tab_series">סדרות</string>
+    <string name="series_tag">סדרה</string>
+    <string name="minutes_episode">%1$d דק׳ לפרק</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: סרטים ברשימה: %1$d</string>
+    <string name="bucket_badge">מספר %1$d ב־Bucket list</string>
+    <string name="bucket_explainer">בוחרים סרטים לצפייה אחד אחרי השני. \"התחלה\" פותח את הראשון ב־Stremio, ובכל פעם שחוזרים ל־SCARY היא שואלת אם לנגן את הבא.</string>
+    <string name="bucket_limits">SCARY פותחת את עמוד הסרט ב־Stremio, ושם בוחרים מקור ולוחצים Play. היא לא רואה מתי סרט נגמר: החזרה ל־SCARY (Home או Back) היא הסימן, לפי הזמן שעבר.</string>
+    <string name="bucket_empty_title">ה־Bucket list ריק</string>
+    <string name="bucket_empty_body">בחרו כמה סרטים להערב, ו־SCARY תסדר אותם בתור.</string>
+    <string name="bucket_pick">בחירת סרטים</string>
+    <string name="bucket_start">התחלה</string>
+    <string name="bucket_pick_more">בחירת עוד סרטים</string>
+    <string name="bucket_clear">ניקוי הרשימה</string>
+    <string name="bucket_clear_confirm">לחצו שוב כדי לנקות</string>
+    <string name="bucket_total">סרטים ברשימה: %1$d · זמן כולל: %2$s</string>
+    <string name="bucket_unavailable">לא זמין כרגע</string>
+    <string name="bucket_move_up">הזזת %1$s למעלה</string>
+    <string name="bucket_move_down">הזזת %1$s למטה</string>
+    <string name="bucket_remove">הסרת %1$s</string>
+    <string name="bucket_prompt_finished">סיימת את %1$s?</string>
+    <string name="bucket_prompt_early">חזרת מוקדם מ־%1$s</string>
+    <string name="bucket_prompt_next">הבא: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">זה היה הסרט האחרון ב־Bucket list.</string>
+    <string name="bucket_prompt_note">ה־Bucket list נשאר כמו שהוא עד שתשנו אותו.</string>
+    <string name="bucket_prompt_back">חזרה ל־%1$s</string>
+    <string name="bucket_prompt_play">לנגן את %1$s</string>
+    <string name="bucket_prompt_later">לא עכשיו</string>
+    <string name="bucket_prompt_stop">לעצור בינתיים</string>
+    <string name="action_add_bucket">הוספה ל־Bucket list</string>
+    <string name="action_in_bucket">ב־Bucket list</string>
+    <string name="picking_title">בחירת סרטים ל־Bucket list</string>
+    <string name="picking_hint">OK על פוסטר מוסיף אותו או מוציא אותו. Back או \"סיום\" כשמוכנים.</string>
+    <string name="picking_count">סרטים שנבחרו: %1$d</string>
+    <string name="picking_done">סיום</string>
+    <string name="msg_bucket_films_only">רק סרטים יכולים להיכנס ל־Bucket list.</string>
+    <string name="msg_bucket_locked">%1$s נעול: הוא לא יכול להיכנס ל־Bucket list.</string>
+    <string name="msg_bucket_full">ה־Bucket list מלא (%1$s סרטים).</string>
+    <string name="msg_bucket_added">%1$s הוא מספר %2$s ב־Bucket list.</string>
+    <string name="msg_bucket_removed">%1$s יצא מה־Bucket list.</string>
+    <string name="msg_bucket_cleared">ה־Bucket list ריק עכשיו.</string>
+    <string name="msg_bucket_empty">בחרו קודם כמה סרטים.</string>
+    <string name="msg_bucket_done">זה היה כל ה־Bucket list. שרדתם!</string>
 </resources>

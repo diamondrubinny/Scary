@@ -21,6 +21,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
 import io.github.diamondrubinny.scary.core.catalog.MyList
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
+import io.github.diamondrubinny.scary.core.catalog.BucketList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.catalog.WatchedList
 import io.github.diamondrubinny.scary.core.links.KnownPackages
@@ -78,6 +79,10 @@ data class LauncherPrefs(
     val watchedDays: Map<String, Long> = emptyMap(),
     /** When the sleep timer ends, in wall-clock milliseconds; null when it is off. */
     val sleepAtMillis: Long? = null,
+    /** The bucket list: films to watch one after another, in order. */
+    val bucketIds: List<String> = emptyList(),
+    /** The bucket-list film handed to Stremio, until SCARY is back on screen; null otherwise. */
+    val bucketPlaying: String? = null,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
@@ -115,6 +120,8 @@ class SettingsRepository(private val context: Context) {
                 dislikedIds = RecentList.decode(p[DISLIKED]),
                 watchedDays = decodeDays(p[WATCHED_DAYS]),
                 sleepAtMillis = p[SLEEP_AT],
+                bucketIds = RecentList.decode(p[BUCKET]),
+                bucketPlaying = p[BUCKET_PLAYING]?.takeIf(String::isNotBlank),
             )
         }
         .distinctUntilChanged()
@@ -163,6 +170,18 @@ class SettingsRepository(private val context: Context) {
     }
 
     suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
+
+    /** Changes the bucket list with [change] (BucketList's functions), atomically; returns the new list. */
+    suspend fun updateBucket(change: (List<String>) -> List<String>): List<String> {
+        var updated = emptyList<String>()
+        edit {
+            updated = change(RecentList.decode(it[BUCKET])).take(BucketList.MAX_SIZE)
+            it[BUCKET] = RecentList.encode(updated)
+        }
+        return updated
+    }
+
+    suspend fun setBucketPlaying(movieId: String?) = edit { if (movieId == null) it.remove(BUCKET_PLAYING) else it[BUCKET_PLAYING] = movieId }
 
     /** Null goes back to the device's own country. */
     suspend fun setRentBuyCountry(code: String?) = edit {
@@ -276,6 +295,8 @@ class SettingsRepository(private val context: Context) {
         private val DISLIKED = stringPreferencesKey("disliked_movie_ids")
         private val WATCHED_DAYS = stringPreferencesKey("watched_movie_days")
         private val SLEEP_AT = longPreferencesKey("sleep_at_millis")
+        private val BUCKET = stringPreferencesKey("bucket_movie_ids")
+        private val BUCKET_PLAYING = stringPreferencesKey("bucket_playing")
         private const val MAX_RATED = 500
 
         /** "id@epochDay,id@epochDay", newest first; anything malformed is skipped. */

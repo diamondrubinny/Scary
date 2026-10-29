@@ -108,12 +108,16 @@ fun MovieMeta(movie: Movie, modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        BasicText(movie.year.toString(), style = ScaryType.BodyStrong)
+        BasicText(movie.yearsLabel, style = ScaryType.BodyStrong)
         if (movie.director.isNotBlank()) {
             BasicText(movie.director, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         if (movie.runtimeMin > 0) {
-            BasicText(stringResource(R.string.minutes, movie.runtimeMin), style = ScaryType.Body.copy(color = ScaryColors.Ash))
+            // A series' runtime is one episode's.
+            BasicText(
+                stringResource(if (movie.isSeries) R.string.minutes_episode else R.string.minutes, movie.runtimeMin),
+                style = ScaryType.Body.copy(color = ScaryColors.Ash),
+            )
         }
         movie.imdbRating?.let { rating ->
             BasicText(
@@ -376,6 +380,19 @@ fun EmptyState(
         BasicText(body, style = ScaryType.Body.copy(color = ScaryColors.Ash))
         if (actionLabel != null) {
             ScaryButton(text = actionLabel, onClick = onAction, modifier = Modifier.padding(top = 6.dp))
+        }
+    }
+}
+
+/** The bucket list: a short list, each line with a dot before it. */
+@Composable
+fun BucketIcon(color: Color, modifier: Modifier = Modifier) {
+    Canvas(modifier.size(20.dp)) {
+        val stroke = size.minDimension * 0.11f
+        for (i in 0..2) {
+            val y = size.height * (0.22f + i * 0.28f)
+            drawCircle(color, radius = stroke * 0.95f, center = Offset(size.width * 0.14f, y))
+            drawLine(color, Offset(size.width * 0.34f, y), Offset(size.width * 0.92f, y), strokeWidth = stroke, cap = androidx.compose.ui.graphics.StrokeCap.Round)
         }
     }
 }

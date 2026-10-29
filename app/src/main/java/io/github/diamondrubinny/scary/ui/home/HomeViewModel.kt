@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.catalog.BucketList
+import io.github.diamondrubinny.scary.core.catalog.BucketReturn
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.links.StreamingApps
 import io.github.diamondrubinny.scary.core.links.ResolvedCountry
 import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
@@ -108,6 +111,15 @@ class HomeViewModel(
     private val mood = MutableStateFlow<Mood?>(null)
     private val decade = MutableStateFlow<Int?>(null)
 
+    /** The home screen's tab: films or series. */
+    private val tab = MutableStateFlow(MediaKind.MOVIE)
+
+    /** Picking films for the bucket list from the home rows. */
+    private val picking = MutableStateFlow(false)
+
+    /** The home screen's choices that rebuild its rows. */
+    private data class HomeChoices(val mood: Mood?, val decade: Int?, val budget: TimeBudget?, val tab: MediaKind, val picking: Boolean)
+
     /** Pages of endless online rows loaded while scrolling, by row id. In memory only; gone when SCARY restarts. */
     private val extraPages = MutableStateFlow<Map<String, List<CinemetaMeta>>>(emptyMap())
     private val language = MutableStateFlow(Language.HE)
@@ -169,10 +181,10 @@ class HomeViewModel(
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
         combine(installedApps, inputs) { a, i -> a to i },
-        combine(mood, decade, timeBudget) { m, d, t -> Triple(m, d, t) },
+        combine(mood, decade, timeBudget, tab, picking) { m, d, t, k, p -> HomeChoices(m, d, t, k, p) },
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, (apps, tvInputList), (selectedMood, selectedDecade, budget), prefs, unlocked ->
+    ) { catalogState, (apps, tvInputList), choices, prefs, unlocked ->
         val tiles = appTiles(apps, prefs, tvInputList)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -185,7 +197,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, selectedMood, selectedDecade, budget, prefs, unlocked)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, choices, prefs, unlocked)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -204,6 +216,9 @@ class HomeViewModel(
             dislikedIds = prefs.dislikedIds.toSet(),
             // On until SleepTimerReceiver has paused playback and cleared it (or a restart of the TV dropped the alarm).
             sleepAtMillis = prefs.sleepAtMillis,
+            tab = choices.tab,
+            picking = choices.picking,
+            bucketIds = prefs.bucketIds,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -381,15 +396,19 @@ class HomeViewModel(
     fun searchEverywhere(movie: Movie) = guard(movie, GatedAction.SearchEverywhere(movie))
 
     private fun buildState(
-        catalog: Catalog,
+        all: Catalog,
         tiles: List<AppTile>,
         drawer: List<DrawerApp>,
-        selectedMood: Mood?,
-        selectedDecade: Int?,
-        budget: TimeBudget?,
+        choices: HomeChoices,
         prefs: LauncherPrefs,
         unlocked: Boolean,
     ): HomeUiState {
+        // The tab shows its own kind only: films, or series. Search (state.movies) still finds both.
+        val catalog = all.ofKind(choices.tab)
+        val selectedMood = choices.mood
+        val selectedDecade = choices.decade
+        val budget = choices.budget
+        val films = choices.tab == MediaKind.MOVIE
         // Tonight's pick is one not seen yet, as long as any is left, and never one marked "not for me".
         val watched = prefs.watchedIds.toHashSet()
         val disliked = prefs.dislikedIds.toHashSet()
@@ -401,28 +420,31 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
-            if (prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
+            if (films && prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
                 val movies = season.pick(catalog.movies)
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
-            Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
-                ?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
-            add(
-                HomeRow.Moods(
-                    selected = selectedMood,
-                    movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
-                    decade = selectedDecade,
-                    decades = Decades.available(catalog.movies),
-                ),
-            )
-            add(
-                HomeRow.TimePlan(
-                    selected = budget,
-                    plan = budget?.let { TimePlan.plan(catalog.movies, it, today(), exclude = disliked, watched = watched, isLocked = isLocked) },
-                ),
-            )
+            // Moods, decades, time plans and recommendations are about films: a series has no single length or year.
+            if (films) {
+                Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
+                    ?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                add(
+                    HomeRow.Moods(
+                        selected = selectedMood,
+                        movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
+                        decade = selectedDecade,
+                        decades = Decades.available(catalog.movies),
+                    ),
+                )
+                add(
+                    HomeRow.TimePlan(
+                        selected = budget,
+                        plan = budget?.let { TimePlan.plan(catalog.movies, it, today(), exclude = disliked, watched = watched, isLocked = isLocked) },
+                    ),
+                )
+            }
             catalog.collections.forEach { collection ->
                 // Family night can empty a row; an empty row is not shown.
                 val movies = catalog.moviesOf(collection)
@@ -437,7 +459,7 @@ class HomeViewModel(
             effectsEnabled = prefs.effectsEnabled,
             drawer = drawer,
             nightMaxFear = prefs.nightMaxFear,
-            movies = catalog.movies,
+            movies = all.movies,
         )
     }
 
@@ -473,7 +495,7 @@ class HomeViewModel(
         detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.disliked == disliked) return it.details }
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
         val dislikedSet = disliked.toHashSet()
-        val candidates = if (dislikedSet.isEmpty()) shown.movies else shown.movies.filter { it.id !in dislikedSet }
+        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in dislikedSet }
         return MovieDetails(movie, Similar.find(candidates, movie))
             .also { detailsCache = DetailsCacheEntry(movieId, shown, disliked, it) }
     }
@@ -617,8 +639,10 @@ class HomeViewModel(
         // With a mood or a decade chosen, the surprise comes from those movies; the whole library when none of them fits.
         // Never a film marked "not for me".
         val disliked = prefs.dislikedIds.toHashSet()
-        val candidates = shown.movies.filter { it.id !in disliked }
-        val pick = surpriseFrom(Decades.pick(candidates, mood.value, decade.value)) ?: surpriseFrom(candidates)
+        // From the tab on screen: a film, or a series.
+        val candidates = shown.movies.filter { it.kind == tab.value && it.id !in disliked }
+        val chosen = if (tab.value == MediaKind.MOVIE) Decades.pick(candidates, mood.value, decade.value) else candidates
+        val pick = surpriseFrom(chosen) ?: surpriseFrom(candidates)
         if (pick == null) show(R.string.msg_surprise_none) else openDetails(pick.id)
     }
 
@@ -631,6 +655,11 @@ class HomeViewModel(
         // Back during the shiver screen cancels opening the movie, and stays on this screen.
         if (_launching.value != null) {
             cancelLaunch()
+            return true
+        }
+        // Back while picking films ends the picking and shows the bucket list.
+        if (picking.value && backStack.value.last() == Screen.Home) {
+            finishPicking()
             return true
         }
         if (backStack.value.size <= 1) return false
@@ -693,10 +722,16 @@ class HomeViewModel(
         viewModelScope.launch {
             val pending = settings.takePendingWatch() ?: return@launch
             val prefs = settings.prefs.first()
-            if (!prefs.autoWatched || pending.movieId in prefs.watchedIds) return@launch
             val catalog = (shownCatalog.first { it !is CatalogState.Loading } as? CatalogState.Ready)?.catalog
             val movie = catalog?.movie(pending.movieId) ?: webMovieIfAllowed(pending.movieId)
             val away = System.currentTimeMillis() - pending.startedAtMillis
+            // Back from a bucket-list film: ask about the next one, every time.
+            if (prefs.bucketPlaying == pending.movieId) {
+                settings.setBucketPlaying(null)
+                if (movie != null) offerNextInBucket(movie, finished = BucketReturn.finished(away, movie.runtimeMin))
+            }
+            // A series is never marked by itself: coming back after an episode is not the end of it.
+            if (!prefs.autoWatched || pending.movieId in prefs.watchedIds || movie?.isSeries == true) return@launch
             if (!AutoWatched.counts(away, movie?.runtimeMin ?: 0)) return@launch
             if (settings.setWatched(pending.movieId, watched = true) && movie != null) {
                 show(R.string.msg_auto_watched, movie.displayTitle(language.value))
@@ -734,6 +769,7 @@ class HomeViewModel(
         backStack.value = listOf(Screen.Home)
         heroId.value = null
         lastFocusedKey = null
+        picking.value = false
         _homeResets.update { it + 1 }
     }
 
@@ -750,7 +786,7 @@ class HomeViewModel(
     /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
     private suspend fun keptOnline(): Set<String> {
         val prefs = settings.prefs.first()
-        return (prefs.myListIds + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        return (prefs.myListIds + prefs.recentIds + prefs.bucketIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) = guard(movie, GatedAction.Watch(movie))
@@ -1138,6 +1174,151 @@ class HomeViewModel(
     }
 
     fun openStats() = push(Screen.Stats)
+
+    /** Films or series on the home screen. The rows start again from the top and the hero shows the tab's pick. */
+    fun selectTab(kind: MediaKind) {
+        if (tab.value == kind) return
+        tab.value = kind
+        heroId.value = null
+        lastFocusedKey = null
+    }
+
+    // Bucket list -----------------------------------------------------------------------------------------------------
+
+    private val _bucketPrompt = MutableStateFlow<BucketPrompt?>(null)
+
+    /** The question shown on coming back from a bucket-list film; null when there is none. */
+    val bucketPrompt: StateFlow<BucketPrompt?> = _bucketPrompt.asStateFlow()
+
+    /** The bucket list's screen, or picking straight away while it is empty. */
+    fun openBucket() {
+        if (latestPrefs?.bucketIds.isNullOrEmpty()) startPicking() else push(Screen.Bucket)
+    }
+
+    /** Picking mode on the films tab: OK on a poster adds or removes it. Back or "Done" shows the list. */
+    fun startPicking() {
+        tab.value = MediaKind.MOVIE
+        backStack.value = listOf(Screen.Home)
+        heroId.value = null
+        lastFocusedKey = null
+        picking.value = true
+        _homeResets.update { it + 1 }
+    }
+
+    fun finishPicking() {
+        picking.value = false
+        backStack.value = listOf(Screen.Home, Screen.Bucket)
+    }
+
+    /** A film in or out of the bucket list. Not a series (it has no end), and not a locked film. */
+    fun toggleBucket(movie: Movie, language: Language) {
+        val title = movie.displayTitle(language)
+        if (movie.isSeries) {
+            show(R.string.msg_bucket_films_only)
+            return
+        }
+        val prefs = latestPrefs
+        if (prefs != null && ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, movie)) {
+            show(R.string.msg_bucket_locked, title)
+            return
+        }
+        viewModelScope.launch {
+            val before = settings.prefs.first().bucketIds
+            if (movie.id !in before && before.size >= BucketList.MAX_SIZE) {
+                show(R.string.msg_bucket_full, BucketList.MAX_SIZE.toString())
+                return@launch
+            }
+            val after = settings.updateBucket { BucketList.toggle(it, movie.id) }
+            val place = after.indexOf(movie.id)
+            if (place >= 0) {
+                savedMovies.save(movie, language, keptOnline())
+                show(R.string.msg_bucket_added, title, (place + 1).toString())
+            } else {
+                show(R.string.msg_bucket_removed, title)
+            }
+        }
+    }
+
+    /** A film of the bucket list as it may be shown now (family night hides some); null when it is not available. */
+    fun bucketMovie(id: String): Movie? = movieById(id)
+
+    fun moveInBucket(id: String, by: Int) {
+        viewModelScope.launch { settings.updateBucket { BucketList.move(it, id, by) } }
+    }
+
+    fun removeFromBucket(id: String) {
+        viewModelScope.launch { settings.updateBucket { BucketList.remove(it, id) } }
+    }
+
+    fun clearBucket() {
+        viewModelScope.launch {
+            settings.updateBucket { emptyList() }
+            settings.setBucketPlaying(null)
+        }
+        show(R.string.msg_bucket_cleared)
+    }
+
+    /** Opens the first film of the list in Stremio (through the PIN when it is locked); the rest follow on return. */
+    fun startBucket() {
+        val first = latestPrefs?.bucketIds.orEmpty().firstNotNullOfOrNull(::movieById)
+        if (first == null) show(R.string.msg_bucket_empty) else playFromBucket(first)
+    }
+
+    private fun playFromBucket(movie: Movie) {
+        viewModelScope.launch {
+            settings.setBucketPlaying(movie.id)
+            watch(movie)
+        }
+    }
+
+    /**
+     * Back from [current]: when it was watched to the end ([finished]) it leaves the list and the next one is offered;
+     * back early, the viewer may return to it or go on. After the last film, a message says the list is done.
+     */
+    private suspend fun offerNextInBucket(current: Movie, finished: Boolean) {
+        val list = if (finished) settings.updateBucket { BucketList.remove(it, current.id) } else settings.prefs.first().bucketIds
+        val upcoming = if (finished) list else list.dropWhile { it != current.id }.drop(1)
+        val next = upcoming.firstNotNullOfOrNull(::movieById)
+        if (finished && next == null) {
+            show(R.string.msg_bucket_done)
+            return
+        }
+        _bucketPrompt.value = BucketPrompt(current, next, finished)
+    }
+
+    /** "Play the next one": a film left early is taken off the list first. */
+    fun playNextInBucket() {
+        val prompt = _bucketPrompt.value ?: return
+        _bucketPrompt.value = null
+        viewModelScope.launch {
+            if (!prompt.finished) settings.updateBucket { BucketList.remove(it, prompt.current.id) }
+            prompt.next?.let(::playFromBucket)
+        }
+    }
+
+    /** Back to the film left early. */
+    fun backToBucketFilm() {
+        val prompt = _bucketPrompt.value ?: return
+        _bucketPrompt.value = null
+        playFromBucket(prompt.current)
+    }
+
+    /** "Not now": the list stays as it is, and "Start" goes on from its first film. */
+    fun dismissBucketPrompt() {
+        _bucketPrompt.value = null
+    }
+
+    /** Debug builds only (screenshots): the question as it shows after a film watched to the end. */
+    fun debugBucketPrompt() {
+        val films = visibleCatalog()?.ofKind(MediaKind.MOVIE)?.movies ?: return
+        _bucketPrompt.value = BucketPrompt(films[0], films.getOrNull(1), finished = true)
+    }
+
+    /** Debug builds only (screenshots): a bucket list of the first three classics. */
+    fun debugFillBucket() {
+        val ids = visibleCatalog()?.ofKind(MediaKind.MOVIE)?.movies?.take(3)?.map { it.id } ?: return
+        viewModelScope.launch { settings.updateBucket { ids } }
+    }
 
     /**
      * "Your year in fear": this calendar year (films marked as watched with a date) and all time. Watched films no

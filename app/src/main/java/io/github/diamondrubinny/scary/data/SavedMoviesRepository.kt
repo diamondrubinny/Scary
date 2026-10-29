@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.catalog.BucketList
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.catalog.KeptList
@@ -68,7 +69,7 @@ class SavedMoviesRepository(context: Context) {
         }
     }
 
-    // My list (100) and Recent (12) fit well inside MAX_SIZE, so the cap still holds in practice.
+    // My list (100), Recent (12) and the bucket list (30) fit well inside MAX_SIZE, so the cap still holds in practice.
     private fun trim(items: List<CinemetaMeta>, keep: Set<String>): List<CinemetaMeta> =
         KeptList.trim(items, MAX_SIZE) { it.imdbId in keep }
 
@@ -94,6 +95,6 @@ class SavedMoviesRepository(context: Context) {
     private companion object {
         const val TAG = "SavedMovies"
         const val MAX_SIZE = 150
-        const val MAX_KEPT = MyList.MAX_SIZE + RecentList.MAX_SIZE
+        const val MAX_KEPT = MyList.MAX_SIZE + RecentList.MAX_SIZE + BucketList.MAX_SIZE
     }
 }

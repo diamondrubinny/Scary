@@ -4,6 +4,14 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.ui.components.BUCKET_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.components.tabTag
+import io.github.diamondrubinny.scary.ui.home.PICKING_BANNER_TAG
+import io.github.diamondrubinny.scary.ui.bucket.BUCKET_SCREEN_TAG
+import io.github.diamondrubinny.scary.ui.bucket.BUCKET_PROMPT_TAG
+import io.github.diamondrubinny.scary.ui.bucket.bucketItemTag
 import io.github.diamondrubinny.scary.ui.home.rowTag
 import io.github.diamondrubinny.scary.ui.settings.TRAILER_AUTOPLAY_ROW_TAG
 import io.github.diamondrubinny.scary.ui.trailer.TRAILER_INTRO_TAG
@@ -718,6 +726,101 @@ class ScaryUiTest {
             focused.top >= rows.top && focused.bottom <= rows.bottom && title != null && title.top >= rows.top
         }
     }
+
+    @Test
+    fun theSeriesTabShowsTheSeriesLibraryAndTheMoviesTabComesBack() {
+        waitForHome()
+        val catalog = rule.activity.assets.open("series.json").bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
+        val collection = catalog.collections.first()
+        val series = catalog.moviesOf(collection).first()
+        val seriesTab = hasTestTag(tabTag(MediaKind.SERIES))
+        val moviesTab = hasTestTag(tabTag(MediaKind.MOVIE))
+        rule.onNode(moviesTab).assertIsSelected()
+        withCleanup({
+            rule.onNode(seriesTab).performClick()
+            waitFor(seriesTab and isSelected())
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("collection:${collection.id}") }.isSuccess }
+            // A series card says its years, and the film rows are gone.
+            waitFor(hasContentDescription("${series.title}, ${series.yearsLabel}", substring = true))
+            assertTrue(runCatching { rows.performScrollToKey("moods") }.isFailure)
+        }) {
+            rule.onNode(moviesTab).performClick()
+            waitFor(moviesTab and isSelected())
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("moods") }.isSuccess }
+        }
+    }
+
+    @Test
+    fun pickingFilmsNumbersThemAndTheBucketListKeepsAndChangesTheirOrder() {
+        waitForHome()
+        val catalog = bundledCatalog()
+        val collection = catalog.collections.first()
+        val (first, second) = catalog.moviesOf(collection).take(2)
+        val rowKey = "collection:${collection.id}"
+        fun card(movie: Movie) = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag(rowKey)))
+        val clear = hasText(text(R.string.bucket_clear))
+        withCleanup({
+            // Empty, the bucket list's button goes straight to picking.
+            rule.onNodeWithTag(BUCKET_BUTTON_TAG).performClick()
+            waitFor(hasTestTag(PICKING_BANNER_TAG))
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+            rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+            waitFor(card(first))
+            rule.onNode(card(first)).performClick()
+            waitFor(card(first) and hasContentDescription(rule.activity.getString(R.string.bucket_badge, 1), substring = true))
+            rule.onNode(card(second)).performClick()
+            waitFor(card(second) and hasContentDescription(rule.activity.getString(R.string.bucket_badge, 2), substring = true))
+            // OK did not open a movie page while picking.
+            assertTrue(rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
+            rule.onNode(hasText(text(R.string.picking_done))).performClick()
+            waitFor(hasTestTag(BUCKET_SCREEN_TAG))
+            assertBucketOrder(first.id, second.id)
+            // The second film moves up: the order swaps.
+            rule.onNode(hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.displayTitle(Language.HE)), substring = false) or
+                hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.title))).performClick()
+            rule.waitUntil(TIMEOUT_MS) { runCatching { assertBucketOrder(second.id, first.id) }.isSuccess }
+            // Clearing asks once more.
+            rule.onNode(clear).performClick()
+            waitFor(hasText(text(R.string.bucket_clear_confirm)))
+            rule.onNode(hasText(text(R.string.bucket_clear_confirm))).performClick()
+            waitFor(hasText(text(R.string.bucket_empty_title)))
+            backToHome()
+        }) {
+            backToHome()
+            rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "bucket"))
+            rule.waitForIdle()
+            if (rule.onAllNodes(clear).fetchSemanticsNodes().isNotEmpty()) {
+                rule.onNode(clear).performClick()
+                waitFor(hasText(text(R.string.bucket_clear_confirm)))
+                rule.onNode(hasText(text(R.string.bucket_clear_confirm))).performClick()
+            }
+            backToHome()
+        }
+    }
+
+    /** The bucket list's rows, top to bottom, are these films. */
+    private fun assertBucketOrder(vararg ids: String) {
+        val tops = ids.map { rule.onNodeWithTag(bucketItemTag(it)).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue("Bucket list order is not ${ids.toList()}", tops.zipWithNext().all { (a, b) -> a < b })
+    }
+
+    @Test
+    fun theQuestionAfterABucketListFilmOffersTheNextAndBackKeepsTheList() {
+        waitForHomeFocus()
+        rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "bucket:prompt"))
+        val prompt = hasTestTag(BUCKET_PROMPT_TAG)
+        waitFor(prompt)
+        rule.onNode(hasText(text(R.string.bucket_prompt_later))).assertExists()
+        rule.onNode(hasText(text(R.string.bucket_prompt_note))).assertExists()
+        rule.waitForIdle()
+        pressBack()
+        waitForGone(prompt)
+        waitUntilOrDescribe("the home screen") { onHome() }
+    }
+
+    private fun bundledCatalog() = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
 
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {
