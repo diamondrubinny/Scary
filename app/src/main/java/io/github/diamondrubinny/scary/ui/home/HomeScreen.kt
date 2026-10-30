@@ -484,12 +484,12 @@ private fun HomeRowView(
         return
     }
     if (row is HomeRow.Collection) {
-        // Endless online rows: ask for the next page while there are still a few cards to go.
-        val size by rememberUpdatedState(row.movies.size)
+        // Endless online rows: ask for the next page while there are still plenty of cards to go, and again each time a
+        // page arrives while the viewer is still near the end, so the row keeps ahead of the remote without a pause.
         val onNearEnd by rememberUpdatedState(actions.onNearRowEnd)
         LaunchedEffect(rowState, row.key) {
-            snapshotFlow { rowState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 }
-                .collect { last -> if (last >= 0 && last >= size - LOAD_AHEAD) onNearEnd(row.key) }
+            snapshotFlow { (rowState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1) to rowState.layoutInfo.totalItemsCount }
+                .collect { (last, size) -> if (last >= 0 && last >= size - LOAD_AHEAD) onNearEnd(row.key) }
         }
     }
     val title = when (row) {
@@ -675,7 +675,7 @@ private fun SkeletonBlock(modifier: Modifier) {
 }
 
 /** Cards from the end of a row at which its next page starts loading. */
-private const val LOAD_AHEAD = 8
+private const val LOAD_AHEAD = 20
 
 private const val SKELETON_ALPHA_MIN = 0.45f
 private const val SKELETON_ALPHA_MAX = 0.9f

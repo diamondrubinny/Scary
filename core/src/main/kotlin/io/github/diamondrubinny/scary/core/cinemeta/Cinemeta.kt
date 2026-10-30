@@ -105,8 +105,12 @@ object Cinemeta {
     /** Movies in one catalog page. */
     const val PAGE_SIZE = 50
 
-    /** An endless row stops growing here, to keep memory in check on 2 GB TV boxes. */
-    const val MAX_ENDLESS_ROW_MOVIES = 1_000
+    /**
+     * A safety bound only: endless rows go on until their catalogs run out (Cinemeta's horror ends near 1,750 films,
+     * its thrillers near 4,150), and rows that walk back through the years go on far beyond. Well over what anyone
+     * scrolls through on a TV.
+     */
+    const val MAX_ENDLESS_ROW_MOVIES = 50_000
 
     /**
      * Movies an online row may hold after the daily refresh: three catalog pages, the most any row loads, so nothing
@@ -391,9 +395,10 @@ data class CinemetaCache(
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
-         * 4: every trailer of a movie, not only the first; 5: series and their rows).
+         * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
+         * back through the years).
          */
-        const val ROWS_VERSION = 5
+        const val ROWS_VERSION = 6
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =
@@ -402,5 +407,33 @@ data class CinemetaCache(
             } catch (e: IllegalArgumentException) {
                 null
             }
+    }
+}
+
+/**
+ * Where an endless row continues, as one number. A plain row's cursor is its next catalog skip. A row that walks back
+ * through the years (the "year" catalog, from its first year down to [FIRST_YEAR]) packs how many years back it is and
+ * the skip within that year: when a year runs out, the row carries on with the year before.
+ */
+object EndlessCursor {
+    /** Bigger than any skip within one year (Cinemeta.MAX_SKIP). */
+    const val YEAR_STEP = 100_000
+    const val FIRST_YEAR = 1920
+
+    fun yearsBack(cursor: Int): Int = cursor / YEAR_STEP
+
+    fun skip(cursor: Int): Int = cursor % YEAR_STEP
+
+    /** The year [cursor] reads from, for a row starting at [startYear]; null once it is past [FIRST_YEAR]. */
+    fun year(startYear: Int, cursor: Int): Int? = (startYear - yearsBack(cursor)).takeIf { it >= FIRST_YEAR }
+
+    /** The start of the year before. */
+    fun nextYear(cursor: Int): Int = (yearsBack(cursor) + 1) * YEAR_STEP
+
+    /** The next page after one that came back with [pageSize] films: the year before when this year ran out. */
+    fun after(cursor: Int, pageSize: Int, yearChain: Boolean): Int? = when {
+        !yearChain -> if (pageSize == 0 || cursor + Cinemeta.PAGE_SIZE > Cinemeta.MAX_SKIP) null else cursor + Cinemeta.PAGE_SIZE
+        pageSize == 0 || skip(cursor) + Cinemeta.PAGE_SIZE > Cinemeta.MAX_SKIP -> nextYear(cursor)
+        else -> cursor + Cinemeta.PAGE_SIZE
     }
 }

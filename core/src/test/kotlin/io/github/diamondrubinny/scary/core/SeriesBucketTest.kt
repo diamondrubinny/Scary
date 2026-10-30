@@ -136,4 +136,39 @@ class SeriesBucketTest {
         assertTrue(BucketReturn.finished(AutoWatched.MAX_AWAY_MS * 2, 100))
         assertTrue(BucketReturn.finished(AutoWatched.UNKNOWN_RUNTIME_AWAY_MS, 0))
     }
+
+    @Test
+    fun `an endless row goes on to its catalog's end, and a row through the years carries on with the year before`() {
+        val step = io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
+        // A plain row: the next skip, until a page comes back empty or the catalog's furthest page.
+        assertEquals(150, step.after(100, 50, yearChain = false))
+        assertNull(step.after(100, 0, yearChain = false))
+        assertNull(step.after(Cinemeta.MAX_SKIP, 50, yearChain = false))
+        // Through the years: an empty page moves to the year before, from its first page.
+        val start = 100
+        assertEquals(2024, step.year(2024, start))
+        val nextYear = step.after(start, 0, yearChain = true)!!
+        assertEquals(2023, step.year(2024, nextYear))
+        assertEquals(0, step.skip(nextYear))
+        assertEquals(nextYear + 50, step.after(nextYear, 50, yearChain = true))
+        assertEquals(2023, step.year(2024, nextYear + 50))
+        // Never past the first year.
+        val past = (2024 - step.FIRST_YEAR + 1) * step.YEAR_STEP
+        assertNull(step.year(2024, past))
+    }
+
+    @Test
+    fun `TMDB rows can be asked for any page up to its last`() {
+        val url = io.github.diamondrubinny.scary.core.tmdb.Tmdb.discoverUrl(
+            io.github.diamondrubinny.scary.core.tmdb.TmdbRow.TOP_HORROR, java.time.LocalDate.of(2026, 10, 30),
+            io.github.diamondrubinny.scary.core.model.Language.EN, page = 7,
+        )
+        assertTrue("page=7" in url)
+        assertThrows(IllegalArgumentException::class.java) {
+            io.github.diamondrubinny.scary.core.tmdb.Tmdb.discoverUrl(
+                io.github.diamondrubinny.scary.core.tmdb.TmdbRow.TOP_HORROR, java.time.LocalDate.of(2026, 10, 30),
+                io.github.diamondrubinny.scary.core.model.Language.EN, page = 501,
+            )
+        }
+    }
 }

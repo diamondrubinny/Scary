@@ -131,7 +131,11 @@ object Tmdb {
         return "$API/movie/$tmdbId/external_ids"
     }
 
-    fun discoverUrl(row: TmdbRow, today: LocalDate, language: Language): String {
+    /** TMDB serves discover results 20 to a page, and no further than page 500. */
+    const val MAX_PAGE = 500
+
+    fun discoverUrl(row: TmdbRow, today: LocalDate, language: Language, page: Int = 1): String {
+        require(page in 1..MAX_PAGE) { "invalid page" }
         val params = when (row) {
             TmdbRow.NEW_HORROR -> listOf(
                 "with_genres" to "$HORROR",
@@ -156,7 +160,7 @@ object Tmdb {
                 "primary_release_date.gte" to today.plusDays(1).toString(),
                 "primary_release_date.lte" to today.plusMonths(6).toString(),
             )
-        } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to "1")
+        } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to page.toString())
         return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
     }
 

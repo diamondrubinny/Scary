@@ -505,14 +505,14 @@ class ScaryUiTest {
     @Test
     fun anEndlessOnlineRowLoadsMoreMoviesAtItsEnd() {
         waitForHome()
-        val rowKey = "collection:" + Cinemeta.onlineCollectionId("horror_deep")
+        val rowKey = "collection:" + Cinemeta.onlineCollectionId("horror_popular")
         val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
         // Online rows need Cinemeta; without the network the row is not there, and there is nothing to test.
         val present = runCatching { rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey(rowKey) }.isSuccess } }.isSuccess
         assumeTrue("Online rows are not available on this emulator", present)
         val row = rule.onNodeWithTag(rowTag(rowKey))
-        // The daily refresh loads two pages (up to 100 movies); reaching the end asks for the next page. Scrolling to
-        // the furthest card that exists brings the end into view, whatever the exact count.
+        // The daily refresh loads the first page (up to 50 movies); nearing the end asks for the next pages, with no
+        // cap. Scrolling to the furthest card that exists brings the end into view, whatever the exact count.
         row.performScrollToIndex(0)
         rule.waitUntil(ONLINE_TIMEOUT_MS) {
             runCatching { row.performScrollToIndex(BEYOND_FIRST_PAGES) }.isSuccess.also { reached ->
@@ -840,7 +840,7 @@ class ScaryUiTest {
         // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
         const val MAX_BACKS = 6
         const val ONLINE_TIMEOUT_MS = 45_000L
-        val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
+        val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60, 49, 45, 40, 30)
         const val BEYOND_FIRST_PAGES = 120
         const val SCREEN_DEPTH = 6
         const val SLEEP_CHOICES = 5

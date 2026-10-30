@@ -108,6 +108,28 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         }
     }
 
+    /** Where a TMDB row goes on after the daily refresh (its first page); null for rows that are not TMDB's. */
+    fun endlessStart(rowId: String): Int? = TmdbRow.entries.firstOrNull { it.id == rowId }?.let { 2 }
+
+    /**
+     * Page [page] of the TMDB row [rowId], as Cinemeta-style entries with their IMDb ids, loaded while the viewer
+     * scrolls (memory only). Its `next` is null at TMDB's last page or page 500. Null without a key or when offline.
+     */
+    suspend fun loadPage(rowId: String, page: Int, language: Language): OnlinePage? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val row = TmdbRow.entries.firstOrNull { it.id == rowId } ?: return@withContext null
+        if (page !in 1..Tmdb.MAX_PAGE) return@withContext OnlinePage(emptyList(), null)
+        val results = body(Tmdb.discoverUrl(row, LocalDate.now(), language, page), key)?.let(Tmdb::parseDiscover)
+            ?: return@withContext null
+        val metas = coroutineScope {
+            results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
+                chunk.map { r -> async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it, language) } } }
+                    .awaitAll()
+            }
+        }.filterNotNull()
+        OnlinePage(metas, if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
+    }
+
     /** IMDb id to TMDB id, so a movie page opened again needs one request, not two. */
     private val tmdbIds = HashMap<String, Long>()
 

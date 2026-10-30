@@ -513,23 +513,26 @@ class HomeViewModel(
         return if (familyNight) FamilyNight.filter(extended) else extended
     }
 
-    private class RowPaging(var nextSkip: Int, var loading: Boolean = false, var done: Boolean = false)
+    /** An endless row's place: [next] is its next page (a Cinemeta cursor or a TMDB page), null at its end. */
+    private class RowPaging(var next: Int?, var loading: Boolean = false)
 
     private val paging = HashMap<String, RowPaging>()
 
     /**
-     * The viewer is near the end of a home row: an endless online row loads its next page (50 movies). Pages without a
-     * single movie the row keeps (a year page of comedies) are skipped, a few at a time. Offline, nothing happens, and
-     * the next scroll tries again.
+     * The viewer is near the end of a home row: every online row (Cinemeta's, and TMDB's with a key) loads its next
+     * page, with no cap but the catalog's own end; rows that walk back through the years go on from year to year.
+     * Pages without a single movie the row keeps (a year page of comedies) are skipped, a few at a time. Offline,
+     * nothing happens, and the next scroll tries again.
      */
     fun onNearRowEnd(rowKey: String) {
         val rowId = rowKey.removePrefix("collection:" + Cinemeta.onlineCollectionId(""))
         if (rowId == rowKey || latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
-        val start = cinemeta.endlessStart(rowId) ?: return
+        val fromTmdb = cinemeta.endlessStart(rowId) == null
+        val start = cinemeta.endlessStart(rowId) ?: tmdb.endlessStart(rowId) ?: return
         val state = paging.getOrPut(rowId) { RowPaging(start) }
-        if (state.loading || state.done) return
+        if (state.loading || state.next == null) return
         if (extraPages.value[rowId].orEmpty().size >= Cinemeta.MAX_ENDLESS_ROW_MOVIES) {
-            state.done = true
+            state.next = null
             return
         }
         state.loading = true
@@ -538,17 +541,11 @@ class HomeViewModel(
                 var found = emptyList<CinemetaMeta>()
                 var attempts = 0
                 while (found.isEmpty() && attempts < MAX_EMPTY_PAGES) {
-                    if (state.nextSkip > Cinemeta.MAX_SKIP) {
-                        state.done = true
-                        break
-                    }
-                    val page = cinemeta.loadPage(rowId, state.nextSkip) ?: return@launch
+                    val cursor = state.next ?: break
+                    val page = (if (fromTmdb) tmdb.loadPage(rowId, cursor, language.value) else cinemeta.loadPage(rowId, cursor))
+                        ?: return@launch
                     attempts++
-                    if (page.rawSize == 0) {
-                        state.done = true
-                        break
-                    }
-                    state.nextSkip += Cinemeta.PAGE_SIZE
+                    state.next = page.next
                     found = page.movies
                 }
                 if (found.isNotEmpty()) {
@@ -1415,7 +1412,7 @@ class HomeViewModel(
         private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
-        private const val MAX_EMPTY_PAGES = 4
+        private const val MAX_EMPTY_PAGES = 12
         private const val GOOGLE_TV_LABEL = "Google TV"
         private const val LAUNCH_STILL_MS = 400L
         private const val LAUNCH_CLEAR_MS = 1_500L
