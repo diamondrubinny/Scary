@@ -787,6 +787,27 @@ class ScaryUiTest {
         waitFor(donate)
     }
 
+    @Test
+    fun goingDownAFilmPageAndBackUpBringsItsTitleBack() {
+        waitForHomeFocus()
+        val movie = bundledMovies().first { it.id == "the_shining" }
+        rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "details:${movie.id}"))
+        val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
+        val title = isHeading() and hasContentDescription(movie.title)
+        waitFor(watch)
+        waitFor(title)
+        fun titleTop() = rule.onNode(title).fetchSemanticsNode().boundsInRoot.top
+        val top = titleTop()
+        // All the way down: the buttons, the apps, rent or buy, then "More like this".
+        repeat(DETAILS_DEPTH) { pressKey(KeyEvent.KEYCODE_DPAD_DOWN) }
+        Log.i("ScaryUiTest", "film page: title top ${top}px at first, ${titleTop()}px at the bottom")
+        // And back up to the top row of buttons (Up lands on the nearest one; more Ups stay there): the title comes
+        // back with the buttons, where it was at first.
+        repeat(DETAILS_DEPTH) { pressKey(KeyEvent.KEYCODE_DPAD_UP) }
+        waitUntilOrDescribe("the film's title back at the top of its page") { kotlin.math.abs(titleTop() - top) < 1f }
+        backToHome()
+    }
+
     private fun pressKey(keyCode: Int) {
         waitUntilOrDescribe("the window to take the remote's keys") { readyForKeys() }
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(keyCode)
@@ -925,6 +946,7 @@ class ScaryUiTest {
         const val SCREEN_DEPTH = 6
         const val SLEEP_CHOICES = 5
         const val ROWS_TO_WALK = 6
+        const val DETAILS_DEPTH = 8
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }

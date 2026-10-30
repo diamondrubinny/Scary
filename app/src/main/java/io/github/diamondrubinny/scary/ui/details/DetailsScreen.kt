@@ -64,6 +64,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.ui.geometry.Rect
 import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
 import io.github.diamondrubinny.scary.ui.home.ProviderOffer
 import androidx.compose.foundation.verticalScroll
@@ -122,19 +125,23 @@ fun DetailsScreen(
 
     // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
     // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
-    // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour.
+    // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour. The header
+    // asks to be shown from its top down to the focus (FromPageTop), so coming back up to the buttons brings the
+    // title back too.
     val rowsScroll = LocalBringIntoViewSpec.current
-    CompositionLocalProvider(LocalBringIntoViewSpec provides OnlyWhenNeeded) {
+    val pageTop = with(LocalDensity.current) { PageTopPadding.toPx() }
+    val pageSpec = remember(pageTop) { OnlyWhenNeeded(pageTop) }
+    CompositionLocalProvider(LocalBringIntoViewSpec provides pageSpec) {
         val pageScroll = rememberScrollState()
         // The trailer stops once the page scrolls more than half of it out of view (YouTube: only while visible).
         val halfTrailerPx = with(LocalDensity.current) { (DetailsTrailerSize.height / 2).toPx() }
         val trailerOnScreen by remember(pageScroll, halfTrailerPx) { derivedStateOf { pageScroll.value < halfTrailerPx } }
         // Room for the trailer is kept from the start, so text and buttons never move under the focus when it starts.
         val trailerSlot = canAutoTrailer(movie, isLocked(movie), trailer, DetailsTrailerSize)
-        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
+        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                 Row(
-                    modifier = Modifier.padding(horizontal = SidePadding),
+                    modifier = Modifier.bringIntoViewResponder(FromPageTop).padding(horizontal = SidePadding),
                     horizontalArrangement = Arrangement.spacedBy(36.dp),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -280,17 +287,36 @@ fun DetailsScreen(
     }
 }
 
-/** Scrolls only when the focused item is partly out of view, and then just enough to show it. */
+private val PageTopPadding = 36.dp
+
+/**
+ * Scrolls only when the requested part is partly out of view. A part above the view comes down to the page's top
+ * margin ([top] pixels; the scroll stops at the very top anyway); one below comes up just enough. A part taller than
+ * the view shows its bottom, where the focus is.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-private val OnlyWhenNeeded = object : BringIntoViewSpec {
+private class OnlyWhenNeeded(private val top: Float) : BringIntoViewSpec {
     override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
         val trailingEdge = offset + size
         return when {
             offset >= 0f && trailingEdge <= containerSize -> 0f
-            offset < 0f || size > containerSize -> offset
+            size > containerSize -> trailingEdge - containerSize
+            offset < 0f -> offset - top
             else -> trailingEdge - containerSize
         }
     }
+}
+
+/**
+ * The header (title, synopsis, buttons, apps, rent or buy) asks the page to show it from its top down to the focused
+ * button. Back up from "More like this" to the buttons, the title comes back with them instead of staying cut off.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private object FromPageTop : BringIntoViewResponder {
+    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, 0f, localRect.right, localRect.bottom)
+
+    // The header does not scroll by itself; the page does.
+    override suspend fun bringChildIntoView(localRect: () -> Rect?) = Unit
 }
 
 /**

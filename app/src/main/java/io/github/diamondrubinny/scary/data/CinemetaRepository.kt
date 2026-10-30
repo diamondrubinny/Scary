@@ -98,6 +98,26 @@ class CinemetaRepository(context: Context) {
                     endless = true,
                     yearChain = true,
                 ),
+                // Other genres' catalogs, keeping only their horror, thriller and mystery titles: mostly films the rows
+                // above do not reach (measured: about half of each page is new to them).
+                RowSpec(
+                    "scifi_horror", "top", "Sci-Fi", listOf(0, 50, 100),
+                    titles("אימה ומדע בדיוני", "Sci-fi horror and suspense", "Terror e suspense de ficção científica", "Фантастические ужасы и триллеры", "رعب وإثارة من الخيال العلمي"),
+                    themedOnly = true,
+                    endless = true,
+                ),
+                RowSpec(
+                    "crime_thriller", "top", "Crime", listOf(0, 50, 100),
+                    titles("פשע ומתח", "Crime and suspense", "Crime e suspense", "Криминал и напряжение", "جريمة وتشويق"),
+                    themedOnly = true,
+                    endless = true,
+                ),
+                RowSpec(
+                    "action_thriller", "top", "Action", listOf(0, 50, 100),
+                    titles("אקשן ומתח", "Action and suspense", "Ação e suspense", "Экшен и напряжение", "حركة وتشويق"),
+                    themedOnly = true,
+                    endless = true,
+                ),
                 // The series tab.
                 RowSpec(
                     "series_horror", "top", "Horror", listOf(0, 50),
@@ -114,6 +134,20 @@ class CinemetaRepository(context: Context) {
                 RowSpec(
                     "series_mystery", "top", "Mystery", listOf(0),
                     titles("סדרות תעלומה", "Mystery series", "Séries de mistério", "Сериалы-загадки", "مسلسلات غموض"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_scifi", "top", "Sci-Fi", listOf(0, 50, 100),
+                    titles("סדרות אימה ומדע בדיוני", "Sci-fi horror and suspense series", "Séries de terror e suspense de ficção científica", "Фантастические сериалы ужасов и напряжения", "مسلسلات رعب وإثارة من الخيال العلمي"),
+                    themedOnly = true,
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_fantasy", "top", "Fantasy", listOf(0, 50, 100),
+                    titles("פנטזיה אפלה", "Dark fantasy series", "Séries de fantasia sombria", "Мрачное фэнтези", "مسلسلات فانتازيا مظلمة"),
+                    themedOnly = true,
                     endless = true,
                     kind = MediaKind.SERIES,
                 ),

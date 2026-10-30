@@ -398,7 +398,7 @@ data class CinemetaCache(
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
          * back through the years).
          */
-        const val ROWS_VERSION = 6
+        const val ROWS_VERSION = 7
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =
