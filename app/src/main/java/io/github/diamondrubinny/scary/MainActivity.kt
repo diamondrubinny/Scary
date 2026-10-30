@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary
 
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.launch.HomeButtonService
 import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
 import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
@@ -109,8 +110,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** A key press on SCARY's own window, where the TV remote's keys land: Compose moves the focus or clicks. */
+    /**
+     * A key press where the TV remote's keys land. With SCARY's accessibility service on (Android 13 and later) it
+     * goes through the system, so it reaches a dialog's window too (the PIN, the TMDB key); otherwise it goes to
+     * SCARY's own window, where Compose moves the focus or clicks.
+     */
     private fun pressKey(keyCode: Int) {
+        val key = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_UP -> HomeButtonService.Key.UP
+            KeyEvent.KEYCODE_DPAD_DOWN -> HomeButtonService.Key.DOWN
+            KeyEvent.KEYCODE_DPAD_LEFT -> HomeButtonService.Key.LEFT
+            KeyEvent.KEYCODE_DPAD_RIGHT -> HomeButtonService.Key.RIGHT
+            else -> HomeButtonService.Key.OK
+        }
+        if (HomeButtonService.arrowsEverywhere && HomeButtonService.instance?.press(key) == true) return
         val now = SystemClock.uptimeMillis()
         window.superDispatchKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
         window.superDispatchKeyEvent(KeyEvent(now, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, keyCode, 0))

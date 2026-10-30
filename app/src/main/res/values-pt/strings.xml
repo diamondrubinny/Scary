@@ -101,7 +101,7 @@
     <string name="settings_home_note">Se a TV não deixa escolher o SCARY como tela inicial (comum no Google TV e em alguns modelos Xiaomi), ligue a opção do botão Home. O SCARY passa a abrir a cada toque em Home e quando a TV liga. Ele só escuta a tecla Home e não lê nada da tela.</string>
     <string name="tile_set_home">Tornar o SCARY a tela inicial</string>
     <string name="a11y_service_label">SCARY: botão Home</string>
-    <string name="a11y_service_description">Faz o botão Home do controle abrir o SCARY e abre o SCARY quando a TV liga. Ele só escuta a tecla Home. Não consegue ler nem mudar nada na tela.</string>
+    <string name="a11y_service_description">Faz o botão Home do controle abrir o SCARY e abre o SCARY quando a TV liga. Enquanto você usa o controle pelo celular do SCARY, também aperta no app aberto as teclas que o celular envia (setas, OK, Voltar). Só escuta a tecla Home e não consegue ler nada na tela.</string>
     <string name="msg_enable_service">Em Acessibilidade, escolha “SCARY: botão Home” e ative.</string>
     <string name="settings_tmdb">Chave do TMDB</string>
     <string name="value_tmdb_none">Não definida</string>
@@ -154,7 +154,7 @@
         <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
         <item>Trailers que tocam sozinhos (ligados depois que você concorda na primeira pergunta; dá para desligar nas configurações): o player é o do YouTube, no modo de privacidade aprimorada (youtube-nocookie.com, e youtube.com como última tentativa quando um trailer não toca lá). Quando um trailer toca, o YouTube (Google) recebe o endereço IP da sua TV, dados do aparelho e do navegador e o ID do trailer, conforme a política de privacidade do Google. O SCARY bloqueia cookies no player e apaga o armazenamento dele ao fechar. Nenhum trailer toca off-line ou na noite em família.</item>
-        <item>Controle pelo celular, só enquanto você o liga nas configurações: a TV serve uma pequena página na sua rede doméstica, que o celular abre ao escanear um código QR. O código contém uma chave de uso único que assina e criptografa cada comando entre o celular e a TV, e a chave nunca é enviada pela rede. Os comandos vão direto do celular para a TV e não são guardados; o texto da busca e a chave do TMDB são usados depois como descrito acima. A página não carrega nada da internet. O controle desliga quando você o desconecta, após 30 minutos sem uso ou quando chegam comandos falsos.</item>
+        <item>Controle pelo celular, só enquanto você o liga nas configurações: a TV serve uma pequena página na sua rede doméstica, que o celular abre ao escanear um código QR. O código contém uma chave de uso único que assina e criptografa cada comando entre o celular e a TV, e a chave nunca é enviada pela rede. Os comandos vão direto do celular para a TV e não são guardados; o texto da busca e a chave do TMDB são usados depois como descrito acima. A página não carrega nada da internet. O controle desliga quando você o desconecta, após 30 minutos sem uso ou quando chegam comandos falsos. Para apertar teclas em outros apps (Stremio, Netflix…), o controle pelo celular usa o serviço de acessibilidade do SCARY, só se você o ativou; ele aperta teclas e não lê nada da tela.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
         <item>Dúvidas, correções ou pedidos sobre seus dados: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
@@ -371,7 +371,10 @@
     <string name="remote_disconnect">Desconectar</string>
     <string name="remote_new_code">Novo código</string>
     <string name="remote_turn_on">Ligar</string>
-    <string name="remote_limits">As setas funcionam dentro do SCARY. Reproduzir, pausar e volume também funcionam em outros apps.</string>
     <string name="remote_privacy">Funciona só na sua rede doméstica. Cada comando é assinado e criptografado com uma chave de uso único do código QR, e essa chave nunca é enviada pela rede. Nada é guardado nem enviado para a internet. O controle desliga sozinho após 30 minutos sem uso.</string>
     <string name="remote_qr_description">Código QR que abre o controle do SCARY no seu celular</string>
+    <string name="remote_other_apps_full">O celular também controla outros apps (Stremio, Netflix…): setas, OK, Voltar e Início. A busca e a chave do TMDB trazem o SCARY de volta primeiro.</string>
+    <string name="remote_other_apps_back_home">Em outros apps (Stremio, Netflix…) o celular aperta Voltar e Início, e reproduz, pausa e ajusta o volume. As setas precisam de Android 13 ou mais recente na TV.</string>
+    <string name="remote_other_apps_off">Dentro do SCARY o celular faz tudo. Para controlar outros apps também (Stremio, Netflix…), ative “SCARY Home button” nas configurações de acessibilidade da TV. Reproduzir, pausar e volume já funcionam em todo lugar.</string>
+    <string name="remote_other_apps_enable">Permitir controle de outros apps</string>
 </resources>

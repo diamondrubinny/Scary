@@ -39,14 +39,34 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryType
 /** Test tags of the phone remote's screen and its QR code. */
 const val PHONE_REMOTE_TAG = "phoneRemote"
 const val PHONE_REMOTE_QR_TAG = "phoneRemoteQr"
+const val OTHER_APPS_BUTTON_TAG = "phoneRemoteOtherApps"
+
+/** How far the phone reaches outside SCARY: through SCARY's accessibility service, when the viewer turned it on. */
+enum class OtherApps {
+    /** Arrows, OK, Back and Home in every app (Android 13 and later). */
+    FULL,
+
+    /** Back and Home only: older Android cannot press the arrows for another app. */
+    BACK_AND_HOME,
+
+    /** The service is off: inside SCARY only. */
+    OFF,
+}
 
 /**
  * The phone remote: a QR code for the phone, how to use it, whether a phone is connected, and Disconnect. Opening
  * this screen turns the remote on ([onStart]); it stays on while the viewer browses, until Disconnect or 30 minutes
- * without a command.
+ * without a command. [otherApps] says whether the phone also controls other apps, with a button to allow it.
  */
 @Composable
-fun PhoneRemoteScreen(state: PhoneRemoteServer.State, onStart: () -> Unit, onStop: () -> Unit, onNewCode: () -> Unit) {
+fun PhoneRemoteScreen(
+    state: PhoneRemoteServer.State,
+    onStart: () -> Unit,
+    onStop: () -> Unit,
+    onNewCode: () -> Unit,
+    otherApps: OtherApps = OtherApps.OFF,
+    onEnableOtherApps: () -> Unit = {},
+) {
     val firstFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) { onStart() }
     val on = state as? PhoneRemoteServer.State.On
@@ -94,7 +114,24 @@ fun PhoneRemoteScreen(state: PhoneRemoteServer.State, onStart: () -> Unit, onSto
                     ScaryButton(stringResource(R.string.remote_turn_on), onClick = onStart, primary = true, focusRequester = firstFocus)
                 }
             }
-            BasicText(stringResource(R.string.remote_limits), style = ScaryType.Caption)
+            BasicText(
+                stringResource(
+                    when (otherApps) {
+                        OtherApps.FULL -> R.string.remote_other_apps_full
+                        OtherApps.BACK_AND_HOME -> R.string.remote_other_apps_back_home
+                        OtherApps.OFF -> R.string.remote_other_apps_off
+                    },
+                ),
+                style = ScaryType.Body,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            if (otherApps == OtherApps.OFF) {
+                ScaryButton(
+                    stringResource(R.string.remote_other_apps_enable),
+                    onClick = onEnableOtherApps,
+                    modifier = Modifier.testTag(OTHER_APPS_BUTTON_TAG),
+                )
+            }
             BasicText(stringResource(R.string.remote_privacy), style = ScaryType.Caption)
         }
         if (on != null) {

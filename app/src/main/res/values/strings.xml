@@ -102,7 +102,7 @@
     <string name="settings_home_note">If the TV does not let you pick SCARY as the home screen (common on Google TV and some Xiaomi models), turn on the Home button option. SCARY then opens on every Home press and when the TV starts. It listens only for the Home key and reads nothing on the screen.</string>
     <string name="tile_set_home">Make SCARY the home screen</string>
     <string name="a11y_service_label">SCARY Home button</string>
-    <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. It only listens for the Home key. It cannot read or change anything on the screen.</string>
+    <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. While you use SCARY\'s phone remote, it also presses the keys the phone sends (arrows, OK, Back) in the app in front. It listens only for the Home key and cannot read anything on the screen.</string>
     <string name="msg_enable_service">In Accessibility, choose “SCARY Home button” and turn it on.</string>
     <string name="settings_tmdb">TMDB key</string>
     <string name="value_tmdb_none">Not set</string>
@@ -156,7 +156,7 @@
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
-        <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive.</item>
+        <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
@@ -370,7 +370,10 @@
     <string name="remote_disconnect">Disconnect</string>
     <string name="remote_new_code">New code</string>
     <string name="remote_turn_on">Turn on</string>
-    <string name="remote_limits">The arrows work inside SCARY. Play, pause and volume also work in other apps.</string>
     <string name="remote_privacy">Works only on your home network. Every command is signed and encrypted with a one-time key from the QR code, and that key is never sent over the network. Nothing is stored or sent to the internet. The remote turns off by itself after 30 minutes without use.</string>
     <string name="remote_qr_description">QR code that opens the SCARY phone remote on your phone</string>
+    <string name="remote_other_apps_full">The phone also controls other apps (Stremio, Netflix…): arrows, OK, Back and Home. Search and the TMDB key bring SCARY back first.</string>
+    <string name="remote_other_apps_back_home">In other apps (Stremio, Netflix…) the phone presses Back and Home, and plays, pauses and sets the volume. The arrows need Android 13 or later on the TV.</string>
+    <string name="remote_other_apps_off">Inside SCARY the phone does everything. To control other apps too (Stremio, Netflix…), turn on “SCARY Home button” in the TV\'s accessibility settings. Play, pause and volume work everywhere already.</string>
+    <string name="remote_other_apps_enable">Allow control of other apps</string>
 </resources>

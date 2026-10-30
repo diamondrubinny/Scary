@@ -18,11 +18,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import io.github.diamondrubinny.scary.launch.HomeButtonService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -220,7 +223,10 @@ class PhoneRemoteServer(private val context: Context) {
         }
     }
 
-    /** Play/Pause and the volume work whatever app is in front; the rest is SCARY's screen's to do. */
+    /**
+     * Play/Pause and the volume work whatever app is in front. The rest is SCARY's screen's to do while it is in
+     * front, and goes through SCARY's accessibility service while another app is ([elsewhere]).
+     */
     private suspend fun handle(request: RemoteProtocol.Request): Reply {
         val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
         when (request.command) {
@@ -232,9 +238,45 @@ class PhoneRemoteServer(private val context: Context) {
             Command.VOLUME_DOWN -> audio?.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI)
             Command.MUTE -> audio?.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_TOGGLE_MUTE, AudioManager.FLAG_SHOW_UI)
             Command.PING -> Unit
-            else -> return handler?.handle(request) ?: Reply("not_front")
+            else -> return handler?.handle(request)?.takeUnless { it.status == NOT_FRONT } ?: elsewhere(request)
         }
         return Reply("ok")
+    }
+
+    /**
+     * Another app is in front (Stremio, Netflix…). Arrows, OK and Back are pressed there by SCARY's accessibility
+     * service, when the viewer turned it on; Home, search, opening a title and the TMDB key bring SCARY back first.
+     */
+    private suspend fun elsewhere(request: RemoteProtocol.Request): Reply {
+        val service = HomeButtonService.instance ?: return Reply("a11y_off")
+        val key = when (request.command) {
+            Command.UP -> HomeButtonService.Key.UP
+            Command.DOWN -> HomeButtonService.Key.DOWN
+            Command.LEFT -> HomeButtonService.Key.LEFT
+            Command.RIGHT -> HomeButtonService.Key.RIGHT
+            Command.OK -> HomeButtonService.Key.OK
+            Command.BACK -> HomeButtonService.Key.BACK
+            else -> null
+        }
+        if (key != null) {
+            val pressed = withContext(Dispatchers.Main) { service.press(key) }
+            return when {
+                pressed -> Reply("ok")
+                key != HomeButtonService.Key.BACK && !HomeButtonService.arrowsEverywhere -> Reply("old_android")
+                else -> Reply(NOT_FRONT)
+            }
+        }
+        if (!withContext(Dispatchers.Main) { service.bringScaryToFront() }) return Reply(NOT_FRONT)
+        if (request.command == Command.HOME) return Reply("ok")
+        // SCARY takes a moment to come to the front and take commands again.
+        return withTimeoutOrNull(FRONT_WAIT_MS) {
+            var reply: Reply? = null
+            while (reply == null || reply.status == NOT_FRONT) {
+                delay(FRONT_POLL_MS)
+                reply = handler?.handle(request)
+            }
+            reply
+        } ?: Reply(NOT_FRONT)
     }
 
     @Synchronized
@@ -330,6 +372,9 @@ class PhoneRemoteServer(private val context: Context) {
 
     private companion object {
         const val TAG = "ScaryRemote"
+        const val NOT_FRONT = "not_front"
+        const val FRONT_WAIT_MS = 5_000L
+        const val FRONT_POLL_MS = 100L
         const val BACKLOG = 8
         const val MAX_CONNECTIONS = 4
         const val SOCKET_TIMEOUT_MS = 5_000

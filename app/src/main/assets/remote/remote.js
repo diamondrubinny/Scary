@@ -120,7 +120,7 @@ const WORDS = {
     offline: "The TV cannot be reached. Same Wi-Fi? Is SCARY's phone remote still on?",
     noSecret: "Scan the QR code on the TV again: this page needs the code's secret.",
     badSignature: "This code is no longer valid. Scan the new code on the TV.",
-    notFound: "The TV no longer shows this title. Search again.", notFront: "Open SCARY on the TV first: the arrows only move around in SCARY.", busy: "Slow down a little.",
+    notFound: "The TV no longer shows this title. Search again.", notFront: "Could not reach SCARY on the TV. Try again.", a11yOff: "To control other apps from the phone, turn on “SCARY Home button” on the TV: SCARY › Settings › Phone remote.", oldAndroid: "This TV runs Android older than 13: in other apps the phone presses Back and Home, plays, pauses and sets the volume, but not the arrows.", busy: "Slow down a little.",
     up: "Up", down: "Down", left: "Left", right: "Right", ok: "OK", back: "Back", home: "Home",
     play: "Play / Pause", volUp: "Volume up", volDown: "Volume down", mute: "Mute",
     searchLabel: "Search films and series", searchButton: "Search on the TV", openOnTv: "Open on the TV",
@@ -136,7 +136,7 @@ const WORDS = {
     offline: "אין חיבור לטלוויזיה. אותה רשת Wi-Fi? השליטה מהטלפון עדיין פועלת ב־SCARY?",
     noSecret: "סרקו שוב את קוד ה־QR בטלוויזיה: הדף צריך את הסוד שבקוד.",
     badSignature: "הקוד הזה כבר לא בתוקף. סרקו את הקוד החדש בטלוויזיה.",
-    notFound: "הכותר הזה כבר לא מוצג בטלוויזיה. חפשו שוב.", notFront: "פתחו קודם את SCARY בטלוויזיה: החיצים זזים רק בתוך SCARY.", busy: "קצת לאט יותר.",
+    notFound: "הכותר הזה כבר לא מוצג בטלוויזיה. חפשו שוב.", notFront: "לא הצלחנו להגיע ל־SCARY בטלוויזיה. נסו שוב.", a11yOff: "כדי לשלוט מהטלפון גם באפליקציות אחרות, מפעילים בטלוויזיה את “SCARY Home button”: ‏SCARY › הגדרות › שלט בטלפון.", oldAndroid: "בטלוויזיה הזו Android ישן מ־13: באפליקציות אחרות הטלפון לוחץ חזרה ובית, מפעיל, משהה ומשנה עוצמה, אבל לא חצים.", busy: "קצת לאט יותר.",
     up: "למעלה", down: "למטה", left: "שמאלה", right: "ימינה", ok: "OK", back: "חזרה", home: "בית",
     play: "ניגון / השהיה", volUp: "הגברה", volDown: "הנמכה", mute: "השתקה",
     searchLabel: "חיפוש סרטים וסדרות", searchButton: "חיפוש בטלוויזיה", openOnTv: "פתיחה בטלוויזיה",
@@ -152,7 +152,7 @@ const WORDS = {
     offline: "لا يمكن الوصول إلى التلفاز. نفس شبكة Wi-Fi؟ هل ما زال التحكم من الهاتف يعمل في SCARY؟",
     noSecret: "امسح رمز QR على التلفاز مرة أخرى: تحتاج هذه الصفحة إلى السر الموجود في الرمز.",
     badSignature: "لم يعد هذا الرمز صالحًا. امسح الرمز الجديد على التلفاز.",
-    notFound: "لم يعد هذا العنوان معروضًا على التلفاز. ابحث مرة أخرى.", notFront: "افتح SCARY على التلفاز أولًا: الأسهم تتحرك داخل SCARY فقط.", busy: "على مهلك قليلًا.",
+    notFound: "لم يعد هذا العنوان معروضًا على التلفاز. ابحث مرة أخرى.", notFront: "تعذّر الوصول إلى SCARY على التلفاز. حاول مرة أخرى.", a11yOff: "للتحكم في التطبيقات الأخرى من الهاتف، فعّل “SCARY Home button” على التلفاز: SCARY › الإعدادات › جهاز التحكم بالهاتف.", oldAndroid: "يعمل هذا التلفاز بإصدار Android أقدم من 13: في التطبيقات الأخرى يضغط الهاتف الرجوع والرئيسية ويشغّل ويوقف مؤقتًا ويضبط الصوت، لكن دون الأسهم.", busy: "على مهلك قليلًا.",
     up: "أعلى", down: "أسفل", left: "يسار", right: "يمين", ok: "OK", back: "رجوع", home: "الرئيسية",
     play: "تشغيل / إيقاف مؤقت", volUp: "رفع الصوت", volDown: "خفض الصوت", mute: "كتم",
     searchLabel: "ابحث عن أفلام ومسلسلات", searchButton: "ابحث على التلفاز", openOnTv: "افتح على التلفاز",
@@ -168,7 +168,7 @@ const WORDS = {
     offline: "A TV não responde. Mesma rede Wi-Fi? O controle pelo celular ainda está ligado no SCARY?",
     noSecret: "Escaneie de novo o código QR na TV: esta página precisa do segredo do código.",
     badSignature: "Este código não vale mais. Escaneie o novo código na TV.",
-    notFound: "A TV não mostra mais este título. Busque de novo.", notFront: "Abra o SCARY na TV primeiro: as setas só se movem dentro do SCARY.", busy: "Mais devagar.",
+    notFound: "A TV não mostra mais este título. Busque de novo.", notFront: "Não deu para alcançar o SCARY na TV. Tente de novo.", a11yOff: "Para controlar outros apps pelo celular, ative “SCARY Home button” na TV: SCARY › Configurações › Controle pelo celular.", oldAndroid: "Esta TV tem Android anterior ao 13: em outros apps o celular aperta Voltar e Início, reproduz, pausa e ajusta o volume, mas não as setas.", busy: "Mais devagar.",
     up: "Cima", down: "Baixo", left: "Esquerda", right: "Direita", ok: "OK", back: "Voltar", home: "Início",
     play: "Tocar / Pausar", volUp: "Aumentar volume", volDown: "Diminuir volume", mute: "Mudo",
     searchLabel: "Buscar filmes e séries", searchButton: "Buscar na TV", openOnTv: "Abrir na TV",
@@ -184,7 +184,7 @@ const WORDS = {
     offline: "Телевизор недоступен. Та же сеть Wi-Fi? Управление с телефона в SCARY ещё включено?",
     noSecret: "Отсканируйте QR-код на телевизоре ещё раз: странице нужен секрет из кода.",
     badSignature: "Этот код больше не действует. Отсканируйте новый код на телевизоре.",
-    notFound: "Телевизор больше не показывает это название. Поищите снова.", notFront: "Сначала откройте SCARY на телевизоре: стрелки работают только внутри SCARY.", busy: "Помедленнее.",
+    notFound: "Телевизор больше не показывает это название. Поищите снова.", notFront: "Не удалось связаться со SCARY на телевизоре. Попробуйте ещё раз.", a11yOff: "Чтобы управлять с телефона и другими приложениями, включите на телевизоре «SCARY Home button»: SCARY › Настройки › Пульт в телефоне.", oldAndroid: "На этом телевизоре Android старше 13: в других приложениях телефон нажимает «Назад» и «Домой», включает, ставит на паузу и меняет громкость, но не стрелки.", busy: "Помедленнее.",
     up: "Вверх", down: "Вниз", left: "Влево", right: "Вправо", ok: "OK", back: "Назад", home: "Домой",
     play: "Пуск / пауза", volUp: "Громче", volDown: "Тише", mute: "Без звука",
     searchLabel: "Поиск фильмов и сериалов", searchButton: "Искать на телевизоре", openOnTv: "Открыть на телевизоре",
@@ -198,7 +198,7 @@ const WORDS = {
 };
 const RTL = new Set(["he", "ar"]);
 const STATUS_WORDS = {
-  bad_signature: "badSignature", not_front: "notFront", not_found: "notFound", busy: "busy", off: "offline",
+  bad_signature: "badSignature", not_front: "notFront", not_found: "notFound", a11y_off: "a11yOff", old_android: "oldAndroid", busy: "busy", off: "offline",
   tmdb_saved: "tmdbSaved", tmdb_invalid: "tmdbInvalid", tmdb_rejected: "tmdbRejected",
   tmdb_unreachable: "tmdbUnreachable", tmdb_storage: "tmdbStorage",
 };

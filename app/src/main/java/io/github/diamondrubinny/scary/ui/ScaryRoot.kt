@@ -76,6 +76,8 @@ import io.github.diamondrubinny.scary.ui.stats.StatsScreen
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
+import io.github.diamondrubinny.scary.ui.remote.OtherApps
+import io.github.diamondrubinny.scary.launch.HomeButtonService
 import io.github.diamondrubinny.scary.system.SleepTimer
 import io.github.diamondrubinny.scary.ui.components.minutesLeft
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
@@ -396,6 +398,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                         phoneRemote.stop()
                         phoneRemote.start(language)
                     },
+                    otherApps = when {
+                        !launcherStatus.homeButtonServiceOn -> OtherApps.OFF
+                        HomeButtonService.arrowsEverywhere -> OtherApps.FULL
+                        else -> OtherApps.BACK_AND_HOME
+                    },
+                    onEnableOtherApps = ::openAccessibility,
                 )
                 current == Screen.Bucket -> BucketScreen(
                     ids = state.bucketIds,

@@ -84,6 +84,10 @@ import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
 import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
 import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
 import java.net.Socket
+import android.os.ParcelFileDescriptor
+import android.provider.Settings
+import androidx.lifecycle.Lifecycle
+import io.github.diamondrubinny.scary.launch.HomeButtonService
 
 /**
  * The main flows, driven through the same semantics TalkBack uses. Text comes from the app's own resources, so the
@@ -707,6 +711,70 @@ class ScaryUiTest {
         }
     }
 
+    @Test
+    fun withItsAccessibilityServiceOnThePhoneRemoteReachesOtherApps() {
+        waitForHome()
+        val remote = (rule.activity.application as ScaryApplication).container.phoneRemote
+        val service = "${rule.activity.packageName}/${HomeButtonService::class.java.name}"
+        val servicesBefore = shell("settings get secure enabled_accessibility_services")
+        val enabledBefore = shell("settings get secure accessibility_enabled")
+        fun scaryInFront(): Boolean {
+            var resumed = false
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                resumed = rule.activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+            }
+            return resumed
+        }
+        withCleanup({
+            // Off: another app in front gets nothing, and the phone is told how to allow it.
+            val url = remote.start(Language.EN) ?: error("no network for the phone remote")
+            val port = Uri.parse(url).port
+            val secret = Base64.decode(
+                Uri.parse(url).fragment.orEmpty().split('&').first { it.startsWith("s=") }.removePrefix("s="),
+                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+            )
+            var counter = System.currentTimeMillis() * 1000
+            rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+            if (HomeButtonService.instance == null) {
+                val off = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                assertTrue(off, "\"a11y_off\"" in off)
+            }
+            // On: Back from the phone closes the other app, and the arrows go as far as this Android allows.
+            shell("settings put secure enabled_accessibility_services $service")
+            shell("settings put secure accessibility_enabled 1")
+            waitUntilOrDescribe("SCARY's accessibility service to start") { HomeButtonService.instance != null }
+            if (!scaryInFront()) {
+                val down = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.DOWN))
+                val expected = if (HomeButtonService.arrowsEverywhere) "\"ok\"" else "\"old_android\""
+                assertTrue(down, down.startsWith("HTTP/1.1 200") && expected in down)
+            }
+            // The service may open SCARY by itself shortly after the TV starts: then go back to the settings.
+            if (scaryInFront()) {
+                rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+            }
+            repeat(MAX_BACKS) {
+                if (scaryInFront()) return@repeat
+                val back = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                assertTrue(back, back.startsWith("HTTP/1.1 200") && "\"ok\"" in back)
+                SystemClock.sleep(BACK_SETTLE_MS)
+            }
+            waitUntilOrDescribe("SCARY back in front after Back on the phone") { scaryInFront() }
+        }) {
+            remote.stop()
+            shell(if (servicesBefore == "null" || servicesBefore.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services $servicesBefore")
+            shell(if (enabledBefore == "null" || enabledBefore.isEmpty()) "settings delete secure accessibility_enabled" else "settings put secure accessibility_enabled $enabledBefore")
+            if (!scaryInFront()) rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            waitUntilOrDescribe("SCARY in front") { scaryInFront() }
+            backToHome()
+        }
+    }
+
+    private fun shell(command: String): String =
+        ParcelFileDescriptor.AutoCloseInputStream(InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command))
+            .use { it.readBytes().toString(Charsets.UTF_8).trim() }
+
     /** A plain HTTP exchange with the phone remote over the loopback address; the answer, head and body. */
     private fun remoteHttp(port: Int, request: String): String =
         Socket("127.0.0.1", port).use { socket ->
@@ -947,6 +1015,7 @@ class ScaryUiTest {
         const val SLEEP_CHOICES = 5
         const val ROWS_TO_WALK = 6
         const val DETAILS_DEPTH = 8
+        const val BACK_SETTLE_MS = 1_500L
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }
