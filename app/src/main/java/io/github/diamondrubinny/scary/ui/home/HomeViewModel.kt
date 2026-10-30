@@ -234,12 +234,6 @@ class HomeViewModel(
     private var appsJob: Job? = null
     private var nextMessageId = 0L
 
-    init {
-        loadCatalog()
-        refreshApps()
-        viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
-    }
-
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
@@ -1457,6 +1451,14 @@ class HomeViewModel(
 
     private fun show(@StringRes text: Int, vararg args: String) {
         _message.value = UserMessage(++nextMessageId, text, args.toList())
+    }
+
+    // Last in the class: the work it starts runs at once on the main thread (Main.immediate) and can reach any field
+    // before its first suspension, so every field must be initialized by then.
+    init {
+        loadCatalog()
+        refreshApps()
+        viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
     }
 
     companion object {

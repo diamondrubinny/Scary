@@ -85,6 +85,7 @@ import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
 import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
 import java.net.Socket
 import android.os.ParcelFileDescriptor
+import android.app.UiAutomation
 import android.provider.Settings
 import androidx.lifecycle.Lifecycle
 import io.github.diamondrubinny.scary.launch.HomeButtonService
@@ -771,9 +772,16 @@ class ScaryUiTest {
         }
     }
 
-    private fun shell(command: String): String =
-        ParcelFileDescriptor.AutoCloseInputStream(InstrumentationRegistry.getInstrumentation().uiAutomation.executeShellCommand(command))
+    /**
+     * A shell command, as the test. Its UiAutomation must not suppress accessibility services, as it does by
+     * default: SCARY's own service would never start.
+     */
+    private fun shell(command: String): String {
+        val automation = InstrumentationRegistry.getInstrumentation()
+            .getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+        return ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command))
             .use { it.readBytes().toString(Charsets.UTF_8).trim() }
+    }
 
     /** A plain HTTP exchange with the phone remote over the loopback address; the answer, head and body. */
     private fun remoteHttp(port: Int, request: String): String =
