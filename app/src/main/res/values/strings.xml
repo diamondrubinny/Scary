@@ -107,7 +107,7 @@
     <string name="settings_tmdb">TMDB key</string>
     <string name="value_tmdb_none">Not set</string>
     <string name="tmdb_dialog_title">TMDB API key</string>
-    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
+    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Easiest: paste it from your phone with the button below.</string>
     <string name="tmdb_hint">Paste or type the key</string>
     <string name="tmdb_save">Save and check</string>
     <string name="tmdb_delete">Delete the key</string>
@@ -156,6 +156,7 @@
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
+        <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
@@ -352,4 +353,24 @@
     <string name="msg_bucket_empty">Pick a few films first.</string>
     <string name="msg_bucket_done">That was the whole bucket list. Well survived!</string>
     <string name="night_pick_series">Tonight\'s series</string>
+    <!-- Phone remote -->
+    <string name="tmdb_use_phone">Paste it from your phone</string>
+    <string name="settings_phone_remote">Phone remote</string>
+    <string name="settings_phone_remote_note">Control SCARY from your phone\'s browser on the same Wi-Fi: arrows, search, and pasting the TMDB key. Nothing to install.</string>
+    <string name="remote_title">Phone remote</string>
+    <string name="remote_step_wifi">1. Connect your phone to the same Wi-Fi as the TV.</string>
+    <string name="remote_step_scan">2. Scan the code with the phone\'s camera and open the page.</string>
+    <string name="remote_step_use">3. Use the arrows, search for films, or paste your TMDB key.</string>
+    <string name="remote_connected">A phone is connected.</string>
+    <string name="remote_waiting">Waiting for a phone to scan the code…</string>
+    <string name="remote_no_network">The TV is not on a home network (Wi-Fi or Ethernet), so a phone cannot reach it.</string>
+    <string name="remote_idle">The phone remote turned off after 30 minutes without use.</string>
+    <string name="remote_forged">The phone remote turned off because a device on the network sent forged commands.</string>
+    <string name="remote_off">The phone remote is off.</string>
+    <string name="remote_disconnect">Disconnect</string>
+    <string name="remote_new_code">New code</string>
+    <string name="remote_turn_on">Turn on</string>
+    <string name="remote_limits">The arrows work inside SCARY. Play, pause and volume also work in other apps.</string>
+    <string name="remote_privacy">Works only on your home network. Every command is signed and encrypted with a one-time key from the QR code, and that key is never sent over the network. Nothing is stored or sent to the internet. The remote turns off by itself after 30 minutes without use.</string>
+    <string name="remote_qr_description">QR code that opens the SCARY phone remote on your phone</string>
 </resources>

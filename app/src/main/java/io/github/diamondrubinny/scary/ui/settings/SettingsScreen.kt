@@ -66,6 +66,7 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenPhoneRemote: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -98,16 +99,20 @@ fun SettingsScreen(
     actions: SettingsActions,
     returningFrom: DocumentKind? = null,
     returningFromStats: Boolean = false,
+    returningFromRemote: Boolean = false,
+    phoneRemoteOn: Boolean = false,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
     val statementFocus = remember { FocusRequester() }
     val statsFocus = remember { FocusRequester() }
+    val remoteFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         // Back from a document lands on the row that opened it, not at the top.
         val target = when {
             returningFromStats -> statsFocus
+            returningFromRemote -> remoteFocus
             returningFrom == DocumentKind.Privacy -> privacyFocus
             returningFrom == DocumentKind.Accessibility -> statementFocus
             else -> firstFocus
@@ -158,6 +163,13 @@ fun SettingsScreen(
         )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
+        SettingRow(
+            label = stringResource(R.string.settings_phone_remote),
+            value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
+            onClick = actions.onOpenPhoneRemote,
+            modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_rent_country),
             value = when {
@@ -303,6 +315,9 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Test tag of the phone remote's row. */
+const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"

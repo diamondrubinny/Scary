@@ -4,6 +4,11 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
+import android.os.SystemClock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -67,10 +72,48 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        (application as ScaryApplication).container.phoneRemote.handler = remoteHandler
+    }
+
     override fun onStop() {
         super.onStop()
         ambient.stop()
         viewModel.onBackgrounded()
+        val remote = (application as ScaryApplication).container.phoneRemote
+        if (remote.handler === remoteHandler) remote.handler = null
+    }
+
+    /**
+     * The phone remote's commands for SCARY's screen. Arrows, OK and Back go in as the TV remote's keys would, so they
+     * move the focus exactly as it does; they reach only SCARY (an app cannot press keys in other apps).
+     */
+    private val remoteHandler = PhoneRemoteServer.Handler { request ->
+        withContext(Dispatchers.Main.immediate) {
+            if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@withContext PhoneRemoteServer.Reply("not_front")
+            when (request.command) {
+                Command.UP -> pressKey(KeyEvent.KEYCODE_DPAD_UP)
+                Command.DOWN -> pressKey(KeyEvent.KEYCODE_DPAD_DOWN)
+                Command.LEFT -> pressKey(KeyEvent.KEYCODE_DPAD_LEFT)
+                Command.RIGHT -> pressKey(KeyEvent.KEYCODE_DPAD_RIGHT)
+                Command.OK -> pressKey(KeyEvent.KEYCODE_DPAD_CENTER)
+                Command.BACK -> if (!viewModel.closeTopDialog()) onBackPressedDispatcher.onBackPressed()
+                Command.HOME -> viewModel.onHomePressed()
+                Command.SEARCH -> return@withContext PhoneRemoteServer.Reply("ok", viewModel.remoteSearch(request.text))
+                Command.OPEN -> if (!viewModel.remoteOpen(request.text)) return@withContext PhoneRemoteServer.Reply("not_found")
+                Command.TMDB_KEY -> return@withContext PhoneRemoteServer.Reply(viewModel.remoteTmdbKey(request.text))
+                else -> Unit
+            }
+            PhoneRemoteServer.Reply("ok")
+        }
+    }
+
+    /** A key press on SCARY's own window, where the TV remote's keys land: Compose moves the focus or clicks. */
+    private fun pressKey(keyCode: Int) {
+        val now = SystemClock.uptimeMillis()
+        window.superDispatchKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
+        window.superDispatchKeyEvent(KeyEvent(now, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, keyCode, 0))
     }
 
     override fun onResume() {
@@ -129,6 +172,10 @@ class MainActivity : ComponentActivity() {
                 viewModel.openSettings()
                 // Only through settings: with a PIN set, settings asks for it first.
                 if (viewModel.screen.value == Screen.Settings) viewModel.openStats()
+            }
+            target == "remote" -> {
+                viewModel.openSettings()
+                if (viewModel.screen.value == Screen.Settings) viewModel.openPhoneRemote()
             }
             // "How much time do you have?" with a budget chosen, e.g. "time:double".
             target.startsWith("time:") -> TimeBudget.fromKey(target.removePrefix("time:"))?.let { budget ->

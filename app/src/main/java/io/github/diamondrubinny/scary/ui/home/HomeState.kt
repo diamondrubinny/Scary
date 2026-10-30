@@ -199,6 +199,7 @@ sealed interface Screen {
     data class Document(val kind: DocumentKind) : Screen
     data object Stats : Screen
     data object Bucket : Screen
+    data object PhoneRemote : Screen
 }
 
 /**

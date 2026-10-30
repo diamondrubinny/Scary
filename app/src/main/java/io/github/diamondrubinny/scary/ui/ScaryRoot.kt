@@ -73,6 +73,9 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.stats.StatsScreen
+import io.github.diamondrubinny.scary.ScaryApplication
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
 import io.github.diamondrubinny.scary.system.SleepTimer
 import io.github.diamondrubinny.scary.ui.components.minutesLeft
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
@@ -117,6 +120,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     BackHandler { viewModel.back() }
 
     val context = LocalContext.current
+    val phoneRemote = remember(context) { (context.applicationContext as ScaryApplication).container.phoneRemote }
+    val remoteState by phoneRemote.state.collectAsStateWithLifecycle()
 
     // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
     val sleepSaved = state.sleepAtMillis != null
@@ -202,12 +207,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     }
     // Which document settings opened last, so focus can return to its row. Forgotten once settings close.
     var lastDocument by remember { mutableStateOf<DocumentKind?>(null) }
-    // The same for "Your year in fear".
+    // The same for "Your year in fear" and the phone remote.
     var fromStats by remember { mutableStateOf(false) }
+    var fromRemote by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
-        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats) {
+        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote) {
             lastDocument = null
             fromStats = false
+            fromRemote = false
         }
     }
     val settingsActions = SettingsActions(
@@ -234,7 +241,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onOpenStats = {
             lastDocument = null
             fromStats = true
+            fromRemote = false
             viewModel.openStats()
+        },
+        onOpenPhoneRemote = {
+            lastDocument = null
+            fromStats = false
+            fromRemote = true
+            viewModel.openPhoneRemote()
         },
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
@@ -341,6 +355,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     actions = settingsActions,
                     returningFrom = lastDocument,
                     returningFromStats = fromStats,
+                    returningFromRemote = fromRemote,
+                    phoneRemoteOn = remoteState is PhoneRemoteServer.State.On,
                 )
                 details != null -> DetailsScreen(
                     details = details,
@@ -372,6 +388,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
+                current == Screen.PhoneRemote -> PhoneRemoteScreen(
+                    state = remoteState,
+                    onStart = { phoneRemote.start(language) },
+                    onStop = phoneRemote::stop,
+                    onNewCode = {
+                        phoneRemote.stop()
+                        phoneRemote.start(language)
+                    },
+                )
                 current == Screen.Bucket -> BucketScreen(
                     ids = state.bucketIds,
                     movieOf = viewModel::bucketMovie,
@@ -415,6 +440,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onSubmit = viewModel::submitTmdbKey,
                     onDelete = viewModel::clearTmdbKey,
                     onDismiss = viewModel::dismissTmdbDialog,
+                    onUsePhone = {
+                        viewModel.dismissTmdbDialog()
+                        viewModel.openPhoneRemote()
+                    },
                 )
             }
 

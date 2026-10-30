@@ -192,6 +192,12 @@ shot 66-bucket-prompt 4
 key KEYCODE_BACK
 open --es scary.debug.open home
 
+# The phone remote: its QR code and how to use it; OK on Disconnect turns it off again.
+open --es scary.debug.open remote
+shot 67-phone-remote 5
+key KEYCODE_DPAD_CENTER
+open --es scary.debug.open home
+
 # Family night: only gentle movies and a badge in the top bar; then back to normal.
 open --es scary.debug.open family
 shot 36-family-night 6

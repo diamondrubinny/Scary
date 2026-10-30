@@ -106,7 +106,7 @@
     <string name="settings_tmdb">מפתח TMDB</string>
     <string name="value_tmdb_none">לא הוגדר</string>
     <string name="tmdb_dialog_title">מפתח API של TMDB</string>
-    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מציגה שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. ההקלדה נוחה יותר עם אפליקציית Google TV בטלפון.</string>
+    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מציגה שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. הכי נוח: להדביק מהטלפון עם הכפתור למטה.</string>
     <string name="tmdb_hint">הדביקו או הקלידו את המפתח</string>
     <string name="tmdb_save">שמירה ובדיקה</string>
     <string name="tmdb_delete">מחיקת המפתח</string>
@@ -154,6 +154,7 @@
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
         <item>טריילרים שמתנגנים מעצמם (פעילים אחרי שהסכמתם כשנשאלתם בפעם הראשונה, ואפשר לכבות אותם בהגדרות): הנגן הוא של YouTube, במצב הפרטיות המשופרת שלו (youtube-nocookie.com, ו־youtube.com כניסיון אחרון כשטריילר לא מתנגן שם). כשטריילר מתנגן, YouTube ‏(Google) מקבלת את כתובת ה־IP של הטלוויזיה, פרטי המכשיר והדפדפן ואת מזהה הטריילר, לפי מדיניות הפרטיות של Google. ‏SCARY חוסמת עוגיות בנגן ומוחקת את האחסון שלו כשהוא נסגר. טריילרים לא מתנגנים בלי רשת או בערב משפחתי.</item>
+        <item>שלט בטלפון, רק כשמפעילים אותו בהגדרות: הטלוויזיה מגישה דף קטן ברשת הביתית, והטלפון פותח אותו בסריקת קוד QR. הקוד מכיל מפתח חד־פעמי שחותם ומצפין כל פקודה בין הטלפון לטלוויזיה, והמפתח לא נשלח ברשת אף פעם. הפקודות עוברות ישירות מהטלפון לטלוויזיה ולא נשמרות; טקסט החיפוש ומפתח ה־TMDB משמשים אחר כך כמתואר למעלה. הדף לא טוען דבר מהאינטרנט. השלט כבה כשמנתקים אותו, אחרי 30 דקות בלי שימוש, או כשמגיעות פקודות מזויפות.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>
         <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי עורך דין.</item>
@@ -353,4 +354,24 @@
     <string name="msg_bucket_empty">בחרו קודם כמה סרטים.</string>
     <string name="msg_bucket_done">זה היה כל ה־Bucket list. שרדתם!</string>
     <string name="night_pick_series">הסדרה של הלילה</string>
+    <!-- Phone remote -->
+    <string name="tmdb_use_phone">הדבקה מהטלפון</string>
+    <string name="settings_phone_remote">שלט בטלפון</string>
+    <string name="settings_phone_remote_note">שליטה ב־SCARY מהדפדפן בטלפון באותה רשת Wi-Fi: חצים, חיפוש והדבקת מפתח TMDB. בלי להתקין כלום.</string>
+    <string name="remote_title">שלט בטלפון</string>
+    <string name="remote_step_wifi">1. מחברים את הטלפון לאותה רשת Wi-Fi של הטלוויזיה.</string>
+    <string name="remote_step_scan">2. סורקים את הקוד במצלמת הטלפון ופותחים את הדף.</string>
+    <string name="remote_step_use">3. משתמשים בחצים, מחפשים סרטים או מדביקים את מפתח ה־TMDB.</string>
+    <string name="remote_connected">טלפון מחובר.</string>
+    <string name="remote_waiting">ממתינים שטלפון יסרוק את הקוד…</string>
+    <string name="remote_no_network">הטלוויזיה לא מחוברת לרשת ביתית (Wi-Fi או כבל), ולכן הטלפון לא יכול להגיע אליה.</string>
+    <string name="remote_idle">השלט בטלפון כבה אחרי 30 דקות בלי שימוש.</string>
+    <string name="remote_forged">השלט בטלפון כבה כי מכשיר ברשת שלח פקודות מזויפות.</string>
+    <string name="remote_off">השלט בטלפון כבוי.</string>
+    <string name="remote_disconnect">ניתוק</string>
+    <string name="remote_new_code">קוד חדש</string>
+    <string name="remote_turn_on">הפעלה</string>
+    <string name="remote_limits">החצים פועלים בתוך SCARY. הפעלה, השהיה ועוצמת קול פועלים גם באפליקציות אחרות.</string>
+    <string name="remote_privacy">פועל רק ברשת הביתית. כל פקודה חתומה ומוצפנת במפתח חד־פעמי שבקוד ה־QR, והמפתח לא נשלח ברשת אף פעם. שום דבר לא נשמר ולא נשלח לאינטרנט. השלט כבה מעצמו אחרי 30 דקות בלי שימוש.</string>
+    <string name="remote_qr_description">קוד QR שפותח בטלפון את השלט של SCARY</string>
 </resources>

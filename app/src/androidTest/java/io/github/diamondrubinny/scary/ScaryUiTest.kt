@@ -74,6 +74,16 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import android.net.Uri
+import android.util.Base64
+import android.view.View
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
+import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
+import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
+import java.net.Socket
 
 /**
  * The main flows, driven through the same semantics TalkBack uses. Text comes from the app's own resources, so the
@@ -641,6 +651,76 @@ class ScaryUiTest {
         // A fresh emulator has watched nothing yet; either way, the screen says what it shows.
         waitFor(hasText(text(R.string.stats_empty_title)) or hasText(text(R.string.stats_all_time)))
         backToHome()
+    }
+
+    @Test
+    fun thePhoneRemoteShowsItsCodeAndTakesOnlySignedCommands() {
+        waitForHome()
+        val remote = (rule.activity.application as ScaryApplication).container.phoneRemote
+        withCleanup({
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            val row = hasTestTag(PHONE_REMOTE_ROW_TAG)
+            waitFor(row)
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(hasTestTag(PHONE_REMOTE_QR_TAG))
+            waitFor(hasText(text(R.string.remote_waiting)))
+            val on = remote.state.value as PhoneRemoteServer.State.On
+            val port = Uri.parse(on.url).port
+            val secret = Base64.decode(
+                Uri.parse(on.url).fragment.orEmpty().split('&').first { it.startsWith("s=") }.removePrefix("s="),
+                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+            )
+            // The page is served to anyone, and holds no secret.
+            val page = remoteHttp(port, "GET / HTTP/1.1\r\nHost: tv\r\n\r\n")
+            assertTrue(page, page.startsWith("HTTP/1.1 200") && "remote.js" in page && "Content-Security-Policy" in page)
+            var counter = System.currentTimeMillis() * 1000
+            // A command signed with another key is refused, and does nothing.
+            val forged = remotePost(port, RemoteProtocol.seal(ByteArray(RemoteProtocol.SECRET_BYTES), ++counter, Command.HOME))
+            assertTrue(forged, forged.startsWith("HTTP/1.1 401"))
+            rule.onNode(hasTestTag(PHONE_REMOTE_TAG)).assertExists()
+            // A signed arrow moves the focus as the TV remote's would: from Disconnect to New code.
+            waitFor(hasText(text(R.string.remote_disconnect)) and isFocused())
+            val right = if (rule.activity.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL) Command.LEFT else Command.RIGHT
+            val arrow = remotePost(port, RemoteProtocol.seal(secret, ++counter, right))
+            assertTrue(arrow, arrow.startsWith("HTTP/1.1 200"))
+            waitFor(hasText(text(R.string.remote_new_code)) and isFocused())
+            waitFor(hasText(text(R.string.remote_connected)))
+            // A signed search runs on the TV and answers the phone with the matches.
+            val movie = bundledMovies().first()
+            val body = RemoteProtocol.seal(secret, ++counter, Command.SEARCH, movie.title)
+            val search = remotePost(port, body)
+            assertTrue(search, search.startsWith("HTTP/1.1 200") && "\"${movie.id}\"" in search)
+            waitFor(hasSetTextAction() and hasText(movie.title))
+            // The same command sent again is a replay.
+            val replay = remotePost(port, body)
+            assertTrue(replay, replay.startsWith("HTTP/1.1 409"))
+            val home = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.HOME))
+            assertTrue(home, home.startsWith("HTTP/1.1 200"))
+            waitUntilOrDescribe("the home screen") { onHome() }
+            // Disconnect forgets the key: the old code stops working.
+            remote.stop()
+            val after = runCatching { remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.HOME)) }.getOrDefault("closed")
+            assertTrue(after, !after.startsWith("HTTP/1.1 200"))
+        }) {
+            remote.stop()
+            backToHome()
+        }
+    }
+
+    /** A plain HTTP exchange with the phone remote over the loopback address; the answer, head and body. */
+    private fun remoteHttp(port: Int, request: String): String =
+        Socket("127.0.0.1", port).use { socket ->
+            socket.soTimeout = TIMEOUT_MS.toInt()
+            socket.getOutputStream().apply {
+                write(request.toByteArray(Charsets.UTF_8))
+                flush()
+            }
+            socket.getInputStream().readBytes().toString(Charsets.UTF_8)
+        }
+
+    private fun remotePost(port: Int, json: String): String {
+        val body = json.toByteArray(Charsets.UTF_8)
+        return remoteHttp(port, "POST /api HTTP/1.1\r\nHost: tv\r\nContent-Type: application/json\r\nContent-Length: ${body.size}\r\n\r\n$json")
     }
 
     @Test

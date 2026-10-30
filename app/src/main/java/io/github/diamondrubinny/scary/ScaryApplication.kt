@@ -82,6 +82,9 @@ class AppContainer(context: Context) {
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)
+
+    /** The phone remote's server: off until the viewer turns it on. */
+    val phoneRemote = io.github.diamondrubinny.scary.remote.PhoneRemoteServer(appContext)
     val settingsRepository = SettingsRepository(appContext)
     val savedMoviesRepository = SavedMoviesRepository(appContext)
     val launcher = Launcher(appContext, appsRepository)

@@ -1,0 +1,47 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+/* Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary */
+/* Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files. */
+
+/* SCARY's colours; every text colour passes WCAG AA on the background. */
+:root { --void: #0a0b0b; --crypt: #151615; --bone: #e9e1cf; --ash: #b3ad9f; --blood: #8e1b1b; --candle: #e0a94a; --fear: #d94040; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--void); color: var(--bone); }
+body {
+  margin: 0 auto; max-width: 520px; padding: 16px 16px calc(24px + env(safe-area-inset-bottom));
+  font: 17px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Hebrew", "Noto Sans Arabic", Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.brand { margin: 0; font-weight: 900; font-size: 30px; letter-spacing: .08em; color: var(--fear); text-shadow: 0 2px 0 var(--blood); }
+#status { margin: 0; color: var(--candle); flex: 1; min-width: 12em; }
+/* minmax(0, 1fr): columns never grow past a narrow phone because of a long label or field. */
+main { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; margin-top: 16px; }
+section { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+button {
+  font: inherit; font-weight: 700; color: var(--bone); background: var(--crypt);
+  border: 2px solid rgba(233, 225, 207, .25); border-radius: 14px; min-height: 52px; padding: 8px 12px; cursor: pointer;
+  touch-action: manipulation;
+}
+button:active { background: var(--bone); color: var(--void); }
+:focus-visible { outline: 3px solid var(--candle); outline-offset: 3px; }
+/* The pad and the keys keep their places in right-to-left pages too: "left" is on the left, volume down before up. */
+.pad { direction: ltr; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-areas: ". up ." "left ok right" ". down ."; gap: 10px; }
+.pad button { min-height: 76px; font-size: 26px; }
+.up { grid-area: up; } .down { grid-area: down; } .left { grid-area: left; } .right { grid-area: right; }
+.ok { grid-area: ok; background: var(--candle); color: var(--void); border-color: var(--candle); border-radius: 50%; aspect-ratio: 1; }
+.keys { direction: ltr; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.keys button { overflow-wrap: anywhere; }
+label, h2 { font-weight: 700; margin: 0; font-size: 17px; }
+.hint { margin: 0; color: var(--ash); font-size: 15px; }
+.field { display: flex; gap: 8px; }
+input {
+  flex: 1; min-width: 0; font: inherit; color: var(--bone); background: var(--crypt); border: 2px solid rgba(233, 225, 207, .35);
+  border-radius: 12px; padding: 10px 12px; min-height: 52px;
+}
+#results { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+#results li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: var(--crypt); border-radius: 12px; }
+#results li span { overflow-wrap: anywhere; }
+#results li button { min-height: 44px; flex: none; }
+.unpaired main { opacity: .35; pointer-events: none; }
+footer { margin-top: 28px; color: var(--ash); font-size: 13px; text-align: center; direction: ltr; }

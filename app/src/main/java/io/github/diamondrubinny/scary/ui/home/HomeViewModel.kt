@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.core.catalog.Search
+import kotlinx.coroutines.withTimeoutOrNull
 import io.github.diamondrubinny.scary.core.catalog.BucketList
 import io.github.diamondrubinny.scary.core.catalog.BucketReturn
 import io.github.diamondrubinny.scary.core.model.MediaKind
@@ -1185,6 +1188,56 @@ class HomeViewModel(
 
     fun openStats() = push(Screen.Stats)
 
+    // Phone remote --------------------------------------------------------------------------------------------------
+
+    fun openPhoneRemote() = push(Screen.PhoneRemote)
+
+    /** The phone's Back: closes the dialog on top, if any (dialogs have windows of their own, out of a key's reach). */
+    fun closeTopDialog(): Boolean = when {
+        _bucketPrompt.value != null -> { dismissBucketPrompt(); true }
+        _pinDialog.value != null -> { dismissPin(); true }
+        _tmdbDialog.value != null -> { dismissTmdbDialog(); true }
+        _trailerIntro.value -> { dismissTrailerIntro(); true }
+        else -> false
+    }
+
+    /**
+     * A search typed on the phone: the TV shows it on its search screen, and the phone gets the matches to open (the
+     * library's at once, the web's when they arrive, within a few seconds). Family night's limits apply, as on the TV.
+     */
+    suspend fun remoteSearch(text: String): List<PhoneRemoteServer.Result> {
+        val query = text.trim().take(MAX_QUERY_LENGTH)
+        backStack.value = listOf(Screen.Home, Screen.Search)
+        setSearchQuery(query)
+        val library = Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS)
+        val web = withTimeoutOrNull(REMOTE_WEB_WAIT_MS) {
+            webSearch.first { it.query == query.trim() && !it.loading }
+        }?.results.orEmpty()
+        val lang = language.value
+        return (library + web).distinctBy { it.id }.take(REMOTE_RESULTS)
+            .map { PhoneRemoteServer.Result(it.id, it.displayTitle(lang), it.yearsLabel) }
+    }
+
+    /** A film or series picked on the phone; false when SCARY does not know it (or no longer shows it). */
+    fun remoteOpen(id: String): Boolean {
+        if (movieById(id) == null) return false
+        openDetails(id)
+        return true
+    }
+
+    /** A TMDB key pasted on the phone: checked and stored as from the key dialog; the phone gets the outcome. */
+    suspend fun remoteTmdbKey(input: String): String = when (tmdb.setKey(input)) {
+        TmdbKeyResult.SAVED -> {
+            _tmdbDialog.value = null
+            show(R.string.msg_tmdb_saved)
+            "tmdb_saved"
+        }
+        TmdbKeyResult.INVALID_FORMAT -> "tmdb_invalid"
+        TmdbKeyResult.REJECTED -> "tmdb_rejected"
+        TmdbKeyResult.UNREACHABLE -> "tmdb_unreachable"
+        TmdbKeyResult.STORAGE_FAILED -> "tmdb_storage"
+    }
+
     /** Films or series on the home screen. The rows start again from the top and the hero shows the tab's pick. */
     fun selectTab(kind: MediaKind) {
         if (tab.value == kind) return
@@ -1413,6 +1466,8 @@ class HomeViewModel(
         private const val STOP_TIMEOUT_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 12
+        private const val REMOTE_RESULTS = 15
+        private const val REMOTE_WEB_WAIT_MS = 5_000L
         private const val GOOGLE_TV_LABEL = "Google TV"
         private const val LAUNCH_STILL_MS = 400L
         private const val LAUNCH_CLEAR_MS = 1_500L
