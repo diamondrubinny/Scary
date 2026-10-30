@@ -131,6 +131,7 @@ fun DetailsScreen(
     val rowsScroll = LocalBringIntoViewSpec.current
     val pageTop = with(LocalDensity.current) { PageTopPadding.toPx() }
     val pageSpec = remember(pageTop) { OnlyWhenNeeded(pageTop) }
+    val fromPageTop = remember(pageTop) { FromPageTop(pageTop) }
     CompositionLocalProvider(LocalBringIntoViewSpec provides pageSpec) {
         val pageScroll = rememberScrollState()
         // The trailer stops once the page scrolls more than half of it out of view (YouTube: only while visible).
@@ -141,7 +142,7 @@ fun DetailsScreen(
         Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                 Row(
-                    modifier = Modifier.bringIntoViewResponder(FromPageTop).padding(horizontal = SidePadding),
+                    modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
                     horizontalArrangement = Arrangement.spacedBy(36.dp),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -308,12 +309,13 @@ private class OnlyWhenNeeded(private val top: Float) : BringIntoViewSpec {
 }
 
 /**
- * The header (title, synopsis, buttons, apps, rent or buy) asks the page to show it from its top down to the focused
- * button. Back up from "More like this" to the buttons, the title comes back with them instead of staying cut off.
+ * The header (title, synopsis, buttons, apps, rent or buy) asks the page to show it from the page's very top (its
+ * [top] margin above the header included) down to the focused button. Back up from "More like this" to the buttons,
+ * the page returns to where it started instead of stopping with the title at the screen's edge or cut off.
  */
 @OptIn(ExperimentalFoundationApi::class)
-private object FromPageTop : BringIntoViewResponder {
-    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, 0f, localRect.right, localRect.bottom)
+private class FromPageTop(private val top: Float) : BringIntoViewResponder {
+    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, -top, localRect.right, localRect.bottom)
 
     // The header does not scroll by itself; the page does.
     override suspend fun bringChildIntoView(localRect: () -> Rect?) = Unit
