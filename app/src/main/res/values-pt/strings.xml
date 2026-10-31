@@ -375,6 +375,6 @@
     <string name="remote_qr_description">Código QR que abre o controle do SCARY no seu celular</string>
     <string name="remote_other_apps_full">O celular também controla outros apps (Stremio, Netflix…): setas, OK, Voltar e Início. A busca e a chave do TMDB trazem o SCARY de volta primeiro.</string>
     <string name="remote_other_apps_back_home">Em outros apps (Stremio, Netflix…) o celular aperta Voltar e Início, e reproduz, pausa e ajusta o volume. As setas precisam de Android 13 ou mais recente na TV.</string>
-    <string name="remote_other_apps_off">Dentro do SCARY o celular faz tudo. Para controlar outros apps também (Stremio, Netflix…), ative “SCARY Home button” nas configurações de acessibilidade da TV. Reproduzir, pausar e volume já funcionam em todo lugar.</string>
+    <string name="remote_other_apps_off">Dentro do SCARY o celular faz tudo. Para controlar outros apps também (Stremio, Netflix…), ative “SCARY: botão Home” nas configurações de acessibilidade da TV. Reproduzir, pausar e volume já funcionam em todo lugar.</string>
     <string name="remote_other_apps_enable">Permitir controle de outros apps</string>
 </resources>

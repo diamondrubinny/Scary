@@ -385,6 +385,6 @@
     <string name="remote_qr_description">رمز QR يفتح جهاز التحكم SCARY على هاتفك</string>
     <string name="remote_other_apps_full">يتحكم الهاتف أيضًا في التطبيقات الأخرى (Stremio وNetflix…): الأسهم وOK والرجوع والرئيسية. البحث ومفتاح TMDB يعيدان SCARY إلى الواجهة أولًا.</string>
     <string name="remote_other_apps_back_home">في التطبيقات الأخرى (Stremio وNetflix…) يضغط الهاتف الرجوع والرئيسية، ويشغّل ويوقف مؤقتًا ويضبط الصوت. تحتاج الأسهم إلى Android 13 أو أحدث على التلفزيون.</string>
-    <string name="remote_other_apps_off">داخل SCARY يقوم الهاتف بكل شيء. للتحكم في التطبيقات الأخرى أيضًا (Stremio وNetflix…)، فعّل “SCARY Home button” في إعدادات إمكانية الوصول في التلفزيون. التشغيل والإيقاف المؤقت والصوت تعمل في كل مكان أصلًا.</string>
+    <string name="remote_other_apps_off">داخل SCARY يقوم الهاتف بكل شيء. للتحكم في التطبيقات الأخرى أيضًا (Stremio وNetflix…)، فعّل “زر الشاشة الرئيسية لـ SCARY” في إعدادات إمكانية الوصول في التلفزيون. التشغيل والإيقاف المؤقت والصوت تعمل في كل مكان أصلًا.</string>
     <string name="remote_other_apps_enable">السماح بالتحكم في التطبيقات الأخرى</string>
 </resources>

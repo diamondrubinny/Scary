@@ -375,6 +375,6 @@
     <string name="remote_qr_description">קוד QR שפותח בטלפון את השלט של SCARY</string>
     <string name="remote_other_apps_full">הטלפון שולט גם באפליקציות אחרות (Stremio, Netflix…): חצים, OK, חזרה ובית. חיפוש ומפתח TMDB מחזירים קודם ל־SCARY.</string>
     <string name="remote_other_apps_back_home">באפליקציות אחרות (Stremio, Netflix…) הטלפון לוחץ חזרה ובית, ומפעיל, משהה ומשנה עוצמת קול. החצים דורשים Android 13 ומעלה בטלוויזיה.</string>
-    <string name="remote_other_apps_off">בתוך SCARY הטלפון עושה הכל. כדי לשלוט גם באפליקציות אחרות (Stremio, Netflix…), מפעילים את “SCARY Home button” בהגדרות הנגישות של הטלוויזיה. הפעלה, השהיה ועוצמת קול כבר פועלים בכל מקום.</string>
+    <string name="remote_other_apps_off">בתוך SCARY הטלפון עושה הכל. כדי לשלוט גם באפליקציות אחרות (Stremio, Netflix…), מפעילים את “SCARY: כפתור הבית” בהגדרות הנגישות של הטלוויזיה. הפעלה, השהיה ועוצמת קול כבר פועלים בכל מקום.</string>
     <string name="remote_other_apps_enable">הפעלת שליטה באפליקציות אחרות</string>
 </resources>

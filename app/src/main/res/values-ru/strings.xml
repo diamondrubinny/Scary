@@ -378,6 +378,6 @@
     <string name="remote_qr_description">QR-код, открывающий пульт SCARY на телефоне</string>
     <string name="remote_other_apps_full">Телефон управляет и другими приложениями (Stremio, Netflix…): стрелки, OK, «Назад» и «Домой». Поиск и ключ TMDB сначала возвращают SCARY.</string>
     <string name="remote_other_apps_back_home">В других приложениях (Stremio, Netflix…) телефон нажимает «Назад» и «Домой», включает, ставит на паузу и меняет громкость. Для стрелок на телевизоре нужен Android 13 или новее.</string>
-    <string name="remote_other_apps_off">Внутри SCARY телефон умеет всё. Чтобы управлять и другими приложениями (Stremio, Netflix…), включите «SCARY Home button» в настройках специальных возможностей телевизора. Воспроизведение, пауза и громкость уже работают везде.</string>
+    <string name="remote_other_apps_off">Внутри SCARY телефон умеет всё. Чтобы управлять и другими приложениями (Stremio, Netflix…), включите «SCARY: кнопка «Домой»» в настройках специальных возможностей телевизора. Воспроизведение, пауза и громкость уже работают везде.</string>
     <string name="remote_other_apps_enable">Разрешить управление другими приложениями</string>
 </resources>
