@@ -114,7 +114,8 @@ page = re.sub(
     r'(<img id="hero-img" src=")[^"]*(" width="1280" height="720" data-i18n-attr="alt:hero_alt" alt=")[^"]*(")',
     lambda m: m.group(1) + heroes["en"] + m.group(2) + html.escape(en["hero_alt"]) + m.group(3), page, count=1)
 page = re.sub(r'(<span data-i18n="hero_caption">)[^<]*', lambda m: m.group(1) + html.escape(en["hero_caption"], quote=False), page, count=1)
-page = re.sub(r'(<span data-i18n="fear_label"[^>]*>)[^<]*', lambda m: m.group(1) + en["fear_label"], page, count=1)
+page, n = re.subn(r'(<span [^>]*data-i18n="fear_label"[^>]*>)[^<]*', lambda m: m.group(1) + en["fear_label"], page, count=1)
+assert n == 1, "fear_label"
 marks = "".join('<i class="on"></i>' if i < HERO["fear"] else "<i></i>" for i in range(5))
 page = re.sub(
     r'(<span class="fear" role="img" data-i18n-attr="aria-label:fear_aria" aria-label=")[^"]*(">)(?:<i[^>]*></i>){5}',
@@ -171,6 +172,16 @@ CSS = """
 page = page.replace("</style>", CSS + "</style>", 1)
 
 open(out_html, "w", encoding="utf-8").write(page)
+
+# The server allows the inline style and script only by hash (Content-Security-Policy): print the new ones.
+import hashlib  # noqa: E402
+styles = re.findall(r"<style>(.*?)</style>", page, flags=re.S)
+scripts = re.findall(r"<script>(.*?)</script>", page, flags=re.S)
+assert len(styles) == 1 and len(scripts) == 1, (len(styles), len(scripts))
+def csp_hash(text):
+    return "'sha256-" + base64.b64encode(hashlib.sha256(text.encode("utf-8")).digest()).decode() + "'"
+print("style-src", csp_hash(styles[0]))
+print("script-src", csp_hash(scripts[0]))
 
 # ---- og.jpg (1200x630): the English hero on the site's dark background ---------------------------------------
 og = Image.new("RGB", (1200, 630), (14, 9, 8))
