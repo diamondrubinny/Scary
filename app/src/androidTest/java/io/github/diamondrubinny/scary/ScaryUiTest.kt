@@ -892,14 +892,29 @@ class ScaryUiTest {
 
     /** The focused card or chip lies wholly inside the rows, and so does its row's title (the nearest one above it). */
     private fun assertFocusedRowFullyShown() {
-        val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+        var seen = "nothing focused in the rows"
+        try {
+            waitForRowShown { seen = it }
+        } catch (failure: AssertionError) {
+            throw AssertionError("Last seen: $seen\n${failure.message}", failure)
+        }
+        Log.d("ScaryKeys", "test: row shown, $seen")
+    }
+
+    private fun waitForRowShown(report: (String) -> Unit) {
         waitUntilOrDescribe("a focused card wholly inside the rows, its row title in view") {
-            val focused = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
-                .singleOrNull()?.boundsInRoot ?: return@waitUntilOrDescribe false
-            val title = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
-                .map { it.boundsInRoot }
-                .filter { it.bottom <= focused.top }
-                .maxByOrNull { it.bottom }
+            // The rows' bounds are read each time: the hero shrinks as the focus enters the rows, moving them up.
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+            val focusedNode = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .singleOrNull() ?: return@waitUntilOrDescribe false
+            val focused = focusedNode.boundsInRoot
+            val titleNode = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .filter { it.boundsInRoot.bottom <= focused.top }
+                .maxByOrNull { it.boundsInRoot.bottom }
+            val title = titleNode?.boundsInRoot
+            report("rows ${rows.top}..${rows.bottom}, focused " +
+                "${focusedNode.config.getOrNull(SemanticsProperties.ContentDescription)} ${focused.top}..${focused.bottom}, " +
+                "title ${titleNode?.config?.getOrNull(SemanticsProperties.Text)} ${title?.top}..${title?.bottom}")
             focused.top >= rows.top && focused.bottom <= rows.bottom && title != null && title.top >= rows.top
         }
     }
