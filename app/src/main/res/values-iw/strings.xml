@@ -101,12 +101,12 @@
     <string name="settings_home_note">אם הטלוויזיה לא מאפשרת לבחור את SCARY כמסך הבית (נפוץ ב־Google TV ובחלק ממכשירי Xiaomi), הפעילו את כפתור הבית בשלט. SCARY תיפתח בכל לחיצה על Home ובהדלקת הטלוויזיה. השירות מאזין רק למקש Home ולא קורא שום דבר מהמסך.</string>
     <string name="tile_set_home">הגדרת SCARY כמסך הבית</string>
     <string name="a11y_service_label">SCARY: כפתור הבית</string>
-    <string name="a11y_service_description">גורם לכפתור Home בשלט לפתוח את SCARY, ופותח את SCARY כשהטלוויזיה נדלקת. השירות מאזין רק למקש Home, ולא יכול לקרוא או לשנות שום דבר במסך.</string>
+    <string name="a11y_service_description">גורם לכפתור Home בשלט לפתוח את SCARY, ופותח את SCARY כשהטלוויזיה נדלקת. בזמן שימוש בשלט בטלפון של SCARY, השירות גם לוחץ באפליקציה שפתוחה על המקשים שהטלפון שולח (חצים, OK, חזרה). השירות מאזין רק למקש Home ולא יכול לקרוא שום דבר במסך.</string>
     <string name="msg_enable_service">בהגדרות הנגישות בחרו “SCARY: כפתור הבית” והפעילו.</string>
     <string name="settings_tmdb">מפתח TMDB</string>
     <string name="value_tmdb_none">לא הוגדר</string>
     <string name="tmdb_dialog_title">מפתח API של TMDB</string>
-    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מציגה שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. ההקלדה נוחה יותר עם אפליקציית Google TV בטלפון.</string>
+    <string name="tmdb_dialog_body">עם מפתח אישי מ־TMDB, SCARY מציגה שמות ותקצירים בשפה שלך, תמונות חדות יותר ועוד שלוש שורות. מקבלים מפתח בחינם לשימוש אישי ב־themoviedb.org, בהגדרות ואז API. אפשר להדביק את מפתח ה־API (32 תווים) או את ה־Read Access Token. הכי נוח: להדביק מהטלפון עם הכפתור למטה.</string>
     <string name="tmdb_hint">הדביקו או הקלידו את המפתח</string>
     <string name="tmdb_save">שמירה ובדיקה</string>
     <string name="tmdb_delete">מחיקת המפתח</string>
@@ -149,10 +149,12 @@
         <item>ב־SCARY אין חשבונות, אין פרסומות, אין אנליטיקה ואין עוגיות, ואין שרת של SCARY. שום דבר שאתם עושים בלאנצ׳ר לא נשלח אלינו.</item>
         <item>נשמר רק בטלוויזיה הזו: ההגדרות והשפה, אפליקציות מוצמדות ומוסתרות, 12 הסרטים האחרונים שפתחתם, \"הרשימה שלי\", קוד ה־PIN של נעילת ההורים כ־hash עם salt (לעולם לא הקוד עצמו), זמני קריסות אחרונות (השעה בלבד), ומידע ותמונות של סרטים במטמון. הסרת SCARY או ניקוי הנתונים שלה בהגדרות הטלוויזיה מוחקים הכל. SCARY לא נכללת בגיבוי של Android.</item>
         <item>רשימת האפליקציות המותקנות נקראת בטלוויזיה כדי להציג אותן, ולא יוצאת ממנה.</item>
+        <item>גם אלה נשמרים רק בטלוויזיה הזו: הסרטים שסימנתם \"אהבתי\" או \"לא בשבילי\", היום שבו סימנתם כל סרט כנצפה, וה־Bucket list שלכם. מהם נבנים \"כי אהבת\", \"כמה זמן יש לך?\" ו\"השנה שלך בפחד\", והחישוב נעשה בטלוויזיה. טיימר השינה הוא התראה בטלוויזיה שעוצרת את מה שמתנגן. הכניסות של הטלוויזיה (HDMI, אנטנה) נקראות בטלוויזיה כדי להציג אותן. קוד ה־QR בעמוד סרט פותח את עמוד ה־IMDb שלו בטלפון שלכם, והטלוויזיה לא שולחת דבר.</item>
         <item>מידע על סרטים מהרשת, שאפשר לכבות בהגדרות: SCARY מבקשת מ־Cinemeta, שירות המידע הציבורי של Stremio, פוסטרים, רקעים, דירוגים ושחקנים. נשלחים רק מזהי IMDb ציבוריים של סרטים, ובחיפוש גם טקסט החיפוש. התמונות נטענות מכתובות HTTPS ש־Cinemeta מספקת, בעיקר images.metahub.space. כמו כל אתר, השירותים האלה רואים את כתובת ה־IP של הטלוויזיה. המידע נשמר במטמון ל־24 שעות.</item>
         <item>TMDB, רק אם הזנתם מפתח משלכם: הבקשות נשלחות ל־api.themoviedb.org עם המפתח, מזהי הסרטים ושפת הממשק. המפתח מוצפן בטלוויזיה באמצעות Android Keystore, לא נכתב ללוגים ונשלח רק ל־TMDB. מחיקת המפתח מוחקת גם את המטמון של TMDB. אפשרויות השכירה והקנייה בעמודי הסרטים מגיעות מ־TMDB (נתונים של JustWatch): הבקשה כוללת רק את מזהה הסרט, והמדינה נקבעת בטלוויזיה לפי הגדרת האזור או לפי בחירתכם בהגדרות, ואף פעם לא לפי המיקום שלכם.</item>
         <item>חיפוש קולי עובר לשירות זיהוי הדיבור של הטלוויזיה עצמה (בדרך כלל Google). ההקלטה נשלחת לשירות הזה ולא ל־SCARY, ו־SCARY מקבלת רק את הטקסט שזוהה.</item>
         <item>טריילרים שמתנגנים מעצמם (פעילים אחרי שהסכמתם כשנשאלתם בפעם הראשונה, ואפשר לכבות אותם בהגדרות): הנגן הוא של YouTube, במצב הפרטיות המשופרת שלו (youtube-nocookie.com, ו־youtube.com כניסיון אחרון כשטריילר לא מתנגן שם). כשטריילר מתנגן, YouTube ‏(Google) מקבלת את כתובת ה־IP של הטלוויזיה, פרטי המכשיר והדפדפן ואת מזהה הטריילר, לפי מדיניות הפרטיות של Google. ‏SCARY חוסמת עוגיות בנגן ומוחקת את האחסון שלו כשהוא נסגר. טריילרים לא מתנגנים בלי רשת או בערב משפחתי.</item>
+        <item>שלט בטלפון, רק כשמפעילים אותו בהגדרות: הטלוויזיה מגישה דף קטן ברשת הביתית, והטלפון פותח אותו בסריקת קוד QR. הקוד מכיל מפתח חד־פעמי שחותם ומצפין כל פקודה בין הטלפון לטלוויזיה, והמפתח לא נשלח ברשת אף פעם. הפקודות עוברות ישירות מהטלפון לטלוויזיה ולא נשמרות; טקסט החיפוש ומפתח ה־TMDB משמשים אחר כך כמתואר למעלה. הדף לא טוען דבר מהאינטרנט. השלט כבה כשמנתקים אותו, אחרי 30 דקות בלי שימוש, או כשמגיעות פקודות מזויפות. כדי ללחוץ על מקשים באפליקציות אחרות (Stremio, Netflix…), השלט בטלפון משתמש בשירות הנגישות של SCARY, רק אם הפעלתם אותו; השירות לוחץ על מקשים ולא קורא דבר מהמסך.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>
         <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי עורך דין.</item>
@@ -268,4 +270,111 @@
     <string name="settings_trailer_note">הטריילרים מגיעים מ־YouTube, שרואה את כתובת ה־IP של הטלוויזיה בזמן שטריילר מתנגן. הם לא מתנגנים בלי רשת, בערב משפחתי, בסרט נעול או כשהאנימציות בטלוויזיה כבויות.</string>
     <string name="msg_trailers_off">טריילרים לא יתנגנו מעצמם. אפשר להפעיל אותם שוב בהגדרות.</string>
     <string name="settings_trailer_last">הטריילר האחרון: %1$s</string>
+    <string name="row_time">כמה זמן יש לך?</string>
+    <string name="time_quick">עד 90 דקות</string>
+    <string name="time_evening">ערב (עד שעתיים)</string>
+    <string name="time_double">סרט כפול</string>
+    <string name="time_marathon">מרתון</string>
+    <string name="time_empty">אין כרגע סרט בספרייה שמתאים לזמן הזה. נסו זמן אחר.</string>
+    <string name="time_lineup">לצפייה לפי הסדר. ביחד: %1$s</string>
+    <string name="time_order">סרט %1$d</string>
+    <string name="row_because_loved">כי אהבת את %1$s</string>
+    <string name="action_love">אהבתי</string>
+    <string name="action_loved">אהבת</string>
+    <string name="action_not_for_me">לא בשבילי</string>
+    <string name="action_not_for_me_on">סומן: לא בשבילי</string>
+    <string name="msg_loved">אהבת. סרטים דומים יופיעו במסך הבית.</string>
+    <string name="msg_not_for_me">סומן כלא בשבילך. הוא לא יוצע שוב.</string>
+    <string name="msg_rating_cleared">הדירוג הוסר.</string>
+    <string name="coming_on">בקולנוע %1$s</string>
+    <string name="coming_on_long">בקולנוע ב־%1$s</string>
+    <string name="tv_input_description">כניסת טלוויזיה: %1$s</string>
+    <string name="share_scan">סרקו לשיתוף הסרט</string>
+    <string name="share_scan_description">קוד QR לעמוד ה־IMDb של %1$s: סרקו אותו במצלמת הטלפון כדי לפתוח ולשתף.</string>
+    <string name="settings_sleep_timer">טיימר שינה</string>
+    <string name="sleep_left">נותרו %1$d דק׳</string>
+    <string name="sleep_off">כבוי</string>
+    <string name="settings_sleep_timer_note">כשהזמן נגמר, מה שמתנגן נעצר, ושומר המסך וההמתנה של הטלוויזיה נכנסים לפעולה. לחצו OK כדי לשנות.</string>
+    <string name="settings_stats">השנה שלך בפחד</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">מאז ומעולם</string>
+    <string name="stats_empty_title">עוד אין פחד</string>
+    <string name="stats_empty_body">סמנו סרטים כנצפו או כאהובים, והשנה שלך בפחד תופיע כאן.</string>
+    <string name="stats_none_yet">עוד לא נצפה אף סרט.</string>
+    <string name="stats_note">חושב בטלוויזיה הזו מרשימת הנצפים והאהובים שלך. שום דבר לא נשלח לשום מקום.</string>
+    <string name="stats_watched">סרטים שנצפו</string>
+    <string name="stats_hours">שעות של פחד</string>
+    <string name="stats_average_fear">פחד ממוצע</string>
+    <string name="stats_scariest">המפחיד ביותר</string>
+    <string name="stats_favorite_subgenre">תת־ז׳אנר אהוב</string>
+    <string name="stats_favorite_decade">עשור אהוב</string>
+    <string name="stats_loved">סרטים אהובים</string>
+    <string name="tab_movies">סרטים</string>
+    <string name="tab_series">סדרות</string>
+    <string name="series_tag">סדרה</string>
+    <string name="minutes_episode">%1$d דק׳ לפרק</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: סרטים ברשימה: %1$d</string>
+    <string name="bucket_badge">מספר %1$d ב־Bucket list</string>
+    <string name="bucket_explainer">בוחרים סרטים לצפייה אחד אחרי השני. \"התחלה\" פותח את הראשון ב־Stremio, ובכל פעם שחוזרים ל־SCARY היא שואלת אם לנגן את הבא.</string>
+    <string name="bucket_limits">SCARY פותחת את עמוד הסרט ב־Stremio, ושם בוחרים מקור ולוחצים Play. היא לא רואה מתי סרט נגמר: החזרה ל־SCARY (Home או Back) היא הסימן, לפי הזמן שעבר.</string>
+    <string name="bucket_empty_title">ה־Bucket list ריק</string>
+    <string name="bucket_empty_body">בחרו כמה סרטים להערב, ו־SCARY תסדר אותם בתור.</string>
+    <string name="bucket_pick">בחירת סרטים</string>
+    <string name="bucket_start">התחלה</string>
+    <string name="bucket_pick_more">בחירת עוד סרטים</string>
+    <string name="bucket_clear">ניקוי הרשימה</string>
+    <string name="bucket_clear_confirm">לחצו שוב כדי לנקות</string>
+    <string name="bucket_total">סרטים ברשימה: %1$d · זמן כולל: %2$s</string>
+    <string name="bucket_unavailable">לא זמין כרגע</string>
+    <string name="bucket_move_up">הזזת %1$s למעלה</string>
+    <string name="bucket_move_down">הזזת %1$s למטה</string>
+    <string name="bucket_remove">הסרת %1$s</string>
+    <string name="bucket_prompt_finished">סיימת את %1$s?</string>
+    <string name="bucket_prompt_early">חזרת מוקדם מ־%1$s</string>
+    <string name="bucket_prompt_next">הבא: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">זה היה הסרט האחרון ב־Bucket list.</string>
+    <string name="bucket_prompt_note">ה־Bucket list נשאר כמו שהוא עד שתשנו אותו.</string>
+    <string name="bucket_prompt_back">חזרה ל־%1$s</string>
+    <string name="bucket_prompt_play">לנגן את %1$s</string>
+    <string name="bucket_prompt_later">לא עכשיו</string>
+    <string name="bucket_prompt_stop">לעצור בינתיים</string>
+    <string name="action_add_bucket">הוספה ל־Bucket list</string>
+    <string name="action_in_bucket">ב־Bucket list</string>
+    <string name="picking_title">בחירת סרטים ל־Bucket list</string>
+    <string name="picking_hint">OK על פוסטר מוסיף אותו או מוציא אותו. Back או \"סיום\" כשמוכנים.</string>
+    <string name="picking_count">סרטים שנבחרו: %1$d</string>
+    <string name="picking_done">סיום</string>
+    <string name="msg_bucket_films_only">רק סרטים יכולים להיכנס ל־Bucket list.</string>
+    <string name="msg_bucket_locked">%1$s נעול: הוא לא יכול להיכנס ל־Bucket list.</string>
+    <string name="msg_bucket_full">ה־Bucket list מלא (%1$s סרטים).</string>
+    <string name="msg_bucket_added">%1$s הוא מספר %2$s ב־Bucket list.</string>
+    <string name="msg_bucket_removed">%1$s יצא מה־Bucket list.</string>
+    <string name="msg_bucket_cleared">ה־Bucket list ריק עכשיו.</string>
+    <string name="msg_bucket_empty">בחרו קודם כמה סרטים.</string>
+    <string name="msg_bucket_done">זה היה כל ה־Bucket list. שרדתם!</string>
+    <string name="night_pick_series">הסדרה של הלילה</string>
+    <!-- Phone remote -->
+    <string name="tmdb_use_phone">הדבקה מהטלפון</string>
+    <string name="settings_phone_remote">שלט בטלפון</string>
+    <string name="settings_phone_remote_note">שליטה ב־SCARY מהדפדפן בטלפון באותה רשת Wi-Fi: חצים, חיפוש והדבקת מפתח TMDB. בלי להתקין כלום.</string>
+    <string name="remote_title">שלט בטלפון</string>
+    <string name="remote_step_wifi">1. מחברים את הטלפון לאותה רשת Wi-Fi של הטלוויזיה.</string>
+    <string name="remote_step_scan">2. סורקים את הקוד במצלמת הטלפון ופותחים את הדף.</string>
+    <string name="remote_step_use">3. משתמשים בחצים, מחפשים סרטים או מדביקים את מפתח ה־TMDB.</string>
+    <string name="remote_connected">טלפון מחובר.</string>
+    <string name="remote_waiting">ממתינים שטלפון יסרוק את הקוד…</string>
+    <string name="remote_no_network">הטלוויזיה לא מחוברת לרשת ביתית (Wi-Fi או כבל), ולכן הטלפון לא יכול להגיע אליה.</string>
+    <string name="remote_idle">השלט בטלפון כבה אחרי 30 דקות בלי שימוש.</string>
+    <string name="remote_forged">השלט בטלפון כבה כי מכשיר ברשת שלח פקודות מזויפות.</string>
+    <string name="remote_off">השלט בטלפון כבוי.</string>
+    <string name="remote_disconnect">ניתוק</string>
+    <string name="remote_new_code">קוד חדש</string>
+    <string name="remote_turn_on">הפעלה</string>
+    <string name="remote_privacy">פועל רק ברשת הביתית. כל פקודה חתומה ומוצפנת במפתח חד־פעמי שבקוד ה־QR, והמפתח לא נשלח ברשת אף פעם. שום דבר לא נשמר ולא נשלח לאינטרנט. השלט כבה מעצמו אחרי 30 דקות בלי שימוש.</string>
+    <string name="remote_qr_description">קוד QR שפותח בטלפון את השלט של SCARY</string>
+    <string name="remote_other_apps_full">הטלפון שולט גם באפליקציות אחרות (Stremio, Netflix…): חצים, OK, חזרה ובית. חיפוש ומפתח TMDB מחזירים קודם ל־SCARY.</string>
+    <string name="remote_other_apps_back_home">באפליקציות אחרות (Stremio, Netflix…) הטלפון לוחץ חזרה ובית, ומפעיל, משהה ומשנה עוצמת קול. החצים דורשים Android 13 ומעלה בטלוויזיה.</string>
+    <string name="remote_other_apps_off">בתוך SCARY הטלפון עושה הכל. כדי לשלוט גם באפליקציות אחרות (Stremio, Netflix…), מפעילים את “SCARY Home button” בהגדרות הנגישות של הטלוויזיה. הפעלה, השהיה ועוצמת קול כבר פועלים בכל מקום.</string>
+    <string name="remote_other_apps_enable">הפעלת שליטה באפליקציות אחרות</string>
 </resources>

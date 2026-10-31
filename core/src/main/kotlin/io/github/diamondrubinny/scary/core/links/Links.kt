@@ -29,6 +29,12 @@ object Links {
         return "stremio:///detail/movie/$imdbId/$imdbId"
     }
 
+    /** A series' page in Stremio, where its seasons and episodes are listed. Like [stremioMovie], to verify on the device. */
+    fun stremioSeries(imdbId: String): String {
+        require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
+        return "stremio:///detail/series/$imdbId"
+    }
+
     fun playStoreMarket(packageName: String): String {
         require(packagePattern.matches(packageName)) { "invalid package name" }
         return "market://details?id=$packageName"
@@ -40,6 +46,12 @@ object Links {
     }
 
     private val youtubePattern = Regex("^[A-Za-z0-9_-]{11}$")
+
+    /** A movie's IMDb page, for "open on your phone" (a QR code on the movie page). */
+    fun imdbTitle(imdbId: String): String {
+        require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
+        return "https://www.imdb.com/title/$imdbId/"
+    }
 
     fun youTubeVideo(videoId: String): String {
         require(youtubePattern.matches(videoId)) { "invalid YouTube id" }

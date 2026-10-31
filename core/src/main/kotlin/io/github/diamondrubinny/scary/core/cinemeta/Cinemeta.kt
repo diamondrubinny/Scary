@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.cinemeta
 
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import kotlinx.serialization.Serializable
@@ -35,11 +36,28 @@ data class CinemetaMeta(
     val trailerYoutubeId: String? = null,
     /** More trailers of the same movie, for when the first may not play inside an app. */
     val trailerAlternates: List<String> = emptyList(),
+    /** ISO release date, for films not out yet (TMDB's coming-soon row); empty otherwise. */
+    val releaseDate: String = "",
     /** Title and description in [localLanguage] (a Language.code), when the row comes from TMDB. */
     val localName: String = "",
     val localDescription: String = "",
     val localLanguage: String = "",
-)
+    /** "movie" or "series", as Cinemeta says. */
+    val type: String = TYPE_MOVIE,
+    /** A series' last year, from "2016–2025"; null when it ended the year it began or is still running. */
+    val endYear: Int? = null,
+    /** A series still running ("2022–"). */
+    val ongoing: Boolean = false,
+) {
+    val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
+
+    companion object {
+        const val TYPE_MOVIE = "movie"
+        const val TYPE_SERIES = "series"
+
+        fun typeOf(kind: MediaKind): String = if (kind == MediaKind.SERIES) TYPE_SERIES else TYPE_MOVIE
+    }
+}
 
 /** A row pulled from a Cinemeta catalog, such as popular horror. */
 @Serializable
@@ -87,8 +105,12 @@ object Cinemeta {
     /** Movies in one catalog page. */
     const val PAGE_SIZE = 50
 
-    /** An endless row stops growing here, to keep memory in check on 2 GB TV boxes. */
-    const val MAX_ENDLESS_ROW_MOVIES = 1_000
+    /**
+     * A safety bound only: endless rows go on until their catalogs run out (Cinemeta's horror ends near 1,750 films,
+     * its thrillers near 4,150), and rows that walk back through the years go on far beyond. Well over what anyone
+     * scrolls through on a TV.
+     */
+    const val MAX_ENDLESS_ROW_MOVIES = 50_000
 
     /**
      * Movies an online row may hold after the daily refresh: three catalog pages, the most any row loads, so nothing
@@ -106,18 +128,18 @@ object Cinemeta {
     /** Full metas fetched per search to learn the genres of results that came without them. */
     private const val MAX_GENRE_LOOKUPS = 12
 
-    fun metaUrl(imdbId: String): String {
+    fun metaUrl(imdbId: String, kind: MediaKind = MediaKind.MOVIE): String {
         require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
-        return "$BASE_URL/meta/movie/$imdbId.json"
+        return "$BASE_URL/meta/${CinemetaMeta.typeOf(kind)}/$imdbId.json"
     }
 
     /** A catalog page; Cinemeta pages hold 50 movies, so [skip] moves in steps of 50. */
-    fun catalogUrl(catalogId: String, genre: String, skip: Int = 0): String {
+    fun catalogUrl(catalogId: String, genre: String, skip: Int = 0, kind: MediaKind = MediaKind.MOVIE): String {
         require(catalogIdPattern.matches(catalogId)) { "invalid catalog id" }
         require(genrePattern.matches(genre)) { "invalid genre" }
         require(skip in 0..MAX_SKIP) { "invalid skip" }
         val extra = if (skip > 0) "genre=$genre&skip=$skip" else "genre=$genre"
-        return "$BASE_URL/catalog/movie/$catalogId/$extra.json"
+        return "$BASE_URL/catalog/${CinemetaMeta.typeOf(kind)}/$catalogId/$extra.json"
     }
 
     /**
@@ -130,7 +152,7 @@ object Cinemeta {
      * Search in Cinemeta's "top" catalog, using the Stremio add-on "extra" path argument. Null when the query is too
      * short or too long; otherwise every character outside [A-Za-z0-9-_.~] is percent-encoded as UTF-8.
      */
-    fun searchUrl(query: String): String? {
+    fun searchUrl(query: String, kind: MediaKind = MediaKind.MOVIE): String? {
         val q = query.trim().replace(Regex("\\s+"), " ")
         if (q.length !in MIN_SEARCH_LENGTH..MAX_SEARCH_LENGTH) return null
         val encoded = buildString {
@@ -143,7 +165,7 @@ object Cinemeta {
                 }
             }
         }
-        return "$BASE_URL/catalog/movie/top/search=$encoded.json"
+        return "$BASE_URL/catalog/${CinemetaMeta.typeOf(kind)}/top/search=$encoded.json"
     }
 
     /**
@@ -192,6 +214,9 @@ object Cinemeta {
         localName = movie.titles[language].orEmpty(),
         localDescription = movie.synopses[language].orEmpty(),
         localLanguage = language.takeIf { movie.titles.containsKey(it) || movie.synopses.containsKey(it) }.orEmpty(),
+        type = CinemetaMeta.typeOf(movie.kind),
+        endYear = movie.endYear,
+        ongoing = movie.ongoing,
     )
 
     fun parseMeta(text: String): CinemetaMeta? =
@@ -211,7 +236,13 @@ object Cinemeta {
         val imdbId = (o.str("imdb_id") ?: o.str("id"))?.takeIf(imdbPattern::matches) ?: return null
         val name = o.str("name")?.trim()?.take(200)?.takeIf(String::isNotEmpty) ?: return null
         if (adultTitle.containsMatchIn(name)) return null
-        val year = (o.str("year") ?: o.str("releaseInfo"))?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
+        val years = o.str("releaseInfo")?.takeIf(String::isNotBlank) ?: o.str("year")
+        val year = years?.take(4)?.toIntOrNull()?.takeIf { it in 1895..2100 }
+        val type = if (o.str("type") == CinemetaMeta.TYPE_SERIES) CinemetaMeta.TYPE_SERIES else CinemetaMeta.TYPE_MOVIE
+        // A series' years: "2016–2025" (ended), "2022–" (running), "2018" (one season); either dash.
+        val span = years?.trim()?.let(seriesYears::matchEntire)
+        val endYear = span?.groupValues?.get(2)?.toIntOrNull()?.takeIf { year != null && it in year..2100 }
+        val ongoing = type == CinemetaMeta.TYPE_SERIES && span != null && span.groupValues[1].isNotEmpty() && span.groupValues[2].isEmpty()
         val trailers = (
             (o["trailerStreams"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("ytId") }.orEmpty() +
                 (o["trailers"] as? JsonArray)?.mapNotNull { (it as? JsonObject)?.str("source") }.orEmpty()
@@ -231,8 +262,13 @@ object Cinemeta {
             runtimeMin = o.str("runtime")?.substringBefore(' ')?.toIntOrNull()?.takeIf { it in 1..600 },
             trailerYoutubeId = trailers.firstOrNull(),
             trailerAlternates = trailers.drop(1),
+            type = type,
+            endYear = endYear.takeIf { type == CinemetaMeta.TYPE_SERIES },
+            ongoing = ongoing,
         )
     }
+
+    private val seriesYears = Regex("^\\d{4}([–-])?(\\d{4})?$")
 
     /** Only https URLs of sane length; anything else (http, data:, file:, javascript:) is dropped. */
     fun safeImage(url: String?): String? =
@@ -248,6 +284,9 @@ object Cinemeta {
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
         trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
+        // A running series ends, or a new season starts: Cinemeta knows before the bundled library does.
+        endYear = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.endYear else movie.endYear,
+        ongoing = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.ongoing else movie.ongoing,
     )
 
     /** A movie that is only known from Cinemeta. Fear is unknown, so it stays null. */
@@ -272,7 +311,11 @@ object Cinemeta {
             cast = meta.cast,
             trailerYoutubeId = meta.trailerYoutubeId,
             trailerAlternates = meta.trailerAlternates,
+            releaseDate = meta.releaseDate.ifBlank { null },
             curated = false,
+            kind = meta.kind,
+            endYear = meta.endYear,
+            ongoing = meta.ongoing,
         )
     }
 
@@ -352,9 +395,10 @@ data class CinemetaCache(
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
-         * 4: every trailer of a movie, not only the first).
+         * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
+         * back through the years).
          */
-        const val ROWS_VERSION = 4
+        const val ROWS_VERSION = 7
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =
@@ -363,5 +407,33 @@ data class CinemetaCache(
             } catch (e: IllegalArgumentException) {
                 null
             }
+    }
+}
+
+/**
+ * Where an endless row continues, as one number. A plain row's cursor is its next catalog skip. A row that walks back
+ * through the years (the "year" catalog, from its first year down to [FIRST_YEAR]) packs how many years back it is and
+ * the skip within that year: when a year runs out, the row carries on with the year before.
+ */
+object EndlessCursor {
+    /** Bigger than any skip within one year (Cinemeta.MAX_SKIP). */
+    const val YEAR_STEP = 100_000
+    const val FIRST_YEAR = 1920
+
+    fun yearsBack(cursor: Int): Int = cursor / YEAR_STEP
+
+    fun skip(cursor: Int): Int = cursor % YEAR_STEP
+
+    /** The year [cursor] reads from, for a row starting at [startYear]; null once it is past [FIRST_YEAR]. */
+    fun year(startYear: Int, cursor: Int): Int? = (startYear - yearsBack(cursor)).takeIf { it >= FIRST_YEAR }
+
+    /** The start of the year before. */
+    fun nextYear(cursor: Int): Int = (yearsBack(cursor) + 1) * YEAR_STEP
+
+    /** The next page after one that came back with [pageSize] films: the year before when this year ran out. */
+    fun after(cursor: Int, pageSize: Int, yearChain: Boolean): Int? = when {
+        !yearChain -> if (pageSize == 0 || cursor + Cinemeta.PAGE_SIZE > Cinemeta.MAX_SKIP) null else cursor + Cinemeta.PAGE_SIZE
+        pageSize == 0 || skip(cursor) + Cinemeta.PAGE_SIZE > Cinemeta.MAX_SKIP -> nextYear(cursor)
+        else -> cursor + Cinemeta.PAGE_SIZE
     }
 }

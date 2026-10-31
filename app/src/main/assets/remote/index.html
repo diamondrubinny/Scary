@@ -1,0 +1,61 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary -->
+<!-- Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files. -->
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0a0b0b">
+  <title>SCARY remote</title>
+  <link rel="stylesheet" href="remote.css">
+  <script src="remote.js" defer></script>
+</head>
+<body>
+  <header>
+    <p class="brand" aria-hidden="true">SCARY</p>
+    <p id="status" role="status" aria-live="polite"></p>
+  </header>
+  <main>
+    <section class="pad" aria-label="Remote">
+      <button type="button" class="up" data-cmd="up" data-label="up">▲</button>
+      <button type="button" class="left" data-cmd="left" data-label="left">◀</button>
+      <button type="button" class="ok" data-cmd="ok" data-w="ok">OK</button>
+      <button type="button" class="right" data-cmd="right" data-label="right">▶</button>
+      <button type="button" class="down" data-cmd="down" data-label="down">▼</button>
+    </section>
+    <section class="keys">
+      <button type="button" data-cmd="back" data-w="back">Back</button>
+      <button type="button" data-cmd="home" data-w="home">Home</button>
+      <button type="button" data-cmd="play" data-w="play">Play / Pause</button>
+      <button type="button" data-cmd="vol_down" data-w="volDown">Volume down</button>
+      <button type="button" data-cmd="mute" data-w="mute">Mute</button>
+      <button type="button" data-cmd="vol_up" data-w="volUp">Volume up</button>
+    </section>
+    <section>
+      <form id="search-form" role="search" autocomplete="off">
+        <label for="search" data-w="searchLabel">Search films and series</label>
+        <div class="field">
+          <input id="search" type="search" maxlength="60" enterkeyhint="search">
+          <button type="submit" data-w="searchButton">Search on the TV</button>
+        </div>
+      </form>
+      <ul id="results"></ul>
+    </section>
+    <section>
+      <h2 data-w="tmdbTitle">TMDB key</h2>
+      <p class="hint" data-w="tmdbHint"></p>
+      <form id="tmdb-form" autocomplete="off">
+        <label for="tmdb" data-w="tmdbLabel">Paste the key here</label>
+        <div class="field">
+          <input id="tmdb" type="password" maxlength="600" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
+          <button type="submit" data-w="tmdbButton">Send to the TV</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <footer data-w="credit">Powered by SCARY · Open source</footer>
+</body>
+</html>

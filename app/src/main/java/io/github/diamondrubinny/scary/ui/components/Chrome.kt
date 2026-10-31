@@ -4,6 +4,12 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.layout.Column
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 import io.github.diamondrubinny.scary.core.brand.Credit
@@ -18,10 +24,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,6 +47,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.home.UserMessage
@@ -50,12 +67,27 @@ fun TopBar(
     onSurprise: () -> Unit,
     modifier: Modifier = Modifier,
     familyNight: Boolean = false,
+    sleepAtMillis: Long? = null,
+    /** While the rows have the focus: the donation code steps aside so the rows get the room (it shows again above). */
+    compact: Boolean = false,
+    /** The home screen's tabs (films, series); none on other screens. */
+    tab: MediaKind? = null,
+    onSelectTab: (MediaKind) -> Unit = {},
+    /** The bucket list's button, with how many films it holds; none when null. */
+    onOpenBucket: (() -> Unit)? = null,
+    bucketCount: Int = 0,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
             BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
             CreditLine(short = true)
-            DonateMini(Modifier.padding(top = 8.dp))
+            AnimatedVisibility(
+                visible = !compact,
+                enter = if (LocalReduceMotion.current) EnterTransition.None else fadeIn() + expandVertically(),
+                exit = if (LocalReduceMotion.current) ExitTransition.None else fadeOut() + shrinkVertically(),
+            ) {
+                DonateMini(Modifier.padding(top = 8.dp))
+            }
         }
         if (familyNight) {
             // Not just a color: the badge says it in words.
@@ -68,10 +100,23 @@ fun TopBar(
                     .padding(horizontal = 14.dp, vertical = 5.dp),
             )
         }
+        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 28.dp))
         Spacer(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
             Clock()
             Spacer(Modifier.width(4.dp))
+            if (onOpenBucket != null) {
+                IconCircleButton(
+                    contentDescription = if (bucketCount > 0) {
+                        stringResource(R.string.bucket_button_count, bucketCount)
+                    } else {
+                        stringResource(R.string.bucket_title)
+                    },
+                    onClick = onOpenBucket,
+                    modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
+                ) { BucketIcon(it) }
+            }
             IconCircleButton(
                 contentDescription = stringResource(R.string.search_title),
                 onClick = onOpenSearch,
@@ -112,6 +157,35 @@ fun Clock(modifier: Modifier = Modifier) {
     BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier)
 }
 
+/** The sleep timer at a glance: a moon and the minutes left. Not focusable; its words are read with the top bar. */
+@Composable
+fun SleepCountdown(endsAtMillis: Long, modifier: Modifier = Modifier) {
+    val minutes by produceState(minutesShown(endsAtMillis), endsAtMillis) {
+        while (true) {
+            value = minutesShown(endsAtMillis)
+            delay(MILLIS_PER_MINUTE / 2)
+        }
+    }
+    val text = stringResource(R.string.sleep_left, minutes)
+    Row(
+        modifier.semantics(mergeDescendants = true) { contentDescription = text },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        MoonIcon(ScaryColors.Candle, Modifier.size(18.dp))
+        BasicText(text, style = ScaryType.Label.copy(color = ScaryColors.Candle))
+    }
+}
+
+/** Whole minutes until [endsAtMillis], rounded up, so "1 min" shows until the very end. */
+fun minutesLeft(endsAtMillis: Long): Int = ((endsAtMillis - System.currentTimeMillis() + 59_999) / 60_000).toInt().coerceAtLeast(0)
+
+/**
+ * The minutes the countdown shows: never under 1 while the timer is on. The system may run the alarm a few minutes
+ * late (an inexact alarm on Android 12+), and the timer stays on until it has paused playback.
+ */
+fun minutesShown(endsAtMillis: Long): Int = minutesLeft(endsAtMillis).coerceAtLeast(1)
+
 /** Short status line at the bottom of the screen, announced politely by TalkBack. */
 @Composable
 fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Modifier = Modifier) {
@@ -150,4 +224,39 @@ fun CreditLine(modifier: Modifier = Modifier, short: Boolean = false) {
         style = ScaryType.Caption.mixedLanguage(),
         modifier = modifier,
     )
+}
+
+/** Test tags of the bucket list's button and of the films and series tabs. */
+const val BUCKET_BUTTON_TAG = "bucketButton"
+fun tabTag(kind: MediaKind): String = "tab:${kind.name.lowercase()}"
+
+/** Films or series: two tabs beside the logo. The chosen one is filled, and says so to TalkBack. */
+@Composable
+private fun HomeTabs(selected: MediaKind, onSelect: (MediaKind) -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        for (kind in MediaKind.entries) {
+            val chosen = kind == selected
+            FocusSurface(
+                onClick = { onSelect(kind) },
+                modifier = Modifier
+                    .testTag(tabTag(kind))
+                    .semantics {
+                        role = Role.Tab
+                        this.selected = chosen
+                    },
+                shape = RoundedCornerShape(50),
+                focusedScale = 1.06f,
+                containerColor = if (chosen) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.5f),
+                focusedContainerColor = ScaryColors.Bone,
+                borderColor = if (chosen) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
+            ) { focused ->
+                BasicText(
+                    text = stringResource(if (kind == MediaKind.SERIES) R.string.tab_series else R.string.tab_movies),
+                    style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+                    maxLines = 1,
+                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp, vertical = 9.dp),
+                )
+            }
+        }
+    }
 }

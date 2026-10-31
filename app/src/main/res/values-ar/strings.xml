@@ -102,12 +102,12 @@
     <string name="settings_home_note">إذا لم يسمح التلفزيون باختيار SCARY كشاشة رئيسية (وهذا شائع في Google TV وبعض طرازات Xiaomi)، فعّل خيار زر الشاشة الرئيسية. عندها يُفتح SCARY عند كل ضغطة على زر Home وعند تشغيل التلفزيون. هو يستمع إلى زر Home فقط ولا يقرأ أي شيء على الشاشة.</string>
     <string name="tile_set_home">اجعل SCARY الشاشة الرئيسية</string>
     <string name="a11y_service_label">زر الشاشة الرئيسية لـ SCARY</string>
-    <string name="a11y_service_description">يجعل زر Home في جهاز التحكم يفتح SCARY، ويفتح SCARY عند تشغيل التلفزيون. يستمع إلى زر Home فقط، ولا يستطيع قراءة أي شيء على الشاشة أو تغييره.</string>
+    <string name="a11y_service_description">يجعل زر Home في جهاز التحكم يفتح SCARY، ويفتح SCARY عند تشغيل التلفزيون. أثناء استخدام جهاز التحكم بالهاتف من SCARY، يضغط أيضًا في التطبيق المفتوح الأزرار التي يرسلها الهاتف (الأسهم وOK والرجوع). يستمع إلى زر Home فقط، ولا يستطيع قراءة أي شيء على الشاشة.</string>
     <string name="msg_enable_service">في إعدادات تسهيل الاستخدام، اختر «زر الشاشة الرئيسية لـ SCARY» وفعّله.</string>
     <string name="settings_tmdb">مفتاح TMDB</string>
     <string name="value_tmdb_none">غير مضبوط</string>
     <string name="tmdb_dialog_title">مفتاح TMDB API</string>
-    <string name="tmdb_dialog_body">باستخدام مفتاح TMDB الخاص بك، يعرض SCARY العناوين والملخصات بلغتك، وصورًا أوضح، وثلاثة صفوف إضافية. احصل على مفتاح مجاني للاستخدام الشخصي من themoviedb.org، من الإعدادات ثم API. الصق مفتاح API (‏32 حرفًا) أو Read Access Token. الكتابة أسهل باستخدام تطبيق Google TV على هاتفك.</string>
+    <string name="tmdb_dialog_body">باستخدام مفتاح TMDB الخاص بك، يعرض SCARY العناوين والملخصات بلغتك، وصورًا أوضح، وثلاثة صفوف إضافية. احصل على مفتاح مجاني للاستخدام الشخصي من themoviedb.org، من الإعدادات ثم API. الصق مفتاح API (‏32 حرفًا) أو Read Access Token. الأسهل: الصقه من هاتفك بالزر أدناه.</string>
     <string name="tmdb_hint">الصق المفتاح أو اكتبه</string>
     <string name="tmdb_save">حفظ وتحقق</string>
     <string name="tmdb_delete">حذف المفتاح</string>
@@ -150,10 +150,12 @@
         <item>لا يحتوي SCARY على حسابات ولا إعلانات ولا تحليلات ولا ملفات تعريف ارتباط، ولا يوجد خادم لـ SCARY. لا يُرسل إلينا أي شيء تفعله في الواجهة.</item>
         <item>يُخزَّن على هذا التلفزيون فقط: إعداداتك ولغتك، والتطبيقات المثبّتة في المقدمة والمخفية، وآخر 12 فيلمًا فتحتها، وقائمتك، ورمز PIN للرقابة الأبوية بصيغة hash مع salt (وليس الرمز نفسه أبدًا)، وأوقات الأعطال الأخيرة (الوقت فقط)، ومعلومات الأفلام والصور المخزنة مؤقتًا. إلغاء تثبيت SCARY أو مسح بياناته من إعدادات التلفزيون يحذف كل ذلك. SCARY مستثنى من النسخ الاحتياطي في Android.</item>
         <item>تُقرأ قائمة التطبيقات المثبتة على هذا التلفزيون لعرضها، ولا تغادره أبدًا.</item>
+        <item>ويُخزَّن أيضًا على هذا التلفزيون فقط: الأفلام التي علّمتها \"أحببته\" أو \"ليس لي\"، واليوم الذي علّمت فيه كل فيلم كمُشاهَد، وقائمة Bucket list الخاصة بك. منها تُبنى \"لأنك أحببت\" و\"كم لديك من الوقت؟\" و\"عامك في الخوف\"، ويجري الحساب على التلفزيون. مؤقت النوم منبّه على التلفزيون يوقف ما يُعرض مؤقتًا. تُقرأ مداخل التلفزيون (HDMI، الهوائي) على التلفزيون لعرضها. رمز QR في صفحة الفيلم يفتح صفحته على IMDb في هاتفك، ولا يرسل التلفزيون شيئًا.</item>
         <item>بيانات الأفلام عبر الإنترنت، ويمكنك إيقافها من الإعدادات: يطلب SCARY من Cinemeta، خدمة البيانات الوصفية العامة لـ Stremio، الملصقات والخلفيات والتقييمات وطاقم التمثيل. لا يُرسل سوى معرّفات أفلام IMDb العامة، ونص البحث عندما تبحث. تُحمَّل الصور من عناوين HTTPS التي يقدّمها Cinemeta، ومعظمها من images.metahub.space. وكأي موقع ويب، ترى هذه الخدمات عنوان IP الخاص بتلفزيونك. تُخزَّن المعلومات مؤقتًا لمدة 24 ساعة.</item>
         <item>‏TMDB، فقط إذا أدخلت مفتاحك الخاص: تُرسل الطلبات إلى api.themoviedb.org مع مفتاحك ومعرّفات الأفلام ولغة الواجهة. يُشفَّر المفتاح على هذا التلفزيون باستخدام Android Keystore، ولا يُسجَّل أبدًا، ولا يُرسل إلا إلى TMDB. حذف المفتاح يحذف أيضًا ذاكرة TMDB المؤقتة. تأتي عروض الاستئجار والشراء في صفحات الأفلام من TMDB (بيانات JustWatch): يحمل الطلب معرّف الفيلم فقط، ويُحدَّد بلدك على التلفاز من إعداد المنطقة أو من اختيارك في الإعدادات، وليس من موقعك أبدًا.</item>
         <item>يُسلِّم البحث الصوتي المهمة إلى أداة التعرف على الكلام في هذا التلفزيون (عادةً Google). يذهب التسجيل إلى تلك الخدمة وليس إلى SCARY، ولا يتلقى SCARY سوى النص المُتعرَّف عليه.</item>
         <item>الإعلانات الترويجية التي تُعرض تلقائيًا (تعمل بعد موافقتك عند سؤالك أول مرة، ويمكنك إيقافها من الإعدادات): المشغّل هو مشغّل YouTube في وضع الخصوصية المحسّنة (youtube-nocookie.com، وyoutube.com كمحاولة أخيرة عندما لا يعمل الإعلان هناك). عند عرض إعلان ترويجي، تتلقى YouTube ‏(Google) عنوان IP الخاص بتلفزيونك وتفاصيل الجهاز والمتصفح ومعرّف الإعلان، وفق سياسة خصوصية Google. يحظر SCARY ملفات تعريف الارتباط في المشغّل ويحذف تخزينه عند إغلاقه. لا يُعرض أي إعلان ترويجي دون اتصال بالإنترنت أو في السهرة العائلية.</item>
+        <item>جهاز التحكم بالهاتف، فقط حين تشغّله من الإعدادات: يقدّم التلفاز صفحة صغيرة على شبكتك المنزلية، يفتحها هاتفك بمسح رمز QR. يحمل الرمز مفتاحًا لمرة واحدة يوقّع ويشفّر كل أمر بين الهاتف والتلفاز، ولا يُرسل المفتاح عبر الشبكة أبدًا. تنتقل الأوامر مباشرة من الهاتف إلى التلفاز ولا تُخزَّن؛ ثم يُستخدم نص البحث ومفتاح TMDB كما هو موضح أعلاه. لا تحمّل الصفحة أي شيء من الإنترنت. ينطفئ جهاز التحكم عند قطع الاتصال، أو بعد 30 دقيقة دون استخدام، أو عند وصول أوامر مزيفة. للضغط على الأزرار في التطبيقات الأخرى (Stremio وNetflix…)، يستخدم جهاز التحكم بالهاتف خدمة إمكانية الوصول في SCARY، فقط إذا فعّلتها؛ فهي تضغط الأزرار ولا تقرأ شيئًا من الشاشة.</item>
         <item>المشاهدة والإعلانات الترويجية والمتجر تفتح Stremio أو YouTube أو Google Play. ومن تلك اللحظة تسري سياسات الخصوصية الخاصة بها.</item>
         <item>للأسئلة أو التصحيحات أو الطلبات المتعلقة ببياناتك: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>آخر تحديث: أكتوبر 2026. هذه مسودة لم يراجعها محامٍ بعد.</item>
@@ -278,4 +280,111 @@
     <string name="settings_trailer_note">تأتي الإعلانات الترويجية من YouTube، الذي يرى عنوان IP الخاص بتلفزيونك أثناء عرض أحدها. لا تُعرض أبدًا دون اتصال بالإنترنت، ولا في السهرة العائلية، ولا لفيلم مقفل، ولا عند إيقاف الرسوم المتحركة في التلفزيون.</string>
     <string name="msg_trailers_off">لن تُعرض الإعلانات الترويجية تلقائيًا. يمكنك تشغيلها مجددًا من الإعدادات.</string>
     <string name="settings_trailer_last">آخر إعلان ترويجي: %1$s</string>
+    <string name="row_time">كم لديك من الوقت؟</string>
+    <string name="time_quick">حتى 90 دقيقة</string>
+    <string name="time_evening">أمسية (حتى ساعتين)</string>
+    <string name="time_double">فيلمان متتاليان</string>
+    <string name="time_marathon">ماراثون</string>
+    <string name="time_empty">لا يوجد في المكتبة الآن فيلم يناسب هذا الوقت. جرّب وقتًا آخر.</string>
+    <string name="time_lineup">شاهدها بهذا الترتيب. المجموع: %1$s</string>
+    <string name="time_order">الفيلم %1$d</string>
+    <string name="row_because_loved">لأنك أحببت %1$s</string>
+    <string name="action_love">أحببته</string>
+    <string name="action_loved">أحببته ✓</string>
+    <string name="action_not_for_me">ليس لي</string>
+    <string name="action_not_for_me_on">مُعلَّم: ليس لي</string>
+    <string name="msg_loved">أحببته. ستظهر أفلام مشابهة في الشاشة الرئيسية.</string>
+    <string name="msg_not_for_me">عُلِّم بأنه ليس لك. لن يُقترح مرة أخرى.</string>
+    <string name="msg_rating_cleared">أُزيل التقييم.</string>
+    <string name="coming_on">في السينما %1$s</string>
+    <string name="coming_on_long">في السينما في %1$s</string>
+    <string name="tv_input_description">مدخل التلفاز: %1$s</string>
+    <string name="share_scan">امسح لمشاركة الفيلم</string>
+    <string name="share_scan_description">رمز QR لصفحة IMDb لفيلم %1$s: امسحه بكاميرا الهاتف لفتحه ومشاركته.</string>
+    <string name="settings_sleep_timer">مؤقت النوم</string>
+    <string name="sleep_left">متبقٍّ %1$d دقيقة</string>
+    <string name="sleep_off">متوقف</string>
+    <string name="settings_sleep_timer_note">عند انتهاء الوقت، يتوقف ما يُعرض مؤقتًا، ويتولى شاشة التوقف ووضع الاستعداد في التلفاز الأمر. اضغط OK للتغيير.</string>
+    <string name="settings_stats">عامك في الخوف</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">كل الأوقات</string>
+    <string name="stats_empty_title">لا خوف بعد</string>
+    <string name="stats_empty_body">علّم الأفلام كمُشاهَدة أو محبوبة، وسيظهر عامك في الخوف هنا.</string>
+    <string name="stats_none_yet">لم تُشاهَد أفلام بعد.</string>
+    <string name="stats_note">يُحسب على هذا التلفاز من قائمتي المُشاهَدة والمحبوبة. لا يُرسَل شيء إلى أي مكان.</string>
+    <string name="stats_watched">أفلام شوهدت</string>
+    <string name="stats_hours">ساعات الخوف</string>
+    <string name="stats_average_fear">متوسط الخوف</string>
+    <string name="stats_scariest">الأكثر رعبًا</string>
+    <string name="stats_favorite_subgenre">النوع الفرعي المفضل</string>
+    <string name="stats_favorite_decade">العقد المفضل</string>
+    <string name="stats_loved">أفلام محبوبة</string>
+    <string name="tab_movies">أفلام</string>
+    <string name="tab_series">مسلسلات</string>
+    <string name="series_tag">مسلسل</string>
+    <string name="minutes_episode">%1$d دقيقة للحلقة</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: الأفلام فيها: %1$d</string>
+    <string name="bucket_badge">رقم %1$d في Bucket list</string>
+    <string name="bucket_explainer">اختر أفلامًا لمشاهدتها واحدًا تلو الآخر. «ابدأ» يفتح الأول في Stremio، وفي كل مرة تعود فيها إلى SCARY يسألك إن كان سيُشغّل التالي.</string>
+    <string name="bucket_limits">يفتح SCARY صفحة الفيلم في Stremio، وهناك تختار المصدر وتضغط Play. لا يرى SCARY متى ينتهي الفيلم: العودة إليه (Home أو Back) هي العلامة، بحسب الوقت الذي مضى.</string>
+    <string name="bucket_empty_title">Bucket list فارغة</string>
+    <string name="bucket_empty_body">اختر بعض الأفلام لهذه الليلة، وسيرتبها SCARY في طابور.</string>
+    <string name="bucket_pick">اختيار الأفلام</string>
+    <string name="bucket_start">ابدأ</string>
+    <string name="bucket_pick_more">اختيار المزيد</string>
+    <string name="bucket_clear">مسح القائمة</string>
+    <string name="bucket_clear_confirm">اضغط مرة أخرى للمسح</string>
+    <string name="bucket_total">الأفلام في القائمة: %1$d · المدة الكلية: %2$s</string>
+    <string name="bucket_unavailable">غير متاح الآن</string>
+    <string name="bucket_move_up">تحريك %1$s لأعلى</string>
+    <string name="bucket_move_down">تحريك %1$s لأسفل</string>
+    <string name="bucket_remove">إزالة %1$s</string>
+    <string name="bucket_prompt_finished">هل أنهيت %1$s؟</string>
+    <string name="bucket_prompt_early">عدت مبكرًا من %1$s</string>
+    <string name="bucket_prompt_next">التالي: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">كان ذلك آخر فيلم في Bucket list.</string>
+    <string name="bucket_prompt_note">تبقى Bucket list كما هي حتى تغيّرها.</string>
+    <string name="bucket_prompt_back">العودة إلى %1$s</string>
+    <string name="bucket_prompt_play">تشغيل %1$s</string>
+    <string name="bucket_prompt_later">ليس الآن</string>
+    <string name="bucket_prompt_stop">توقف الآن</string>
+    <string name="action_add_bucket">إضافة إلى Bucket list</string>
+    <string name="action_in_bucket">في Bucket list</string>
+    <string name="picking_title">اختيار أفلام لـ Bucket list</string>
+    <string name="picking_hint">OK على الملصق يضيفه أو يزيله. Back أو «تم» عندما تكون جاهزًا.</string>
+    <string name="picking_count">الأفلام المختارة: %1$d</string>
+    <string name="picking_done">تم</string>
+    <string name="msg_bucket_films_only">الأفلام فقط يمكن أن تدخل Bucket list.</string>
+    <string name="msg_bucket_locked">%1$s مقفل: لا يمكن إضافته إلى Bucket list.</string>
+    <string name="msg_bucket_full">Bucket list ممتلئة (%1$s فيلمًا).</string>
+    <string name="msg_bucket_added">%1$s هو رقم %2$s في Bucket list.</string>
+    <string name="msg_bucket_removed">خرج %1$s من Bucket list.</string>
+    <string name="msg_bucket_cleared">أصبحت Bucket list فارغة.</string>
+    <string name="msg_bucket_empty">اختر بعض الأفلام أولًا.</string>
+    <string name="msg_bucket_done">كانت هذه Bucket list كلها. نجوت!</string>
+    <string name="night_pick_series">مسلسل الليلة</string>
+    <!-- Phone remote -->
+    <string name="tmdb_use_phone">الصقه من هاتفك</string>
+    <string name="settings_phone_remote">جهاز التحكم بالهاتف</string>
+    <string name="settings_phone_remote_note">تحكّم في SCARY من متصفح هاتفك على شبكة Wi-Fi نفسها: الأسهم والبحث ولصق مفتاح TMDB. لا حاجة لتثبيت أي شيء.</string>
+    <string name="remote_title">جهاز التحكم بالهاتف</string>
+    <string name="remote_step_wifi">1. صِل هاتفك بشبكة Wi-Fi نفسها المتصل بها التلفاز.</string>
+    <string name="remote_step_scan">2. امسح الرمز بكاميرا الهاتف وافتح الصفحة.</string>
+    <string name="remote_step_use">3. استخدم الأسهم، أو ابحث عن أفلام، أو الصق مفتاح TMDB.</string>
+    <string name="remote_connected">هاتف متصل.</string>
+    <string name="remote_waiting">بانتظار أن يمسح هاتف الرمز…</string>
+    <string name="remote_no_network">التلفاز غير متصل بشبكة منزلية (Wi-Fi أو كابل)، لذا لا يمكن للهاتف الوصول إليه.</string>
+    <string name="remote_idle">أُطفئ جهاز التحكم بالهاتف بعد 30 دقيقة دون استخدام.</string>
+    <string name="remote_forged">أُطفئ جهاز التحكم بالهاتف لأن جهازًا على الشبكة أرسل أوامر مزيفة.</string>
+    <string name="remote_off">جهاز التحكم بالهاتف مطفأ.</string>
+    <string name="remote_disconnect">قطع الاتصال</string>
+    <string name="remote_new_code">رمز جديد</string>
+    <string name="remote_turn_on">تشغيل</string>
+    <string name="remote_privacy">يعمل على شبكتك المنزلية فقط. كل أمر موقَّع ومشفَّر بمفتاح لمرة واحدة من رمز QR، ولا يُرسل هذا المفتاح عبر الشبكة أبدًا. لا يُخزَّن شيء ولا يُرسل إلى الإنترنت. ينطفئ جهاز التحكم من تلقاء نفسه بعد 30 دقيقة دون استخدام.</string>
+    <string name="remote_qr_description">رمز QR يفتح جهاز التحكم SCARY على هاتفك</string>
+    <string name="remote_other_apps_full">يتحكم الهاتف أيضًا في التطبيقات الأخرى (Stremio وNetflix…): الأسهم وOK والرجوع والرئيسية. البحث ومفتاح TMDB يعيدان SCARY إلى الواجهة أولًا.</string>
+    <string name="remote_other_apps_back_home">في التطبيقات الأخرى (Stremio وNetflix…) يضغط الهاتف الرجوع والرئيسية، ويشغّل ويوقف مؤقتًا ويضبط الصوت. تحتاج الأسهم إلى Android 13 أو أحدث على التلفزيون.</string>
+    <string name="remote_other_apps_off">داخل SCARY يقوم الهاتف بكل شيء. للتحكم في التطبيقات الأخرى أيضًا (Stremio وNetflix…)، فعّل “SCARY Home button” في إعدادات إمكانية الوصول في التلفزيون. التشغيل والإيقاف المؤقت والصوت تعمل في كل مكان أصلًا.</string>
+    <string name="remote_other_apps_enable">السماح بالتحكم في التطبيقات الأخرى</string>
 </resources>

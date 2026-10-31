@@ -4,6 +4,14 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.ui.components.BUCKET_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.components.tabTag
+import io.github.diamondrubinny.scary.ui.home.PICKING_BANNER_TAG
+import io.github.diamondrubinny.scary.ui.bucket.BUCKET_SCREEN_TAG
+import io.github.diamondrubinny.scary.ui.bucket.BUCKET_PROMPT_TAG
+import io.github.diamondrubinny.scary.ui.bucket.bucketItemTag
 import io.github.diamondrubinny.scary.ui.home.rowTag
 import io.github.diamondrubinny.scary.ui.settings.TRAILER_AUTOPLAY_ROW_TAG
 import io.github.diamondrubinny.scary.ui.trailer.TRAILER_INTRO_TAG
@@ -28,6 +36,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isNotSelected
 import androidx.compose.ui.test.isFocused
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -47,11 +56,16 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
+import io.github.diamondrubinny.scary.ui.settings.SLEEP_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.STATS_ROW_TAG
+import io.github.diamondrubinny.scary.ui.stats.STATS_SCREEN_TAG
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import org.junit.Assert.assertTrue
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onRoot
@@ -60,6 +74,21 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import android.net.Uri
+import android.util.Base64
+import android.view.View
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
+import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
+import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
+import java.net.Socket
+import android.os.ParcelFileDescriptor
+import android.app.UiAutomation
+import android.provider.Settings
+import androidx.lifecycle.Lifecycle
+import io.github.diamondrubinny.scary.launch.HomeButtonService
 
 /**
  * The main flows, driven through the same semantics TalkBack uses. Text comes from the app's own resources, so the
@@ -491,14 +520,14 @@ class ScaryUiTest {
     @Test
     fun anEndlessOnlineRowLoadsMoreMoviesAtItsEnd() {
         waitForHome()
-        val rowKey = "collection:" + Cinemeta.onlineCollectionId("horror_deep")
+        val rowKey = "collection:" + Cinemeta.onlineCollectionId("horror_popular")
         val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
         // Online rows need Cinemeta; without the network the row is not there, and there is nothing to test.
         val present = runCatching { rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey(rowKey) }.isSuccess } }.isSuccess
         assumeTrue("Online rows are not available on this emulator", present)
         val row = rule.onNodeWithTag(rowTag(rowKey))
-        // The daily refresh loads two pages (up to 100 movies); reaching the end asks for the next page. Scrolling to
-        // the furthest card that exists brings the end into view, whatever the exact count.
+        // The daily refresh loads the first page (up to 50 movies); nearing the end asks for the next pages, with no
+        // cap. Scrolling to the furthest card that exists brings the end into view, whatever the exact count.
         row.performScrollToIndex(0)
         rule.waitUntil(ONLINE_TIMEOUT_MS) {
             runCatching { row.performScrollToIndex(BEYOND_FIRST_PAGES) }.isSuccess.also { reached ->
@@ -562,6 +591,416 @@ class ScaryUiTest {
         waitUntilOrDescribe("the home screen") { onHome() }
     }
 
+    @Test
+    fun choosingHowMuchTimeYouHaveShowsANumberedLineupAndChoosingItAgainClosesIt() {
+        waitForHome()
+        rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("time")
+        val chip = hasText(text(R.string.time_double))
+        val first = hasText(rule.activity.getString(R.string.time_order, 1))
+        val second = hasText(rule.activity.getString(R.string.time_order, 2))
+        waitFor(chip)
+        rule.onNode(chip).assertIsNotSelected()
+        rule.onNode(chip).performClick()
+        waitFor(chip and isSelected())
+        // A double feature is two films, numbered in the order to watch them.
+        waitFor(first)
+        rule.onNode(second).assertExists()
+        rule.onNode(chip).performClick()
+        waitFor(chip and isNotSelected())
+        waitForGone(first)
+    }
+
+    @Test
+    fun lovingAFilmBringsBecauseYouLovedAndCanBeTakenBack() {
+        waitForHome()
+        val movie = bundledMovies().first { it.title == "Hereditary" }
+        val love = hasText(text(R.string.action_love))
+        val loved = hasText(text(R.string.action_loved))
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+        withCleanup(
+            test = {
+                openViaSearch(movie)
+                waitFor(love or loved)
+                if (rule.onAllNodes(loved).fetchSemanticsNodes().isEmpty()) rule.onNode(love).performScrollTo().performClick()
+                waitFor(loved)
+                backToHome()
+                // Films like it get a row of their own on the home screen.
+                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("because") }.isSuccess }
+                waitFor(hasText(rule.activity.getString(R.string.row_because_loved, movie.title)))
+                openViaSearch(movie)
+                rule.onNode(loved).performScrollTo().performClick()
+                waitFor(love)
+                backToHome()
+                // The home state is built off the main thread: the row goes once the new state arrives.
+                rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("because") }.isFailure }
+            },
+            cleanup = {
+                backToHome()
+                openViaSearch(movie)
+                waitFor(love or loved)
+                if (rule.onAllNodes(loved).fetchSemanticsNodes().isNotEmpty()) rule.onNode(loved).performScrollTo().performClick()
+                waitFor(love)
+                backToHome()
+            },
+        )
+    }
+
+    @Test
+    fun yourYearInFearOpensFromSettings() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(STATS_ROW_TAG)
+        waitFor(row)
+        rule.onNode(row).performScrollTo().performClick()
+        waitFor(hasTestTag(STATS_SCREEN_TAG))
+        // A fresh emulator has watched nothing yet; either way, the screen says what it shows.
+        waitFor(hasText(text(R.string.stats_empty_title)) or hasText(text(R.string.stats_all_time)))
+        backToHome()
+    }
+
+    @Test
+    fun thePhoneRemoteShowsItsCodeAndTakesOnlySignedCommands() {
+        waitForHome()
+        val remote = (rule.activity.application as ScaryApplication).container.phoneRemote
+        withCleanup({
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            val row = hasTestTag(PHONE_REMOTE_ROW_TAG)
+            waitFor(row)
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(hasTestTag(PHONE_REMOTE_QR_TAG))
+            waitFor(hasText(text(R.string.remote_waiting)))
+            val on = remote.state.value as PhoneRemoteServer.State.On
+            val port = Uri.parse(on.url).port
+            val secret = Base64.decode(
+                Uri.parse(on.url).fragment.orEmpty().split('&').first { it.startsWith("s=") }.removePrefix("s="),
+                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+            )
+            // The page is served to anyone, and holds no secret.
+            val page = remoteHttp(port, "GET / HTTP/1.1\r\nHost: tv\r\n\r\n")
+            assertTrue(page, page.startsWith("HTTP/1.1 200") && "remote.js" in page && "Content-Security-Policy" in page)
+            var counter = System.currentTimeMillis() * 1000
+            // A command signed with another key is refused, and does nothing.
+            val forged = remotePost(port, RemoteProtocol.seal(ByteArray(RemoteProtocol.SECRET_BYTES), ++counter, Command.HOME))
+            assertTrue(forged, forged.startsWith("HTTP/1.1 401"))
+            rule.onNode(hasTestTag(PHONE_REMOTE_TAG)).assertExists()
+            // A signed arrow moves the focus as the TV remote's would: from Disconnect to New code.
+            waitFor(hasText(text(R.string.remote_disconnect)) and isFocused())
+            val right = if (rule.activity.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL) Command.LEFT else Command.RIGHT
+            val arrow = remotePost(port, RemoteProtocol.seal(secret, ++counter, right))
+            assertTrue(arrow, arrow.startsWith("HTTP/1.1 200"))
+            waitFor(hasText(text(R.string.remote_new_code)) and isFocused())
+            waitFor(hasText(text(R.string.remote_connected)))
+            // A signed search runs on the TV and answers the phone with the matches.
+            val movie = bundledMovies().first()
+            val body = RemoteProtocol.seal(secret, ++counter, Command.SEARCH, movie.title)
+            val search = remotePost(port, body)
+            assertTrue(search, search.startsWith("HTTP/1.1 200") && "\"${movie.id}\"" in search)
+            waitFor(hasSetTextAction() and hasText(movie.title))
+            // The same command sent again is a replay.
+            val replay = remotePost(port, body)
+            assertTrue(replay, replay.startsWith("HTTP/1.1 409"))
+            val home = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.HOME))
+            assertTrue(home, home.startsWith("HTTP/1.1 200"))
+            waitUntilOrDescribe("the home screen") { onHome() }
+            // Disconnect forgets the key: the old code stops working.
+            remote.stop()
+            val after = runCatching { remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.HOME)) }.getOrDefault("closed")
+            assertTrue(after, !after.startsWith("HTTP/1.1 200"))
+        }) {
+            remote.stop()
+            backToHome()
+        }
+    }
+
+    @Test
+    fun withItsAccessibilityServiceOnThePhoneRemoteReachesOtherApps() {
+        waitForHome()
+        val remote = (rule.activity.application as ScaryApplication).container.phoneRemote
+        val service = "${rule.activity.packageName}/${HomeButtonService::class.java.name}"
+        val servicesBefore = shell("settings get secure enabled_accessibility_services")
+        val enabledBefore = shell("settings get secure accessibility_enabled")
+        fun scaryInFront(): Boolean {
+            var resumed = false
+            InstrumentationRegistry.getInstrumentation().runOnMainSync {
+                resumed = rule.activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+            }
+            return resumed
+        }
+        withCleanup({
+            // Off: another app in front gets nothing, and the phone is told how to allow it.
+            val url = remote.start(Language.EN) ?: error("no network for the phone remote")
+            val port = Uri.parse(url).port
+            val secret = Base64.decode(
+                Uri.parse(url).fragment.orEmpty().split('&').first { it.startsWith("s=") }.removePrefix("s="),
+                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+            )
+            var counter = System.currentTimeMillis() * 1000
+            rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+            if (HomeButtonService.instance == null) {
+                val off = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                assertTrue(off, "\"a11y_off\"" in off)
+            }
+            // On: Back from the phone closes the other app, and the arrows go as far as this Android allows.
+            shell("settings put secure enabled_accessibility_services $service")
+            shell("settings put secure accessibility_enabled 1")
+            waitUntilOrDescribe("SCARY's accessibility service to start") { HomeButtonService.instance != null }
+            if (!scaryInFront()) {
+                val down = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.DOWN))
+                val expected = if (HomeButtonService.arrowsEverywhere) "\"ok\"" else "\"old_android\""
+                assertTrue(down, down.startsWith("HTTP/1.1 200") && expected in down)
+            }
+            // The service may open SCARY by itself shortly after the TV starts: then go back to the settings.
+            if (scaryInFront()) {
+                rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+            }
+            repeat(MAX_BACKS) {
+                if (scaryInFront()) return@repeat
+                val back = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                assertTrue(back, back.startsWith("HTTP/1.1 200") && "\"ok\"" in back)
+                SystemClock.sleep(BACK_SETTLE_MS)
+            }
+            waitUntilOrDescribe("SCARY back in front after Back on the phone") { scaryInFront() }
+        }) {
+            remote.stop()
+            shell(if (servicesBefore == "null" || servicesBefore.isEmpty()) "settings delete secure enabled_accessibility_services" else "settings put secure enabled_accessibility_services $servicesBefore")
+            shell(if (enabledBefore == "null" || enabledBefore.isEmpty()) "settings delete secure accessibility_enabled" else "settings put secure accessibility_enabled $enabledBefore")
+            if (!scaryInFront()) rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            waitUntilOrDescribe("SCARY in front") { scaryInFront() }
+            backToHome()
+        }
+    }
+
+    /**
+     * A shell command, as the test. Its UiAutomation must not suppress accessibility services, as it does by
+     * default: SCARY's own service would never start.
+     */
+    private fun shell(command: String): String {
+        val automation = InstrumentationRegistry.getInstrumentation()
+            .getUiAutomation(UiAutomation.FLAG_DONT_SUPPRESS_ACCESSIBILITY_SERVICES)
+        return ParcelFileDescriptor.AutoCloseInputStream(automation.executeShellCommand(command))
+            .use { it.readBytes().toString(Charsets.UTF_8).trim() }
+    }
+
+    /** A plain HTTP exchange with the phone remote over the loopback address; the answer, head and body. */
+    private fun remoteHttp(port: Int, request: String): String =
+        Socket("127.0.0.1", port).use { socket ->
+            socket.soTimeout = TIMEOUT_MS.toInt()
+            socket.getOutputStream().apply {
+                write(request.toByteArray(Charsets.UTF_8))
+                flush()
+            }
+            socket.getInputStream().readBytes().toString(Charsets.UTF_8)
+        }
+
+    private fun remotePost(port: Int, json: String): String {
+        val body = json.toByteArray(Charsets.UTF_8)
+        return remoteHttp(port, "POST /api HTTP/1.1\r\nHost: tv\r\nContent-Type: application/json\r\nContent-Length: ${body.size}\r\n\r\n$json")
+    }
+
+    @Test
+    fun theSleepTimerStepsThroughItsChoicesAndTurnsOff() {
+        waitForHome()
+        val row = hasTestTag(SLEEP_ROW_TAG)
+        val label = text(R.string.settings_sleep_timer)
+        val off = hasContentDescription("$label: ${text(R.string.sleep_off)}")
+        fun openSettings() {
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            waitFor(row)
+        }
+        openSettings()
+        withCleanup({
+            waitFor(off)
+            for (minutes in listOf(30, 60, 90, 120)) {
+                rule.onNode(row).performScrollTo().performClick()
+                waitFor(hasContentDescription("$label: ${rule.activity.getString(R.string.sleep_left, minutes)}"))
+            }
+            // The countdown shows in the top bar too, on the home screen.
+            backToHome()
+            waitFor(hasContentDescription(rule.activity.getString(R.string.sleep_left, 120)))
+            openSettings()
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(off)
+        }) {
+            // Never leave an alarm behind: from settings, step on until the timer is off, one saved step at a time.
+            backToHome()
+            openSettings()
+            repeat(SLEEP_CHOICES) {
+                if (rule.onAllNodes(off).fetchSemanticsNodes().isNotEmpty()) return@repeat
+                val before = rule.onNode(row).fetchSemanticsNode().config.getOrNull(SemanticsProperties.ContentDescription)
+                rule.onNode(row).performScrollTo().performClick()
+                rule.waitUntil(TIMEOUT_MS) {
+                    rule.onNode(row).fetchSemanticsNode().config.getOrNull(SemanticsProperties.ContentDescription) != before
+                }
+            }
+            waitFor(off)
+            backToHome()
+        }
+    }
+
+    @Test
+    fun goingDownTheRowsShowsEachWholeRowWithItsTitleAndGoingUpBringsTheHeroBack() {
+        waitForHomeFocus()
+        val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
+        val donate = hasContentDescription(text(R.string.donate_qr_description))
+        waitFor(watch)
+        rule.onNode(donate).assertExists()
+        // Down from the hero into the rows: the top gives them room, and every focused row shows whole, title and all.
+        repeat(ROWS_TO_WALK) { step ->
+            pressKey(KeyEvent.KEYCODE_DPAD_DOWN)
+            if (step == 0) waitForGone(donate)
+            assertFocusedRowFullyShown()
+        }
+        // And back up to the hero (Up lands on its nearest button), which comes back whole.
+        val inRows = isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))
+        repeat(ROWS_TO_WALK + 1) {
+            if (rule.onAllNodes(inRows).fetchSemanticsNodes().isNotEmpty()) pressKey(KeyEvent.KEYCODE_DPAD_UP)
+        }
+        val heroButton = listOf(R.string.action_watch_stremio, R.string.action_trailer, R.string.action_details)
+            .map { hasText(text(it)) }.reduce { a, b -> a or b }
+        waitFor(heroButton and isFocused())
+        waitFor(donate)
+    }
+
+    @Test
+    fun goingDownAFilmPageAndBackUpBringsItsTitleBack() {
+        waitForHomeFocus()
+        val movie = bundledMovies().first { it.id == "the_shining" }
+        rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "details:${movie.id}"))
+        val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
+        val title = isHeading() and hasContentDescription(movie.title)
+        waitFor(watch)
+        waitFor(title)
+        fun titleTop() = rule.onNode(title).fetchSemanticsNode().boundsInRoot.top
+        val top = titleTop()
+        // All the way down: the buttons, the apps, rent or buy, then "More like this".
+        repeat(DETAILS_DEPTH) { pressKey(KeyEvent.KEYCODE_DPAD_DOWN) }
+        Log.i("ScaryUiTest", "film page: title top ${top}px at first, ${titleTop()}px at the bottom")
+        // And back up to the top row of buttons (Up lands on the nearest one; more Ups stay there): the title comes
+        // back with the buttons, where it was at first.
+        repeat(DETAILS_DEPTH) { pressKey(KeyEvent.KEYCODE_DPAD_UP) }
+        waitUntilOrDescribe("the film's title back at the top of its page") { kotlin.math.abs(titleTop() - top) < 1f }
+        backToHome()
+    }
+
+    private fun pressKey(keyCode: Int) {
+        waitUntilOrDescribe("the window to take the remote's keys") { readyForKeys() }
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(keyCode)
+        rule.waitForIdle()
+    }
+
+    /** The focused card or chip lies wholly inside the rows, and so does its row's title (the nearest one above it). */
+    private fun assertFocusedRowFullyShown() {
+        val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+        waitUntilOrDescribe("a focused card wholly inside the rows, its row title in view") {
+            val focused = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .singleOrNull()?.boundsInRoot ?: return@waitUntilOrDescribe false
+            val title = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .map { it.boundsInRoot }
+                .filter { it.bottom <= focused.top }
+                .maxByOrNull { it.bottom }
+            focused.top >= rows.top && focused.bottom <= rows.bottom && title != null && title.top >= rows.top
+        }
+    }
+
+    @Test
+    fun theSeriesTabShowsTheSeriesLibraryAndTheMoviesTabComesBack() {
+        waitForHome()
+        val catalog = rule.activity.assets.open("series.json").bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
+        val collection = catalog.collections.first()
+        val series = catalog.moviesOf(collection).first()
+        val seriesTab = hasTestTag(tabTag(MediaKind.SERIES))
+        val moviesTab = hasTestTag(tabTag(MediaKind.MOVIE))
+        rule.onNode(moviesTab).assertIsSelected()
+        withCleanup({
+            rule.onNode(seriesTab).performClick()
+            waitFor(seriesTab and isSelected())
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG)
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("collection:${collection.id}") }.isSuccess }
+            // A series card says its years, and the film rows are gone.
+            waitFor(hasContentDescription("${series.title}, ${series.yearsLabel}", substring = true))
+            assertTrue(runCatching { rows.performScrollToKey("moods") }.isFailure)
+        }) {
+            rule.onNode(moviesTab).performClick()
+            waitFor(moviesTab and isSelected())
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("moods") }.isSuccess }
+        }
+    }
+
+    @Test
+    fun pickingFilmsNumbersThemAndTheBucketListKeepsAndChangesTheirOrder() {
+        waitForHome()
+        val catalog = bundledCatalog()
+        val collection = catalog.collections.first()
+        val (first, second) = catalog.moviesOf(collection).take(2)
+        val rowKey = "collection:${collection.id}"
+        fun card(movie: Movie) = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
+            hasAnyAncestor(hasTestTag(rowTag(rowKey)))
+        val clear = hasText(text(R.string.bucket_clear))
+        withCleanup({
+            // Empty, the bucket list's button goes straight to picking.
+            rule.onNodeWithTag(BUCKET_BUTTON_TAG).performClick()
+            waitFor(hasTestTag(PICKING_BANNER_TAG))
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(rowKey)
+            rule.onNodeWithTag(rowTag(rowKey)).performScrollToIndex(0)
+            waitFor(card(first))
+            rule.onNode(card(first)).performClick()
+            waitFor(card(first) and hasContentDescription(rule.activity.getString(R.string.bucket_badge, 1), substring = true))
+            rule.onNode(card(second)).performClick()
+            waitFor(card(second) and hasContentDescription(rule.activity.getString(R.string.bucket_badge, 2), substring = true))
+            // OK did not open a movie page while picking.
+            assertTrue(rule.onAllNodes(hasText(text(R.string.row_more_like))).fetchSemanticsNodes().isEmpty())
+            rule.onNode(hasText(text(R.string.picking_done))).performClick()
+            waitFor(hasTestTag(BUCKET_SCREEN_TAG))
+            assertBucketOrder(first.id, second.id)
+            // The second film moves up: the order swaps.
+            val uiLanguage = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+            rule.onNode(hasContentDescription(rule.activity.getString(R.string.bucket_move_up, second.displayTitle(uiLanguage)))).performClick()
+            rule.waitUntil(TIMEOUT_MS) { runCatching { assertBucketOrder(second.id, first.id) }.isSuccess }
+            // Clearing asks once more.
+            rule.onNode(clear).performClick()
+            waitFor(hasText(text(R.string.bucket_clear_confirm)))
+            rule.onNode(hasText(text(R.string.bucket_clear_confirm))).performClick()
+            waitFor(hasText(text(R.string.bucket_empty_title)))
+            backToHome()
+        }) {
+            backToHome()
+            rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "bucket"))
+            rule.waitForIdle()
+            if (rule.onAllNodes(clear).fetchSemanticsNodes().isNotEmpty()) {
+                rule.onNode(clear).performClick()
+                waitFor(hasText(text(R.string.bucket_clear_confirm)))
+                rule.onNode(hasText(text(R.string.bucket_clear_confirm))).performClick()
+            }
+            backToHome()
+        }
+    }
+
+    /** The bucket list's rows, top to bottom, are these films. */
+    private fun assertBucketOrder(vararg ids: String) {
+        val tops = ids.map { rule.onNodeWithTag(bucketItemTag(it)).fetchSemanticsNode().boundsInRoot.top }
+        assertTrue("Bucket list order is not ${ids.toList()}", tops.zipWithNext().all { (a, b) -> a < b })
+    }
+
+    @Test
+    fun theQuestionAfterABucketListFilmOffersTheNextAndBackKeepsTheList() {
+        waitForHomeFocus()
+        rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "bucket:prompt"))
+        val prompt = hasTestTag(BUCKET_PROMPT_TAG)
+        waitFor(prompt)
+        rule.onNode(hasText(text(R.string.bucket_prompt_later))).assertExists()
+        rule.onNode(hasText(text(R.string.bucket_prompt_note))).assertExists()
+        // Back goes to the window with the focus: wait until the dialog has it.
+        waitFor(isFocused() and hasAnyAncestor(prompt))
+        rule.waitForIdle()
+        pressBack()
+        waitForGone(prompt)
+        waitUntilOrDescribe("the home screen") { onHome() }
+    }
+
+    private fun bundledCatalog() = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
+
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
@@ -578,9 +1017,13 @@ class ScaryUiTest {
         // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
         const val MAX_BACKS = 6
         const val ONLINE_TIMEOUT_MS = 45_000L
-        val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60)
+        val NEAR_END_OF_FIRST_PAGES = listOf(99, 95, 90, 80, 60, 49, 45, 40, 30)
         const val BEYOND_FIRST_PAGES = 120
         const val SCREEN_DEPTH = 6
+        const val SLEEP_CHOICES = 5
+        const val ROWS_TO_WALK = 6
+        const val DETAILS_DEPTH = 8
+        const val BACK_SETTLE_MS = 1_500L
         const val SCREEN_CHARS = 6_000
         const val FOCUS_DESCRIPTION_CHARS = 300
     }

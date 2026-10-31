@@ -12,6 +12,10 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import io.github.diamondrubinny.scary.core.model.MovieCollection
 import io.github.diamondrubinny.scary.data.InstalledApp
+import io.github.diamondrubinny.scary.data.TvInput
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.catalog.TimePlanResult
 
 data class HomeUiState(
     val loading: Boolean = true,
@@ -42,7 +46,20 @@ data class HomeUiState(
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
+    val lovedIds: Set<String> = emptySet(),
+    val dislikedIds: Set<String> = emptySet(),
+    /** When the sleep timer ends (wall clock), or null when it is off. */
+    val sleepAtMillis: Long? = null,
+    /** Films or series: the home screen's tab. */
+    val tab: MediaKind = MediaKind.MOVIE,
+    /** Picking films for the bucket list: OK on a poster adds or removes it instead of opening it. */
+    val picking: Boolean = false,
+    /** The bucket list, in order. */
+    val bucketIds: List<String> = emptyList(),
 ) {
+    /** A film's place in the bucket list, from 1; null when it is not in it. */
+    fun bucketNumber(movie: Movie): Int? = bucketIds.indexOf(movie.id).takeIf { it >= 0 }?.plus(1)
+
     fun isLocked(movie: Movie): Boolean = ParentalGate.isLocked(parentalEnabled, sessionUnlocked, lockFromFear, movie)
 
     fun isWatched(movie: Movie): Boolean = movie.id in watchedIds
@@ -115,6 +132,16 @@ sealed interface HomeRow {
         override val key = "season:${season.key}"
     }
 
+    /** "Because you loved X": films like one the viewer loved. */
+    data class BecauseYouLoved(val because: Movie, val movies: List<Movie>) : HomeRow {
+        override val key = "because"
+    }
+
+    /** "How much time do you have?": the budget chips, and once one is picked, the films or the lineup for it. */
+    data class TimePlan(val selected: TimeBudget?, val plan: TimePlanResult?) : HomeRow {
+        override val key = "time"
+    }
+
     /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
     data class Moods(
         val selected: Mood?,
@@ -138,6 +165,11 @@ sealed interface AppTile {
     /** A pinned app that is not installed yet; selecting it opens Google Play. */
     data class Suggestion(val packageName: String, val label: String) : AppTile {
         override val key = "suggest:$packageName"
+    }
+
+    /** One of the TV's own inputs: HDMI 1, the antenna... */
+    data class Input(val input: TvInput) : AppTile {
+        override val key = "input:${input.id}"
     }
 
     data object SetAsHome : AppTile {
@@ -165,6 +197,9 @@ sealed interface Screen {
     data object Settings : Screen
     data object Search : Screen
     data class Document(val kind: DocumentKind) : Screen
+    data object Stats : Screen
+    data object Bucket : Screen
+    data object PhoneRemote : Screen
 }
 
 /**
@@ -216,3 +251,9 @@ data class RentOrBuyUi(val movieId: String, val state: RentOrBuyState)
 data class LaunchingState(val movie: Movie, val appLabel: String)
 
 data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<String> = emptyList())
+
+/**
+ * What SCARY asks on coming back from a bucket-list film: [finished] when the time away looks like the whole film (it
+ * then leaves the list), otherwise the viewer may go back to it. [next] is the film after it, if any.
+ */
+data class BucketPrompt(val current: Movie, val next: Movie?, val finished: Boolean)

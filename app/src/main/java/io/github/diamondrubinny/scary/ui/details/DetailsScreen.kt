@@ -38,10 +38,18 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.components.QrImage
+import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.core.brand.Donation
+import androidx.compose.ui.platform.LocalConfiguration
+import java.time.format.FormatStyle
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
@@ -56,6 +64,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.ui.geometry.Rect
 import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
 import io.github.diamondrubinny.scary.ui.home.ProviderOffer
 import androidx.compose.foundation.verticalScroll
@@ -96,6 +107,13 @@ fun DetailsScreen(
     /** Changes when the TMDB key, the country or online data change, so the offers load again. */
     offersKey: Any? = null,
     trailer: TrailerSettings = TrailerSettings.Off,
+    loved: Boolean = false,
+    /** In the bucket list (films only), and its button. */
+    inBucket: Boolean = false,
+    onToggleBucket: ((Movie) -> Unit)? = null,
+    notForMe: Boolean = false,
+    onToggleLoved: (Movie) -> Unit = {},
+    onToggleNotForMe: (Movie) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -107,19 +125,24 @@ fun DetailsScreen(
 
     // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
     // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
-    // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour.
+    // page scrolls only as far as the focused button needs; the rows inside keep the TV's own behaviour. The header
+    // asks to be shown from its top down to the focus (FromPageTop), so coming back up to the buttons brings the
+    // title back too.
     val rowsScroll = LocalBringIntoViewSpec.current
-    CompositionLocalProvider(LocalBringIntoViewSpec provides OnlyWhenNeeded) {
+    val pageTop = with(LocalDensity.current) { PageTopPadding.toPx() }
+    val pageSpec = remember(pageTop) { OnlyWhenNeeded(pageTop) }
+    val fromPageTop = remember(pageTop) { FromPageTop(pageTop) }
+    CompositionLocalProvider(LocalBringIntoViewSpec provides pageSpec) {
         val pageScroll = rememberScrollState()
         // The trailer stops once the page scrolls more than half of it out of view (YouTube: only while visible).
         val halfTrailerPx = with(LocalDensity.current) { (DetailsTrailerSize.height / 2).toPx() }
         val trailerOnScreen by remember(pageScroll, halfTrailerPx) { derivedStateOf { pageScroll.value < halfTrailerPx } }
         // Room for the trailer is kept from the start, so text and buttons never move under the focus when it starts.
         val trailerSlot = canAutoTrailer(movie, isLocked(movie), trailer, DetailsTrailerSize)
-        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = 36.dp, bottom = 24.dp)) {
+        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                 Row(
-                    modifier = Modifier.padding(horizontal = SidePadding),
+                    modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
                     horizontalArrangement = Arrangement.spacedBy(36.dp),
                 ) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -129,6 +152,13 @@ fun DetailsScreen(
                             BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
                         }
                         MovieMeta(movie)
+                        // Not out yet (TMDB's coming-soon row).
+                        movie.comingOn(LocalDate.now())?.let { date ->
+                            BasicText(
+                                stringResource(R.string.coming_on_long, longDate(date)),
+                                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                            )
+                        }
                         if (movie.cast.isNotEmpty()) {
                             BasicText(
                                 stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
@@ -167,12 +197,28 @@ fun DetailsScreen(
                                 text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
                                 onClick = { onToggleWatched(movie) },
                             )
+                            // "Loved it" feeds "Because you loved"; "Not for me" keeps the film out of every suggestion.
+                            ScaryButton(
+                                text = stringResource(if (loved) R.string.action_loved else R.string.action_love),
+                                onClick = { onToggleLoved(movie) },
+                            )
+                            ScaryButton(
+                                text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
+                                onClick = { onToggleNotForMe(movie) },
+                            )
+                            // Films only: a series has no end for the next one to follow.
+                            if (onToggleBucket != null && !movie.isSeries) {
+                                ScaryButton(
+                                    text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
+                                    onClick = { onToggleBucket(movie) },
+                                )
+                            }
                         }
                         if (elsewhere) {
                             WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
                         }
-                        // A locked movie shows no store either, as it shows no art.
-                        if (rentOrBuy != null && !isLocked(movie)) {
+                        // A locked movie shows no store either, as it shows no art. Series: not yet (TMDB lists them apart).
+                        if (rentOrBuy != null && !isLocked(movie) && !movie.isSeries) {
                             RentOrBuy(
                                 state = rentOrBuy,
                                 countryName = countryName,
@@ -180,34 +226,37 @@ fun DetailsScreen(
                             )
                         }
                     }
-                    // The trailer takes the poster's place while it plays, and gives it back when it ends.
-                    AutoTrailer(
-                        movie = movie,
-                        locked = isLocked(movie),
-                        settings = trailer,
-                        playerSize = DetailsTrailerSize,
-                        modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
-                        visible = trailerOnScreen,
-                    ) {
-                        Box(
-                            Modifier
-                                .size(width = 150.dp, height = 225.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // The trailer takes the poster's place while it plays, and gives it back when it ends.
+                        AutoTrailer(
+                            movie = movie,
+                            locked = isLocked(movie),
+                            settings = trailer,
+                            playerSize = DetailsTrailerSize,
+                            modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
+                            visible = trailerOnScreen,
                         ) {
-                            PosterArt(movie, Modifier.fillMaxSize())
-                            // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
-                            val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
-                            if (poster != null) {
-                                AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                            } else {
-                                BasicText(
-                                    text = movie.title,
-                                    style = ScaryType.Title.mixedLanguage(),
-                                    maxLines = 3,
-                                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                                )
+                            Box(
+                                Modifier
+                                    .size(width = 150.dp, height = 225.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                            ) {
+                                PosterArt(movie, Modifier.fillMaxSize())
+                                // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                                val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
+                                if (poster != null) {
+                                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                                } else {
+                                    BasicText(
+                                        text = movie.title,
+                                        style = ScaryType.Title.mixedLanguage(),
+                                        maxLines = 3,
+                                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                                    )
+                                }
                             }
                         }
+                        if (!isLocked(movie)) ShareCode(movie, language)
                     }
                 }
                 if (details.similar.isNotEmpty()) {
@@ -239,17 +288,37 @@ fun DetailsScreen(
     }
 }
 
-/** Scrolls only when the focused item is partly out of view, and then just enough to show it. */
+private val PageTopPadding = 36.dp
+
+/**
+ * Scrolls only when the requested part is partly out of view. A part above the view comes down to the page's top
+ * margin ([top] pixels; the scroll stops at the very top anyway); one below comes up just enough. A part taller than
+ * the view shows its bottom, where the focus is.
+ */
 @OptIn(ExperimentalFoundationApi::class)
-private val OnlyWhenNeeded = object : BringIntoViewSpec {
+private class OnlyWhenNeeded(private val top: Float) : BringIntoViewSpec {
     override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
         val trailingEdge = offset + size
         return when {
             offset >= 0f && trailingEdge <= containerSize -> 0f
-            offset < 0f || size > containerSize -> offset
+            size > containerSize -> trailingEdge - containerSize
+            offset < 0f -> offset - top
             else -> trailingEdge - containerSize
         }
     }
+}
+
+/**
+ * The header (title, synopsis, buttons, apps, rent or buy) asks the page to show it from the page's very top (its
+ * [top] margin above the header included) down to the focused button. Back up from "More like this" to the buttons,
+ * the page returns to where it started instead of stopping with the title at the screen's edge or cut off.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private class FromPageTop(private val top: Float) : BringIntoViewResponder {
+    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, -top, localRect.right, localRect.bottom)
+
+    // The header does not scroll by itself; the page does.
+    override suspend fun bringChildIntoView(localRect: () -> Rect?) = Unit
 }
 
 /**
@@ -332,3 +401,29 @@ private fun WatchElsewhere(
 
 /** 16:9, and 640 x 360 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
 private val DetailsTrailerSize = DpSize(320.dp, 180.dp)
+
+/**
+ * "Scan to share this movie": a QR code to the film's IMDb page, which the phone opens and can pass on with its own
+ * share button. The TV sends nothing.
+ */
+@Composable
+private fun ShareCode(movie: Movie, language: Language) {
+    val link = remember(movie.imdbId) { runCatching { Links.imdbTitle(movie.imdbId) }.getOrNull() } ?: return
+    val code = remember(link) { Donation.qr(link) }
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        BasicText(
+            stringResource(R.string.share_scan),
+            // Next to the code, whichever side it is on.
+            style = ScaryType.Caption.copy(textAlign = TextAlign.End),
+            modifier = Modifier.width(120.dp),
+        )
+        QrImage(code = code, size = 96.dp, description = stringResource(R.string.share_scan_description, movie.displayTitle(language)))
+    }
+}
+
+/** "14 November 2026" in the UI's language. */
+@Composable
+private fun longDate(date: LocalDate): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(date, locale) { date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
+}

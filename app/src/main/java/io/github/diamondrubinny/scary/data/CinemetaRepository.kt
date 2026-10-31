@@ -9,8 +9,10 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
+import io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
 import io.github.diamondrubinny.scary.core.model.Catalog
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -25,6 +27,12 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
 import javax.net.ssl.HttpsURLConnection
+
+/**
+ * One more page of an endless row: the films it keeps (none when a page held only films of other genres) and where the
+ * row goes on, or null when it has reached its end.
+ */
+data class OnlinePage(val movies: List<CinemetaMeta>, val next: Int?)
 
 /** Fetches artwork and popular rows from Cinemeta and keeps a copy on disk. */
 class CinemetaRepository(context: Context) {
@@ -45,6 +53,10 @@ class CinemetaRepository(context: Context) {
         val titles: Map<String, String>,
         val themedOnly: Boolean = false,
         val endless: Boolean = false,
+        /** Films, or series for the series tab. */
+        val kind: MediaKind = MediaKind.MOVIE,
+        /** A "year" row that, when its year runs out, goes on with the year before (EndlessCursor). */
+        val yearChain: Boolean = false,
     )
 
     private val rowSpecs: List<RowSpec>
@@ -54,6 +66,7 @@ class CinemetaRepository(context: Context) {
                 RowSpec(
                     "horror_popular", "top", "Horror", listOf(0),
                     titles("פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас", "رعب رائج الآن"),
+                    endless = true,
                 ),
                 RowSpec(
                     "horror_new", "year", year.toString(), listOf(0, 50, 100),
@@ -64,10 +77,6 @@ class CinemetaRepository(context: Context) {
                 RowSpec(
                     "thriller_popular", "top", "Thriller", listOf(0),
                     titles("מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры", "أفلام إثارة رائجة"),
-                ),
-                RowSpec(
-                    "horror_deep", "top", "Horror", listOf(50, 100),
-                    titles("עוד מהמרתף", "Deeper in the cellar", "Mais fundo no porão", "Глубже в подвал", "أعمق في القبو"),
                     endless = true,
                 ),
                 RowSpec(
@@ -81,30 +90,110 @@ class CinemetaRepository(context: Context) {
                     themedOnly = true,
                     endless = true,
                 ),
+                // Back through the years, one after another, as far as the catalog goes: the row with no end.
                 RowSpec(
-                    "thriller_deep", "top", "Thriller", listOf(50),
-                    titles("עוד מותחנים", "More thrillers", "Mais suspenses", "Ещё триллеры", "مزيد من الإثارة"),
+                    "horror_archive", "year", (year - 2).toString(), listOf(0, 50),
+                    titles("עוד מהמרתף: שנה אחרי שנה אחורה", "Deeper in the cellar, year by year", "Mais fundo no porão, ano a ano", "Глубже в подвал, год за годом", "أعمق في القبو، عامًا بعد عام"),
+                    themedOnly = true,
                     endless = true,
+                    yearChain = true,
+                ),
+                // Other genres' catalogs, keeping only their horror, thriller and mystery titles: mostly films the rows
+                // above do not reach (measured: about half of each page is new to them).
+                RowSpec(
+                    "scifi_horror", "top", "Sci-Fi", listOf(0, 50, 100),
+                    titles("אימה ומדע בדיוני", "Sci-fi horror and suspense", "Terror e suspense de ficção científica", "Фантастические ужасы и триллеры", "رعب وإثارة من الخيال العلمي"),
+                    themedOnly = true,
+                    endless = true,
+                ),
+                RowSpec(
+                    "crime_thriller", "top", "Crime", listOf(0, 50, 100),
+                    titles("פשע ומתח", "Crime and suspense", "Crime e suspense", "Криминал и напряжение", "جريمة وتشويق"),
+                    themedOnly = true,
+                    endless = true,
+                ),
+                RowSpec(
+                    "action_thriller", "top", "Action", listOf(0, 50, 100),
+                    titles("אקשן ומתח", "Action and suspense", "Ação e suspense", "Экшен и напряжение", "حركة وتشويق"),
+                    themedOnly = true,
+                    endless = true,
+                ),
+                // The series tab.
+                RowSpec(
+                    "series_horror", "top", "Horror", listOf(0, 50),
+                    titles("סדרות אימה פופולריות", "Popular horror series", "Séries de terror em alta", "Популярные хоррор-сериалы", "مسلسلات رعب رائجة"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_thriller", "top", "Thriller", listOf(0),
+                    titles("סדרות מתח פופולריות", "Popular thriller series", "Séries de suspense em alta", "Популярные сериалы-триллеры", "مسلسلات إثارة رائجة"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_mystery", "top", "Mystery", listOf(0),
+                    titles("סדרות תעלומה", "Mystery series", "Séries de mistério", "Сериалы-загадки", "مسلسلات غموض"),
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_scifi", "top", "Sci-Fi", listOf(0, 50, 100),
+                    titles("סדרות אימה ומדע בדיוני", "Sci-fi horror and suspense series", "Séries de terror e suspense de ficção científica", "Фантастические сериалы ужасов и напряжения", "مسلسلات رعب وإثارة من الخيال العلمي"),
+                    themedOnly = true,
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_fantasy", "top", "Fantasy", listOf(0, 50, 100),
+                    titles("פנטזיה אפלה", "Dark fantasy series", "Séries de fantasia sombria", "Мрачное фэнтези", "مسلسلات فانتازيا مظلمة"),
+                    themedOnly = true,
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_new", "year", year.toString(), listOf(0, 50),
+                    titles("סדרות חדשות השנה", "New series this year", "Séries novas deste ano", "Новые сериалы этого года", "مسلسلات جديدة هذا العام"),
+                    themedOnly = true,
+                    endless = true,
+                    kind = MediaKind.SERIES,
+                ),
+                RowSpec(
+                    "series_archive", "year", (year - 1).toString(), listOf(0, 50),
+                    titles("עוד סדרות: שנה אחרי שנה אחורה", "More series, year by year", "Mais séries, ano a ano", "Ещё сериалы, год за годом", "مزيد من المسلسلات، عامًا بعد عام"),
+                    themedOnly = true,
+                    endless = true,
+                    yearChain = true,
+                    kind = MediaKind.SERIES,
                 ),
             )
         }
-
-    /** One more page of an endless row: [rawSize] movies came back, [movies] are the ones the row keeps. */
-    data class Page(val rawSize: Int, val movies: List<CinemetaMeta>)
 
     /** Where an endless row continues after the pages loaded with the daily refresh; null for rows that do not. */
     fun endlessStart(rowId: String): Int? =
         rowSpecs.firstOrNull { it.id == rowId && it.endless }?.let { it.skips.last() + Cinemeta.PAGE_SIZE }
 
     /**
-     * The catalog page at [skip] for the endless row [rowId], loaded while the viewer scrolls. Kept in memory only.
-     * Null when the TV is offline or the service is down; never throws.
+     * The next page of the endless row [rowId] at [cursor] (EndlessCursor), loaded while the viewer scrolls. Kept in
+     * memory only. Null when the TV is offline or the service is down; never throws.
      */
-    suspend fun loadPage(rowId: String, skip: Int): Page? = withContext(Dispatchers.IO) {
+    suspend fun loadPage(rowId: String, cursor: Int): OnlinePage? = withContext(Dispatchers.IO) {
         val spec = rowSpecs.firstOrNull { it.id == rowId && it.endless } ?: return@withContext null
-        val url = runCatching { Cinemeta.catalogUrl(spec.catalog, spec.genre, skip) }.getOrNull() ?: return@withContext null
+        val genre = if (spec.yearChain) {
+            // Past the first year there is nothing left: the row ends.
+            EndlessCursor.year(spec.genre.toInt(), cursor)?.toString() ?: return@withContext OnlinePage(emptyList(), null)
+        } else {
+            spec.genre
+        }
+        val skip = if (spec.yearChain) EndlessCursor.skip(cursor) else cursor
+        val url = runCatching { Cinemeta.catalogUrl(spec.catalog, genre, skip, spec.kind) }.getOrNull()
+            ?: return@withContext OnlinePage(emptyList(), null)
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
-        Page(metas.size, if (spec.themedOnly) Cinemeta.themed(metas) else metas)
+        val ofKind = metas.filter { it.kind == spec.kind }
+        OnlinePage(
+            movies = if (spec.themedOnly) Cinemeta.themed(ofKind) else ofKind,
+            next = EndlessCursor.after(cursor, metas.size, spec.yearChain),
+        )
     }
 
     private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
@@ -114,8 +203,11 @@ class CinemetaRepository(context: Context) {
         if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()
     }
 
-    /** Returns fresh data, or null when the TV is offline or the service is down. Never throws. */
-    suspend fun refresh(imdbIds: List<String>): CinemetaCache? = withContext(Dispatchers.IO) {
+    /**
+     * Returns fresh data for the library's films and series ([items], IMDb id and kind), or null when the TV is offline
+     * or the service is down. Never throws.
+     */
+    suspend fun refresh(items: List<Pair<String, MediaKind>>): CinemetaCache? = withContext(Dispatchers.IO) {
         // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
         // and the three popular rows queue first so whole rows of posters appear early.
         val pool = Semaphore(PARALLEL_REQUESTS)
@@ -124,16 +216,18 @@ class CinemetaRepository(context: Context) {
                 async {
                     // The pages of one row load side by side; a page that fails just leaves the row shorter.
                     val pages = spec.skips.map { skip ->
-                        async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip)) }?.let(Cinemeta::parseCatalog) }
+                        async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip, spec.kind)) }?.let(Cinemeta::parseCatalog) }
                     }.awaitAll().filterNotNull()
-                    val metas = pages.flatten().distinctBy { it.imdbId }.let { if (spec.themedOnly) Cinemeta.themed(it) else it }
+                    // A row keeps only its own kind, even if Cinemeta mixes one in.
+                    val metas = pages.flatten().distinctBy { it.imdbId }.filter { it.kind == spec.kind }
+                        .let { if (spec.themedOnly) Cinemeta.themed(it) else it }
                     metas.takeIf { it.isNotEmpty() }?.let {
                         OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
                     }
                 }
             }
-            val metas = imdbIds.distinct().map { id ->
-                async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } }
+            val metas = items.distinctBy { it.first }.map { (id, kind) ->
+                async { pool.withPermit { fetch(Cinemeta.metaUrl(id, kind))?.let(Cinemeta::parseMeta) } }
             }
             metas.awaitAll() to rows.awaitAll().filterNotNull()
         }
@@ -143,12 +237,18 @@ class CinemetaRepository(context: Context) {
     }
 
     /**
-     * Web search in Cinemeta for the search screen. Only the query text and the TV's IP reach Cinemeta. Null when the
-     * query is invalid, the TV is offline or the service is down; never throws.
+     * Web search in Cinemeta for the search screen, films and series side by side. Only the query text and the TV's IP
+     * reach Cinemeta. Null when the query is invalid, the TV is offline or the service is down; never throws.
      */
     suspend fun search(query: String, known: Catalog): List<Movie>? = withContext(Dispatchers.IO) {
-        val url = Cinemeta.searchUrl(query) ?: return@withContext null
-        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        val urls = MediaKind.entries.mapNotNull { kind -> Cinemeta.searchUrl(query, kind)?.let { kind to it } }
+        if (urls.isEmpty()) return@withContext null
+        val pages = coroutineScope { urls.map { (kind, url) -> async { kind to fetch(url)?.let(Cinemeta::parseCatalog) } }.awaitAll() }
+        if (pages.all { it.second == null }) return@withContext null
+        // Films and series take turns, so neither crowds out the other; a result that does not say its type is the
+        // type it was searched as.
+        val lists = pages.map { (kind, metas) -> metas.orEmpty().map { if (it.kind == kind) it else it.copy(type = CinemetaMeta.typeOf(kind)) } }
+        val metas = (0 until (lists.maxOfOrNull { it.size } ?: 0)).flatMap { i -> lists.mapNotNull { it.getOrNull(i) } }
         // The top results often come without genres: look them up (side by side), so the theme filter can judge them.
         val missing = Cinemeta.needsGenres(metas, known)
         val full = if (missing.isEmpty()) {
@@ -156,11 +256,12 @@ class CinemetaRepository(context: Context) {
         } else {
             val pool = Semaphore(PARALLEL_REQUESTS)
             coroutineScope {
-                missing.map { id -> async { pool.withPermit { fetch(Cinemeta.metaUrl(id))?.let(Cinemeta::parseMeta) } } }
+                val kinds = metas.associate { it.imdbId to it.kind }
+                missing.map { id -> async { pool.withPermit { fetch(Cinemeta.metaUrl(id, kinds[id] ?: MediaKind.MOVIE))?.let(Cinemeta::parseMeta) } } }
                     .awaitAll().filterNotNull().associateBy { it.imdbId }
             }
         }
-        Cinemeta.searchResults(metas.map { full[it.imdbId] ?: it }, known)
+        Cinemeta.searchResults(metas.map { meta -> full[meta.imdbId]?.copy(type = meta.type) ?: meta }, known)
     }
 
     private fun save(cache: CinemetaCache) {

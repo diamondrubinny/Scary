@@ -4,6 +4,12 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalConfiguration
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import coil3.compose.AsyncImage
@@ -102,13 +111,16 @@ fun PosterCard(
 ) {
     val lockedLabel = stringResource(R.string.locked_badge)
     val watchedLabel = stringResource(R.string.watched_badge)
+    val extras = cardExtras(movie)
+    val comingOn = remember(movie.releaseDate) { movie.comingOn(LocalDate.now()) }
+    val comingLabel = comingOn?.let { stringResource(R.string.coming_on, shortDate(it)) }
     FocusSurface(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(width)
             .aspectRatio(2f / 3f),
-        contentDescription = listOfNotNull("${movie.title}, ${movie.year}", watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked })
+        contentDescription = (listOfNotNull("${movie.title}, ${movie.yearsLabel}", comingLabel, watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked }) + extras.labels)
             .joinToString(", "),
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
@@ -128,8 +140,8 @@ fun PosterCard(
         }
         if (!posterShown) {
             BasicText(
-                text = movie.year.toString(),
-                style = ScaryType.Caption,
+                text = movie.yearsLabel,
+                style = ScaryType.Caption.copy(textDirection = TextDirection.Ltr),
                 modifier = Modifier.align(Alignment.TopStart).padding(7.dp),
             )
             BasicText(
@@ -141,7 +153,28 @@ fun PosterCard(
             )
         }
         CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
+        CardExtras(extras)
+        // Not out yet (TMDB's coming-soon row): the date, in words as well as on the card.
+        if (comingLabel != null) {
+            BasicText(
+                text = comingLabel,
+                style = ScaryType.Caption.copy(color = ScaryColors.Void),
+                maxLines = 1,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(6.dp)
+                    .background(ScaryColors.Candle, RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+        }
     }
+}
+
+/** "14 Nov" in the UI's language. */
+@Composable
+fun shortDate(date: LocalDate): String {
+    val locale = LocalConfiguration.current.locales[0]
+    return remember(date, locale) { date.format(DateTimeFormatter.ofPattern("d MMM", locale)) }
 }
 
 @Composable
@@ -156,13 +189,14 @@ fun WideMovieCard(
     onLongClick: (() -> Unit)? = null,
 ) {
     val watchedLabel = stringResource(R.string.watched_badge)
+    val extras = cardExtras(movie)
     FocusSurface(
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .width(176.dp)
             .aspectRatio(16f / 9f),
-        contentDescription = if (watched) "${movie.title}, ${movie.year}, $watchedLabel" else "${movie.title}, ${movie.year}",
+        contentDescription = (listOfNotNull("${movie.title}, ${movie.yearsLabel}", watchedLabel.takeIf { watched }) + extras.labels).joinToString(", "),
         borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
         onFocusChanged = { if (it) onFocused() },
     ) {
@@ -176,6 +210,7 @@ fun WideMovieCard(
             )
         }
         CardBadges(locked, watched, Modifier.align(Alignment.TopEnd))
+        CardExtras(extras)
         Column(Modifier.align(Alignment.BottomStart).padding(horizontal = 9.dp, vertical = 7.dp)) {
             BasicText(movie.title, style = ScaryType.CardTitle.copy(fontSize = ScaryType.Title.fontSize).mixedLanguage(), maxLines = 1, overflow = TextOverflow.Ellipsis)
             // Online movies often have no runtime: no "0 min", as on the movie page.
@@ -218,6 +253,7 @@ fun AppTileCard(
 ) {
     val label = when (tile) {
         is AppTile.Installed -> tile.app.label
+        is AppTile.Input -> tile.input.label
         is AppTile.Suggestion -> stringResource(R.string.install_app, tile.label)
         AppTile.AllApps -> stringResource(R.string.all_apps)
         AppTile.SetAsHome -> stringResource(R.string.tile_set_home)
@@ -225,6 +261,7 @@ fun AppTileCard(
     }
     val description = when {
         tile is AppTile.SystemSettings -> stringResource(R.string.system_settings_description)
+        tile is AppTile.Input -> stringResource(R.string.tv_input_description, tile.input.label)
         badge != null -> "$label, $badge"
         else -> label
     }
@@ -266,6 +303,7 @@ fun AppTileCard(
                     AppTile.SetAsHome -> HomeIcon(ScaryColors.Candle, Modifier.size(28.dp))
                     AppTile.SystemSettings -> GearIcon(ScaryColors.Bone, Modifier.size(26.dp))
                     AppTile.AllApps -> GridIcon(ScaryColors.Bone, Modifier.size(26.dp))
+                    is AppTile.Input -> InputIcon(ScaryColors.Candle, Modifier.size(26.dp))
                     else -> Box(
                         Modifier
                             .size(26.dp)
@@ -325,3 +363,53 @@ fun AppTileCard(
 private val TILE_WIDTH = 136.dp
 private val TEXT_TILE_WIDTH = 200.dp
 private val SET_HOME_TILE_WIDTH = 240.dp
+
+/**
+ * While picking films for the bucket list, a film's place in it (from 1), or null when it is not in it. Provided by the
+ * home screen in picking mode only; null everywhere else, so no number shows.
+ */
+val LocalBucketNumber = compositionLocalOf<((Movie) -> Int?)?> { null }
+
+/** Where films and series mix (search): series carry a "Series" tag. */
+val LocalShowSeriesTag = staticCompositionLocalOf { false }
+
+/** What a card shows beyond its poster: its bucket-list number, the series tag, and the same in words for TalkBack. */
+class CardExtrasState(val bucketNumber: Int?, val seriesTag: String?, val labels: List<String>)
+
+@Composable
+fun cardExtras(movie: Movie): CardExtrasState {
+    val number = LocalBucketNumber.current?.invoke(movie)
+    val seriesTag = if (movie.isSeries && LocalShowSeriesTag.current) stringResource(R.string.series_tag) else null
+    val numberLabel = number?.let { stringResource(R.string.bucket_badge, it) }
+    return CardExtrasState(number, seriesTag, listOfNotNull(seriesTag, numberLabel))
+}
+
+/** The bucket-list number (top start) and the series tag (bottom end), drawn over a card. */
+@Composable
+fun BoxScope.CardExtras(extras: CardExtrasState) {
+    extras.bucketNumber?.let { number ->
+        BasicText(
+            text = number.toString(),
+            style = ScaryType.Label.copy(color = ScaryColors.Void, textAlign = TextAlign.Center),
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(6.dp)
+                .size(30.dp)
+                .background(ScaryColors.Candle, CircleShape)
+                .border(2.dp, ScaryColors.Void, CircleShape)
+                .wrapContentHeight(Alignment.CenterVertically),
+        )
+    }
+    extras.seriesTag?.let { tag ->
+        BasicText(
+            text = tag,
+            style = ScaryType.Caption.copy(color = ScaryColors.Bone),
+            maxLines = 1,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(6.dp)
+                .background(ScaryColors.Blood, RoundedCornerShape(4.dp))
+                .padding(horizontal = 6.dp, vertical = 2.dp),
+        )
+    }
+}

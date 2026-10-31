@@ -21,6 +21,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
 import io.github.diamondrubinny.scary.core.catalog.MyList
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
+import io.github.diamondrubinny.scary.core.catalog.BucketList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
 import io.github.diamondrubinny.scary.core.catalog.WatchedList
 import io.github.diamondrubinny.scary.core.links.KnownPackages
@@ -31,6 +32,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import java.time.LocalDate
 
 private val Context.settingsStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -69,9 +71,24 @@ data class LauncherPrefs(
     val trailerSound: Boolean = false,
     /** The viewer has read what playing trailers here means (YouTube) and chosen to keep them or turn them off. */
     val trailerIntroSeen: Boolean = false,
+    /** Films the viewer loved, newest first: "Because you loved X". */
+    val lovedIds: List<String> = emptyList(),
+    /** Films marked "not for me", newest first: never suggested again. */
+    val dislikedIds: List<String> = emptyList(),
+    /** When each film was marked as watched (epoch day), for "your year in fear"; films marked before this was kept have none. */
+    val watchedDays: Map<String, Long> = emptyMap(),
+    /** When the sleep timer ends, in wall-clock milliseconds; null when it is off. */
+    val sleepAtMillis: Long? = null,
+    /** The bucket list: films to watch one after another, in order. */
+    val bucketIds: List<String> = emptyList(),
+    /** The bucket-list film handed to Stremio, until SCARY is back on screen; null otherwise. */
+    val bucketPlaying: String? = null,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
 }
+
+/** How the viewer rated a film: one or the other, never both. */
+enum class Rating { LOVED, NOT_FOR_ME }
 
 /** Local-only preferences. No account, no sync, no analytics. */
 class SettingsRepository(private val context: Context) {
@@ -99,6 +116,12 @@ class SettingsRepository(private val context: Context) {
                 trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
                 trailerSound = p[TRAILER_SOUND] ?: false,
                 trailerIntroSeen = p[TRAILER_INTRO_SEEN] ?: false,
+                lovedIds = RecentList.decode(p[LOVED]),
+                dislikedIds = RecentList.decode(p[DISLIKED]),
+                watchedDays = decodeDays(p[WATCHED_DAYS]),
+                sleepAtMillis = p[SLEEP_AT],
+                bucketIds = RecentList.decode(p[BUCKET]),
+                bucketPlaying = p[BUCKET_PLAYING]?.takeIf(String::isNotBlank),
             )
         }
         .distinctUntilChanged()
@@ -126,12 +149,39 @@ class SettingsRepository(private val context: Context) {
         edit {
             val current = RecentList.decode(it[WATCHED])
             changed = (movieId in current) != watched
-            if (changed) it[WATCHED] = RecentList.encode(if (watched) WatchedList.add(current, movieId) else WatchedList.remove(current, movieId))
+            if (changed) {
+                it[WATCHED] = RecentList.encode(if (watched) WatchedList.add(current, movieId) else WatchedList.remove(current, movieId))
+                val days = decodeDays(it[WATCHED_DAYS]) - movieId
+                val updated = if (watched) mapOf(movieId to LocalDate.now().toEpochDay()) + days else days
+                it[WATCHED_DAYS] = encodeDays(updated.entries.take(WatchedList.MAX_SIZE).associate { e -> e.key to e.value })
+            }
         }
         return changed
     }
 
     suspend fun setAutoWatched(enabled: Boolean) = edit { it[AUTO_WATCHED] = enabled }
+
+    /** "Loved it" or "not for me" (one excludes the other), or neither with null. */
+    suspend fun setRating(movieId: String, rating: Rating?) = edit {
+        val loved = RecentList.decode(it[LOVED]).filter { id -> id != movieId }
+        val disliked = RecentList.decode(it[DISLIKED]).filter { id -> id != movieId }
+        it[LOVED] = RecentList.encode((if (rating == Rating.LOVED) listOf(movieId) + loved else loved).take(MAX_RATED))
+        it[DISLIKED] = RecentList.encode((if (rating == Rating.NOT_FOR_ME) listOf(movieId) + disliked else disliked).take(MAX_RATED))
+    }
+
+    suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
+
+    /** Changes the bucket list with [change] (BucketList's functions), atomically; returns the new list. */
+    suspend fun updateBucket(change: (List<String>) -> List<String>): List<String> {
+        var updated = emptyList<String>()
+        edit {
+            updated = change(RecentList.decode(it[BUCKET])).take(BucketList.MAX_SIZE)
+            it[BUCKET] = RecentList.encode(updated)
+        }
+        return updated
+    }
+
+    suspend fun setBucketPlaying(movieId: String?) = edit { if (movieId == null) it.remove(BUCKET_PLAYING) else it[BUCKET_PLAYING] = movieId }
 
     /** Null goes back to the device's own country. */
     suspend fun setRentBuyCountry(code: String?) = edit {
@@ -241,6 +291,23 @@ class SettingsRepository(private val context: Context) {
         private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")
         private val TRAILER_SOUND = booleanPreferencesKey("trailer_sound")
         private val TRAILER_INTRO_SEEN = booleanPreferencesKey("trailer_intro_seen")
+        private val LOVED = stringPreferencesKey("loved_movie_ids")
+        private val DISLIKED = stringPreferencesKey("disliked_movie_ids")
+        private val WATCHED_DAYS = stringPreferencesKey("watched_movie_days")
+        private val SLEEP_AT = longPreferencesKey("sleep_at_millis")
+        private val BUCKET = stringPreferencesKey("bucket_movie_ids")
+        private val BUCKET_PLAYING = stringPreferencesKey("bucket_playing")
+        private const val MAX_RATED = 500
+
+        /** "id@epochDay,id@epochDay", newest first; anything malformed is skipped. */
+        private fun decodeDays(raw: String?): Map<String, Long> =
+            RecentList.decode(raw).mapNotNull { entry ->
+                val at = entry.lastIndexOf('@')
+                val day = entry.substring(at + 1).toLongOrNull()
+                if (at <= 0 || day == null) null else entry.substring(0, at) to day
+            }.toMap()
+
+        private fun encodeDays(days: Map<String, Long>): String = RecentList.encode(days.map { (id, day) -> "$id@$day" })
         const val DEFAULT_LOCK_FROM_FEAR = 4
     }
 }

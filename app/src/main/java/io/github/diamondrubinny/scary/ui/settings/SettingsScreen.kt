@@ -22,6 +22,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import io.github.diamondrubinny.scary.ui.components.minutesShown
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +56,8 @@ class SettingsActions(
     val onToggleSounds: () -> Unit,
     val onToggleTrailerAutoplay: () -> Unit,
     val onToggleTrailerSound: () -> Unit,
+    val onCycleSleepTimer: () -> Unit,
+    val onOpenStats: () -> Unit,
     val onSetupPin: () -> Unit,
     val onCycleLockLevel: () -> Unit,
     val onTurnOffLock: () -> Unit,
@@ -61,6 +66,7 @@ class SettingsActions(
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
+    val onOpenPhoneRemote: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -75,6 +81,8 @@ fun SettingsScreen(
     soundsEnabled: Boolean,
     trailerAutoplay: Boolean,
     trailerSound: Boolean,
+    /** When the sleep timer ends (wall clock), or null when it is off. */
+    sleepAtMillis: Long?,
     parentalEnabled: Boolean,
     lockFromFear: Int,
     familyNight: Boolean,
@@ -90,17 +98,24 @@ fun SettingsScreen(
     versionName: String,
     actions: SettingsActions,
     returningFrom: DocumentKind? = null,
+    returningFromStats: Boolean = false,
+    returningFromRemote: Boolean = false,
+    phoneRemoteOn: Boolean = false,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
     val statementFocus = remember { FocusRequester() }
+    val statsFocus = remember { FocusRequester() }
+    val remoteFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         // Back from a document lands on the row that opened it, not at the top.
-        val target = when (returningFrom) {
-            DocumentKind.Privacy -> privacyFocus
-            DocumentKind.Accessibility -> statementFocus
-            null -> firstFocus
+        val target = when {
+            returningFromStats -> statsFocus
+            returningFromRemote -> remoteFocus
+            returningFrom == DocumentKind.Privacy -> privacyFocus
+            returningFrom == DocumentKind.Accessibility -> statementFocus
+            else -> firstFocus
         }
         runCatching { target.requestFocus() }
     }
@@ -149,6 +164,13 @@ fun SettingsScreen(
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         SettingRow(
+            label = stringResource(R.string.settings_phone_remote),
+            value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
+            onClick = actions.onOpenPhoneRemote,
+            modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
+        SettingRow(
             label = stringResource(R.string.settings_rent_country),
             value = when {
                 rentCountryName == null -> stringResource(R.string.value_country_unknown)
@@ -186,6 +208,12 @@ fun SettingsScreen(
         )
         BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
         SettingRow(
+            label = stringResource(R.string.settings_stats),
+            value = null,
+            onClick = actions.onOpenStats,
+            modifier = Modifier.focusRequester(statsFocus).testTag(STATS_ROW_TAG),
+        )
+        SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
@@ -215,6 +243,20 @@ fun SettingsScreen(
             onClick = actions.onOpenScreensaver,
         )
         BasicText(stringResource(R.string.settings_screensaver_note), style = ScaryType.Caption)
+        // The countdown refreshes on its own while settings stay open.
+        val sleepMinutes by produceState(sleepAtMillis?.let(::minutesShown) ?: 0, sleepAtMillis) {
+            while (true) {
+                value = sleepAtMillis?.let(::minutesShown) ?: 0
+                delay(30_000)
+            }
+        }
+        SettingRow(
+            label = stringResource(R.string.settings_sleep_timer),
+            value = if (sleepMinutes > 0) stringResource(R.string.sleep_left, sleepMinutes) else stringResource(R.string.sleep_off),
+            onClick = actions.onCycleSleepTimer,
+            modifier = Modifier.testTag(SLEEP_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_sleep_timer_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_parental),
             value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),
@@ -273,6 +315,13 @@ fun SettingsScreen(
         )
     }
 }
+
+/** Test tag of the phone remote's row. */
+const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
+
+/** Test tags of the sleep timer and "Your year in fear" rows. */
+const val SLEEP_ROW_TAG = "sleepTimerRow"
+const val STATS_ROW_TAG = "statsRow"
 
 /** Test tag of the "Play trailers by themselves" row. */
 const val TRAILER_AUTOPLAY_ROW_TAG = "trailerAutoplayRow"

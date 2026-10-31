@@ -4,6 +4,19 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.ui.components.LocalBucketNumber
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.rememberUpdatedState
@@ -69,6 +82,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -102,6 +116,14 @@ class HomeActions(
     val onDecade: (Int) -> Unit,
     /** The viewer is near the end of a row; endless online rows load their next page. */
     val onNearRowEnd: (rowKey: String) -> Unit = {},
+    /** Picks a time budget in "How much time do you have?", or clears it when chosen again. */
+    val onTimeBudget: (TimeBudget) -> Unit = {},
+    /** Films or series. */
+    val onSelectTab: (MediaKind) -> Unit = {},
+    /** The bucket list's button in the top bar. */
+    val onOpenBucket: () -> Unit = {},
+    /** "Done" while picking films for the bucket list. */
+    val onFinishPicking: () -> Unit = {},
 )
 
 val SidePadding = 48.dp
@@ -115,6 +137,7 @@ fun rowTag(rowKey: String): String = "row:$rowKey"
 /** Key of the credit line at the end of the home rows. */
 const val CREDIT_KEY = "credit"
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
     state: HomeUiState,
@@ -154,6 +177,13 @@ fun HomeScreen(
         onScrolledToRow()
     }
 
+    // Picking starts with "Done" focused: the banner arrives with the new state, which may come after the reset below.
+    LaunchedEffect(state.picking) {
+        if (!state.picking) return@LaunchedEffect
+        withFrameNanos { }
+        heroFocus.tryRequestFocus()
+    }
+
     // Focus lands on "watch tonight's pick" at start and after Home; on the last card when coming back from details.
     LaunchedEffect(state.loading, resets) {
         if (state.loading) return@LaunchedEffect
@@ -163,6 +193,13 @@ fun HomeScreen(
         if (!restored) heroFocus.tryRequestFocus()
     }
 
+    // While the remote is in the rows, the top of the screen gives them room: the donation code steps aside and the hero
+    // drops its synopsis, so a whole row (title and cards) shows with the next one peeking below it.
+    var rowsFocused by remember { mutableStateOf(false) }
+    val rowsScroll = LocalBringIntoViewSpec.current
+    val rowTop = with(LocalDensity.current) { RowTop.toPx() }
+    val rowsPivot = remember(rowTop) { WholeRowInView(rowTop) }
+
     Column(Modifier.fillMaxSize()) {
         TopBar(
             effectsEnabled = state.effectsEnabled,
@@ -170,18 +207,30 @@ fun HomeScreen(
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
-            modifier = Modifier.padding(horizontal = SidePadding, vertical = 18.dp),
+            modifier = Modifier.padding(horizontal = SidePadding, vertical = if (rowsFocused) 12.dp else 18.dp),
             familyNight = state.familyNight,
+            sleepAtMillis = state.sleepAtMillis,
+            compact = rowsFocused,
+            tab = state.tab,
+            onSelectTab = actions.onSelectTab,
+            onOpenBucket = actions.onOpenBucket,
+            bucketCount = state.bucketIds.size,
         )
-        Hero(
-            movie = state.hero,
-            isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
-            language = language,
-            primaryFocus = heroFocus,
-            actions = actions,
-            locked = state.hero?.let(state::isLocked) ?: false,
-            trailer = trailer,
-        )
+        if (state.picking) {
+            // Picking films for the bucket list: the hero gives way to what OK does now, and how many are in.
+            PickingBanner(count = state.bucketIds.size, doneFocus = heroFocus, onDone = actions.onFinishPicking)
+        } else {
+            Hero(
+                movie = state.hero,
+                isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
+                language = language,
+                primaryFocus = heroFocus,
+                actions = actions,
+                locked = state.hero?.let(state::isLocked) ?: false,
+                trailer = trailer,
+                compact = rowsFocused,
+            )
+        }
         if (state.catalogError) {
             EmptyState(
                 title = stringResource(R.string.catalog_error_title),
@@ -189,32 +238,104 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
             )
         }
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .fadeTopEdge(72.dp)
-                .testTag(HOME_ROWS_TAG),
-            contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
+        // The focused row settles at the top of the rows, title and all; the cards inside keep the TV's own scrolling.
+        CompositionLocalProvider(
+            LocalBringIntoViewSpec provides rowsPivot,
+            // While picking, each poster shows its place in the bucket list.
+            LocalBucketNumber provides if (state.picking) state::bucketNumber else null,
         ) {
-            items(state.rows, key = { it.key }) { row ->
-                HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
-                    heroAfterMyList = true
+            LazyColumn(
+                state = listState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .onFocusChanged { rowsFocused = it.hasFocus }
+                    .fadeTopEdge(RowsFade)
+                    .testTag(HOME_ROWS_TAG),
+                contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                items(state.rows, key = { it.key }) { row ->
+                    CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
+                        Box(Modifier.bringIntoViewResponder(FromRowTitle)) {
+                            HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
+                                heroAfterMyList = true
+                            }
+                        }
+                    }
                 }
-            }
-            item(key = CREDIT_KEY) {
-                Column(
-                    Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    CreditLine()
-                    DataCredit()
+                item(key = CREDIT_KEY) {
+                    Column(
+                        Modifier.padding(horizontal = SidePadding, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        CreditLine()
+                        DataCredit()
+                    }
                 }
             }
         }
     }
+}
+
+/** Test tag of the picking banner (bucket list). */
+const val PICKING_BANNER_TAG = "pickingBanner"
+
+/** In place of the hero while picking films for the bucket list: what OK does, how many are in, and "Done". */
+@Composable
+private fun PickingBanner(count: Int, doneFocus: FocusRequester, onDone: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .padding(horizontal = SidePadding, vertical = 8.dp)
+            .fillMaxWidth()
+            .testTag(PICKING_BANNER_TAG),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            BasicText(
+                stringResource(R.string.picking_title),
+                style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.6f),
+                modifier = Modifier.semantics { heading() },
+            )
+            BasicText(stringResource(R.string.picking_hint), style = ScaryType.Body)
+            BasicText(
+                stringResource(R.string.picking_count, count),
+                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+            )
+        }
+        ScaryButton(text = stringResource(R.string.picking_done), onClick = onDone, primary = true, focusRequester = doneFocus)
+    }
+}
+
+/** Where the focused row's top (its title) settles in the rows: just below the faded top edge. */
+private val RowTop = 24.dp
+
+/** Rows scrolled past melt into the dark over this much, above the focused row's title. */
+private val RowsFade = 20.dp
+
+/**
+ * A row asks the rows to show it from its title down to the focused card or chip, not the card alone: on a row with
+ * two lines (moods and decades), the second line would otherwise push the title out of view.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private object FromRowTitle : BringIntoViewResponder {
+    override fun calculateRectForParent(localRect: Rect): Rect = Rect(localRect.left, 0f, localRect.right, localRect.bottom)
+
+    // The row itself does not scroll vertically; its cards' own row handles the sideways part.
+    override suspend fun bringChildIntoView(localRect: () -> Rect?) = Unit
+}
+
+/**
+ * Scrolls the rows so the requested part (a row from its title down to the focus) starts [top] pixels below their
+ * top, and the next row peeks in below. A part taller than the rows is scrolled just enough to show its bottom, where
+ * the focus is.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private class WholeRowInView(private val top: Float) : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float =
+        if (size <= containerSize - top) offset - top else offset + size - containerSize
 }
 
 @Composable
@@ -226,26 +347,43 @@ private fun Hero(
     actions: HomeActions,
     locked: Boolean,
     trailer: TrailerSettings,
+    /** The rows have the focus: no synopsis and a smaller trailer, so the rows get the room. */
+    compact: Boolean = false,
 ) {
+    val height by animateDpAsState(
+        targetValue = if (compact) HeroCompactHeight else HeroHeight,
+        animationSpec = if (LocalReduceMotion.current) snap() else tween(HERO_RESIZE_MS),
+        label = "heroHeight",
+    )
     // The trailer window sits on the far side from the text (right in English, left in Hebrew and Arabic), so nothing
     // ever covers it, as YouTube requires.
     Row(
         modifier = Modifier
             .padding(horizontal = SidePadding)
             .fillMaxWidth()
-            .height(212.dp),
+            .height(height),
         verticalAlignment = Alignment.Bottom,
     ) {
-        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.fillMaxWidth(0.62f))
+        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.fillMaxWidth(0.62f), showSynopsis = !compact)
         Spacer(Modifier.weight(1f))
         if (movie != null) {
-            AutoTrailer(movie = movie, locked = locked, settings = trailer, playerSize = HeroTrailerSize)
+            AutoTrailer(movie = movie, locked = locked, settings = trailer, playerSize = if (compact) HeroTrailerCompactSize else HeroTrailerSize)
         }
     }
 }
 
+private val HeroHeight = 212.dp
+
+/** Title, details and buttons without the synopsis, beside the smaller trailer. */
+private val HeroCompactHeight = 164.dp
+
+private const val HERO_RESIZE_MS = 180
+
 /** 16:9, and 608 x 342 pixels on a 1080p TV: above YouTube's 200 x 200 minimum. */
 private val HeroTrailerSize = DpSize(304.dp, 171.dp)
+
+/** 16:9 while the rows have the focus: 576 x 324 pixels at 1080p, 384 x 216 even on a 720p TV. */
+private val HeroTrailerCompactSize = DpSize(288.dp, 162.dp)
 
 @Composable
 private fun HeroText(
@@ -255,6 +393,7 @@ private fun HeroText(
     primaryFocus: FocusRequester,
     actions: HomeActions,
     modifier: Modifier,
+    showSynopsis: Boolean = true,
 ) {
     Column(
         modifier = modifier.fillMaxHeight(),
@@ -262,7 +401,11 @@ private fun HeroText(
     ) {
         if (movie == null) return@Column
         BasicText(
-            text = if (isNightPick) stringResource(R.string.night_pick) else subgenreLine(movie),
+            text = when {
+                !isNightPick -> subgenreLine(movie)
+                movie.isSeries -> stringResource(R.string.night_pick_series)
+                else -> stringResource(R.string.night_pick)
+            },
             style = ScaryType.Eyebrow,
         )
         // The text block yields space first, so the buttons below always keep their full height,
@@ -281,12 +424,15 @@ private fun HeroText(
                 modifier = Modifier.semantics { heading() },
             )
             MovieMeta(movie)
-            BasicText(
-                text = movie.synopsis(language),
-                style = ScaryType.Body.mixedLanguage(),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
+            // The film page always has it; here it gives way to the rows while they have the focus.
+            if (showSynopsis) {
+                BasicText(
+                    text = movie.synopsis(language),
+                    style = ScaryType.Body.mixedLanguage(),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
             ScaryButton(
@@ -333,13 +479,17 @@ private fun HomeRowView(
         MoodsRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
         return
     }
+    if (row is HomeRow.TimePlan) {
+        TimePlanRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
+        return
+    }
     if (row is HomeRow.Collection) {
-        // Endless online rows: ask for the next page while there are still a few cards to go.
-        val size by rememberUpdatedState(row.movies.size)
+        // Endless online rows: ask for the next page while there are still plenty of cards to go, and again each time a
+        // page arrives while the viewer is still near the end, so the row keeps ahead of the remote without a pause.
         val onNearEnd by rememberUpdatedState(actions.onNearRowEnd)
         LaunchedEffect(rowState, row.key) {
-            snapshotFlow { rowState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1 }
-                .collect { last -> if (last >= 0 && last >= size - LOAD_AHEAD) onNearEnd(row.key) }
+            snapshotFlow { (rowState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1) to rowState.layoutInfo.totalItemsCount }
+                .collect { (last, size) -> if (last >= 0 && last >= size - LOAD_AHEAD) onNearEnd(row.key) }
         }
     }
     val title = when (row) {
@@ -349,6 +499,8 @@ private fun HomeRowView(
         is HomeRow.Collection -> row.collection.title(language)
         is HomeRow.Seasonal -> stringResource(row.season.titleRes())
         is HomeRow.Moods -> stringResource(R.string.row_moods)
+        is HomeRow.TimePlan -> stringResource(R.string.row_time)
+        is HomeRow.BecauseYouLoved -> stringResource(R.string.row_because_loved, row.because.displayTitle(language))
     }
     Column {
         Row(
@@ -411,9 +563,13 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Moods -> Unit
-                is HomeRow.Collection, is HomeRow.Seasonal -> items(
-                    if (row is HomeRow.Collection) row.movies else (row as HomeRow.Seasonal).movies,
+                is HomeRow.Moods, is HomeRow.TimePlan -> Unit
+                is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved -> items(
+                    when (row) {
+                        is HomeRow.Collection -> row.movies
+                        is HomeRow.BecauseYouLoved -> row.movies
+                        else -> (row as HomeRow.Seasonal).movies
+                    },
                     key = { it.id },
                 ) { movie ->
                     val key = "${row.key}:${movie.id}"
@@ -453,7 +609,9 @@ private fun Modifier.fadeTopEdge(height: Dp): Modifier = this
 fun subgenreLine(movie: Movie): String {
     val genre = stringResource(movie.genre.labelRes())
     val subs = movie.subgenres.map { stringResource(it.labelRes()) }
-    return (listOf(genre) + subs).joinToString(" · ")
+    // A series says so first: "Series · Horror · Ghost".
+    val kind = if (movie.isSeries) listOf(stringResource(R.string.series_tag)) else emptyList()
+    return (kind + listOf(genre) + subs).joinToString(" · ")
 }
 
 /**
@@ -517,7 +675,7 @@ private fun SkeletonBlock(modifier: Modifier) {
 }
 
 /** Cards from the end of a row at which its next page starts loading. */
-private const val LOAD_AHEAD = 8
+private const val LOAD_AHEAD = 20
 
 private const val SKELETON_ALPHA_MIN = 0.45f
 private const val SKELETON_ALPHA_MAX = 0.9f
@@ -618,6 +776,96 @@ private fun MoodsRowView(
         }
     }
 }
+
+/**
+ * "How much time do you have?": four chips, and for the chosen one the films that fit (up to 90 minutes, up to two
+ * hours), or a lineup to watch in order (a double feature, a marathon) with its total length.
+ */
+@Composable
+private fun TimePlanRowView(
+    row: HomeRow.TimePlan,
+    chipState: LazyListState,
+    restoreKey: String?,
+    restoreFocus: FocusRequester,
+    actions: HomeActions,
+    isLocked: (Movie) -> Boolean,
+    isWatched: (Movie) -> Boolean,
+) {
+    val movieState = rememberLazyListState()
+    LaunchedEffect(row.selected) { movieState.scrollToItem(0) }
+    val plan = row.plan
+    Column {
+        BasicText(
+            text = stringResource(R.string.row_time),
+            style = ScaryType.RowTitle,
+            modifier = Modifier
+                .padding(horizontal = SidePadding)
+                .semantics { heading() },
+        )
+        LazyRow(
+            state = chipState,
+            contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(TimeBudget.entries, key = { it.key }) { budget ->
+                val key = "${row.key}:chip:${budget.key}"
+                MoodChip(
+                    label = stringResource(budget.labelRes()),
+                    selected = budget == row.selected,
+                    onClick = { actions.onTimeBudget(budget) },
+                    onFocused = { actions.onCardFocused(key, null) },
+                    focusRequester = restoreFocus.takeIf { key == restoreKey },
+                )
+            }
+        }
+        if (plan != null && plan.movies.isEmpty()) {
+            EmptyState(
+                title = stringResource(R.string.mood_empty_title),
+                body = stringResource(R.string.time_empty),
+                modifier = Modifier.padding(horizontal = SidePadding, vertical = 8.dp),
+            )
+        }
+        if (plan != null && plan.movies.isNotEmpty()) {
+            if (plan.budget.isLineup) {
+                BasicText(
+                    text = stringResource(R.string.time_lineup, hoursAndMinutes(plan.totalMinutes)),
+                    style = ScaryType.Caption,
+                    modifier = Modifier.padding(horizontal = SidePadding),
+                )
+            }
+            LazyRow(
+                state = movieState,
+                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+            ) {
+                itemsIndexed(plan.movies, key = { _, movie -> movie.id }) { index, movie ->
+                    val key = "${row.key}:${movie.id}"
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        // A lineup is watched in order: the number says which comes when.
+                        if (plan.budget.isLineup) {
+                            BasicText(
+                                text = stringResource(R.string.time_order, index + 1),
+                                style = ScaryType.Label.copy(color = ScaryColors.Candle),
+                            )
+                        }
+                        PosterCard(
+                            movie = movie,
+                            locked = isLocked(movie),
+                            watched = isWatched(movie),
+                            onClick = { actions.onOpenDetails(movie) },
+                            onLongClick = { actions.onToggleMyList(movie) },
+                            onFocused = { actions.onCardFocused(key, movie.id) },
+                            focusRequester = restoreFocus.takeIf { key == restoreKey },
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** 292 minutes as "4:52". */
+fun hoursAndMinutes(minutes: Int): String = "%d:%02d".format(java.util.Locale.ROOT, minutes / 60, minutes % 60)
 
 @Composable
 private fun MoodChip(

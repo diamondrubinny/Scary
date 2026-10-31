@@ -59,6 +59,8 @@ fun TmdbKeyDialog(
     onSubmit: (String) -> Unit,
     onDelete: () -> Unit,
     onDismiss: () -> Unit,
+    /** Paste the key on the phone instead: opens the phone remote. */
+    onUsePhone: (() -> Unit)? = null,
 ) {
     var input by remember { mutableStateOf("") }
     val fieldFocus = remember { FocusRequester() }
@@ -138,6 +140,10 @@ fun TmdbKeyDialog(
                 )
                 if (keyMask != null) ScaryButton(stringResource(R.string.tmdb_delete), onClick = onDelete)
                 ScaryButton(stringResource(R.string.pin_cancel), onClick = onDismiss)
+            }
+            // A long key is easier to paste on a phone than to type with a remote.
+            if (onUsePhone != null) {
+                ScaryButton(stringResource(R.string.tmdb_use_phone), onClick = onUsePhone)
             }
             BasicText(stringResource(R.string.tmdb_note), style = ScaryType.Caption)
         }

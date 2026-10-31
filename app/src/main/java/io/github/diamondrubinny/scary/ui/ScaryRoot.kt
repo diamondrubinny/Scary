@@ -4,6 +4,11 @@
 
 package io.github.diamondrubinny.scary.ui
 
+import io.github.diamondrubinny.scary.ui.bucket.BucketActions
+import io.github.diamondrubinny.scary.ui.bucket.BucketScreen
+import io.github.diamondrubinny.scary.ui.bucket.BucketPromptDialog
+import io.github.diamondrubinny.scary.ui.components.LocalShowSeriesTag
+import androidx.compose.runtime.CompositionLocalProvider
 import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
 import android.app.Activity
 import android.content.Context
@@ -67,6 +72,14 @@ import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
+import io.github.diamondrubinny.scary.ui.stats.StatsScreen
+import io.github.diamondrubinny.scary.ScaryApplication
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
+import io.github.diamondrubinny.scary.ui.remote.OtherApps
+import io.github.diamondrubinny.scary.launch.HomeButtonService
+import io.github.diamondrubinny.scary.system.SleepTimer
+import io.github.diamondrubinny.scary.ui.components.minutesLeft
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 
 @Composable
@@ -88,6 +101,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
+    val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -108,6 +122,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     BackHandler { viewModel.back() }
 
     val context = LocalContext.current
+    val phoneRemote = remember(context) { (context.applicationContext as ScaryApplication).container.phoneRemote }
+    val remoteState by phoneRemote.state.collectAsStateWithLifecycle()
+
+    // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
+    val sleepSaved = state.sleepAtMillis != null
+    LaunchedEffect(sleepSaved) {
+        if (sleepSaved && !SleepTimer.isSet(context)) viewModel.setSleepAt(null)
+    }
 
     // Becoming the home screen: the system dialog where the TV offers it, otherwise the Home button service.
     fun refreshLauncherStatus() = viewModel.updateLauncherStatus(
@@ -140,7 +162,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val actions = remember(viewModel, settingsLabel, language) {
         HomeActions(
             onCardFocused = viewModel::onCardFocused,
-            onOpenDetails = { viewModel.openDetails(it.id) },
+            // While picking films for the bucket list, OK on a poster adds or removes it instead of opening it.
+            onOpenDetails = { if (viewModel.uiState.value.picking) viewModel.toggleBucket(it, language) else viewModel.openDetails(it.id) },
             onWatch = viewModel::watch,
             onTrailer = viewModel::trailer,
             onTile = { tile -> if (tile == AppTile.SetAsHome) requestDefaultHome() else viewModel.openTile(tile, settingsLabel) },
@@ -152,7 +175,28 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onMood = viewModel::toggleMood,
             onDecade = viewModel::toggleDecade,
             onNearRowEnd = viewModel::onNearRowEnd,
+            onTimeBudget = viewModel::toggleTimeBudget,
+            onSelectTab = viewModel::selectTab,
+            onOpenBucket = viewModel::openBucket,
+            onFinishPicking = viewModel::finishPicking,
         )
+    }
+    val bucketActions = remember(viewModel) {
+        BucketActions(
+            onStart = viewModel::startBucket,
+            onPickMore = viewModel::startPicking,
+            onClear = viewModel::clearBucket,
+            onMove = viewModel::moveInBucket,
+            onRemove = viewModel::removeFromBucket,
+        )
+    }
+    // Films or series: a new tab starts its rows from the top (coming back from a movie page keeps the place).
+    var shownTab by remember { mutableStateOf(state.tab) }
+    LaunchedEffect(state.tab) {
+        if (state.tab == shownTab) return@LaunchedEffect
+        shownTab = state.tab
+        homeListState.scrollToItem(0)
+        rowStates.values.forEach { it.scrollToItem(0) }
     }
     val allAppsActions = remember(viewModel) {
         AllAppsActions(
@@ -165,8 +209,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     }
     // Which document settings opened last, so focus can return to its row. Forgotten once settings close.
     var lastDocument by remember { mutableStateOf<DocumentKind?>(null) }
+    // The same for "Your year in fear" and the phone remote.
+    var fromStats by remember { mutableStateOf(false) }
+    var fromRemote by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
-        if (screen != Screen.Settings && screen !is Screen.Document) lastDocument = null
+        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote) {
+            lastDocument = null
+            fromStats = false
+            fromRemote = false
+        }
     }
     val settingsActions = SettingsActions(
         onToggleLanguage = {
@@ -179,6 +230,28 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleSounds = viewModel::toggleSounds,
         onToggleTrailerAutoplay = viewModel::toggleTrailerAutoplay,
         onToggleTrailerSound = viewModel::toggleTrailerSound,
+        onCycleSleepTimer = {
+            // Off, 30, 60, 90, 120 minutes, then off again: the next choice above the minutes left.
+            val next = SleepTimer.next(state.sleepAtMillis?.let(::minutesLeft) ?: 0)
+            if (next == 0) {
+                SleepTimer.cancel(context)
+                viewModel.setSleepAt(null)
+            } else {
+                viewModel.setSleepAt(SleepTimer.start(context, next))
+            }
+        },
+        onOpenStats = {
+            lastDocument = null
+            fromStats = true
+            fromRemote = false
+            viewModel.openStats()
+        },
+        onOpenPhoneRemote = {
+            lastDocument = null
+            fromStats = false
+            fromRemote = true
+            viewModel.openPhoneRemote()
+        },
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -199,10 +272,12 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         },
         onOpenPrivacy = {
             lastDocument = DocumentKind.Privacy
+            fromStats = false
             viewModel.openDocument(DocumentKind.Privacy)
         },
         onOpenAccessibilityStatement = {
             lastDocument = DocumentKind.Accessibility
+            fromStats = false
             viewModel.openDocument(DocumentKind.Accessibility)
         },
     )
@@ -216,7 +291,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     // family night (YouTube may show ads and suggestions), and not when the TV's "Remove animations" is on.
     val trailersEnabled = state.trailerAutoplay && state.onlineEnabled && !state.familyNight && systemAnimations &&
         lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
-        launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro
+        launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro && bucketPrompt == null &&
+        !state.picking
     val trailerSettings = remember(viewModel, trailersEnabled, state.trailerSound, state.trailerIntroSeen) {
         TrailerSettings(
             enabled = trailersEnabled,
@@ -238,22 +314,24 @@ fun ScaryRoot(viewModel: HomeViewModel) {
 
             when {
                 state.loading -> LoadingView()
-                current == Screen.Search -> SearchScreen(
-                    movies = state.movies,
-                    query = searchQuery,
-                    onQueryChange = viewModel::setSearchQuery,
-                    onOpenMovie = {
-                        searchOpenedId = it.id
-                        viewModel.openDetails(it.id)
-                    },
-                    language = language,
-                    isLocked = state::isLocked,
-                    isWatched = state::isWatched,
-                    gridState = searchGrid,
-                    returnTo = searchOpenedId,
-                    webSearch = webSearch,
-                    onSurprise = viewModel::surprise,
-                )
+                current == Screen.Search -> CompositionLocalProvider(LocalShowSeriesTag provides true) {
+                    SearchScreen(
+                        movies = state.movies,
+                        query = searchQuery,
+                        onQueryChange = viewModel::setSearchQuery,
+                        onOpenMovie = {
+                            searchOpenedId = it.id
+                            viewModel.openDetails(it.id)
+                        },
+                        language = language,
+                        isLocked = state::isLocked,
+                        isWatched = state::isWatched,
+                        gridState = searchGrid,
+                        returnTo = searchOpenedId,
+                        webSearch = webSearch,
+                        onSurprise = viewModel::surprise,
+                    )
+                }
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
@@ -263,6 +341,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     soundsEnabled = state.soundsEnabled,
                     trailerAutoplay = state.trailerAutoplay,
                     trailerSound = state.trailerSound,
+                    sleepAtMillis = state.sleepAtMillis,
                     parentalEnabled = state.parentalEnabled,
                     lockFromFear = state.lockFromFear,
                     familyNight = state.familyNight,
@@ -277,6 +356,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     versionName = versionName,
                     actions = settingsActions,
                     returningFrom = lastDocument,
+                    returningFromStats = fromStats,
+                    returningFromRemote = fromRemote,
+                    phoneRemoteOn = remoteState is PhoneRemoteServer.State.On,
                 )
                 details != null -> DetailsScreen(
                     details = details,
@@ -300,6 +382,35 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onLoadOffers = viewModel::loadRentOrBuy,
                     offersKey = listOf(tmdbKeyMask, rentCountry, state.onlineEnabled),
                     trailer = trailerSettings,
+                    loved = details.movie.id in state.lovedIds,
+                    notForMe = details.movie.id in state.dislikedIds,
+                    onToggleLoved = { viewModel.toggleLoved(it, language) },
+                    onToggleNotForMe = { viewModel.toggleNotForMe(it, language) },
+                    inBucket = details.movie.id in state.bucketIds,
+                    onToggleBucket = { viewModel.toggleBucket(it, language) },
+                )
+                current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
+                current == Screen.PhoneRemote -> PhoneRemoteScreen(
+                    state = remoteState,
+                    onStart = { phoneRemote.start(language) },
+                    onStop = phoneRemote::stop,
+                    onNewCode = {
+                        phoneRemote.stop()
+                        phoneRemote.start(language)
+                    },
+                    otherApps = when {
+                        !launcherStatus.homeButtonServiceOn -> OtherApps.OFF
+                        HomeButtonService.arrowsEverywhere -> OtherApps.FULL
+                        else -> OtherApps.BACK_AND_HOME
+                    },
+                    onEnableOtherApps = ::openAccessibility,
+                )
+                current == Screen.Bucket -> BucketScreen(
+                    ids = state.bucketIds,
+                    movieOf = viewModel::bucketMovie,
+                    language = language,
+                    isLocked = state::isLocked,
+                    actions = bucketActions,
                 )
                 else -> HomeScreen(
                     state = state,
@@ -337,6 +448,20 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onSubmit = viewModel::submitTmdbKey,
                     onDelete = viewModel::clearTmdbKey,
                     onDismiss = viewModel::dismissTmdbDialog,
+                    onUsePhone = {
+                        viewModel.dismissTmdbDialog()
+                        viewModel.openPhoneRemote()
+                    },
+                )
+            }
+
+            bucketPrompt?.let { prompt ->
+                BucketPromptDialog(
+                    prompt = prompt,
+                    language = language,
+                    onPlayNext = viewModel::playNextInBucket,
+                    onBackToFilm = viewModel::backToBucketFilm,
+                    onDismiss = viewModel::dismissBucketPrompt,
                 )
             }
 

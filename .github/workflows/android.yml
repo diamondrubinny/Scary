@@ -27,6 +27,10 @@ jobs:
       - name: SCARY credit check
         run: bash .github/scripts/check-credit.sh
 
+      # The phone remote's page signs commands in JavaScript; it must agree with RemoteProtocol.kt byte for byte.
+      - name: Phone remote page check
+        run: node tools/remote/check-remote-js.cjs
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin

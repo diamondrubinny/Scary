@@ -21,6 +21,7 @@ import coil3.request.crossfade
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
+import io.github.diamondrubinny.scary.data.TvInputsRepository
 import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SecretStore
@@ -80,6 +81,10 @@ class AppContainer(context: Context) {
     val tmdbRepository = TmdbRepository(appContext, SecretStore(appContext))
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
+    val tvInputsRepository = TvInputsRepository(appContext)
+
+    /** The phone remote's server: off until the viewer turns it on. */
+    val phoneRemote = io.github.diamondrubinny.scary.remote.PhoneRemoteServer(appContext)
     val settingsRepository = SettingsRepository(appContext)
     val savedMoviesRepository = SavedMoviesRepository(appContext)
     val launcher = Launcher(appContext, appsRepository)

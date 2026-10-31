@@ -4,6 +4,12 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.launch.HomeButtonService
+import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
+import android.os.SystemClock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -30,6 +36,9 @@ import kotlinx.coroutines.launch
 import io.github.diamondrubinny.scary.ui.ScaryRoot
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
+import io.github.diamondrubinny.scary.ui.home.Screen
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.model.MediaKind
 
 class MainActivity : ComponentActivity() {
 
@@ -64,10 +73,60 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        (application as ScaryApplication).container.phoneRemote.handler = remoteHandler
+    }
+
     override fun onStop() {
         super.onStop()
         ambient.stop()
         viewModel.onBackgrounded()
+        val remote = (application as ScaryApplication).container.phoneRemote
+        if (remote.handler === remoteHandler) remote.handler = null
+    }
+
+    /**
+     * The phone remote's commands for SCARY's screen. Arrows, OK and Back go in as the TV remote's keys would, so they
+     * move the focus exactly as it does; they reach only SCARY (an app cannot press keys in other apps).
+     */
+    private val remoteHandler = PhoneRemoteServer.Handler { request ->
+        withContext(Dispatchers.Main.immediate) {
+            if (!lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) return@withContext PhoneRemoteServer.Reply("not_front")
+            when (request.command) {
+                Command.UP -> pressKey(KeyEvent.KEYCODE_DPAD_UP)
+                Command.DOWN -> pressKey(KeyEvent.KEYCODE_DPAD_DOWN)
+                Command.LEFT -> pressKey(KeyEvent.KEYCODE_DPAD_LEFT)
+                Command.RIGHT -> pressKey(KeyEvent.KEYCODE_DPAD_RIGHT)
+                Command.OK -> pressKey(KeyEvent.KEYCODE_DPAD_CENTER)
+                Command.BACK -> if (!viewModel.closeTopDialog()) onBackPressedDispatcher.onBackPressed()
+                Command.HOME -> viewModel.onHomePressed()
+                Command.SEARCH -> return@withContext PhoneRemoteServer.Reply("ok", viewModel.remoteSearch(request.text))
+                Command.OPEN -> if (!viewModel.remoteOpen(request.text)) return@withContext PhoneRemoteServer.Reply("not_found")
+                Command.TMDB_KEY -> return@withContext PhoneRemoteServer.Reply(viewModel.remoteTmdbKey(request.text))
+                else -> Unit
+            }
+            PhoneRemoteServer.Reply("ok")
+        }
+    }
+
+    /**
+     * A key press where the TV remote's keys land. With SCARY's accessibility service on (Android 13 and later) it
+     * goes through the system, so it reaches a dialog's window too (the PIN, the TMDB key); otherwise it goes to
+     * SCARY's own window, where Compose moves the focus or clicks.
+     */
+    private fun pressKey(keyCode: Int) {
+        val key = when (keyCode) {
+            KeyEvent.KEYCODE_DPAD_UP -> HomeButtonService.Key.UP
+            KeyEvent.KEYCODE_DPAD_DOWN -> HomeButtonService.Key.DOWN
+            KeyEvent.KEYCODE_DPAD_LEFT -> HomeButtonService.Key.LEFT
+            KeyEvent.KEYCODE_DPAD_RIGHT -> HomeButtonService.Key.RIGHT
+            else -> HomeButtonService.Key.OK
+        }
+        if (HomeButtonService.arrowsEverywhere && HomeButtonService.instance?.press(key) == true) return
+        val now = SystemClock.uptimeMillis()
+        window.superDispatchKeyEvent(KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0))
+        window.superDispatchKeyEvent(KeyEvent(now, SystemClock.uptimeMillis(), KeyEvent.ACTION_UP, keyCode, 0))
     }
 
     override fun onResume() {
@@ -122,7 +181,29 @@ class MainActivity : ComponentActivity() {
             target == "surprise" -> viewModel.surprise()
             target == "family" -> viewModel.toggleFamilyNight()
             target == "trailer-intro" -> viewModel.debugShowTrailerIntro()
+            target == "stats" -> {
+                viewModel.openSettings()
+                // Only through settings: with a PIN set, settings asks for it first.
+                if (viewModel.screen.value == Screen.Settings) viewModel.openStats()
+            }
+            target == "remote" -> {
+                viewModel.openSettings()
+                if (viewModel.screen.value == Screen.Settings) viewModel.openPhoneRemote()
+            }
+            // "How much time do you have?" with a budget chosen, e.g. "time:double".
+            target.startsWith("time:") -> TimeBudget.fromKey(target.removePrefix("time:"))?.let { budget ->
+                viewModel.toggleTimeBudget(budget)
+                viewModel.debugShowRow("time", focusKey = "time:chip:${budget.key}")
+            }
             target == "trailers:off" || target == "trailers:on" -> viewModel.debugSetTrailers(target == "trailers:on")
+            // Films or series: "tab:series", "tab:movie".
+            target.startsWith("tab:") -> MediaKind.entries.firstOrNull { it.name.equals(target.removePrefix("tab:"), ignoreCase = true) }
+                ?.let(viewModel::selectTab)
+            // The bucket list: three films in it ("bucket:fill"), its screen, picking mode, and the question on return.
+            target == "bucket:fill" -> viewModel.debugFillBucket()
+            target == "bucket" -> viewModel.openBucket()
+            target == "bucket:picking" -> viewModel.startPicking()
+            target == "bucket:prompt" -> viewModel.debugBucketPrompt()
             // A home row brought into view, e.g. "row:moods" or "row:season:halloween"; with "mood:<key>", that mood
             // is chosen and its chip focused.
             target.startsWith("row:") -> viewModel.debugShowRow(target.removePrefix("row:"), focusKey = null)

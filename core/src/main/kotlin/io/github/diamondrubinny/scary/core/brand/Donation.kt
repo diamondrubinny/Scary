@@ -20,7 +20,10 @@ object Donation {
 
     /** The code for [text], built once per call: cheap enough for a settings screen, so callers just remember it. */
     fun qr(text: String = URL): QrCode {
-        val code = Encoder.encode(text, ErrorCorrectionLevel.M, mapOf(EncodeHintType.CHARACTER_SET to "UTF-8"))
+        // Plain ASCII (every link) needs no character-set marker (ECI), which some phone scanners read badly and
+        // which makes the code denser; anything else is UTF-8.
+        val hints = if (text.all { it.code < 128 }) emptyMap() else mapOf(EncodeHintType.CHARACTER_SET to "UTF-8")
+        val code = Encoder.encode(text, ErrorCorrectionLevel.M, hints)
         val matrix = code.matrix
         val size = matrix.width
         return QrCode(size, BooleanArray(size * size) { i -> matrix.get(i % size, i / size).toInt() == 1 })

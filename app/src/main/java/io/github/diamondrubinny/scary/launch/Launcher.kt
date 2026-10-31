@@ -9,6 +9,7 @@ import android.app.SearchManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.media.tv.TvContract
 import android.net.Uri
 import androidx.core.net.toUri
 import android.provider.Settings
@@ -18,6 +19,7 @@ import io.github.diamondrubinny.scary.core.links.Links
 import io.github.diamondrubinny.scary.core.links.StreamingApps
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
+import io.github.diamondrubinny.scary.data.TvInput
 
 sealed interface LaunchResult {
     data object Opened : LaunchResult
@@ -41,13 +43,29 @@ class Launcher(
 
     fun openInStremio(movie: Movie): LaunchResult {
         if (!apps.isInstalled(KnownPackages.STREMIO)) return openStoreFor(KnownPackages.STREMIO, STREMIO_LABEL)
-        val deepLink = Intent(Intent.ACTION_VIEW, Links.stremioMovie(movie.imdbId).toUri())
+        // A series opens on its page in Stremio, where its seasons and episodes are.
+        val link = if (movie.isSeries) Links.stremioSeries(movie.imdbId) else Links.stremioMovie(movie.imdbId)
+        val deepLink = Intent(Intent.ACTION_VIEW, link.toUri())
             .setPackage(KnownPackages.STREMIO)
         if (start(deepLink)) return LaunchResult.Opened
         return when (launchApp(KnownPackages.STREMIO, STREMIO_LABEL)) {
             LaunchResult.Opened -> LaunchResult.OpenedAppOnly(movie.title)
             else -> LaunchResult.Failed(STREMIO_LABEL)
         }
+    }
+
+    /**
+     * One of the TV's own inputs: an HDMI input opens on its passthrough channel, the tuner on its channels, through the
+     * TV's own Live TV app. When that app takes neither (some makers use their own), the input's app opens instead.
+     */
+    fun openInput(input: TvInput): LaunchResult {
+        val uri = if (input.kind == TvInput.Kind.TUNER) {
+            TvContract.buildChannelsUriForInput(input.id)
+        } else {
+            TvContract.buildChannelUriForPassthroughInput(input.id)
+        }
+        if (start(Intent(Intent.ACTION_VIEW, uri))) return LaunchResult.Opened
+        return launchApp(input.packageName, input.label)
     }
 
     fun openTrailer(movie: Movie): LaunchResult {

@@ -102,12 +102,12 @@
     <string name="settings_home_note">If the TV does not let you pick SCARY as the home screen (common on Google TV and some Xiaomi models), turn on the Home button option. SCARY then opens on every Home press and when the TV starts. It listens only for the Home key and reads nothing on the screen.</string>
     <string name="tile_set_home">Make SCARY the home screen</string>
     <string name="a11y_service_label">SCARY Home button</string>
-    <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. It only listens for the Home key. It cannot read or change anything on the screen.</string>
+    <string name="a11y_service_description">Makes the Home button on the remote open SCARY, and opens SCARY when the TV starts. While you use SCARY\'s phone remote, it also presses the keys the phone sends (arrows, OK, Back) in the app in front. It listens only for the Home key and cannot read anything on the screen.</string>
     <string name="msg_enable_service">In Accessibility, choose “SCARY Home button” and turn it on.</string>
     <string name="settings_tmdb">TMDB key</string>
     <string name="value_tmdb_none">Not set</string>
     <string name="tmdb_dialog_title">TMDB API key</string>
-    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Typing is easier with the Google TV app on your phone.</string>
+    <string name="tmdb_dialog_body">With your own TMDB key, SCARY shows titles and synopses in your language, sharper artwork and three more rows. Get a free key for personal use at themoviedb.org, under Settings and then API. Paste either the API key (32 characters) or the Read Access Token. Easiest: paste it from your phone with the button below.</string>
     <string name="tmdb_hint">Paste or type the key</string>
     <string name="tmdb_save">Save and check</string>
     <string name="tmdb_delete">Delete the key</string>
@@ -151,10 +151,12 @@
         <item>SCARY has no accounts, no ads, no analytics and no cookies, and there is no SCARY server. Nothing you do in the launcher is sent to us.</item>
         <item>Stored only on this TV: your settings and language, pinned and hidden apps, the last 12 movies you opened, your My list, the parental PIN as a salted hash (never the PIN itself), the times of recent crashes (only the time), and cached movie information and images. Uninstalling SCARY or clearing its data in the TV settings deletes all of it. SCARY is excluded from Android backup.</item>
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
+        <item>Also only on this TV: the films you marked \"Loved it\" or \"Not for me\" the day you marked each film as watched, and your bucket list. They power \"Because you loved\", \"How much time do you have?\" and \"Your year in fear\", which are worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing. The TV\'s own inputs (HDMI, antenna) are read on the TV to show them. The QR code on a film\'s page opens its IMDb page on your phone; the TV sends nothing.</item>
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
         <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
+        <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
@@ -267,4 +269,111 @@
     <string name="settings_trailer_note">Trailers come from YouTube, which sees your TV\'s IP address while one plays. They never play offline, in family night, for a locked movie, or when the TV\'s animations are turned off.</string>
     <string name="msg_trailers_off">Trailers won\'t play by themselves. You can turn them back on in Settings.</string>
     <string name="settings_trailer_last">Last trailer: %1$s</string>
+    <string name="row_time">How much time do you have?</string>
+    <string name="time_quick">Up to 90 minutes</string>
+    <string name="time_evening">An evening (up to 2 hours)</string>
+    <string name="time_double">Double feature</string>
+    <string name="time_marathon">Marathon</string>
+    <string name="time_empty">Nothing in the library fits this time right now. Try another one.</string>
+    <string name="time_lineup">Watch in this order. Together: %1$s</string>
+    <string name="time_order">Film %1$d</string>
+    <string name="row_because_loved">Because you loved %1$s</string>
+    <string name="action_love">Loved it</string>
+    <string name="action_loved">Loved</string>
+    <string name="action_not_for_me">Not for me</string>
+    <string name="action_not_for_me_on">Marked: not for me</string>
+    <string name="msg_loved">Loved. Similar films will show up on the home screen.</string>
+    <string name="msg_not_for_me">Marked as not for me. It won\'t be suggested again.</string>
+    <string name="msg_rating_cleared">Rating removed.</string>
+    <string name="coming_on">In cinemas %1$s</string>
+    <string name="coming_on_long">In cinemas on %1$s</string>
+    <string name="tv_input_description">TV input: %1$s</string>
+    <string name="share_scan">Scan to share this movie</string>
+    <string name="share_scan_description">QR code to the IMDb page of %1$s: scan it with the phone\'s camera to open and share it.</string>
+    <string name="settings_sleep_timer">Sleep timer</string>
+    <string name="sleep_left">%1$d min left</string>
+    <string name="sleep_off">Off</string>
+    <string name="settings_sleep_timer_note">When the time is up, whatever is playing pauses, and the TV\'s own screensaver and standby take over. Press OK to change it.</string>
+    <string name="settings_stats">Your year in fear</string>
+    <string name="stats_this_year">%1$d</string>
+    <string name="stats_all_time">All time</string>
+    <string name="stats_empty_title">No fear yet</string>
+    <string name="stats_empty_body">Mark films as watched or loved, and your year in fear will show up here.</string>
+    <string name="stats_none_yet">Nothing watched yet.</string>
+    <string name="stats_note">Worked out on this TV from your watched and loved lists. Nothing is sent anywhere.</string>
+    <string name="stats_watched">Films watched</string>
+    <string name="stats_hours">Hours of fear</string>
+    <string name="stats_average_fear">Average fear</string>
+    <string name="stats_scariest">Scariest</string>
+    <string name="stats_favorite_subgenre">Favorite subgenre</string>
+    <string name="stats_favorite_decade">Favorite decade</string>
+    <string name="stats_loved">Films loved</string>
+    <string name="tab_movies">Movies</string>
+    <string name="tab_series">Series</string>
+    <string name="series_tag">Series</string>
+    <string name="minutes_episode">%1$d min per episode</string>
+    <string name="bucket_title">Bucket list</string>
+    <string name="bucket_button_count">Bucket list: films in it: %1$d</string>
+    <string name="bucket_badge">Number %1$d in the bucket list</string>
+    <string name="bucket_explainer">Pick films to watch one after another. Start opens the first one in Stremio; each time you come back to SCARY, it asks whether to play the next.</string>
+    <string name="bucket_limits">SCARY opens each film\'s page in Stremio, where you choose a source and press Play. It cannot see when a film ends: coming back to SCARY (Home or Back) is the sign, judged by the time away.</string>
+    <string name="bucket_empty_title">The bucket list is empty</string>
+    <string name="bucket_empty_body">Pick a few films for tonight, and SCARY will line them up.</string>
+    <string name="bucket_pick">Pick films</string>
+    <string name="bucket_start">Start</string>
+    <string name="bucket_pick_more">Pick more films</string>
+    <string name="bucket_clear">Clear the list</string>
+    <string name="bucket_clear_confirm">Press again to clear</string>
+    <string name="bucket_total">Films in the list: %1$d · Total time: %2$s</string>
+    <string name="bucket_unavailable">Not available right now</string>
+    <string name="bucket_move_up">Move %1$s up</string>
+    <string name="bucket_move_down">Move %1$s down</string>
+    <string name="bucket_remove">Remove %1$s</string>
+    <string name="bucket_prompt_finished">Finished %1$s?</string>
+    <string name="bucket_prompt_early">Back early from %1$s</string>
+    <string name="bucket_prompt_next">Next: %1$s (%2$s)</string>
+    <string name="bucket_prompt_last">That was the last film of the bucket list.</string>
+    <string name="bucket_prompt_note">The bucket list stays as it is until you change it.</string>
+    <string name="bucket_prompt_back">Back to %1$s</string>
+    <string name="bucket_prompt_play">Play %1$s</string>
+    <string name="bucket_prompt_later">Not now</string>
+    <string name="bucket_prompt_stop">Stop for now</string>
+    <string name="action_add_bucket">Add to bucket list</string>
+    <string name="action_in_bucket">In the bucket list</string>
+    <string name="picking_title">Pick films for the bucket list</string>
+    <string name="picking_hint">OK on a poster adds it or takes it out. Back or Done when you are ready.</string>
+    <string name="picking_count">Films picked: %1$d</string>
+    <string name="picking_done">Done</string>
+    <string name="msg_bucket_films_only">Only films can go in the bucket list.</string>
+    <string name="msg_bucket_locked">%1$s is locked: it cannot go in the bucket list.</string>
+    <string name="msg_bucket_full">The bucket list is full (%1$s films).</string>
+    <string name="msg_bucket_added">%1$s is number %2$s in the bucket list.</string>
+    <string name="msg_bucket_removed">%1$s left the bucket list.</string>
+    <string name="msg_bucket_cleared">The bucket list is empty now.</string>
+    <string name="msg_bucket_empty">Pick a few films first.</string>
+    <string name="msg_bucket_done">That was the whole bucket list. Well survived!</string>
+    <string name="night_pick_series">Tonight\'s series</string>
+    <!-- Phone remote -->
+    <string name="tmdb_use_phone">Paste it from your phone</string>
+    <string name="settings_phone_remote">Phone remote</string>
+    <string name="settings_phone_remote_note">Control SCARY from your phone\'s browser on the same Wi-Fi: arrows, search, and pasting the TMDB key. Nothing to install.</string>
+    <string name="remote_title">Phone remote</string>
+    <string name="remote_step_wifi">1. Connect your phone to the same Wi-Fi as the TV.</string>
+    <string name="remote_step_scan">2. Scan the code with the phone\'s camera and open the page.</string>
+    <string name="remote_step_use">3. Use the arrows, search for films, or paste your TMDB key.</string>
+    <string name="remote_connected">A phone is connected.</string>
+    <string name="remote_waiting">Waiting for a phone to scan the code…</string>
+    <string name="remote_no_network">The TV is not on a home network (Wi-Fi or Ethernet), so a phone cannot reach it.</string>
+    <string name="remote_idle">The phone remote turned off after 30 minutes without use.</string>
+    <string name="remote_forged">The phone remote turned off because a device on the network sent forged commands.</string>
+    <string name="remote_off">The phone remote is off.</string>
+    <string name="remote_disconnect">Disconnect</string>
+    <string name="remote_new_code">New code</string>
+    <string name="remote_turn_on">Turn on</string>
+    <string name="remote_privacy">Works only on your home network. Every command is signed and encrypted with a one-time key from the QR code, and that key is never sent over the network. Nothing is stored or sent to the internet. The remote turns off by itself after 30 minutes without use.</string>
+    <string name="remote_qr_description">QR code that opens the SCARY phone remote on your phone</string>
+    <string name="remote_other_apps_full">The phone also controls other apps (Stremio, Netflix…): arrows, OK, Back and Home. Search and the TMDB key bring SCARY back first.</string>
+    <string name="remote_other_apps_back_home">In other apps (Stremio, Netflix…) the phone presses Back and Home, and plays, pauses and sets the volume. The arrows need Android 13 or later on the TV.</string>
+    <string name="remote_other_apps_off">Inside SCARY the phone does everything. To control other apps too (Stremio, Netflix…), turn on “SCARY Home button” in the TV\'s accessibility settings. Play, pause and volume work everywhere already.</string>
+    <string name="remote_other_apps_enable">Allow control of other apps</string>
 </resources>

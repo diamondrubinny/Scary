@@ -9,6 +9,7 @@ import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,10 +34,12 @@ class CatalogRepository(
     private val mutex = Mutex()
     private var bundled: Catalog? = null
 
-    /** Throws CatalogException or IOException when the bundled catalog is broken. */
+    /** The films and the series, in one catalog. Throws CatalogException or IOException when either is broken. */
     suspend fun loadBundled(): Catalog = mutex.withLock {
         bundled ?: withContext(Dispatchers.IO) {
-            context.assets.open(ASSET_PATH).bufferedReader().use { CatalogParser.parse(it.readText()) }
+            val films = context.assets.open(ASSET_PATH).bufferedReader().use { CatalogParser.parse(it.readText()) }
+            val series = context.assets.open(SERIES_PATH).bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
+            films.copy(movies = films.movies + series.movies, collections = films.collections + series.collections)
         }.also { bundled = it }
     }
 
@@ -67,11 +70,12 @@ class CatalogRepository(
 
                     val knownCinemeta = cinemetaCache
                     if (knownCinemeta == null || knownCinemeta.isStale(now)) {
-                        cinemeta.refresh(base.movies.map { it.imdbId })?.let { cinemetaCache = it; emit(build()) }
+                        cinemeta.refresh(base.movies.map { it.imdbId to it.kind })?.let { cinemetaCache = it; emit(build()) }
                     }
                     val knownTmdb = tmdbCache
                     if (hasKey && (knownTmdb == null || knownTmdb.isStale(now))) {
-                        val ids = build().movies.map { it.imdbId }
+                        // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.
+                        val ids = build().movies.filterNot { it.isSeries }.map { it.imdbId }
                         tmdb.refresh(ids, lang)?.let { tmdbCache = it; emit(build()) }
                     }
                 }
@@ -79,5 +83,6 @@ class CatalogRepository(
 
     private companion object {
         const val ASSET_PATH = "catalog.json"
+        const val SERIES_PATH = "series.json"
     }
 }
