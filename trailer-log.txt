@@ -1,0 +1,304 @@
+--------- beginning of main
+--------- beginning of system
+10-31 20:05:55.473  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:05:56.216  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:05:56.217  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:05:56.517  8823  8823 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+10-31 20:05:56.574  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:05:56.574  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:05:56.574  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:05:56.574  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:05:57.940  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:57.949  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:57.973  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 MJNR58zaStE nocookie: YouTube player ready
+10-31 20:05:58.150  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:58.209  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:58.261  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 MJNR58zaStE nocookie: YouTube error 150
+10-31 20:05:58.274  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:05:58.642  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:05:58.642  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:05:58.873  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:05:58.873  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:05:58.873  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:05:58.874  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:05:59.084  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:59.124  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:59.185  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 V6wWKNij_1M nocookie: YouTube player ready
+10-31 20:05:59.314  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:59.354  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:05:59.378  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 V6wWKNij_1M nocookie: YouTube error 150
+10-31 20:05:59.389  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:05:59.756  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:05:59.756  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:05:59.927  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:05:59.927  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:05:59.928  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:05:59.928  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:00.222  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:00.281  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:00.299  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 MJNR58zaStE youtube: YouTube player ready
+10-31 20:06:00.467  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:00.510  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:00.527  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 MJNR58zaStE youtube: YouTube error 150
+10-31 20:06:15.028  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:15.421  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:15.421  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:15.721  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:15.721  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:15.721  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:15.721  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:15.973  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:15.991  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:15.999  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/5 jAE7dNurHR4 nocookie: YouTube player ready
+10-31 20:06:16.138  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:16.177  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:16.199  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/5 jAE7dNurHR4 nocookie: YouTube error 150
+10-31 20:06:16.204  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:16.534  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:16.534  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:16.687  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:16.688  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:16.688  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:16.688  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:16.848  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:16.890  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:16.923  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/5 FZQvIJxG9Xs nocookie: YouTube player ready
+10-31 20:06:17.012  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:17.046  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:17.099  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/5 FZQvIJxG9Xs nocookie: YouTube error 150
+10-31 20:06:17.104  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:17.337  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:17.337  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:17.619  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:17.619  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:17.619  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:17.619  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:17.760  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:17.804  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:17.837  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/5 ANKdpe4J2h0 nocookie: YouTube player ready
+10-31 20:06:17.965  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:18.003  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:18.039  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/5 ANKdpe4J2h0 nocookie: YouTube error 150
+10-31 20:06:18.054  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:18.316  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:18.316  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:18.612  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:18.612  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:18.612  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:18.612  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:18.718  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:18.748  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:18.784  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/5 S014oGZiSdI nocookie: YouTube player ready
+10-31 20:06:18.950  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:19.218  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:19.363  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:19.483  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:19.518  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/5 S014oGZiSdI nocookie: YouTube error 150
+10-31 20:06:19.539  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:19.736  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:19.736  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:20.087  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:20.088  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:20.088  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:20.088  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:20.323  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:20.375  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:20.394  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 5/5 jAE7dNurHR4 youtube: YouTube player ready
+10-31 20:06:20.620  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:20.664  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:20.704  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 5/5 jAE7dNurHR4 youtube: YouTube error 150
+10-31 20:06:31.040  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:31.398  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:31.398  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:31.581  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:31.581  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:31.581  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:31.581  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:31.917  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:31.929  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:31.937  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 NT0loXUv-ks nocookie: YouTube player ready
+10-31 20:06:32.058  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:32.096  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:32.118  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 NT0loXUv-ks nocookie: YouTube error 150
+10-31 20:06:32.138  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:32.340  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:32.341  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:32.500  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:32.501  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:32.501  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:32.501  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:32.803  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:32.838  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:32.912  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 3JsrH8eUVOo nocookie: YouTube player ready
+10-31 20:06:32.972  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.006  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.025  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 3JsrH8eUVOo nocookie: YouTube error 150
+10-31 20:06:33.038  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:33.250  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:33.250  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:33.571  8823  8823 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+10-31 20:06:33.578  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:33.578  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:33.578  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:33.578  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:33.689  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.724  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.758  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 2Orp73nufs0 nocookie: YouTube player ready
+10-31 20:06:33.813  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.851  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:33.870  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 2Orp73nufs0 nocookie: YouTube error 150
+10-31 20:06:33.890  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:34.108  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:34.108  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:34.264  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:34.265  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:34.265  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:34.265  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:34.612  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:34.669  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:34.695  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 NT0loXUv-ks youtube: YouTube player ready
+10-31 20:06:34.827  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:34.871  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:34.898  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 NT0loXUv-ks youtube: YouTube error 150
+10-31 20:06:47.036  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:47.445  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:47.445  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:47.596  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:47.596  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:47.596  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:47.600  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:47.877  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:47.887  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:47.890  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 gsB70ZRY-hI nocookie: YouTube player ready
+10-31 20:06:47.890  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 gsB70ZRY-hI nocookie: YouTube error 150
+10-31 20:06:47.905  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:48.120  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:48.120  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:48.261  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:48.262  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:48.262  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:48.262  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:48.571  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:48.610  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:48.639  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 Lc9pZmkNf34 nocookie: YouTube player ready
+10-31 20:06:48.749  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:48.784  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:48.826  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 Lc9pZmkNf34 nocookie: YouTube error 150
+10-31 20:06:48.837  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:49.041  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:49.041  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:49.371  8823  8823 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+10-31 20:06:49.376  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:49.376  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:49.376  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:49.376  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:49.457  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:49.491  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:49.518  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 sRfnevzM9kQ nocookie: YouTube player ready
+10-31 20:06:49.788  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:49.826  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:49.858  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 sRfnevzM9kQ nocookie: YouTube error 150
+10-31 20:06:49.872  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:06:50.117  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:06:50.117  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:06:50.402  8823  8823 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+10-31 20:06:50.442  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:06:50.442  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:06:50.442  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:06:50.442  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:06:50.669  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:50.692  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:06:50.710  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 gsB70ZRY-hI youtube: YouTube player ready
+10-31 20:06:50.710  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 gsB70ZRY-hI youtube: YouTube error 150
+10-31 20:07:03.080  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:03.437  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:03.437  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:03.731  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:03.735  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:03.735  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:03.735  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:03.981  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:03.995  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:04.002  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 zoNa1WH3GR8 nocookie: YouTube player ready
+10-31 20:07:04.110  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:04.162  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:04.184  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 zoNa1WH3GR8 nocookie: YouTube error 150
+10-31 20:07:04.205  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:04.399  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:04.403  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:04.627  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:04.627  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:04.628  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:04.628  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:04.822  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:04.855  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:04.930  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 9tyMi1Hn32I nocookie: YouTube player ready
+10-31 20:07:04.984  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:05.020  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:05.048  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 9tyMi1Hn32I nocookie: YouTube error 150
+10-31 20:07:05.054  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:05.245  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:05.245  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:05.412  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:05.416  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:05.416  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:05.416  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:05.740  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:05.794  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:05.810  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 zoNa1WH3GR8 youtube: YouTube player ready
+10-31 20:07:05.978  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:06.025  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:06.062  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 zoNa1WH3GR8 youtube: YouTube error 150
+10-31 20:07:19.045  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:19.504  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:19.510  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:19.678  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:19.678  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:19.678  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:19.678  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:19.977  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:19.990  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:19.993  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 U0LETmDvuXc nocookie: YouTube player ready
+10-31 20:07:20.108  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:20.146  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:20.167  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 U0LETmDvuXc nocookie: YouTube error 150
+10-31 20:07:20.187  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:20.414  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:20.414  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:20.537  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:20.537  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:20.537  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:20.537  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:20.812  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:20.845  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:20.879  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 i3J6ACKQ7K0 nocookie: YouTube player ready
+10-31 20:07:20.986  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.021  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.069  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 i3J6ACKQ7K0 nocookie: YouTube error 150
+10-31 20:07:21.087  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:21.316  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:21.323  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:21.600  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:21.600  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:21.600  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:21.600  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:21.713  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.745  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.774  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 YjGSwuaf20g nocookie: YouTube player ready
+10-31 20:07:21.875  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.909  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:21.938  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 YjGSwuaf20g nocookie: YouTube error 150
+10-31 20:07:21.954  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: loading
+10-31 20:07:22.149  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+10-31 20:07:22.150  8823  8823 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+10-31 20:07:22.449  8823  8823 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+10-31 20:07:22.453  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+10-31 20:07:22.453  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+10-31 20:07:22.453  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+10-31 20:07:22.453  8823  8823 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+10-31 20:07:22.624  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:22.677  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:22.688  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 U0LETmDvuXc youtube: YouTube player ready
+10-31 20:07:22.833  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:22.874  8823  8823 D ScaryTrailer: console: [Report Only] Refused to load the image 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7' because it violates the following Content Security Policy directive: "img-src https://youtube.com https://*.youtube.com https://youtu.be https://www.youtubekids.com https://www.yo
+10-31 20:07:22.895  8823  8823 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 U0LETmDvuXc youtube: YouTube error 150
