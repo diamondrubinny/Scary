@@ -16,10 +16,18 @@
 <img src="https://img.shields.io/badge/License-Apache_2.0-555?style=for-the-badge" alt="Apache License 2.0">
 </p>
 
+<p align="center"><img src="docs/screenshots/phone-remote.jpg" alt="The phone remote: the TV shows a QR code and how to use it; next to it, the phone's remote page with arrows, OK, Back, Home, volume, a search for shining and its results, each with Open on the TV (Hebrew interface)" width="860"></p>
+<p align="center"><b>📱 New: your phone is the remote</b> · scan the code on the TV, and the phone's browser controls SCARY, Stremio and other apps,<br>searches films, and pastes the TMDB key. Home Wi-Fi only, every command signed and encrypted, nothing to install.</p>
+
 <table>
 <tr>
-<td width="33%"><img src="docs/screenshots/en-home.jpg" alt="Home screen with tonight's pick, the credit under the logo, the apps row and the Halloween row" width="100%"><br><b>Tonight's pick</b> · a new horror film every night, full-screen artwork</td>
-<td width="33%"><img src="docs/screenshots/en-details.jpg" alt="Movie page for Hereditary with its logo, fear meter, cast and buttons to search it in installed apps" width="100%"><br><b>Movie pages</b> · logo art, fear meter, and a search in every app you have</td>
+<td width="33%"><img src="docs/screenshots/series.jpg" alt="The Series tab: Crystal Lake as the hero and a row of popular horror series (Hebrew interface)" width="100%"><br><b>Horror and thriller series</b> · a Series tab, 40 hand-picked shows and endless rows</td>
+<td width="33%"><img src="docs/screenshots/bucket-list.jpg" alt="The bucket list: Psycho, Rosemary's Baby and The Exorcist in order, with Start and the total running time (Hebrew interface)" width="100%"><br><b>Bucket list</b> · pick a few films and they play one after another</td>
+<td width="33%"><img src="docs/screenshots/time-double.jpg" alt="How much time do you have, with Double feature chosen and two numbered films (Hebrew interface)" width="100%"><br><b>How much time do you have?</b> · a lineup for 90 minutes, an evening or a marathon</td>
+</tr>
+<tr>
+<td width="33%"><img src="docs/screenshots/en-home.jpg" alt="Home screen with tonight's pick, the Movies and Series tabs, the donation code and the apps row" width="100%"><br><b>Tonight's pick</b> · a new horror film every night, full-screen artwork</td>
+<td width="33%"><img src="docs/screenshots/en-details.jpg" alt="Movie page for Hereditary with its logo, fear meter, cast, Loved it and bucket list buttons, apps to search in, and a QR code to share the film" width="100%"><br><b>Movie pages</b> · fear meter, a search in every app you have, and a QR code to share the film</td>
 <td width="33%"><img src="docs/screenshots/shiver.jpg" alt="Dark launch screen with the movie's logo trembling before Stremio opens" width="100%"><br><b>The shiver</b> · the title trembles in the dark before the movie opens</td>
 </tr>
 <tr>
@@ -102,6 +110,11 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 <td width="33%"><img src="docs/screenshots/he-home.jpg" alt="מסך הבית בעברית עם הסרט של הלילה" width="100%"></td>
 <td width="33%"><img src="docs/screenshots/he-details.jpg" alt="עמוד סרט בעברית עם מד פחד וכפתורי צפייה" width="100%"></td>
 <td width="33%"><img src="docs/screenshots/he-search.jpg" alt="חיפוש בעברית עם תוצאות מהמאגר ומהרשת" width="100%"></td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/phone-remote.jpg" alt="שלט בטלפון: קוד QR בטלוויזיה, ולידו דף השלט בטלפון עם חצים, חיפוש ותוצאות" width="100%"><br><b>שלט בטלפון</b> · סורקים, והטלפון שולט ב־SCARY וגם ב־Stremio</td>
+<td><img src="docs/screenshots/bucket-picking.jpg" alt="מצב בחירה ל־Bucket list עם סרט מסומן" width="100%"><br><b>Bucket list</b> · בוחרים סרטים, והם מתנגנים אחד אחרי השני</td>
+<td><img src="docs/screenshots/bucket-prompt.jpg" alt="השאלה בחזרה מסרט: לנגן את הבא ברשימה" width="100%"><br><b>הסרט הבא</b> · חוזרים מ־Stremio, ו־SCARY מציעה את הבא</td>
 </tr>
 </table>
 
@@ -329,6 +342,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 |--------|-----------|
 | `core/` | Pure Kotlin/JVM: catalog model and validation, search, tonight's pick, Cinemeta and TMDB parsing, PIN hashing, deep links. Unit tested. |
 | `app/` | Android app: Jetpack Compose UI, HOME intent filter, Home-button accessibility service, installed apps, launching. |
+| `app/src/main/assets/remote/` | The phone remote's page, served by SCARY on the home network. Its own SHA-256/HMAC (no Web Crypto over plain HTTP), checked byte for byte against `core`'s `RemoteProtocol` by `tools/remote/check-remote-js.cjs` in CI. Design and threat model: [docs/PHONE_REMOTE_PLAN.md](docs/PHONE_REMOTE_PLAN.md). |
 | `app/src/main/assets/catalog.json` | The curated library: synopses in Hebrew, English, Portuguese, Russian and Arabic, collection titles in all five. Validated by the `core` tests on every build. |
 
 ```bash
