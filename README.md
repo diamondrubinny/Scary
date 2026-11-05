@@ -75,6 +75,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 📺 **Horror and thriller series**: a Series tab with 40 hand-picked shows (Hill House, Stranger Things, Dark, Kingdom…) and live rows of popular horror, thriller and mystery series.
 - 🍿 **Bucket list**: pick a few films, press Start, and they play one after another: each time you come back from Stremio, SCARY asks whether to play the next.
 - 📱 **Phone remote**: scan a QR code on the TV and your phone becomes a remote: arrows, search, and pasting the TMDB key. With SCARY's accessibility service on, it controls Stremio and other apps too (arrows need Android 13+). It works on your home Wi-Fi only, every command is signed and encrypted, and there is nothing to install.
+- 🧠 **Sorted by what you watch**: films you have seen go to the end of each row (or hide in a Watched row), the rows you watch most move up, and "Because you watched" suggests more. Sign in to your **TMDB account** and your watchlist, favourites and ratings stay in step.
 - 🔍 **Search by text or voice**, in the library and across the web. Web results are horror, thriller and mystery only.
 - ⭐ **My list and Watched**: hold OK on any poster to keep it (hold again to remove it), and mark what you have seen. Come back from a movie and SCARY marks it as watched for you.
 - 🌫️ **Atmosphere**: fog, film grain and an ambient drone (all can be turned off), and a screensaver of horror backdrops.
@@ -138,6 +139,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 📺 **סדרות אימה ומתח**: טאב סדרות עם 40 סדרות שנבחרו ביד (Hill House, Stranger Things, Dark, Kingdom…) ושורות חיות של סדרות אימה, מתח ותעלומה פופולריות.
 - 🍿 **Bucket list**: בוחרים כמה סרטים, לוחצים "התחלה", והם מתנגנים אחד אחרי השני: בכל חזרה מ־Stremio,‏ SCARY שואלת אם לנגן את הבא.
 - 📱 **שלט בטלפון**: סורקים קוד QR בטלוויזיה והטלפון הופך לשלט: חצים, חיפוש והדבקת מפתח TMDB. עם שירות הנגישות של SCARY הוא שולט גם ב־Stremio ובאפליקציות אחרות (חצים: Android 13 ומעלה). עובד רק ברשת הביתית, כל פקודה חתומה ומוצפנת, ואין מה להתקין.
+- 🧠 **ממוין לפי מה שאתם רואים**: סרטים שראיתם עוברים לסוף כל שורה (או מוסתרים בשורת "צפית"), השורות שאתם רואים מהן הכי הרבה עולות, ו"כי צפית ב…" מציע עוד. מתחברים ל**חשבון TMDB**, ורשימת הצפייה, המועדפים והדירוגים נשארים מסונכרנים.
 - 🔍 **חיפוש בהקלדה או בקול**, במאגר וגם ברשת. מהרשת מגיעים רק סרטי אימה, מתח ומסתורין.
 - ⭐ **"הרשימה שלי" ו"נצפה"**: לחיצה ארוכה על פוסטר שומרת אותו (לחיצה ארוכה נוספת מסירה), ואפשר לסמן מה כבר ראיתם. כשחוזרים מסרט, SCARY מסמנת אותו כנצפה בעצמה.
 - 🌫️ **אווירה**: ערפל, גרעיניות קולנועית וצלילי רקע (אפשר לכבות), ושומר מסך עם רקעים מסרטי אימה.
@@ -198,6 +200,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 - 📺 **مسلسلات رعب وإثارة**: تبويب للمسلسلات فيه 40 مسلسلًا مختارًا (Hill House وStranger Things وDark وKingdom…) وصفوف حية لمسلسلات الرعب والإثارة والغموض الرائجة.
 - 🍿 **Bucket list**: اختر بعض الأفلام، اضغط «ابدأ»، فتُعرض واحدًا تلو الآخر: في كل عودة من Stremio يسألك SCARY إن كان سيشغّل التالي.
 - 📱 **جهاز التحكم بالهاتف**: امسح رمز QR على التلفاز فيصبح هاتفك جهاز تحكم: الأسهم والبحث ولصق مفتاح TMDB. مع خدمة إمكانية الوصول في SCARY يتحكم أيضًا في Stremio والتطبيقات الأخرى (الأسهم: Android 13 أو أحدث). يعمل على شبكتك المنزلية فقط، وكل أمر موقَّع ومشفَّر، ولا حاجة لتثبيت أي شيء.
+- 🧠 **مرتّب حسب ما تشاهده**: تنتقل الأفلام التي شاهدتها إلى نهاية كل صف (أو تُخفى في صف «شوهد»)، وتصعد الصفوف التي تشاهد منها أكثر، و«لأنك شاهدت» يقترح المزيد. سجّل الدخول إلى **حساب TMDB** لتبقى قائمة المشاهدة والمفضلة والتقييمات متزامنة.
 - 🔍 **بحث بالكتابة أو بالصوت** في المكتبة وعلى الإنترنت. نتائج الإنترنت أفلام رعب وإثارة وغموض فقط.
 - ⭐ **«قائمتي» و«شوهد»**: ضغطة مطوّلة على أي ملصق تحفظه (وضغطة أخرى تزيله)، ويمكنك وضع علامة على ما شاهدته. وعند عودتك من فيلم، يضع SCARY عليه علامة «شوهد» بنفسه.
 - 🌫️ **أجواء**: ضباب وحبيبات سينمائية وأصوات خلفية (يمكن إيقافها)، وشاشة توقف بخلفيات من أفلام الرعب.
@@ -256,6 +259,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 - 📺 **Séries de terror e suspense**: uma aba de séries com 40 títulos escolhidos a dedo (Hill House, Stranger Things, Dark, Kingdom…) e fileiras ao vivo de séries populares de terror, suspense e mistério.
 - 🍿 **Bucket list**: escolha alguns filmes, aperte Começar e eles tocam um depois do outro: cada vez que você volta do Stremio, o SCARY pergunta se toca o próximo.
 - 📱 **Controle pelo celular**: escaneie um código QR na TV e o celular vira controle: setas, busca e colar a chave do TMDB. Com o serviço de acessibilidade do SCARY, controla também o Stremio e outros apps (setas: Android 13+). Funciona só na rede de casa, cada comando é assinado e criptografado, e não há nada para instalar.
+- 🧠 **Ordenado pelo que você assiste**: os filmes que você viu vão para o fim de cada fileira (ou ficam numa fileira Vistos), as fileiras de que você mais assiste sobem, e "Porque você assistiu" sugere mais. Entre na sua **conta do TMDB** e a watchlist, os favoritos e as avaliações ficam sincronizados.
 - 🔍 **Busca por texto ou voz**, na coleção e na internet. Da internet vêm só terror, suspense e mistério.
 - ⭐ **Minha lista e Visto**: segure OK em qualquer pôster para guardá-lo (segure de novo para tirar) e marque o que você já viu. Ao voltar de um filme, o SCARY o marca como visto sozinho.
 - 🌫️ **Atmosfera**: névoa, granulado de cinema e som ambiente (tudo pode ser desligado), e um protetor de tela com fundos de filmes de terror.
@@ -312,6 +316,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 - 📺 **Хоррор- и триллер-сериалы**: вкладка сериалов с 40 отобранными вручную (Hill House, Stranger Things, Dark, Kingdom…) и живыми рядами популярных хоррор-, триллер- и детективных сериалов.
 - 🍿 **Bucket list**: выберите несколько фильмов, нажмите «Начать», и они пойдут один за другим: каждый раз, когда вы возвращаетесь из Stremio, SCARY спрашивает, включить ли следующий.
 - 📱 **Пульт в телефоне**: отсканируйте QR-код на телевизоре, и телефон станет пультом: стрелки, поиск и вставка ключа TMDB. Со службой специальных возможностей SCARY управляет и Stremio, и другими приложениями (стрелки: Android 13+). Работает только в домашней сети, каждая команда подписана и зашифрована, ничего устанавливать не нужно.
+- 🧠 **Сортировка по просмотрам**: просмотренные фильмы уходят в конец подборок (или прячутся в подборке «Просмотренные»), подборки, из которых вы смотрите чаще, поднимаются, а «Потому что вы смотрели» предлагает похожее. Войдите в **аккаунт TMDB**, и список к просмотру, избранное и оценки будут синхронизированы.
 - 🔍 **Поиск текстом или голосом** — в коллекции и в интернете. Из интернета приходят только ужасы, триллеры и детективы.
 - ⭐ **«Мой список» и «Просмотрено»**: удерживайте OK на постере, чтобы сохранить фильм (ещё раз — чтобы убрать), и отмечайте просмотренное. Когда вы возвращаетесь после фильма, SCARY сам отмечает его просмотренным.
 - 🌫️ **Атмосфера**: туман, киноплёночное зерно и фоновые звуки (можно отключить), а также заставка с кадрами из фильмов ужасов.

@@ -153,7 +153,7 @@
         <item>The list of installed apps is read on this TV to show them, and never leaves it.</item>
         <item>Also only on this TV: the films you marked \"Loved it\" or \"Not for me\" the day you marked each film as watched, and your bucket list. They power \"Because you loved\", \"How much time do you have?\" and \"Your year in fear\", which are worked out on the TV. The sleep timer is an alarm on the TV that pauses what is playing. The TV\'s own inputs (HDMI, antenna) are read on the TV to show them. The QR code on a film\'s page opens its IMDb page on your phone; the TV sends nothing.</item>
         <item>Online movie data, which you can turn off in settings: SCARY asks Cinemeta, the public metadata service of Stremio, for posters, backgrounds, ratings and cast. Only public IMDb movie IDs are sent, plus the search text when you search. Images load from the HTTPS addresses Cinemeta gives, mostly images.metahub.space. Like any website, these services see your TV\'s IP address. The information is cached for 24 hours.</item>
-        <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location.</item>
+        <item>TMDB, only if you enter your own key: requests go to api.themoviedb.org with your key, movie IDs and the interface language. The key is encrypted on this TV with the Android Keystore, is never logged, and is sent only to TMDB. Deleting the key also deletes the TMDB cache. Rent and buy offers on movie pages come from TMDB\'s watch providers (data by JustWatch): the request carries only the movie\'s ID, and your country is picked on the TV from its region setting, or chosen by you in settings, never from your location. If you also sign in to your TMDB account: your session is encrypted on this TV and sent only to TMDB, and SCARY reads your watchlist, favourites and rated films there and sends the horror, thriller and mystery films you add or remove. Signing out deletes the session.</item>
         <item>Voice search hands over to this TV\'s own speech recognizer (usually Google). The recording goes to that service, not to SCARY; SCARY only receives the recognized text.</item>
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
         <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
@@ -381,4 +381,32 @@
     <string name="row_watched">Watched</string>
     <string name="settings_hide_watched">Hide films I\'ve watched</string>
     <string name="settings_hide_watched_note">Off: films you\'ve watched go to the end of each row. On: they leave the rows and wait in a Watched row. Either way, the rows you watch most move up, worked out on this TV.</string>
+    <!-- TMDB account -->
+    <string name="settings_tmdb_account">TMDB account</string>
+    <string name="value_tmdb_account_none">Not signed in</string>
+    <string name="tmdb_account_title">Your TMDB account</string>
+    <string name="tmdb_account_what">Sign in, and SCARY keeps your lists in step with your TMDB account: your watchlist is My list, your favourites are \"Loved it\", and films you rated there count as watched here. Sorting by what you watch then knows your whole history.</string>
+    <string name="tmdb_account_add_key">Add a TMDB key first</string>
+    <string name="tmdb_account_sign_in">Sign in with TMDB</string>
+    <string name="tmdb_account_cancel">Cancel</string>
+    <string name="tmdb_account_sync_now">Sync now</string>
+    <string name="tmdb_account_sign_out">Sign out</string>
+    <string name="tmdb_account_step_scan">1. Scan the code with your phone\'s camera.</string>
+    <string name="tmdb_account_step_approve">2. Sign in to TMDB there and press Approve. The TV notices by itself.</string>
+    <string name="tmdb_account_lists">Only horror, thriller and mystery films are synced; other films in your account are left alone. Removing a film on one side removes it on the other.</string>
+    <string name="tmdb_account_privacy">Your session is encrypted on this TV with the Android Keystore and sent only to api.themoviedb.org. TMDB receives the films you add to or remove from these lists. Signing out deletes the session on the TV and on TMDB; your lists here stay.</string>
+    <string name="tmdb_account_qr_description">QR code that opens TMDB\'s sign-in approval on your phone</string>
+    <string name="tmdb_account_no_key">Signing in uses your TMDB key. Add one first.</string>
+    <string name="tmdb_account_signed_out">Not signed in.</string>
+    <string name="tmdb_account_waiting">Waiting for you to approve on TMDB…</string>
+    <string name="tmdb_account_syncing">Signed in as %1$s. Syncing…</string>
+    <string name="tmdb_account_signed_in">Signed in as %1$s.</string>
+    <string name="tmdb_account_synced">Signed in as %1$s. Last sync at %2$s.</string>
+    <string name="tmdb_account_synced_partly">Signed in as %1$s. Synced at %2$s, but some changes did not reach TMDB; they will be tried again.</string>
+    <string name="tmdb_account_unreachable">Could not reach TMDB. Check the internet connection and try again.</string>
+    <string name="tmdb_account_expired">The code expired before it was approved. Sign in again for a new one.</string>
+    <string name="tmdb_account_no_account">TMDB approved, but did not give the account. Try again.</string>
+    <string name="tmdb_account_session_ended">TMDB ended this session (signed out there?). Sign in again to keep syncing.</string>
+    <string name="msg_tmdb_synced">Your TMDB lists are synced.</string>
+    <string name="msg_tmdb_signed_out">Signed out of TMDB. Your lists stay on this TV.</string>
 </resources>

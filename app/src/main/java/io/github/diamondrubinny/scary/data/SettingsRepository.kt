@@ -174,6 +174,32 @@ class SettingsRepository(private val context: Context) {
         it[DISLIKED] = RecentList.encode((if (rating == Rating.NOT_FOR_ME) listOf(movieId) + disliked else disliked).take(MAX_RATED))
     }
 
+    /** The lists as they are stored after [applySync]: the lists have caps, so not everything given may fit. */
+    data class StoredLists(val myList: List<String>, val loved: List<String>, val watched: List<String>)
+
+    /**
+     * The lists as a sync with the viewer's TMDB account left them (TmdbSync): My list and "Loved it" replaced (null
+     * leaves one as it is), films added to Watched. Films loved there are no longer "not for me" here. Films marked
+     * watched from TMDB get no date: SCARY does not know when they were seen, and "Your year in fear" counts only
+     * the films marked here.
+     */
+    suspend fun applySync(myList: List<String>?, loved: List<String>?, watchedAdded: List<String>): StoredLists {
+        var stored = StoredLists(emptyList(), emptyList(), emptyList())
+        edit { p ->
+            myList?.let { p[MY_LIST] = RecentList.encode(it.distinct().take(MyList.MAX_SIZE)) }
+            loved?.let { list ->
+                val kept = list.distinct().take(MAX_RATED)
+                p[LOVED] = RecentList.encode(kept)
+                p[DISLIKED] = RecentList.encode(RecentList.decode(p[DISLIKED]).filterNot(kept::contains))
+            }
+            val watched = RecentList.decode(p[WATCHED])
+            val added = watchedAdded.distinct().filterNot(watched::contains)
+            if (added.isNotEmpty()) p[WATCHED] = RecentList.encode((added + watched).take(WatchedList.MAX_SIZE))
+            stored = StoredLists(RecentList.decode(p[MY_LIST]), RecentList.decode(p[LOVED]), RecentList.decode(p[WATCHED]))
+        }
+        return stored
+    }
+
     suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
 
     /** Changes the bucket list with [change] (BucketList's functions), atomically; returns the new list. */

@@ -35,6 +35,7 @@ import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SecretStore
 import io.github.diamondrubinny.scary.data.TmdbRepository
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.launch.Launcher
 import io.github.diamondrubinny.scary.stability.CrashGuard
@@ -114,7 +115,8 @@ class AppContainer(context: Context) {
     val networkWatcher = NetworkWatcher(appContext)
 
     val cinemetaRepository = CinemetaRepository(appContext)
-    val tmdbRepository = TmdbRepository(appContext, SecretStore(appContext))
+    private val secretStore = SecretStore(appContext)
+    val tmdbRepository = TmdbRepository(appContext, secretStore)
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)
@@ -123,6 +125,9 @@ class AppContainer(context: Context) {
     val phoneRemote = io.github.diamondrubinny.scary.remote.PhoneRemoteServer(appContext)
     val settingsRepository = SettingsRepository(appContext)
     val savedMoviesRepository = SavedMoviesRepository(appContext)
+
+    /** The viewer's own TMDB account, only once they sign in. */
+    val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
 }

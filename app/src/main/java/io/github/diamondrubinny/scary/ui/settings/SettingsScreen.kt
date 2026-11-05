@@ -68,6 +68,7 @@ class SettingsActions(
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
     val onOpenPhoneRemote: () -> Unit = {},
+    val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -90,6 +91,8 @@ fun SettingsScreen(
     seasonalRows: Boolean,
     autoWatched: Boolean,
     hideWatched: Boolean = false,
+    /** The TMDB account's name when signed in, null otherwise. */
+    tmdbAccountName: String? = null,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -162,6 +165,12 @@ fun SettingsScreen(
             label = stringResource(R.string.settings_tmdb),
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
             onClick = actions.onOpenTmdb,
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_tmdb_account),
+            value = tmdbAccountName ?: stringResource(R.string.value_tmdb_account_none),
+            onClick = actions.onOpenTmdbAccount,
+            modifier = Modifier.testTag(TMDB_ACCOUNT_ROW_TAG),
         )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
@@ -328,6 +337,7 @@ fun SettingsScreen(
 /** Test tag of the phone remote's row. */
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
+const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"

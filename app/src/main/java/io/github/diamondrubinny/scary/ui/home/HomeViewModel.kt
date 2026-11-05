@@ -34,6 +34,9 @@ import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Personalize
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.data.TvInputsRepository
 import io.github.diamondrubinny.scary.data.TvInput
@@ -101,6 +104,8 @@ class HomeViewModel(
     private val tvInputs: TvInputsRepository,
     /** Signals that the TV's network is back, to fetch online rows that failed or are old. */
     private val networkBack: Flow<Unit> = emptyFlow(),
+    /** The viewer's TMDB account, when they sign in; null in tests that do not need it. */
+    private val tmdbAccount: TmdbAccountRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -264,7 +269,9 @@ class HomeViewModel(
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
+            tmdbAccount?.load()
             savedMovies.load()
+            watchTmdbAccount()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
             catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
@@ -790,6 +797,63 @@ class HomeViewModel(
                 show(R.string.msg_auto_watched, movie.displayTitle(language.value))
             }
         }
+    }
+
+    // The viewer's TMDB account ------------------------------------------------------------------------------------
+
+    /** Signed in or not, waiting for approval, syncing: for the account's screen and the settings row. */
+    val tmdbAccountState: StateFlow<TmdbAccountRepository.State> =
+        tmdbAccount?.state ?: MutableStateFlow(TmdbAccountRepository.State.SignedOut)
+
+    /** The lists as the last sync left them: changes the sync makes itself do not start another. */
+    private var syncedLists: Pair<List<String>, List<String>>? = null
+
+    /**
+     * Keeps the account in step: after signing in, when SCARY is back on screen (at most every [ACCOUNT_SYNC_GAP_MS]),
+     * and shortly after My list or "Loved it" changes here. A key added or deleted updates what the account can do.
+     */
+    @OptIn(FlowPreview::class)
+    private fun watchTmdbAccount() {
+        val account = tmdbAccount ?: return
+        viewModelScope.launch { tmdb.keyMask.collect { account.onKeyChanged() } }
+        viewModelScope.launch { refreshRequests.collect { syncTmdbAccount(ACCOUNT_SYNC_GAP_MS) } }
+        viewModelScope.launch {
+            settings.prefs.map { it.myListIds to it.lovedIds }
+                .distinctUntilChanged()
+                .debounce(ACCOUNT_SYNC_DEBOUNCE_MS)
+                .collect { lists -> if (lists != syncedLists) syncTmdbAccount(0) }
+        }
+    }
+
+    private suspend fun syncTmdbAccount(minGapMs: Long) {
+        val account = tmdbAccount ?: return
+        if (account.state.value !is TmdbAccountRepository.State.SignedIn) return
+        val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
+        val result = account.sync(full, language.value, minGapMs) ?: return
+        val prefs = settings.prefs.first()
+        syncedLists = prefs.myListIds to prefs.lovedIds
+        if (result.addedToMyList + result.addedToLoved + result.addedToWatched > 0) show(R.string.msg_tmdb_synced)
+    }
+
+    fun openTmdbAccount() = push(Screen.TmdbAccount)
+
+    fun startTmdbSignIn() {
+        tmdbAccount?.startSignIn { viewModelScope.launch { syncTmdbAccount(0) } }
+    }
+
+    fun cancelTmdbSignIn() {
+        tmdbAccount?.cancelSignIn()
+    }
+
+    fun signOutOfTmdb() {
+        viewModelScope.launch {
+            tmdbAccount?.signOut()
+            show(R.string.msg_tmdb_signed_out)
+        }
+    }
+
+    fun syncTmdbNow() {
+        viewModelScope.launch { syncTmdbAccount(0) }
     }
 
     /** Marks a movie as watched or not, from its page, and says which. Not PIN-gated: it opens nothing. */
@@ -1525,6 +1589,12 @@ class HomeViewModel(
         private const val STOP_TIMEOUT_MS = 5_000L
         /** How often to look whether online data is old while SCARY stays on screen; a look fetches only what is due. */
         private const val REFRESH_CHECK_MS = 30 * 60_000L
+
+        /** A sync with the TMDB account when SCARY is back on screen, at most this often. */
+        private const val ACCOUNT_SYNC_GAP_MS = 15 * 60_000L
+
+        /** A change to My list or "Loved it" goes to the account this long after the last one (several in a row: once). */
+        private const val ACCOUNT_SYNC_DEBOUNCE_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 12
         private const val REMOTE_RESULTS = 15
@@ -1548,6 +1618,7 @@ class HomeViewModel(
                     container.regionDetector,
                     container.tvInputsRepository,
                     container.networkWatcher.online,
+                    container.tmdbAccount,
                 )
             }
         }

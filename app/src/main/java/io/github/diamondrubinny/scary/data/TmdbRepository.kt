@@ -130,7 +130,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         OnlinePage(metas, if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
     }
 
-    /** IMDb id to TMDB id, so a movie page opened again needs one request, not two. */
+    /** IMDb id to TMDB id, so a movie page opened again needs one request, not two (and the account's lists). */
     private val tmdbIds = HashMap<String, Long>()
 
     /** Watch providers by TMDB id, every country, newest last. In memory only, for [PROVIDERS_MAX_AGE_MS]. */
@@ -145,12 +145,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
      */
     suspend fun watchProviders(imdbId: String): Map<String, RegionOffers>? = withContext(Dispatchers.IO) {
         val key = auth ?: return@withContext null
-        val tmdbId = synchronized(tmdbIds) { tmdbIds[imdbId] } ?: run {
-            val url = runCatching { Tmdb.findUrl(imdbId, Language.EN) }.getOrNull() ?: return@withContext null
-            val found = body(url, key)?.let { Tmdb.parseFind(it, Language.EN) }?.tmdbId ?: return@withContext null
-            synchronized(tmdbIds) { tmdbIds[imdbId] = found }
-            found
-        }
+        val tmdbId = tmdbIdOf(imdbId) ?: return@withContext null
         val now = System.currentTimeMillis()
         synchronized(providers) { providers[tmdbId]?.takeIf { now - it.first < PROVIDERS_MAX_AGE_MS }?.second }
             ?.let { return@withContext it }
@@ -159,23 +154,97 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         offers
     }
 
-    private data class Response(val code: Int, val body: String?)
+    /** An answer from TMDB: the status code, and the body of a successful (2xx) answer. */
+    data class Response(val code: Int, val body: String?) {
+        val ok: Boolean get() = code in 200..299
+    }
+
+    /** Whether the viewer has added a key: everything else TMDB offers needs one. */
+    val hasKey: Boolean get() = auth != null
+
+    /**
+     * A request to TMDB with the viewer's key, for their account (TmdbAccountRepository): [method] GET, POST or
+     * DELETE, and a JSON body. Null without a key or when TMDB cannot be reached. Never logs the URL or the body.
+     */
+    suspend fun call(method: String, url: String, jsonBody: String? = null): Response? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        request(method, url, key, jsonBody)
+    }
+
+    /** IMDb id to TMDB id ("find"), remembered on the TV. Null when TMDB does not know the film or cannot be reached. */
+    suspend fun tmdbIdOf(imdbId: String): Long? = withContext(Dispatchers.IO) {
+        synchronized(tmdbIds) { tmdbIds[imdbId] }?.let { return@withContext it }
+        val key = auth ?: return@withContext null
+        val url = runCatching { Tmdb.findUrl(imdbId, Language.EN) }.getOrNull() ?: return@withContext null
+        val found = body(url, key)?.let { Tmdb.parseFind(it, Language.EN) }?.tmdbId ?: return@withContext null
+        remember(imdbId, found)
+        found
+    }
+
+    /** TMDB id to IMDb id ("external_ids"), remembered on the TV. */
+    suspend fun imdbIdOf(tmdbId: Long): String? = withContext(Dispatchers.IO) {
+        synchronized(tmdbIds) { imdbIds[tmdbId] }?.let { return@withContext it }
+        val key = auth ?: return@withContext null
+        val found = body(Tmdb.externalIdsUrl(tmdbId), key)?.let(Tmdb::parseImdbId) ?: return@withContext null
+        remember(found, tmdbId)
+        found
+    }
+
+    private val imdbIds = HashMap<Long, String>()
+    private val idsFile = File(context.filesDir, "tmdb_ids.json")
+    private var idsLoaded = false
+
+    /** Both ways, and on disk: syncing a list of hundreds of films looks each one up once, not every time. */
+    private fun remember(imdbId: String, tmdbId: Long) {
+        synchronized(tmdbIds) {
+            loadIds()
+            if (tmdbIds[imdbId] == tmdbId && imdbIds[tmdbId] == imdbId) return
+            if (tmdbIds.size >= MAX_IDS) {
+                tmdbIds.clear()
+                imdbIds.clear()
+            }
+            tmdbIds[imdbId] = tmdbId
+            imdbIds[tmdbId] = imdbId
+            runCatching { idsFile.writeText(Tmdb.encodeIds(tmdbIds)) }
+                .onFailure { Log.w(TAG, "Could not save TMDB ids: ${it.javaClass.simpleName}") }
+        }
+    }
+
+    private fun loadIds() {
+        if (idsLoaded) return
+        idsLoaded = true
+        val saved = runCatching { if (idsFile.exists()) Tmdb.decodeIds(idsFile.readText()) else emptyMap() }.getOrDefault(emptyMap())
+        saved.forEach { (imdb, tmdbId) ->
+            tmdbIds.putIfAbsent(imdb, tmdbId)
+            imdbIds.putIfAbsent(tmdbId, imdb)
+        }
+    }
 
     private fun body(url: String, auth: TmdbAuth): String? = get(url, auth)?.takeIf { it.code == HttpURLConnection.HTTP_OK }?.body
 
-    private fun get(url: String, auth: TmdbAuth): Response? {
+    private fun get(url: String, auth: TmdbAuth): Response? = request("GET", url, auth, null)
+
+    private fun request(method: String, url: String, auth: TmdbAuth, jsonBody: String?): Response? {
         var connection: HttpsURLConnection? = null
         return try {
             val target = URL(Tmdb.authorize(url, auth))
-            if (target.host != Tmdb.API_HOST) return null
+            if (target.host != Tmdb.API_HOST || method !in METHODS) return null
             connection = target.openConnection() as? HttpsURLConnection ?: return null
             connection.connectTimeout = TIMEOUT_MS
             connection.readTimeout = TIMEOUT_MS
             connection.instanceFollowRedirects = false
+            connection.requestMethod = method
             connection.setRequestProperty("Accept", "application/json")
             if (auth is TmdbAuth.Bearer) connection.setRequestProperty("Authorization", "Bearer ${auth.token}")
+            if (jsonBody != null) {
+                val bytes = jsonBody.toByteArray(Charsets.UTF_8)
+                connection.doOutput = true
+                connection.setRequestProperty("Content-Type", "application/json;charset=utf-8")
+                connection.setFixedLengthStreamingMode(bytes.size)
+                connection.outputStream.use { it.write(bytes) }
+            }
             val code = connection.responseCode
-            val text = if (code == HttpURLConnection.HTTP_OK) connection.inputStream.use { it.readLimited() } else null
+            val text = if (code in 200..299) connection.inputStream.use { it.readLimited() } else null
             Response(code, text)
         } catch (e: IOException) {
             // Only the exception type: the URL can contain the key.
@@ -212,5 +281,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val PROVIDERS_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
+        const val MAX_IDS = 5_000
+        val METHODS = setOf("GET", "POST", "DELETE")
     }
 }

@@ -151,7 +151,7 @@
         <item>A lista de apps instalados é lida nesta TV para exibi-los e nunca sai dela.</item>
         <item>Também só nesta TV: os filmes que você marcou como \"Amei\" ou \"Não é pra mim\" o dia em que marcou cada filme como assistido e a sua bucket list. Eles alimentam \"Porque você amou\", \"Quanto tempo você tem?\" e \"Seu ano no medo\", calculados na TV. O timer de sono é um alarme na TV que pausa o que estiver tocando. As entradas da própria TV (HDMI, antena) são lidas na TV para exibi-las. O código QR na página de um filme abre a página dele no IMDb no seu celular; a TV não envia nada.</item>
         <item>Dados de filmes on-line, que podem ser desligados nas configurações: o SCARY pede ao Cinemeta, o serviço público de metadados do Stremio, pôsteres, fundos, notas e elenco. Só são enviados IDs públicos de filmes do IMDb e, na busca, o texto pesquisado. As imagens vêm dos endereços HTTPS indicados pelo Cinemeta, principalmente images.metahub.space. Como qualquer site, esses serviços veem o endereço IP da sua TV. As informações ficam em cache por 24 horas.</item>
-        <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização.</item>
+        <item>TMDB, só se você inserir sua própria chave: as solicitações vão para api.themoviedb.org com a chave, os IDs dos filmes e o idioma da interface. A chave é criptografada nesta TV com o Android Keystore, nunca vai para os logs e só é enviada ao TMDB. Apagar a chave também apaga o cache do TMDB. As ofertas de aluguel e compra nas páginas de filme vêm do TMDB (dados da JustWatch): a solicitação leva só o ID do filme, e o seu país é definido na TV pela configuração de região, ou escolhido por você nas configurações, nunca pela sua localização. Se você também entrar na sua conta do TMDB: a sessão fica criptografada nesta TV e é enviada só ao TMDB, e o SCARY lê de lá a sua watchlist, favoritos e filmes avaliados, e envia os filmes de terror, suspense e mistério que você adiciona ou remove. Sair apaga a sessão.</item>
         <item>A busca por voz usa o reconhecimento de fala da própria TV (geralmente do Google). A gravação vai para esse serviço, não para o SCARY; o SCARY recebe só o texto reconhecido.</item>
         <item>Trailers que tocam sozinhos (ligados depois que você concorda na primeira pergunta; dá para desligar nas configurações): o player é o do YouTube, no modo de privacidade aprimorada (youtube-nocookie.com, e youtube.com como última tentativa quando um trailer não toca lá). Quando um trailer toca, o YouTube (Google) recebe o endereço IP da sua TV, dados do aparelho e do navegador e o ID do trailer, conforme a política de privacidade do Google. O SCARY bloqueia cookies no player e apaga o armazenamento dele ao fechar. Nenhum trailer toca off-line ou na noite em família.</item>
         <item>Controle pelo celular, só enquanto você o liga nas configurações: a TV serve uma pequena página na sua rede doméstica, que o celular abre ao escanear um código QR. O código contém uma chave de uso único que assina e criptografa cada comando entre o celular e a TV, e a chave nunca é enviada pela rede. Os comandos vão direto do celular para a TV e não são guardados; o texto da busca e a chave do TMDB são usados depois como descrito acima. A página não carrega nada da internet. O controle desliga quando você o desconecta, após 30 minutos sem uso ou quando chegam comandos falsos. Para apertar teclas em outros apps (Stremio, Netflix…), o controle pelo celular usa o serviço de acessibilidade do SCARY, só se você o ativou; ele aperta teclas e não lê nada da tela.</item>
@@ -382,4 +382,32 @@
     <string name="row_watched">Vistos</string>
     <string name="settings_hide_watched">Esconder filmes que já vi</string>
     <string name="settings_hide_watched_note">Desligado: os filmes que você viu vão para o fim de cada fileira. Ligado: eles saem das fileiras e ficam numa fileira Vistos. De todo jeito, as fileiras de que você mais assiste sobem, com o cálculo feito nesta TV.</string>
+    <!-- TMDB account -->
+    <string name="settings_tmdb_account">Conta do TMDB</string>
+    <string name="value_tmdb_account_none">Não conectada</string>
+    <string name="tmdb_account_title">Sua conta do TMDB</string>
+    <string name="tmdb_account_what">Entre, e o SCARY mantém suas listas em sincronia com a sua conta do TMDB: a watchlist é a Minha lista, os favoritos são \"Amei\", e os filmes que você avaliou lá contam como vistos aqui. Assim a ordenação pelo que você assiste conhece todo o seu histórico.</string>
+    <string name="tmdb_account_add_key">Adicione uma chave do TMDB primeiro</string>
+    <string name="tmdb_account_sign_in">Entrar com o TMDB</string>
+    <string name="tmdb_account_cancel">Cancelar</string>
+    <string name="tmdb_account_sync_now">Sincronizar agora</string>
+    <string name="tmdb_account_sign_out">Sair</string>
+    <string name="tmdb_account_step_scan">1. Escaneie o código com a câmera do celular.</string>
+    <string name="tmdb_account_step_approve">2. Entre no TMDB ali e aperte Approve. A TV percebe sozinha.</string>
+    <string name="tmdb_account_lists">Só filmes de terror, suspense e mistério são sincronizados; os outros filmes da sua conta ficam como estão. Remover um filme de um lado remove do outro.</string>
+    <string name="tmdb_account_privacy">Sua sessão fica criptografada nesta TV com o Android Keystore e é enviada só para api.themoviedb.org. O TMDB recebe os filmes que você adiciona ou remove dessas listas. Sair apaga a sessão na TV e no TMDB; suas listas aqui ficam.</string>
+    <string name="tmdb_account_qr_description">Código QR que abre no celular a aprovação de entrada do TMDB</string>
+    <string name="tmdb_account_no_key">A entrada usa a sua chave do TMDB. Adicione uma primeiro.</string>
+    <string name="tmdb_account_signed_out">Não conectada.</string>
+    <string name="tmdb_account_waiting">Esperando a sua aprovação no TMDB…</string>
+    <string name="tmdb_account_syncing">Conectado como %1$s. Sincronizando…</string>
+    <string name="tmdb_account_signed_in">Conectado como %1$s.</string>
+    <string name="tmdb_account_synced">Conectado como %1$s. Última sincronização às %2$s.</string>
+    <string name="tmdb_account_synced_partly">Conectado como %1$s. Sincronizado às %2$s, mas algumas mudanças não chegaram ao TMDB; vamos tentar de novo.</string>
+    <string name="tmdb_account_unreachable">Não deu para falar com o TMDB. Verifique a internet e tente de novo.</string>
+    <string name="tmdb_account_expired">O código expirou antes de ser aprovado. Entre de novo para um código novo.</string>
+    <string name="tmdb_account_no_account">O TMDB aprovou, mas não devolveu a conta. Tente de novo.</string>
+    <string name="tmdb_account_session_ended">O TMDB encerrou esta sessão (você saiu por lá?). Entre de novo para continuar sincronizando.</string>
+    <string name="msg_tmdb_synced">Suas listas do TMDB estão sincronizadas.</string>
+    <string name="msg_tmdb_signed_out">Você saiu do TMDB. Suas listas ficam nesta TV.</string>
 </resources>

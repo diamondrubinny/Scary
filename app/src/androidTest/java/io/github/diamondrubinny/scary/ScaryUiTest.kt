@@ -84,6 +84,8 @@ import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
 import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
 import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
 import java.net.Socket
+import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
@@ -829,6 +831,20 @@ class ScaryUiTest {
             }
             backToHome()
         }
+    }
+
+    @Test
+    fun theTmdbAccountScreenOpensFromSettingsAndAsksForAKeyFirst() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(TMDB_ACCOUNT_ROW_TAG)
+        waitFor(row)
+        rule.onNode(row).performScrollTo().performClick()
+        waitFor(hasTestTag(TMDB_ACCOUNT_TAG))
+        // The emulator has no TMDB key: signing in needs one, and the screen says so, with the way to add it.
+        waitFor(hasText(text(R.string.tmdb_account_no_key)))
+        waitFor(hasText(text(R.string.tmdb_account_add_key)) and isFocused())
+        backToHome()
     }
 
     @Test
