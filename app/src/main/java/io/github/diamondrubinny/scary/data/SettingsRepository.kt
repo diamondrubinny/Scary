@@ -192,6 +192,15 @@ class SettingsRepository(private val context: Context) {
     /** Remembers that [pending] was handed to another app; SCARY judges the viewing when it is back on screen. */
     suspend fun setPendingWatch(pending: PendingWatch) = edit { it[PENDING_WATCH] = pending.encode() }
 
+    /**
+     * The TV's screen went off at [atMillis]: a movie handed to another app counts as watched up to now, however long
+     * the TV then stays off. Nothing happens when no movie is pending.
+     */
+    suspend fun endPendingWatch(atMillis: Long) = edit {
+        val pending = PendingWatch.decode(it[PENDING_WATCH]) ?: return@edit
+        it[PENDING_WATCH] = pending.endedAt(atMillis).encode()
+    }
+
     /** The movie handed to another app, if any, forgotten as it is read: each return to SCARY judges it once. */
     suspend fun takePendingWatch(): PendingWatch? {
         var pending: PendingWatch? = null

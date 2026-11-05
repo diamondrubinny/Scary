@@ -65,7 +65,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,6 +98,8 @@ class HomeViewModel(
     private val cinemeta: CinemetaRepository,
     private val regionDetector: RegionDetector,
     private val tvInputs: TvInputsRepository,
+    /** Signals that the TV's network is back, to fetch online rows that failed or are old. */
+    private val networkBack: Flow<Unit> = emptyFlow(),
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -234,12 +241,30 @@ class HomeViewModel(
     private var appsJob: Job? = null
     private var nextMessageId = 0L
 
+    /** "Look again": SCARY is back on screen. Online data that is missing or old is then fetched. */
+    private val refreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    /**
+     * When to check online data again: back on screen, network back, and every [REFRESH_CHECK_MS] while SCARY stays
+     * in front for hours. A check fetches only what is missing, old (a day) or due for a retry ([RefreshPolicy]).
+     */
+    private val refreshSignals: Flow<Unit> = merge(
+        refreshRequests,
+        networkBack,
+        flow {
+            while (true) {
+                delay(REFRESH_CHECK_MS)
+                emit(Unit)
+            }
+        },
+    )
+
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
             savedMovies.load()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
-            catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language)
+            catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
                 .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) }
                 .catch { e ->
@@ -719,12 +744,14 @@ class HomeViewModel(
     fun onResumed() {
         // Back on the trailer question put it off only while SCARY stayed in front.
         trailerIntroPutOff = false
+        refreshRequests.tryEmit(Unit)
         viewModelScope.launch {
             val pending = settings.takePendingWatch() ?: return@launch
             val prefs = settings.prefs.first()
             val catalog = (shownCatalog.first { it !is CatalogState.Loading } as? CatalogState.Ready)?.catalog
             val movie = catalog?.movie(pending.movieId) ?: webMovieIfAllowed(pending.movieId)
-            val away = System.currentTimeMillis() - pending.startedAtMillis
+            // Up to the screen going off, when the TV was switched off after the film (SettingsRepository.endPendingWatch).
+            val away = pending.awayMillis(System.currentTimeMillis())
             // Back from a bucket-list film: ask about the next one, every time.
             if (prefs.bucketPlaying == pending.movieId) {
                 settings.setBucketPlaying(null)
@@ -1466,6 +1493,8 @@ class HomeViewModel(
         /** Off unless "setprop log.tag.ScaryKeys DEBUG", as in FocusSurface: lets a failed UI test show what happened. */
         private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
+        /** How often to look whether online data is old while SCARY stays on screen; a look fetches only what is due. */
+        private const val REFRESH_CHECK_MS = 30 * 60_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 12
         private const val REMOTE_RESULTS = 15
@@ -1488,6 +1517,7 @@ class HomeViewModel(
                     container.cinemetaRepository,
                     container.regionDetector,
                     container.tvInputsRepository,
+                    container.networkWatcher.online,
                 )
             }
         }

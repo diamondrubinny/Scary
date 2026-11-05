@@ -34,15 +34,27 @@ object AutoWatched {
     }
 }
 
-/** A movie handed to another app to watch, remembered until SCARY is back on screen. */
-data class PendingWatch(val movieId: String, val startedAtMillis: Long) {
-    fun encode(): String = "$movieId|$startedAtMillis"
+/**
+ * A movie handed to another app to watch, remembered until SCARY is back on screen. [endedAtMillis] is when the TV's
+ * screen went off while it was away: watching a film and switching the TV off is the commonest end of an evening, and
+ * SCARY only comes back on screen the next day. The time away is counted up to then, not up to that next day.
+ */
+data class PendingWatch(val movieId: String, val startedAtMillis: Long, val endedAtMillis: Long? = null) {
+    fun encode(): String = if (endedAtMillis == null) "$movieId|$startedAtMillis" else "$movieId|$startedAtMillis|$endedAtMillis"
+
+    /** The time spent away watching: up to the screen going off, or up to [nowMillis]. */
+    fun awayMillis(nowMillis: Long): Long = (endedAtMillis ?: nowMillis) - startedAtMillis
+
+    /** The screen went off at [atMillis]: only the first time counts (a TV switched off and on again stays ended). */
+    fun endedAt(atMillis: Long): PendingWatch = if (endedAtMillis != null || atMillis < startedAtMillis) this else copy(endedAtMillis = atMillis)
 
     companion object {
         fun decode(raw: String?): PendingWatch? {
-            val (id, at) = raw?.split('|')?.takeIf { it.size == 2 } ?: return null
-            val started = at.toLongOrNull() ?: return null
-            return if (id.isBlank() || started <= 0) null else PendingWatch(id, started)
+            val parts = raw?.split('|')?.takeIf { it.size == 2 || it.size == 3 } ?: return null
+            val id = parts[0]
+            val started = parts[1].toLongOrNull() ?: return null
+            val ended = if (parts.size == 3) parts[2].toLongOrNull() ?: return null else null
+            return if (id.isBlank() || started <= 0 || (ended != null && ended < started)) null else PendingWatch(id, started, ended)
         }
     }
 }
