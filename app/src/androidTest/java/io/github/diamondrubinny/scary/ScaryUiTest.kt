@@ -84,6 +84,10 @@ import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
 import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
 import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
 import java.net.Socket
+import androidx.lifecycle.ViewModelProvider
+import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import kotlinx.coroutines.runBlocking
 import android.os.ParcelFileDescriptor
 import android.app.UiAutomation
 import android.provider.Settings
@@ -797,6 +801,34 @@ class ScaryUiTest {
     private fun remotePost(port: Int, json: String): String {
         val body = json.toByteArray(Charsets.UTF_8)
         return remoteHttp(port, "POST /api HTTP/1.1\r\nHost: tv\r\nContent-Type: application/json\r\nContent-Length: ${body.size}\r\n\r\n$json")
+    }
+
+    @Test
+    fun watchedFilmsGoToTheEndOfTheirRowAndCanBeHiddenInAWatchedRow() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        val catalog = bundledCatalog()
+        val collection = catalog.collections.first { catalog.moviesOf(it).size >= 4 }
+        val film = catalog.moviesOf(collection).first()
+        fun row() = viewModel.uiState.value.rows.filterIsInstance<HomeRow.Collection>().firstOrNull { it.collection.id == collection.id }
+        withCleanup({
+            runBlocking { container.settingsRepository.setWatched(film.id, watched = true) }
+            waitUntilOrDescribe("${film.title} at the end of its row once watched") { row()?.movies?.lastOrNull()?.id == film.id }
+            runBlocking { container.settingsRepository.setHideWatched(true) }
+            waitUntilOrDescribe("${film.title} out of its row and in the Watched row") {
+                val watchedRow = viewModel.uiState.value.rows.filterIsInstance<HomeRow.Watched>().singleOrNull()
+                row()?.movies?.none { it.id == film.id } == true && watchedRow?.movies?.any { it.id == film.id } == true
+            }
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("watched")
+            waitFor(hasText(text(R.string.row_watched)))
+        }) {
+            runBlocking {
+                container.settingsRepository.setHideWatched(false)
+                container.settingsRepository.setWatched(film.id, watched = false)
+            }
+            backToHome()
+        }
     }
 
     @Test

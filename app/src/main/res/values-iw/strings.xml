@@ -222,7 +222,7 @@
     <string name="msg_unmarked_watched">%1$s כבר לא מסומן כנצפה</string>
     <string name="msg_auto_watched">ברוכים השבים. %1$s סומן כנצפה, ואפשר לשנות את זה בעמוד הסרט.</string>
     <string name="settings_auto_watched">סימון כנצפה אחרי צפייה</string>
-    <string name="settings_auto_watched_note">כשחוזרים ל־SCARY אחרי רוב אורך הסרט, הוא מסומן כנצפה. ‏SCARY לא רואה מה קורה באפליקציות אחרות, ולכן היא מחליטה לפי הזמן בלבד. תמיד אפשר לשנות את זה בעמוד הסרט.</string>
+    <string name="settings_auto_watched_note">כשחוזרים ל־SCARY, או מכבים את הטלוויזיה, אחרי רוב אורך הסרט, הוא מסומן כנצפה. ‏SCARY לא רואה מה קורה באפליקציות אחרות ולכן מחליטה לפי הזמן בלבד; תמיד אפשר לשנות בעמוד הסרט.</string>
     <string name="my_list_hint">לחיצה ארוכה על OK מסירה סרט מהרשימה</string>
     <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
     <string name="rent_buy_title">‏לא מצאתם? אפשר לשכור או לקנות · %1$s</string>
@@ -377,4 +377,9 @@
     <string name="remote_other_apps_back_home">באפליקציות אחרות (Stremio, Netflix…) הטלפון לוחץ חזרה ובית, ומפעיל, משהה ומשנה עוצמת קול. החצים דורשים Android 13 ומעלה בטלוויזיה.</string>
     <string name="remote_other_apps_off">בתוך SCARY הטלפון עושה הכל. כדי לשלוט גם באפליקציות אחרות (Stremio, Netflix…), מפעילים את “SCARY: כפתור הבית” בהגדרות הנגישות של הטלוויזיה. הפעלה, השהיה ועוצמת קול כבר פועלים בכל מקום.</string>
     <string name="remote_other_apps_enable">הפעלת שליטה באפליקציות אחרות</string>
+    <!-- Sorting by what you watch -->
+    <string name="row_because_watched">כי צפית ב־%1$s</string>
+    <string name="row_watched">צפית</string>
+    <string name="settings_hide_watched">הסתרת סרטים שצפיתי</string>
+    <string name="settings_hide_watched_note">כבוי: סרטים שצפיתם עוברים לסוף כל שורה. פעיל: הם יוצאים מהשורות ומחכים בשורת "צפית". בכל מקרה, השורות שאתם צופים מהן הכי הרבה עולות למעלה, והחישוב נעשה בטלוויזיה.</string>
 </resources>

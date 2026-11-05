@@ -232,7 +232,7 @@
     <string name="msg_unmarked_watched">أُزيلت علامة «شوهد» عن %1$s</string>
     <string name="msg_auto_watched">أهلًا بعودتك. وُضعت علامة «شوهد» على %1$s، ويمكنك تغييرها من صفحة الفيلم.</string>
     <string name="settings_auto_watched">وضع علامة «شوهد» بعد المشاهدة</string>
-    <string name="settings_auto_watched_note">عندما تعود إلى SCARY بعد معظم مدة الفيلم، توضع عليه علامة «شوهد». لا يرى SCARY ما يجري داخل التطبيقات الأخرى، لذلك يحكم بالوقت فقط، ويمكنك دائمًا تغيير ذلك من صفحة الفيلم.</string>
+    <string name="settings_auto_watched_note">عندما تعود إلى SCARY، أو تطفئ التلفزيون، بعد معظم مدة الفيلم، توضع عليه علامة «شوهد». لا يرى SCARY ما يحدث داخل التطبيقات الأخرى، لذا يحكم بالوقت فقط؛ ويمكنك دائمًا تغيير ذلك من صفحة الفيلم.</string>
     <string name="my_list_hint">اضغط مطولًا على OK فوق الملصق لإزالته</string>
     <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
     <string name="rent_buy_title">لم تجده؟ استأجره أو اشترِه · %1$s</string>
@@ -387,4 +387,9 @@
     <string name="remote_other_apps_back_home">في التطبيقات الأخرى (Stremio وNetflix…) يضغط الهاتف الرجوع والرئيسية، ويشغّل ويوقف مؤقتًا ويضبط الصوت. تحتاج الأسهم إلى Android 13 أو أحدث على التلفزيون.</string>
     <string name="remote_other_apps_off">داخل SCARY يقوم الهاتف بكل شيء. للتحكم في التطبيقات الأخرى أيضًا (Stremio وNetflix…)، فعّل “زر الشاشة الرئيسية لـ SCARY” في إعدادات إمكانية الوصول في التلفزيون. التشغيل والإيقاف المؤقت والصوت تعمل في كل مكان أصلًا.</string>
     <string name="remote_other_apps_enable">السماح بالتحكم في التطبيقات الأخرى</string>
+    <!-- Sorting by what you watch -->
+    <string name="row_because_watched">لأنك شاهدت %1$s</string>
+    <string name="row_watched">شوهد</string>
+    <string name="settings_hide_watched">إخفاء الأفلام التي شاهدتها</string>
+    <string name="settings_hide_watched_note">عند الإيقاف: تنتقل الأفلام التي شاهدتها إلى نهاية كل صف. عند التشغيل: تخرج من الصفوف وتنتظر في صف «شوهد». وفي الحالتين تصعد الصفوف التي تشاهد منها أكثر، ويجري الحساب على هذا التلفزيون.</string>
 </resources>

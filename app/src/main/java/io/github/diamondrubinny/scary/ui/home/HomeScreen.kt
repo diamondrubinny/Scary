@@ -501,6 +501,8 @@ private fun HomeRowView(
         is HomeRow.Moods -> stringResource(R.string.row_moods)
         is HomeRow.TimePlan -> stringResource(R.string.row_time)
         is HomeRow.BecauseYouLoved -> stringResource(R.string.row_because_loved, row.because.displayTitle(language))
+        is HomeRow.BecauseYouWatched -> stringResource(R.string.row_because_watched, row.because.displayTitle(language))
+        is HomeRow.Watched -> stringResource(R.string.row_watched)
     }
     Column {
         Row(
@@ -564,10 +566,13 @@ private fun HomeRowView(
                     )
                 }
                 is HomeRow.Moods, is HomeRow.TimePlan -> Unit
-                is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved -> items(
+                is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved, is HomeRow.BecauseYouWatched,
+                is HomeRow.Watched -> items(
                     when (row) {
                         is HomeRow.Collection -> row.movies
                         is HomeRow.BecauseYouLoved -> row.movies
+                        is HomeRow.BecauseYouWatched -> row.movies
+                        is HomeRow.Watched -> row.movies
                         else -> (row as HomeRow.Seasonal).movies
                     },
                     key = { it.id },

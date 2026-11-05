@@ -43,6 +43,7 @@ data class HomeUiState(
     /** Ids the viewer has seen, for the badge on cards and the button on a movie's page. */
     val watchedIds: Set<String> = emptySet(),
     val autoWatched: Boolean = true,
+    val hideWatched: Boolean = false,
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
@@ -135,6 +136,16 @@ sealed interface HomeRow {
     /** "Because you loved X": films like one the viewer loved. */
     data class BecauseYouLoved(val because: Movie, val movies: List<Movie>) : HomeRow {
         override val key = "because"
+    }
+
+    /** "Because you watched X": films like the one the viewer watched most recently. */
+    data class BecauseYouWatched(val because: Movie, val movies: List<Movie>) : HomeRow {
+        override val key = "because_watched"
+    }
+
+    /** Films the viewer watched, newest first: shown when watched films are hidden from the other rows. */
+    data class Watched(val movies: List<Movie>) : HomeRow {
+        override val key = "watched"
     }
 
     /** "How much time do you have?": the budget chips, and once one is picked, the films or the lineup for it. */

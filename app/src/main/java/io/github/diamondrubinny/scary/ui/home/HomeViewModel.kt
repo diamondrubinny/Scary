@@ -33,6 +33,7 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
+import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.data.TvInputsRepository
 import io.github.diamondrubinny.scary.data.TvInput
@@ -219,6 +220,7 @@ class HomeViewModel(
             seasonalRows = prefs.seasonalRows,
             watchedIds = prefs.watchedIds.toSet(),
             autoWatched = prefs.autoWatched,
+            hideWatched = prefs.hideWatched,
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
@@ -438,24 +440,40 @@ class HomeViewModel(
         val nightPick = NightPick.pick(liked.filter { it.id !in watched }, today(), prefs.nightMaxFear)
             ?: NightPick.pick(liked, today(), prefs.nightMaxFear)
         val isLocked = { movie: Movie -> ParentalGate.isLocked(prefs.parentalEnabled, unlocked, prefs.lockFromFear, movie) }
+        // Sorted by what the viewer watches (Personalize): in rows for finding something new, films already seen go to
+        // the end, or out with "hide watched"; the rows of the kind they watch most come first. Their own lists
+        // (recently opened, My list) stay as they made them.
+        val hideWatched = prefs.hideWatched
+        fun unseenFirst(movies: List<Movie>): List<Movie> =
+            if (hideWatched) movies.filter { it.id !in watched } else Personalize.watchedLast(movies) { it.id in watched }
+        val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
+        val seenOrLoved = watched + prefs.lovedIds
         val rows = buildList {
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
             if (films && prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
-                val movies = season.pick(catalog.movies)
+                val movies = unseenFirst(season.pick(catalog.movies))
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
             // Moods, decades, time plans and recommendations are about films: a series has no single length or year.
             if (films) {
-                Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
-                    ?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                val loved = Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
+                loved?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                // Not the same films twice: "Because you watched" skips the loved row's seed and its films.
+                Recommender.becauseYouWatched(
+                    catalog.movies,
+                    prefs.watchedIds,
+                    exclude = disliked + prefs.lovedIds + loved?.movies?.map { it.id }.orEmpty(),
+                    skipSeeds = setOfNotNull(loved?.because?.id),
+                    isLocked = isLocked,
+                )?.let { add(HomeRow.BecauseYouWatched(it.because, it.movies)) }
                 add(
                     HomeRow.Moods(
                         selected = selectedMood,
-                        movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
+                        movies = unseenFirst(Decades.pick(catalog.movies, selectedMood, selectedDecade)),
                         decade = selectedDecade,
                         decades = Decades.available(catalog.movies),
                     ),
@@ -467,11 +485,19 @@ class HomeViewModel(
                     ),
                 )
             }
-            catalog.collections.forEach { collection ->
-                // Family night can empty a row; an empty row is not shown.
-                val movies = catalog.moviesOf(collection)
-                if (movies.isNotEmpty()) add(HomeRow.Collection(collection, movies))
+            if (hideWatched) {
+                val seen = prefs.watchedIds.mapNotNull(catalog::movie)
+                if (seen.isNotEmpty()) add(HomeRow.Watched(seen))
             }
+            // Family night can empty a row; an empty row is not shown.
+            val collections = catalog.collections
+                .map { collection -> collection to catalog.moviesOf(collection) }
+                .filter { (_, movies) -> movies.isNotEmpty() }
+            Personalize.byTaste(collections, taste) { (_, movies) -> Personalize.rowScore(movies, taste, seenOrLoved) }
+                .forEach { (collection, movies) ->
+                    val shown = unseenFirst(movies)
+                    if (shown.isNotEmpty()) add(HomeRow.Collection(collection, shown))
+                }
         }
         return HomeUiState(
             loading = false,
@@ -778,6 +804,10 @@ class HomeViewModel(
 
     fun toggleAutoWatched() {
         viewModelScope.launch { settings.setAutoWatched(!settings.prefs.first().autoWatched) }
+    }
+
+    fun toggleHideWatched() {
+        viewModelScope.launch { settings.setHideWatched(!settings.prefs.first().hideWatched) }
     }
 
     private fun cancelLaunch() {

@@ -222,7 +222,7 @@
     <string name="msg_unmarked_watched">%1$s não está mais marcado como visto</string>
     <string name="msg_auto_watched">Bem-vindo de volta. %1$s foi marcado como visto; você pode mudar isso na página do filme.</string>
     <string name="settings_auto_watched">Marcar como visto depois de assistir</string>
-    <string name="settings_auto_watched_note">Quando você volta ao SCARY depois da maior parte da duração do filme, ele é marcado como visto. O SCARY não vê o que acontece em outros apps, então decide só pelo tempo; você sempre pode mudar isso na página do filme.</string>
+    <string name="settings_auto_watched_note">Quando você volta ao SCARY, ou desliga a TV, depois da maior parte da duração do filme, ele é marcado como visto. O SCARY não vê o que acontece em outros apps, então julga só pelo tempo; você sempre pode mudar isso na página do filme.</string>
     <string name="my_list_hint">Segure OK em um pôster para removê-lo</string>
     <!-- Rent or buy on movie pages: data by JustWatch, via TMDB. -->
     <string name="rent_buy_title">Não encontrou? Alugue ou compre · %1$s</string>
@@ -377,4 +377,9 @@
     <string name="remote_other_apps_back_home">Em outros apps (Stremio, Netflix…) o celular aperta Voltar e Início, e reproduz, pausa e ajusta o volume. As setas precisam de Android 13 ou mais recente na TV.</string>
     <string name="remote_other_apps_off">Dentro do SCARY o celular faz tudo. Para controlar outros apps também (Stremio, Netflix…), ative “SCARY: botão Home” nas configurações de acessibilidade da TV. Reproduzir, pausar e volume já funcionam em todo lugar.</string>
     <string name="remote_other_apps_enable">Permitir controle de outros apps</string>
+    <!-- Sorting by what you watch -->
+    <string name="row_because_watched">Porque você assistiu %1$s</string>
+    <string name="row_watched">Vistos</string>
+    <string name="settings_hide_watched">Esconder filmes que já vi</string>
+    <string name="settings_hide_watched_note">Desligado: os filmes que você viu vão para o fim de cada fileira. Ligado: eles saem das fileiras e ficam numa fileira Vistos. De todo jeito, as fileiras de que você mais assiste sobem, com o cálculo feito nesta TV.</string>
 </resources>

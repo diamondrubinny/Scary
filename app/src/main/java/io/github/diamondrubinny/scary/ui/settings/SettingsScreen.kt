@@ -52,6 +52,7 @@ class SettingsActions(
     val onCycleNightFear: () -> Unit,
     val onToggleSeasonalRows: () -> Unit,
     val onToggleAutoWatched: () -> Unit,
+    val onToggleHideWatched: () -> Unit = {},
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onToggleTrailerAutoplay: () -> Unit,
@@ -88,6 +89,7 @@ fun SettingsScreen(
     familyNight: Boolean,
     seasonalRows: Boolean,
     autoWatched: Boolean,
+    hideWatched: Boolean = false,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -208,6 +210,13 @@ fun SettingsScreen(
         )
         BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
         SettingRow(
+            label = stringResource(R.string.settings_hide_watched),
+            value = stringResource(if (hideWatched) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleHideWatched,
+            modifier = Modifier.testTag(HIDE_WATCHED_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_hide_watched_note), style = ScaryType.Caption)
+        SettingRow(
             label = stringResource(R.string.settings_stats),
             value = null,
             onClick = actions.onOpenStats,
@@ -318,6 +327,7 @@ fun SettingsScreen(
 
 /** Test tag of the phone remote's row. */
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
+const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"
