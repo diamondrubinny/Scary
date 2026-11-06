@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
@@ -70,7 +71,13 @@ class CatalogRepository(
                     var cinemetaCache = cinemeta.cached()
                     var tmdbCache = if (hasKey) tmdb.cached(lang) else null
                     fun build(): Catalog {
-                        val withCinemeta = cinemetaCache?.let { Cinemeta.merge(base, it.metas, it.rows) } ?: base
+                        val withCinemeta = cinemetaCache?.let { cache ->
+                            // The library's categories go on with films from Cinemeta (core Categories), after their own.
+                            cache.categories.entries.fold(Cinemeta.merge(base, cache.metas, cache.rows)) { acc, (collectionId, ids) ->
+                                val curated = acc.collections.firstOrNull { it.id == collectionId }?.movieIds?.size ?: 0
+                                Cinemeta.extend(acc, collectionId, ids.mapNotNull(cache.metas::get), maxRow = curated + Categories.MAX_PER_CATEGORY)
+                            }
+                        } ?: base
                         val cache = tmdbCache ?: return withCinemeta
                         val withRows = Cinemeta.merge(withCinemeta, emptyMap(), cache.rows)
                         return withRows.copy(movies = withRows.movies.map { m -> cache.info[m.imdbId]?.let { Tmdb.enrich(m, it) } ?: m })

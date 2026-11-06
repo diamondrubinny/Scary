@@ -48,6 +48,8 @@ data class CinemetaMeta(
     val endYear: Int? = null,
     /** A series still running ("2022–"). */
     val ongoing: Boolean = false,
+    /** Countries as Cinemeta lists them, the main one first ("South Korea, United States"); empty when unknown. */
+    val country: String = "",
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -94,6 +96,7 @@ object Cinemeta {
     private val catalogIdPattern = Regex("^[A-Za-z]{1,32}$")
     private const val MAX_URL_LENGTH = 512
     private const val MAX_TEXT_LENGTH = 1_500
+    private const val MAX_COUNTRY_LENGTH = 120
     private const val MAX_CAST = 6
     private const val MAX_TRAILERS = 4
     private const val MIN_SEARCH_LENGTH = 3
@@ -191,7 +194,8 @@ object Cinemeta {
         return metas.filter { it.genres.isEmpty() && it.imdbId !in knownImdb }.map { it.imdbId }.distinct().take(limit)
     }
 
-    private fun onTheme(meta: CinemetaMeta): Boolean =
+    /** Horror, thriller or mystery, and not a documentary or a film for children: what SCARY's shelves hold. */
+    fun onTheme(meta: CinemetaMeta): Boolean =
         meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } &&
             meta.genres.none { g -> OFF_THEME_GENRES.any { it.equals(g, ignoreCase = true) } }
 
@@ -265,6 +269,7 @@ object Cinemeta {
             type = type,
             endYear = endYear.takeIf { type == CinemetaMeta.TYPE_SERIES },
             ongoing = ongoing,
+            country = o.str("country")?.trim()?.take(MAX_COUNTRY_LENGTH).orEmpty(),
         )
     }
 
@@ -385,6 +390,8 @@ data class CinemetaCache(
     val rows: List<OnlineRow>,
     /** Which set of online rows this cache holds; caches from older sets refresh at once. */
     val rowsVersion: Int = 1,
+    /** More films for the library's categories (core Categories), IMDb ids by collection id; their details are in [metas]. */
+    val categories: Map<String, List<String>> = emptyMap(),
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
@@ -396,9 +403,9 @@ data class CinemetaCache(
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
-         * back through the years).
+         * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta).
          */
-        const val ROWS_VERSION = 7
+        const val ROWS_VERSION = 8
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

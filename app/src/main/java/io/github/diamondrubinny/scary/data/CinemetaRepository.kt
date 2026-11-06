@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
@@ -231,9 +232,31 @@ class CinemetaRepository(context: Context) {
             }
             metas.awaitAll() to rows.awaitAll().filterNotNull()
         }
-        val metas = metaList.filterNotNull().associateBy { it.imdbId }
+        val metas = metaList.filterNotNull().associateByTo(LinkedHashMap()) { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
-        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION).also(::save)
+        // The library's categories, filled from Cinemeta's big catalogs: one shared pool, sorted into every category.
+        val categoryPool = categoryPool(pool)
+        val categories = Categories.sort(categoryPool)
+        val used = categories.values.flatten().toHashSet()
+        categoryPool.forEach { meta -> if (meta.imdbId in used) metas.putIfAbsent(meta.imdbId, meta) }
+        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION, categories).also(::save)
+    }
+
+    /**
+     * The films and series the categories are filled from: the first pages of Cinemeta's horror, thriller and mystery
+     * catalogs (most popular first), about 3,500 films and 1,500 series. A page that fails just leaves the pool smaller.
+     */
+    private suspend fun categoryPool(pool: Semaphore): List<CinemetaMeta> = coroutineScope {
+        CATEGORY_POOL.flatMap { (kind, genre, pages) ->
+            (0 until pages).map { page ->
+                async {
+                    pool.withPermit { fetch(Cinemeta.catalogUrl("top", genre, page * Cinemeta.PAGE_SIZE, kind)) }
+                        ?.let(Cinemeta::parseCatalog)
+                        ?.filter { it.kind == kind }
+                        .orEmpty()
+                }
+            }
+        }.awaitAll().flatten().distinctBy { it.imdbId }
     }
 
     /**
@@ -312,5 +335,15 @@ class CinemetaRepository(context: Context) {
         const val TIMEOUT_MS = 10_000
         const val PARALLEL_REQUESTS = 6
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
+
+        /** Where the categories' films come from: Cinemeta's "top" catalogs, and how many pages (50 each) of each. */
+        val CATEGORY_POOL = listOf(
+            Triple(MediaKind.MOVIE, "Horror", 36),
+            Triple(MediaKind.MOVIE, "Thriller", 30),
+            Triple(MediaKind.MOVIE, "Mystery", 10),
+            Triple(MediaKind.SERIES, "Horror", 10),
+            Triple(MediaKind.SERIES, "Thriller", 10),
+            Triple(MediaKind.SERIES, "Mystery", 10),
+        )
     }
 }
