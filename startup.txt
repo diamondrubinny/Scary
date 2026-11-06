@@ -1,0 +1,3 @@
+Release cold start, ms (emulator, API 30 TV, 3 runs)
+as installed: 1802 1649 1647
+speed-profile: 1706 1591 1646
