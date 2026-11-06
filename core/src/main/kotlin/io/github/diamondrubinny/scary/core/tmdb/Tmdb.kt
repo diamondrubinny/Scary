@@ -241,6 +241,19 @@ object Tmdb {
         )
     }
 
+    /** Horror, thriller or mystery: what SCARY's shelves hold. */
+    fun isThemed(result: TmdbResult): Boolean = result.genreIds.any { it == HORROR || it == THRILLER || it == MYSTERY }
+
+    /** IMDb to TMDB ids, as stored on the TV. Only well-formed pairs survive a read. */
+    fun encodeIds(ids: Map<String, Long>): String =
+        kotlinx.serialization.json.JsonObject(ids.mapValues { JsonPrimitive(it.value) }).toString()
+
+    fun decodeIds(text: String): Map<String, Long> =
+        root(text)?.mapNotNull { (imdb, value) ->
+            val id = (value as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 }
+            if (id != null && imdbPattern.matches(imdb)) imdb to id else null
+        }?.toMap().orEmpty()
+
     fun rowOf(row: TmdbRow, metas: List<CinemetaMeta>): OnlineRow =
         OnlineRow(row.id, row.titleHe, row.titleEn, metas, mapOf("pt" to row.titlePt, "ru" to row.titleRu, "ar" to row.titleAr))
 

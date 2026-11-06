@@ -52,6 +52,7 @@ class SettingsActions(
     val onCycleNightFear: () -> Unit,
     val onToggleSeasonalRows: () -> Unit,
     val onToggleAutoWatched: () -> Unit,
+    val onToggleHideWatched: () -> Unit = {},
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onToggleTrailerAutoplay: () -> Unit,
@@ -67,6 +68,7 @@ class SettingsActions(
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
     val onOpenPhoneRemote: () -> Unit = {},
+    val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -88,6 +90,9 @@ fun SettingsScreen(
     familyNight: Boolean,
     seasonalRows: Boolean,
     autoWatched: Boolean,
+    hideWatched: Boolean = false,
+    /** The TMDB account's name when signed in, null otherwise. */
+    tmdbAccountName: String? = null,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -161,6 +166,12 @@ fun SettingsScreen(
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
             onClick = actions.onOpenTmdb,
         )
+        SettingRow(
+            label = stringResource(R.string.settings_tmdb_account),
+            value = tmdbAccountName ?: stringResource(R.string.value_tmdb_account_none),
+            onClick = actions.onOpenTmdbAccount,
+            modifier = Modifier.testTag(TMDB_ACCOUNT_ROW_TAG),
+        )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         SettingRow(
@@ -207,6 +218,13 @@ fun SettingsScreen(
             onClick = actions.onToggleAutoWatched,
         )
         BasicText(stringResource(R.string.settings_auto_watched_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.settings_hide_watched),
+            value = stringResource(if (hideWatched) R.string.value_on else R.string.value_off),
+            onClick = actions.onToggleHideWatched,
+            modifier = Modifier.testTag(HIDE_WATCHED_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_hide_watched_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_stats),
             value = null,
@@ -318,6 +336,8 @@ fun SettingsScreen(
 
 /** Test tag of the phone remote's row. */
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
+const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
+const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"

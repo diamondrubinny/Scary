@@ -57,15 +57,33 @@ class SavedMoviesRepository(context: Context) {
             val next = trim(listOf(meta) + _items.value.filter { it.imdbId != meta.imdbId }, keep + meta.imdbId)
             if (next == _items.value) return@withLock
             _items.value = next
-            withContext(Dispatchers.IO) {
-                try {
-                    val tmp = File(file.parentFile, file.name + ".tmp")
-                    tmp.writeText(json.encodeToString(serializer, next))
-                    if (!tmp.renameTo(file)) tmp.delete()
-                } catch (e: IOException) {
-                    Log.w(TAG, "Could not save movies: ${e.javaClass.simpleName}")
-                }
-            }
+            withContext(Dispatchers.IO) { write(next) }
+        }
+    }
+
+    /**
+     * Keeps several online movies at once, newest first (films from the viewer's TMDB lists): one write for all. Past
+     * the cap, the oldest go first, never one in [keep].
+     */
+    suspend fun saveAll(metas: List<CinemetaMeta>, keep: Set<String>) {
+        if (metas.isEmpty()) return
+        mutex.withLock {
+            loadLocked()
+            val ids = metas.mapTo(HashSet()) { it.imdbId }
+            val next = trim(metas.distinctBy { it.imdbId } + _items.value.filter { it.imdbId !in ids }, keep + ids)
+            if (next == _items.value) return@withLock
+            _items.value = next
+            withContext(Dispatchers.IO) { write(next) }
+        }
+    }
+
+    private fun write(items: List<CinemetaMeta>) {
+        try {
+            val tmp = File(file.parentFile, file.name + ".tmp")
+            tmp.writeText(json.encodeToString(serializer, items))
+            if (!tmp.renameTo(file)) tmp.delete()
+        } catch (e: IOException) {
+            Log.w(TAG, "Could not save movies: ${e.javaClass.simpleName}")
         }
     }
 

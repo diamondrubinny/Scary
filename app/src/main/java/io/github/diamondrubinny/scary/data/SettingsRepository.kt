@@ -63,6 +63,8 @@ data class LauncherPrefs(
     val watchedIds: List<String> = emptyList(),
     /** Mark a movie as watched after time away that looks like a viewing ([io.github.diamondrubinny.scary.core.catalog.AutoWatched]). */
     val autoWatched: Boolean = true,
+    /** Watched films leave the home rows (a "Watched" row keeps them) instead of going to the end of each row. */
+    val hideWatched: Boolean = false,
     /** ISO country chosen for rent and buy offers; null follows the device ([io.github.diamondrubinny.scary.core.links.Region]). */
     val rentBuyCountry: String? = null,
     /** A trailer plays by itself next to a movie the focus rests on. On by default, after [trailerIntroSeen]. */
@@ -112,6 +114,7 @@ class SettingsRepository(private val context: Context) {
                 seasonalRows = p[SEASONAL_ROWS] ?: true,
                 watchedIds = RecentList.decode(p[WATCHED]),
                 autoWatched = p[AUTO_WATCHED] ?: true,
+                hideWatched = p[HIDE_WATCHED] ?: false,
                 rentBuyCountry = Region.normalize(p[RENT_BUY_COUNTRY]),
                 trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
                 trailerSound = p[TRAILER_SOUND] ?: false,
@@ -161,12 +164,40 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setAutoWatched(enabled: Boolean) = edit { it[AUTO_WATCHED] = enabled }
 
+    suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
+
     /** "Loved it" or "not for me" (one excludes the other), or neither with null. */
     suspend fun setRating(movieId: String, rating: Rating?) = edit {
         val loved = RecentList.decode(it[LOVED]).filter { id -> id != movieId }
         val disliked = RecentList.decode(it[DISLIKED]).filter { id -> id != movieId }
         it[LOVED] = RecentList.encode((if (rating == Rating.LOVED) listOf(movieId) + loved else loved).take(MAX_RATED))
         it[DISLIKED] = RecentList.encode((if (rating == Rating.NOT_FOR_ME) listOf(movieId) + disliked else disliked).take(MAX_RATED))
+    }
+
+    /** The lists as they are stored after [applySync]: the lists have caps, so not everything given may fit. */
+    data class StoredLists(val myList: List<String>, val loved: List<String>, val watched: List<String>)
+
+    /**
+     * The lists as a sync with the viewer's TMDB account left them (TmdbSync): My list and "Loved it" replaced (null
+     * leaves one as it is), films added to Watched. Films loved there are no longer "not for me" here. Films marked
+     * watched from TMDB get no date: SCARY does not know when they were seen, and "Your year in fear" counts only
+     * the films marked here.
+     */
+    suspend fun applySync(myList: List<String>?, loved: List<String>?, watchedAdded: List<String>): StoredLists {
+        var stored = StoredLists(emptyList(), emptyList(), emptyList())
+        edit { p ->
+            myList?.let { p[MY_LIST] = RecentList.encode(it.distinct().take(MyList.MAX_SIZE)) }
+            loved?.let { list ->
+                val kept = list.distinct().take(MAX_RATED)
+                p[LOVED] = RecentList.encode(kept)
+                p[DISLIKED] = RecentList.encode(RecentList.decode(p[DISLIKED]).filterNot(kept::contains))
+            }
+            val watched = RecentList.decode(p[WATCHED])
+            val added = watchedAdded.distinct().filterNot(watched::contains)
+            if (added.isNotEmpty()) p[WATCHED] = RecentList.encode((added + watched).take(WatchedList.MAX_SIZE))
+            stored = StoredLists(RecentList.decode(p[MY_LIST]), RecentList.decode(p[LOVED]), RecentList.decode(p[WATCHED]))
+        }
+        return stored
     }
 
     suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
@@ -191,6 +222,15 @@ class SettingsRepository(private val context: Context) {
 
     /** Remembers that [pending] was handed to another app; SCARY judges the viewing when it is back on screen. */
     suspend fun setPendingWatch(pending: PendingWatch) = edit { it[PENDING_WATCH] = pending.encode() }
+
+    /**
+     * The TV's screen went off at [atMillis]: a movie handed to another app counts as watched up to now, however long
+     * the TV then stays off. Nothing happens when no movie is pending.
+     */
+    suspend fun endPendingWatch(atMillis: Long) = edit {
+        val pending = PendingWatch.decode(it[PENDING_WATCH]) ?: return@edit
+        it[PENDING_WATCH] = pending.endedAt(atMillis).encode()
+    }
 
     /** The movie handed to another app, if any, forgotten as it is read: each return to SCARY judges it once. */
     suspend fun takePendingWatch(): PendingWatch? {
@@ -286,6 +326,7 @@ class SettingsRepository(private val context: Context) {
         private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")
         private val WATCHED = stringPreferencesKey("watched_movie_ids")
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
+        private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val PENDING_WATCH = stringPreferencesKey("pending_watch")
         private val RENT_BUY_COUNTRY = stringPreferencesKey("rent_buy_country")
         private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")

@@ -84,6 +84,28 @@ class WatchedTest {
     fun `a pending watch survives being stored, and junk is ignored`() {
         val pending = PendingWatch("cm_tt0081505", 1_700_000_000_000)
         assertEquals(pending, PendingWatch.decode(pending.encode()))
-        listOf(null, "", "id", "id|", "|123", "id|abc", "id|0", "a|b|c").forEach { assertNull(it, PendingWatch.decode(it)) }
+        listOf(null, "", "id", "id|", "|123", "id|abc", "id|0", "a|b|c", "id|200|100", "id|100|x", "a|1|2|3")
+            .forEach { assertNull(it, PendingWatch.decode(it)) }
+        val ended = pending.endedAt(pending.startedAtMillis + 5_000)
+        assertEquals(ended, PendingWatch.decode(ended.encode()))
+    }
+
+    @Test
+    fun `a film watched and then the TV switched off counts up to the screen going off`() {
+        val start = 1_700_000_000_000
+        val minute = 60_000L
+        val pending = PendingWatch("the_shining", start)
+        // Switched off right after the film (146 minutes), and back the next morning: 14 hours later.
+        val ended = pending.endedAt(start + 140 * minute)
+        val nextMorning = start + 14 * 60 * minute
+        assertEquals(140 * minute, ended.awayMillis(nextMorning))
+        assertTrue(AutoWatched.counts(ended.awayMillis(nextMorning), 146))
+        // Without the screen-off time, the same evening looked like a TV left on all night, and was not marked.
+        assertFalse(AutoWatched.counts(pending.awayMillis(nextMorning), 146))
+        // Switched off a few minutes in: not a viewing.
+        assertFalse(AutoWatched.counts(pending.endedAt(start + 5 * minute).awayMillis(nextMorning), 146))
+        // Only the first screen-off counts, and one before the start is ignored.
+        assertEquals(ended, ended.endedAt(start + 200 * minute))
+        assertEquals(pending, pending.endedAt(start - minute))
     }
 }

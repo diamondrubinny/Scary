@@ -33,6 +33,10 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
+import io.github.diamondrubinny.scary.core.catalog.Personalize
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.data.TvInputsRepository
 import io.github.diamondrubinny.scary.data.TvInput
@@ -65,7 +69,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -93,6 +102,10 @@ class HomeViewModel(
     private val cinemeta: CinemetaRepository,
     private val regionDetector: RegionDetector,
     private val tvInputs: TvInputsRepository,
+    /** Signals that the TV's network is back, to fetch online rows that failed or are old. */
+    private val networkBack: Flow<Unit> = emptyFlow(),
+    /** The viewer's TMDB account, when they sign in; null in tests that do not need it. */
+    private val tmdbAccount: TmdbAccountRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -212,6 +225,7 @@ class HomeViewModel(
             seasonalRows = prefs.seasonalRows,
             watchedIds = prefs.watchedIds.toSet(),
             autoWatched = prefs.autoWatched,
+            hideWatched = prefs.hideWatched,
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
@@ -234,12 +248,32 @@ class HomeViewModel(
     private var appsJob: Job? = null
     private var nextMessageId = 0L
 
+    /** "Look again": SCARY is back on screen. Online data that is missing or old is then fetched. */
+    private val refreshRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+
+    /**
+     * When to check online data again: back on screen, network back, and every [REFRESH_CHECK_MS] while SCARY stays
+     * in front for hours. A check fetches only what is missing, old (a day) or due for a retry ([RefreshPolicy]).
+     */
+    private val refreshSignals: Flow<Unit> = merge(
+        refreshRequests,
+        networkBack,
+        flow {
+            while (true) {
+                delay(REFRESH_CHECK_MS)
+                emit(Unit)
+            }
+        },
+    )
+
     private fun loadCatalog() {
         viewModelScope.launch {
             tmdb.load()
+            tmdbAccount?.load()
             savedMovies.load()
+            watchTmdbAccount()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
-            catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language)
+            catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
                 .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) }
                 .catch { e ->
@@ -413,24 +447,40 @@ class HomeViewModel(
         val nightPick = NightPick.pick(liked.filter { it.id !in watched }, today(), prefs.nightMaxFear)
             ?: NightPick.pick(liked, today(), prefs.nightMaxFear)
         val isLocked = { movie: Movie -> ParentalGate.isLocked(prefs.parentalEnabled, unlocked, prefs.lockFromFear, movie) }
+        // Sorted by what the viewer watches (Personalize): in rows for finding something new, films already seen go to
+        // the end, or out with "hide watched"; the rows of the kind they watch most come first. Their own lists
+        // (recently opened, My list) stay as they made them.
+        val hideWatched = prefs.hideWatched
+        fun unseenFirst(movies: List<Movie>): List<Movie> =
+            if (hideWatched) movies.filter { it.id !in watched } else Personalize.watchedLast(movies) { it.id in watched }
+        val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
+        val seenOrLoved = watched + prefs.lovedIds
         val rows = buildList {
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
             if (films && prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
-                val movies = season.pick(catalog.movies)
+                val movies = unseenFirst(season.pick(catalog.movies))
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
             if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
             // Moods, decades, time plans and recommendations are about films: a series has no single length or year.
             if (films) {
-                Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
-                    ?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                val loved = Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
+                loved?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                // Not the same films twice: "Because you watched" skips the loved row's seed and its films.
+                Recommender.becauseYouWatched(
+                    catalog.movies,
+                    prefs.watchedIds,
+                    exclude = disliked + prefs.lovedIds + loved?.movies?.map { it.id }.orEmpty(),
+                    skipSeeds = setOfNotNull(loved?.because?.id),
+                    isLocked = isLocked,
+                )?.let { add(HomeRow.BecauseYouWatched(it.because, it.movies)) }
                 add(
                     HomeRow.Moods(
                         selected = selectedMood,
-                        movies = Decades.pick(catalog.movies, selectedMood, selectedDecade),
+                        movies = unseenFirst(Decades.pick(catalog.movies, selectedMood, selectedDecade)),
                         decade = selectedDecade,
                         decades = Decades.available(catalog.movies),
                     ),
@@ -442,11 +492,19 @@ class HomeViewModel(
                     ),
                 )
             }
-            catalog.collections.forEach { collection ->
-                // Family night can empty a row; an empty row is not shown.
-                val movies = catalog.moviesOf(collection)
-                if (movies.isNotEmpty()) add(HomeRow.Collection(collection, movies))
+            if (hideWatched) {
+                val seen = prefs.watchedIds.mapNotNull(catalog::movie)
+                if (seen.isNotEmpty()) add(HomeRow.Watched(seen))
             }
+            // Family night can empty a row; an empty row is not shown.
+            val collections = catalog.collections
+                .map { collection -> collection to catalog.moviesOf(collection) }
+                .filter { (_, movies) -> movies.isNotEmpty() }
+            Personalize.byTaste(collections, taste) { (_, movies) -> Personalize.rowScore(movies, taste, seenOrLoved) }
+                .forEach { (collection, movies) ->
+                    val shown = unseenFirst(movies)
+                    if (shown.isNotEmpty()) add(HomeRow.Collection(collection, shown))
+                }
         }
         return HomeUiState(
             loading = false,
@@ -719,12 +777,14 @@ class HomeViewModel(
     fun onResumed() {
         // Back on the trailer question put it off only while SCARY stayed in front.
         trailerIntroPutOff = false
+        refreshRequests.tryEmit(Unit)
         viewModelScope.launch {
             val pending = settings.takePendingWatch() ?: return@launch
             val prefs = settings.prefs.first()
             val catalog = (shownCatalog.first { it !is CatalogState.Loading } as? CatalogState.Ready)?.catalog
             val movie = catalog?.movie(pending.movieId) ?: webMovieIfAllowed(pending.movieId)
-            val away = System.currentTimeMillis() - pending.startedAtMillis
+            // Up to the screen going off, when the TV was switched off after the film (SettingsRepository.endPendingWatch).
+            val away = pending.awayMillis(System.currentTimeMillis())
             // Back from a bucket-list film: ask about the next one, every time.
             if (prefs.bucketPlaying == pending.movieId) {
                 settings.setBucketPlaying(null)
@@ -739,6 +799,63 @@ class HomeViewModel(
         }
     }
 
+    // The viewer's TMDB account ------------------------------------------------------------------------------------
+
+    /** Signed in or not, waiting for approval, syncing: for the account's screen and the settings row. */
+    val tmdbAccountState: StateFlow<TmdbAccountRepository.State> =
+        tmdbAccount?.state ?: MutableStateFlow(TmdbAccountRepository.State.SignedOut)
+
+    /** The lists as the last sync left them: changes the sync makes itself do not start another. */
+    private var syncedLists: Pair<List<String>, List<String>>? = null
+
+    /**
+     * Keeps the account in step: after signing in, when SCARY is back on screen (at most every [ACCOUNT_SYNC_GAP_MS]),
+     * and shortly after My list or "Loved it" changes here. A key added or deleted updates what the account can do.
+     */
+    @OptIn(FlowPreview::class)
+    private fun watchTmdbAccount() {
+        val account = tmdbAccount ?: return
+        viewModelScope.launch { tmdb.keyMask.collect { account.onKeyChanged() } }
+        viewModelScope.launch { refreshRequests.collect { syncTmdbAccount(ACCOUNT_SYNC_GAP_MS) } }
+        viewModelScope.launch {
+            settings.prefs.map { it.myListIds to it.lovedIds }
+                .distinctUntilChanged()
+                .debounce(ACCOUNT_SYNC_DEBOUNCE_MS)
+                .collect { lists -> if (lists != syncedLists) syncTmdbAccount(0) }
+        }
+    }
+
+    private suspend fun syncTmdbAccount(minGapMs: Long) {
+        val account = tmdbAccount ?: return
+        if (account.state.value !is TmdbAccountRepository.State.SignedIn) return
+        val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
+        val result = account.sync(full, language.value, minGapMs) ?: return
+        val prefs = settings.prefs.first()
+        syncedLists = prefs.myListIds to prefs.lovedIds
+        if (result.addedToMyList + result.addedToLoved + result.addedToWatched > 0) show(R.string.msg_tmdb_synced)
+    }
+
+    fun openTmdbAccount() = push(Screen.TmdbAccount)
+
+    fun startTmdbSignIn() {
+        tmdbAccount?.startSignIn { viewModelScope.launch { syncTmdbAccount(0) } }
+    }
+
+    fun cancelTmdbSignIn() {
+        tmdbAccount?.cancelSignIn()
+    }
+
+    fun signOutOfTmdb() {
+        viewModelScope.launch {
+            tmdbAccount?.signOut()
+            show(R.string.msg_tmdb_signed_out)
+        }
+    }
+
+    fun syncTmdbNow() {
+        viewModelScope.launch { syncTmdbAccount(0) }
+    }
+
     /** Marks a movie as watched or not, from its page, and says which. Not PIN-gated: it opens nothing. */
     fun toggleWatched(movie: Movie, language: Language) {
         viewModelScope.launch {
@@ -751,6 +868,10 @@ class HomeViewModel(
 
     fun toggleAutoWatched() {
         viewModelScope.launch { settings.setAutoWatched(!settings.prefs.first().autoWatched) }
+    }
+
+    fun toggleHideWatched() {
+        viewModelScope.launch { settings.setHideWatched(!settings.prefs.first().hideWatched) }
     }
 
     private fun cancelLaunch() {
@@ -1466,6 +1587,14 @@ class HomeViewModel(
         /** Off unless "setprop log.tag.ScaryKeys DEBUG", as in FocusSurface: lets a failed UI test show what happened. */
         private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
+        /** How often to look whether online data is old while SCARY stays on screen; a look fetches only what is due. */
+        private const val REFRESH_CHECK_MS = 30 * 60_000L
+
+        /** A sync with the TMDB account when SCARY is back on screen, at most this often. */
+        private const val ACCOUNT_SYNC_GAP_MS = 15 * 60_000L
+
+        /** A change to My list or "Loved it" goes to the account this long after the last one (several in a row: once). */
+        private const val ACCOUNT_SYNC_DEBOUNCE_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 12
         private const val REMOTE_RESULTS = 15
@@ -1488,6 +1617,8 @@ class HomeViewModel(
                     container.cinemetaRepository,
                     container.regionDetector,
                     container.tvInputsRepository,
+                    container.networkWatcher.online,
+                    container.tmdbAccount,
                 )
             }
         }

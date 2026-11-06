@@ -6,6 +6,15 @@ package io.github.diamondrubinny.scary
 
 import android.app.ActivityManager
 import android.app.Application
+import android.content.BroadcastReceiver
+import android.content.Intent
+import android.content.IntentFilter
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import io.github.diamondrubinny.scary.data.NetworkWatcher
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.os.StrictMode
@@ -26,6 +35,7 @@ import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SecretStore
 import io.github.diamondrubinny.scary.data.TmdbRepository
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.launch.Launcher
 import io.github.diamondrubinny.scary.stability.CrashGuard
@@ -36,11 +46,34 @@ class ScaryApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         CrashGuard.install(this)
+        watchScreenOff()
         if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
             // Debug builds only: report disk and network work on the main thread, and leaked resources, in logcat.
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().detectAll().penaltyLog().build())
             StrictMode.setVmPolicy(StrictMode.VmPolicy.Builder().detectAll().penaltyLog().build())
         }
+    }
+
+    /**
+     * The screen going off ends a viewing: a movie handed to Stremio counts as watched up to then, not up to the next
+     * day when SCARY is on screen again (SettingsRepository.endPendingWatch). Only while SCARY's process runs, which
+     * for the home screen is nearly always; otherwise the time away is judged as before.
+     */
+    private fun watchScreenOff() {
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (intent.action != Intent.ACTION_SCREEN_OFF) return
+                val pending = goAsync()
+                container.scope.launch {
+                    try {
+                        container.settingsRepository.endPendingWatch(System.currentTimeMillis())
+                    } finally {
+                        pending.finish()
+                    }
+                }
+            }
+        }
+        ContextCompat.registerReceiver(this, receiver, IntentFilter(Intent.ACTION_SCREEN_OFF), ContextCompat.RECEIVER_NOT_EXPORTED)
     }
 
     /**
@@ -77,8 +110,13 @@ class ScaryApplication : Application(), SingletonImageLoader.Factory {
 class AppContainer(context: Context) {
     private val appContext = context.applicationContext
 
+    /** Work that outlives a screen, such as noting that the screen went off. */
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    val networkWatcher = NetworkWatcher(appContext)
+
     val cinemetaRepository = CinemetaRepository(appContext)
-    val tmdbRepository = TmdbRepository(appContext, SecretStore(appContext))
+    private val secretStore = SecretStore(appContext)
+    val tmdbRepository = TmdbRepository(appContext, secretStore)
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)
@@ -87,6 +125,9 @@ class AppContainer(context: Context) {
     val phoneRemote = io.github.diamondrubinny.scary.remote.PhoneRemoteServer(appContext)
     val settingsRepository = SettingsRepository(appContext)
     val savedMoviesRepository = SavedMoviesRepository(appContext)
+
+    /** The viewer's own TMDB account, only once they sign in. */
+    val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
 }

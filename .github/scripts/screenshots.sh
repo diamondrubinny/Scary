@@ -222,6 +222,31 @@ shot 43-en-my-list 4
 open --es scary.debug.open home
 open --es scary.debug.open surprise
 shot 44-en-surprise 6
+# English versions of the series tab, the bucket list, "How much time do you have?" and the phone remote, for the
+# website (scary.network) and the English gallery.
+open --es scary.debug.open home
+open --es scary.debug.open tab:series
+shot 68-en-series 10
+key KEYCODE_DPAD_DOWN
+key KEYCODE_DPAD_DOWN
+shot 69-en-series-rows 4
+open --es scary.debug.open tab:movie
+sleep 3
+open --es scary.debug.open bucket:fill
+sleep 2
+open --es scary.debug.open bucket
+shot 70-en-bucket-list 5
+open --es scary.debug.open bucket:prompt
+shot 71-en-bucket-prompt 4
+key KEYCODE_BACK
+open --es scary.debug.open home
+sleep 3
+open --es scary.debug.open time:double
+shot 72-en-time-double 5
+open --es scary.debug.open remote
+shot 73-en-phone-remote 5
+key KEYCODE_DPAD_CENTER
+open --es scary.debug.open home
 # English versions of the moods, family night and shiver screens, for the English video ad (tools/promo).
 open --es scary.debug.open home
 open --es scary.debug.open mood:relentless

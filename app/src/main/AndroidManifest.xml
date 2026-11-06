@@ -3,6 +3,8 @@
 
     <!-- Only for movie artwork and info from Cinemeta (can be turned off in SCARY settings). HTTPS only. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- To fetch online rows again as soon as the TV's network is back (it often starts before its Wi-Fi). -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- The sleep timer pauses playback on time. Without it (the default from Android 14) the timer may end a few
          minutes late. No data is involved. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />

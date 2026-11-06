@@ -84,6 +84,12 @@ import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_QR_TAG
 import io.github.diamondrubinny.scary.ui.remote.PHONE_REMOTE_TAG
 import io.github.diamondrubinny.scary.ui.settings.PHONE_REMOTE_ROW_TAG
 import java.net.Socket
+import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
+import androidx.lifecycle.ViewModelProvider
+import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import kotlinx.coroutines.runBlocking
 import android.os.ParcelFileDescriptor
 import android.app.UiAutomation
 import android.provider.Settings
@@ -800,6 +806,48 @@ class ScaryUiTest {
     }
 
     @Test
+    fun watchedFilmsGoToTheEndOfTheirRowAndCanBeHiddenInAWatchedRow() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        val catalog = bundledCatalog()
+        val collection = catalog.collections.first { catalog.moviesOf(it).size >= 4 }
+        val film = catalog.moviesOf(collection).first()
+        fun row() = viewModel.uiState.value.rows.filterIsInstance<HomeRow.Collection>().firstOrNull { it.collection.id == collection.id }
+        withCleanup({
+            runBlocking { container.settingsRepository.setWatched(film.id, watched = true) }
+            waitUntilOrDescribe("${film.title} at the end of its row once watched") { row()?.movies?.lastOrNull()?.id == film.id }
+            runBlocking { container.settingsRepository.setHideWatched(true) }
+            waitUntilOrDescribe("${film.title} out of its row and in the Watched row") {
+                val watchedRow = viewModel.uiState.value.rows.filterIsInstance<HomeRow.Watched>().singleOrNull()
+                row()?.movies?.none { it.id == film.id } == true && watchedRow?.movies?.any { it.id == film.id } == true
+            }
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("watched")
+            waitFor(hasText(text(R.string.row_watched)))
+        }) {
+            runBlocking {
+                container.settingsRepository.setHideWatched(false)
+                container.settingsRepository.setWatched(film.id, watched = false)
+            }
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theTmdbAccountScreenOpensFromSettingsAndAsksForAKeyFirst() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(TMDB_ACCOUNT_ROW_TAG)
+        waitFor(row)
+        rule.onNode(row).performScrollTo().performClick()
+        waitFor(hasTestTag(TMDB_ACCOUNT_TAG))
+        // The emulator has no TMDB key: signing in needs one, and the screen says so, with the way to add it.
+        waitFor(hasText(text(R.string.tmdb_account_no_key)))
+        waitFor(hasText(text(R.string.tmdb_account_add_key)) and isFocused())
+        backToHome()
+    }
+
+    @Test
     fun theSleepTimerStepsThroughItsChoicesAndTurnsOff() {
         waitForHome()
         val row = hasTestTag(SLEEP_ROW_TAG)
@@ -892,14 +940,29 @@ class ScaryUiTest {
 
     /** The focused card or chip lies wholly inside the rows, and so does its row's title (the nearest one above it). */
     private fun assertFocusedRowFullyShown() {
-        val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+        var seen = "nothing focused in the rows"
+        try {
+            waitForRowShown { seen = it }
+        } catch (failure: AssertionError) {
+            throw AssertionError("Last seen: $seen\n${failure.message}", failure)
+        }
+        Log.d("ScaryKeys", "test: row shown, $seen")
+    }
+
+    private fun waitForRowShown(report: (String) -> Unit) {
         waitUntilOrDescribe("a focused card wholly inside the rows, its row title in view") {
-            val focused = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
-                .singleOrNull()?.boundsInRoot ?: return@waitUntilOrDescribe false
-            val title = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
-                .map { it.boundsInRoot }
-                .filter { it.bottom <= focused.top }
-                .maxByOrNull { it.bottom }
+            // The rows' bounds are read each time: the hero shrinks as the focus enters the rows, moving them up.
+            val rows = rule.onNodeWithTag(HOME_ROWS_TAG).fetchSemanticsNode().boundsInRoot
+            val focusedNode = rule.onAllNodes(isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .singleOrNull() ?: return@waitUntilOrDescribe false
+            val focused = focusedNode.boundsInRoot
+            val titleNode = rule.onAllNodes(isHeading() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))).fetchSemanticsNodes()
+                .filter { it.boundsInRoot.bottom <= focused.top }
+                .maxByOrNull { it.boundsInRoot.bottom }
+            val title = titleNode?.boundsInRoot
+            report("rows ${rows.top}..${rows.bottom}, focused " +
+                "${focusedNode.config.getOrNull(SemanticsProperties.ContentDescription)} ${focused.top}..${focused.bottom}, " +
+                "title ${titleNode?.config?.getOrNull(SemanticsProperties.Text)} ${title?.top}..${title?.bottom}")
             focused.top >= rows.top && focused.bottom <= rows.bottom && title != null && title.top >= rows.top
         }
     }

@@ -10,12 +10,15 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.sync.RefreshPolicy
+import io.github.diamondrubinny.scary.core.sync.RefreshState
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
@@ -45,10 +48,17 @@ class CatalogRepository(
 
     /**
      * Layers, each optional: bundled catalog, then Cinemeta artwork and rows, then TMDB Hebrew text and rows when
-     * the user has added a TMDB key. Re-runs when the online switch or the key changes.
+     * the user has added a TMDB key. Re-runs when the online switch or the key changes. SCARY is the home screen and
+     * stays up for days, so each signal on [refresh] (back on screen, network back, a timer) fetches again whatever is
+     * missing or old ([RefreshPolicy]); a failed fetch is retried later, not given up on.
      */
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun catalog(onlineEnabled: Flow<Boolean>, tmdbKeySet: Flow<Boolean>, language: Flow<Language>): Flow<Catalog> =
+    fun catalog(
+        onlineEnabled: Flow<Boolean>,
+        tmdbKeySet: Flow<Boolean>,
+        language: Flow<Language>,
+        refresh: Flow<Unit> = emptyFlow(),
+    ): Flow<Catalog> =
         combine(onlineEnabled, tmdbKeySet, language) { online, hasKey, lang -> Triple(online, hasKey, lang) }
             .distinctUntilChanged()
             .flatMapLatest { (online, hasKey, lang) ->
@@ -57,7 +67,6 @@ class CatalogRepository(
                     emit(base)
                     if (!online) return@flow
 
-                    val now = System.currentTimeMillis()
                     var cinemetaCache = cinemeta.cached()
                     var tmdbCache = if (hasKey) tmdb.cached(lang) else null
                     fun build(): Catalog {
@@ -68,16 +77,33 @@ class CatalogRepository(
                     }
                     if (cinemetaCache != null || tmdbCache != null) emit(build())
 
-                    val knownCinemeta = cinemetaCache
-                    if (knownCinemeta == null || knownCinemeta.isStale(now)) {
-                        cinemeta.refresh(base.movies.map { it.imdbId to it.kind })?.let { cinemetaCache = it; emit(build()) }
+                    var cinemetaState = RefreshState()
+                    var tmdbState = RefreshState()
+                    suspend fun fetchWhatIsDue() {
+                        val now = System.currentTimeMillis()
+                        val knownCinemeta = cinemetaCache
+                        if (RefreshPolicy.due(knownCinemeta == null || knownCinemeta.isStale(now), cinemetaState, now)) {
+                            val fresh = cinemeta.refresh(base.movies.map { it.imdbId to it.kind })
+                            cinemetaState = RefreshPolicy.after(cinemetaState, fresh != null, System.currentTimeMillis())
+                            if (fresh != null) {
+                                cinemetaCache = fresh
+                                emit(build())
+                            }
+                        }
+                        val knownTmdb = tmdbCache
+                        if (hasKey && RefreshPolicy.due(knownTmdb == null || knownTmdb.isStale(now), tmdbState, now)) {
+                            // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.
+                            val ids = build().movies.filterNot { it.isSeries }.map { it.imdbId }
+                            val fresh = tmdb.refresh(ids, lang)
+                            tmdbState = RefreshPolicy.after(tmdbState, fresh != null, System.currentTimeMillis())
+                            if (fresh != null) {
+                                tmdbCache = fresh
+                                emit(build())
+                            }
+                        }
                     }
-                    val knownTmdb = tmdbCache
-                    if (hasKey && (knownTmdb == null || knownTmdb.isStale(now))) {
-                        // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.
-                        val ids = build().movies.filterNot { it.isSeries }.map { it.imdbId }
-                        tmdb.refresh(ids, lang)?.let { tmdbCache = it; emit(build()) }
-                    }
+                    fetchWhatIsDue()
+                    refresh.collect { fetchWhatIsDue() }
                 }
             }
 

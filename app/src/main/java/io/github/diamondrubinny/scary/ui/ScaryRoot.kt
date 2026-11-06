@@ -76,6 +76,9 @@ import io.github.diamondrubinny.scary.ui.stats.StatsScreen
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
+import io.github.diamondrubinny.scary.ui.settings.TmdbAccountActions
+import io.github.diamondrubinny.scary.ui.settings.TmdbAccountScreen
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.ui.remote.OtherApps
 import io.github.diamondrubinny.scary.launch.HomeButtonService
 import io.github.diamondrubinny.scary.system.SleepTimer
@@ -102,6 +105,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
     val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
+    val tmdbAccount by viewModel.tmdbAccountState.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -258,6 +262,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleFamilyNight = viewModel::toggleFamilyNight,
         onToggleSeasonalRows = viewModel::toggleSeasonalRows,
         onToggleAutoWatched = viewModel::toggleAutoWatched,
+        onToggleHideWatched = viewModel::toggleHideWatched,
+        onOpenTmdbAccount = viewModel::openTmdbAccount,
         onToggleOnline = viewModel::toggleOnline,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
@@ -347,6 +353,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     familyNight = state.familyNight,
                     seasonalRows = state.seasonalRows,
                     autoWatched = state.autoWatched,
+                    hideWatched = state.hideWatched,
+                    tmdbAccountName = (tmdbAccount as? TmdbAccountRepository.State.SignedIn)?.username,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
@@ -390,6 +398,18 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
+                current == Screen.TmdbAccount -> TmdbAccountScreen(
+                    state = tmdbAccount,
+                    actions = remember(viewModel) {
+                        TmdbAccountActions(
+                            onSignIn = viewModel::startTmdbSignIn,
+                            onCancel = viewModel::cancelTmdbSignIn,
+                            onSignOut = viewModel::signOutOfTmdb,
+                            onSyncNow = viewModel::syncTmdbNow,
+                            onAddKey = viewModel::openTmdbDialog,
+                        )
+                    },
+                )
                 current == Screen.PhoneRemote -> PhoneRemoteScreen(
                     state = remoteState,
                     onStart = { phoneRemote.start(language) },
