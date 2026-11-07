@@ -413,4 +413,44 @@
     <string name="tmdb_account_session_ended">TMDB завершил эту сессию (вы вышли там?). Войдите снова, чтобы продолжить синхронизацию.</string>
     <string name="msg_tmdb_synced">Ваши списки TMDB синхронизированы.</string>
     <string name="msg_tmdb_signed_out">Вы вышли из TMDB. Ваши списки остаются на этом телевизоре.</string>
+
+    <!-- What do you love? (taste picker) and clearing recently opened -->
+    <string name="loved_badge">понравилось</string>
+    <string name="taste_title">Что вам нравится?</string>
+    <string name="taste_explainer">Нажмите OK на фильмах и сериалах, которые вам нравятся. SCARY упорядочит ряды по ним: подходящее вашему вкусу будет первым.</string>
+    <string name="taste_done">Готово</string>
+    <string name="taste_invite_body">Выберите несколько любимых фильмов и сериалов, и ряды будут сначала показывать то, что подходит вашему вкусу. Всё остаётся на этом телевизоре.</string>
+    <string name="taste_invite_pick">Выбрать любимое</string>
+    <string name="taste_invite_later">Не сейчас</string>
+    <string name="msg_taste_sorted">Готово. Ряды теперь следуют вашему вкусу.</string>
+    <string name="msg_taste_few">Сохранено. Выберите ещё несколько, и ряды будут следовать вашему вкусу.</string>
+    <string name="msg_recent_cleared">Ряд «Недавно открытые» очищен.</string>
+    <string name="settings_clear_recent">Очистить «Недавно открытые»</string>
+    <string name="settings_clear_recent_confirm">Нажмите ещё раз для очистки</string>
+    <string name="settings_clear_recent_empty">Пусто</string>
+    <string name="settings_clear_recent_note">Только этот ряд на главном экране. «Просмотрено», «Мой список» и «Понравилось» остаются.</string>
+    <plurals name="taste_count_more">
+        <item quantity="one">Выбрано: %1$d. Выберите хотя бы %2$d, чтобы ряды следовали вашему вкусу.</item>
+        <item quantity="few">Выбрано: %1$d. Выберите хотя бы %2$d, чтобы ряды следовали вашему вкусу.</item>
+        <item quantity="many">Выбрано: %1$d. Выберите хотя бы %2$d, чтобы ряды следовали вашему вкусу.</item>
+        <item quantity="other">Выбрано: %1$d. Выберите хотя бы %2$d, чтобы ряды следовали вашему вкусу.</item>
+    </plurals>
+    <plurals name="taste_count">
+        <item quantity="one">Выбрано: %1$d. Ряды следуют вашему вкусу.</item>
+        <item quantity="few">Выбрано: %1$d. Ряды следуют вашему вкусу.</item>
+        <item quantity="many">Выбрано: %1$d. Ряды следуют вашему вкусу.</item>
+        <item quantity="other">Выбрано: %1$d. Ряды следуют вашему вкусу.</item>
+    </plurals>
+    <plurals name="settings_taste_value">
+        <item quantity="one">%1$d понравился</item>
+        <item quantity="few">%1$d понравились</item>
+        <item quantity="many">%1$d понравились</item>
+        <item quantity="other">%1$d понравились</item>
+    </plurals>
+    <plurals name="settings_clear_recent_value">
+        <item quantity="one">%1$d название</item>
+        <item quantity="few">%1$d названия</item>
+        <item quantity="many">%1$d названий</item>
+        <item quantity="other">%1$d названия</item>
+    </plurals>
 </resources>

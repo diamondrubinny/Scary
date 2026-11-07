@@ -34,7 +34,9 @@ import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Personalize
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.data.TmdbAccountRepository
+import io.github.diamondrubinny.scary.data.OnlinePage
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
 import io.github.diamondrubinny.scary.core.catalog.Decades
@@ -236,6 +238,7 @@ class HomeViewModel(
             tab = choices.tab,
             picking = choices.picking,
             bucketIds = prefs.bucketIds,
+            recentCount = prefs.recentIds.size,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -459,6 +462,8 @@ class HomeViewModel(
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
+            // A new viewer: until a few films are watched or loved, the rows cannot follow their taste. Ask once.
+            if (!taste.known && !prefs.tasteInviteDismissed && !prefs.familyNight) add(HomeRow.TasteInvite)
             if (films && prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
                 val movies = unseenFirst(season.pick(catalog.movies))
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
@@ -500,9 +505,14 @@ class HomeViewModel(
             val collections = catalog.collections
                 .map { collection -> collection to catalog.moviesOf(collection) }
                 .filter { (_, movies) -> movies.isNotEmpty() }
-            Personalize.byTaste(collections, taste) { (_, movies) -> Personalize.rowScore(movies, taste, seenOrLoved) }
+            val online = Cinemeta.onlineCollectionId("")
+            val ordered = Personalize.byTaste(collections, taste) { (_, movies) -> Personalize.rowScore(movies, taste, seenOrLoved) }
+            // Each film once down the screen: a film from the web only in the first row that reaches it; library films
+            // keep their places in the categories they were chosen for. Then, inside each row, the films from the web
+            // that fit the viewer's taste best come first.
+            Personalize.withoutRepeats(ordered) { collection, movie -> movie.curated && !collection.id.startsWith(online) }
                 .forEach { (collection, movies) ->
-                    val shown = unseenFirst(movies)
+                    val shown = unseenFirst(Personalize.byTasteInRow(movies, taste))
                     if (shown.isNotEmpty()) add(HomeRow.Collection(collection, shown))
                 }
         }
@@ -538,21 +548,29 @@ class HomeViewModel(
     /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
     private var detailsCache: DetailsCacheEntry? = null
 
-    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val disliked: List<String>, val details: MovieDetails)
+    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val prefs: LauncherPrefs?, val details: MovieDetails)
 
     /**
      * Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. Films
-     * marked "not for me" are never in it.
+     * marked "not for me" are never in it; among films alike, those that fit the viewer's taste go first, and the ones
+     * they watched go last.
      */
     fun details(movieId: String): MovieDetails? {
         val shown = visibleCatalog() ?: return null
-        val disliked = latestPrefs?.dislikedIds.orEmpty()
-        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.disliked == disliked) return it.details }
+        val prefs = latestPrefs
+        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.prefs === prefs) return it.details }
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        val dislikedSet = disliked.toHashSet()
-        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in dislikedSet }
-        return MovieDetails(movie, Similar.find(candidates, movie))
-            .also { detailsCache = DetailsCacheEntry(movieId, shown, disliked, it) }
+        val disliked = prefs?.dislikedIds.orEmpty().toHashSet()
+        val watched = prefs?.watchedIds.orEmpty().toHashSet()
+        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in disliked }
+        val taste = prefs?.let { Personalize.taste(shown::movie, it.watchedIds, it.lovedIds, it.dislikedIds) } ?: Personalize.Taste.NONE
+        val bonus: (Movie) -> Double = if (taste.known) {
+            { TASTE_WEIGHT * taste.score(it).coerceIn(-TASTE_CAP, TASTE_CAP) / TASTE_CAP }
+        } else {
+            { 0.0 }
+        }
+        return MovieDetails(movie, Similar.find(candidates, movie, bonus = bonus) { it.id in watched })
+            .also { detailsCache = DetailsCacheEntry(movieId, shown, prefs, it) }
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -563,7 +581,10 @@ class HomeViewModel(
         val extended = if (!online) {
             catalog
         } else {
-            extras.entries.fold(catalog) { acc, (rowId, metas) -> Cinemeta.extend(acc, Cinemeta.onlineCollectionId(rowId), metas) }
+            extras.entries.fold(catalog) { acc, (key, metas) ->
+                val collectionId = if (key.startsWith(CATEGORY_PREFIX)) key.removePrefix(CATEGORY_PREFIX) else Cinemeta.onlineCollectionId(key)
+                Cinemeta.extend(acc, collectionId, metas)
+            }
         }
         return if (familyNight) FamilyNight.filter(extended) else extended
     }
@@ -580,10 +601,25 @@ class HomeViewModel(
      * nothing happens, and the next scroll tries again.
      */
     fun onNearRowEnd(rowKey: String) {
-        val rowId = rowKey.removePrefix("collection:" + Cinemeta.onlineCollectionId(""))
-        if (rowId == rowKey || latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
+        if (latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
+        val collectionId = rowKey.removePrefix("collection:").takeIf { it != rowKey } ?: return
+        // A library category goes on past its films from the daily pool (CategoryPaging), kept under "cat:<id>".
+        if (collectionId in Categories.ids) {
+            loadMore(CATEGORY_PREFIX + collectionId, start = 0) { cursor -> cinemeta.loadCategoryPage(collectionId, cursor) }
+            return
+        }
+        val rowId = collectionId.removePrefix(Cinemeta.onlineCollectionId("")).takeIf { it != collectionId } ?: return
         val fromTmdb = cinemeta.endlessStart(rowId) == null
         val start = cinemeta.endlessStart(rowId) ?: tmdb.endlessStart(rowId) ?: return
+        loadMore(rowId, start) { cursor -> if (fromTmdb) tmdb.loadPage(rowId, cursor, language.value) else cinemeta.loadPage(rowId, cursor) }
+    }
+
+    /**
+     * Loads the next pages of the row kept under [key] in [extraPages], from [start]: pages until one brings films
+     * not on the home screen yet (each film shows once down the screen), skipping up to [MAX_EMPTY_PAGES] at a time.
+     */
+    private fun loadMore(key: String, start: Int, load: suspend (Int) -> OnlinePage?) {
+        val rowId = key
         val state = paging.getOrPut(rowId) { RowPaging(start) }
         if (state.loading || state.next == null) return
         if (extraPages.value[rowId].orEmpty().size >= Cinemeta.MAX_ENDLESS_ROW_MOVIES) {
@@ -595,13 +631,17 @@ class HomeViewModel(
             try {
                 var found = emptyList<CinemetaMeta>()
                 var attempts = 0
+                // Films already on the home screen do not count: rows show each film once, and a page of them would
+                // leave the row as it was, with nothing to scroll to.
+                val onScreen = uiState.value.rows.flatMapTo(HashSet()) { row ->
+                    (row as? HomeRow.Collection)?.movies?.map { it.imdbId }.orEmpty()
+                }
                 while (found.isEmpty() && attempts < MAX_EMPTY_PAGES) {
                     val cursor = state.next ?: break
-                    val page = (if (fromTmdb) tmdb.loadPage(rowId, cursor, language.value) else cinemeta.loadPage(rowId, cursor))
-                        ?: return@launch
+                    val page = load(cursor) ?: return@launch
                     attempts++
                     state.next = page.next
-                    found = page.movies
+                    found = page.movies.filterNot { it.imdbId in onScreen }
                 }
                 if (found.isNotEmpty()) {
                     extraPages.update { pages ->
@@ -1276,7 +1316,48 @@ class HomeViewModel(
     /** "Not for me" on a film's page: it is no longer suggested; pressed again, it is taken back. */
     fun toggleNotForMe(movie: Movie, language: Language) = rate(movie, Rating.NOT_FOR_ME, language)
 
-    private fun rate(movie: Movie, rating: Rating, language: Language) {
+    /**
+     * OK on a poster in "What do you love?": loved, or taken back. No message for each pick: the screen's count and the
+     * heart on the poster say it, and TalkBack reads both.
+     */
+    fun toggleLovedQuietly(movie: Movie) = rate(movie, Rating.LOVED, quiet = true)
+
+    fun openTastePicker() = push(Screen.TastePicker)
+
+    /** "Not now" on the home screen's invitation; settings still offer the picker. */
+    fun dismissTasteInvite() {
+        viewModelScope.launch { settings.setTasteInviteDismissed(true) }
+    }
+
+    /** "Done" in the picker: back where it was opened, saying the rows now follow the picks (once there are enough). */
+    fun finishTastePicker() {
+        val loved = latestPrefs?.lovedIds?.size ?: 0
+        back()
+        if (loved >= Personalize.MIN_HISTORY) show(R.string.msg_taste_sorted) else if (loved > 0) show(R.string.msg_taste_few)
+    }
+
+    /**
+     * The picker's posters for one tab: the library's own (chosen by hand, so known) best rated first, then popular ones
+     * from the web in the order they came. Films marked "Not for me" stay out; family night's limits apply as everywhere.
+     */
+    fun tasteCandidates(kind: MediaKind): List<Movie> {
+        val catalog = (shownCatalog.value as? CatalogState.Ready)?.catalog ?: return emptyList()
+        val disliked = latestPrefs?.dislikedIds?.toHashSet().orEmpty()
+        val state = uiState.value
+        val ofKind = catalog.ofKind(kind).movies.filter { it.id !in disliked && !state.isLocked(it) }
+        val (curated, online) = ofKind.partition { it.curated }
+        return (curated.sortedByDescending { it.imdbRating ?: 0.0 } + online).take(MAX_TASTE_CANDIDATES)
+    }
+
+    /** "Clear recently opened" in settings. Watched, My list and the ratings stay. */
+    fun clearRecent() {
+        viewModelScope.launch {
+            settings.clearRecent()
+            show(R.string.msg_recent_cleared)
+        }
+    }
+
+    private fun rate(movie: Movie, rating: Rating, language: Language? = null, quiet: Boolean = false) {
         viewModelScope.launch {
             val prefs = settings.prefs.first()
             val current = when (movie.id) {
@@ -1286,7 +1367,7 @@ class HomeViewModel(
             }
             val next = rating.takeIf { it != current }
             settings.setRating(movie.id, next)
-            show(
+            if (!quiet) show(
                 when (next) {
                     Rating.LOVED -> R.string.msg_loved
                     Rating.NOT_FOR_ME -> R.string.msg_not_for_me
@@ -1597,6 +1678,14 @@ class HomeViewModel(
         private const val ACCOUNT_SYNC_DEBOUNCE_MS = 5_000L
         private const val LAUNCH_SHIVER_MS = 1_600L
         private const val MAX_EMPTY_PAGES = 12
+
+        /** A library category's pages in [extraPages], next to the online rows' ids. */
+        private const val CATEGORY_PREFIX = "cat:"
+        private const val MAX_TASTE_CANDIDATES = 120
+
+        /** How much the taste may move a film in "More like this": up to one shared genre's worth. */
+        private const val TASTE_WEIGHT = 1.5
+        private const val TASTE_CAP = 4.0
         private const val REMOTE_RESULTS = 15
         private const val REMOTE_WEB_WAIT_MS = 5_000L
         private const val GOOGLE_TV_LABEL = "Google TV"

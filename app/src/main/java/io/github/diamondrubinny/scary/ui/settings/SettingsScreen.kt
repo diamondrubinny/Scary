@@ -22,6 +22,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import io.github.diamondrubinny.scary.ui.components.minutesShown
 import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
@@ -30,7 +32,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -69,6 +73,8 @@ class SettingsActions(
     val onOpenTmdb: () -> Unit,
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
+    val onOpenTastePicker: () -> Unit = {},
+    val onClearRecent: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -106,18 +112,23 @@ fun SettingsScreen(
     returningFromStats: Boolean = false,
     returningFromRemote: Boolean = false,
     phoneRemoteOn: Boolean = false,
+    lovedCount: Int = 0,
+    recentCount: Int = 0,
+    returningFromTaste: Boolean = false,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
     val statementFocus = remember { FocusRequester() }
     val statsFocus = remember { FocusRequester() }
     val remoteFocus = remember { FocusRequester() }
+    val tasteFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         // Back from a document lands on the row that opened it, not at the top.
         val target = when {
             returningFromStats -> statsFocus
             returningFromRemote -> remoteFocus
+            returningFromTaste -> tasteFocus
             returningFrom == DocumentKind.Privacy -> privacyFocus
             returningFrom == DocumentKind.Accessibility -> statementFocus
             else -> firstFocus
@@ -225,6 +236,32 @@ fun SettingsScreen(
             modifier = Modifier.testTag(HIDE_WATCHED_ROW_TAG),
         )
         BasicText(stringResource(R.string.settings_hide_watched_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.taste_title),
+            value = pluralStringResource(R.plurals.settings_taste_value, lovedCount, lovedCount),
+            onClick = actions.onOpenTastePicker,
+            modifier = Modifier.focusRequester(tasteFocus).testTag(TASTE_ROW_TAG),
+        )
+        // Clearing asks once more; moving away takes the question back.
+        var confirmClearRecent by remember { mutableStateOf(false) }
+        SettingRow(
+            label = stringResource(if (confirmClearRecent) R.string.settings_clear_recent_confirm else R.string.settings_clear_recent),
+            value = if (recentCount == 0) stringResource(R.string.settings_clear_recent_empty) else pluralStringResource(R.plurals.settings_clear_recent_value, recentCount, recentCount),
+            onClick = {
+                when {
+                    recentCount == 0 -> Unit
+                    confirmClearRecent -> {
+                        confirmClearRecent = false
+                        actions.onClearRecent()
+                    }
+                    else -> confirmClearRecent = true
+                }
+            },
+            modifier = Modifier
+                .onFocusChanged { if (!it.hasFocus) confirmClearRecent = false }
+                .testTag(CLEAR_RECENT_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_clear_recent_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_stats),
             value = null,
@@ -338,6 +375,8 @@ fun SettingsScreen(
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
+const val TASTE_ROW_TAG = "tasteRow"
+const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"

@@ -410,4 +410,40 @@
     <string name="tmdb_account_session_ended">‏TMDB סיימה את ה־session (אולי התנתקתם שם?). מתחברים שוב כדי להמשיך לסנכרן.</string>
     <string name="msg_tmdb_synced">רשימות ה־TMDB שלכם סונכרנו.</string>
     <string name="msg_tmdb_signed_out">התנתקתם מ־TMDB. הרשימות נשארות בטלוויזיה.</string>
+
+    <!-- What do you love? (taste picker) and clearing recently opened -->
+    <string name="loved_badge">אהבתי</string>
+    <string name="taste_title">מה אתם אוהבים?</string>
+    <string name="taste_explainer">לחצו OK על הסרטים והסדרות שאתם אוהבים. SCARY יסדר את השורות לפיהם: מה שמתאים לטעם שלכם יופיע ראשון.</string>
+    <string name="taste_done">סיום</string>
+    <string name="taste_invite_body">בחרו כמה סרטים וסדרות שאתם אוהבים, והשורות יציגו קודם את מה שמתאים לטעם שלכם. הכל נשמר בטלוויזיה הזו.</string>
+    <string name="taste_invite_pick">לבחירת מה שאני אוהב</string>
+    <string name="taste_invite_later">לא עכשיו</string>
+    <string name="msg_taste_sorted">מעולה. השורות מסודרות עכשיו לפי הטעם שלכם.</string>
+    <string name="msg_taste_few">נשמר. בחרו עוד כמה, והשורות יסתדרו לפי הטעם שלכם.</string>
+    <string name="msg_recent_cleared">\"נפתחו לאחרונה\" נוקה.</string>
+    <string name="settings_clear_recent">ניקוי \"נפתחו לאחרונה\"</string>
+    <string name="settings_clear_recent_confirm">לחצו שוב לניקוי</string>
+    <string name="settings_clear_recent_empty">ריק</string>
+    <string name="settings_clear_recent_note">רק השורה הזו במסך הבית. \"נצפה\", \"הרשימה שלי\" ו\"אהבתי\" נשארים.</string>
+    <plurals name="taste_count_more">
+        <item quantity="one">נבחר אחד. בחרו לפחות %2$d כדי שהשורות יסתדרו לפי הטעם שלכם.</item>
+        <item quantity="two">נבחרו שניים. בחרו לפחות %2$d כדי שהשורות יסתדרו לפי הטעם שלכם.</item>
+        <item quantity="other">נבחרו %1$d. בחרו לפחות %2$d כדי שהשורות יסתדרו לפי הטעם שלכם.</item>
+    </plurals>
+    <plurals name="taste_count">
+        <item quantity="one">נבחר אחד. השורות מסודרות לפי הטעם שלכם.</item>
+        <item quantity="two">נבחרו שניים. השורות מסודרות לפי הטעם שלכם.</item>
+        <item quantity="other">נבחרו %1$d. השורות מסודרות לפי הטעם שלכם.</item>
+    </plurals>
+    <plurals name="settings_taste_value">
+        <item quantity="one">אהוב אחד</item>
+        <item quantity="two">שניים אהובים</item>
+        <item quantity="other">%1$d אהובים</item>
+    </plurals>
+    <plurals name="settings_clear_recent_value">
+        <item quantity="one">כותר אחד</item>
+        <item quantity="two">שני כותרים</item>
+        <item quantity="other">%1$d כותרים</item>
+    </plurals>
 </resources>

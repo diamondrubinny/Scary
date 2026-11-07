@@ -124,6 +124,10 @@ class HomeActions(
     val onOpenBucket: () -> Unit = {},
     /** "Done" while picking films for the bucket list. */
     val onFinishPicking: () -> Unit = {},
+    /** "Pick films I love" on the home screen's invitation. */
+    val onOpenTastePicker: () -> Unit = {},
+    /** "Not now" on that invitation. */
+    val onDismissTasteInvite: () -> Unit = {},
 )
 
 val SidePadding = 48.dp
@@ -154,14 +158,16 @@ fun HomeScreen(
 ) {
     val heroFocus = remember { FocusRequester() }
     val restoreFocus = remember { FocusRequester() }
-    // Set when the last movie of My list is removed from its own row: the row goes away, and focus with it.
-    var heroAfterMyList by remember { mutableStateOf(false) }
-    val hasMyList = state.rows.any { it is HomeRow.MyList }
-    LaunchedEffect(hasMyList, heroAfterMyList) {
-        if (heroAfterMyList && !hasMyList) {
+    // The key of a row going away from inside (the last movie of My list removed, "Not now" on the taste invitation):
+    // the focus goes with it, so it moves to the hero once the row is gone.
+    var heroAfterRow by remember { mutableStateOf<String?>(null) }
+    val rowKeys = state.rows.map { it.key }
+    LaunchedEffect(rowKeys, heroAfterRow) {
+        val gone = heroAfterRow ?: return@LaunchedEffect
+        if (gone !in rowKeys) {
             withFrameNanos { }
             heroFocus.tryRequestFocus()
-            heroAfterMyList = false
+            heroAfterRow = null
         }
     }
 
@@ -259,7 +265,7 @@ fun HomeScreen(
                     CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                         Box(Modifier.bringIntoViewResponder(FromRowTitle)) {
                             HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {
-                                heroAfterMyList = true
+                                heroAfterRow = row.key
                             }
                         }
                     }
@@ -458,7 +464,8 @@ private fun HomeRowView(
     isLocked: (Movie) -> Boolean,
     isWatched: (Movie) -> Boolean,
     showSetHome: Boolean,
-    onMyListEmptied: () -> Unit,
+    /** This row is about to go away by the viewer's own action (its last film removed, or dismissed). */
+    onRowGone: () -> Unit,
 ) {
     // Holding OK on a My list card removes it: the card that takes its place gets the focus, so the next one can go too.
     val neighbourFocus = remember { FocusRequester() }
@@ -483,6 +490,10 @@ private fun HomeRowView(
         TimePlanRowView(row, rowState, restoreKey, restoreFocus, actions, isLocked, isWatched)
         return
     }
+    if (row is HomeRow.TasteInvite) {
+        TasteInviteView(row, restoreKey, restoreFocus, actions, onRowGone)
+        return
+    }
     if (row is HomeRow.Collection) {
         // Endless online rows: ask for the next page while there are still plenty of cards to go, and again each time a
         // page arrives while the viewer is still near the end, so the row keeps ahead of the remote without a pause.
@@ -503,6 +514,7 @@ private fun HomeRowView(
         is HomeRow.BecauseYouLoved -> stringResource(R.string.row_because_loved, row.because.displayTitle(language))
         is HomeRow.BecauseYouWatched -> stringResource(R.string.row_because_watched, row.because.displayTitle(language))
         is HomeRow.Watched -> stringResource(R.string.row_watched)
+        is HomeRow.TasteInvite -> stringResource(R.string.taste_title)
     }
     Column {
         Row(
@@ -542,7 +554,7 @@ private fun HomeRowView(
                         watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = {
-                            if (row.movies.size == 1) onMyListEmptied() else removedAt = index
+                            if (row.movies.size == 1) onRowGone() else removedAt = index
                             actions.onToggleMyList(movie)
                         },
                         onFocused = { actions.onCardFocused(key, movie.id) },
@@ -565,7 +577,7 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Moods, is HomeRow.TimePlan -> Unit
+                is HomeRow.Moods, is HomeRow.TimePlan, is HomeRow.TasteInvite -> Unit
                 is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved, is HomeRow.BecauseYouWatched,
                 is HomeRow.Watched -> items(
                     when (row) {
@@ -869,21 +881,66 @@ private fun TimePlanRowView(
     }
 }
 
+/** Test tag of the home screen's "What do you love?" invitation. */
+const val TASTE_INVITE_TAG = "tasteInvite"
+
+/** "What do you love?" for a viewer SCARY knows little about yet: pick a few films, or "Not now". */
+@Composable
+private fun TasteInviteView(
+    row: HomeRow.TasteInvite,
+    restoreKey: String?,
+    restoreFocus: FocusRequester,
+    actions: HomeActions,
+    onRowGone: () -> Unit,
+) {
+    val pickKey = "${row.key}:pick"
+    val laterKey = "${row.key}:later"
+    Column(
+        modifier = Modifier
+            .padding(horizontal = SidePadding)
+            .fillMaxWidth(0.7f)
+            .testTag(TASTE_INVITE_TAG),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        BasicText(stringResource(R.string.taste_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+        BasicText(stringResource(R.string.taste_invite_body), style = ScaryType.Body)
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(vertical = 6.dp)) {
+            ScaryButton(
+                text = stringResource(R.string.taste_invite_pick),
+                onClick = actions.onOpenTastePicker,
+                primary = true,
+                focusRequester = restoreFocus.takeIf { pickKey == restoreKey },
+                modifier = Modifier.onFocusChanged { if (it.isFocused) actions.onCardFocused(pickKey, null) },
+            )
+            ScaryButton(
+                text = stringResource(R.string.taste_invite_later),
+                onClick = {
+                    onRowGone()
+                    actions.onDismissTasteInvite()
+                },
+                focusRequester = restoreFocus.takeIf { laterKey == restoreKey },
+                modifier = Modifier.onFocusChanged { if (it.isFocused) actions.onCardFocused(laterKey, null) },
+            )
+        }
+    }
+}
+
 /** 292 minutes as "4:52". */
 fun hoursAndMinutes(minutes: Int): String = "%d:%02d".format(java.util.Locale.ROOT, minutes / 60, minutes % 60)
 
 @Composable
-private fun MoodChip(
+internal fun MoodChip(
     label: String,
     selected: Boolean,
     onClick: () -> Unit,
     onFocused: () -> Unit,
     focusRequester: FocusRequester?,
+    modifier: Modifier = Modifier,
 ) {
     FocusSurface(
         onClick = onClick,
         onFocusChanged = { if (it) onFocused() },
-        modifier = (if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+        modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .semantics { this.selected = selected },
         shape = RoundedCornerShape(50),
         focusedScale = 1.06f,

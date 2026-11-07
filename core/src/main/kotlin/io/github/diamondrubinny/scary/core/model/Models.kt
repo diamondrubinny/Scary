@@ -115,6 +115,8 @@ data class Movie(
     val endYear: Int? = null,
     /** A series still running: its years read "2022–". */
     val ongoing: Boolean = false,
+    /** Cinemeta's genres ("Horror", "Mystery", "Sci-Fi"…) when known: what else a film is, besides horror or thriller. */
+    val genres: List<String> = emptyList(),
 ) {
     val isSeries: Boolean get() = kind == MediaKind.SERIES
 

@@ -370,23 +370,41 @@ private val SET_HOME_TILE_WIDTH = 240.dp
  */
 val LocalBucketNumber = compositionLocalOf<((Movie) -> Int?)?> { null }
 
+/** While picking films one loves (the taste picker), whether a film is picked: it carries a heart. Null elsewhere. */
+val LocalLovedMark = compositionLocalOf<((Movie) -> Boolean)?> { null }
+
 /** Where films and series mix (search): series carry a "Series" tag. */
 val LocalShowSeriesTag = staticCompositionLocalOf { false }
 
 /** What a card shows beyond its poster: its bucket-list number, the series tag, and the same in words for TalkBack. */
-class CardExtrasState(val bucketNumber: Int?, val seriesTag: String?, val labels: List<String>)
+class CardExtrasState(val bucketNumber: Int?, val seriesTag: String?, val labels: List<String>, val loved: Boolean = false)
 
 @Composable
 fun cardExtras(movie: Movie): CardExtrasState {
     val number = LocalBucketNumber.current?.invoke(movie)
     val seriesTag = if (movie.isSeries && LocalShowSeriesTag.current) stringResource(R.string.series_tag) else null
     val numberLabel = number?.let { stringResource(R.string.bucket_badge, it) }
-    return CardExtrasState(number, seriesTag, listOfNotNull(seriesTag, numberLabel))
+    val loved = LocalLovedMark.current?.invoke(movie) == true
+    val lovedLabel = if (loved) stringResource(R.string.loved_badge) else null
+    return CardExtrasState(number, seriesTag, listOfNotNull(seriesTag, numberLabel, lovedLabel), loved)
 }
 
-/** The bucket-list number (top start) and the series tag (bottom end), drawn over a card. */
+/** The bucket-list number or the heart of a picked film (top start), and the series tag (bottom end), over a card. */
 @Composable
 fun BoxScope.CardExtras(extras: CardExtrasState) {
+    if (extras.loved) {
+        BasicText(
+            text = "♥",
+            style = ScaryType.Label.copy(color = ScaryColors.Bone, textAlign = TextAlign.Center),
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(6.dp)
+                .size(30.dp)
+                .background(ScaryColors.Blood, CircleShape)
+                .border(2.dp, ScaryColors.Bone, CircleShape)
+                .wrapContentHeight(Alignment.CenterVertically),
+        )
+    }
     extras.bucketNumber?.let { number ->
         BasicText(
             text = number.toString(),

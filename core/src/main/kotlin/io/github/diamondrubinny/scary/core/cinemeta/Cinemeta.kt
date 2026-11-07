@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.cinemeta
 
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.MediaKind
@@ -48,6 +49,10 @@ data class CinemetaMeta(
     val endYear: Int? = null,
     /** A series still running ("2022–"). */
     val ongoing: Boolean = false,
+    /** Countries as Cinemeta lists them, the main one first ("South Korea, United States"); empty when unknown. */
+    val country: String = "",
+    /** Years that run on ("2025–", "1977–1979"): what a series has, even when Cinemeta files it as a film. */
+    val runsOn: Boolean = false,
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -94,6 +99,7 @@ object Cinemeta {
     private val catalogIdPattern = Regex("^[A-Za-z]{1,32}$")
     private const val MAX_URL_LENGTH = 512
     private const val MAX_TEXT_LENGTH = 1_500
+    private const val MAX_COUNTRY_LENGTH = 120
     private const val MAX_CAST = 6
     private const val MAX_TRAILERS = 4
     private const val MIN_SEARCH_LENGTH = 3
@@ -191,7 +197,8 @@ object Cinemeta {
         return metas.filter { it.genres.isEmpty() && it.imdbId !in knownImdb }.map { it.imdbId }.distinct().take(limit)
     }
 
-    private fun onTheme(meta: CinemetaMeta): Boolean =
+    /** Horror, thriller or mystery, and not a documentary or a film for children: what SCARY's shelves hold. */
+    fun onTheme(meta: CinemetaMeta): Boolean =
         meta.genres.any { g -> THEME_GENRES.any { it.equals(g, ignoreCase = true) } } &&
             meta.genres.none { g -> OFF_THEME_GENRES.any { it.equals(g, ignoreCase = true) } }
 
@@ -206,7 +213,7 @@ object Cinemeta {
         description = movie.synopsisEn,
         director = movie.director.split(',').map(String::trim).filter(String::isNotEmpty),
         cast = movie.cast,
-        genres = listOf(if (movie.genre == Genre.HORROR) "Horror" else "Thriller"),
+        genres = movie.genres.ifEmpty { listOf(if (movie.genre == Genre.HORROR) "Horror" else "Thriller") },
         imdbRating = movie.imdbRating,
         runtimeMin = movie.runtimeMin.takeIf { it > 0 },
         trailerYoutubeId = movie.trailerYoutubeId,
@@ -265,6 +272,8 @@ object Cinemeta {
             type = type,
             endYear = endYear.takeIf { type == CinemetaMeta.TYPE_SERIES },
             ongoing = ongoing,
+            country = o.str("country")?.trim()?.take(MAX_COUNTRY_LENGTH).orEmpty(),
+            runsOn = span != null && span.groupValues[1].isNotEmpty(),
         )
     }
 
@@ -284,6 +293,7 @@ object Cinemeta {
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
         trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
+        genres = movie.genres.ifEmpty { meta.genres.takeIf { meta.kind == movie.kind }.orEmpty() },
         // A running series ends, or a new season starts: Cinemeta knows before the bundled library does.
         endYear = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.endYear else movie.endYear,
         ongoing = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.ongoing else movie.ongoing,
@@ -316,6 +326,10 @@ object Cinemeta {
             kind = meta.kind,
             endYear = meta.endYear,
             ongoing = meta.ongoing,
+            // Read from its genres and plot by the categories' rules: "More like this", the taste and "Because you
+            // loved" need them, and a film from the web has no editor to say it is a ghost story.
+            subgenres = Categories.subgenresOf(meta),
+            genres = meta.genres,
         )
     }
 
@@ -333,13 +347,24 @@ object Cinemeta {
         val collection = base.collections[index]
         val byImdb = base.movies.associateByTo(HashMap()) { it.imdbId }
         val added = mutableListOf<Movie>()
-        val newIds = metas.mapNotNull { meta ->
-            byImdb[meta.imdbId]?.id ?: toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
-        }
+        val newIds = metas.mapNotNull { meta -> idFor(meta, byImdb, added) }
         val ids = (collection.movieIds + newIds).distinct().take(maxRow)
         val kept = ids.toHashSet()
         val collections = base.collections.toMutableList().also { it[index] = collection.copy(movieIds = ids) }
         return base.copy(movies = base.movies + added.filter { it.id in kept }, collections = collections)
+    }
+
+    /**
+     * The id [meta] has in the catalog: the movie already there with its IMDb id, or a new one ([added]). Cinemeta lists
+     * a few titles both as a film and as a series under one IMDb id (Haunted Hotel, Count Dracula): one already there
+     * as the other kind is left out, or a series row would hold a film and show on the films tab. A "film" whose
+     * years run on ("2025–") is a series Cinemeta filed under films, and stays out of film rows.
+     */
+    private fun idFor(meta: CinemetaMeta, byImdb: MutableMap<String, Movie>, added: MutableList<Movie>): String? {
+        val known = byImdb[meta.imdbId]
+        if (known != null) return known.id.takeIf { known.kind == meta.kind }
+        if (meta.kind == MediaKind.MOVIE && meta.runsOn) return null
+        return toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
     }
 
     /** The collection id an online row gets in the merged catalog. */
@@ -351,9 +376,7 @@ object Cinemeta {
         val added = mutableListOf<Movie>()
         val onlineCollections = rows.mapNotNull { row ->
             val ids = row.metas.asSequence()
-                .mapNotNull { meta ->
-                    byImdb[meta.imdbId]?.id ?: toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
-                }
+                .mapNotNull { meta -> idFor(meta, byImdb, added) }
                 .distinct()
                 .take(perRow)
                 .toList()
@@ -385,6 +408,8 @@ data class CinemetaCache(
     val rows: List<OnlineRow>,
     /** Which set of online rows this cache holds; caches from older sets refresh at once. */
     val rowsVersion: Int = 1,
+    /** More films for the library's categories (core Categories), IMDb ids by collection id; their details are in [metas]. */
+    val categories: Map<String, List<String>> = emptyMap(),
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
@@ -396,9 +421,9 @@ data class CinemetaCache(
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
-         * back through the years).
+         * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta).
          */
-        const val ROWS_VERSION = 7
+        const val ROWS_VERSION = 8
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

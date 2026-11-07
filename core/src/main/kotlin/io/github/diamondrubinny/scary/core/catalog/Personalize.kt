@@ -76,6 +76,32 @@ object Personalize {
         return rows.indices.sortedWith(compareByDescending<Int> { scores[it] }.thenBy { it }).map(rows::get)
     }
 
+    /**
+     * Rows in screen order, each film shown once: a film from the web goes only in the first row that reaches it, and
+     * later rows skip it. Library films stay in every row [alwaysKeep] says (the categories they were chosen for).
+     */
+    fun <K> withoutRepeats(rows: List<Pair<K, List<Movie>>>, alwaysKeep: (K, Movie) -> Boolean): List<Pair<K, List<Movie>>> {
+        val shown = HashSet<String>()
+        return rows.map { (key, movies) ->
+            key to movies.filter { movie -> shown.add(movie.id) || alwaysKeep(key, movie) }
+        }
+    }
+
+    /**
+     * The films from the web in a row, best fitting the [taste] first, after the library's own films (which keep their
+     * curated order). They are sorted in blocks of [block] (a page of the catalog), so films already on screen do not
+     * jump while more pages load. Nothing moves while the taste is not known.
+     */
+    fun byTasteInRow(movies: List<Movie>, taste: Taste, block: Int = BLOCK): List<Movie> {
+        if (!taste.known) return movies
+        val (curated, online) = movies.partition { it.curated }
+        if (online.size < 2) return movies
+        return curated + online.chunked(block).flatMap { chunk ->
+            val scores = chunk.map(taste::score)
+            chunk.indices.sortedWith(compareByDescending<Int> { scores[it] }.thenBy { it }).map(chunk::get)
+        }
+    }
+
     /** A film's traits, as the keys of [Taste]'s weights. */
     internal fun traits(movie: Movie): List<String> = buildList {
         add("g:${movie.genre}")
@@ -94,6 +120,7 @@ object Personalize {
     }
 
     const val MIN_HISTORY = 3
+    private const val BLOCK = 50
     private const val MAX_HISTORY = 200
     private const val RECENCY = 0.97
     private const val LOVED = 3.0

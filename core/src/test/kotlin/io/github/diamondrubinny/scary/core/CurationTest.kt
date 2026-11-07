@@ -52,7 +52,7 @@ class CurationTest {
         val target = movie("t", 3, Genre.HORROR, Subgenre.GHOST, Subgenre.PSYCHOLOGICAL)
         val both = movie("both", 3, Genre.HORROR, Subgenre.GHOST, Subgenre.PSYCHOLOGICAL)
         val one = movie("one", 3, Genre.HORROR, Subgenre.GHOST)
-        val unrelated = movie("unrelated", 3, Genre.THRILLER, Subgenre.CRIME)
+        val unrelated = movie("unrelated", 3, Genre.THRILLER, Subgenre.CRIME).copy(director = "someone else")
         val result = Similar.find(listOf(unrelated, one, target, both), target)
         assertEquals(listOf("both", "one"), result.map { it.id })
     }

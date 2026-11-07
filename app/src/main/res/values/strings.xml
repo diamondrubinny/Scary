@@ -409,4 +409,36 @@
     <string name="tmdb_account_session_ended">TMDB ended this session (signed out there?). Sign in again to keep syncing.</string>
     <string name="msg_tmdb_synced">Your TMDB lists are synced.</string>
     <string name="msg_tmdb_signed_out">Signed out of TMDB. Your lists stay on this TV.</string>
+
+    <!-- What do you love? (taste picker) and clearing recently opened -->
+    <string name="loved_badge">loved</string>
+    <string name="taste_title">What do you love?</string>
+    <string name="taste_explainer">Press OK on the films and series you love. SCARY sorts its rows by them: what fits your taste comes first.</string>
+    <string name="taste_done">Done</string>
+    <string name="taste_invite_body">Pick a few films and series you love, and the rows will show what fits your taste first. It all stays on this TV.</string>
+    <string name="taste_invite_pick">Pick what I love</string>
+    <string name="taste_invite_later">Not now</string>
+    <string name="msg_taste_sorted">Done. Your rows now follow your taste.</string>
+    <string name="msg_taste_few">Saved. Pick a few more and the rows will follow your taste.</string>
+    <string name="msg_recent_cleared">Recently opened is cleared.</string>
+    <string name="settings_clear_recent">Clear recently opened</string>
+    <string name="settings_clear_recent_confirm">Press again to clear</string>
+    <string name="settings_clear_recent_empty">Empty</string>
+    <string name="settings_clear_recent_note">Only that row on the home screen. Watched, My list and Loved stay.</string>
+    <plurals name="taste_count_more">
+        <item quantity="one">%1$d picked. Pick at least %2$d so the rows can follow your taste.</item>
+        <item quantity="other">%1$d picked. Pick at least %2$d so the rows can follow your taste.</item>
+    </plurals>
+    <plurals name="taste_count">
+        <item quantity="one">%1$d picked. The rows follow your taste.</item>
+        <item quantity="other">%1$d picked. The rows follow your taste.</item>
+    </plurals>
+    <plurals name="settings_taste_value">
+        <item quantity="one">%1$d loved</item>
+        <item quantity="other">%1$d loved</item>
+    </plurals>
+    <plurals name="settings_clear_recent_value">
+        <item quantity="one">%1$d title</item>
+        <item quantity="other">%1$d titles</item>
+    </plurals>
 </resources>

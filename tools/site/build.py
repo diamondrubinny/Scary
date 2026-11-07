@@ -69,22 +69,27 @@ for lang in LANGS:
     d = i18n[lang]
     o = old[lang]
     d["sub"] = T["sub"][lang]
-    d["spec_size"] = o["spec_size"].replace("2.7", "2.9").replace("2,7", "2,9")
-    assert "2" in d["spec_size"] and "7" not in d["spec_size"], (lang, d["spec_size"])
+    # Build 193: 3,099,106 bytes, 2.96 MiB (the size the site has always shown in MiB).
+    d["spec_size"] = o["spec_size"].replace("2.7", "3.0").replace("2,7", "3,0")
+    assert "3" in d["spec_size"] and "2.7" not in d["spec_size"] and "2,7" not in d["spec_size"], (lang, d["spec_size"])
     d["badge_new"] = T["badge_new"][lang]
     # Features: new ones and the old ones, in the new order.
+    # Features, in their new order: the new ones, and the old ones moved (f7 joins the moods and the time lineup).
     new_features = {
         "f1": ("f1_t", "f1_d"), "f2": ("f2_t", "f2_d"), "f3": ("f3_t", "f3_d"), "f4": ("f4_t", "f4_d"),
-        "f6": ("f6_t", "f6_d"), "f10": ("f10_t", "f10_d"), "f11": ("f11_t", "f11_d"),
+        "f5": ("fs_t", "fs_d"), "f6": ("fa_t", "fa_d"), "f11": ("f11_t", "f11_d"),
     }
-    moved = {"f5": "f2", "f7": "f3", "f8": "f4", "f9": "f5", "f12": "f9"}
+    moved = {"f8": "f3", "f10": "f5", "f12": "f9"}
     for key, (t, dsc) in new_features.items():
         d[key + "_t"] = T[t][lang]
         d[key + "_d"] = T[dsc][lang]
     for key, was in moved.items():
         d[key + "_t"] = o[was + "_t"]
         d[key + "_d"] = o[was + "_d"]
-    d["f8_d"] = o["f4_d"] + T["f8_d_extra"][lang]
+    d["f7_t"] = o["f2_t"]
+    d["f7_d"] = o["f2_d"] + T["f7_time_extra"][lang]
+    d["f9_t"] = o["f4_t"]
+    d["f9_d"] = o["f4_d"] + T["f8_d_extra"][lang]
     # Screens.
     for i, s in enumerate(SHOTS["order"], 1):
         spec = SHOTS[s]
@@ -122,7 +127,7 @@ page = re.sub(
     lambda m: m.group(1) + html.escape(en["fear_aria"]) + m.group(2) + marks, page, count=1)
 
 # ---- Features -------------------------------------------------------------------------------------------------
-NEW = {1, 3, 4, 6}
+NEW = {1, 3, 4, 5, 6}
 items = []
 for i in range(1, 13):
     title = html.escape(en[f"f{i}_t"], quote=False)
@@ -146,14 +151,15 @@ page = re.sub(r'(<div class="row"[^>]*>\n).*?(\n      </div>\n      <p class="ro
               lambda m: m.group(1) + "\n".join(figures) + m.group(2), page, count=1, flags=re.S)
 
 # ---- Install tip, size, meta, styles ---------------------------------------------------------------------------
-page = page.replace('<li data-i18n="spec_size">2.7 MB</li>', f'<li data-i18n="spec_size">{en["spec_size"]}</li>', 1)
+page, n = re.subn(r'<li data-i18n="spec_size">[^<]*</li>', lambda m: f'<li data-i18n="spec_size">{en["spec_size"]}</li>', page, count=1)
+assert n == 1, "spec_size"
 page = re.sub(r'(<ol class="steps">.*?</ol>)', lambda m: m.group(1) + f'\n        <p class="tip" data-i18n-html="install_tip">{en["install_tip"]}</p>',
               page, count=1, flags=re.S)
 page = re.sub(r'(<p class="sub" data-i18n="sub">)[^<]*', lambda m: m.group(1) + html.escape(en["sub"], quote=False), page, count=1)
 page = re.sub(r'(<span data-i18n="legal_version">)[^<]*', lambda m: m.group(1) + en["legal_version"], page, count=1)
 page = re.sub(r'(<meta name="description" content=")[^"]*', lambda m: m.group(1) + html.escape(
-    "SCARY is a free, open-source horror home screen for Android TV: 170 films and 40 series, tonight's pick, moods, "
-    "a bucket list, your phone as the remote, and every streaming app in one place."), page, count=1)
+    "SCARY is a free, open-source horror home screen for Android TV: 170 films and 40 series, tonight's pick, sorting "
+    "by what you watch, a bucket list, your phone as the remote, and every streaming app in one place."), page, count=1)
 page = re.sub(r'(<meta property="og:description" content=")[^"]*', lambda m: m.group(1) + html.escape(
     "SCARY: a free, open-source horror home screen for Android TV. Films and series, a bucket list and a phone remote. "
     "Download the APK, see the screens, support the project."), page, count=1)

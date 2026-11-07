@@ -410,4 +410,40 @@
     <string name="tmdb_account_session_ended">O TMDB encerrou esta sessão (você saiu por lá?). Entre de novo para continuar sincronizando.</string>
     <string name="msg_tmdb_synced">Suas listas do TMDB estão sincronizadas.</string>
     <string name="msg_tmdb_signed_out">Você saiu do TMDB. Suas listas ficam nesta TV.</string>
+
+    <!-- What do you love? (taste picker) and clearing recently opened -->
+    <string name="loved_badge">amado</string>
+    <string name="taste_title">Do que você gosta?</string>
+    <string name="taste_explainer">Aperte OK nos filmes e séries que você ama. O SCARY ordena as fileiras por eles: o que combina com seu gosto vem primeiro.</string>
+    <string name="taste_done">Pronto</string>
+    <string name="taste_invite_body">Escolha alguns filmes e séries que você ama, e as fileiras vão mostrar primeiro o que combina com seu gosto. Tudo fica nesta TV.</string>
+    <string name="taste_invite_pick">Escolher o que amo</string>
+    <string name="taste_invite_later">Agora não</string>
+    <string name="msg_taste_sorted">Pronto. Suas fileiras agora seguem seu gosto.</string>
+    <string name="msg_taste_few">Salvo. Escolha mais alguns e as fileiras vão seguir seu gosto.</string>
+    <string name="msg_recent_cleared">Abertos recentemente foi limpo.</string>
+    <string name="settings_clear_recent">Limpar abertos recentemente</string>
+    <string name="settings_clear_recent_confirm">Aperte de novo para limpar</string>
+    <string name="settings_clear_recent_empty">Vazio</string>
+    <string name="settings_clear_recent_note">Só essa fileira da tela inicial. Visto, Minha lista e Amado continuam.</string>
+    <plurals name="taste_count_more">
+        <item quantity="one">%1$d escolhido. Escolha pelo menos %2$d para as fileiras seguirem seu gosto.</item>
+        <item quantity="many">%1$d escolhidos. Escolha pelo menos %2$d para as fileiras seguirem seu gosto.</item>
+        <item quantity="other">%1$d escolhidos. Escolha pelo menos %2$d para as fileiras seguirem seu gosto.</item>
+    </plurals>
+    <plurals name="taste_count">
+        <item quantity="one">%1$d escolhido. As fileiras seguem seu gosto.</item>
+        <item quantity="many">%1$d escolhidos. As fileiras seguem seu gosto.</item>
+        <item quantity="other">%1$d escolhidos. As fileiras seguem seu gosto.</item>
+    </plurals>
+    <plurals name="settings_taste_value">
+        <item quantity="one">%1$d amado</item>
+        <item quantity="many">%1$d amados</item>
+        <item quantity="other">%1$d amados</item>
+    </plurals>
+    <plurals name="settings_clear_recent_value">
+        <item quantity="one">%1$d título</item>
+        <item quantity="many">%1$d títulos</item>
+        <item quantity="other">%1$d títulos</item>
+    </plurals>
 </resources>
