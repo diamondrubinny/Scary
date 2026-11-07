@@ -49,19 +49,9 @@ jobs:
           path: ~/.android/debug.keystore
           key: android-debug-keystore-v1
 
-      - name: Core unit tests (catalog, search, PIN, curation, links)
-        run: ./gradlew --no-daemon :core:test
-
-      - name: Build debug APK
-        run: ./gradlew --no-daemon :app:assembleDebug
-
-      - name: Build UI test APK
-        run: ./gradlew --no-daemon :app:assembleDebugAndroidTest
-
-      - name: Lint
-        run: ./gradlew --no-daemon :app:lintDebug
-
-      # Optional dedicated release key from repository secrets. Without it the release APK uses the debug key above.
+      # The signing key from repository secrets, when it is there: every APK of this repository, debug and release,
+      # main and branches, is then signed with it, so any of them installs over any other and over what the TVs have.
+      # Pull requests from forks get no secrets. Without it, the cached debug key above is used.
       - name: Release signing key (optional)
         env:
           KEYSTORE_BASE64: ${{ secrets.SCARY_KEYSTORE_BASE64 }}
@@ -71,8 +61,28 @@ jobs:
             echo "SCARY_KEYSTORE_FILE=$RUNNER_TEMP/release.keystore" >> "$GITHUB_ENV"
             echo "Using the release key from secrets."
           else
-            echo "No release key secret; the release APK is signed with the debug key."
+            echo "No release key secret; the APKs are signed with the debug key."
           fi
+
+      - name: Core unit tests (catalog, search, PIN, curation, links)
+        run: ./gradlew --no-daemon :core:test
+
+      - name: Build debug APK
+        env:
+          SCARY_KEYSTORE_PASSWORD: ${{ secrets.SCARY_KEYSTORE_PASSWORD }}
+          SCARY_KEY_ALIAS: ${{ secrets.SCARY_KEY_ALIAS }}
+          SCARY_KEY_PASSWORD: ${{ secrets.SCARY_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleDebug
+
+      - name: Build UI test APK
+        env:
+          SCARY_KEYSTORE_PASSWORD: ${{ secrets.SCARY_KEYSTORE_PASSWORD }}
+          SCARY_KEY_ALIAS: ${{ secrets.SCARY_KEY_ALIAS }}
+          SCARY_KEY_PASSWORD: ${{ secrets.SCARY_KEY_PASSWORD }}
+        run: ./gradlew --no-daemon :app:assembleDebugAndroidTest
+
+      - name: Lint
+        run: ./gradlew --no-daemon :app:lintDebug
 
       - name: Build release APK (R8, not debuggable)
         env:
