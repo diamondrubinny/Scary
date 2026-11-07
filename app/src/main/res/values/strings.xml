@@ -158,6 +158,7 @@
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
         <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
+        <item>Updates (official builds; you can turn the automatic check off in settings): at most every six hours SCARY asks GitHub for the official repository\'s update file. Nothing about you is sent; GitHub sees the TV\'s IP address. An update is downloaded only when you choose \"Update now\", installed only if it is signed with SCARY\'s key, and Android asks you to confirm.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
     </string-array>
@@ -441,4 +442,31 @@
         <item quantity="one">%1$d title</item>
         <item quantity="other">%1$d titles</item>
     </plurals>
+
+    <!-- Updates from SCARY's official repository -->
+    <string name="update_title">A new version of SCARY</string>
+    <string name="update_version">Version %1$s, build %2$d</string>
+    <string name="update_how">It comes from SCARY\'s official repository and is checked before installing. Android will ask you to confirm.</string>
+    <string name="update_now">Update now</string>
+    <string name="update_later">Later</string>
+    <string name="update_skip">Skip this version</string>
+    <string name="update_downloading">Downloading… %1$d%%</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_permission">To update itself, SCARY needs Android\'s permission to install apps. Allow it once for SCARY on the next screen, then come back.</string>
+    <string name="update_open_settings">Open settings</string>
+    <string name="update_installing">Confirm the update on Android\'s screen. SCARY restarts when it is done.</string>
+    <string name="update_close">Close</string>
+    <string name="update_failed_unreachable">Could not reach the update server. Check the connection and try again from settings.</string>
+    <string name="update_failed_verify">The download did not match the published version, so it was not installed. Try again later.</string>
+    <string name="update_failed_not_official">This file is not signed by SCARY\'s official key, so it was not installed.</string>
+    <string name="update_failed_install">Android did not install the update. You can install it by hand from scary.network.</string>
+    <string name="update_failed_permission_screen">This TV hides the permission screen. Open Settings, Apps, SCARY, and allow installing unknown apps.</string>
+    <string name="settings_update_check">Check for updates</string>
+    <string name="settings_update_checking">Checking…</string>
+    <string name="settings_update_up_to_date">Up to date (build %1$d)</string>
+    <string name="settings_update_available">Available: build %1$d</string>
+    <string name="settings_update_failed">Could not check</string>
+    <string name="settings_update_auto">Look for updates by itself</string>
+    <string name="settings_update_note">Only from SCARY\'s official repository on GitHub, at most every six hours, and only an update signed with SCARY\'s key is installed. GitHub sees the TV\'s IP address; nothing else is sent.</string>
+    <string name="settings_update_not_official">This copy of SCARY is not the official build, so it does not get the official updates.</string>
 </resources>

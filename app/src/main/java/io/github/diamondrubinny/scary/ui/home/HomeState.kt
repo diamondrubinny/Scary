@@ -59,6 +59,7 @@ data class HomeUiState(
     val bucketIds: List<String> = emptyList(),
     /** How many films are in "Recently opened" (settings offers to clear them). */
     val recentCount: Int = 0,
+    val autoUpdateCheck: Boolean = true,
 ) {
     /** A film's place in the bucket list, from 1; null when it is not in it. */
     fun bucketNumber(movie: Movie): Int? = bucketIds.indexOf(movie.id).takeIf { it >= 0 }?.plus(1)

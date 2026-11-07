@@ -88,6 +88,8 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.core.update.UpdateManifest
+import io.github.diamondrubinny.scary.ui.update.UPDATE_DIALOG_TAG
 import io.github.diamondrubinny.scary.ui.taste.TASTE_PICKER_TAG
 import io.github.diamondrubinny.scary.ui.taste.tasteCardTag
 import io.github.diamondrubinny.scary.ui.taste.tasteTabTag
@@ -931,6 +933,49 @@ class ScaryUiTest {
         waitFor(row and hasContentDescription(text(R.string.settings_clear_recent_empty), substring = true))
         backToHome()
         assertTrue(viewModel.uiState.value.rows.none { it is HomeRow.Recent })
+    }
+
+    @Test
+    fun aNewVersionPopsUpAndLaterOrSkipPutItAway() {
+        waitForHomeFocus()
+        val container = (rule.activity.application as ScaryApplication).container
+        val updates = container.updateManager
+        val manifest = UpdateManifest(
+            versionCode = 999_999, versionName = "9.9.9", sha256 = "a".repeat(64), size = 3_000_000, minSdk = 26,
+            notes = mapOf("en" to "Test notes", "he" to "Test notes", "ar" to "Test notes", "pt" to "Test notes", "ru" to "Test notes"),
+        )
+        val dialog = hasTestTag(UPDATE_DIALOG_TAG)
+        withCleanup({
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            waitFor(hasText(text(R.string.update_title)) and hasAnyAncestor(dialog))
+            waitFor(hasText("Test notes") and hasAnyAncestor(dialog))
+            // "Update now" has the focus: the popup is answered with the remote's OK.
+            waitFor(hasText(text(R.string.update_now)) and isFocused() and hasAnyAncestor(dialog))
+            rule.onNode(hasText(text(R.string.update_later)) and hasAnyAncestor(dialog)).performClick()
+            waitForGone(dialog)
+            waitUntilOrDescribe("later saved") { runBlocking { container.settingsRepository.prefs.first().updateLaterUntil } != null }
+            // Again, and this time skip the version.
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            rule.onNode(hasText(text(R.string.update_skip)) and hasAnyAncestor(dialog)).performClick()
+            waitForGone(dialog)
+            waitUntilOrDescribe("skip saved") { runBlocking { container.settingsRepository.prefs.first().updateSkippedVersion } == 999_999 }
+            // Back closes it as "Later".
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            waitFor(isFocused() and hasAnyAncestor(dialog))
+            rule.waitForIdle()
+            pressBack()
+            waitForGone(dialog)
+        }) {
+            rule.runOnUiThread { updates.dismiss() }
+            runBlocking {
+                container.settingsRepository.skipUpdate(0)
+                container.settingsRepository.updateLater(0)
+            }
+            backToHome()
+        }
     }
 
     @Test

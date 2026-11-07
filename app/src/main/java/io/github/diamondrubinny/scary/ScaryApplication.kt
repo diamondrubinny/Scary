@@ -130,4 +130,7 @@ class AppContainer(context: Context) {
     val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
+
+    /** New versions from the official repository's stable release, official builds only. */
+    val updateManager = io.github.diamondrubinny.scary.update.UpdateManager(appContext, settingsRepository, scope)
 }

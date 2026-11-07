@@ -67,6 +67,12 @@ data class LauncherPrefs(
     val hideWatched: Boolean = false,
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
+    /** Look for a new version of SCARY by itself (official builds only). */
+    val autoUpdateCheck: Boolean = true,
+    /** The version the viewer chose to skip, the end of "Later", and the last check. */
+    val updateSkippedVersion: Int? = null,
+    val updateLaterUntil: Long? = null,
+    val updateLastCheck: Long? = null,
     /** ISO country chosen for rent and buy offers; null follows the device ([io.github.diamondrubinny.scary.core.links.Region]). */
     val rentBuyCountry: String? = null,
     /** A trailer plays by itself next to a movie the focus rests on. On by default, after [trailerIntroSeen]. */
@@ -118,6 +124,10 @@ class SettingsRepository(private val context: Context) {
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
+                autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
+                updateSkippedVersion = p[UPDATE_SKIPPED],
+                updateLaterUntil = p[UPDATE_LATER_UNTIL],
+                updateLastCheck = p[UPDATE_LAST_CHECK],
                 rentBuyCountry = Region.normalize(p[RENT_BUY_COUNTRY]),
                 trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
                 trailerSound = p[TRAILER_SOUND] ?: false,
@@ -170,6 +180,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
 
     suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
+
+    suspend fun setAutoUpdateCheck(enabled: Boolean) = edit { it[AUTO_UPDATE_CHECK] = enabled }
+
+    suspend fun setUpdateLastCheck(millis: Long) = edit { it[UPDATE_LAST_CHECK] = millis }
+
+    suspend fun skipUpdate(versionCode: Int) = edit {
+        it[UPDATE_SKIPPED] = versionCode
+        it.remove(UPDATE_LATER_UNTIL)
+    }
+
+    suspend fun updateLater(untilMillis: Long) = edit { it[UPDATE_LATER_UNTIL] = untilMillis }
 
     /** Empties "Recently opened". Watched, My list and the ratings stay. */
     suspend fun clearRecent() = edit { it.remove(RECENT) }
@@ -336,6 +357,10 @@ class SettingsRepository(private val context: Context) {
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
+        private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
+        private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")
+        private val UPDATE_LATER_UNTIL = longPreferencesKey("update_later_until")
+        private val UPDATE_LAST_CHECK = longPreferencesKey("update_last_check")
         private val PENDING_WATCH = stringPreferencesKey("pending_watch")
         private val RENT_BUY_COUNTRY = stringPreferencesKey("rent_buy_country")
         private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")

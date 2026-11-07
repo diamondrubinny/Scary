@@ -157,6 +157,7 @@
         <item>الإعلانات الترويجية التي تُعرض تلقائيًا (تعمل بعد موافقتك عند سؤالك أول مرة، ويمكنك إيقافها من الإعدادات): المشغّل هو مشغّل YouTube في وضع الخصوصية المحسّنة (youtube-nocookie.com، وyoutube.com كمحاولة أخيرة عندما لا يعمل الإعلان هناك). عند عرض إعلان ترويجي، تتلقى YouTube ‏(Google) عنوان IP الخاص بتلفزيونك وتفاصيل الجهاز والمتصفح ومعرّف الإعلان، وفق سياسة خصوصية Google. يحظر SCARY ملفات تعريف الارتباط في المشغّل ويحذف تخزينه عند إغلاقه. لا يُعرض أي إعلان ترويجي دون اتصال بالإنترنت أو في السهرة العائلية.</item>
         <item>جهاز التحكم بالهاتف، فقط حين تشغّله من الإعدادات: يقدّم التلفاز صفحة صغيرة على شبكتك المنزلية، يفتحها هاتفك بمسح رمز QR. يحمل الرمز مفتاحًا لمرة واحدة يوقّع ويشفّر كل أمر بين الهاتف والتلفاز، ولا يُرسل المفتاح عبر الشبكة أبدًا. تنتقل الأوامر مباشرة من الهاتف إلى التلفاز ولا تُخزَّن؛ ثم يُستخدم نص البحث ومفتاح TMDB كما هو موضح أعلاه. لا تحمّل الصفحة أي شيء من الإنترنت. ينطفئ جهاز التحكم عند قطع الاتصال، أو بعد 30 دقيقة دون استخدام، أو عند وصول أوامر مزيفة. للضغط على الأزرار في التطبيقات الأخرى (Stremio وNetflix…)، يستخدم جهاز التحكم بالهاتف خدمة إمكانية الوصول في SCARY، فقط إذا فعّلتها؛ فهي تضغط الأزرار ولا تقرأ شيئًا من الشاشة.</item>
         <item>المشاهدة والإعلانات الترويجية والمتجر تفتح Stremio أو YouTube أو Google Play. ومن تلك اللحظة تسري سياسات الخصوصية الخاصة بها.</item>
+        <item>التحديثات (للإصدار الرسمي؛ يمكنك إيقاف البحث التلقائي من الإعدادات): مرة كل ست ساعات على الأكثر يطلب SCARY من GitHub ملف التحديث من المستودع الرسمي. لا يُرسل شيء عنك؛ يرى GitHub عنوان IP للتلفاز. لا يُنزَّل التحديث إلا عندما تختار \"التحديث الآن\"، ولا يُثبَّت إلا إذا كان موقّعًا بمفتاح SCARY، ويطلب Android تأكيدك.</item>
         <item>للأسئلة أو التصحيحات أو الطلبات المتعلقة ببياناتك: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>آخر تحديث: أكتوبر 2026. هذه مسودة لم يراجعها محامٍ بعد.</item>
     </string-array>
@@ -468,4 +469,31 @@
         <item quantity="many">%1$d عنوانًا</item>
         <item quantity="other">%1$d عنوان</item>
     </plurals>
+
+    <!-- Updates from SCARY's official repository -->
+    <string name="update_title">إصدار جديد من SCARY</string>
+    <string name="update_version">الإصدار %1$s، البناء %2$d</string>
+    <string name="update_how">يأتي من مستودع SCARY الرسمي ويُفحص قبل التثبيت. سيطلب Android التأكيد.</string>
+    <string name="update_now">التحديث الآن</string>
+    <string name="update_later">لاحقًا</string>
+    <string name="update_skip">تخطي هذا الإصدار</string>
+    <string name="update_downloading">جارٍ التنزيل… %1$d%%</string>
+    <string name="update_cancel">إلغاء</string>
+    <string name="update_permission">ليحدّث نفسه، يحتاج SCARY إذن Android لتثبيت التطبيقات. اسمح بذلك مرة واحدة لـ SCARY في الشاشة التالية، ثم عُد.</string>
+    <string name="update_open_settings">فتح الإعدادات</string>
+    <string name="update_installing">أكّد التحديث على شاشة Android. يُعاد تشغيل SCARY عند الانتهاء.</string>
+    <string name="update_close">إغلاق</string>
+    <string name="update_failed_unreachable">تعذّر الوصول إلى خادم التحديثات. تحقق من الاتصال وحاول مجددًا من الإعدادات.</string>
+    <string name="update_failed_verify">لم يطابق الملف المنزَّل الإصدار المنشور، لذا لم يُثبَّت. حاول لاحقًا.</string>
+    <string name="update_failed_not_official">هذا الملف غير موقّع بمفتاح SCARY الرسمي، لذا لم يُثبَّت.</string>
+    <string name="update_failed_install">لم يثبّت Android التحديث. يمكنك تثبيته يدويًا من scary.network.</string>
+    <string name="update_failed_permission_screen">هذا التلفاز يخفي شاشة الإذن. افتح الإعدادات، التطبيقات، SCARY، واسمح بتثبيت التطبيقات غير المعروفة.</string>
+    <string name="settings_update_check">البحث عن تحديثات</string>
+    <string name="settings_update_checking">جارٍ البحث…</string>
+    <string name="settings_update_up_to_date">محدَّث (البناء %1$d)</string>
+    <string name="settings_update_available">البناء %1$d متاح</string>
+    <string name="settings_update_failed">تعذّر البحث</string>
+    <string name="settings_update_auto">البحث عن التحديثات تلقائيًا</string>
+    <string name="settings_update_note">فقط من مستودع SCARY الرسمي على GitHub، مرة كل ست ساعات على الأكثر، ولا يُثبَّت إلا تحديث موقّع بمفتاح SCARY. يرى GitHub عنوان IP للتلفاز؛ لا يُرسل أي شيء آخر.</string>
+    <string name="settings_update_not_official">هذه النسخة من SCARY ليست الإصدار الرسمي، لذا لا تتلقى التحديثات الرسمية.</string>
 </resources>

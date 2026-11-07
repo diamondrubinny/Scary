@@ -74,6 +74,9 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.stats.StatsScreen
 import io.github.diamondrubinny.scary.ui.taste.TastePickerScreen
+import io.github.diamondrubinny.scary.ui.update.UpdateActions
+import io.github.diamondrubinny.scary.ui.update.UpdateDialog
+import io.github.diamondrubinny.scary.update.UpdateState
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
@@ -129,6 +132,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val context = LocalContext.current
     val phoneRemote = remember(context) { (context.applicationContext as ScaryApplication).container.phoneRemote }
     val remoteState by phoneRemote.state.collectAsStateWithLifecycle()
+    val updates = remember(context) { (context.applicationContext as ScaryApplication).container.updateManager }
+    val updateState by updates.state.collectAsStateWithLifecycle()
+    val updatePrompt by updates.prompt.collectAsStateWithLifecycle()
 
     // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
     val sleepSaved = state.sleepAtMillis != null
@@ -273,6 +279,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             viewModel.openTastePicker()
         },
         onClearRecent = viewModel::clearRecent,
+        // With a version found, the row shows it again; otherwise it looks now.
+        onCheckForUpdates = { if (updates.state.value is UpdateState.Available) updates.showPrompt() else updates.checkNow() },
+        onToggleAutoUpdate = viewModel::toggleAutoUpdateCheck,
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -319,7 +328,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val trailersEnabled = state.trailerAutoplay && state.onlineEnabled && !state.familyNight && systemAnimations &&
         lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
         launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro && bucketPrompt == null &&
-        !state.picking
+        !state.picking && !updatePrompt
     val trailerSettings = remember(viewModel, trailersEnabled, state.trailerSound, state.trailerIntroSeen) {
         TrailerSettings(
             enabled = trailersEnabled,
@@ -391,6 +400,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     lovedCount = state.lovedIds.size,
                     recentCount = state.recentCount,
                     returningFromTaste = fromTaste,
+                    updateState = updateState,
+                    autoUpdateCheck = state.autoUpdateCheck,
                 )
                 details != null -> DetailsScreen(
                     details = details,
@@ -516,6 +527,23 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onPlayNext = viewModel::playNextInBucket,
                     onBackToFilm = viewModel::backToBucketFilm,
                     onDismiss = viewModel::dismissBucketPrompt,
+                )
+            }
+
+            // A new version of SCARY: over whatever is on screen, but never on top of another question.
+            if (updatePrompt && launching == null && pinDialog == null && tmdbDialog == null && bucketPrompt == null && !trailerIntro) {
+                UpdateDialog(
+                    state = updateState,
+                    language = language,
+                    actions = remember(updates) {
+                        UpdateActions(
+                            onUpdate = updates::updateNow,
+                            onLater = updates::later,
+                            onSkip = updates::skip,
+                            onOpenPermission = updates::openInstallPermission,
+                            onDismiss = updates::dismiss,
+                        )
+                    },
                 )
             }
 

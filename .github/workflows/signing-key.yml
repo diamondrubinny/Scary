@@ -1,0 +1,44 @@
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+#
+# The APKs are signed with a key kept in the Actions cache, and GitHub removes a cache nobody used for seven days.
+# Without that key, no TV could install an update over the SCARY it has. Once a week this reads the cache (which
+# keeps it) and checks it is still the official key; a failure here is the warning to act on.
+name: Signing key keep-alive
+
+on:
+  schedule:
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keep:
+    if: github.repository == 'diamondrubinny/Scary'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github
+
+      - name: Read the signing key from the cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: android-debug-keystore-v1
+          fail-on-cache-miss: true
+
+      - name: Still the official key
+        run: |
+          set -euo pipefail
+          FOUND=$(keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey \
+            | sed -n 's/^ *SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
+          EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
+          if [ "$FOUND" != "$EXPECTED" ]; then
+            echo "::error::The cached signing key is not the official one. Updates would not install. Do not publish."
+            exit 1
+          fi
+          echo "Signing key present and official."

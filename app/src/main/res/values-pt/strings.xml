@@ -156,6 +156,7 @@
         <item>Trailers que tocam sozinhos (ligados depois que você concorda na primeira pergunta; dá para desligar nas configurações): o player é o do YouTube, no modo de privacidade aprimorada (youtube-nocookie.com, e youtube.com como última tentativa quando um trailer não toca lá). Quando um trailer toca, o YouTube (Google) recebe o endereço IP da sua TV, dados do aparelho e do navegador e o ID do trailer, conforme a política de privacidade do Google. O SCARY bloqueia cookies no player e apaga o armazenamento dele ao fechar. Nenhum trailer toca off-line ou na noite em família.</item>
         <item>Controle pelo celular, só enquanto você o liga nas configurações: a TV serve uma pequena página na sua rede doméstica, que o celular abre ao escanear um código QR. O código contém uma chave de uso único que assina e criptografa cada comando entre o celular e a TV, e a chave nunca é enviada pela rede. Os comandos vão direto do celular para a TV e não são guardados; o texto da busca e a chave do TMDB são usados depois como descrito acima. A página não carrega nada da internet. O controle desliga quando você o desconecta, após 30 minutos sem uso ou quando chegam comandos falsos. Para apertar teclas em outros apps (Stremio, Netflix…), o controle pelo celular usa o serviço de acessibilidade do SCARY, só se você o ativou; ele aperta teclas e não lê nada da tela.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
+        <item>Atualizações (versão oficial; você pode desligar a verificação automática nas configurações): no máximo a cada seis horas o SCARY pede ao GitHub o arquivo de atualização do repositório oficial. Nada sobre você é enviado; o GitHub vê o endereço IP da TV. Uma atualização só é baixada quando você escolhe \"Atualizar agora\", só é instalada se for assinada com a chave do SCARY, e o Android pede sua confirmação.</item>
         <item>Dúvidas, correções ou pedidos sobre seus dados: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
     </string-array>
@@ -446,4 +447,31 @@
         <item quantity="many">%1$d títulos</item>
         <item quantity="other">%1$d títulos</item>
     </plurals>
+
+    <!-- Updates from SCARY's official repository -->
+    <string name="update_title">Uma nova versão do SCARY</string>
+    <string name="update_version">Versão %1$s, build %2$d</string>
+    <string name="update_how">Ela vem do repositório oficial do SCARY e é verificada antes de instalar. O Android vai pedir confirmação.</string>
+    <string name="update_now">Atualizar agora</string>
+    <string name="update_later">Depois</string>
+    <string name="update_skip">Pular esta versão</string>
+    <string name="update_downloading">Baixando… %1$d%%</string>
+    <string name="update_cancel">Cancelar</string>
+    <string name="update_permission">Para se atualizar, o SCARY precisa da permissão do Android para instalar apps. Permita uma vez para o SCARY na próxima tela e volte.</string>
+    <string name="update_open_settings">Abrir configurações</string>
+    <string name="update_installing">Confirme a atualização na tela do Android. O SCARY reinicia quando terminar.</string>
+    <string name="update_close">Fechar</string>
+    <string name="update_failed_unreachable">Não foi possível acessar o servidor de atualizações. Verifique a conexão e tente de novo nas configurações.</string>
+    <string name="update_failed_verify">O arquivo baixado não correspondeu à versão publicada, então não foi instalado. Tente mais tarde.</string>
+    <string name="update_failed_not_official">Este arquivo não é assinado com a chave oficial do SCARY, então não foi instalado.</string>
+    <string name="update_failed_install">O Android não instalou a atualização. Você pode instalar manualmente pelo scary.network.</string>
+    <string name="update_failed_permission_screen">Esta TV esconde a tela de permissão. Abra Configurações, Apps, SCARY, e permita instalar apps desconhecidos.</string>
+    <string name="settings_update_check">Procurar atualizações</string>
+    <string name="settings_update_checking">Procurando…</string>
+    <string name="settings_update_up_to_date">Atualizado (build %1$d)</string>
+    <string name="settings_update_available">Build %1$d disponível</string>
+    <string name="settings_update_failed">Não foi possível verificar</string>
+    <string name="settings_update_auto">Procurar atualizações sozinho</string>
+    <string name="settings_update_note">Só do repositório oficial do SCARY no GitHub, no máximo a cada seis horas, e só é instalada uma atualização assinada com a chave do SCARY. O GitHub vê o endereço IP da TV; nada mais é enviado.</string>
+    <string name="settings_update_not_official">Esta cópia do SCARY não é a versão oficial, então não recebe as atualizações oficiais.</string>
 </resources>

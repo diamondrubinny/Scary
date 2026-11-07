@@ -239,6 +239,7 @@ class HomeViewModel(
             picking = choices.picking,
             bucketIds = prefs.bucketIds,
             recentCount = prefs.recentIds.size,
+            autoUpdateCheck = prefs.autoUpdateCheck,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -1347,6 +1348,14 @@ class HomeViewModel(
         val ofKind = catalog.ofKind(kind).movies.filter { it.id !in disliked && !state.isLocked(it) }
         val (curated, online) = ofKind.partition { it.curated }
         return (curated.sortedByDescending { it.imdbRating ?: 0.0 } + online).take(MAX_TASTE_CANDIDATES)
+    }
+
+    /** "Look for updates by itself" in settings. */
+    fun toggleAutoUpdateCheck() {
+        viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            settings.setAutoUpdateCheck(!prefs.autoUpdateCheck)
+        }
     }
 
     /** "Clear recently opened" in settings. Watched, My list and the ratings stay. */

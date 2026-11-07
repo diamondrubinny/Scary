@@ -49,6 +49,7 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
+import io.github.diamondrubinny.scary.update.UpdateState
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -75,6 +76,8 @@ class SettingsActions(
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
+    val onCheckForUpdates: () -> Unit = {},
+    val onToggleAutoUpdate: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -115,6 +118,8 @@ fun SettingsScreen(
     lovedCount: Int = 0,
     recentCount: Int = 0,
     returningFromTaste: Boolean = false,
+    updateState: UpdateState = UpdateState.Idle,
+    autoUpdateCheck: Boolean = true,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
@@ -351,6 +356,30 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        if (updateState != UpdateState.NotOfficial) {
+            SettingRow(
+                label = stringResource(R.string.settings_update_check),
+                value = when (updateState) {
+                    UpdateState.Checking -> stringResource(R.string.settings_update_checking)
+                    is UpdateState.UpToDate -> stringResource(R.string.settings_update_up_to_date, updateState.versionCode)
+                    is UpdateState.Available -> stringResource(R.string.settings_update_available, updateState.manifest.versionCode)
+                    is UpdateState.Downloading -> stringResource(R.string.update_downloading, updateState.percent)
+                    is UpdateState.Failed -> stringResource(R.string.settings_update_failed)
+                    else -> null
+                },
+                onClick = actions.onCheckForUpdates,
+                modifier = Modifier.testTag(UPDATE_CHECK_ROW_TAG),
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_update_auto),
+                value = stringResource(if (autoUpdateCheck) R.string.value_on else R.string.value_off),
+                onClick = actions.onToggleAutoUpdate,
+            )
+            BasicText(stringResource(R.string.settings_update_note), style = ScaryType.Caption)
+        } else {
+            // A fork's or a developer's own build: the official repository's updates could not install over it.
+            BasicText(stringResource(R.string.settings_update_not_official), style = ScaryType.Caption)
+        }
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
         BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
@@ -377,6 +406,7 @@ const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
+const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"
