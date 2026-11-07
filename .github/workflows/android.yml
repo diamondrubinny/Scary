@@ -100,6 +100,24 @@ jobs:
           ls -l dist
           sha256sum dist/*.apk
 
+      # Every APK of a push to the official repository is signed with the key the TVs trust (the certificates are
+      # public, so they are printed). Pull requests from forks are signed with throwaway keys and not checked here.
+      - name: Signed with the official key
+        if: github.event_name == 'push' && github.repository == 'diamondrubinny/Scary'
+        run: |
+          set -euo pipefail
+          SIGNER="$(ls -d "$ANDROID_HOME"/build-tools/*/ | sort -V | tail -1)apksigner"
+          EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
+          for apk in dist/scary-release-*.apk dist/scary-debug-*.apk; do
+            CERTS=$("$SIGNER" verify --print-certs "$apk" | sed -n 's/^Signer #[0-9]* certificate SHA-256 digest: //p')
+            echo "$apk: $CERTS"
+            if [ "$CERTS" != "$EXPECTED" ]; then
+              echo "::error::$apk is not signed with the official key."
+              exit 1
+            fi
+          done
+          echo "Signed with: ${SCARY_KEYSTORE_FILE:+the key from secrets}${SCARY_KEYSTORE_FILE:-the cached debug key}"
+
       - name: Upload APKs
         uses: actions/upload-artifact@v4
         with:

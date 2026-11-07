@@ -30,8 +30,12 @@ jobs:
       - name: Anything to do?
         id: need
         run: |
+          echo "Signing key in secrets: $HAS_KEY. SCARY_ADMIN_TOKEN present: $HAS_ADMIN_TOKEN."
           if [ "$HAS_KEY" = "true" ]; then
-            echo "The signing key is already in secrets. Delete SCARY_ADMIN_TOKEN if it is still there."
+            echo "The signing key is already in secrets."
+            if [ "$HAS_ADMIN_TOKEN" = "true" ]; then
+              echo "::warning::SCARY_ADMIN_TOKEN is still a repository secret. Delete it, and the token itself."
+            fi
             echo "run=false" >> "$GITHUB_OUTPUT"
           elif [ "$HAS_ADMIN_TOKEN" != "true" ]; then
             echo "No SCARY_ADMIN_TOKEN secret: nothing to do."
