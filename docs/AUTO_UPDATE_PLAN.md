@@ -82,3 +82,26 @@
   - CI (`stable`, בדיקת תעודה, ריצה שבועית, בלי מפתח ל־PR מ־fork);
   - פרטיות.
 - **בדיקה ידנית בטלוויזיה:** אחרי המיזוג הבא ל־main יופיע עדכון אמיתי.
+
+## עדכון: שני מפתחות, והעברה לסודות (7.11.2026)
+- **נמצא:** builds מ־main נחתמים במפתח אחר (`f77773e4…`) מאשר builds מענף העבודה (`5949b2e4…`). ל־GitHub יש cache נפרד לכל ענף, וכל ענף יצר מפתח משלו.
+  - כל ה־APK שנשלחו לטלוויזיות נחתמו ב־`5949b2e4…`.
+- **הוחלט (באישור המשתמש):** לשמור את המפתח של הטלוויזיות ולהעביר אותו לסודות של הריפו.
+  - אז כל APK (debug ו־release, ‏main וענפים) נחתם בו.
+  - PR מ־fork לא מקבל סודות, ולכן לא יכול לקרוא את המפתח.
+  - אין יותר תלות ב־cache.
+- **עד שזה נעשה:** פרסום `stable` מ־main ייכשל בכוונה. המפתח של main לא תואם לתעודה הנעוצה, וכך לא יפורסם עדכון שהטלוויזיות לא יכולות להתקין.
+
+### מה עושים (פעם אחת, כ־5 דקות)
+1. **יוצרים token:** ב־GitHub, Settings (של החשבון) ← Developer settings ← Personal access tokens ← **Fine-grained tokens** ← Generate new token.
+   - Repository access: **Only select repositories** ← `diamondrubinny/Scary`.
+   - Permissions ← Repository permissions ← **Secrets: Read and write**. שום הרשאה אחרת.
+   - Expiration: יום אחד.
+2. **שומרים אותו כסוד:** בריפו, Settings ← Secrets and variables ← Actions ← New repository secret.
+   - שם: `SCARY_ADMIN_TOKEN`.
+   - ערך: ה־token.
+3. **מבקשים מ־Claude לדחוף commit לענף העבודה.** ה־workflow `Move the signing key to secrets`:
+   - בודק שהמפתח הוא בדיוק `5949b2e4…`;
+   - שומר 4 סודות: `SCARY_KEYSTORE_BASE64`, ‏`SCARY_KEYSTORE_PASSWORD`, ‏`SCARY_KEY_ALIAS` ו־`SCARY_KEY_PASSWORD`.
+4. **מוחקים** את הסוד `SCARY_ADMIN_TOKEN` ואת ה־token עצמו.
+5. **מאז:** ה־build הבא מ־main נחתם במפתח של הטלוויזיות, והעדכון האוטומטי עובד.

@@ -2,10 +2,11 @@
 # Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
 # Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 #
-# The APKs are signed with a key kept in the Actions cache, and GitHub removes a cache nobody used for seven days.
-# Without that key, no TV could install an update over the SCARY it has. Once a week this reads the cache (which
-# keeps it) and checks it is still the official key; a failure here is the warning to act on.
-name: Signing key keep-alive
+# Once a week: the key that signs SCARY is still the official one. With the key in repository secrets (the normal
+# case, see move-signing-key.yml) it checks that one. Before it is moved, it reads the key from the Actions cache,
+# which also keeps the cache alive (GitHub removes a cache nobody used for seven days). A failure here is the warning
+# to act on: without the official key, no TV could install an update over the SCARY it has.
+name: Signing key check
 
 on:
   schedule:
@@ -16,15 +17,18 @@ permissions:
   contents: read
 
 jobs:
-  keep:
+  check:
     if: github.repository == 'diamondrubinny/Scary'
     runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.SCARY_KEYSTORE_BASE64 != '' }}
     steps:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: .github
 
-      - name: Read the signing key from the cache
+      - name: Read the signing key from the cache (before it is moved to secrets)
+        if: env.HAS_KEY != 'true'
         uses: actions/cache/restore@v4
         with:
           path: ~/.android/debug.keystore
@@ -32,13 +36,27 @@ jobs:
           fail-on-cache-miss: true
 
       - name: Still the official key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.SCARY_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.SCARY_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SCARY_KEY_ALIAS }}
         run: |
           set -euo pipefail
-          FOUND=$(keytool -list -v -keystore ~/.android/debug.keystore -storepass android -alias androiddebugkey \
+          if [ "$HAS_KEY" = "true" ]; then
+            KEYSTORE="$RUNNER_TEMP/release.keystore"
+            echo "$KEYSTORE_BASE64" | base64 -d > "$KEYSTORE"
+            PASS="$STORE_PASSWORD"; ALIAS="$KEY_ALIAS"
+          else
+            KEYSTORE="$HOME/.android/debug.keystore"
+            PASS=android; ALIAS=androiddebugkey
+            echo "::warning::The signing key is still only in the Actions cache. Move it to secrets (move-signing-key.yml)."
+          fi
+          FOUND=$(keytool -list -v -keystore "$KEYSTORE" -storepass "$PASS" -alias "$ALIAS" \
             | sed -n 's/^ *SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
+          shred -u "$KEYSTORE"
           EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
           if [ "$FOUND" != "$EXPECTED" ]; then
-            echo "::error::The cached signing key is not the official one. Updates would not install. Do not publish."
+            echo "::error::The signing key is not the official one. Updates would not install. Do not publish."
             exit 1
           fi
           echo "Signing key present and official."

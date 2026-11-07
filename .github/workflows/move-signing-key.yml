@@ -1,0 +1,77 @@
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+#
+# One time: moves the signing key the TVs already trust from this branch's Actions cache into the repository's
+# secrets, so every build (main included) is signed with it and pull requests from forks can never read it.
+# - Runs only in the official repository, on pushes to claude/** branches (whose cache holds that key).
+# - Does nothing unless the owner saved a short-lived token as the SCARY_ADMIN_TOKEN secret: a fine-grained token
+#   limited to this repository, with "Secrets: read and write" only.
+# - Checks first that the key is the official one (.github/update-signing-cert.sha256); never moves another.
+# - The key is never printed, uploaded or stored anywhere else; the copy on the runner is shredded.
+# - Once the key is in secrets, it does nothing. Delete the token and the SCARY_ADMIN_TOKEN secret afterwards.
+name: Move the signing key to secrets
+
+on:
+  push:
+    branches: ["claude/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  move:
+    if: github.repository == 'diamondrubinny/Scary'
+    runs-on: ubuntu-latest
+    env:
+      HAS_ADMIN_TOKEN: ${{ secrets.SCARY_ADMIN_TOKEN != '' }}
+      HAS_KEY: ${{ secrets.SCARY_KEYSTORE_BASE64 != '' }}
+    steps:
+      - name: Anything to do?
+        id: need
+        run: |
+          if [ "$HAS_KEY" = "true" ]; then
+            echo "The signing key is already in secrets. Delete SCARY_ADMIN_TOKEN if it is still there."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          elif [ "$HAS_ADMIN_TOKEN" != "true" ]; then
+            echo "No SCARY_ADMIN_TOKEN secret: nothing to do."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.need.outputs.run == 'true'
+        with:
+          sparse-checkout: .github
+
+      - name: Read the key the TVs trust from this branch's cache
+        if: steps.need.outputs.run == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: android-debug-keystore-v1
+          fail-on-cache-miss: true
+
+      - name: Check it is the official key, then save it as secrets
+        if: steps.need.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SCARY_ADMIN_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          KEYSTORE="$HOME/.android/debug.keystore"
+          FOUND=$(keytool -list -v -keystore "$KEYSTORE" -storepass android -alias androiddebugkey \
+            | sed -n 's/^ *SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
+          EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
+          if [ "$FOUND" != "$EXPECTED" ]; then
+            shred -u "$KEYSTORE"
+            echo "::error::The key in this branch's cache is not the one the TVs trust. Nothing was saved."
+            exit 1
+          fi
+          base64 -w0 "$KEYSTORE" | gh secret set SCARY_KEYSTORE_BASE64
+          printf 'android' | gh secret set SCARY_KEYSTORE_PASSWORD
+          printf 'androiddebugkey' | gh secret set SCARY_KEY_ALIAS
+          printf 'android' | gh secret set SCARY_KEY_PASSWORD
+          shred -u "$KEYSTORE"
+          echo "Saved. Now delete the SCARY_ADMIN_TOKEN secret, and the token itself, on GitHub."
