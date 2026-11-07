@@ -895,12 +895,12 @@ class ScaryUiTest {
             waitUntilOrDescribe("the taste invitation on the home screen") { invited() }
             rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(HomeRow.TasteInvite.key)
             waitFor(hasTestTag(TASTE_INVITE_TAG))
-            rule.onNode(hasText(text(R.string.taste_invite_pick))).performClick()
+            rule.onNode(hasText(text(R.string.taste_invite_pick)) and hasAnyAncestor(hasTestTag(TASTE_INVITE_TAG))).performClick()
             waitFor(hasTestTag(TASTE_PICKER_TAG))
             pressBack()
             waitForHome()
             rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(HomeRow.TasteInvite.key)
-            rule.onNode(hasText(text(R.string.taste_invite_later))).performClick()
+            rule.onNode(hasText(text(R.string.taste_invite_later)) and hasAnyAncestor(hasTestTag(TASTE_INVITE_TAG))).performClick()
             waitUntilOrDescribe("the invitation gone") { !invited() }
             waitForGone(hasTestTag(TASTE_INVITE_TAG))
             // The focus does not get lost with the row.
@@ -1152,8 +1152,9 @@ class ScaryUiTest {
         rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "bucket:prompt"))
         val prompt = hasTestTag(BUCKET_PROMPT_TAG)
         waitFor(prompt)
-        rule.onNode(hasText(text(R.string.bucket_prompt_later))).assertExists()
-        rule.onNode(hasText(text(R.string.bucket_prompt_note))).assertExists()
+        // Inside the question: the home screen behind it can have its own "Not now" (the taste invitation).
+        rule.onNode(hasText(text(R.string.bucket_prompt_later)) and hasAnyAncestor(prompt)).assertExists()
+        rule.onNode(hasText(text(R.string.bucket_prompt_note)) and hasAnyAncestor(prompt)).assertExists()
         // Back goes to the window with the focus: wait until the dialog has it.
         waitFor(isFocused() and hasAnyAncestor(prompt))
         rule.waitForIdle()
