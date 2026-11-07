@@ -86,14 +86,32 @@ class CatalogRepository(
 
                     var cinemetaState = RefreshState()
                     var tmdbState = RefreshState()
+                    var categoriesState = RefreshState()
                     suspend fun fetchWhatIsDue() {
                         val now = System.currentTimeMillis()
                         val knownCinemeta = cinemetaCache
                         if (RefreshPolicy.due(knownCinemeta == null || knownCinemeta.isStale(now), cinemetaState, now)) {
-                            val fresh = cinemeta.refresh(base.movies.map { it.imdbId to it.kind })
+                            val fresh = cinemeta.refresh(base.movies.map { it.imdbId to it.kind }, knownCinemeta)
                             cinemetaState = RefreshPolicy.after(cinemetaState, fresh != null, System.currentTimeMillis())
                             if (fresh != null) {
                                 cinemetaCache = fresh
+                                emit(build())
+                                // Then the categories, in the background of rows already on screen.
+                                val filled = cinemeta.refreshCategories(fresh)
+                                categoriesState = RefreshPolicy.after(categoriesState, filled != null, System.currentTimeMillis())
+                                if (filled != null) {
+                                    cinemetaCache = filled
+                                    emit(build())
+                                }
+                            }
+                        }
+                        // Categories that failed to fill (the network dropped right then) are tried again, with backoff.
+                        val withRows = cinemetaCache
+                        if (withRows != null && RefreshPolicy.due(withRows.categories.isEmpty(), categoriesState, now)) {
+                            val filled = cinemeta.refreshCategories(withRows)
+                            categoriesState = RefreshPolicy.after(categoriesState, filled != null, System.currentTimeMillis())
+                            if (filled != null) {
+                                cinemetaCache = filled
                                 emit(build())
                             }
                         }

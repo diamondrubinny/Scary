@@ -57,6 +57,8 @@ data class HomeUiState(
     val picking: Boolean = false,
     /** The bucket list, in order. */
     val bucketIds: List<String> = emptyList(),
+    /** How many films are in "Recently opened" (settings offers to clear them). */
+    val recentCount: Int = 0,
 ) {
     /** A film's place in the bucket list, from 1; null when it is not in it. */
     fun bucketNumber(movie: Movie): Int? = bucketIds.indexOf(movie.id).takeIf { it >= 0 }?.plus(1)
@@ -153,6 +155,11 @@ sealed interface HomeRow {
         override val key = "time"
     }
 
+    /** "What do you love?": asks a viewer SCARY knows little about to pick films they love, until they do or say "Not now". */
+    data object TasteInvite : HomeRow {
+        override val key = "taste_invite"
+    }
+
     /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
     data class Moods(
         val selected: Mood?,
@@ -212,6 +219,7 @@ sealed interface Screen {
     data object Bucket : Screen
     data object PhoneRemote : Screen
     data object TmdbAccount : Screen
+    data object TastePicker : Screen
 }
 
 /**

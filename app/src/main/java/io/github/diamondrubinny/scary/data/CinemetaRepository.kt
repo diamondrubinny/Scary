@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.data
 
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.core.catalog.CategoryPaging
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
@@ -208,7 +209,7 @@ class CinemetaRepository(context: Context) {
      * Returns fresh data for the library's films and series ([items], IMDb id and kind), or null when the TV is offline
      * or the service is down. Never throws.
      */
-    suspend fun refresh(items: List<Pair<String, MediaKind>>): CinemetaCache? = withContext(Dispatchers.IO) {
+    suspend fun refresh(items: List<Pair<String, MediaKind>>, previous: CinemetaCache? = null): CinemetaCache? = withContext(Dispatchers.IO) {
         // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
         // and the three popular rows queue first so whole rows of posters appear early.
         val pool = Semaphore(PARALLEL_REQUESTS)
@@ -234,12 +235,25 @@ class CinemetaRepository(context: Context) {
         }
         val metas = metaList.filterNotNull().associateByTo(LinkedHashMap()) { it.imdbId }
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
-        // The library's categories, filled from Cinemeta's big catalogs: one shared pool, sorted into every category.
-        val categoryPool = categoryPool(pool)
+        // The categories keep yesterday's films until refreshCategories brings today's, right after.
+        val categories = previous?.categories?.takeIf { previous.rowsVersion == CinemetaCache.ROWS_VERSION }.orEmpty()
+        categories.values.flatten().forEach { id -> previous?.metas?.get(id)?.let { metas.putIfAbsent(id, it) } }
+        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION, categories).also(::save)
+    }
+
+    /**
+     * The library's categories filled from Cinemeta's big catalogs: one shared pool, sorted into every category. Run
+     * after [refresh], so the rows show first; three requests at a time, so posters still load on a small TV box.
+     * Null when no page could be read.
+     */
+    suspend fun refreshCategories(cache: CinemetaCache): CinemetaCache? = withContext(Dispatchers.IO) {
+        val categoryPool = categoryPool(Semaphore(CATEGORY_REQUESTS))
+        if (categoryPool.isEmpty()) return@withContext null
         val categories = Categories.sort(categoryPool)
         val used = categories.values.flatten().toHashSet()
+        val metas = LinkedHashMap(cache.metas)
         categoryPool.forEach { meta -> if (meta.imdbId in used) metas.putIfAbsent(meta.imdbId, meta) }
-        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION, categories).also(::save)
+        cache.copy(metas = metas, categories = categories).also(::save)
     }
 
     /**
@@ -247,7 +261,7 @@ class CinemetaRepository(context: Context) {
      * catalogs (most popular first), about 3,500 films and 1,500 series. A page that fails just leaves the pool smaller.
      */
     private suspend fun categoryPool(pool: Semaphore): List<CinemetaMeta> = coroutineScope {
-        CATEGORY_POOL.flatMap { (kind, genre, pages) ->
+        CategoryPaging.POOL.flatMap { (kind, genre, pages) ->
             (0 until pages).map { page ->
                 async {
                     pool.withPermit { fetch(Cinemeta.catalogUrl("top", genre, page * Cinemeta.PAGE_SIZE, kind)) }
@@ -257,6 +271,25 @@ class CinemetaRepository(context: Context) {
                 }
             }
         }.awaitAll().flatten().distinctBy { it.imdbId }
+    }
+
+    /**
+     * The next page of the category [categoryId] past its films from the daily pool, at [cursor] (CategoryPaging):
+     * only the films (or series) its rule takes. Its `next` is null at the end of the years. Null when offline.
+     */
+    suspend fun loadCategoryPage(categoryId: String, cursor: Int): OnlinePage? = withContext(Dispatchers.IO) {
+        val kind = if (categoryId.startsWith("series_")) MediaKind.SERIES else MediaKind.MOVIE
+        val startYear = LocalDate.now().year
+        val page = CategoryPaging.page(kind, cursor, startYear) ?: return@withContext OnlinePage(emptyList(), null)
+        val url = runCatching {
+            val genre = page.genre
+            if (genre != null) Cinemeta.catalogUrl("top", genre, page.skip, kind) else Cinemeta.catalogUrl("year", page.year.toString(), page.skip, kind)
+        }.getOrNull() ?: return@withContext OnlinePage(emptyList(), null)
+        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        OnlinePage(
+            movies = metas.filter { it.kind == kind && Categories.matches(categoryId, it) },
+            next = CategoryPaging.after(kind, cursor, metas.size, startYear),
+        )
     }
 
     /**
@@ -334,16 +367,8 @@ class CinemetaRepository(context: Context) {
         const val TAG = "Cinemeta"
         const val TIMEOUT_MS = 10_000
         const val PARALLEL_REQUESTS = 6
+        const val CATEGORY_REQUESTS = 3
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
 
-        /** Where the categories' films come from: Cinemeta's "top" catalogs, and how many pages (50 each) of each. */
-        val CATEGORY_POOL = listOf(
-            Triple(MediaKind.MOVIE, "Horror", 36),
-            Triple(MediaKind.MOVIE, "Thriller", 30),
-            Triple(MediaKind.MOVIE, "Mystery", 10),
-            Triple(MediaKind.SERIES, "Horror", 10),
-            Triple(MediaKind.SERIES, "Thriller", 10),
-            Triple(MediaKind.SERIES, "Mystery", 10),
-        )
     }
 }

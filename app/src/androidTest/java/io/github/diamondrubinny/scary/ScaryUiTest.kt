@@ -88,8 +88,16 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.ui.taste.TASTE_PICKER_TAG
+import io.github.diamondrubinny.scary.ui.taste.tasteCardTag
+import io.github.diamondrubinny.scary.ui.taste.tasteTabTag
+import io.github.diamondrubinny.scary.ui.home.TASTE_INVITE_TAG
+import io.github.diamondrubinny.scary.ui.settings.TASTE_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.CLEAR_RECENT_ROW_TAG
+import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.first
 import android.os.ParcelFileDescriptor
 import android.app.UiAutomation
 import android.provider.Settings
@@ -831,6 +839,98 @@ class ScaryUiTest {
             }
             backToHome()
         }
+    }
+
+    @Test
+    fun theTastePickerMarksFilmsAndSeriesAsLovedAndDoneGoesBackToSettings() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        val lovedBefore = runBlocking { container.settingsRepository.prefs.first().lovedIds.toSet() }
+        val picked = mutableListOf<String>()
+        withCleanup({
+            rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+            val row = hasTestTag(TASTE_ROW_TAG)
+            waitFor(row)
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(hasTestTag(TASTE_PICKER_TAG))
+            waitFor(hasText(text(R.string.taste_done)) and isFocused())
+            // The library's best rated film comes first; OK puts a heart on it, read out with its title.
+            val film = viewModel.tasteCandidates(MediaKind.MOVIE).first { it.id !in lovedBefore }
+            picked += film.id
+            rule.onNodeWithTag(tasteCardTag(film.id)).performScrollTo().performClick()
+            waitUntilOrDescribe("${film.title} loved") { film.id in viewModel.uiState.value.lovedIds }
+            waitFor(hasTestTag(tasteCardTag(film.id)) and hasContentDescription(text(R.string.loved_badge), substring = true))
+            // Pressed again, the heart goes.
+            rule.onNodeWithTag(tasteCardTag(film.id)).performClick()
+            waitUntilOrDescribe("${film.title} no longer loved") { film.id !in viewModel.uiState.value.lovedIds }
+            // The series tab shows series.
+            rule.onNodeWithTag(tasteTabTag(MediaKind.SERIES)).performClick()
+            val series = viewModel.tasteCandidates(MediaKind.SERIES).first { it.id !in lovedBefore }
+            assertTrue(series.kind == MediaKind.SERIES)
+            picked += series.id
+            waitFor(hasTestTag(tasteCardTag(series.id)))
+            rule.onNodeWithTag(tasteCardTag(series.id)).performClick()
+            waitUntilOrDescribe("${series.title} loved") { series.id in viewModel.uiState.value.lovedIds }
+            // Done: back on settings, on the row that opened the picker.
+            rule.onNode(hasText(text(R.string.taste_done))).performClick()
+            waitFor(row and isFocused())
+        }) {
+            runBlocking { picked.filter { it !in lovedBefore }.forEach { container.settingsRepository.setRating(it, null) } }
+            backToHome()
+        }
+    }
+
+    @Test
+    fun aNewViewerIsInvitedToPickWhatTheyLoveAndNotNowPutsItAway() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        fun invited() = viewModel.uiState.value.rows.any { it is HomeRow.TasteInvite }
+        runBlocking { container.settingsRepository.setTasteInviteDismissed(false) }
+        // Only while SCARY knows little about the viewer (other tests may have left some history on the emulator).
+        val prefs = runBlocking { container.settingsRepository.prefs.first() }
+        assumeTrue((prefs.watchedIds + prefs.lovedIds).toSet().size < Personalize.MIN_HISTORY && !prefs.familyNight)
+        withCleanup({
+            waitUntilOrDescribe("the taste invitation on the home screen") { invited() }
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(HomeRow.TasteInvite.key)
+            waitFor(hasTestTag(TASTE_INVITE_TAG))
+            rule.onNode(hasText(text(R.string.taste_invite_pick))).performClick()
+            waitFor(hasTestTag(TASTE_PICKER_TAG))
+            pressBack()
+            waitForHome()
+            rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(HomeRow.TasteInvite.key)
+            rule.onNode(hasText(text(R.string.taste_invite_later))).performClick()
+            waitUntilOrDescribe("the invitation gone") { !invited() }
+            waitForGone(hasTestTag(TASTE_INVITE_TAG))
+            // The focus does not get lost with the row.
+            waitUntilOrDescribe("something focused") { rule.onAllNodes(isFocused()).fetchSemanticsNodes().isNotEmpty() }
+        }) {
+            runBlocking { container.settingsRepository.setTasteInviteDismissed(false) }
+            backToHome()
+        }
+    }
+
+    @Test
+    fun recentlyOpenedIsClearedFromSettingsAfterAskingOnceMore() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        val film = bundledMovies().first { it.title == "Hereditary" }
+        runBlocking { container.settingsRepository.pushRecent(film.id) }
+        waitUntilOrDescribe("a film in recently opened") { viewModel.uiState.value.recentCount > 0 }
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(CLEAR_RECENT_ROW_TAG)
+        waitFor(row)
+        rule.onNode(row).performScrollTo().performClick()
+        // The first press only asks.
+        waitFor(row and hasContentDescription(text(R.string.settings_clear_recent_confirm), substring = true))
+        assertTrue(viewModel.uiState.value.recentCount > 0)
+        rule.onNode(row).performClick()
+        waitUntilOrDescribe("recently opened empty") { viewModel.uiState.value.recentCount == 0 }
+        waitFor(row and hasContentDescription(text(R.string.settings_clear_recent_empty), substring = true))
+        backToHome()
+        assertTrue(viewModel.uiState.value.rows.none { it is HomeRow.Recent })
     }
 
     @Test

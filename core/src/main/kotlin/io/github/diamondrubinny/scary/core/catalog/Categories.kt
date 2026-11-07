@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.catalog
 
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
+import io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
 import io.github.diamondrubinny.scary.core.model.MediaKind
 
 /**
@@ -170,4 +171,61 @@ object Categories {
         "japan", "south korea", "korea", "china", "hong kong", "taiwan", "thailand", "indonesia", "philippines",
         "malaysia", "india", "vietnam", "singapore",
     )
+}
+
+/**
+ * Where a category goes on once its films from the daily pool run out (scrolling to its end): the pages of Cinemeta's
+ * catalogs after the ones the pool read, then back through the years, year by year, to [EndlessCursor.FIRST_YEAR];
+ * each page sorted by the category's rule. A cursor packs the stage (which catalog) and the place in it.
+ */
+object CategoryPaging {
+    /** Bigger than any skip in one catalog ([Cinemeta.MAX_SKIP]). */
+    const val STAGE_STEP = 10_000_000
+
+    /** A page to read: the "top" catalog of [genre], or (genre null) the catalog of [year]; from [skip]. */
+    data class Page(val genre: String?, val year: Int?, val skip: Int)
+
+    /**
+     * The daily pool the categories are filled from: Cinemeta's "top" catalogs, and how many pages (50 each) of each,
+     * about 3,500 films and 1,500 series.
+     */
+    val POOL: List<Triple<MediaKind, String, Int>> = listOf(
+        Triple(MediaKind.MOVIE, "Horror", 36),
+        Triple(MediaKind.MOVIE, "Thriller", 30),
+        Triple(MediaKind.MOVIE, "Mystery", 10),
+        Triple(MediaKind.SERIES, "Horror", 10),
+        Triple(MediaKind.SERIES, "Thriller", 10),
+        Triple(MediaKind.SERIES, "Mystery", 10),
+    )
+
+    /** The "top" catalogs to go on with, and where in each the pool stopped. */
+    fun tops(kind: MediaKind): List<Pair<String, Int>> =
+        POOL.filter { it.first == kind }.map { (_, genre, pages) -> genre to pages * Cinemeta.PAGE_SIZE }
+
+    /** The page [cursor] reads for a category of [kind], whose year pages start at [startYear]; null past the last. */
+    fun page(kind: MediaKind, cursor: Int, startYear: Int): Page? {
+        val tops = tops(kind)
+        val stage = cursor / STAGE_STEP
+        if (stage < tops.size) {
+            val (genre, start) = tops[stage]
+            return Page(genre, null, start + cursor % STAGE_STEP)
+        }
+        val inYears = cursor - tops.size * STAGE_STEP
+        val year = EndlessCursor.year(startYear, inYears) ?: return null
+        return Page(null, year, EndlessCursor.skip(inYears))
+    }
+
+    /** The cursor after a page that came back with [pageSize] entries: the next catalog when one runs out. */
+    fun after(kind: MediaKind, cursor: Int, pageSize: Int, startYear: Int): Int? {
+        val tops = tops(kind)
+        val stage = cursor / STAGE_STEP
+        if (stage < tops.size) {
+            val page = page(kind, cursor, startYear) ?: return null
+            val exhausted = pageSize == 0 || page.skip + Cinemeta.PAGE_SIZE > Cinemeta.MAX_SKIP
+            return if (exhausted) (stage + 1) * STAGE_STEP else cursor + Cinemeta.PAGE_SIZE
+        }
+        val inYears = cursor - tops.size * STAGE_STEP
+        val next = EndlessCursor.after(inYears, pageSize, yearChain = true) ?: return null
+        return if (EndlessCursor.year(startYear, next) == null) null else tops.size * STAGE_STEP + next
+    }
 }

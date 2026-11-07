@@ -73,6 +73,7 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.stats.StatsScreen
+import io.github.diamondrubinny.scary.ui.taste.TastePickerScreen
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
@@ -183,6 +184,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onSelectTab = viewModel::selectTab,
             onOpenBucket = viewModel::openBucket,
             onFinishPicking = viewModel::finishPicking,
+            onOpenTastePicker = viewModel::openTastePicker,
+            onDismissTasteInvite = viewModel::dismissTasteInvite,
         )
     }
     val bucketActions = remember(viewModel) {
@@ -216,11 +219,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     // The same for "Your year in fear" and the phone remote.
     var fromStats by remember { mutableStateOf(false) }
     var fromRemote by remember { mutableStateOf(false) }
+    var fromTaste by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
-        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote) {
+        if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote &&
+            screen != Screen.TastePicker
+        ) {
             lastDocument = null
             fromStats = false
             fromRemote = false
+            fromTaste = false
         }
     }
     val settingsActions = SettingsActions(
@@ -248,14 +255,24 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             lastDocument = null
             fromStats = true
             fromRemote = false
+            fromTaste = false
             viewModel.openStats()
         },
         onOpenPhoneRemote = {
             lastDocument = null
             fromStats = false
             fromRemote = true
+            fromTaste = false
             viewModel.openPhoneRemote()
         },
+        onOpenTastePicker = {
+            lastDocument = null
+            fromStats = false
+            fromRemote = false
+            fromTaste = true
+            viewModel.openTastePicker()
+        },
+        onClearRecent = viewModel::clearRecent,
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -279,11 +296,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onOpenPrivacy = {
             lastDocument = DocumentKind.Privacy
             fromStats = false
+            fromRemote = false
+            fromTaste = false
             viewModel.openDocument(DocumentKind.Privacy)
         },
         onOpenAccessibilityStatement = {
             lastDocument = DocumentKind.Accessibility
             fromStats = false
+            fromRemote = false
+            fromTaste = false
             viewModel.openDocument(DocumentKind.Accessibility)
         },
     )
@@ -367,6 +388,9 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     returningFromStats = fromStats,
                     returningFromRemote = fromRemote,
                     phoneRemoteOn = remoteState is PhoneRemoteServer.State.On,
+                    lovedCount = state.lovedIds.size,
+                    recentCount = state.recentCount,
+                    returningFromTaste = fromTaste,
                 )
                 details != null -> DetailsScreen(
                     details = details,
@@ -424,6 +448,16 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                         else -> OtherApps.BACK_AND_HOME
                     },
                     onEnableOtherApps = ::openAccessibility,
+                )
+                current == Screen.TastePicker -> TastePickerScreen(
+                    // A new function whenever what the posters come from changes, so the screen picks them again (not at each pick).
+                    candidates = remember(state.movies, state.dislikedIds, state.familyNight, state.sessionUnlocked) {
+                        { kind -> viewModel.tasteCandidates(kind) }
+                    },
+                    isLoved = { it.id in state.lovedIds },
+                    lovedCount = state.lovedIds.size,
+                    onToggle = viewModel::toggleLovedQuietly,
+                    onDone = viewModel::finishTastePicker,
                 )
                 current == Screen.Bucket -> BucketScreen(
                     ids = state.bucketIds,

@@ -420,4 +420,52 @@
     <string name="tmdb_account_session_ended">أنهى TMDB هذه الجلسة (هل سجّلت الخروج هناك؟). سجّل الدخول مرة أخرى لمواصلة المزامنة.</string>
     <string name="msg_tmdb_synced">تمت مزامنة قوائمك على TMDB.</string>
     <string name="msg_tmdb_signed_out">تم تسجيل الخروج من TMDB. تبقى قوائمك على هذا التلفزيون.</string>
+
+    <!-- What do you love? (taste picker) and clearing recently opened -->
+    <string name="loved_badge">أحببته</string>
+    <string name="taste_title">ماذا تحب؟</string>
+    <string name="taste_explainer">اضغط OK على الأفلام والمسلسلات التي تحبها. يرتّب SCARY صفوفه بحسبها: ما يناسب ذوقك يظهر أولًا.</string>
+    <string name="taste_done">تم</string>
+    <string name="taste_invite_body">اختر بعض الأفلام والمسلسلات التي تحبها، وستعرض الصفوف ما يناسب ذوقك أولًا. كل شيء يبقى على هذا التلفاز.</string>
+    <string name="taste_invite_pick">اختيار ما أحب</string>
+    <string name="taste_invite_later">ليس الآن</string>
+    <string name="msg_taste_sorted">تم. صفوفك الآن مرتّبة بحسب ذوقك.</string>
+    <string name="msg_taste_few">تم الحفظ. اختر المزيد قليلًا وستُرتَّب الصفوف بحسب ذوقك.</string>
+    <string name="msg_recent_cleared">تم مسح \"فُتحت مؤخرًا\".</string>
+    <string name="settings_clear_recent">مسح \"فُتحت مؤخرًا\"</string>
+    <string name="settings_clear_recent_confirm">اضغط مرة أخرى للمسح</string>
+    <string name="settings_clear_recent_empty">فارغة</string>
+    <string name="settings_clear_recent_note">هذا الصف في الشاشة الرئيسية فقط. \"شوهد\" و\"قائمتي\" و\"أحببته\" تبقى.</string>
+    <plurals name="taste_count_more">
+        <item quantity="zero">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+        <item quantity="one">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+        <item quantity="two">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+        <item quantity="few">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+        <item quantity="many">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+        <item quantity="other">المختار: %1$d. اختر %2$d على الأقل لتُرتَّب الصفوف بحسب ذوقك.</item>
+    </plurals>
+    <plurals name="taste_count">
+        <item quantity="zero">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+        <item quantity="one">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+        <item quantity="two">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+        <item quantity="few">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+        <item quantity="many">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+        <item quantity="other">المختار: %1$d. الصفوف مرتّبة بحسب ذوقك.</item>
+    </plurals>
+    <plurals name="settings_taste_value">
+        <item quantity="zero">لا شيء بعد</item>
+        <item quantity="one">عمل واحد</item>
+        <item quantity="two">عملان</item>
+        <item quantity="few">%1$d أعمال</item>
+        <item quantity="many">%1$d عملًا</item>
+        <item quantity="other">%1$d عمل</item>
+    </plurals>
+    <plurals name="settings_clear_recent_value">
+        <item quantity="zero">فارغة</item>
+        <item quantity="one">عنوان واحد</item>
+        <item quantity="two">عنوانان</item>
+        <item quantity="few">%1$d عناوين</item>
+        <item quantity="many">%1$d عنوانًا</item>
+        <item quantity="other">%1$d عنوان</item>
+    </plurals>
 </resources>

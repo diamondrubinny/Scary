@@ -50,6 +50,8 @@ data class CinemetaMeta(
     val ongoing: Boolean = false,
     /** Countries as Cinemeta lists them, the main one first ("South Korea, United States"); empty when unknown. */
     val country: String = "",
+    /** Years that run on ("2025–", "1977–1979"): what a series has, even when Cinemeta files it as a film. */
+    val runsOn: Boolean = false,
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -270,6 +272,7 @@ object Cinemeta {
             endYear = endYear.takeIf { type == CinemetaMeta.TYPE_SERIES },
             ongoing = ongoing,
             country = o.str("country")?.trim()?.take(MAX_COUNTRY_LENGTH).orEmpty(),
+            runsOn = span != null && span.groupValues[1].isNotEmpty(),
         )
     }
 
@@ -338,13 +341,24 @@ object Cinemeta {
         val collection = base.collections[index]
         val byImdb = base.movies.associateByTo(HashMap()) { it.imdbId }
         val added = mutableListOf<Movie>()
-        val newIds = metas.mapNotNull { meta ->
-            byImdb[meta.imdbId]?.id ?: toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
-        }
+        val newIds = metas.mapNotNull { meta -> idFor(meta, byImdb, added) }
         val ids = (collection.movieIds + newIds).distinct().take(maxRow)
         val kept = ids.toHashSet()
         val collections = base.collections.toMutableList().also { it[index] = collection.copy(movieIds = ids) }
         return base.copy(movies = base.movies + added.filter { it.id in kept }, collections = collections)
+    }
+
+    /**
+     * The id [meta] has in the catalog: the movie already there with its IMDb id, or a new one ([added]). Cinemeta lists
+     * a few titles both as a film and as a series under one IMDb id (Haunted Hotel, Count Dracula): one already there
+     * as the other kind is left out, or a series row would hold a film and show on the films tab. A "film" whose
+     * years run on ("2025–") is a series Cinemeta filed under films, and stays out of film rows.
+     */
+    private fun idFor(meta: CinemetaMeta, byImdb: MutableMap<String, Movie>, added: MutableList<Movie>): String? {
+        val known = byImdb[meta.imdbId]
+        if (known != null) return known.id.takeIf { known.kind == meta.kind }
+        if (meta.kind == MediaKind.MOVIE && meta.runsOn) return null
+        return toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
     }
 
     /** The collection id an online row gets in the merged catalog. */
@@ -356,9 +370,7 @@ object Cinemeta {
         val added = mutableListOf<Movie>()
         val onlineCollections = rows.mapNotNull { row ->
             val ids = row.metas.asSequence()
-                .mapNotNull { meta ->
-                    byImdb[meta.imdbId]?.id ?: toMovie(meta)?.also { byImdb[it.imdbId] = it; added += it }?.id
-                }
+                .mapNotNull { meta -> idFor(meta, byImdb, added) }
                 .distinct()
                 .take(perRow)
                 .toList()
