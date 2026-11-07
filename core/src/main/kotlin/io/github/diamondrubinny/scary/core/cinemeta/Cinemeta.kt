@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.cinemeta
 
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.MediaKind
@@ -212,7 +213,7 @@ object Cinemeta {
         description = movie.synopsisEn,
         director = movie.director.split(',').map(String::trim).filter(String::isNotEmpty),
         cast = movie.cast,
-        genres = listOf(if (movie.genre == Genre.HORROR) "Horror" else "Thriller"),
+        genres = movie.genres.ifEmpty { listOf(if (movie.genre == Genre.HORROR) "Horror" else "Thriller") },
         imdbRating = movie.imdbRating,
         runtimeMin = movie.runtimeMin.takeIf { it > 0 },
         trailerYoutubeId = movie.trailerYoutubeId,
@@ -292,6 +293,7 @@ object Cinemeta {
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
         trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
+        genres = movie.genres.ifEmpty { meta.genres.takeIf { meta.kind == movie.kind }.orEmpty() },
         // A running series ends, or a new season starts: Cinemeta knows before the bundled library does.
         endYear = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.endYear else movie.endYear,
         ongoing = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.ongoing else movie.ongoing,
@@ -324,6 +326,10 @@ object Cinemeta {
             kind = meta.kind,
             endYear = meta.endYear,
             ongoing = meta.ongoing,
+            // Read from its genres and plot by the categories' rules: "More like this", the taste and "Because you
+            // loved" need them, and a film from the web has no editor to say it is a ghost story.
+            subgenres = Categories.subgenresOf(meta),
+            genres = meta.genres,
         )
     }
 

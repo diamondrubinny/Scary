@@ -548,21 +548,29 @@ class HomeViewModel(
     /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
     private var detailsCache: DetailsCacheEntry? = null
 
-    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val disliked: List<String>, val details: MovieDetails)
+    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val prefs: LauncherPrefs?, val details: MovieDetails)
 
     /**
      * Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. Films
-     * marked "not for me" are never in it.
+     * marked "not for me" are never in it; among films alike, those that fit the viewer's taste go first, and the ones
+     * they watched go last.
      */
     fun details(movieId: String): MovieDetails? {
         val shown = visibleCatalog() ?: return null
-        val disliked = latestPrefs?.dislikedIds.orEmpty()
-        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.disliked == disliked) return it.details }
+        val prefs = latestPrefs
+        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.prefs === prefs) return it.details }
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        val dislikedSet = disliked.toHashSet()
-        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in dislikedSet }
-        return MovieDetails(movie, Similar.find(candidates, movie))
-            .also { detailsCache = DetailsCacheEntry(movieId, shown, disliked, it) }
+        val disliked = prefs?.dislikedIds.orEmpty().toHashSet()
+        val watched = prefs?.watchedIds.orEmpty().toHashSet()
+        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in disliked }
+        val taste = prefs?.let { Personalize.taste(shown::movie, it.watchedIds, it.lovedIds, it.dislikedIds) } ?: Personalize.Taste.NONE
+        val bonus: (Movie) -> Double = if (taste.known) {
+            { TASTE_WEIGHT * taste.score(it).coerceIn(-TASTE_CAP, TASTE_CAP) / TASTE_CAP }
+        } else {
+            { 0.0 }
+        }
+        return MovieDetails(movie, Similar.find(candidates, movie, bonus = bonus) { it.id in watched })
+            .also { detailsCache = DetailsCacheEntry(movieId, shown, prefs, it) }
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -1674,6 +1682,10 @@ class HomeViewModel(
         /** A library category's pages in [extraPages], next to the online rows' ids. */
         private const val CATEGORY_PREFIX = "cat:"
         private const val MAX_TASTE_CANDIDATES = 120
+
+        /** How much the taste may move a film in "More like this": up to one shared genre's worth. */
+        private const val TASTE_WEIGHT = 1.5
+        private const val TASTE_CAP = 4.0
         private const val REMOTE_RESULTS = 15
         private const val REMOTE_WEB_WAIT_MS = 5_000L
         private const val GOOGLE_TV_LABEL = "Google TV"

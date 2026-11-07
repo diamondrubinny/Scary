@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.catalog
 
 import io.github.diamondrubinny.scary.core.model.Movie
 import java.time.LocalDate
+import kotlin.math.abs
 
 object NightPick {
     /**
@@ -39,22 +40,88 @@ object NightPick {
     }
 }
 
+/**
+ * "More like this" on a film's page. Each candidate gets a score: shared subgenres weigh most, then the same director,
+ * shared tags, Cinemeta genres in common (a horror comedy is like other horror comedies), shared actors, a close
+ * decade and fear level, a little for a better rating, and [bonus] (the viewer's taste). Only films that share
+ * something real are in: a subgenre, a director, most of their genres, or (for films with no subgenres to compare)
+ * the genre. Films that score the same are mixed by the pair of ids, so two pages never show the same row by the
+ * accident of an id order, while one page always shows the same row. Films [isWatched] says were seen come last.
+ */
 object Similar {
-    /** Movies sharing the most subgenres with [movie], then the same genre, then the closest fear level. */
-    fun find(movies: List<Movie>, movie: Movie, limit: Int = 10): List<Movie> =
-        movies.asSequence()
-            .filter { it.id != movie.id }
-            .map { it to it.subgenres.count(movie.subgenres::contains) }
-            .filter { (candidate, shared) -> shared > 0 || candidate.genre == movie.genre }
-            .sortedWith(
-                compareByDescending<Pair<Movie, Int>> { it.second }
-                    .thenByDescending { it.first.genre == movie.genre }
-                    .thenBy { kotlin.math.abs(it.first.fearForLock - movie.fearForLock) }
-                    .thenBy { it.first.id },
-            )
-            .map { it.first }
-            .take(limit)
+    fun find(
+        movies: List<Movie>,
+        movie: Movie,
+        limit: Int = LIMIT,
+        bonus: (Movie) -> Double = { 0.0 },
+        isWatched: (Movie) -> Boolean = { false },
+    ): List<Movie> {
+        val directors = directors(movie)
+        val genres = movie.genres.mapTo(HashSet()) { it.lowercase() }
+        val cast = movie.cast.take(CAST_COMPARED).mapTo(HashSet()) { it.lowercase() }
+        val seed = movie.id.hashCode()
+        val themed = !offTheme(movie)
+        val ranked = movies.asSequence()
+            .filter { it.id != movie.id && it.kind == movie.kind && !(themed && offTheme(it)) }
+            .mapNotNull { candidate ->
+                val sharedSubgenres = candidate.subgenres.count(movie.subgenres::contains)
+                val sharedDirector = directors.isNotEmpty() && directors(candidate).any(directors::contains)
+                val otherGenres = candidate.genres.mapTo(HashSet()) { it.lowercase() }
+                val genreFit = if (genres.isEmpty() || otherGenres.isEmpty()) 0.0 else
+                    otherGenres.count(genres::contains).toDouble() / (genres + otherGenres).size
+                val unsorted = movie.subgenres.isEmpty() || candidate.subgenres.isEmpty()
+                val related = sharedSubgenres > 0 || sharedDirector || genreFit >= GENRE_FIT ||
+                    (unsorted && candidate.genre == movie.genre && (genreFit > 0 || genres.isEmpty() || otherGenres.isEmpty()))
+                if (!related) return@mapNotNull null
+                // Shared subgenres as a share of both films' (Dice): a film tagged with everything is not like everything.
+                val subgenreFit = if (sharedSubgenres == 0) 0.0 else 2.0 * sharedSubgenres / (movie.subgenres.size + candidate.subgenres.size)
+                var score = SUBGENRE_WEIGHT * subgenreFit + sharedSubgenres + 2.0 * candidate.tags.count(movie.tags::contains) + 3.0 * genreFit
+                if (sharedDirector) score += 3.0
+                score += candidate.cast.take(CAST_COMPARED).count { it.lowercase() in cast }.coerceAtMost(MAX_SHARED_CAST)
+                if (candidate.genre == movie.genre) score += 1.0
+                val years = abs(candidate.year - movie.year)
+                score += when {
+                    years <= 5 -> 1.0
+                    years <= 10 -> 0.5
+                    else -> 0.0
+                }
+                if (candidate.fear != null && movie.fear != null) score += 0.5 * (2 - abs(candidate.fear - movie.fear)).coerceAtLeast(0)
+                score += RATING_WEIGHT * ((candidate.imdbRating ?: AVERAGE_RATING) - AVERAGE_RATING)
+                score += bonus(candidate)
+                Scored(candidate, score, mix(seed, candidate.id.hashCode()))
+            }
+            .sortedWith(compareByDescending<Scored> { it.score }.thenBy { it.tieBreak })
+            .map { it.movie }
             .toList()
+        return Personalize.watchedLast(ranked, isWatched).take(limit)
+    }
+
+    private class Scored(val movie: Movie, val score: Double, val tieBreak: Int)
+
+    /** A film from the web whose genres are neither horror, thriller nor mystery (a drama in a general catalog). */
+    private fun offTheme(movie: Movie): Boolean =
+        movie.genres.isNotEmpty() && movie.genres.none { it.lowercase() in THEME_GENRES }
+
+    private fun directors(movie: Movie): Set<String> =
+        movie.director.split(',').map { it.trim().lowercase() }.filter(String::isNotEmpty).toSet()
+
+    /** A stable mix of two hashes: the same pair, the same number; another page, another order. */
+    private fun mix(a: Int, b: Int): Int {
+        var h = a * 31 + b
+        h = h xor (h ushr 16)
+        h *= -0x7a143595
+        h = h xor (h ushr 13)
+        return h
+    }
+
+    const val LIMIT = 20
+    private val THEME_GENRES = setOf("horror", "thriller", "mystery")
+    private const val SUBGENRE_WEIGHT = 5.0
+    private const val GENRE_FIT = 0.5
+    private const val CAST_COMPARED = 6
+    private const val MAX_SHARED_CAST = 3
+    private const val AVERAGE_RATING = 6.5
+    private const val RATING_WEIGHT = 0.3
 }
 
 object RecentList {

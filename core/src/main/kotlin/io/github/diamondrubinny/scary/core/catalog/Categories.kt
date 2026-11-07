@@ -8,6 +8,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
 import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.model.Subgenre
 
 /**
  * Fills the library's categories (its curated rows: zombies, vampires, haunted houses…) with more films from
@@ -33,19 +34,36 @@ object Categories {
             ASIAN_HORROR -> horror && meta.country.substringBefore(',').trim().lowercase() in ASIA
             CLASSICS -> horror && (meta.year ?: 0) in 1..1989 && (meta.imdbRating ?: 0.0) >= CLASSIC_RATING
             SERIES_MUST -> horror && (meta.imdbRating ?: 0.0) >= MUST_SEE_RATING
-            else -> {
-                val rule = RULES[collectionId] ?: return false
-                val text = meta.name + ". " + meta.description
-                when {
-                    rule.horror && !horror -> false
-                    rule.thriller && !thriller -> false
-                    rule.excludedGenres.any(genres::contains) -> false
-                    rule.needsGenre != null && rule.needsGenre !in genres -> false
-                    rule.excludedWords?.containsMatchIn(text) == true -> false
-                    else -> rule.words.containsMatchIn(text)
-                }
-            }
+            else -> RULES[collectionId]?.let { applies(it, meta, genres) } == true
         }
+    }
+
+    private fun applies(rule: Rule, meta: CinemetaMeta, genres: Set<String>): Boolean {
+        val horror = "horror" in genres
+        val thriller = "thriller" in genres || "mystery" in genres
+        val text = meta.name + ". " + meta.description
+        return when {
+            rule.horror && !horror -> false
+            rule.thriller && !thriller -> false
+            rule.excludedGenres.any(genres::contains) -> false
+            rule.needsGenre != null && rule.needsGenre !in genres -> false
+            rule.excludedWords?.containsMatchIn(text) == true -> false
+            else -> rule.words.containsMatchIn(text)
+        }
+    }
+
+    /**
+     * What kind of horror or thriller [meta] is, by the same rules as the categories (a film or a series alike): the
+     * subgenres a film from the web gets, as the library's films have them from its editors. Empty when off theme.
+     */
+    fun subgenresOf(meta: CinemetaMeta): List<Subgenre> {
+        if (!Cinemeta.onTheme(meta)) return emptyList()
+        val genres = meta.genres.mapTo(HashSet()) { it.lowercase() }
+        val found = LinkedHashSet<Subgenre>()
+        SUBGENRE_RULES.forEach { (id, subgenre) -> if (RULES[id]?.let { applies(it, meta, genres) } == true) found += subgenre }
+        EXTRA_RULES.forEach { (subgenre, rule) -> if (applies(rule, meta, genres)) found += subgenre }
+        if ("mystery" in genres) found += Subgenre.MYSTERY
+        return found.toList()
     }
 
     /**
@@ -156,6 +174,31 @@ object Categories {
             thriller = true,
             excludedGenres = setOf("comedy"),
         ),
+    )
+
+    /** Which subgenre each rule tells. */
+    private val SUBGENRE_RULES: List<Pair<String, Subgenre>> = listOf(
+        "psychological_horror" to Subgenre.PSYCHOLOGICAL,
+        "psychological_thriller" to Subgenre.PSYCHOLOGICAL,
+        "supernatural" to Subgenre.SUPERNATURAL,
+        "haunted_houses" to Subgenre.HAUNTED_HOUSE,
+        "crime_thriller" to Subgenre.CRIME,
+        "social" to Subgenre.SOCIAL,
+        "survival" to Subgenre.SURVIVAL,
+        "slashers" to Subgenre.SLASHER,
+        "found_footage" to Subgenre.FOUND_FOOTAGE,
+        "folk_horror" to Subgenre.FOLK,
+        "zombies" to Subgenre.ZOMBIE,
+        "vampires" to Subgenre.VAMPIRE,
+        "body_horror" to Subgenre.BODY,
+        "creatures" to Subgenre.CREATURE,
+        "series_mystery" to Subgenre.MYSTERY,
+    )
+
+    /** Subgenres the library has with no row of their own. */
+    private val EXTRA_RULES: List<Pair<Subgenre, Rule>> = listOf(
+        Subgenre.GHOST to Rule(words("ghosts?\\b", "ghostly", "poltergeist", "vengeful spirit", "haunted (?:house|home|mansion|manor|hotel|by (?:a|the) (?:ghost|spirit))")),
+        Subgenre.POSSESSION to Rule(words("possess", "exorcis")),
     )
 
     private const val ASIAN_HORROR = "asian_horror"
