@@ -62,11 +62,11 @@ jobs:
           set -euo pipefail
           KEYSTORE="$HOME/.android/debug.keystore"
           FOUND=$(keytool -list -v -keystore "$KEYSTORE" -storepass android -alias androiddebugkey \
-            | sed -n 's/^ *SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
+            | sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
           EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
           if [ "$FOUND" != "$EXPECTED" ]; then
             shred -u "$KEYSTORE"
-            echo "::error::The key in this branch's cache is not the one the TVs trust. Nothing was saved."
+            echo "::error::The key in this branch's cache (${FOUND:-unreadable}) is not the one the TVs trust. Nothing was saved."
             exit 1
           fi
           base64 -w0 "$KEYSTORE" | gh secret set SCARY_KEYSTORE_BASE64

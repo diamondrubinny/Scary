@@ -52,11 +52,11 @@ jobs:
             echo "::warning::The signing key is still only in the Actions cache. Move it to secrets (move-signing-key.yml)."
           fi
           FOUND=$(keytool -list -v -keystore "$KEYSTORE" -storepass "$PASS" -alias "$ALIAS" \
-            | sed -n 's/^ *SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
+            | sed -n 's/^[[:space:]]*SHA256: //p' | tr -d ':' | tr 'A-F' 'a-f')
           shred -u "$KEYSTORE"
           EXPECTED=$(tr -d ' \n' < .github/update-signing-cert.sha256)
           if [ "$FOUND" != "$EXPECTED" ]; then
-            echo "::error::The signing key is not the official one. Updates would not install. Do not publish."
+            echo "::error::The signing key (${FOUND:-unreadable}) is not the official one. Updates would not install. Do not publish."
             exit 1
           fi
           echo "Signing key present and official."
