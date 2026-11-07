@@ -105,3 +105,4 @@
    - שומר 4 סודות: `SCARY_KEYSTORE_BASE64`, ‏`SCARY_KEYSTORE_PASSWORD`, ‏`SCARY_KEY_ALIAS` ו־`SCARY_KEY_PASSWORD`.
 4. **מוחקים** את הסוד `SCARY_ADMIN_TOKEN` ואת ה־token עצמו.
 5. **מאז:** ה־build הבא מ־main נחתם במפתח של הטלוויזיות, והעדכון האוטומטי עובד.
+- **7.11.2026:** הוגדר `SCARY_ADMIN_TOKEN`; ההעברה הופעלה בדחיפה הזו.
