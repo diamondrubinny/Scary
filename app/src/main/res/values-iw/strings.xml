@@ -257,6 +257,14 @@
     <string name="subgenre_vampire">‏ערפדים</string>
     <string name="subgenre_body">‏אימת הגוף</string>
     <string name="subgenre_haunted_house">‏בית רדוף</string>
+    <string name="subgenre_giallo">ג׳אלו</string>
+    <string name="subgenre_witch">מכשפות</string>
+    <string name="subgenre_cosmic">אימה קוסמית</string>
+    <string name="subgenre_animal">חיות תוקפות</string>
+    <string name="subgenre_sci_fi">אימת מדע בדיוני</string>
+    <string name="subgenre_comedy">אימה קומית</string>
+    <string name="subgenre_gothic">גותי</string>
+    <string name="subgenre_home_invasion">פלישה לבית</string>
     <string name="mood_short">‏קצר וחד</string>
     <string name="mood_slow_burn">‏אימה שמתבשלת לאט</string>
     <string name="row_decades">‏או בחרו עשור</string>

@@ -6,15 +6,16 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Decades
+import io.github.diamondrubinny.scary.core.catalog.HorrorIndex
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.MovieTag
 import io.github.diamondrubinny.scary.core.model.Subgenre
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.io.File
 
 /** The new moods and decades, and the bundled library behind every row and mood. */
 class LibraryTest {
@@ -68,8 +69,10 @@ class LibraryTest {
         }
         // Family night shows only fear 1-2: there must be plenty of those.
         assertTrue(catalog.movies.count { (it.fear ?: 5) <= 2 } >= 20)
+        // Every subgenre has films, in the hand-picked library or the full index (index.json).
+        val index = HorrorIndex.parse(File("../app/src/main/assets/index.json").readText()).movies
         Subgenre.entries.forEach { sub ->
-            assertTrue("no movie is $sub", catalog.movies.any { sub in it.subgenres })
+            assertTrue("no movie is $sub", catalog.movies.any { sub in it.subgenres } || index.any { sub in it.subgenres })
         }
         assertTrue(Decades.available(catalog.movies).containsAll(listOf(1960, 1970, 1980, 1990, 2000, 2010, 2020)))
     }

@@ -256,6 +256,14 @@
     <string name="subgenre_vampire">Vampires</string>
     <string name="subgenre_body">Body horror</string>
     <string name="subgenre_haunted_house">Haunted house</string>
+    <string name="subgenre_giallo">Giallo</string>
+    <string name="subgenre_witch">Witches</string>
+    <string name="subgenre_cosmic">Cosmic horror</string>
+    <string name="subgenre_animal">Animal attack</string>
+    <string name="subgenre_sci_fi">Sci-fi horror</string>
+    <string name="subgenre_comedy">Horror comedy</string>
+    <string name="subgenre_gothic">Gothic</string>
+    <string name="subgenre_home_invasion">Home invasion</string>
     <string name="mood_short">Short and sharp</string>
     <string name="mood_slow_burn">Slow-burn dread</string>
     <string name="row_decades">Or choose a decade</string>

@@ -53,6 +53,14 @@ enum class Subgenre {
     @SerialName("vampire") VAMPIRE,
     @SerialName("body") BODY,
     @SerialName("haunted_house") HAUNTED_HOUSE,
+    @SerialName("giallo") GIALLO,
+    @SerialName("witch") WITCH,
+    @SerialName("cosmic") COSMIC,
+    @SerialName("animal") ANIMAL,
+    @SerialName("sci_fi") SCI_FI,
+    @SerialName("comedy") COMEDY,
+    @SerialName("gothic") GOTHIC,
+    @SerialName("home_invasion") HOME_INVASION,
 }
 
 /** A film, or a series (whose runtime is an episode's, and whose page in Stremio lists the episodes). */

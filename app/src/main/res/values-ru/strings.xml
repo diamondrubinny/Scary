@@ -260,6 +260,14 @@
     <string name="subgenre_vampire">Вампиры</string>
     <string name="subgenre_body">Боди-хоррор</string>
     <string name="subgenre_haunted_house">Дом с привидениями</string>
+    <string name="subgenre_giallo">Джалло</string>
+    <string name="subgenre_witch">Ведьмы</string>
+    <string name="subgenre_cosmic">Космический ужас</string>
+    <string name="subgenre_animal">Нападение животных</string>
+    <string name="subgenre_sci_fi">Научно-фантастический хоррор</string>
+    <string name="subgenre_comedy">Комедийный хоррор</string>
+    <string name="subgenre_gothic">Готика</string>
+    <string name="subgenre_home_invasion">Вторжение в дом</string>
     <string name="mood_short">Коротко и остро</string>
     <string name="mood_slow_burn">Медленно нарастающий ужас</string>
     <string name="row_decades">Или выберите десятилетие</string>

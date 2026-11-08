@@ -267,6 +267,14 @@
     <string name="subgenre_vampire">مصاصو دماء</string>
     <string name="subgenre_body">رعب الجسد</string>
     <string name="subgenre_haunted_house">بيت مسكون</string>
+    <string name="subgenre_giallo">جيالو</string>
+    <string name="subgenre_witch">ساحرات</string>
+    <string name="subgenre_cosmic">رعب كوني</string>
+    <string name="subgenre_animal">هجوم الحيوانات</string>
+    <string name="subgenre_sci_fi">رعب الخيال العلمي</string>
+    <string name="subgenre_comedy">رعب كوميدي</string>
+    <string name="subgenre_gothic">قوطي</string>
+    <string name="subgenre_home_invasion">اقتحام المنزل</string>
     <string name="mood_short">قصير وحاد</string>
     <string name="mood_slow_burn">رعب يتصاعد ببطء</string>
     <string name="row_decades">أو اختر عقدًا</string>

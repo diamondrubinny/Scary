@@ -257,6 +257,14 @@
     <string name="subgenre_vampire">Vampiros</string>
     <string name="subgenre_body">Horror corporal</string>
     <string name="subgenre_haunted_house">Casa assombrada</string>
+    <string name="subgenre_giallo">Giallo</string>
+    <string name="subgenre_witch">Bruxas</string>
+    <string name="subgenre_cosmic">Horror cósmico</string>
+    <string name="subgenre_animal">Ataque animal</string>
+    <string name="subgenre_sci_fi">Terror de ficção científica</string>
+    <string name="subgenre_comedy">Terror cômico</string>
+    <string name="subgenre_gothic">Gótico</string>
+    <string name="subgenre_home_invasion">Invasão domiciliar</string>
     <string name="mood_short">Curto e afiado</string>
     <string name="mood_slow_burn">Terror em fogo lento</string>
     <string name="row_decades">Ou escolha uma década</string>
