@@ -63,6 +63,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - 🌙 **"What do you feel like tonight?"**: eight moods, from mind games and "short and sharp" to "slow-burn dread" and "no sleep tonight", or pick a decade, alone or with a mood. "Surprise me" picks from your choice. Plus special rows for Halloween and Friday the 13th.
 - 🧟 **Rows for every kind of fear**: found footage, folk horror, Asian horror, zombies, vampires, body horror, haunted houses and creatures, next to the classics, slashers and psychological thrillers.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
+- 📱 **TVs, tablets and phones**: one APK. TVs keep the TV layout; tablets and phones get their own (a two-row top bar, the poster above the text, full-width settings), work by touch, upright or on their side, and SCARY gets an icon in the app drawer.
 - 📺 **Where to watch**: search the movie in the apps you have (Netflix, Disney+, Prime Video, Apple TV, Max, YouTube, Plex and more) and in Google TV search.
 - 🛒 **Didn't find it? Rent or buy**: with a TMDB key, the movie page lists the stores that rent or sell it in your country, and the services that include it. Your country comes from the TV's settings, never from your location. Data by JustWatch.
 - 👨‍👩‍👧 **Family night**: only the gentlest films, everywhere, and leaving it takes a PIN.
