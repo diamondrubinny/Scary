@@ -178,6 +178,7 @@ class MainActivity : ComponentActivity() {
                 viewModel.openSearch()
             }
             target == "apps" -> viewModel.openAllApps()
+            target == "ask" -> viewModel.openAsk()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
             target == "home" -> viewModel.onHomePressed()
