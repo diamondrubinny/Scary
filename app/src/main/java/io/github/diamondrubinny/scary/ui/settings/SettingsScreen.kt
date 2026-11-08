@@ -224,6 +224,7 @@ fun SettingsScreen(
             label = stringResource(R.string.settings_language),
             value = language.nativeName,
             onClick = actions.onToggleLanguage,
+            modifier = Modifier.testTag(LANGUAGE_ROW_TAG),
         )
         SettingRow(
             label = stringResource(R.string.settings_effects),
@@ -421,6 +422,7 @@ const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
 const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"
 const val AI_ENABLED_ROW_TAG = "aiEnabledRow"
+const val LANGUAGE_ROW_TAG = "languageRow"
 const val AI_PROVIDER_ROW_TAG = "aiProviderRow"
 
 /** The AI section's values, as settings show them. */

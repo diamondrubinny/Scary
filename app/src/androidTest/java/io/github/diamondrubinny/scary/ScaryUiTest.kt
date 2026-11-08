@@ -88,6 +88,9 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.ui.settings.LANGUAGE_DIALOG_TAG
+import io.github.diamondrubinny.scary.ui.settings.LANGUAGE_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.languageTag
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.ui.ai.AI_CONSENT_TAG
 import io.github.diamondrubinny.scary.ui.ai.AI_PROVIDER_TAG
@@ -1049,6 +1052,27 @@ class ScaryUiTest {
             waitFor(hasTestTag(aiProviderTag(AiProvider.POLLINATIONS_FREE)) and isFocused())
             pressBack()
             waitForGone(hasTestTag(AI_PROVIDER_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theLanguageListShowsEveryLanguageInItselfWithTheCurrentOneChosen() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(LANGUAGE_ROW_TAG)
+        waitFor(row)
+        val dialog = hasTestTag(LANGUAGE_DIALOG_TAG)
+        withCleanup({
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(dialog)
+            Language.entries.forEach { waitFor(hasTestTag(languageTag(it)) and hasContentDescription(it.nativeName)) }
+            // The language in use is marked and has the focus.
+            val current = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+            waitFor(hasTestTag(languageTag(current)) and isSelected() and isFocused())
+            pressBack()
+            waitForGone(dialog)
         }) {
             backToHome()
         }

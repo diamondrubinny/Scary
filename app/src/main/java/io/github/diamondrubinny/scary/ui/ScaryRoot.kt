@@ -87,6 +87,7 @@ import io.github.diamondrubinny.scary.ui.ai.AiUrlDialog
 import io.github.diamondrubinny.scary.ui.ai.AskActions
 import io.github.diamondrubinny.scary.ui.ai.AskScreen
 import io.github.diamondrubinny.scary.ui.settings.AiSettingsState
+import io.github.diamondrubinny.scary.ui.settings.LanguageDialog
 import io.github.diamondrubinny.scary.ui.update.UpdateDialog
 import io.github.diamondrubinny.scary.update.UpdateState
 import io.github.diamondrubinny.scary.ScaryApplication
@@ -154,6 +155,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     var aiDialog by remember { mutableStateOf<AiDialogKind?>(null) }
     var aiKeyVersion by remember { mutableIntStateOf(0) }
     var aiKeyTarget by remember { mutableStateOf<AiProvider?>(null) }
+    var languageDialog by remember { mutableStateOf(false) }
     val aiProvider = AiProvider.fromKey(state.aiProvider) ?: AiProvider.DEFAULT
 
     // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
@@ -258,10 +260,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         }
     }
     val settingsActions = SettingsActions(
-        onToggleLanguage = {
-            LanguageStore.write(context, language.next())
-            context.findActivity()?.recreate()
-        },
+        onToggleLanguage = { languageDialog = true },
         onToggleEffects = viewModel::toggleEffects,
         onCycleNightFear = { viewModel.setNightMaxFear(state.nightMaxFear % SettingsRepository.MAX_FEAR + 1) },
         onSystemSettings = { viewModel.openTile(AppTile.SystemSettings, settingsLabel) },
@@ -597,6 +596,20 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onPlayNext = viewModel::playNextInBucket,
                     onBackToFilm = viewModel::backToBucketFilm,
                     onDismiss = viewModel::dismissBucketPrompt,
+                )
+            }
+
+            if (languageDialog) {
+                LanguageDialog(
+                    current = language,
+                    onPick = { picked ->
+                        languageDialog = false
+                        if (picked != language) {
+                            LanguageStore.write(context, picked)
+                            context.findActivity()?.recreate()
+                        }
+                    },
+                    onDismiss = { languageDialog = false },
                 )
             }
 
