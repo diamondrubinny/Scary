@@ -61,6 +61,8 @@ import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 
 /** Test tags of the "Ask SCARY" screen, its tabs and its results. */
 const val ASK_SCREEN_TAG = "askScreen"
@@ -180,7 +182,7 @@ private fun SuggestPane(
                 submitLabel = stringResource(R.string.ai_send),
                 language = language,
                 focusRequester = inputFocus,
-                modifier = Modifier.fillMaxWidth(0.85f),
+                modifier = Modifier.paneWidth(scaryLayout, 0.85f),
             )
         }
         item(span = { GridItemSpan(maxLineSpan) }, key = "chips") {
@@ -288,7 +290,7 @@ private fun ChatPane(state: AiState, language: Language, inputFocus: FocusReques
             submitLabel = stringResource(R.string.ai_chat_send),
             language = language,
             focusRequester = inputFocus,
-            modifier = Modifier.fillMaxWidth(0.85f),
+            modifier = Modifier.paneWidth(scaryLayout, 0.85f),
         )
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (state.chat.isNotEmpty()) ScaryButton(stringResource(R.string.ai_new_chat), onClick = actions.onNewChat)

@@ -55,6 +55,7 @@ import io.github.diamondrubinny.scary.ui.home.PinDialogState
 import io.github.diamondrubinny.scary.ui.home.PinStep
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import kotlinx.coroutines.delay
 
 /**
@@ -92,7 +93,7 @@ fun PinDialog(state: PinDialogState, onSubmit: (String) -> Unit, onDismiss: () -
         }
         Column(
             modifier = Modifier
-                .width(340.dp)
+                .dialogWidth(340.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Blood, RoundedCornerShape(12.dp))
                 .padding(22.dp)

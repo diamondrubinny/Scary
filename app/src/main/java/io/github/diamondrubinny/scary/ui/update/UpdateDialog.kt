@@ -40,6 +40,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import io.github.diamondrubinny.scary.update.UpdateState
 
 /** Test tag of the update popup. */
@@ -69,7 +70,7 @@ fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions)
         }
         Column(
             modifier = Modifier
-                .width(620.dp)
+                .dialogWidth(620.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                 .verticalScroll(rememberScrollState())

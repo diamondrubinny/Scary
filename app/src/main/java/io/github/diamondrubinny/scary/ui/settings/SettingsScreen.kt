@@ -4,9 +4,6 @@
 
 package io.github.diamondrubinny.scary.ui.settings
 
-import io.github.diamondrubinny.scary.ui.components.CreditLine
-import io.github.diamondrubinny.scary.ui.components.DataCredit
-import io.github.diamondrubinny.scary.ui.components.SupportScary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import io.github.diamondrubinny.scary.ui.components.minutesShown
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,18 +35,25 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.ui.components.CreditLine
+import io.github.diamondrubinny.scary.ui.components.DataCredit
 import io.github.diamondrubinny.scary.ui.components.FearMeter
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import io.github.diamondrubinny.scary.ui.components.SupportScary
+import io.github.diamondrubinny.scary.ui.components.minutesShown
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
 import io.github.diamondrubinny.scary.update.UpdateState
-import io.github.diamondrubinny.scary.ai.AiTask
-import io.github.diamondrubinny.scary.core.ai.AiProvider
+import kotlinx.coroutines.delay
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -158,7 +160,7 @@ fun SettingsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = SidePadding, vertical = 28.dp)
-            .fillMaxWidth(0.7f),
+            .paneWidth(scaryLayout, 0.7f),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         BasicText(

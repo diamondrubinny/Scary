@@ -4,26 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
-import io.github.diamondrubinny.scary.core.model.MediaKind
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.selected
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.layout.Column
-import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
-import io.github.diamondrubinny.scary.core.brand.Credit
 import android.text.format.DateFormat
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
@@ -31,7 +12,22 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,20 +39,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.foundation.layout.size
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.core.brand.Credit
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.ui.home.UserMessage
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
-import kotlinx.coroutines.delay
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import kotlinx.coroutines.delay
 
 /** Test tag of the top bar's "Ask SCARY ✦" button. */
 const val ASK_BUTTON_TAG = "askButton"
@@ -82,6 +86,13 @@ fun TopBar(
     /** "Ask SCARY ✦"; none when AI is off. */
     onAsk: (() -> Unit)? = null,
 ) {
+    if (scaryLayout.narrow) {
+        NarrowTopBar(
+            effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, modifier, familyNight, sleepAtMillis,
+            tab, onSelectTab, onOpenBucket, bucketCount, onAsk,
+        )
+        return
+    }
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
             BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
@@ -111,45 +122,108 @@ fun TopBar(
             if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
             Clock()
             Spacer(Modifier.width(4.dp))
-            if (onOpenBucket != null) {
-                IconCircleButton(
-                    contentDescription = if (bucketCount > 0) {
-                        stringResource(R.string.bucket_button_count, bucketCount)
-                    } else {
-                        stringResource(R.string.bucket_title)
-                    },
-                    onClick = onOpenBucket,
-                    modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
-                ) { BucketIcon(it) }
-            }
-            if (onAsk != null) {
-                IconCircleButton(
-                    contentDescription = stringResource(R.string.ai_title),
-                    onClick = onAsk,
-                    modifier = Modifier.testTag(ASK_BUTTON_TAG),
-                ) { BasicText("✦", style = ScaryType.Title.copy(color = it, fontSize = ScaryType.Title.fontSize * 0.9f)) }
-            }
-            IconCircleButton(
-                contentDescription = stringResource(R.string.search_title),
-                onClick = onOpenSearch,
-            ) { SearchIcon(it) }
-            IconCircleButton(
-                contentDescription = stringResource(R.string.surprise_me),
-                onClick = onSurprise,
-            ) { DiceIcon(it) }
-            IconCircleButton(
-                contentDescription = stringResource(
-                    if (effectsEnabled) R.string.effects_on_description else R.string.effects_off_description,
-                ),
-                onClick = onToggleEffects,
-                dimmed = !effectsEnabled,
-            ) { FogIcon(it) }
-            IconCircleButton(
-                contentDescription = stringResource(R.string.settings_title),
-                onClick = onOpenSettings,
-            ) { GearIcon(it) }
+            TopBarButtons(effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
         }
     }
+}
+
+/**
+ * The top bar on a tablet or phone: the logo and the clock, then the tabs and the buttons in a row of their own that
+ * scrolls sideways when it does not fit. The donation code stays on the TV: a phone cannot scan its own screen.
+ */
+@Composable
+private fun NarrowTopBar(
+    effectsEnabled: Boolean,
+    onToggleEffects: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onSurprise: () -> Unit,
+    modifier: Modifier,
+    familyNight: Boolean,
+    sleepAtMillis: Long?,
+    tab: MediaKind?,
+    onSelectTab: (MediaKind) -> Unit,
+    onOpenBucket: (() -> Unit)?,
+    bucketCount: Int,
+    onAsk: (() -> Unit)?,
+) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                BasicText(stringResource(R.string.app_name), style = ScaryType.Logo)
+                CreditLine(short = true)
+            }
+            if (sleepAtMillis != null) SleepCountdown(sleepAtMillis, Modifier.padding(end = 12.dp))
+            Clock()
+        }
+        Row(
+            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (familyNight) {
+                BasicText(
+                    stringResource(R.string.family_night_badge),
+                    style = ScaryType.Label.copy(color = ScaryColors.Void),
+                    modifier = Modifier
+                        .background(ScaryColors.Candle, RoundedCornerShape(50))
+                        .padding(horizontal = 14.dp, vertical = 5.dp),
+                )
+            }
+            if (tab != null) HomeTabs(tab, onSelectTab)
+            TopBarButtons(effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+        }
+    }
+}
+
+@Composable
+private fun TopBarButtons(
+    effectsEnabled: Boolean,
+    onToggleEffects: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
+    onSurprise: () -> Unit,
+    onOpenBucket: (() -> Unit)?,
+    bucketCount: Int,
+    onAsk: (() -> Unit)?,
+) {
+    if (onOpenBucket != null) {
+        IconCircleButton(
+            contentDescription = if (bucketCount > 0) {
+                stringResource(R.string.bucket_button_count, bucketCount)
+            } else {
+                stringResource(R.string.bucket_title)
+            },
+            onClick = onOpenBucket,
+            modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
+        ) { BucketIcon(it) }
+    }
+    if (onAsk != null) {
+        IconCircleButton(
+            contentDescription = stringResource(R.string.ai_title),
+            onClick = onAsk,
+            modifier = Modifier.testTag(ASK_BUTTON_TAG),
+        ) { BasicText("✦", style = ScaryType.Title.copy(color = it, fontSize = ScaryType.Title.fontSize * 0.9f)) }
+    }
+    IconCircleButton(
+        contentDescription = stringResource(R.string.search_title),
+        onClick = onOpenSearch,
+    ) { SearchIcon(it) }
+    IconCircleButton(
+        contentDescription = stringResource(R.string.surprise_me),
+        onClick = onSurprise,
+    ) { DiceIcon(it) }
+    IconCircleButton(
+        contentDescription = stringResource(
+            if (effectsEnabled) R.string.effects_on_description else R.string.effects_off_description,
+        ),
+        onClick = onToggleEffects,
+        dimmed = !effectsEnabled,
+    ) { FogIcon(it) }
+    IconCircleButton(
+        contentDescription = stringResource(R.string.settings_title),
+        onClick = onOpenSettings,
+    ) { GearIcon(it) }
 }
 
 @Composable

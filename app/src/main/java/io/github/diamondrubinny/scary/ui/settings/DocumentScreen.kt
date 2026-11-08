@@ -4,8 +4,6 @@
 
 package io.github.diamondrubinny.scary.ui.settings
 
-import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
-import io.github.diamondrubinny.scary.core.brand.Credit
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.focusable
@@ -38,10 +36,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 
 /**
  * The privacy notice or the accessibility statement. Each paragraph takes focus, so the D-pad scrolls
@@ -72,7 +74,7 @@ fun DocumentScreen(kind: DocumentKind) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = SidePadding, vertical = 28.dp)
-            .fillMaxWidth(0.7f),
+            .paneWidth(scaryLayout, 0.7f),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         BasicText(

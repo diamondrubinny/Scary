@@ -36,6 +36,7 @@ import io.github.diamondrubinny.scary.ui.components.FocusSurface
 import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 
 /**
  * The country rent and buy offers are shown for. "Automatic" follows the TV (and on a phone, its network); any
@@ -64,7 +65,7 @@ fun CountryPicker(
         }
         Column(
             modifier = Modifier
-                .width(520.dp)
+                .dialogWidth(520.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                 .padding(24.dp),

@@ -57,7 +57,10 @@ import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.home.hoursAndMinutes
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 
 /** Test tags of the bucket list's screen, its rows and the question on coming back from a film. */
 const val BUCKET_SCREEN_TAG = "bucketScreen"
@@ -114,7 +117,7 @@ fun BucketScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "head") {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth(0.75f)) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.paneWidth(scaryLayout, 0.75f)) {
                 BasicText(
                     stringResource(R.string.bucket_title),
                     style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f),
@@ -270,7 +273,7 @@ fun BucketPromptDialog(
         }
         Column(
             modifier = Modifier
-                .width(600.dp)
+                .dialogWidth(600.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
                 .verticalScroll(rememberScrollState())

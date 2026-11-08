@@ -4,102 +4,107 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
-import io.github.diamondrubinny.scary.core.model.MediaKind
-import io.github.diamondrubinny.scary.ui.components.LocalBucketNumber
-import androidx.compose.foundation.relocation.BringIntoViewResponder
-import androidx.compose.foundation.relocation.bringIntoViewResponder
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.gestures.BringIntoViewSpec
-import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.rememberUpdatedState
-import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.liveRegion
-import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.semantics.selected
-import io.github.diamondrubinny.scary.core.catalog.Mood
-import io.github.diamondrubinny.scary.ui.components.EmptyState
-import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
-import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ai.AiChip
+import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.TimeBudget
-import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.ui.ai.labelRes
+import io.github.diamondrubinny.scary.ui.ai.promptRes
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import io.github.diamondrubinny.scary.ui.components.DataCredit
-import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
+import io.github.diamondrubinny.scary.ui.components.EmptyState
+import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import io.github.diamondrubinny.scary.ui.components.LocalBucketNumber
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
-import io.github.diamondrubinny.scary.ai.AiChip
-import io.github.diamondrubinny.scary.ui.ai.labelRes
-import io.github.diamondrubinny.scary.ui.ai.promptRes
 import io.github.diamondrubinny.scary.ui.components.TopBar
 import io.github.diamondrubinny.scary.ui.components.WideMovieCard
+import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
+import io.github.diamondrubinny.scary.ui.theme.LocalScaryLayout
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
+import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 
 /** Callbacks from the home screen, grouped so the composable signature stays readable. */
 class HomeActions(
@@ -135,13 +140,18 @@ class HomeActions(
     val onAsk: (AiChip?, String?) -> Unit = { _, _ -> },
 )
 
-val SidePadding = 48.dp
+/** The margin on both sides of every screen: 48dp on a TV, less on tablets and phones (ScaryLayout). */
+val SidePadding: Dp
+    @Composable @ReadOnlyComposable get() = LocalScaryLayout.current.side
 
 /** The list of home rows, for UI tests. */
 const val HOME_ROWS_TAG = "homeRows"
 
 /** Test tag of a home row's list of cards. */
 fun rowTag(rowKey: String): String = "row:$rowKey"
+
+/** Key of the hero when it scrolls with the rows (tablets and phones). */
+const val HERO_KEY = "hero"
 
 /** Key of the credit line at the end of the home rows. */
 const val CREDIT_KEY = "credit"
@@ -228,10 +238,12 @@ fun HomeScreen(
             bucketCount = state.bucketIds.size,
             onAsk = if (state.aiEnabled) ({ actions.onAsk(null, null) }) else null,
         )
+        // On a tablet or phone the hero scrolls away with the rows (first item below), so the rows get the room.
+        val heroInRows = scaryLayout.narrow
         if (state.picking) {
             // Picking films for the bucket list: the hero gives way to what OK does now, and how many are in.
             PickingBanner(count = state.bucketIds.size, doneFocus = heroFocus, onDone = actions.onFinishPicking)
-        } else {
+        } else if (!heroInRows) {
             Hero(
                 movie = state.hero,
                 isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
@@ -267,6 +279,19 @@ fun HomeScreen(
                 contentPadding = PaddingValues(top = 8.dp, bottom = 40.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
+                if (heroInRows && !state.picking) {
+                    item(key = HERO_KEY) {
+                        Hero(
+                            movie = state.hero,
+                            isNightPick = state.hero != null && state.hero.id == state.nightPick?.id,
+                            language = language,
+                            primaryFocus = heroFocus,
+                            actions = actions,
+                            locked = state.hero?.let(state::isLocked) ?: false,
+                            trailer = trailer,
+                        )
+                    }
+                }
                 items(state.rows, key = { it.key }) { row ->
                     CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                         Box(Modifier.bringIntoViewResponder(FromRowTitle)) {
@@ -362,6 +387,11 @@ private fun Hero(
     /** The rows have the focus: no synopsis and a smaller trailer, so the rows get the room. */
     compact: Boolean = false,
 ) {
+    if (scaryLayout.narrow) {
+        // One column: the text and its buttons, full width; no trailer window beside it (and none playing by itself).
+        HeroText(movie, isNightPick, language, primaryFocus, actions, Modifier.padding(horizontal = SidePadding).fillMaxWidth(), fillHeight = false)
+        return
+    }
     val height by animateDpAsState(
         targetValue = if (compact) HeroCompactHeight else HeroHeight,
         animationSpec = if (LocalReduceMotion.current) snap() else tween(HERO_RESIZE_MS),
@@ -406,9 +436,11 @@ private fun HeroText(
     actions: HomeActions,
     modifier: Modifier,
     showSynopsis: Boolean = true,
+    /** Fills the hero's fixed height (the TV layout); false in one column, where it is as tall as its text. */
+    fillHeight: Boolean = true,
 ) {
     Column(
-        modifier = modifier.fillMaxHeight(),
+        modifier = if (fillHeight) modifier.fillMaxHeight() else modifier,
         verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
     ) {
         if (movie == null) return@Column
@@ -423,7 +455,7 @@ private fun HeroText(
         // The text block yields space first, so the buttons below always keep their full height,
         // even when a longer language wraps the synopsis to two lines.
         Column(
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = if (fillHeight) Modifier.weight(1f, fill = false) else Modifier,
             verticalArrangement = Arrangement.spacedBy(7.dp, Alignment.Bottom),
         ) {
             BasicText(
@@ -446,7 +478,12 @@ private fun HeroText(
                 )
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
+        // On a narrow screen the buttons wrap to a second line rather than being cut.
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(top = 4.dp),
+        ) {
             ScaryButton(
                 text = stringResource(R.string.action_watch_stremio),
                 onClick = { actions.onWatch(movie) },
@@ -960,7 +997,7 @@ private fun TasteInviteView(
     Column(
         modifier = Modifier
             .padding(horizontal = SidePadding)
-            .fillMaxWidth(0.7f)
+            .paneWidth(scaryLayout, 0.7f)
             .testTag(TASTE_INVITE_TAG),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {

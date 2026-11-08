@@ -4,6 +4,8 @@
 
 package io.github.diamondrubinny.scary.ui.search
 
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiPicks
 import io.github.diamondrubinny.scary.ui.ai.AiStatus
@@ -152,7 +154,7 @@ fun SearchScreen(
         Row(
             modifier = Modifier
                 .padding(horizontal = SidePadding)
-                .fillMaxWidth(0.7f),
+                .paneWidth(scaryLayout, 0.7f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
