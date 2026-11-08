@@ -105,14 +105,19 @@ object Decades {
 
     /**
      * Curated movies for a mood, a decade, or both. Nothing is chosen: nothing to show. With a decade alone, the
-     * decade's movies in order of year.
+     * decade's hand-picked movies in order of year, then up to [MAX_MORE] more from that decade (the full index and
+     * online rows, most widely known first, as they come in [movies]).
      */
     fun pick(movies: List<Movie>, mood: Mood?, decade: Int?): List<Movie> = when {
         mood == null && decade == null -> emptyList()
-        mood == null -> movies.filter { it.curated && of(it) == decade }.sortedBy { it.year }
+        mood == null -> {
+            val (curated, more) = movies.filter { of(it) == decade }.partition { it.curated }
+            curated.sortedBy { it.year } + more.take(MAX_MORE)
+        }
         decade == null -> mood.pick(movies)
         else -> mood.pick(movies).filter { of(it) == decade }
     }
 
     private const val MIN_MOVIES = 3
+    const val MAX_MORE = 150
 }

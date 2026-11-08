@@ -320,6 +320,11 @@ class CinemetaRepository(context: Context) {
         Cinemeta.searchResults(metas.map { meta -> full[meta.imdbId]?.copy(type = meta.type) ?: meta }, known)
     }
 
+    /** One film's details from Cinemeta (synopsis, length, cast, trailers): only its IMDb id leaves the TV. */
+    suspend fun meta(imdbId: String, kind: MediaKind): CinemetaMeta? = withContext(Dispatchers.IO) {
+        fetch(Cinemeta.metaUrl(imdbId, kind))?.let(Cinemeta::parseMeta)?.takeIf { it.imdbId == imdbId }
+    }
+
     private fun save(cache: CinemetaCache) {
         try {
             val tmp = File(cacheFile.parentFile, cacheFile.name + ".tmp")

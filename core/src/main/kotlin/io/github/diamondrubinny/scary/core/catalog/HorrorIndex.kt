@@ -29,7 +29,7 @@ object HorrorIndex {
     private const val MAX_NAME = 80
     private const val MAX_GENRES = 6
     private const val FIRST_FILM_YEAR = 1895
-    private val imdbPattern = Regex("^tt\\d{7,9}$")
+    private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val genrePattern = Regex("^[A-Za-z][A-Za-z -]{1,23}$")
     private val languages = Language.entries.map { it.code }.toSet()
     private val subgenres = Subgenre.entries.associateBy { it.serialName }

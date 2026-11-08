@@ -290,9 +290,15 @@ class HomeViewModel(
             savedMovies.load()
             watchTmdbAccount()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
+            // The full index comes in the background, after the library is on screen.
+            launch { indexMovies.value = catalogRepository.loadIndex() }
+            val index = indexMovies.combine(enrichedIndex) { films, enriched -> films to enriched }
             catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
-                .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) }
+                .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) to isOnline }
+                .combine(index) { (catalog, isOnline), (films, enriched) -> withIndex(catalog, films, enriched, isOnline) }
+                // Thousands of films are merged per update: off the main thread.
+                .flowOn(Dispatchers.Default)
                 .catch { e ->
                     when (e) {
                         is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
@@ -318,6 +324,50 @@ class HomeViewModel(
             .map { if (online) it else it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) }
             .toList()
         return if (extra.isEmpty()) catalog else catalog.copy(movies = catalog.movies + extra)
+    }
+
+    /** The full horror index (core HorrorIndex): empty until read, and if it cannot be. */
+    private val indexMovies = MutableStateFlow<List<Movie>>(emptyList())
+
+    /** Index films opened once, filled in from Cinemeta (synopsis, length, cast, trailers), by movie id. */
+    private val enrichedIndex = MutableStateFlow<Map<String, Movie>>(emptyMap())
+
+    /**
+     * Adds the full index after everything else: search finds thousands of films, offline too, and a decade, "More like
+     * this" and Ask SCARY choose from all of them. With online data on, each shows Cinemeta's poster for its IMDb id;
+     * off, nothing loads from the web. Films already shown (library, online rows, saved) are not added twice.
+     */
+    private fun withIndex(catalog: Catalog, films: List<Movie>, enriched: Map<String, Movie>, online: Boolean): Catalog {
+        if (films.isEmpty()) return catalog
+        val known = catalog.movies.mapTo(HashSet()) { it.imdbId }
+        val extra = films.asSequence()
+            .filter { it.imdbId !in known }
+            .map { enriched[it.id] ?: it }
+            .map {
+                if (online) it.copy(posterUrl = it.posterUrl ?: Cinemeta.posterUrl(it.imdbId)) else it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null)
+            }
+            .toList()
+        // The library's subgenre rows go on with index films of that subgenre (slashers, zombies…), best known first.
+        val collections = catalog.collections.map { collection ->
+            val subgenre = Categories.subgenreOfRow(collection.id) ?: return@map collection
+            val have = collection.movieIds.toHashSet()
+            val more = extra.asSequence().filter { subgenre in it.subgenres && it.id !in have }.take(INDEX_PER_ROW).map { it.id }.toList()
+            if (more.isEmpty()) collection else collection.copy(movieIds = collection.movieIds + more)
+        }
+        return catalog.copy(movies = catalog.movies + extra, collections = collections)
+    }
+
+    /**
+     * An index film comes with no synopsis: the first time it is opened (online), its details come from Cinemeta. Only
+     * its IMDb id leaves the TV, as for every online row.
+     */
+    private fun fillInIndexFilm(movieId: String) {
+        if (latestPrefs?.onlineEnabled != true || movieId in enrichedIndex.value) return
+        val film = indexMovies.value.firstOrNull { it.id == movieId } ?: return
+        viewModelScope.launch {
+            val meta = cinemeta.meta(film.imdbId, film.kind) ?: return@launch
+            enrichedIndex.update { it + (movieId to Cinemeta.enrich(film, meta)) }
+        }
     }
 
     fun refreshApps() {
@@ -987,7 +1037,10 @@ class HomeViewModel(
 
     private fun perform(action: GatedAction) {
         when (action) {
-            is GatedAction.Details -> push(Screen.Details(action.movieId))
+            is GatedAction.Details -> {
+                fillInIndexFilm(action.movieId)
+                push(Screen.Details(action.movieId))
+            }
             is GatedAction.Watch -> {
                 viewModelScope.launch {
                     settings.pushRecent(action.movie.id)
@@ -1821,6 +1874,8 @@ class HomeViewModel(
         private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80
         private const val WEB_SEARCH_DELAY_MS = 700L
+        /** Index films added to each library subgenre row. */
+        private const val INDEX_PER_ROW = 40
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
             initializer {

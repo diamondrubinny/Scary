@@ -52,7 +52,8 @@ class LibraryTest {
         assertEquals(1980, Decades.of(small[0]))
         // Only decades with enough curated movies become chips.
         assertEquals(listOf(1980), Decades.available(small, minMovies = 2))
-        assertEquals(listOf("quick", "long_slow"), ids(Decades.pick(small, null, 1980)))
+        // A decade alone: the hand-picked films by year, then the others from that decade (the full index, online rows).
+        assertEquals(listOf("quick", "long_slow", "online_short"), ids(Decades.pick(small, null, 1980)))
         assertEquals(listOf("quick"), ids(Decades.pick(small, Mood.SHORT, 1980)))
         assertEquals(listOf("quicker", "quick"), ids(Decades.pick(small, Mood.SHORT, null)))
         assertTrue(Decades.pick(small, null, null).isEmpty())

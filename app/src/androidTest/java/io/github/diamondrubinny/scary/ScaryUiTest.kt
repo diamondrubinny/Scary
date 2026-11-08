@@ -247,6 +247,22 @@ class ScaryUiTest {
         backToHome()
     }
 
+    /** The full index (index.json): search finds a well-known film outside the hand-picked library, and it opens. */
+    @Test
+    fun searchFindsAFilmFromTheFullIndex() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextInput("deep red")
+        // Its title as shown: Hebrew where Wikidata has one ("אדום עמוק"), English otherwise.
+        val deepRed = hasContentDescription("Deep Red", substring = true) or hasContentDescription("אדום עמוק", substring = true) or
+            hasContentDescription("Кроваво-красное", substring = true) or hasContentDescription("Profondo rosso", substring = true) or hasContentDescription("أحمر داكن", substring = true)
+        waitFor(deepRed, ONLINE_TIMEOUT_MS)
+        rule.onAllNodes(deepRed)[0].performClick()
+        waitFor(hasText(text(R.string.action_watch_stremio)))
+        pressBack()
+    }
+
     @Test
     fun searchFindsAMovieAndMyListToggles() {
         waitForHome()

@@ -139,6 +139,15 @@ object Cinemeta {
         return "$BASE_URL/meta/${CinemetaMeta.typeOf(kind)}/$imdbId.json"
     }
 
+    /**
+     * The poster Cinemeta gives any film, built from its IMDb id (the address Cinemeta's own metas carry): films of the
+     * full index show their real poster without a request per film.
+     */
+    fun posterUrl(imdbId: String): String {
+        require(imdbPattern.matches(imdbId)) { "invalid IMDb id" }
+        return "https://images.metahub.space/poster/medium/$imdbId/img"
+    }
+
     /** A catalog page; Cinemeta pages hold 50 movies, so [skip] moves in steps of 50. */
     fun catalogUrl(catalogId: String, genre: String, skip: Int = 0, kind: MediaKind = MediaKind.MOVIE): String {
         require(catalogIdPattern.matches(catalogId)) { "invalid catalog id" }
@@ -293,6 +302,9 @@ object Cinemeta {
         trailerYoutubeId = movie.trailerYoutubeId ?: meta.trailerYoutubeId,
         trailerAlternates = if (movie.trailerYoutubeId != null) movie.trailerAlternates else meta.trailerAlternates,
         synopsisEn = movie.synopsisEn.ifBlank { meta.description },
+        // Films from the full index come with no length and, now and then, no director.
+        runtimeMin = movie.runtimeMin.takeIf { it > 0 } ?: meta.runtimeMin ?: 0,
+        director = movie.director.ifBlank { meta.director.joinToString(", ") },
         genres = movie.genres.ifEmpty { meta.genres.takeIf { meta.kind == movie.kind }.orEmpty() },
         // A running series ends, or a new season starts: Cinemeta knows before the bundled library does.
         endYear = if (movie.isSeries && meta.kind == movie.kind && (meta.endYear != null || meta.ongoing)) meta.endYear else movie.endYear,

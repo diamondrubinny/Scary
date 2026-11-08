@@ -195,6 +195,14 @@ object Categories {
         "series_mystery" to Subgenre.MYSTERY,
     )
 
+    /**
+     * The horror subgenre a library row is about ("slashers" → slasher), so films of the full index that Wikidata files
+     * under it can go on in that row. Null for rows that are not one subgenre, and for the thriller rows (the index
+     * holds horror only).
+     */
+    fun subgenreOfRow(collectionId: String): Subgenre? =
+        SUBGENRE_RULES.firstOrNull { (id, _) -> id == collectionId && id != "psychological_thriller" && id != "crime_thriller" }?.second
+
     /** Subgenres the library has with no row of their own. */
     private val EXTRA_RULES: List<Pair<Subgenre, Rule>> = listOf(
         Subgenre.GHOST to Rule(words("ghosts?\\b", "ghostly", "poltergeist", "vengeful spirit", "haunted (?:house|home|mansion|manor|hotel|by (?:a|the) (?:ghost|spirit))")),
