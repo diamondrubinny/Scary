@@ -157,6 +157,7 @@
         <item>Controle pelo celular, só enquanto você o liga nas configurações: a TV serve uma pequena página na sua rede doméstica, que o celular abre ao escanear um código QR. O código contém uma chave de uso único que assina e criptografa cada comando entre o celular e a TV, e a chave nunca é enviada pela rede. Os comandos vão direto do celular para a TV e não são guardados; o texto da busca e a chave do TMDB são usados depois como descrito acima. A página não carrega nada da internet. O controle desliga quando você o desconecta, após 30 minutos sem uso ou quando chegam comandos falsos. Para apertar teclas em outros apps (Stremio, Netflix…), o controle pelo celular usa o serviço de acessibilidade do SCARY, só se você o ativou; ele aperta teclas e não lê nada da tela.</item>
         <item>Assistir, trailers e a loja abrem o Stremio, o YouTube ou o Google Play. A partir daí valem as políticas de privacidade deles.</item>
         <item>Atualizações (versão oficial; você pode desligar a verificação automática nas configurações): no máximo a cada seis horas o SCARY pede ao GitHub o arquivo de atualização do repositório oficial. Nada sobre você é enviado; o GitHub vê o endereço IP da TV. Uma atualização só é baixada quando você escolhe \"Atualizar agora\", só é instalada se for assinada com a chave do SCARY, e o Android pede sua confirmação.</item>
+        <item>Pergunte ao SCARY (IA; desligado até você concordar, uma vez por serviço; pode ser desligado nas configurações): sua pergunta e informações públicas sobre os filmes que o SCARY oferece para escolher (título, ano, tipo, nível de medo) vão para o serviço de IA que você escolher: Pollinations (grátis, sem chave) ou um serviço com sua própria chave (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter, Mistral, DeepSeek, Pollinations ou um endereço que você informar). O que você assistiu, suas listas e qualquer coisa que identifique você nunca são enviados; algumas palavras sobre seu gosto só se você ativar. As chaves ficam criptografadas na TV e só vão para o próprio serviço. O serviço vê o endereço IP da TV e valem os termos dele; o serviço gratuito pode guardar perguntas e respostas. A conversa não é salva.</item>
         <item>Dúvidas, correções ou pedidos sobre seus dados: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Atualizado em outubro de 2026. Este é um rascunho ainda não revisado por um advogado.</item>
     </string-array>
@@ -504,7 +505,7 @@
     <string name="ai_reply_none">Nada nesta TV combina com isso. Tente outras palavras.</string>
     <string name="ai_retry">Tentar de novo</string>
     <string name="ai_open_settings">Configurações de IA</string>
-    <string name="ai_error_wait">O serviço gratuito aceita uma pergunta a cada 30 segundos. Segundos restantes: %1$d</string>
+    <string name="ai_error_wait">O serviço gratuito responde uma pergunta por vez, com uma pequena espera entre elas. Segundos restantes: %1$d</string>
     <string name="ai_error_wait_over">Você já pode perguntar de novo.</string>
     <string name="ai_error_needs_key">Este serviço precisa da sua chave. Adicione em Configurações, IA.</string>
     <string name="ai_error_bad_key">O serviço não aceitou a chave. Verifique em Configurações, IA.</string>
@@ -571,4 +572,6 @@
     <string name="value_ai_none">Não definida</string>
     <string name="value_ai_test_ok">Conectado</string>
     <string name="value_ai_test_failed">Sem conexão</string>
+    <string name="ai_reply_picked">Escolhidos para você no catálogo desta TV:</string>
+    <string name="ai_free_language_note">Do serviço gratuito, cujo modelo pequeno escreve melhor em inglês. Para respostas melhores no seu idioma, use sua própria chave (Configurações, IA).</string>
 </resources>

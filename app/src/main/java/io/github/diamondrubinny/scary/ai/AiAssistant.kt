@@ -90,6 +90,12 @@ data class AiState(
     val consent: AiProvider? = null,
     /** "Test connection" in settings. */
     val test: AiTask<String> = AiTask.Idle,
+    /**
+     * The last answer came from the free service in a language its small model writes poorly (all but English,
+     * checked 8 Nov 2026): reasons under posters are then SCARY's own (from each film's traits), and free text says
+     * a personal key writes better.
+     */
+    val weakLanguage: Boolean = false,
 )
 
 /**
@@ -115,11 +121,11 @@ class AiAssistant(
         _state.update { it.copy(recommendQuery = text, recommendChip = chip) }
         run({ copy(recommend = it) }) { provider, ctx, shareTaste ->
             val pool = if (chip == null) ctx.shelf else ctx.shelf.filter(chip::allows)
-            val candidates = AiCandidates.select(pool, text, ctx.taste, ctx.watched)
+            val candidates = AiCandidates.select(pool, text, ctx.taste, ctx.watched, limit = provider.shelfSize)
             if (candidates.isEmpty()) return@run AiTask.Failed(AiError.NO_FILMS)
             val taste = if (shareTaste) AiPrompts.tasteSummary(ctx.taste) else null
             ask(provider, AiPrompts.recommend(text, candidates, ctx.language, taste)) { reply ->
-                AiAnswer.parsePicks(reply, candidates, AiPrompts.MAX_PICKS)
+                AiAnswer.parsePicks(reply, candidates, AiPrompts.MAX_PICKS)?.let { localReasons(provider, ctx, it) }
             }
         }
     }
@@ -130,10 +136,10 @@ class AiAssistant(
         if (text.isEmpty()) return
         _state.update { it.copy(searchQuery = text) }
         run({ copy(search = it) }) { provider, ctx, _ ->
-            val candidates = AiPrompts.searchCandidates(ctx.everything, text, labels)
+            val candidates = AiPrompts.searchCandidates(ctx.everything, text, labels, limit = provider.searchShelfSize)
             if (candidates.isEmpty()) return@run AiTask.Failed(AiError.NO_FILMS)
             ask(provider, AiPrompts.smartSearch(text, candidates, ctx.language)) { reply ->
-                AiAnswer.parsePicks(reply, candidates, AiPrompts.MAX_SEARCH_PICKS)
+                AiAnswer.parsePicks(reply, candidates, AiPrompts.MAX_SEARCH_PICKS)?.let { localReasons(provider, ctx, it) }
             }
         }
     }
@@ -244,7 +250,7 @@ class AiAssistant(
                 ctx == null -> AiTask.Failed(AiError.NO_FILMS)
                 else -> work(provider, ctx, prefs.aiShareTaste)
             }
-            _state.update { it.set(result) }
+            _state.update { it.set(result).copy(weakLanguage = ctx != null && weak(provider, ctx)) }
         }
         job = scope.launch {
             val prefs = settings.prefs.first()
@@ -257,6 +263,12 @@ class AiAssistant(
             }
         }
     }
+
+    private fun weak(provider: AiProvider, ctx: AiContext) = provider.free && ctx.language != Language.EN
+
+    /** With [weak] language, the model's reasons and reply are dropped: the screen shows each film's traits instead. */
+    private fun localReasons(provider: AiProvider, ctx: AiContext, picks: AiPicks): AiPicks =
+        if (weak(provider, ctx)) AiPicks(picks.picks.map { it.copy(why = "") }, "") else picks
 
     /** Sends [prompt]; [read] turns the reply into the result, or null when it cannot be understood. */
     private suspend fun <T> ask(provider: AiProvider, prompt: AiPrompt, read: (String) -> T?): AiTask<T> =

@@ -24,9 +24,10 @@ object AiWire {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun requestBody(format: AiProvider.Format, model: String, prompt: AiPrompt): String = when (format) {
+    fun requestBody(format: AiProvider.Format, model: String, prompt: AiPrompt, reasoningEffort: String? = null): String = when (format) {
         AiProvider.Format.OPENAI -> buildJsonObject {
             put("model", model)
+            if (reasoningEffort != null) put("reasoning_effort", reasoningEffort)
             put(
                 "messages",
                 buildJsonArray {

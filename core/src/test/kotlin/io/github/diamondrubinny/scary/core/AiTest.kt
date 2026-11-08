@@ -50,6 +50,10 @@ class AiTest {
         assertTrue(AiProvider.OPENAI.needsKey && AiProvider.ANTHROPIC.needsKey && AiProvider.GEMINI.needsKey)
         assertEquals(AiProvider.Format.ANTHROPIC, AiProvider.ANTHROPIC.format)
         assertEquals(AiProvider.POLLINATIONS_FREE, AiProvider.DEFAULT)
+        // The free model must think less to answer within its limit; no other service gets the parameter.
+        assertEquals("low", AiProvider.POLLINATIONS_FREE.reasoningEffort)
+        assertTrue(AiProvider.entries.filter { !it.free }.all { it.reasoningEffort == null })
+        assertTrue(AiProvider.POLLINATIONS_FREE.shelfSize < AiProvider.OPENAI.shelfSize)
     }
 
     @Test
@@ -88,6 +92,12 @@ class AiTest {
         assertFalse(picks.picks[1].why.contains('‮'))
         assertEquals("Two for tonight.", picks.reply)
         assertNull(AiAnswer.parsePicks("I think you would like Hereditary!", films, max = 8))
+        // A small model's slip (a stray "." after the last string, seen on the free service): still read, same rules.
+        val slipped = """{"picks":[{"n":3,"why":"pagan \"ritual\""},{"n":42,"why":"made up"},{"n":1,"why":"a doll".}] ,"reply":"Two."}"""
+        val loose = AiAnswer.parsePicks(slipped, films, max = 8)!!
+        assertEquals(listOf("c", "a"), loose.picks.map { it.movie.id })
+        assertEquals("pagan \"ritual\"", loose.picks[0].why)
+        assertEquals("Two.", loose.reply)
         assertEquals(0, AiAnswer.parsePicks("""{"picks":"nope"}""", films, 8)!!.picks.size)
         val many = """{"picks":[{"n":1},{"n":2},{"n":3}]}"""
         assertEquals(2, AiAnswer.parsePicks(many, films, max = 2)!!.picks.size)
@@ -152,6 +162,9 @@ class AiTest {
         val openai = Json.parseToJsonElement(AiWire.requestBody(AiProvider.Format.OPENAI, "m", prompt)).jsonObject
         assertEquals("system", openai["messages"]!!.jsonArray[0].jsonObject["role"]!!.jsonPrimitive.content)
         assertEquals("hi \"quoted\" }", openai["messages"]!!.jsonArray[1].jsonObject["content"]!!.jsonPrimitive.content)
+        assertFalse(openai.containsKey("reasoning_effort"))
+        val free = Json.parseToJsonElement(AiWire.requestBody(AiProvider.Format.OPENAI, "openai", prompt, "low")).jsonObject
+        assertEquals("low", free["reasoning_effort"]!!.jsonPrimitive.content)
         val anthropic = Json.parseToJsonElement(AiWire.requestBody(AiProvider.Format.ANTHROPIC, "m", prompt)).jsonObject
         assertTrue(anthropic.containsKey("system") && anthropic.containsKey("max_tokens"))
         assertEquals("user", anthropic["messages"]!!.jsonArray[0].jsonObject["role"]!!.jsonPrimitive.content)

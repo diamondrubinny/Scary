@@ -71,6 +71,17 @@ enum class AiProvider(
     val needsKey: Boolean get() = auth != Auth.NONE && this != CUSTOM
     val free: Boolean get() = this == POLLINATIONS_FREE
 
+    /**
+     * The free service's model reasons before it answers, within a fixed output limit: with a long shelf it ran out
+     * before answering (checked 8 Nov 2026: 80 films failed, "low" effort answered in 9 s). Only sent where known to
+     * be accepted; other services may refuse an unknown parameter.
+     */
+    val reasoningEffort: String? get() = if (this == POLLINATIONS_FREE) "low" else null
+
+    /** How many films a request may offer: fewer for the free service, whose limits are tighter. */
+    val shelfSize: Int get() = if (free) 60 else 80
+    val searchShelfSize: Int get() = if (free) 50 else 120
+
     /** The only host a request (and so the key) may go to. */
     val host: String? get() = chatUrl.takeIf { it.isNotEmpty() }?.let { runCatching { URI(it).host }.getOrNull() }
 

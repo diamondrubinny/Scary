@@ -127,6 +127,8 @@ fun DetailsScreen(
     onToggleNotForMe: (Movie) -> Unit = {},
     /** "About this film ✦": the AI's spoiler-free take for this film, when asked; null when AI is off. */
     about: AiTask<String>? = null,
+    /** The free service wrote it in a language it writes poorly: say a personal key writes better. */
+    aboutWeakLanguage: Boolean = false,
     onAbout: (Movie) -> Unit = {},
     onAiSettings: () -> Unit = {},
 ) {
@@ -252,6 +254,7 @@ fun DetailsScreen(
                                         style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
                                         modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                                     )
+                                    if (aboutWeakLanguage) BasicText(stringResource(R.string.ai_free_language_note), style = ScaryType.Caption)
                                 }
                             }
                         }

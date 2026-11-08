@@ -57,6 +57,7 @@ import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.home.MoodChip
 import io.github.diamondrubinny.scary.ui.home.SidePadding
+import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
@@ -211,7 +212,7 @@ private fun SuggestPane(
                 AiStatus(result, onRetry = { actions.onRecommend(state.recommendQuery, state.recommendChip) }, onSettings = actions.onOpenSettings)
                 if (result is AiTask.Done) {
                     val reply = result.value.reply.ifEmpty {
-                        if (result.value.picks.isEmpty()) stringResource(R.string.ai_reply_none) else ""
+                        if (result.value.picks.isEmpty()) stringResource(R.string.ai_reply_none) else stringResource(R.string.ai_reply_picked)
                     }
                     if (reply.isNotEmpty()) {
                         BasicText(
@@ -245,9 +246,13 @@ private fun PickCard(pick: AiPick, locked: Boolean, watched: Boolean, first: Boo
             watched = watched,
             focusRequester = firstFocus.takeIf { first },
         )
-        if (pick.why.isNotEmpty()) {
+        // The AI's reason, or (from the free service in a language it writes poorly) the film's own traits.
+        val reason = pick.why.ifEmpty {
+            (listOfNotNull(pick.movie.fear?.let { stringResource(R.string.fear_short, it) }) + subgenreLine(pick.movie)).joinToString(" · ")
+        }
+        if (reason.isNotEmpty()) {
             BasicText(
-                pick.why,
+                reason,
                 style = ScaryType.Caption.copy(color = ScaryColors.Bone).mixedLanguage(),
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis,
@@ -290,6 +295,9 @@ private fun ChatPane(state: AiState, language: Language, inputFocus: FocusReques
             BasicText(stringResource(R.string.ai_chat_note), style = ScaryType.Caption)
         }
         AiStatus(state.chatTask, onRetry = actions.onRetryChat, onSettings = actions.onOpenSettings)
+        if (state.weakLanguage && state.chat.any { it.role == AiMessage.Role.ASSISTANT }) {
+            BasicText(stringResource(R.string.ai_free_language_note), style = ScaryType.Caption)
+        }
         LazyColumn(state = listState, verticalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.weight(1f)) {
             items(state.chat.withIndex().toList(), key = { it.index }) { (_, turn) -> Bubble(turn) }
         }

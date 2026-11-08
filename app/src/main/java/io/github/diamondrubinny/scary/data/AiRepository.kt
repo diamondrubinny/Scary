@@ -100,7 +100,7 @@ class AiRepository(
         if (provider.needsKey && key == null) return@withLock Result.NeedsKey
         val chatUrl = chatUrl(provider) ?: return@withLock Result.NeedsKey
         val model = model(provider, chatUrl, key) ?: return@withLock Result.NoModel
-        val body = AiWire.requestBody(provider.format, model, prompt)
+        val body = AiWire.requestBody(provider.format, model, prompt, provider.reasoningEffort)
         val result = withContext(Dispatchers.IO) { post(provider, chatUrl, key, body) }
         if (provider.free) {
             val wait = (result as? Result.Wait)?.seconds ?: FREE_GAP_SECONDS
@@ -231,7 +231,8 @@ class AiRepository(
         private const val MAX_MODELS_BYTES = 2 * 1024 * 1024
         private const val PAYMENT_REQUIRED = 402
         private const val TOO_MANY_REQUESTS = 429
-        const val FREE_GAP_SECONDS = 30
+        /** The free service's gap between answers: 30 s in its documentation, 45 s in its replies on 8 Nov 2026. */
+        const val FREE_GAP_SECONDS = 45
         private const val MAX_WAIT_SECONDS = 600
 
         fun secretName(provider: AiProvider): String = "ai_key_${provider.key}"

@@ -159,6 +159,7 @@
         <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
         <item>Updates (official builds; you can turn the automatic check off in settings): at most every six hours SCARY asks GitHub for the official repository\'s update file. Nothing about you is sent; GitHub sees the TV\'s IP address. An update is downloaded only when you choose \"Update now\", installed only if it is signed with SCARY\'s key, and Android asks you to confirm.</item>
+        <item>Ask SCARY (AI; off until you agree, once for each service; can be turned off in settings): your question and public facts about the films SCARY offers it to choose from (titles, years, kinds, fear level) go to the AI service you choose: Pollinations (free, no key) or a service with your own key (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter, Mistral, DeepSeek, Pollinations, or an address you give). What you watched, your lists and anything that identifies you are never sent; a few words on your taste only if you turn that on. Keys are encrypted on this TV and sent only to their own service. The service sees the TV\'s IP address and its own terms apply; the free service may keep questions and answers. The chat is not saved.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
     </string-array>
@@ -499,7 +500,7 @@
     <string name="ai_reply_none">Nothing on this TV fits that. Try other words.</string>
     <string name="ai_retry">Try again</string>
     <string name="ai_open_settings">AI settings</string>
-    <string name="ai_error_wait">The free service takes one question every 30 seconds. Seconds left: %1$d</string>
+    <string name="ai_error_wait">The free service answers one question at a time, with a short wait in between. Seconds left: %1$d</string>
     <string name="ai_error_wait_over">You can ask again now.</string>
     <string name="ai_error_needs_key">This service needs your key. Add it in Settings, AI.</string>
     <string name="ai_error_bad_key">The service did not accept the key. Check it in Settings, AI.</string>
@@ -566,4 +567,6 @@
     <string name="value_ai_none">Not set</string>
     <string name="value_ai_test_ok">Connected</string>
     <string name="value_ai_test_failed">Not connected</string>
+    <string name="ai_reply_picked">Picked for you from this TV\'s catalog:</string>
+    <string name="ai_free_language_note">From the free service, whose small model writes best in English. For better answers in your language, use your own key (Settings, AI).</string>
 </resources>

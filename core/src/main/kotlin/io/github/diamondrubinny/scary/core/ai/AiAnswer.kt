@@ -32,7 +32,7 @@ object AiAnswer {
 
     /** The picks in [text] among [candidates] (numbered from 1), at most [max]; null when it cannot be read at all. */
     fun parsePicks(text: String, candidates: List<Movie>, max: Int): AiPicks? {
-        val root = jsonObjectIn(text) ?: return null
+        val root = jsonObjectIn(text) ?: return loosePicks(text, candidates, max)
         val picks = (root["picks"] as? JsonArray).orEmpty().mapNotNull { element ->
             val pick = element as? JsonObject ?: return@mapNotNull null
             val number = (pick["n"] ?: pick["number"] ?: pick["id"]) as? JsonPrimitive ?: return@mapNotNull null
@@ -44,6 +44,25 @@ object AiAnswer {
         val reply = (root["reply"] as? JsonPrimitive)?.takeIf { it.isString }?.content.orEmpty()
         return AiPicks(picks, plain(reply, MAX_REPLY, keepLines = false))
     }
+
+    private val loosePick = Regex("\"n\"\\s*:\\s*\"?(\\d{1,4})\"?\\s*(?:,\\s*\"why\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\")?")
+    private val looseReply = Regex("\"reply\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"")
+
+    /**
+     * Small models sometimes send JSON with a slip (a stray character after a string): the picks are then read one by
+     * one with the same rules (numbers from the list only, each once, plain text). Null when there is not even one.
+     */
+    private fun loosePicks(text: String, candidates: List<Movie>, max: Int): AiPicks? {
+        val picks = loosePick.findAll(text).mapNotNull { match ->
+            val movie = match.groupValues[1].toIntOrNull()?.let { candidates.getOrNull(it - 1) } ?: return@mapNotNull null
+            AiPick(movie, plain(unescape(match.groupValues[2]), MAX_WHY, keepLines = false))
+        }.distinctBy { it.movie.id }.take(max).toList()
+        if (picks.isEmpty()) return null
+        val reply = looseReply.find(text)?.groupValues?.get(1)?.let(::unescape).orEmpty()
+        return AiPicks(picks, plain(reply, MAX_REPLY, keepLines = false))
+    }
+
+    private fun unescape(text: String): String = text.replace("\\\"", "\"").replace("\\n", " ").replace("\\\\", "\\")
 
     /** Free text (chat, "about this film"): plain, at most [max] characters. */
     fun text(text: String, max: Int = MAX_TEXT): String = plain(text, max, keepLines = true)

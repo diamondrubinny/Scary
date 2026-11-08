@@ -479,6 +479,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     inBucket = details.movie.id in state.bucketIds,
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
+                    aboutWeakLanguage = aiState.weakLanguage,
                     onAbout = { aiAssistant?.about(it) },
                     onAiSettings = viewModel::openSettings,
                 )

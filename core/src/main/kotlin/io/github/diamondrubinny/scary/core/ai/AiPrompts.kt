@@ -47,7 +47,7 @@ object AiPrompts {
             append("You are SCARY, a horror and thriller guide on a TV. The viewer asks what to watch. ")
             append("Choose up to $MAX_PICKS titles ONLY from the numbered list below that best fit the request, best first. ")
             append("Never invent titles and never use a number that is not in the list. ")
-            append("For each pick write one short sentence in $lang (at most 15 words) saying why it fits, with no spoilers. ")
+            append("For each pick, \"why\" is 3 to 8 simple everyday words in $lang saying why it fits (for example: slow dread, ghosts, almost no blood), with no spoilers. ")
             append(JSON_SHAPE.replace("{lang}", lang))
             if (tasteSummary != null) append("\nThe viewer's taste, from their own choices on this TV: ").append(tasteSummary).append('.')
             append("\n\nTitles:\n").append(numbered(candidates))
@@ -62,7 +62,7 @@ object AiPrompts {
             append("You are SCARY's search on a TV. The viewer describes a horror or thriller title they are trying to find ")
             append("(a scene, the plot, an actor, the era). Return up to $MAX_SEARCH_PICKS titles ONLY from the numbered list below ")
             append("that match the description, best match first; return none if nothing matches. Never invent titles. ")
-            append("For each, one short sentence in $lang (at most 12 words) saying what matches, with no spoilers. ")
+            append("For each, \"why\" is 3 to 8 simple everyday words in $lang saying what matches, with no spoilers. ")
             append(JSON_SHAPE.replace("{lang}", lang))
             append("\n\nTitles:\n").append(numbered(candidates, synopsis = true))
         }
@@ -75,7 +75,7 @@ object AiPrompts {
         val system = "You are SCARY, a horror and thriller guide on a TV. In $lang, with absolutely no spoilers " +
             "(no twists, no ending, no character deaths, nothing past the first act), write three short paragraphs: " +
             "why watch it, who it is for, and how scary it is (dread, jump scares, gore). At most 100 words in all. " +
-            "Plain text only: no markdown, no lists, no links."
+            "Plain text only: no markdown, no lists, no links. $SIMPLE_WORDS"
         val facts = buildString {
             append(movie.title).append(" (").append(movie.yearsLabel).append("), ")
             append(if (movie.kind == MediaKind.SERIES) "series" else "film")
@@ -92,7 +92,8 @@ object AiPrompts {
         val system = buildString {
             append("You are SCARY, a friendly horror and thriller guide on a TV. Answer in $lang, briefly (at most 120 words), ")
             append("in plain text: no markdown, no lists, no links. No spoilers unless the viewer clearly asks for them. ")
-            append("Talk about films, series and horror culture only; politely steer anything else back to films.")
+            append("Talk about films, series and horror culture only; politely steer anything else back to films. ")
+            append(SIMPLE_WORDS)
             if (tasteSummary != null) append(" The viewer's taste, from their own choices on this TV: ").append(tasteSummary).append('.')
         }
         val kept = turns.takeLast(MAX_CHAT_TURNS).map { it.copy(text = clip(it.text, MAX_CHAT_CHARS)) }
@@ -149,6 +150,11 @@ object AiPrompts {
         val clean = text.filter { it == '\n' || !it.isISOControl() }.trim()
         return if (clean.length <= max) clean else clean.take(max).trimEnd() + "…"
     }
+
+    /** Small models invent words in Hebrew, Arabic or Russian; asking for plain words helped (checked 8 Nov 2026). */
+    private const val SIMPLE_WORDS =
+        "Write the way a native speaker would: short sentences and common everyday words only; never invent words, " +
+            "and if unsure of a word, use a simpler one."
 
     private const val JSON_SHAPE =
         "Answer with JSON only, exactly in this shape: {\"picks\":[{\"n\":12,\"why\":\"...\"}],\"reply\":\"one short friendly sentence in {lang}\"}. " +

@@ -88,6 +88,18 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.core.ai.AiProvider
+import io.github.diamondrubinny.scary.ui.ai.AI_CONSENT_TAG
+import io.github.diamondrubinny.scary.ui.ai.AI_PROVIDER_TAG
+import io.github.diamondrubinny.scary.ui.ai.AI_STATUS_TAG
+import io.github.diamondrubinny.scary.ui.ai.ASK_CHAT_TAG
+import io.github.diamondrubinny.scary.ui.ai.ASK_SCREEN_TAG
+import io.github.diamondrubinny.scary.ui.ai.aiProviderTag
+import io.github.diamondrubinny.scary.ui.ai.askTabTag
+import io.github.diamondrubinny.scary.ui.components.ASK_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.details.AI_ABOUT_TAG
+import io.github.diamondrubinny.scary.ui.details.AI_ABOUT_TEXT_TAG
+import io.github.diamondrubinny.scary.ui.settings.AI_PROVIDER_ROW_TAG
 import io.github.diamondrubinny.scary.core.update.UpdateManifest
 import io.github.diamondrubinny.scary.ui.update.UPDATE_DIALOG_TAG
 import io.github.diamondrubinny.scary.ui.taste.TASTE_PICKER_TAG
@@ -974,6 +986,70 @@ class ScaryUiTest {
                 container.settingsRepository.skipUpdate(0)
                 container.settingsRepository.updateLater(0)
             }
+            backToHome()
+        }
+    }
+
+    @Test
+    fun askScaryOpensFromTheTopBarAndAsksBeforeSendingAnything() {
+        waitForHomeFocus()
+        val container = (rule.activity.application as ScaryApplication).container
+        runBlocking { container.settingsRepository.setAiConsent(AiProvider.POLLINATIONS_FREE, false) }
+        val consent = hasTestTag(AI_CONSENT_TAG)
+        withCleanup({
+            rule.onNodeWithTag(ASK_BUTTON_TAG).performClick()
+            waitFor(hasTestTag(ASK_SCREEN_TAG))
+            // A one-press request: nothing goes out before the viewer agrees to the free service.
+            rule.onNode(hasText(text(R.string.ai_chip_short)) and hasAnyAncestor(hasTestTag(ASK_SCREEN_TAG))).performClick()
+            waitFor(consent)
+            waitFor(hasText(text(R.string.ai_consent_agree)) and isFocused() and hasAnyAncestor(consent))
+            rule.onNode(hasText(text(R.string.ai_consent_later)) and hasAnyAncestor(consent)).performClick()
+            waitForGone(consent)
+            // Nothing asked, nothing thinking.
+            waitForGone(hasTestTag(AI_STATUS_TAG))
+            // The chat tab.
+            rule.onNodeWithTag(askTabTag(chat = true)).performClick()
+            waitFor(hasTestTag(ASK_CHAT_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theAskScaryRowAndAboutThisFilmAskForConsentToo() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        runBlocking { container.settingsRepository.setAiConsent(AiProvider.POLLINATIONS_FREE, false) }
+        waitUntilOrDescribe("the Ask SCARY row on the home screen") { viewModel.uiState.value.rows.any { it is HomeRow.AskAi } }
+        val consent = hasTestTag(AI_CONSENT_TAG)
+        withCleanup({
+            openViaSearch(bundledMovies().first { it.title == "Hereditary" })
+            rule.onNodeWithTag(AI_ABOUT_TAG).performScrollTo().performClick()
+            waitFor(consent)
+            rule.onNode(hasText(text(R.string.ai_consent_later)) and hasAnyAncestor(consent)).performClick()
+            waitForGone(consent)
+            waitForGone(hasTestTag(AI_ABOUT_TEXT_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun aiSettingsListEveryServiceWithItsState() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(AI_PROVIDER_ROW_TAG)
+        waitFor(row)
+        withCleanup({
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(hasTestTag(AI_PROVIDER_TAG))
+            AiProvider.entries.forEach { waitFor(hasTestTag(aiProviderTag(it))) }
+            // The free service is chosen by default, and says it needs no key.
+            waitFor(hasTestTag(aiProviderTag(AiProvider.POLLINATIONS_FREE)) and isFocused())
+            pressBack()
+            waitForGone(hasTestTag(AI_PROVIDER_TAG))
+        }) {
             backToHome()
         }
     }
