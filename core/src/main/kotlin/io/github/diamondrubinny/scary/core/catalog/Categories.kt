@@ -200,8 +200,11 @@ object Categories {
      * under it can go on in that row. Null for rows that are not one subgenre, and for the thriller rows (the index
      * holds horror only).
      */
-    fun subgenreOfRow(collectionId: String): Subgenre? =
-        SUBGENRE_RULES.firstOrNull { (id, _) -> id == collectionId && id != "psychological_thriller" && id != "crime_thriller" }?.second
+    fun subgenreOfRow(collectionId: String): Subgenre? = INDEX_ONLY_ROWS[collectionId]
+        ?: SUBGENRE_RULES.firstOrNull { (id, _) -> id == collectionId && id != "psychological_thriller" && id != "crime_thriller" }?.second
+
+    /** Library rows that go on with films of the full index only (Cinemeta's plots tell these subgenres poorly). */
+    private val INDEX_ONLY_ROWS = mapOf("giallo" to Subgenre.GIALLO, "witches" to Subgenre.WITCH, "cosmic_horror" to Subgenre.COSMIC)
 
     /** Subgenres the library has with no row of their own. */
     private val EXTRA_RULES: List<Pair<Subgenre, Rule>> = listOf(
