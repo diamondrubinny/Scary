@@ -21,10 +21,12 @@ adb shell settings put system accelerometer_rotation 0 || true
 adb shell settings put system user_rotation 0 || true
 
 # The app drawer lists SCARY (LAUNCHER), as a phone's launcher would.
-if adb shell cmd package query-activities -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | tr -d '\r' | grep -q "$PKG"; then
+# (Read in full first, then searched: "grep -q" ending a pipe early fails it under pipefail.)
+drawer=$(adb shell cmd package query-activities --brief -a android.intent.action.MAIN -c android.intent.category.LAUNCHER | tr -d '\r')
+if grep -q "$PKG" <<< "$drawer"; then
   echo "In the app drawer: yes" > "$OUT/ui-tests.txt"
 else
-  echo "SCARY is not in the app drawer."; exit 1
+  echo "SCARY is not in the app drawer. The drawer lists:"; echo "$drawer"; exit 1
 fi
 
 run_tests() {
@@ -35,7 +37,7 @@ run_tests() {
   for s in window_animation_scale transition_animation_scale animator_duration_scale; do adb shell settings put global "$s" 1; done
   echo "$result"
   { echo "$label:"; echo "$result" | grep -E '^(OK \(|FAILURES|Tests run:)' || echo "No test summary"; } >> "$OUT/ui-tests.txt"
-  if ! echo "$result" | grep -q '^OK ('; then echo "Phone layout tests failed ($label)."; exit 1; fi
+  if ! grep -q '^OK (' <<< "$result"; then echo "Phone layout tests failed ($label)."; exit 1; fi
 }
 
 screens() {
