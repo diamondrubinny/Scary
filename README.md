@@ -59,7 +59,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 
 **Why SCARY?**
 
-- 🩸 **170 hand-picked films** with a fear meter (1–5), plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
+- 🩸 **450 hand-picked films** with a fear meter (1–5) in 28 rows (giallo, witches, cosmic horror, slashers, Israeli horror and more), an offline index of about 3,900 more horror films (from Wikidata, checked against IMDb) for search and the decade rows, plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
 - 🌙 **"What do you feel like tonight?"**: eight moods, from mind games and "short and sharp" to "slow-burn dread" and "no sleep tonight", or pick a decade, alone or with a mood. "Surprise me" picks from your choice. Plus special rows for Halloween and Friday the 13th.
 - 🧟 **Rows for every kind of fear**: found footage, folk horror, Asian horror, zombies, vampires, body horror, haunted houses and creatures, next to the classics, slashers and psychological thrillers.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
@@ -126,7 +126,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **למה SCARY?**
 
-- 🩸 **170 סרטים שנבחרו ביד** עם מד פחד (1–5), ועוד 6 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות, ואחת שהולכת אחורה שנה אחרי שנה) שממשיכות להיטען כשגוללים, בלי הגבלה: עשרות אלפי סרטים שמתעדכנים כל יום.
+- 🩸 **450 סרטים שנבחרו ביד** עם מד פחד (1–5) ב־28 שורות (ג׳אלו, מכשפות, אימה קוסמית, סלאשרים, אימה ישראלית ועוד), אינדקס של כ־3,900 סרטי אימה נוספים שעובד גם בלי אינטרנט (מ־Wikidata, נבדק מול IMDb) לחיפוש ולשורות העשורים, ועוד 6 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות, ואחת שהולכת אחורה שנה אחרי שנה) שממשיכות להיטען כשגוללים, בלי הגבלה: עשרות אלפי סרטים שמתעדכנים כל יום.
 - 🌙 **"מה בא לך הלילה?"**: שמונה מצבי רוח, ממשחקי מוח ו"קצר וחד" ועד "אימה שמתבשלת לאט" ו"לא לישון הלילה", או בחירת עשור, לבד או יחד עם מצב רוח. "הפתע אותי" בוחר מתוך הבחירה שלכם. ושורות מיוחדות להלואין ולשישי ה־13.
 - 🧟 **שורה לכל סוג של פחד**: פוטג' שנמצא, אימה פולקלורית, אימה אסייתית, זומבים, ערפדים, אימת הגוף, בתים רדופים ויצורים, לצד הקלאסיקות, הסלאשרים והמותחנים הפסיכולוגיים.
 - 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
@@ -189,7 +189,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **لماذا SCARY؟**
 
-- 🩸 **170 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5)، و6 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض، وصف يعود عامًا بعد عام) تواصل التحميل كلما تابعت التمرير بلا حدود: عشرات آلاف الأفلام التي تتجدد يوميًا.
+- 🩸 **450 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5) في 28 صفًا، وفهرس لنحو 3,900 فيلم رعب إضافي يعمل دون إنترنت للبحث وصفوف العقود، و6 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض، وصف يعود عامًا بعد عام) تواصل التحميل كلما تابعت التمرير بلا حدود: عشرات آلاف الأفلام التي تتجدد يوميًا.
 - 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ثمانية أمزجة من ألعاب العقل و«قصير وحاد» إلى «رعب يتصاعد ببطء» و«لا نوم الليلة»، أو اختر عقدًا وحده أو مع مزاج. و«فاجئني» يختار من اختيارك. وصفوف خاصة بالهالوين والجمعة 13.
 - 🧟 **صف لكل نوع من الخوف**: لقطات عُثر عليها، رعب فولكلوري، رعب آسيوي، زومبي، مصاصو دماء، رعب الجسد، بيوت مسكونة ومخلوقات، إلى جانب الكلاسيكيات وأفلام القتلة والإثارة النفسية.
 - 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.
@@ -250,7 +250,7 @@ O SCARY transforma sua Android TV em uma sala de cinema de terror. Em vez de uma
 
 **Por que o SCARY?**
 
-- 🩸 **170 filmes escolhidos a dedo** com medidor de medo (1–5), e mais 6 fileiras da internet (populares, lançamentos do ano, suspense, mistério e uma que volta ano a ano) que continuam carregando conforme você rola, sem limite: dezenas de milhares de filmes, atualizados todos os dias.
+- 🩸 **450 filmes escolhidos a dedo** com medidor de medo (1–5) em 28 fileiras, um índice offline de cerca de 3.900 outros filmes de terror para a busca e as fileiras por década, e mais 6 fileiras da internet (populares, lançamentos do ano, suspense, mistério e uma que volta ano a ano) que continuam carregando conforme você rola, sem limite: dezenas de milhares de filmes, atualizados todos os dias.
 - 🌙 **"O que você quer ver hoje à noite?"**: oito climas, de jogos mentais e "curto e afiado" a "terror em fogo lento" e "hoje ninguém dorme", ou escolha uma década, sozinha ou com um clima. O "Surpreenda-me" escolhe dentro da sua escolha. E fileiras especiais para o Halloween e a sexta-feira 13.
 - 🧟 **Uma fileira para cada tipo de medo**: found footage, terror folclórico, terror asiático, zumbis, vampiros, horror corporal, casas assombradas e criaturas, ao lado dos clássicos, slashers e thrillers psicológicos.
 - 😱 **O arrepio**: o logo do filme treme e pisca como uma lâmpada morrendo, e a tela escurece logo antes de o filme abrir.
@@ -309,7 +309,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 
 **Почему SCARY?**
 
-- 🩸 **170 отобранных вручную фильмов** со шкалой страха (1–5) и 6 рядов из интернета (популярное, новинки года, триллеры, загадки и ряд, идущий назад год за годом), которые подгружаются по мере прокрутки без ограничений: десятки тысяч фильмов, обновляемых каждый день.
+- 🩸 **450 отобранных вручную фильмов** со шкалой страха (1–5) в 28 рядах, офлайн-указатель ещё примерно 3 900 фильмов ужасов для поиска и рядов по десятилетиям и 6 рядов из интернета (популярное, новинки года, триллеры, загадки и ряд, идущий назад год за годом), которые подгружаются по мере прокрутки без ограничений: десятки тысяч фильмов, обновляемых каждый день.
 - 🌙 **«Что посмотреть сегодня ночью?»**: восемь настроений, от «Игр разума» и «Коротко и остро» до «Медленно нарастающего ужаса» и «Сегодня не уснуть», или выберите десятилетие, отдельно или вместе с настроением. «Удиви меня» выбирает из вашего выбора. И особые ряды к Хэллоуину и пятнице 13-го.
 - 🧟 **Ряд для каждого вида страха**: найденная плёнка, фолк-хоррор, азиатские ужасы, зомби, вампиры, боди-хоррор, дома с привидениями и чудовища, рядом с классикой, слэшерами и психологическими триллерами.
 - 😱 **Дрожь**: логотип фильма дрожит и мерцает, как умирающая лампа, а перед запуском фильма экран темнеет.
