@@ -49,6 +49,9 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
+import io.github.diamondrubinny.scary.update.UpdateState
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.core.ai.AiProvider
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -75,6 +78,17 @@ class SettingsActions(
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
+    val onCheckForUpdates: () -> Unit = {},
+    val onToggleAi: () -> Unit = {},
+    val onAiProvider: () -> Unit = {},
+    val onAiKey: () -> Unit = {},
+    val onAiModel: () -> Unit = {},
+    val onAiUrl: () -> Unit = {},
+    val onAiTest: () -> Unit = {},
+    val onToggleAiTaste: () -> Unit = {},
+    val onToggleAiHomeRow: () -> Unit = {},
+    val onDeleteAiKeys: () -> Unit = {},
+    val onToggleAutoUpdate: () -> Unit = {},
     val onOpenRentCountry: () -> Unit,
     val onOpenScreensaver: () -> Unit,
     val onOpenPrivacy: () -> Unit,
@@ -115,6 +129,9 @@ fun SettingsScreen(
     lovedCount: Int = 0,
     recentCount: Int = 0,
     returningFromTaste: Boolean = false,
+    updateState: UpdateState = UpdateState.Idle,
+    autoUpdateCheck: Boolean = true,
+    ai: AiSettingsState = AiSettingsState(),
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
@@ -185,6 +202,7 @@ fun SettingsScreen(
         )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
+        AiSection(ai, actions)
         SettingRow(
             label = stringResource(R.string.settings_phone_remote),
             value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
@@ -351,6 +369,30 @@ fun SettingsScreen(
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        if (updateState != UpdateState.NotOfficial) {
+            SettingRow(
+                label = stringResource(R.string.settings_update_check),
+                value = when (updateState) {
+                    UpdateState.Checking -> stringResource(R.string.settings_update_checking)
+                    is UpdateState.UpToDate -> stringResource(R.string.settings_update_up_to_date, updateState.versionCode)
+                    is UpdateState.Available -> stringResource(R.string.settings_update_available, updateState.manifest.versionCode)
+                    is UpdateState.Downloading -> stringResource(R.string.update_downloading, updateState.percent)
+                    is UpdateState.Failed -> stringResource(R.string.settings_update_failed)
+                    else -> null
+                },
+                onClick = actions.onCheckForUpdates,
+                modifier = Modifier.testTag(UPDATE_CHECK_ROW_TAG),
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_update_auto),
+                value = stringResource(if (autoUpdateCheck) R.string.value_on else R.string.value_off),
+                onClick = actions.onToggleAutoUpdate,
+            )
+            BasicText(stringResource(R.string.settings_update_note), style = ScaryType.Caption)
+        } else {
+            // A fork's or a developer's own build: the official repository's updates could not install over it.
+            BasicText(stringResource(R.string.settings_update_not_official), style = ScaryType.Caption)
+        }
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
         BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
@@ -377,6 +419,105 @@ const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
+const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"
+const val AI_ENABLED_ROW_TAG = "aiEnabledRow"
+const val AI_PROVIDER_ROW_TAG = "aiProviderRow"
+
+/** The AI section's values, as settings show them. */
+data class AiSettingsState(
+    val enabled: Boolean = true,
+    val provider: AiProvider = AiProvider.DEFAULT,
+    val keyMask: String? = null,
+    val model: String? = null,
+    val customUrl: String = "",
+    val shareTaste: Boolean = false,
+    val homeRow: Boolean = true,
+    val test: AiTask<String> = AiTask.Idle,
+)
+
+/**
+ * AI: on or off; the service (Pollinations' free one, or one with the viewer's key); its key, model, and for a custom
+ * service its address; a connection test; whether a short taste summary may be sent; the home screen's chips; and
+ * deleting every key (asked twice).
+ */
+@Composable
+private fun AiSection(ai: AiSettingsState, actions: SettingsActions) {
+    BasicText(
+        stringResource(R.string.settings_ai_section),
+        style = ScaryType.RowTitle,
+        modifier = Modifier.padding(top = 14.dp).semantics { heading() },
+    )
+    SettingRow(
+        label = stringResource(R.string.settings_ai_enabled),
+        value = stringResource(if (ai.enabled) R.string.value_on else R.string.value_off),
+        onClick = actions.onToggleAi,
+        modifier = Modifier.testTag(AI_ENABLED_ROW_TAG),
+    )
+    if (!ai.enabled) return
+    SettingRow(
+        label = stringResource(R.string.settings_ai_provider),
+        value = ai.provider.displayName,
+        onClick = actions.onAiProvider,
+        modifier = Modifier.testTag(AI_PROVIDER_ROW_TAG),
+    )
+    if (ai.provider == AiProvider.CUSTOM) {
+        SettingRow(
+            label = stringResource(R.string.settings_ai_url),
+            value = ai.customUrl.ifEmpty { stringResource(R.string.value_ai_none) },
+            onClick = actions.onAiUrl,
+        )
+    }
+    if (!ai.provider.free) {
+        SettingRow(
+            label = stringResource(R.string.settings_ai_key),
+            value = ai.keyMask ?: stringResource(R.string.value_ai_none),
+            onClick = actions.onAiKey,
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_ai_model),
+            value = ai.model ?: stringResource(R.string.ai_model_auto),
+            onClick = actions.onAiModel,
+        )
+    }
+    SettingRow(
+        label = stringResource(R.string.settings_ai_test),
+        value = when (ai.test) {
+            AiTask.Loading -> stringResource(R.string.ai_thinking)
+            is AiTask.Done -> stringResource(R.string.value_ai_test_ok)
+            is AiTask.Failed -> stringResource(R.string.value_ai_test_failed)
+            else -> null
+        },
+        onClick = actions.onAiTest,
+    )
+    (ai.test as? AiTask.Done)?.let { BasicText(it.value, style = ScaryType.Caption.mixedLanguage()) }
+    (ai.test as? AiTask.Failed)?.let { failed -> io.github.diamondrubinny.scary.ui.ai.AiStatus(failed, onRetry = null, onSettings = null) }
+    SettingRow(
+        label = stringResource(R.string.settings_ai_share_taste),
+        value = stringResource(if (ai.shareTaste) R.string.value_on else R.string.value_off),
+        onClick = actions.onToggleAiTaste,
+    )
+    BasicText(stringResource(R.string.settings_ai_share_taste_note), style = ScaryType.Caption)
+    SettingRow(
+        label = stringResource(R.string.settings_ai_home_row),
+        value = stringResource(if (ai.homeRow) R.string.value_on else R.string.value_off),
+        onClick = actions.onToggleAiHomeRow,
+    )
+    var confirmDelete by remember { mutableStateOf(false) }
+    SettingRow(
+        label = stringResource(if (confirmDelete) R.string.settings_ai_delete_keys_confirm else R.string.settings_ai_delete_keys),
+        value = null,
+        onClick = {
+            if (confirmDelete) {
+                confirmDelete = false
+                actions.onDeleteAiKeys()
+            } else {
+                confirmDelete = true
+            }
+        },
+        modifier = Modifier.onFocusChanged { if (!it.hasFocus) confirmDelete = false },
+    )
+    BasicText(stringResource(R.string.settings_ai_note), style = ScaryType.Caption)
+}
 
 /** Test tags of the sleep timer and "Your year in fear" rows. */
 const val SLEEP_ROW_TAG = "sleepTimerRow"

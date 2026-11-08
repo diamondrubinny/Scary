@@ -128,7 +128,7 @@ const WORDS = {
     tmdbTitle: "TMDB key", tmdbHint: "Paste your TMDB API key or read access token. It travels encrypted and is checked by TMDB.",
     tmdbLabel: "Paste the key here", tmdbButton: "Send to the TV", tmdbSaved: "Saved. TMDB rows and titles in your language are on their way.",
     tmdbInvalid: "That does not look like a TMDB key.", tmdbRejected: "TMDB did not accept this key.",
-    tmdbUnreachable: "TMDB could not be reached from the TV. Try again.", tmdbStorage: "The TV could not store the key safely.",
+    tmdbUnreachable: "TMDB could not be reached from the TV. Try again.", tmdbStorage: "The TV could not store the key safely.", aiTitle: "AI key", aiHint: "For Ask SCARY with your own AI service. The key travels encrypted, is checked with the service, and stays on the TV.", aiService: "Service", aiLabel: "Paste the key here", aiButton: "Send to the TV", aiSaved: "Saved. Ask SCARY now uses this service.", aiInvalid: "That does not look like a key.", aiRejected: "The service did not accept this key.", aiUnreachable: "The TV could not reach the service. Try again.", aiStorage: "The TV could not store the key safely.",
     credit: "Powered by SCARY · Open source",
   },
   he: {
@@ -144,7 +144,7 @@ const WORDS = {
     tmdbTitle: "מפתח TMDB", tmdbHint: "הדביקו את מפתח ה־API או את ה־Read Access Token של TMDB. הוא עובר מוצפן ונבדק מול TMDB.",
     tmdbLabel: "מדביקים כאן את המפתח", tmdbButton: "שליחה לטלוויזיה", tmdbSaved: "נשמר. השורות של TMDB והשמות בעברית בדרך.",
     tmdbInvalid: "זה לא נראה כמו מפתח של TMDB.", tmdbRejected: "TMDB לא קיבלה את המפתח.",
-    tmdbUnreachable: "הטלוויזיה לא הצליחה להגיע ל־TMDB. נסו שוב.", tmdbStorage: "הטלוויזיה לא הצליחה לשמור את המפתח בבטחה.",
+    tmdbUnreachable: "הטלוויזיה לא הצליחה להגיע ל־TMDB. נסו שוב.", tmdbStorage: "הטלוויזיה לא הצליחה לשמור את המפתח בבטחה.", aiTitle: "מפתח AI", aiHint: "ל\"שאלו את SCARY\" עם שירות AI משלכם. המפתח עובר מוצפן, נבדק מול השירות ונשמר רק בטלוויזיה.", aiService: "שירות", aiLabel: "מדביקים כאן את המפתח", aiButton: "שליחה לטלוויזיה", aiSaved: "נשמר. \"שאלו את SCARY\" עובד עכשיו עם השירות הזה.", aiInvalid: "זה לא נראה כמו מפתח.", aiRejected: "השירות לא קיבל את המפתח.", aiUnreachable: "הטלוויזיה לא הצליחה להגיע לשירות. נסו שוב.", aiStorage: "הטלוויזיה לא הצליחה לשמור את המפתח בבטחה.",
     credit: "Powered by SCARY · Open source",
   },
   ar: {
@@ -160,7 +160,7 @@ const WORDS = {
     tmdbTitle: "مفتاح TMDB", tmdbHint: "الصق مفتاح API أو رمز Read Access الخاص بـ TMDB. ينتقل مشفّرًا ويتحقق منه TMDB.",
     tmdbLabel: "الصق المفتاح هنا", tmdbButton: "أرسل إلى التلفاز", tmdbSaved: "حُفظ. صفوف TMDB والعناوين المترجمة في الطريق.",
     tmdbInvalid: "هذا لا يبدو مفتاح TMDB.", tmdbRejected: "لم يقبل TMDB هذا المفتاح.",
-    tmdbUnreachable: "تعذّر على التلفاز الوصول إلى TMDB. حاول مرة أخرى.", tmdbStorage: "تعذّر على التلفاز حفظ المفتاح بأمان.",
+    tmdbUnreachable: "تعذّر على التلفاز الوصول إلى TMDB. حاول مرة أخرى.", tmdbStorage: "تعذّر على التلفاز حفظ المفتاح بأمان.", aiTitle: "مفتاح الذكاء الاصطناعي", aiHint: "لـ\"اسأل SCARY\" مع خدمة ذكاء اصطناعي خاصة بك. ينتقل المفتاح مشفّرًا ويُتحقق منه لدى الخدمة ويبقى على التلفاز.", aiService: "الخدمة", aiLabel: "الصق المفتاح هنا", aiButton: "أرسل إلى التلفاز", aiSaved: "حُفظ. يستخدم \"اسأل SCARY\" هذه الخدمة الآن.", aiInvalid: "هذا لا يبدو مفتاحًا.", aiRejected: "لم تقبل الخدمة هذا المفتاح.", aiUnreachable: "تعذّر على التلفاز الوصول إلى الخدمة. حاول مرة أخرى.", aiStorage: "تعذّر على التلفاز حفظ المفتاح بأمان.",
     credit: "Powered by SCARY · Open source",
   },
   pt: {
@@ -176,7 +176,7 @@ const WORDS = {
     tmdbTitle: "Chave do TMDB", tmdbHint: "Cole sua chave de API ou token de leitura do TMDB. Ela viaja criptografada e é verificada pelo TMDB.",
     tmdbLabel: "Cole a chave aqui", tmdbButton: "Enviar para a TV", tmdbSaved: "Salva. As fileiras do TMDB e os títulos traduzidos estão a caminho.",
     tmdbInvalid: "Isso não parece uma chave do TMDB.", tmdbRejected: "O TMDB não aceitou esta chave.",
-    tmdbUnreachable: "A TV não conseguiu falar com o TMDB. Tente de novo.", tmdbStorage: "A TV não conseguiu guardar a chave com segurança.",
+    tmdbUnreachable: "A TV não conseguiu falar com o TMDB. Tente de novo.", tmdbStorage: "A TV não conseguiu guardar a chave com segurança.", aiTitle: "Chave de IA", aiHint: "Para o Pergunte ao SCARY com seu próprio serviço de IA. A chave viaja criptografada, é verificada com o serviço e fica na TV.", aiService: "Serviço", aiLabel: "Cole a chave aqui", aiButton: "Enviar para a TV", aiSaved: "Salva. O Pergunte ao SCARY agora usa este serviço.", aiInvalid: "Isso não parece uma chave.", aiRejected: "O serviço não aceitou esta chave.", aiUnreachable: "A TV não conseguiu falar com o serviço. Tente de novo.", aiStorage: "A TV não conseguiu guardar a chave com segurança.",
     credit: "Powered by SCARY · Open source",
   },
   ru: {
@@ -192,7 +192,7 @@ const WORDS = {
     tmdbTitle: "Ключ TMDB", tmdbHint: "Вставьте API-ключ или токен доступа TMDB. Он передаётся в зашифрованном виде и проверяется TMDB.",
     tmdbLabel: "Вставьте ключ сюда", tmdbButton: "Отправить на телевизор", tmdbSaved: "Сохранено. Ряды TMDB и переведённые названия уже в пути.",
     tmdbInvalid: "Это не похоже на ключ TMDB.", tmdbRejected: "TMDB не принял этот ключ.",
-    tmdbUnreachable: "Телевизор не смог связаться с TMDB. Попробуйте ещё раз.", tmdbStorage: "Телевизор не смог надёжно сохранить ключ.",
+    tmdbUnreachable: "Телевизор не смог связаться с TMDB. Попробуйте ещё раз.", tmdbStorage: "Телевизор не смог надёжно сохранить ключ.", aiTitle: "Ключ ИИ", aiHint: "Для «Спросите SCARY» с вашим собственным сервисом ИИ. Ключ передаётся зашифрованным, проверяется сервисом и хранится только на телевизоре.", aiService: "Сервис", aiLabel: "Вставьте ключ сюда", aiButton: "Отправить на телевизор", aiSaved: "Сохранено. «Спросите SCARY» теперь использует этот сервис.", aiInvalid: "Это не похоже на ключ.", aiRejected: "Сервис не принял этот ключ.", aiUnreachable: "Телевизор не смог связаться с сервисом. Попробуйте ещё раз.", aiStorage: "Телевизор не смог надёжно сохранить ключ.",
     credit: "Powered by SCARY · Open source",
   },
 };
@@ -201,6 +201,7 @@ const STATUS_WORDS = {
   bad_signature: "badSignature", not_front: "notFront", not_found: "notFound", a11y_off: "a11yOff", old_android: "oldAndroid", busy: "busy", off: "offline",
   tmdb_saved: "tmdbSaved", tmdb_invalid: "tmdbInvalid", tmdb_rejected: "tmdbRejected",
   tmdb_unreachable: "tmdbUnreachable", tmdb_storage: "tmdbStorage",
+  ai_saved: "aiSaved", ai_invalid: "aiInvalid", ai_rejected: "aiRejected", ai_unreachable: "aiUnreachable", ai_storage: "aiStorage",
 };
 
 function start() {
@@ -294,6 +295,16 @@ function start() {
       row.append(name, open);
       results.appendChild(row);
     }
+  });
+
+  document.getElementById("ai-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const field = document.getElementById("ai-key");
+    const key = field.value.trim();
+    if (!key) return;
+    // "service\nkey": the TV checks both, then tries the key with that service before keeping it.
+    const reply = await send("ai_key", document.getElementById("ai-service").value + "\n" + key);
+    if (reply && reply.s === "ai_saved") field.value = "";
   });
 
   document.getElementById("tmdb-form").addEventListener("submit", async (event) => {

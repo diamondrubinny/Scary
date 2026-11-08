@@ -3,6 +3,8 @@
 
     <!-- Only for movie artwork and info from Cinemeta (can be turned off in SCARY settings). HTTPS only. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Updating SCARY itself from its official repository; Android asks the viewer before every install. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <!-- To fetch online rows again as soon as the TV's network is back (it often starts before its Wi-Fi). -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- The sleep timer pauses playback on time. Without it (the default from Android 14) the timer may end a few
@@ -116,6 +118,10 @@
         <!-- The sleep timer's end: reached only by SCARY's own alarm. -->
         <receiver
             android:name=".system.SleepTimerReceiver"
+            android:exported="false" />
+        <!-- Android's answers to an update's install session: reached only by SCARY's own PendingIntent. -->
+        <receiver
+            android:name=".update.UpdateInstallReceiver"
             android:exported="false" />
     </application>
 </manifest>

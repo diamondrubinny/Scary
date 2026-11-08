@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -74,6 +75,20 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.stats.StatsScreen
 import io.github.diamondrubinny.scary.ui.taste.TastePickerScreen
+import io.github.diamondrubinny.scary.ui.update.UpdateActions
+import io.github.diamondrubinny.scary.ai.AiState
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.core.ai.AiProvider
+import io.github.diamondrubinny.scary.ui.ai.AiConsentDialog
+import io.github.diamondrubinny.scary.ui.ai.AiKeyDialog
+import io.github.diamondrubinny.scary.ui.ai.AiModelDialog
+import io.github.diamondrubinny.scary.ui.ai.AiProviderDialog
+import io.github.diamondrubinny.scary.ui.ai.AiUrlDialog
+import io.github.diamondrubinny.scary.ui.ai.AskActions
+import io.github.diamondrubinny.scary.ui.ai.AskScreen
+import io.github.diamondrubinny.scary.ui.settings.AiSettingsState
+import io.github.diamondrubinny.scary.ui.update.UpdateDialog
+import io.github.diamondrubinny.scary.update.UpdateState
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
@@ -129,6 +144,17 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val context = LocalContext.current
     val phoneRemote = remember(context) { (context.applicationContext as ScaryApplication).container.phoneRemote }
     val remoteState by phoneRemote.state.collectAsStateWithLifecycle()
+    val updates = remember(context) { (context.applicationContext as ScaryApplication).container.updateManager }
+    val updateState by updates.state.collectAsStateWithLifecycle()
+    val updatePrompt by updates.prompt.collectAsStateWithLifecycle()
+    // AI: its state, the dialog open in its settings, and a counter that re-reads the saved keys' masks.
+    val aiAssistant = viewModel.ai
+    val aiStateFlow = remember(aiAssistant) { aiAssistant?.state ?: kotlinx.coroutines.flow.MutableStateFlow(AiState()) }
+    val aiState by aiStateFlow.collectAsStateWithLifecycle()
+    var aiDialog by remember { mutableStateOf<AiDialogKind?>(null) }
+    var aiKeyVersion by remember { mutableIntStateOf(0) }
+    var aiKeyTarget by remember { mutableStateOf<AiProvider?>(null) }
+    val aiProvider = AiProvider.fromKey(state.aiProvider) ?: AiProvider.DEFAULT
 
     // A sleep timer saved before the TV restarted has lost its alarm: it shows as off.
     val sleepSaved = state.sleepAtMillis != null
@@ -186,6 +212,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onFinishPicking = viewModel::finishPicking,
             onOpenTastePicker = viewModel::openTastePicker,
             onDismissTasteInvite = viewModel::dismissTasteInvite,
+            onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
         )
     }
     val bucketActions = remember(viewModel) {
@@ -273,6 +300,21 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             viewModel.openTastePicker()
         },
         onClearRecent = viewModel::clearRecent,
+        onToggleAi = { viewModel.setAiEnabled(!state.aiEnabled) },
+        onAiProvider = { aiDialog = AiDialogKind.PROVIDER },
+        onAiKey = { aiDialog = AiDialogKind.KEY },
+        onAiModel = { aiDialog = AiDialogKind.MODEL },
+        onAiUrl = { aiDialog = AiDialogKind.URL },
+        onAiTest = { aiAssistant?.testConnection() },
+        onToggleAiTaste = { viewModel.setAiShareTaste(!state.aiShareTaste) },
+        onToggleAiHomeRow = { viewModel.setAiHomeRow(!state.aiHomeRow) },
+        onDeleteAiKeys = {
+            viewModel.deleteAllAiKeys()
+            aiKeyVersion++
+        },
+        // With a version found, the row shows it again; otherwise it looks now.
+        onCheckForUpdates = { if (updates.state.value is UpdateState.Available) updates.showPrompt() else updates.checkNow() },
+        onToggleAutoUpdate = viewModel::toggleAutoUpdateCheck,
         onSetupPin = viewModel::startPinSetup,
         onCycleLockLevel = viewModel::cycleLockLevel,
         onTurnOffLock = viewModel::turnOffParental,
@@ -319,7 +361,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val trailersEnabled = state.trailerAutoplay && state.onlineEnabled && !state.familyNight && systemAnimations &&
         lifecycleState.isAtLeast(Lifecycle.State.RESUMED) &&
         launching == null && pinDialog == null && tmdbDialog == null && !countryPicker && !trailerIntro && bucketPrompt == null &&
-        !state.picking
+        !state.picking && !updatePrompt
     val trailerSettings = remember(viewModel, trailersEnabled, state.trailerSound, state.trailerIntroSeen) {
         TrailerSettings(
             enabled = trailersEnabled,
@@ -357,6 +399,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                         returnTo = searchOpenedId,
                         webSearch = webSearch,
                         onSurprise = viewModel::surprise,
+                        smart = if (state.aiEnabled) aiState.search else null,
+                        aiQuery = aiState.searchQuery,
+                        onSmartSearch = { query, labels -> aiAssistant?.smartSearch(query, labels) },
+                        onAiSettings = viewModel::openSettings,
                     )
                 }
                 current is Screen.Document -> DocumentScreen(current.kind)
@@ -391,6 +437,18 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     lovedCount = state.lovedIds.size,
                     recentCount = state.recentCount,
                     returningFromTaste = fromTaste,
+                    updateState = updateState,
+                    autoUpdateCheck = state.autoUpdateCheck,
+                    ai = AiSettingsState(
+                        enabled = state.aiEnabled,
+                        provider = aiProvider,
+                        keyMask = remember(aiProvider, aiKeyVersion) { viewModel.aiKeyMask(aiProvider) },
+                        model = state.aiModels[aiProvider.key] ?: aiProvider.fixedModel,
+                        customUrl = state.aiCustomUrl,
+                        shareTaste = state.aiShareTaste,
+                        homeRow = state.aiHomeRow,
+                        test = aiState.test,
+                    ),
                 )
                 details != null -> DetailsScreen(
                     details = details,
@@ -420,6 +478,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onToggleNotForMe = { viewModel.toggleNotForMe(it, language) },
                     inBucket = details.movie.id in state.bucketIds,
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
+                    about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
+                    aboutWeakLanguage = aiState.weakLanguage,
+                    onAbout = { aiAssistant?.about(it) },
+                    onAiSettings = viewModel::openSettings,
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
                 current == Screen.TmdbAccount -> TmdbAccountScreen(
@@ -448,6 +510,25 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                         else -> OtherApps.BACK_AND_HOME
                     },
                     onEnableOtherApps = ::openAccessibility,
+                )
+                current is Screen.Ask -> AskScreen(
+                    state = aiState,
+                    chat = current.chat,
+                    serviceLabel = aiProvider.displayName + (state.aiModels[aiProvider.key]?.let { " · $it" } ?: ""),
+                    language = language,
+                    isLocked = state::isLocked,
+                    isWatched = state::isWatched,
+                    actions = remember(viewModel, aiAssistant) {
+                        AskActions(
+                            onRecommend = { query, chip -> aiAssistant?.recommend(query, chip) },
+                            onOpenMovie = { viewModel.openDetails(it.id) },
+                            onSendChat = { aiAssistant?.sendChat(it) },
+                            onRetryChat = { aiAssistant?.retryChat() },
+                            onNewChat = { aiAssistant?.clearChat() },
+                            onSelectTab = viewModel::setAskTab,
+                            onOpenSettings = viewModel::openSettings,
+                        )
+                    },
                 )
                 current == Screen.TastePicker -> TastePickerScreen(
                     // A new function whenever what the posters come from changes, so the screen picks them again (not at each pick).
@@ -519,6 +600,86 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                 )
             }
 
+            // Asked once per AI service, before anything is sent to it.
+            aiState.consent?.let { provider ->
+                AiConsentDialog(
+                    provider = provider,
+                    onAgree = { aiAssistant?.agree() },
+                    onLater = { aiAssistant?.decline() },
+                    onOwnKey = {
+                        aiAssistant?.decline()
+                        viewModel.openSettings()
+                        aiDialog = AiDialogKind.PROVIDER
+                    },
+                )
+            }
+            when (aiDialog) {
+                AiDialogKind.PROVIDER -> AiProviderDialog(
+                    current = aiProvider,
+                    hasKey = { viewModel.aiKeyMask(it) != null },
+                    onPick = { picked ->
+                        viewModel.setAiProvider(picked)
+                        aiDialog = when {
+                            picked == AiProvider.CUSTOM && state.aiCustomUrl.isEmpty() -> AiDialogKind.URL
+                            picked.needsKey && viewModel.aiKeyMask(picked) == null -> AiDialogKind.KEY_FOR.also { aiKeyTarget = picked }
+                            else -> null
+                        }
+                    },
+                    onDismiss = { aiDialog = null },
+                )
+                AiDialogKind.KEY, AiDialogKind.KEY_FOR -> {
+                    val target = if (aiDialog == AiDialogKind.KEY_FOR) aiKeyTarget ?: aiProvider else aiProvider
+                    AiKeyDialog(
+                        provider = target,
+                        keyMask = remember(target, aiKeyVersion) { viewModel.aiKeyMask(target) },
+                        onSave = { key -> viewModel.saveAiKey(target, key).also { aiKeyVersion++ } },
+                        onDelete = {
+                            viewModel.deleteAiKey(target)
+                            aiKeyVersion++
+                            aiDialog = null
+                        },
+                        onUsePhone = {
+                            aiDialog = null
+                            viewModel.openPhoneRemote()
+                        },
+                        onDismiss = { aiDialog = null },
+                    )
+                }
+                AiDialogKind.URL -> AiUrlDialog(
+                    current = state.aiCustomUrl,
+                    onSave = viewModel::setAiCustomUrl,
+                    onDismiss = { aiDialog = null },
+                )
+                AiDialogKind.MODEL -> AiModelDialog(
+                    provider = aiProvider,
+                    current = state.aiModels[aiProvider.key],
+                    load = { viewModel.aiModels(aiProvider) },
+                    onPick = { model ->
+                        viewModel.setAiModel(aiProvider, model)
+                        aiDialog = null
+                    },
+                    onDismiss = { aiDialog = null },
+                )
+                null -> Unit
+            }
+
+            // A new version of SCARY: over whatever is on screen, but never on top of another question.
+            if (updatePrompt && launching == null && pinDialog == null && tmdbDialog == null && bucketPrompt == null && !trailerIntro) {
+                UpdateDialog(
+                    state = updateState,
+                    language = language,
+                    actions = remember(updates) {
+                        UpdateActions(
+                            onUpdate = updates::updateNow,
+                            onLater = updates::later,
+                            onSkip = updates::skip,
+                            onOpenPermission = updates::openInstallPermission,
+                            onDismiss = updates::dismiss,
+                        )
+                    },
+                )
+            }
+
             if (trailerIntro) {
                 TrailerIntroDialog(
                     onPlay = { viewModel.answerTrailerIntro(true) },
@@ -558,3 +719,6 @@ private fun Context.versionName(): String = try {
 } catch (_: PackageManager.NameNotFoundException) {
     ""
 }
+
+/** Which AI settings dialog is open. */
+private enum class AiDialogKind { PROVIDER, KEY, KEY_FOR, URL, MODEL }

@@ -55,6 +55,29 @@
         </div>
       </form>
     </section>
+    <section>
+      <h2 data-w="aiTitle">AI key</h2>
+      <p class="hint" data-w="aiHint"></p>
+      <form id="ai-form" autocomplete="off">
+        <label for="ai-service" data-w="aiService">Service</label>
+        <select id="ai-service" dir="ltr">
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="gemini">Google Gemini</option>
+          <option value="groq">Groq</option>
+          <option value="openrouter">OpenRouter</option>
+          <option value="mistral">Mistral</option>
+          <option value="deepseek">DeepSeek</option>
+          <option value="pollinations">Pollinations</option>
+          <option value="custom">OpenAI-compatible address</option>
+        </select>
+        <label for="ai-key" data-w="aiLabel">Paste the key here</label>
+        <div class="field">
+          <input id="ai-key" type="password" maxlength="400" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
+          <button type="submit" data-w="aiButton">Send to the TV</button>
+        </div>
+      </form>
+    </section>
   </main>
   <footer data-w="credit">Powered by SCARY · Open source</footer>
 </body>

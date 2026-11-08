@@ -39,6 +39,10 @@ android {
     }
 
     buildTypes {
+        // With the key from the environment, debug builds are signed with it too: one key for every APK.
+        debug {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true

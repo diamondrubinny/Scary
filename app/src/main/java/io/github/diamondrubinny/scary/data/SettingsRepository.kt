@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.data
 
 import io.github.diamondrubinny.scary.core.links.Region
+import io.github.diamondrubinny.scary.core.ai.AiProvider
 import android.content.Context
 import android.provider.Settings
 import androidx.datastore.core.DataStore
@@ -67,6 +68,22 @@ data class LauncherPrefs(
     val hideWatched: Boolean = false,
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
+    /** Look for a new version of SCARY by itself (official builds only). */
+    val autoUpdateCheck: Boolean = true,
+    /** The version the viewer chose to skip, the end of "Later", and the last check. */
+    val updateSkippedVersion: Int? = null,
+    val updateLaterUntil: Long? = null,
+    val updateLastCheck: Long? = null,
+    /** AI: on at all; which service; the model chosen per service; services the viewer agreed to send to. */
+    val aiEnabled: Boolean = true,
+    val aiProvider: String = AiProvider.DEFAULT.key,
+    val aiModels: Map<String, String> = emptyMap(),
+    val aiConsented: Set<String> = emptySet(),
+    /** A short taste summary may go with AI requests (separate consent, off by default). */
+    val aiShareTaste: Boolean = false,
+    val aiCustomUrl: String = "",
+    /** "Ask SCARY" quick chips on the home screen. */
+    val aiHomeRow: Boolean = true,
     /** ISO country chosen for rent and buy offers; null follows the device ([io.github.diamondrubinny.scary.core.links.Region]). */
     val rentBuyCountry: String? = null,
     /** A trailer plays by itself next to a movie the focus rests on. On by default, after [trailerIntroSeen]. */
@@ -118,6 +135,17 @@ class SettingsRepository(private val context: Context) {
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
+                autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
+                updateSkippedVersion = p[UPDATE_SKIPPED],
+                updateLaterUntil = p[UPDATE_LATER_UNTIL],
+                updateLastCheck = p[UPDATE_LAST_CHECK],
+                aiEnabled = p[AI_ENABLED] ?: true,
+                aiProvider = p[AI_PROVIDER] ?: AiProvider.DEFAULT.key,
+                aiModels = decodeModels(p[AI_MODELS]),
+                aiConsented = p[AI_CONSENTED].orEmpty(),
+                aiShareTaste = p[AI_SHARE_TASTE] ?: false,
+                aiCustomUrl = p[AI_CUSTOM_URL].orEmpty(),
+                aiHomeRow = p[AI_HOME_ROW] ?: true,
                 rentBuyCountry = Region.normalize(p[RENT_BUY_COUNTRY]),
                 trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
                 trailerSound = p[TRAILER_SOUND] ?: false,
@@ -170,6 +198,39 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
 
     suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
+
+    suspend fun setAutoUpdateCheck(enabled: Boolean) = edit { it[AUTO_UPDATE_CHECK] = enabled }
+
+    suspend fun setAiEnabled(enabled: Boolean) = edit { it[AI_ENABLED] = enabled }
+
+    suspend fun setAiProvider(provider: AiProvider) = edit { it[AI_PROVIDER] = provider.key }
+
+    suspend fun setAiModel(provider: AiProvider, model: String?) = edit {
+        val models = decodeModels(it[AI_MODELS]).toMutableMap()
+        if (model == null) models.remove(provider.key) else models[provider.key] = model
+        it[AI_MODELS] = models.entries.joinToString("\n") { (k, v) -> "$k=$v" }
+    }
+
+    /** The viewer agreed to send requests to [provider] (asked once per service), or took it back. */
+    suspend fun setAiConsent(provider: AiProvider, agreed: Boolean) = edit {
+        val set = it[AI_CONSENTED].orEmpty()
+        it[AI_CONSENTED] = if (agreed) set + provider.key else set - provider.key
+    }
+
+    suspend fun setAiShareTaste(enabled: Boolean) = edit { it[AI_SHARE_TASTE] = enabled }
+
+    suspend fun setAiCustomUrl(url: String) = edit { it[AI_CUSTOM_URL] = url }
+
+    suspend fun setAiHomeRow(enabled: Boolean) = edit { it[AI_HOME_ROW] = enabled }
+
+    suspend fun setUpdateLastCheck(millis: Long) = edit { it[UPDATE_LAST_CHECK] = millis }
+
+    suspend fun skipUpdate(versionCode: Int) = edit {
+        it[UPDATE_SKIPPED] = versionCode
+        it.remove(UPDATE_LATER_UNTIL)
+    }
+
+    suspend fun updateLater(untilMillis: Long) = edit { it[UPDATE_LATER_UNTIL] = untilMillis }
 
     /** Empties "Recently opened". Watched, My list and the ratings stay. */
     suspend fun clearRecent() = edit { it.remove(RECENT) }
@@ -336,6 +397,22 @@ class SettingsRepository(private val context: Context) {
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
+        private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
+        private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")
+        private val UPDATE_LATER_UNTIL = longPreferencesKey("update_later_until")
+        private val UPDATE_LAST_CHECK = longPreferencesKey("update_last_check")
+        private val AI_ENABLED = booleanPreferencesKey("ai_enabled")
+        private val AI_PROVIDER = stringPreferencesKey("ai_provider")
+        private val AI_MODELS = stringPreferencesKey("ai_models")
+        private val AI_CONSENTED = stringSetPreferencesKey("ai_consented")
+        private val AI_SHARE_TASTE = booleanPreferencesKey("ai_share_taste")
+        private val AI_CUSTOM_URL = stringPreferencesKey("ai_custom_url")
+        private val AI_HOME_ROW = booleanPreferencesKey("ai_home_row")
+
+        /** "openai=gpt-x" lines: the model saved for each service. */
+        fun decodeModels(raw: String?): Map<String, String> = raw.orEmpty().lines()
+            .mapNotNull { line -> line.split('=', limit = 2).takeIf { it.size == 2 && it[0].isNotBlank() && it[1].isNotBlank() } }
+            .associate { it[0] to it[1] }
         private val PENDING_WATCH = stringPreferencesKey("pending_watch")
         private val RENT_BUY_COUNTRY = stringPreferencesKey("rent_buy_country")
         private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")

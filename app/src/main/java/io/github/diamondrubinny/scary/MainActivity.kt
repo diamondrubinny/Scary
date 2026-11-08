@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
                 Command.SEARCH -> return@withContext PhoneRemoteServer.Reply("ok", viewModel.remoteSearch(request.text))
                 Command.OPEN -> if (!viewModel.remoteOpen(request.text)) return@withContext PhoneRemoteServer.Reply("not_found")
                 Command.TMDB_KEY -> return@withContext PhoneRemoteServer.Reply(viewModel.remoteTmdbKey(request.text))
+                Command.AI_KEY -> return@withContext PhoneRemoteServer.Reply(viewModel.remoteAiKey(request.text))
                 else -> Unit
             }
             PhoneRemoteServer.Reply("ok")
@@ -135,6 +136,8 @@ class MainActivity : ComponentActivity() {
         viewModel.refreshApps()
         // Back from a movie in Stremio (or another app): it may count as watched.
         viewModel.onResumed()
+        // A new version of SCARY, when one is due to be looked for; or carrying on after allowing installs.
+        (application as ScaryApplication).container.updateManager.onResumed()
         viewModel.updateLauncherStatus(
             LauncherStatus(HomeRole.isDefaultHome(this), HomeRole.isHomeButtonServiceOn(this)),
         )

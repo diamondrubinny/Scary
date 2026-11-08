@@ -88,6 +88,20 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.core.ai.AiProvider
+import io.github.diamondrubinny.scary.ui.ai.AI_CONSENT_TAG
+import io.github.diamondrubinny.scary.ui.ai.AI_PROVIDER_TAG
+import io.github.diamondrubinny.scary.ui.ai.AI_STATUS_TAG
+import io.github.diamondrubinny.scary.ui.ai.ASK_CHAT_TAG
+import io.github.diamondrubinny.scary.ui.ai.ASK_SCREEN_TAG
+import io.github.diamondrubinny.scary.ui.ai.aiProviderTag
+import io.github.diamondrubinny.scary.ui.ai.askTabTag
+import io.github.diamondrubinny.scary.ui.components.ASK_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.details.AI_ABOUT_TAG
+import io.github.diamondrubinny.scary.ui.details.AI_ABOUT_TEXT_TAG
+import io.github.diamondrubinny.scary.ui.settings.AI_PROVIDER_ROW_TAG
+import io.github.diamondrubinny.scary.core.update.UpdateManifest
+import io.github.diamondrubinny.scary.ui.update.UPDATE_DIALOG_TAG
 import io.github.diamondrubinny.scary.ui.taste.TASTE_PICKER_TAG
 import io.github.diamondrubinny.scary.ui.taste.tasteCardTag
 import io.github.diamondrubinny.scary.ui.taste.tasteTabTag
@@ -931,6 +945,113 @@ class ScaryUiTest {
         waitFor(row and hasContentDescription(text(R.string.settings_clear_recent_empty), substring = true))
         backToHome()
         assertTrue(viewModel.uiState.value.rows.none { it is HomeRow.Recent })
+    }
+
+    @Test
+    fun aNewVersionPopsUpAndLaterOrSkipPutItAway() {
+        waitForHomeFocus()
+        val container = (rule.activity.application as ScaryApplication).container
+        val updates = container.updateManager
+        val manifest = UpdateManifest(
+            versionCode = 999_999, versionName = "9.9.9", sha256 = "a".repeat(64), size = 3_000_000, minSdk = 26,
+            notes = mapOf("en" to "Test notes", "he" to "Test notes", "ar" to "Test notes", "pt" to "Test notes", "ru" to "Test notes"),
+        )
+        val dialog = hasTestTag(UPDATE_DIALOG_TAG)
+        withCleanup({
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            waitFor(hasText(text(R.string.update_title)) and hasAnyAncestor(dialog))
+            waitFor(hasText("Test notes") and hasAnyAncestor(dialog))
+            // "Update now" has the focus: the popup is answered with the remote's OK.
+            waitFor(hasText(text(R.string.update_now)) and isFocused() and hasAnyAncestor(dialog))
+            rule.onNode(hasText(text(R.string.update_later)) and hasAnyAncestor(dialog)).performClick()
+            waitForGone(dialog)
+            waitUntilOrDescribe("later saved") { runBlocking { container.settingsRepository.prefs.first().updateLaterUntil } != null }
+            // Again, and this time skip the version.
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            rule.onNode(hasText(text(R.string.update_skip)) and hasAnyAncestor(dialog)).performClick()
+            waitForGone(dialog)
+            waitUntilOrDescribe("skip saved") { runBlocking { container.settingsRepository.prefs.first().updateSkippedVersion } == 999_999 }
+            // Back closes it as "Later".
+            rule.runOnUiThread { updates.offerForTest(manifest) }
+            waitFor(dialog)
+            waitFor(isFocused() and hasAnyAncestor(dialog))
+            rule.waitForIdle()
+            pressBack()
+            waitForGone(dialog)
+        }) {
+            rule.runOnUiThread { updates.dismiss() }
+            runBlocking {
+                container.settingsRepository.skipUpdate(0)
+                container.settingsRepository.updateLater(0)
+            }
+            backToHome()
+        }
+    }
+
+    @Test
+    fun askScaryOpensFromTheTopBarAndAsksBeforeSendingAnything() {
+        waitForHomeFocus()
+        val container = (rule.activity.application as ScaryApplication).container
+        runBlocking { container.settingsRepository.setAiConsent(AiProvider.POLLINATIONS_FREE, false) }
+        val consent = hasTestTag(AI_CONSENT_TAG)
+        withCleanup({
+            rule.onNodeWithTag(ASK_BUTTON_TAG).performClick()
+            waitFor(hasTestTag(ASK_SCREEN_TAG))
+            // A one-press request: nothing goes out before the viewer agrees to the free service.
+            rule.onNode(hasText(text(R.string.ai_chip_short)) and hasAnyAncestor(hasTestTag(ASK_SCREEN_TAG))).performClick()
+            waitFor(consent)
+            waitFor(hasText(text(R.string.ai_consent_agree)) and isFocused() and hasAnyAncestor(consent))
+            rule.onNode(hasText(text(R.string.ai_consent_later)) and hasAnyAncestor(consent)).performClick()
+            waitForGone(consent)
+            // Nothing asked, nothing thinking.
+            waitForGone(hasTestTag(AI_STATUS_TAG))
+            // The chat tab.
+            rule.onNodeWithTag(askTabTag(chat = true)).performClick()
+            waitFor(hasTestTag(ASK_CHAT_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theAskScaryRowAndAboutThisFilmAskForConsentToo() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        runBlocking { container.settingsRepository.setAiConsent(AiProvider.POLLINATIONS_FREE, false) }
+        waitUntilOrDescribe("the Ask SCARY row on the home screen") { viewModel.uiState.value.rows.any { it is HomeRow.AskAi } }
+        val consent = hasTestTag(AI_CONSENT_TAG)
+        withCleanup({
+            openViaSearch(bundledMovies().first { it.title == "Hereditary" })
+            rule.onNodeWithTag(AI_ABOUT_TAG).performScrollTo().performClick()
+            waitFor(consent)
+            rule.onNode(hasText(text(R.string.ai_consent_later)) and hasAnyAncestor(consent)).performClick()
+            waitForGone(consent)
+            waitForGone(hasTestTag(AI_ABOUT_TEXT_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun aiSettingsListEveryServiceWithItsState() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(AI_PROVIDER_ROW_TAG)
+        waitFor(row)
+        withCleanup({
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(hasTestTag(AI_PROVIDER_TAG))
+            AiProvider.entries.forEach { waitFor(hasTestTag(aiProviderTag(it))) }
+            // The free service is chosen by default, and says it needs no key.
+            waitFor(hasTestTag(aiProviderTag(AiProvider.POLLINATIONS_FREE)) and isFocused())
+            pressBack()
+            waitForGone(hasTestTag(AI_PROVIDER_TAG))
+        }) {
+            backToHome()
+        }
     }
 
     @Test

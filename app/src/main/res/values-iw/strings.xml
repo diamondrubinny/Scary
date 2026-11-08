@@ -156,6 +156,8 @@
         <item>טריילרים שמתנגנים מעצמם (פעילים אחרי שהסכמתם כשנשאלתם בפעם הראשונה, ואפשר לכבות אותם בהגדרות): הנגן הוא של YouTube, במצב הפרטיות המשופרת שלו (youtube-nocookie.com, ו־youtube.com כניסיון אחרון כשטריילר לא מתנגן שם). כשטריילר מתנגן, YouTube ‏(Google) מקבלת את כתובת ה־IP של הטלוויזיה, פרטי המכשיר והדפדפן ואת מזהה הטריילר, לפי מדיניות הפרטיות של Google. ‏SCARY חוסמת עוגיות בנגן ומוחקת את האחסון שלו כשהוא נסגר. טריילרים לא מתנגנים בלי רשת או בערב משפחתי.</item>
         <item>שלט בטלפון, רק כשמפעילים אותו בהגדרות: הטלוויזיה מגישה דף קטן ברשת הביתית, והטלפון פותח אותו בסריקת קוד QR. הקוד מכיל מפתח חד־פעמי שחותם ומצפין כל פקודה בין הטלפון לטלוויזיה, והמפתח לא נשלח ברשת אף פעם. הפקודות עוברות ישירות מהטלפון לטלוויזיה ולא נשמרות; טקסט החיפוש ומפתח ה־TMDB משמשים אחר כך כמתואר למעלה. הדף לא טוען דבר מהאינטרנט. השלט כבה כשמנתקים אותו, אחרי 30 דקות בלי שימוש, או כשמגיעות פקודות מזויפות. כדי ללחוץ על מקשים באפליקציות אחרות (Stremio, Netflix…), השלט בטלפון משתמש בשירות הנגישות של SCARY, רק אם הפעלתם אותו; השירות לוחץ על מקשים ולא קורא דבר מהמסך.</item>
         <item>צפייה, טריילרים והחנות פותחים את Stremio, YouTube או Google Play. מאותו רגע חלה מדיניות הפרטיות שלהם.</item>
+        <item>עדכונים (בגרסה הרשמית; אפשר לכבות את הבדיקה האוטומטית בהגדרות): לכל היותר פעם בשש שעות SCARY מבקש מ־GitHub את קובץ העדכון של הריפו הרשמי. שום מידע עליכם לא נשלח; GitHub רואה את כתובת ה־IP של הטלוויזיה. עדכון מורד רק כשבוחרים \"עדכון עכשיו\", מותקן רק אם הוא חתום במפתח של SCARY, ו־Android מבקש אישור.</item>
+        <item>\"שאלו את SCARY\" (AI; כבוי עד שמסכימים, פעם אחת לכל שירות; אפשר לכבות בהגדרות): השאלה שלכם ופרטים ציבוריים על הסרטים ש־SCARY מציע לבחור מהם (שם, שנה, סוג, רמת פחד) נשלחים לשירות ה־AI שבחרתם: Pollinations (חינמי, בלי מפתח) או שירות עם מפתח משלכם (OpenAI, ‏Anthropic, ‏Google Gemini, ‏Groq, ‏OpenRouter, ‏Mistral, ‏DeepSeek, ‏Pollinations או כתובת שתזינו). מה שצפיתם, הרשימות שלכם וכל פרט מזהה לעולם לא נשלחים; כמה מילים על הטעם שלכם רק אם הפעלתם את זה. המפתחות מוצפנים בטלוויזיה ונשלחים רק לשירות שלהם. השירות רואה את כתובת ה־IP של הטלוויזיה והתנאים שלו חלים; השירות החינמי עשוי לשמור שאלות ותשובות. השיחה לא נשמרת.</item>
         <item>שאלות, תיקונים או בקשות לגבי המידע שלכם: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>עודכן באוקטובר 2026. זו טיוטה שעדיין לא נבדקה על ידי עורך דין.</item>
     </string-array>
@@ -446,4 +448,130 @@
         <item quantity="two">שני כותרים</item>
         <item quantity="other">%1$d כותרים</item>
     </plurals>
+
+    <!-- Updates from SCARY's official repository -->
+    <string name="update_title">גרסה חדשה של SCARY</string>
+    <string name="update_version">גרסה %1$s, build %2$d</string>
+    <string name="update_how">היא מגיעה מהריפו הרשמי של SCARY ונבדקת לפני ההתקנה. Android יבקש לאשר.</string>
+    <string name="update_now">עדכון עכשיו</string>
+    <string name="update_later">אחר כך</string>
+    <string name="update_skip">דילוג על הגרסה הזו</string>
+    <string name="update_downloading">מוריד… %1$d%%</string>
+    <string name="update_cancel">ביטול</string>
+    <string name="update_permission">כדי להתעדכן, SCARY צריך את אישור Android להתקנת אפליקציות. אשרו פעם אחת ל־SCARY במסך הבא, וחזרו.</string>
+    <string name="update_open_settings">פתיחת ההגדרות</string>
+    <string name="update_installing">אשרו את העדכון במסך של Android. SCARY יופעל מחדש בסיום.</string>
+    <string name="update_close">סגירה</string>
+    <string name="update_failed_unreachable">אין חיבור לשרת העדכונים. בדקו את החיבור ונסו שוב מההגדרות.</string>
+    <string name="update_failed_verify">הקובץ שהורד לא תאם לגרסה שפורסמה, ולכן לא הותקן. נסו שוב מאוחר יותר.</string>
+    <string name="update_failed_not_official">הקובץ לא חתום במפתח הרשמי של SCARY, ולכן לא הותקן.</string>
+    <string name="update_failed_install">Android לא התקין את העדכון. אפשר להתקין ידנית מ־scary.network.</string>
+    <string name="update_failed_permission_screen">הטלוויזיה הזו מסתירה את מסך ההרשאה. פתחו הגדרות, אפליקציות, SCARY, ואשרו התקנת אפליקציות לא מוכרות.</string>
+    <string name="settings_update_check">בדיקת עדכונים</string>
+    <string name="settings_update_checking">בודק…</string>
+    <string name="settings_update_up_to_date">מעודכן (build %1$d)</string>
+    <string name="settings_update_available">build %1$d זמין</string>
+    <string name="settings_update_failed">הבדיקה נכשלה</string>
+    <string name="settings_update_auto">בדיקת עדכונים אוטומטית</string>
+    <string name="settings_update_note">רק מהריפו הרשמי של SCARY ב־GitHub, לכל היותר פעם בשש שעות, ומותקן רק עדכון שחתום במפתח של SCARY. ‏GitHub רואה את כתובת ה־IP של הטלוויזיה; שום דבר אחר לא נשלח.</string>
+    <string name="settings_update_not_official">העותק הזה של SCARY אינו הגרסה הרשמית, ולכן הוא לא מקבל את העדכונים הרשמיים.</string>
+
+    <!-- Ask SCARY (AI) -->
+    <string name="ai_title">שאלו את SCARY ✦</string>
+    <string name="ai_row_hint">לחיצה אחת, או שאלה במילים שלכם</string>
+    <string name="ai_chip_like_loved">כמו מה שאני אוהב</string>
+    <string name="ai_chip_short">קצר ומפחיד</string>
+    <string name="ai_chip_gentle">מפחיד, אבל בעדינות</string>
+    <string name="ai_chip_classic">קלאסיקה</string>
+    <string name="ai_chip_scariest">הכי מפחיד שיש</string>
+    <string name="ai_chip_own">שאלה משלכם…</string>
+    <string name="ai_prompt_like_loved">משהו שאוהב, לפי הטעם שלי</string>
+    <string name="ai_prompt_short">משהו קצר ומפחיד, פחות משעה וחצי</string>
+    <string name="ai_prompt_gentle">משהו מפחיד רק קצת, מתאים לזוג או למי שחדש באימה</string>
+    <string name="ai_prompt_classic">סרט אימה קלאסי שכל אחד צריך לראות</string>
+    <string name="ai_prompt_scariest">הדבר הכי מפחיד שיש לך</string>
+    <string name="ai_tab_suggest">המלצות</string>
+    <string name="ai_tab_chat">שיחה</string>
+    <string name="ai_hint">למשל: כמו Hereditary, אבל פחות מגעיל</string>
+    <string name="ai_send">לשאול</string>
+    <string name="ai_chat_hint">שאלו כל דבר על סרטי וסדרות אימה</string>
+    <string name="ai_chat_send">שליחה</string>
+    <string name="ai_chat_note">לא נשמר: השיחה נמחקת כשיוצאים מהמסך.</string>
+    <string name="ai_new_chat">שיחה חדשה</string>
+    <string name="ai_thinking">חושב…</string>
+    <string name="ai_service_line">עובד עם %1$s</string>
+    <string name="ai_change">שינוי</string>
+    <string name="ai_you_asked">שאלתם: %1$s</string>
+    <string name="ai_reply_none">אין בטלוויזיה הזו משהו שמתאים לזה. נסו מילים אחרות.</string>
+    <string name="ai_retry">לנסות שוב</string>
+    <string name="ai_open_settings">הגדרות AI</string>
+    <string name="ai_error_wait">השירות החינמי עונה על שאלה אחת בכל פעם, עם המתנה קצרה ביניהן. שניות שנותרו: %1$d</string>
+    <string name="ai_error_wait_over">אפשר לשאול שוב.</string>
+    <string name="ai_error_needs_key">השירות הזה צריך את המפתח שלכם. מוסיפים אותו בהגדרות, AI.</string>
+    <string name="ai_error_bad_key">השירות לא קיבל את המפתח. בדקו אותו בהגדרות, AI.</string>
+    <string name="ai_error_no_credit">נגמר הקרדיט בשירות הזה.</string>
+    <string name="ai_error_no_model">לא נמצא מודל בשירות הזה. בחרו אחד בהגדרות, AI.</string>
+    <string name="ai_error_unreachable">אין חיבור לשירות ה־AI. בדקו את החיבור.</string>
+    <string name="ai_error_failed">שירות ה־AI לא ענה. נסו שוב.</string>
+    <string name="ai_error_not_understood">לא הצלחנו להבין את התשובה. נסו שוב.</string>
+    <string name="ai_error_off">ה־AI כבוי בהגדרות.</string>
+    <string name="ai_error_chat_blocked">השיחה כבויה כשנעילת ההורים או ערב משפחתי פועלים.</string>
+    <string name="ai_error_no_films">אין כרגע סרטים לבחור מהם.</string>
+    <string name="ai_about">על הסרט ✦</string>
+    <string name="ai_about_title">בלי ספוילרים</string>
+    <string name="ai_smart_search">חיפוש חכם ✦</string>
+    <string name="ai_smart_results">נמצא בעזרת AI</string>
+    <string name="search_library_results">בספרייה</string>
+    <string name="ai_consent_title">לשלוח ל־%1$s?</string>
+    <string name="ai_consent_body">השאלה שלכם, ושמות הסרטים ש־SCARY מציע לבחור מהם, נשלחים ל־%1$s, שירות AI מחוץ ל־SCARY. התנאים ומדיניות הפרטיות שלו חלים: %2$s</string>
+    <string name="ai_consent_private">אף פעם לא נשלח: מה צפיתם, הרשימות שלכם, או כל פרט מזהה. השירות רואה את כתובת ה־IP של הטלוויזיה.</string>
+    <string name="ai_consent_free_note">השירות החינמי עשוי לשמור שאלות ותשובות. לפרטיות רבה יותר ובלי המתנה, השתמשו במפתח משלכם.</string>
+    <string name="ai_consent_agree">מסכים</string>
+    <string name="ai_consent_later">לא עכשיו</string>
+    <string name="ai_consent_own_key">מפתח משלי</string>
+    <string name="ai_provider_title">בחירת שירות AI</string>
+    <string name="ai_provider_free">חינמי, בלי מפתח</string>
+    <string name="ai_provider_has_key">המפתח שמור</string>
+    <string name="ai_provider_needs_key">צריך מפתח</string>
+    <string name="ai_provider_custom">כתובת משלכם</string>
+    <string name="ai_key_title">מפתח %1$s</string>
+    <string name="ai_key_where">מקבלים מפתח ב־%1$s</string>
+    <string name="ai_key_billing">שירותים בתשלום מחייבים את החשבון שלכם. המפתח מוצפן בטלוויזיה ונשלח רק לשירות הזה.</string>
+    <string name="ai_key_hint">מקלידים או מדביקים את המפתח</string>
+    <string name="ai_key_save">שמירה</string>
+    <string name="ai_key_phone">הקלדה בטלפון</string>
+    <string name="ai_key_delete">מחיקת המפתח</string>
+    <string name="ai_key_checking">בודק את המפתח מול השירות…</string>
+    <string name="ai_key_invalid">זה לא נראה כמו מפתח.</string>
+    <string name="ai_key_rejected">השירות לא קיבל את המפתח.</string>
+    <string name="ai_key_unreachable">אין חיבור לשירות. נסו שוב.</string>
+    <string name="ai_key_storage">לא הצלחנו לשמור את המפתח בבטחה.</string>
+    <string name="ai_url_title">כתובת השירות</string>
+    <string name="ai_url_body">שירות תואם OpenAI בכתובת https://‎, למשל https://example.com/v1.</string>
+    <string name="ai_url_invalid">השתמשו בכתובת https://‎ רגילה.</string>
+    <string name="ai_model_title">בחירת מודל</string>
+    <string name="ai_model_auto">אוטומטי</string>
+    <string name="ai_model_loading">טוען את המודלים של השירות…</string>
+    <string name="ai_model_none">השירות לא הציג את המודלים שלו.</string>
+    <string name="msg_ai_key_saved">מפתח %1$s נשמר. \"שאלו את SCARY\" עובד איתו עכשיו.</string>
+    <string name="msg_ai_key_deleted">המפתח נמחק.</string>
+    <string name="msg_ai_keys_deleted">כל מפתחות ה־AI נמחקו. חזרה לשירות החינמי.</string>
+    <string name="settings_ai_section">AI</string>
+    <string name="settings_ai_enabled">תכונות AI</string>
+    <string name="settings_ai_provider">שירות AI</string>
+    <string name="settings_ai_key">מפתח</string>
+    <string name="settings_ai_model">מודל</string>
+    <string name="settings_ai_url">כתובת</string>
+    <string name="settings_ai_test">בדיקת חיבור</string>
+    <string name="settings_ai_share_taste">לשלוח גם סיכום טעם קצר</string>
+    <string name="settings_ai_share_taste_note">כבוי: נשלחים רק השאלה ושמות סרטים. פועל: גם כמה מילים כמו \"אוהב רוחות, נמנע מסלאשרים\", אף פעם לא שמות של סרטים.</string>
+    <string name="settings_ai_home_row">\"שאלו את SCARY\" במסך הבית</string>
+    <string name="settings_ai_delete_keys">מחיקת כל מפתחות ה־AI</string>
+    <string name="settings_ai_delete_keys_confirm">לחצו שוב כדי למחוק את כל מפתחות ה־AI</string>
+    <string name="settings_ai_note">המפתחות מוצפנים בטלוויזיה ונשלחים רק לשירות שלהם. שום דבר לא נשלח לפני שאתם מסכימים, פעם אחת לכל שירות.</string>
+    <string name="value_ai_none">לא הוגדר</string>
+    <string name="value_ai_test_ok">מחובר</string>
+    <string name="value_ai_test_failed">לא מחובר</string>
+    <string name="ai_reply_picked">נבחרו בשבילכם מהקטלוג של הטלוויזיה הזו:</string>
+    <string name="ai_free_language_note">מהשירות החינמי, שהמודל הקטן שלו כותב הכי טוב באנגלית. לתשובות טובות יותר בעברית, השתמשו במפתח משלכם (הגדרות, AI).</string>
 </resources>

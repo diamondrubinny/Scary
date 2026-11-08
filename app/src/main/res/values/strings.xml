@@ -158,6 +158,8 @@
         <item>Trailers that play by themselves (on once you agree when first asked; you can turn them off in settings): the player is YouTube\'s, in its privacy-enhanced mode (youtube-nocookie.com, and youtube.com as a last try when a trailer will not play there). When a trailer plays, YouTube (Google) receives your TV\'s IP address, device and browser details and the trailer\'s ID, under Google\'s privacy policy. SCARY blocks cookies in the player and deletes its storage when it closes. No trailer plays offline or in family night.</item>
         <item>Phone remote, only while you turn it on in settings: the TV serves a small page on your home network, which your phone opens by scanning a QR code. The code holds a one-time key that signs and encrypts every command between the phone and the TV, and the key is never sent over the network. Commands go straight from the phone to the TV and are not stored; search text and the TMDB key are then used as described above. The page loads nothing from the internet. The remote turns off when you disconnect it, after 30 minutes without use, or when forged commands arrive. To press keys in other apps (Stremio, Netflix…), the phone remote uses SCARY\'s accessibility service, only if you turned it on; it presses keys and reads nothing on the screen.</item>
         <item>Watching, trailers and the store open Stremio, YouTube or Google Play. From that point their own privacy policies apply.</item>
+        <item>Updates (official builds; you can turn the automatic check off in settings): at most every six hours SCARY asks GitHub for the official repository\'s update file. Nothing about you is sent; GitHub sees the TV\'s IP address. An update is downloaded only when you choose \"Update now\", installed only if it is signed with SCARY\'s key, and Android asks you to confirm.</item>
+        <item>Ask SCARY (AI; off until you agree, once for each service; can be turned off in settings): your question and public facts about the films SCARY offers it to choose from (titles, years, kinds, fear level) go to the AI service you choose: Pollinations (free, no key) or a service with your own key (OpenAI, Anthropic, Google Gemini, Groq, OpenRouter, Mistral, DeepSeek, Pollinations, or an address you give). What you watched, your lists and anything that identifies you are never sent; a few words on your taste only if you turn that on. Keys are encrypted on this TV and sent only to their own service. The service sees the TV\'s IP address and its own terms apply; the free service may keep questions and answers. The chat is not saved.</item>
         <item>Questions, corrections or requests about your data: d@rubinny.net · github.com/diamondrubinny/Scary/issues</item>
         <item>Updated October 2026. This is a draft that has not yet been reviewed by a lawyer.</item>
     </string-array>
@@ -441,4 +443,130 @@
         <item quantity="one">%1$d title</item>
         <item quantity="other">%1$d titles</item>
     </plurals>
+
+    <!-- Updates from SCARY's official repository -->
+    <string name="update_title">A new version of SCARY</string>
+    <string name="update_version">Version %1$s, build %2$d</string>
+    <string name="update_how">It comes from SCARY\'s official repository and is checked before installing. Android will ask you to confirm.</string>
+    <string name="update_now">Update now</string>
+    <string name="update_later">Later</string>
+    <string name="update_skip">Skip this version</string>
+    <string name="update_downloading">Downloading… %1$d%%</string>
+    <string name="update_cancel">Cancel</string>
+    <string name="update_permission">To update itself, SCARY needs Android\'s permission to install apps. Allow it once for SCARY on the next screen, then come back.</string>
+    <string name="update_open_settings">Open settings</string>
+    <string name="update_installing">Confirm the update on Android\'s screen. SCARY restarts when it is done.</string>
+    <string name="update_close">Close</string>
+    <string name="update_failed_unreachable">Could not reach the update server. Check the connection and try again from settings.</string>
+    <string name="update_failed_verify">The download did not match the published version, so it was not installed. Try again later.</string>
+    <string name="update_failed_not_official">This file is not signed by SCARY\'s official key, so it was not installed.</string>
+    <string name="update_failed_install">Android did not install the update. You can install it by hand from scary.network.</string>
+    <string name="update_failed_permission_screen">This TV hides the permission screen. Open Settings, Apps, SCARY, and allow installing unknown apps.</string>
+    <string name="settings_update_check">Check for updates</string>
+    <string name="settings_update_checking">Checking…</string>
+    <string name="settings_update_up_to_date">Up to date (build %1$d)</string>
+    <string name="settings_update_available">Available: build %1$d</string>
+    <string name="settings_update_failed">Could not check</string>
+    <string name="settings_update_auto">Look for updates by itself</string>
+    <string name="settings_update_note">Only from SCARY\'s official repository on GitHub, at most every six hours, and only an update signed with SCARY\'s key is installed. GitHub sees the TV\'s IP address; nothing else is sent.</string>
+    <string name="settings_update_not_official">This copy of SCARY is not the official build, so it does not get the official updates.</string>
+
+    <!-- Ask SCARY (AI) -->
+    <string name="ai_title">Ask SCARY ✦</string>
+    <string name="ai_row_hint">One press, or ask in your own words</string>
+    <string name="ai_chip_like_loved">Like what I love</string>
+    <string name="ai_chip_short">Short and scary</string>
+    <string name="ai_chip_gentle">Scary, but gentle</string>
+    <string name="ai_chip_classic">A classic</string>
+    <string name="ai_chip_scariest">The scariest</string>
+    <string name="ai_chip_own">Ask in your own words…</string>
+    <string name="ai_prompt_like_loved">Something I would love, going by my taste</string>
+    <string name="ai_prompt_short">Something short and scary, under an hour and a half</string>
+    <string name="ai_prompt_gentle">Something only a little scary, good for a couple or someone new to horror</string>
+    <string name="ai_prompt_classic">A classic horror film everyone should see</string>
+    <string name="ai_prompt_scariest">The scariest thing you have</string>
+    <string name="ai_tab_suggest">Suggestions</string>
+    <string name="ai_tab_chat">Chat</string>
+    <string name="ai_hint">For example: like Hereditary, but less gory</string>
+    <string name="ai_send">Ask</string>
+    <string name="ai_chat_hint">Ask anything about horror films and series</string>
+    <string name="ai_chat_send">Send</string>
+    <string name="ai_chat_note">Not saved: the chat is gone when you leave this screen.</string>
+    <string name="ai_new_chat">New chat</string>
+    <string name="ai_thinking">Thinking…</string>
+    <string name="ai_service_line">Using %1$s</string>
+    <string name="ai_change">Change</string>
+    <string name="ai_you_asked">You asked: %1$s</string>
+    <string name="ai_reply_none">Nothing on this TV fits that. Try other words.</string>
+    <string name="ai_retry">Try again</string>
+    <string name="ai_open_settings">AI settings</string>
+    <string name="ai_error_wait">The free service answers one question at a time, with a short wait in between. Seconds left: %1$d</string>
+    <string name="ai_error_wait_over">You can ask again now.</string>
+    <string name="ai_error_needs_key">This service needs your key. Add it in Settings, AI.</string>
+    <string name="ai_error_bad_key">The service did not accept the key. Check it in Settings, AI.</string>
+    <string name="ai_error_no_credit">No credit left with this service.</string>
+    <string name="ai_error_no_model">No model found on this service. Choose one in Settings, AI.</string>
+    <string name="ai_error_unreachable">Could not reach the AI service. Check the connection.</string>
+    <string name="ai_error_failed">The AI service did not answer. Try again.</string>
+    <string name="ai_error_not_understood">The answer could not be understood. Try again.</string>
+    <string name="ai_error_off">AI is off in Settings.</string>
+    <string name="ai_error_chat_blocked">Chat is off while the parental lock or family night is on.</string>
+    <string name="ai_error_no_films">No films to choose from right now.</string>
+    <string name="ai_about">About this film ✦</string>
+    <string name="ai_about_title">Without spoilers</string>
+    <string name="ai_smart_search">Smart search ✦</string>
+    <string name="ai_smart_results">Found by AI</string>
+    <string name="search_library_results">In the library</string>
+    <string name="ai_consent_title">Send this to %1$s?</string>
+    <string name="ai_consent_body">Your question, and the titles SCARY offers it to choose from, go to %1$s, an AI service outside SCARY. Its own terms and privacy policy apply: %2$s</string>
+    <string name="ai_consent_private">Never sent: what you watched, your lists, or anything that identifies you. The service sees the TV\'s IP address.</string>
+    <string name="ai_consent_free_note">The free service may keep questions and answers. For more privacy and no waiting, use your own key.</string>
+    <string name="ai_consent_agree">Agree</string>
+    <string name="ai_consent_later">Not now</string>
+    <string name="ai_consent_own_key">Use my own key</string>
+    <string name="ai_provider_title">Choose an AI service</string>
+    <string name="ai_provider_free">Free, no key</string>
+    <string name="ai_provider_has_key">Key saved</string>
+    <string name="ai_provider_needs_key">Needs your key</string>
+    <string name="ai_provider_custom">Your address</string>
+    <string name="ai_key_title">%1$s key</string>
+    <string name="ai_key_where">Get a key at %1$s</string>
+    <string name="ai_key_billing">Paid services charge your own account. The key is encrypted on this TV and sent only to this service.</string>
+    <string name="ai_key_hint">Type or paste the key</string>
+    <string name="ai_key_save">Save</string>
+    <string name="ai_key_phone">Type it on the phone</string>
+    <string name="ai_key_delete">Delete key</string>
+    <string name="ai_key_checking">Checking the key with the service…</string>
+    <string name="ai_key_invalid">That does not look like a key.</string>
+    <string name="ai_key_rejected">The service did not accept this key.</string>
+    <string name="ai_key_unreachable">Could not reach the service. Try again.</string>
+    <string name="ai_key_storage">The key could not be stored safely.</string>
+    <string name="ai_url_title">Service address</string>
+    <string name="ai_url_body">An OpenAI-compatible service at an https:// address, for example https://example.com/v1.</string>
+    <string name="ai_url_invalid">Use a plain https:// address.</string>
+    <string name="ai_model_title">Choose a model</string>
+    <string name="ai_model_auto">Automatic</string>
+    <string name="ai_model_loading">Loading the service\'s models…</string>
+    <string name="ai_model_none">This service did not list its models.</string>
+    <string name="msg_ai_key_saved">%1$s key saved. Ask SCARY now uses it.</string>
+    <string name="msg_ai_key_deleted">Key deleted.</string>
+    <string name="msg_ai_keys_deleted">All AI keys deleted. Back to the free service.</string>
+    <string name="settings_ai_section">AI</string>
+    <string name="settings_ai_enabled">AI features</string>
+    <string name="settings_ai_provider">AI service</string>
+    <string name="settings_ai_key">Key</string>
+    <string name="settings_ai_model">Model</string>
+    <string name="settings_ai_url">Address</string>
+    <string name="settings_ai_test">Test connection</string>
+    <string name="settings_ai_share_taste">Send a short taste summary too</string>
+    <string name="settings_ai_share_taste_note">Off: only your question and film titles are sent. On: also a few words such as \"likes ghosts, avoids slashers\", never film names.</string>
+    <string name="settings_ai_home_row">Ask SCARY on the home screen</string>
+    <string name="settings_ai_delete_keys">Delete all AI keys</string>
+    <string name="settings_ai_delete_keys_confirm">Press again to delete every AI key</string>
+    <string name="settings_ai_note">Keys are encrypted on this TV and sent only to their own service. Nothing is sent before you agree, once per service.</string>
+    <string name="value_ai_none">Not set</string>
+    <string name="value_ai_test_ok">Connected</string>
+    <string name="value_ai_test_failed">Not connected</string>
+    <string name="ai_reply_picked">Picked for you from this TV\'s catalog:</string>
+    <string name="ai_free_language_note">From the free service, whose small model writes best in English. For better answers in your language, use your own key (Settings, AI).</string>
 </resources>

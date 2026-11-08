@@ -117,6 +117,7 @@ class AppContainer(context: Context) {
     val cinemetaRepository = CinemetaRepository(appContext)
     private val secretStore = SecretStore(appContext)
     val tmdbRepository = TmdbRepository(appContext, secretStore)
+
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)
@@ -126,8 +127,14 @@ class AppContainer(context: Context) {
     val settingsRepository = SettingsRepository(appContext)
     val savedMoviesRepository = SavedMoviesRepository(appContext)
 
+    /** The AI service the viewer chose (Pollinations' free one by default), with their own keys if any. */
+    val aiRepository = io.github.diamondrubinny.scary.data.AiRepository(secretStore, settingsRepository)
+
     /** The viewer's own TMDB account, only once they sign in. */
     val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
+
+    /** New versions from the official repository's stable release, official builds only. */
+    val updateManager = io.github.diamondrubinny.scary.update.UpdateManager(appContext, settingsRepository, scope)
 }
