@@ -9802,6 +9802,2019 @@
     "pt": "REC 2",
     "ar": "التسجيل 2"
    }
+  },
+  {
+   "id": "tcm_2003",
+   "imdbId": "tt0324216",
+   "title": "The Texas Chainsaw Massacre",
+   "year": 2003,
+   "director": "Marcus Nispel",
+   "runtimeMin": 98,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 35,
+   "saturation": 45,
+   "synopsisHe": "ב־1973 חמישה חברים שנוסעים בטקסס אוספים טרמפיסטית בהלם ומגיעים לחווה משפחתית שהיה עדיף להם להתרחק ממנה.",
+   "synopsisEn": "In 1973, five friends driving through Texas pick up a traumatized hitchhiker and end up near a family farm they should have avoided.",
+   "synopses": {
+    "pt": "Em 1973, cinco amigos viajando pelo Texas dão carona a uma jovem traumatizada e acabam perto de uma fazenda que deviam ter evitado.",
+    "ru": "В 1973 году пятеро друзей, едущих по Техасу, подбирают перепуганную попутчицу и оказываются рядом с семейной фермой, которую стоило объехать.",
+    "ar": "عام 1973، خمسة أصدقاء يقودون عبر تكساس يقلّون متطفلة مصدومة فينتهي بهم الأمر قرب مزرعة عائلية كان عليهم تجنبها."
+   },
+   "titles": {
+    "he": "המנסרים מטקסס",
+    "ru": "Техасская резня бензопилой",
+    "ar": "مجزرة منشار تكساس"
+   }
+  },
+  {
+   "id": "wrong_turn_2003",
+   "imdbId": "tt0295700",
+   "title": "Wrong Turn",
+   "year": 2003,
+   "director": "Rob Schmidt",
+   "runtimeMin": 84,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 100,
+   "saturation": 40,
+   "synopsisHe": "קיצור דרך ביערות מערב וירג'יניה משאיר שישה נוסעים תקועים בשטח של קניבלים פרועים.",
+   "synopsisEn": "A shortcut through the West Virginia backwoods strands six travelers in territory claimed by inbred cannibals.",
+   "synopses": {
+    "pt": "Um atalho pelas florestas da Virgínia Ocidental deixa seis viajantes presos num território dominado por canibais.",
+    "ru": "Короткая дорога через леса Западной Виргинии оставляет шестерых путников на территории диких каннибалов.",
+    "ar": "طريق مختصر عبر غابات فرجينيا الغربية يترك ستة مسافرين عالقين في أرض يسيطر عليها آكلو لحوم بشر."
+   },
+   "titles": {
+    "he": "טעות בכיוון",
+    "ru": "Поворот не туда",
+    "pt": "Pânico na Floresta",
+    "ar": "لفة خاطئة"
+   }
+  },
+  {
+   "id": "house_of_wax_2005",
+   "imdbId": "tt0397065",
+   "title": "House of Wax",
+   "year": 2005,
+   "director": "Jaume Collet-Serra",
+   "runtimeMin": 113,
+   "genre": "horror",
+   "subgenres": [
+    "slasher"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 50,
+   "synopsisHe": "חברים בדרך למשחק פוטבול עושים עיקוף לעיירה נשכחת, שמוזיאון השעווה שלה מציאותי קצת יותר מדי.",
+   "synopsisEn": "Friends on the way to a football game take a detour to a forgotten town whose wax museum is a little too lifelike.",
+   "synopses": {
+    "pt": "Amigos a caminho de um jogo de futebol fazem um desvio até uma cidade esquecida cujo museu de cera é realista demais.",
+    "ru": "Друзья по дороге на футбольный матч заезжают в забытый городок, где музей восковых фигур выглядит слишком живым.",
+    "ar": "أصدقاء في طريقهم إلى مباراة كرة قدم ينحرفون إلى بلدة منسية متحف الشمع فيها واقعي أكثر من اللازم."
+   },
+   "titles": {
+    "he": "בית השעווה",
+    "ru": "Дом восковых фигур",
+    "pt": "A Casa de Cera",
+    "ar": "بيت من الشمع"
+   }
+  },
+  {
+   "id": "hatchet_2006",
+   "imdbId": "tt0422401",
+   "title": "Hatchet",
+   "year": 2006,
+   "director": "Adam Green",
+   "runtimeMin": 84,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "comedy"
+   ],
+   "fear": 4,
+   "hue": 110,
+   "saturation": 40,
+   "synopsisHe": "תיירים בסיור לילי בביצה רדופה בלואיזיאנה מטביעים את הסירה שלהם בטריטוריה של רוצח מעוות אגדי.",
+   "synopsisEn": "Tourists on a nighttime haunted swamp tour in Louisiana sink their boat in the territory of a legendary deformed killer.",
+   "synopses": {
+    "pt": "Turistas num passeio noturno por um pântano assombrado da Louisiana afundam o barco no território de um lendário assassino deformado.",
+    "ru": "Туристы на ночной экскурсии по болотам Луизианы топят лодку на территории легендарного обезображенного убийцы.",
+    "ar": "سياح في جولة ليلية بمستنقع مسكون في لويزيانا يغرق قاربهم في منطقة قاتل مشوّه أسطوري."
+   },
+   "titles": {
+    "ru": "Топор",
+    "ar": "فأس"
+   }
+  },
+  {
+   "id": "the_funhouse",
+   "imdbId": "tt0082427",
+   "title": "The Funhouse",
+   "year": 1981,
+   "director": "Tobe Hooper",
+   "runtimeMin": 95,
+   "genre": "horror",
+   "subgenres": [
+    "slasher"
+   ],
+   "fear": 3,
+   "hue": 300,
+   "saturation": 55,
+   "synopsisHe": "ארבעה בני נוער מחליטים לבלות את הלילה בתוך בית השעשועים של לונה פארק נודד, ורואים משהו שלא היו אמורים לראות.",
+   "synopsisEn": "Four teenagers decide to spend the night inside a traveling carnival's funhouse and witness something they were not meant to see.",
+   "synopses": {
+    "pt": "Quatro adolescentes decidem passar a noite dentro do trem-fantasma de um parque itinerante e testemunham algo que não deviam ver.",
+    "ru": "Четверо подростков решают провести ночь в комнате смеха передвижного луна-парка и видят то, чего видеть не должны были.",
+    "ar": "أربعة مراهقين يقررون قضاء الليلة داخل بيت المرح في مدينة ملاهٍ متنقلة، فيشهدون شيئًا لم يكن عليهم رؤيته."
+   },
+   "titles": {
+    "ru": "Смертельная забава"
+   }
+  },
+  {
+   "id": "prom_night_1980",
+   "imdbId": "tt0081383",
+   "title": "Prom Night",
+   "year": 1980,
+   "director": "Paul Lynch",
+   "runtimeMin": 93,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 270,
+   "saturation": 45,
+   "synopsisHe": "שש שנים אחרי שמשחק ילדות נגמר במוות שנשבעו לשמור בסוד, ארבעה בני נוער מקבלים שיחות מאיימות לפני נשף הסיום.",
+   "synopsisEn": "Six years after a childhood game ended in a death they swore to keep secret, four teenagers receive threatening calls before prom.",
+   "synopses": {
+    "pt": "Seis anos depois de uma brincadeira de infância terminar numa morte que juraram manter em segredo, quatro adolescentes recebem ligações ameaçadoras antes do baile.",
+    "ru": "Через шесть лет после детской игры, закончившейся смертью, которую они поклялись скрыть, четверо подростков получают угрожающие звонки перед выпускным.",
+    "ar": "بعد ست سنوات من لعبة طفولة انتهت بموت أقسموا على كتمانه، يتلقى أربعة مراهقين مكالمات تهديد قبل حفل التخرج."
+   },
+   "titles": {
+    "he": "ליל הבכורה",
+    "ru": "Выпускной"
+   }
+  },
+  {
+   "id": "happy_birthday_to_me",
+   "imdbId": "tt0082498",
+   "title": "Happy Birthday to Me",
+   "year": 1981,
+   "director": "J. Lee Thompson",
+   "runtimeMin": 110,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "mystery",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 340,
+   "saturation": 40,
+   "synopsisHe": "חברי חבורה מובחרת באקדמיה פרטית נרצחים אחד אחרי השני, כשנערה עם חורים בזיכרון מתקרבת ליום הולדתה ה־18.",
+   "synopsisEn": "Members of an elite clique at a private academy are killed one by one as a girl with gaps in her memory approaches her eighteenth birthday.",
+   "synopses": {
+    "pt": "Membros de uma panelinha de elite numa academia particular são mortos um a um enquanto uma garota com falhas na memória se aproxima dos 18 anos.",
+    "ru": "Члены элитной компании частной академии гибнут один за другим, а у девушки с провалами в памяти приближается восемнадцатилетие.",
+    "ar": "أعضاء شلّة نخبوية في أكاديمية خاصة يُقتلون واحدًا تلو الآخر بينما تقترب فتاة ذات فجوات في ذاكرتها من عيد ميلادها الثامن عشر."
+   },
+   "titles": {
+    "ru": "С Днём Рождения меня"
+   }
+  },
+  {
+   "id": "hell_night",
+   "imdbId": "tt0082511",
+   "title": "Hell Night",
+   "year": 1981,
+   "director": "Tom DeSimone",
+   "runtimeMin": 101,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "haunted_house"
+   ],
+   "fear": 3,
+   "hue": 280,
+   "saturation": 35,
+   "synopsisHe": "ארבעה מועמדים לאחווה בקולג' חייבים לבלות לילה נעולים באחוזה נטושה שבה נרצחה משפחה, כטקס קבלה.",
+   "synopsisEn": "Four college pledges must spend one night locked in a deserted mansion where a family was murdered, as a fraternity initiation.",
+   "synopses": {
+    "pt": "Quatro calouros precisam passar uma noite trancados numa mansão deserta onde uma família foi assassinada, como trote de fraternidade.",
+    "ru": "Четверо новичков студенческого братства должны провести ночь взаперти в заброшенном особняке, где убили семью, — таков обряд посвящения.",
+    "ar": "أربعة مرشحين لأخوية جامعية يجب أن يقضوا ليلة محبوسين في قصر مهجور قُتلت فيه عائلة، كطقس انضمام."
+   }
+  },
+  {
+   "id": "candyman_2021",
+   "imdbId": "tt9347730",
+   "title": "Candyman",
+   "year": 2021,
+   "director": "Nia DaCosta",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "slasher",
+    "social"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 45,
+   "synopsisHe": "אמן בשיקגו שגר במקום שבו עמדו פעם מגדלי קבריני־גרין מתחיל לצייר את אגדת קנדימן, והיא מתחילה לצייר אותו.",
+   "synopsisEn": "A Chicago artist living where the Cabrini-Green towers once stood starts painting the legend of the Candyman, and it starts painting him.",
+   "synopses": {
+    "pt": "Um artista de Chicago que mora onde antes ficavam as torres de Cabrini-Green começa a pintar a lenda do Candyman, e ela começa a pintá-lo.",
+    "ru": "Чикагский художник, живущий там, где когда-то стояли башни Кабрини-Грин, начинает писать легенду о Кэндимене, а легенда начинает писать его.",
+    "ar": "فنان من شيكاغو يسكن حيث كانت أبراج كابريني غرين يبدأ برسم أسطورة كاندي مان، فتبدأ الأسطورة برسمه."
+   },
+   "titles": {
+    "he": "קנדימן",
+    "ru": "Кэндимэн",
+    "pt": "A Lenda de Candyman",
+    "ar": "رجل الحلوى"
+   }
+  },
+  {
+   "id": "scream_3",
+   "imdbId": "tt0134084",
+   "title": "Scream 3",
+   "year": 2000,
+   "director": "Wes Craven",
+   "runtimeMin": 116,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 60,
+   "synopsisHe": "בסט בהוליווד של הסרט השלישי בסדרת סטאב, גוסטפייס חדש מתחיל לרצוח את השחקנים לפי סדר התסריט.",
+   "synopsisEn": "On the Hollywood set of the third Stab movie, a new Ghostface starts killing the cast in the order of the script.",
+   "synopses": {
+    "pt": "No set de Hollywood do terceiro filme Stab, um novo Ghostface começa a matar o elenco na ordem do roteiro.",
+    "ru": "На голливудской съёмочной площадке третьего фильма «Удар ножом» новый Призрачное Лицо начинает убивать актёров по порядку сценария.",
+    "ar": "في موقع تصوير الفيلم الثالث من سلسلة ستاب في هوليوود، يبدأ غوستفيس جديد بقتل الممثلين بترتيب السيناريو."
+   },
+   "titles": {
+    "he": "צעקה 3",
+    "ru": "Крик 3",
+    "ar": "صرخة 3"
+   }
+  },
+  {
+   "id": "valentine_2001",
+   "imdbId": "tt0242998",
+   "title": "Valentine",
+   "year": 2001,
+   "director": "Jamie Blanks",
+   "runtimeMin": 96,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 345,
+   "saturation": 55,
+   "synopsisHe": "שנים אחרי שהשפילו ילד בריקוד בית ספר, ארבע חברות מתחילות לקבל כרטיסי ולנטיין אכזריים לפני שרוצח רעול פנים מגיע.",
+   "synopsisEn": "Years after they humiliated a boy at a school dance, four friends start getting cruel Valentine's cards before a masked killer arrives.",
+   "synopses": {
+    "pt": "Anos depois de humilharem um garoto num baile da escola, quatro amigas começam a receber cartões de Dia dos Namorados cruéis antes de um assassino mascarado aparecer.",
+    "ru": "Через годы после того, как они унизили мальчика на школьных танцах, четыре подруги начинают получать жестокие валентинки, а затем появляется убийца в маске.",
+    "ar": "بعد سنوات من إذلالهن صبيًا في حفلة مدرسية، تبدأ أربع صديقات بتلقي بطاقات عيد حب قاسية قبل وصول قاتل مقنّع."
+   },
+   "titles": {
+    "he": "יום אהבה קטלני",
+    "ru": "День святого Валентина",
+    "ar": "فالنتاين"
+   }
+  },
+  {
+   "id": "haunt_2019",
+   "imdbId": "tt6535880",
+   "title": "Haunt",
+   "year": 2019,
+   "director": "Scott Beck, Bryan Woods",
+   "runtimeMin": 93,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 20,
+   "saturation": 50,
+   "synopsisHe": "בהאלווין, חבורת חברים מבקרת באטרקציית בית רדוף קיצונית שמבטיחה להראות להם את הפחדים העמוקים ביותר שלהם.",
+   "synopsisEn": "On Halloween, a group of friends visit an extreme haunted house attraction that promises to show their deepest fears.",
+   "synopses": {
+    "pt": "No Halloween, um grupo de amigos visita uma atração de casa mal-assombrada extrema que promete mostrar seus medos mais profundos.",
+    "ru": "В Хэллоуин компания друзей идёт в экстремальный дом с привидениями, который обещает показать их самые глубокие страхи.",
+    "ar": "في الهالوين، تزور مجموعة أصدقاء بيتًا مسكونًا ترفيهيًا متطرفًا يعد بإظهار أعمق مخاوفهم."
+   },
+   "titles": {
+    "ru": "Они"
+   }
+  },
+  {
+   "id": "smile_2",
+   "imdbId": "tt29268110",
+   "title": "Smile 2",
+   "year": 2024,
+   "director": "Parker Finn",
+   "runtimeMin": 127,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 70,
+   "synopsisHe": "ערב סיבוב ההופעות העולמי של הקאמבק שלה, כוכבת פופ מתחילה לחוות אירועים מבעיתים שהיא לא יכולה להסביר או לברוח מהם.",
+   "synopsisEn": "On the eve of her comeback world tour, a pop star starts experiencing terrifying events she cannot explain or escape.",
+   "synopses": {
+    "pt": "Às vésperas da turnê mundial de retorno, uma estrela pop começa a viver acontecimentos aterrorizantes que não consegue explicar nem evitar.",
+    "ru": "Накануне мирового тура-возвращения поп-звезда начинает переживать жуткие события, которые не может ни объяснить, ни избежать.",
+    "ar": "عشية جولتها العالمية للعودة، تبدأ نجمة بوب بمعايشة أحداث مرعبة لا تستطيع تفسيرها ولا الهرب منها."
+   },
+   "titles": {
+    "he": "סמייל איכותי",
+    "ru": "Улыбка 2",
+    "pt": "Sorria 2",
+    "ar": "سمايل 2"
+   }
+  },
+  {
+   "id": "totally_killer",
+   "imdbId": "tt11426232",
+   "title": "Totally Killer",
+   "year": 2023,
+   "director": "Nahnatchka Khan",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "slasher",
+    "comedy",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 300,
+   "saturation": 65,
+   "synopsisHe": "שלושים וחמש שנה אחרי שרוצח רעול פנים השתולל, נערה נוסעת בטעות בזמן ל־1987 כדי לעצור אותו לפני שהתחיל.",
+   "synopsisEn": "Thirty-five years after a masked killer's spree, a teenager accidentally travels back to 1987 to stop it before it starts.",
+   "synopses": {
+    "pt": "Trinta e cinco anos depois da onda de crimes de um assassino mascarado, uma adolescente viaja sem querer para 1987 para impedi-lo antes do começo.",
+    "ru": "Через тридцать пять лет после серии убийств человека в маске школьница случайно попадает в 1987 год, чтобы остановить его до начала.",
+    "ar": "بعد خمسة وثلاثين عامًا من جرائم قاتل مقنّع، تسافر مراهقة عن طريق الخطأ إلى عام 1987 لإيقافه قبل أن يبدأ."
+   },
+   "titles": {
+    "ru": "Конкретный убийца",
+    "ar": "تصحيح الماضي"
+   }
+  },
+  {
+   "id": "tucker_and_dale",
+   "imdbId": "tt1465522",
+   "title": "Tucker and Dale vs Evil",
+   "year": 2010,
+   "director": "Eli Craig",
+   "runtimeMin": 89,
+   "genre": "horror",
+   "subgenres": [
+    "comedy",
+    "slasher"
+   ],
+   "fear": 2,
+   "hue": 110,
+   "saturation": 45,
+   "synopsisHe": "שני כפריים טובי לב שמשפצים את בקתת הנופש שלהם נחשבים לרוצחים בעיני חבורת סטודנטים, עם תוצאות הרסניות.",
+   "synopsisEn": "Two kind hillbillies fixing up their vacation cabin are mistaken for killers by a group of college kids, with disastrous results.",
+   "synopses": {
+    "pt": "Dois caipiras gentis reformando a cabana de férias são confundidos com assassinos por um grupo de universitários, com resultados desastrosos.",
+    "ru": "Двух добродушных деревенщин, ремонтирующих свою хижину, компания студентов принимает за убийц, и это заканчивается катастрофой.",
+    "ar": "قرويان طيبان يرممان كوخ عطلتهما يظنهما طلاب جامعيون قاتلين، بنتائج كارثية."
+   },
+   "titles": {
+    "ru": "Убойные каникулы",
+    "pt": "Tucker & Dale vs Evil",
+    "ar": "توكر وديل يواجهان الشر"
+   }
+  },
+  {
+   "id": "hostel_2005",
+   "imdbId": "tt0450278",
+   "title": "Hostel",
+   "year": 2005,
+   "director": "Eli Roth",
+   "runtimeMin": 94,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "body"
+   ],
+   "fear": 5,
+   "hue": 0,
+   "saturation": 50,
+   "synopsisHe": "שלושה תרמילאים באירופה שומעים על אכסניה בסלובקיה מלאה בנשים יפות, ומגלים שזה עסק מסוג אחר.",
+   "synopsisEn": "Three backpackers in Europe are told about a Slovakian hostel full of beautiful women, and find it is a business of a different kind.",
+   "synopses": {
+    "pt": "Três mochileiros na Europa ouvem falar de um albergue eslovaco cheio de mulheres bonitas e descobrem que é um negócio de outro tipo.",
+    "ru": "Трём туристам в Европе рассказывают о словацком хостеле, полном красавиц, а он оказывается бизнесом совсем другого рода.",
+    "ar": "ثلاثة رحالة في أوروبا يسمعون عن نُزُل سلوفاكي مليء بالجميلات، فيكتشفون أنه تجارة من نوع آخر."
+   },
+   "titles": {
+    "he": "הוסטל",
+    "ru": "Хостел",
+    "ar": "نزل"
+   }
+  },
+  {
+   "id": "hills_have_eyes_1977",
+   "imdbId": "tt0077681",
+   "title": "The Hills Have Eyes",
+   "year": 1977,
+   "director": "Wes Craven",
+   "runtimeMin": 90,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "slasher"
+   ],
+   "fear": 4,
+   "hue": 35,
+   "saturation": 50,
+   "synopsisHe": "הקרוואן של משפחה מתקלקל במדבר נבדה ליד אתר ניסויים גרעיניים ישן, ומישהו בגבעות צופה בהם.",
+   "synopsisEn": "A family's camper breaks down in the Nevada desert near an old nuclear test site, and someone in the hills is watching.",
+   "synopses": {
+    "pt": "O trailer de uma família quebra no deserto de Nevada perto de um antigo campo de testes nucleares, e alguém nas colinas está observando.",
+    "ru": "Фургон семьи ломается в пустыне Невады у старого ядерного полигона, а кто-то в холмах наблюдает.",
+    "ar": "تتعطل مقطورة عائلة في صحراء نيفادا قرب موقع تجارب نووية قديم، وأحدهم في التلال يراقب."
+   },
+   "titles": {
+    "he": "גבעת הפחד",
+    "ru": "У холмов есть глаза",
+    "ar": "التلال لها عيون"
+   }
+  },
+  {
+   "id": "hills_have_eyes_2006",
+   "imdbId": "tt0454841",
+   "title": "The Hills Have Eyes",
+   "year": 2006,
+   "director": "Alexandre Aja",
+   "runtimeMin": 107,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "slasher",
+    "body"
+   ],
+   "fear": 5,
+   "hue": 40,
+   "saturation": 55,
+   "synopsisHe": "בטיול בניו מקסיקו, משפחה לוקחת קיצור דרך ונתקעת באזור שבו כורים מוטנטים חיים בגבעות.",
+   "synopsisEn": "On a road trip through New Mexico, a family takes a shortcut and is stranded where mutated miners live in the hills.",
+   "synopses": {
+    "pt": "Numa viagem pelo Novo México, uma família pega um atalho e fica presa onde mineiros mutantes vivem nas colinas.",
+    "ru": "Во время поездки по Нью-Мексико семья сворачивает на короткую дорогу и застревает там, где в холмах живут мутанты-шахтёры.",
+    "ar": "في رحلة عبر نيو مكسيكو، تسلك عائلة طريقًا مختصرًا فتعلق حيث يعيش عمال مناجم متحولون في التلال."
+   },
+   "titles": {
+    "he": "גבעת הפחד",
+    "ru": "У холмов есть глаза",
+    "pt": "Viagem Maldita",
+    "ar": "التلال لها عيون"
+   }
+  },
+  {
+   "id": "last_house_left_1972",
+   "imdbId": "tt0068833",
+   "title": "The Last House on the Left",
+   "year": 1972,
+   "director": "Wes Craven",
+   "runtimeMin": 84,
+   "genre": "horror",
+   "subgenres": [
+    "crime",
+    "survival"
+   ],
+   "fear": 5,
+   "hue": 30,
+   "saturation": 30,
+   "synopsisHe": "שתי נערות בדרך להופעה נופלות לידי אסירים נמלטים, שמאוחר יותר מחפשים מחסה בבית הלא נכון.",
+   "synopsisEn": "Two teenage girls on the way to a concert fall into the hands of escaped convicts, who later seek shelter at the wrong house.",
+   "synopses": {
+    "pt": "Duas adolescentes a caminho de um show caem nas mãos de presidiários foragidos, que mais tarde buscam abrigo na casa errada.",
+    "ru": "Две девочки-подростка по дороге на концерт попадают в руки беглых заключённых, которые позже ищут укрытия не в том доме.",
+    "ar": "مراهقتان في طريقهما إلى حفل تقعان في أيدي سجناء هاربين، يبحثون لاحقًا عن مأوى في البيت الخطأ."
+   },
+   "titles": {
+    "he": "הבית האחרון משמאל",
+    "ru": "Последний дом слева",
+    "ar": "البيت الأخير على اليسار"
+   }
+  },
+  {
+   "id": "eden_lake",
+   "imdbId": "tt1020530",
+   "title": "Eden Lake",
+   "year": 2008,
+   "director": "James Watkins",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "social"
+   ],
+   "fear": 5,
+   "hue": 110,
+   "saturation": 35,
+   "synopsisHe": "סוף שבוע רומנטי של זוג צעיר באגם מבודד באנגליה הופך לקטלני אחרי שהם מתעמתים עם כנופיית בני נוער מקומיים.",
+   "synopsisEn": "A young couple's romantic weekend at a secluded lake in England turns deadly after they confront a gang of local teenagers.",
+   "synopses": {
+    "pt": "O fim de semana romântico de um jovem casal num lago isolado da Inglaterra fica mortal depois que eles enfrentam uma gangue de adolescentes locais.",
+    "ru": "Романтические выходные молодой пары у уединённого озера в Англии становятся смертельными после стычки с бандой местных подростков.",
+    "ar": "عطلة رومانسية لزوجين شابين عند بحيرة معزولة في إنجلترا تصبح قاتلة بعد مواجهتهما عصابة من المراهقين المحليين."
+   },
+   "titles": {
+    "he": "אגם גן עדן",
+    "ru": "Райское озеро",
+    "ar": "بحيرة عدن"
+   }
+  },
+  {
+   "id": "them_2006",
+   "imdbId": "tt0465203",
+   "title": "Them",
+   "year": 2006,
+   "director": "David Moreau, Xavier Palud",
+   "runtimeMin": 77,
+   "genre": "horror",
+   "subgenres": [
+    "home_invasion",
+    "survival"
+   ],
+   "fear": 4,
+   "hue": 220,
+   "saturation": 20,
+   "synopsisHe": "מורה צרפתייה ובעלה שגרים בבית מבודד מחוץ לבוקרשט מתעוררים בלילה לרעשים מוזרים.",
+   "synopsisEn": "A French teacher and her husband living in an isolated house outside Bucharest wake in the night to strange noises.",
+   "synopses": {
+    "pt": "Uma professora francesa e o marido, que vivem numa casa isolada nos arredores de Bucareste, acordam à noite com ruídos estranhos.",
+    "ru": "Учительница-француженка и её муж, живущие в уединённом доме под Бухарестом, просыпаются ночью от странных звуков.",
+    "ar": "معلمة فرنسية وزوجها يعيشان في بيت معزول خارج بوخارست يستيقظان ليلًا على أصوات غريبة."
+   },
+   "titles": {
+    "ru": "Они",
+    "pt": "Eles"
+   }
+  },
+  {
+   "id": "vacancy_2007",
+   "imdbId": "tt0452702",
+   "title": "Vacancy",
+   "year": 2007,
+   "director": "Nimród Antal",
+   "runtimeMin": 86,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "crime"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 40,
+   "synopsisHe": "זוג שנתקע במוטל מבודד מוצא בחדר שלו סרטוני רצח אמיתיים, שצולמו בדיוק באותו חדר.",
+   "synopsisEn": "A couple stranded at a remote motel find snuff videos in their room, filmed in that very room.",
+   "synopses": {
+    "pt": "Um casal preso num motel isolado encontra vídeos de assassinatos reais no quarto, filmados naquele mesmo quarto.",
+    "ru": "Супруги, застрявшие в уединённом мотеле, находят в номере видеозаписи настоящих убийств, снятых в этой же комнате.",
+    "ar": "زوجان عالقان في نُزُل ناءٍ يجدان في غرفتهما أشرطة قتل حقيقية صُوّرت في الغرفة نفسها."
+   },
+   "titles": {
+    "ru": "Вакансия на жертву",
+    "pt": "Temos Vagas",
+    "ar": "الوظائف الشاغرة"
+   }
+  },
+  {
+   "id": "the_ruins_2008",
+   "imdbId": "tt0963794",
+   "title": "The Ruins",
+   "year": 2008,
+   "director": "Carter Smith",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "body",
+    "creature"
+   ],
+   "fear": 4,
+   "hue": 100,
+   "saturation": 50,
+   "synopsisHe": "תיירים אמריקאים במקסיקו מבקרים במקדש מאיה נידח, והמקומיים מסרבים לתת להם לרדת ממדרגותיו המכוסות בצמחייה.",
+   "synopsisEn": "American tourists in Mexico visit a remote Mayan temple, and the locals refuse to let them leave its vine-covered steps.",
+   "synopses": {
+    "pt": "Turistas americanos no México visitam um templo maia remoto, e os moradores se recusam a deixá-los sair dos degraus cobertos de trepadeiras.",
+    "ru": "Американские туристы в Мексике посещают отдалённый храм майя, и местные не дают им сойти с его заросших лианами ступеней.",
+    "ar": "سياح أمريكيون في المكسيك يزورون معبدًا نائيًا لحضارة المايا، ويرفض السكان المحليون السماح لهم بمغادرة درجاته المكسوّة بالنباتات."
+   },
+   "titles": {
+    "he": "חורבות",
+    "ru": "Руины",
+    "ar": "الأنقاض"
+   }
+  },
+  {
+   "id": "the_purge",
+   "imdbId": "tt2184339",
+   "title": "The Purge",
+   "year": 2013,
+   "director": "James DeMonaco",
+   "runtimeMin": 85,
+   "genre": "horror",
+   "subgenres": [
+    "home_invasion",
+    "social"
+   ],
+   "fear": 3,
+   "hue": 200,
+   "saturation": 35,
+   "synopsisHe": "באמריקה עתידנית שבה כל פשע מותר שתים עשרה שעות בשנה, משפחה עשירה ננעלת ללילה, עד שהבן מכניס זר.",
+   "synopsisEn": "In a future America where all crime is legal for twelve hours a year, a wealthy family locks down for the night, until their son lets a stranger in.",
+   "synopses": {
+    "pt": "Numa América futura onde todo crime é legal por doze horas ao ano, uma família rica se tranca durante a noite, até o filho deixar um estranho entrar.",
+    "ru": "В Америке будущего, где раз в год на двенадцать часов разрешены все преступления, богатая семья запирается на ночь, пока сын не впускает незнакомца.",
+    "ar": "في أمريكا المستقبل حيث كل جريمة مباحة اثنتي عشرة ساعة في السنة، تتحصّن عائلة ثرية ليلًا، حتى يُدخل الابن غريبًا."
+   },
+   "titles": {
+    "he": "הטיהור",
+    "ru": "Судная ночь",
+    "ar": "التطهير"
+   }
+  },
+  {
+   "id": "it_comes_at_night",
+   "imdbId": "tt4695012",
+   "title": "It Comes at Night",
+   "year": 2017,
+   "director": "Trey Edward Shults",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 20,
+   "synopsisHe": "משפחה שמסתתרת ממחלה קטלנית בבית ביער מכניסה משפחה צעירה ונואשת, והאמון מתחיל להירקב.",
+   "synopsisEn": "A family hiding from a deadly sickness in a house in the woods takes in a desperate young family, and trust starts to rot.",
+   "synopses": {
+    "pt": "Uma família escondida de uma doença mortal numa casa na floresta acolhe uma jovem família desesperada, e a confiança começa a apodrecer.",
+    "ru": "Семья, укрывающаяся от смертельной болезни в лесном доме, принимает отчаявшуюся молодую семью, и доверие начинает гнить.",
+    "ar": "عائلة تختبئ من مرض قاتل في بيت بالغابة تؤوي عائلة شابة يائسة، فتبدأ الثقة بالتعفن."
+   },
+   "titles": {
+    "he": "זה מגיע בלילה",
+    "ru": "Оно приходит ночью",
+    "ar": "إنه يأتي ليلا"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "identity_2003",
+   "imdbId": "tt0309698",
+   "title": "Identity",
+   "year": 2003,
+   "director": "James Mangold",
+   "runtimeMin": 90,
+   "genre": "thriller",
+   "subgenres": [
+    "mystery",
+    "slasher",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 210,
+   "saturation": 25,
+   "synopsisHe": "עשרה זרים שנתקעו במוטל בנבדה בסערה נרצחים אחד אחרי השני, ובמקום אחר שופט בוחן את תיקו של רוצח.",
+   "synopsisEn": "Ten strangers stranded at a Nevada motel in a storm are killed one by one, while elsewhere a judge reviews a murderer's case.",
+   "synopses": {
+    "pt": "Dez estranhos presos num motel em Nevada durante uma tempestade são mortos um a um, enquanto em outro lugar um juiz revisa o caso de um assassino.",
+    "ru": "Десять незнакомцев, застрявших в мотеле в Неваде во время бури, гибнут один за другим, а тем временем судья пересматривает дело убийцы.",
+    "ar": "عشرة غرباء عالقون في نُزُل بنيفادا خلال عاصفة يُقتلون واحدًا تلو الآخر، بينما يراجع قاضٍ في مكان آخر قضية قاتل."
+   }
+  },
+  {
+   "id": "jeepers_creepers",
+   "imdbId": "tt0263488",
+   "title": "Jeepers Creepers",
+   "year": 2001,
+   "director": "Victor Salva",
+   "runtimeMin": 90,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 40,
+   "synopsisHe": "בנסיעה הביתה דרך אזור כפרי, אח ואחות רואים דמות זורקת משהו לתוך צינור, ועוצרים להסתכל.",
+   "synopsisEn": "Driving home through the countryside, a brother and sister see a figure dumping something down a pipe, and stop to look.",
+   "synopses": {
+    "pt": "Voltando para casa pelo interior, um irmão e uma irmã veem uma figura jogando algo num cano e param para olhar.",
+    "ru": "Возвращаясь домой по сельской дороге, брат и сестра видят, как кто-то сбрасывает что-то в трубу, и останавливаются посмотреть.",
+    "ar": "في طريق عودتهما عبر الريف، يرى أخ وأخته شخصًا يرمي شيئًا في أنبوب، فيتوقفان لينظرا."
+   }
+  },
+  {
+   "id": "joy_ride",
+   "imdbId": "tt0206314",
+   "title": "Joy Ride",
+   "year": 2001,
+   "director": "John Dahl",
+   "runtimeMin": 98,
+   "genre": "thriller",
+   "subgenres": [
+    "survival",
+    "crime"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 40,
+   "synopsisHe": "שני אחים בטיול דרכים עושים מתיחה בקשר אלחוטי לנהג משאית בודד, שלא חושב שזה מצחיק.",
+   "synopsisEn": "Two brothers on a road trip play a CB radio prank on a lonely trucker, who does not find it funny.",
+   "synopses": {
+    "pt": "Dois irmãos numa viagem de carro passam um trote pelo rádio PX num caminhoneiro solitário, que não acha graça.",
+    "ru": "Два брата в дороге разыгрывают по рации одинокого дальнобойщика, а тому совсем не смешно.",
+    "ar": "شقيقان في رحلة برية يمازحان سائق شاحنة وحيدًا عبر اللاسلكي، ولا يجد هو الأمر مضحكًا."
+   }
+  },
+  {
+   "id": "red_eye",
+   "imdbId": "tt0421239",
+   "title": "Red Eye",
+   "year": 2005,
+   "director": "Wes Craven",
+   "runtimeMin": 85,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "survival"
+   ],
+   "fear": 2,
+   "hue": 0,
+   "saturation": 50,
+   "synopsisHe": "בטיסת לילה למיאמי, מנהלת מלון מבינה שלזר המקסים במושב הסמוך יש תוכנית שהיא חלק ממנה.",
+   "synopsisEn": "On a night flight to Miami, a hotel manager realizes the charming stranger in the next seat has a plan that needs her.",
+   "synopses": {
+    "pt": "Num voo noturno para Miami, uma gerente de hotel percebe que o estranho charmoso da poltrona ao lado tem um plano que depende dela.",
+    "ru": "В ночном рейсе в Майами менеджер отеля понимает, что у обаятельного соседа по креслу есть план, в котором ей отведена роль.",
+    "ar": "في رحلة ليلية إلى ميامي، تدرك مديرة فندق أن الغريب الساحر في المقعد المجاور لديه خطة تحتاجها فيها."
+   }
+  },
+  {
+   "id": "copycat_1995",
+   "imdbId": "tt0112722",
+   "title": "Copycat",
+   "year": 1995,
+   "director": "Jon Amiel",
+   "runtimeMin": 124,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 210,
+   "saturation": 25,
+   "synopsisHe": "פסיכולוגית פלילית שסובלת מאגורפוביה עוזרת לשני בלשים לתפוס רוצח שמשחזר פשעים של רוצחים סדרתיים מפורסמים.",
+   "synopsisEn": "An agoraphobic criminal psychologist helps two detectives catch a killer who recreates the crimes of famous serial murderers.",
+   "synopses": {
+    "pt": "Uma psicóloga criminal agorafóbica ajuda dois detetives a pegar um assassino que recria os crimes de assassinos em série famosos.",
+    "ru": "Криминальный психолог, страдающая агорафобией, помогает двум детективам поймать убийцу, повторяющего преступления знаменитых маньяков.",
+    "ar": "عالمة نفس جنائية مصابة برهاب الأماكن المفتوحة تساعد محققَين على القبض على قاتل يعيد تمثيل جرائم قتلة متسلسلين مشهورين."
+   }
+  },
+  {
+   "id": "disturbia",
+   "imdbId": "tt0486822",
+   "title": "Disturbia",
+   "year": 2007,
+   "director": "D.J. Caruso",
+   "runtimeMin": 105,
+   "genre": "thriller",
+   "subgenres": [
+    "mystery",
+    "crime"
+   ],
+   "fear": 2,
+   "hue": 120,
+   "saturation": 35,
+   "synopsisHe": "נער במעצר בית מרגל אחרי השכנים כדי להעביר את הזמן, ומשתכנע שאחד מהם הוא רוצח.",
+   "synopsisEn": "A teenager under house arrest spies on his neighbors to pass the time and becomes convinced that one of them is a killer.",
+   "synopses": {
+    "pt": "Um adolescente em prisão domiciliar espia os vizinhos para passar o tempo e se convence de que um deles é um assassino.",
+    "ru": "Подросток под домашним арестом от скуки шпионит за соседями и убеждается, что один из них — убийца.",
+    "ar": "مراهق قيد الإقامة الجبرية يتجسس على جيرانه لتمضية الوقت، فيقتنع بأن أحدهم قاتل."
+   }
+  },
+  {
+   "id": "the_grudge_2004",
+   "imdbId": "tt0391198",
+   "title": "The Grudge",
+   "year": 2004,
+   "director": "Takashi Shimizu",
+   "runtimeMin": 92,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "haunted_house"
+   ],
+   "fear": 3,
+   "hue": 200,
+   "saturation": 25,
+   "synopsisHe": "סטודנטית אמריקאית בחילופי סטודנטים שעובדת כמטפלת בטוקיו נשלחת לבית שבו מחכה קללה שנולדה ממוות אלים.",
+   "synopsisEn": "An American exchange student working as a carer in Tokyo is sent to a house where a curse born of a violent death waits.",
+   "synopses": {
+    "pt": "Uma estudante de intercâmbio americana que trabalha como cuidadora em Tóquio é enviada a uma casa onde espera uma maldição nascida de uma morte violenta.",
+    "ru": "Американская студентка по обмену, работающая сиделкой в Токио, попадает в дом, где ждёт проклятие, рождённое насильственной смертью.",
+    "ar": "طالبة تبادل أمريكية تعمل مقدّمة رعاية في طوكيو تُرسل إلى بيت تنتظر فيه لعنة وُلدت من موت عنيف."
+   },
+   "titles": {
+    "he": "הטינה",
+    "ru": "Проклятие",
+    "ar": "الحقد"
+   }
+  },
+  {
+   "id": "insidious_chapter_2",
+   "imdbId": "tt2226417",
+   "title": "Insidious: Chapter 2",
+   "year": 2013,
+   "director": "James Wan",
+   "runtimeMin": 106,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "ghost"
+   ],
+   "fear": 3,
+   "hue": 260,
+   "saturation": 30,
+   "synopsisHe": "משפחת למברט עוברת לגור אצל אמו של ג'וש אחרי מה שעברו, אבל מה שהלך אחריו חזרה מהעולם שמעבר עדיין איתם.",
+   "synopsisEn": "The Lambert family moves in with Josh's mother after their ordeal, but whatever followed him back from the Further is still with them.",
+   "synopses": {
+    "pt": "A família Lambert vai morar com a mãe de Josh depois do pesadelo, mas o que o seguiu de volta do Além ainda está com eles.",
+    "ru": "Семья Ламберт переезжает к матери Джоша после пережитого, но то, что последовало за ним из Потустороннего, всё ещё рядом.",
+    "ar": "تنتقل عائلة لامبرت للعيش مع والدة جوش بعد محنتهم، لكن ما تبعه عائدًا من العالم الآخر لا يزال معهم."
+   },
+   "titles": {
+    "he": "הרוע שבפנים 2",
+    "ru": "Астрал: Глава 2",
+    "pt": "Insidious Chapter 2",
+    "ar": "غدار: الفصل الثاني"
+   }
+  },
+  {
+   "id": "the_nun_2018",
+   "imdbId": "tt5814060",
+   "title": "The Nun",
+   "year": 2018,
+   "director": "Corin Hardy",
+   "runtimeMin": 96,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "possession",
+    "gothic"
+   ],
+   "fear": 3,
+   "hue": 220,
+   "saturation": 15,
+   "synopsisHe": "ב־1952 הוותיקן שולח כומר וטירונית צעירה למנזר ברומניה שבו נזירה שמה קץ לחייה.",
+   "synopsisEn": "In 1952, the Vatican sends a priest and a young novice to a Romanian abbey where a nun has taken her own life.",
+   "synopses": {
+    "pt": "Em 1952, o Vaticano envia um padre e uma jovem noviça a uma abadia romena onde uma freira tirou a própria vida.",
+    "ru": "В 1952 году Ватикан отправляет священника и юную послушницу в румынское аббатство, где монахиня покончила с собой.",
+    "ar": "عام 1952، يرسل الفاتيكان كاهنًا وراهبة مبتدئة إلى دير في رومانيا أنهت فيه راهبة حياتها."
+   },
+   "titles": {
+    "he": "הנזירה",
+    "ru": "Проклятие монахини",
+    "ar": "الراهبة"
+   }
+  },
+  {
+   "id": "the_boy_2016",
+   "imdbId": "tt3882082",
+   "title": "The Boy",
+   "year": 2016,
+   "director": "William Brent Bell",
+   "runtimeMin": 98,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 30,
+   "saturation": 25,
+   "synopsisHe": "מטפלת אמריקאית מקבלת עבודה באחוזה אנגלית ומגלה שהילד שבו תטפל הוא בובת חרסינה עם כללים נוקשים.",
+   "synopsisEn": "An American nanny takes a job at an English manor and learns the boy she will look after is a porcelain doll with strict rules.",
+   "synopses": {
+    "pt": "Uma babá americana aceita um emprego numa mansão inglesa e descobre que o menino de quem vai cuidar é um boneco de porcelana com regras rígidas.",
+    "ru": "Американская няня устраивается в английское поместье и узнаёт, что мальчик, за которым ей предстоит ухаживать, — фарфоровая кукла со строгими правилами.",
+    "ar": "مربية أمريكية تقبل عملًا في قصر إنجليزي فتكتشف أن الطفل الذي سترعاه دمية خزفية لها قواعد صارمة."
+   },
+   "titles": {
+    "he": "הילד",
+    "ru": "Кукла",
+    "ar": "الولد"
+   }
+  },
+  {
+   "id": "trick_r_treat",
+   "imdbId": "tt0862856",
+   "title": "Trick 'r Treat",
+   "year": 2007,
+   "director": "Michael Dougherty",
+   "runtimeMin": 82,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "slasher",
+    "comedy"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 70,
+   "synopsisHe": "ארבעה סיפורים שזורים בליל האלווין בעיירה קטנה באוהיו, שמעליהם משגיחה דמות קטנה במסכת יוטה.",
+   "synopsisEn": "Four interwoven Halloween night stories in one small Ohio town, watched over by a tiny figure in a burlap mask.",
+   "synopses": {
+    "pt": "Quatro histórias entrelaçadas numa noite de Halloween numa cidadezinha de Ohio, vigiadas por uma pequena figura com máscara de saco de estopa.",
+    "ru": "Четыре переплетённые истории ночи Хэллоуина в маленьком городке Огайо, за которыми следит крошечная фигура в мешковатой маске.",
+    "ar": "أربع قصص متشابكة في ليلة الهالوين ببلدة صغيرة في أوهايو، يراقبها كائن صغير بقناع من الخيش."
+   },
+   "titles": {
+    "he": "תעלולים נבזיים",
+    "ru": "Кошелёк или жизнь",
+    "ar": "خدعة أم حلوى"
+   }
+  },
+  {
+   "id": "krampus",
+   "imdbId": "tt3850590",
+   "title": "Krampus",
+   "year": 2015,
+   "director": "Michael Dougherty",
+   "runtimeMin": 98,
+   "genre": "horror",
+   "subgenres": [
+    "folk",
+    "comedy",
+    "creature"
+   ],
+   "fear": 2,
+   "hue": 200,
+   "saturation": 25,
+   "synopsisHe": "ילד שנמאס לו מהמשפחה המתקוטטת שלו מאבד את רוח חג המולד, ואנטי־סנטה עתיק עונה בסופת שלגים.",
+   "synopsisEn": "A boy fed up with his bickering family loses his Christmas spirit, and an ancient anti-Santa answers with a blizzard.",
+   "synopses": {
+    "pt": "Um menino farto da família briguenta perde o espírito natalino, e um antigo anti-Papai Noel responde com uma nevasca.",
+    "ru": "Мальчик, уставший от ссорящейся семьи, теряет рождественский дух, и древний анти-Санта отвечает метелью.",
+    "ar": "صبي سئم عائلته المتشاجرة يفقد روح عيد الميلاد، فيرد عليه نقيض بابا نويل القديم بعاصفة ثلجية."
+   },
+   "titles": {
+    "he": "קרמפוס",
+    "ru": "Крампус",
+    "ar": "كرامبس"
+   }
+  },
+  {
+   "id": "dead_silence",
+   "imdbId": "tt0455760",
+   "title": "Dead Silence",
+   "year": 2007,
+   "director": "James Wan",
+   "runtimeMin": 89,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "ghost"
+   ],
+   "fear": 3,
+   "hue": 200,
+   "saturation": 15,
+   "synopsisHe": "אחרי מותה המוזר של אשתו, אלמן חוזר לעיר הולדתו כדי ללמוד על מדברת מהבטן ועל הבובות שלה.",
+   "synopsisEn": "After his wife's strange death, a widower returns to his hometown to learn about a ventriloquist and her dolls.",
+   "synopses": {
+    "pt": "Depois da morte estranha da esposa, um viúvo volta à cidade natal para descobrir a história de uma ventríloqua e seus bonecos.",
+    "ru": "После странной смерти жены вдовец возвращается в родной город, чтобы узнать о чревовещательнице и её куклах.",
+    "ar": "بعد موت زوجته الغامض، يعود أرمل إلى بلدته ليتعرف على قصة متكلمة من بطنها ودُماها."
+   },
+   "titles": {
+    "he": "דממת המוות",
+    "ru": "Мёртвая тишина",
+    "pt": "Gritos Mortais",
+    "ar": "هدوء تام"
+   }
+  },
+  {
+   "id": "stir_of_echoes",
+   "imdbId": "tt0164181",
+   "title": "Stir of Echoes",
+   "year": 1999,
+   "director": "David Koepp",
+   "runtimeMin": 99,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "mystery",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 30,
+   "synopsisHe": "קוון חשמל בשיקגו מהופנט כבדיחה במסיבה ומתחיל לקבל חזיונות של נערה שנעלמה בשכונה שלו.",
+   "synopsisEn": "A Chicago lineman is hypnotized at a party as a joke and begins receiving visions of a girl who went missing in his neighborhood.",
+   "synopses": {
+    "pt": "Um eletricista de Chicago é hipnotizado de brincadeira numa festa e começa a ter visões de uma garota que desapareceu no bairro.",
+    "ru": "Чикагского электромонтёра в шутку гипнотизируют на вечеринке, и ему начинают являться видения девушки, пропавшей в его районе.",
+    "ar": "عامل خطوط كهرباء في شيكاغو يُنوَّم مغناطيسيًا مزاحًا في حفلة، فتبدأ رؤى فتاة اختفت في حيّه بالظهور له."
+   },
+   "titles": {
+    "ru": "Отзвуки эха"
+   }
+  },
+  {
+   "id": "the_frighteners",
+   "imdbId": "tt0116365",
+   "title": "The Frighteners",
+   "year": 1996,
+   "director": "Peter Jackson",
+   "runtimeMin": 110,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "comedy"
+   ],
+   "fear": 2,
+   "hue": 160,
+   "saturation": 30,
+   "synopsisHe": "נוכל שמסוגל לראות רוחות משתמש בהן כדי לביים בתים רדופים, עד שהוא מבחין ברוח אפלה שמסמנת אנשים למוות.",
+   "synopsisEn": "A con man who can see ghosts uses them to fake hauntings, until he notices a dark spirit marking people for death.",
+   "synopses": {
+    "pt": "Um vigarista que vê fantasmas os usa para encenar assombrações, até notar um espírito sombrio marcando pessoas para morrer.",
+    "ru": "Мошенник, видящий призраков, использует их для фальшивых «изгнаний», пока не замечает тёмного духа, отмечающего людей для смерти.",
+    "ar": "محتال يرى الأشباح يستغلها لتزييف حالات المسّ، حتى يلحظ روحًا مظلمة تَسِم الناس للموت."
+   }
+  },
+  {
+   "id": "what_lies_beneath",
+   "imdbId": "tt0161081",
+   "title": "What Lies Beneath",
+   "year": 2000,
+   "director": "Robert Zemeckis",
+   "runtimeMin": 130,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 200,
+   "saturation": 20,
+   "synopsisHe": "לבדה בביתה ליד האגם בוורמונט אחרי שבתה יצאה לקולג', אישה מתחילה להאמין שרוח מנסה ליצור איתה קשר.",
+   "synopsisEn": "Alone in her lakeside Vermont home after her daughter leaves for college, a woman starts to believe a ghost is trying to reach her.",
+   "synopses": {
+    "pt": "Sozinha em casa à beira de um lago em Vermont depois que a filha vai para a faculdade, uma mulher começa a acreditar que um fantasma tenta alcançá-la.",
+    "ru": "Оставшись одна в доме у озера в Вермонте после отъезда дочери в колледж, женщина начинает верить, что призрак пытается до неё достучаться.",
+    "ar": "وحيدة في بيتها المطل على البحيرة في فيرمونت بعد ذهاب ابنتها إلى الجامعة، تبدأ امرأة بالاعتقاد أن شبحًا يحاول الوصول إليها."
+   },
+   "titles": {
+    "he": "האמת שמתחת לפני השטח",
+    "ru": "Что скрывает ложь",
+    "pt": "Revelação",
+    "ar": "ما يكمن في الأسفل"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "skeleton_key",
+   "imdbId": "tt0397101",
+   "title": "The Skeleton Key",
+   "year": 2005,
+   "director": "Iain Softley",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "folk",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 30,
+   "synopsisHe": "אחות הוספיס מקבלת עבודה בבית מטע מתפורר בלואיזיאנה ומוצאת חדר עליית גג נעול מלא קמעות הודו.",
+   "synopsisEn": "A hospice nurse takes a job at a decaying Louisiana plantation house and finds a locked attic room full of hoodoo charms.",
+   "synopses": {
+    "pt": "Uma enfermeira de cuidados paliativos aceita trabalhar numa decadente casa de fazenda na Louisiana e encontra um sótão trancado cheio de amuletos de hoodoo.",
+    "ru": "Сиделка устраивается в разрушающийся дом на плантации в Луизиане и находит запертую мансарду, полную амулетов худу.",
+    "ar": "ممرضة رعاية تلطيفية تعمل في بيت مزرعة متداعٍ في لويزيانا فتجد غرفة علّية مقفلة مليئة بتمائم الهودو."
+   },
+   "titles": {
+    "he": "סודות נעולים",
+    "ru": "Ключ от всех дверей",
+    "ar": "المفتاح العظمي"
+   }
+  },
+  {
+   "id": "silent_hill",
+   "imdbId": "tt0384537",
+   "title": "Silent Hill",
+   "year": 2006,
+   "director": "Christophe Gans",
+   "runtimeMin": 125,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "creature"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "אם לוקחת את בתה הסהרורית לעיירה הנטושה שהיא ממשיכה לקרוא בשמה, ובערפל הילדה נעלמת.",
+   "synopsisEn": "A mother takes her sleepwalking daughter to the abandoned town she keeps naming, and in the fog the girl disappears.",
+   "synopses": {
+    "pt": "Uma mãe leva a filha sonâmbula à cidade abandonada cujo nome a menina não para de repetir, e na névoa a garota desaparece.",
+    "ru": "Мать везёт дочь-лунатика в заброшенный город, название которого та постоянно повторяет, и в тумане девочка исчезает.",
+    "ar": "أم تأخذ ابنتها السائرة في نومها إلى البلدة المهجورة التي تظل تردد اسمها، وفي الضباب تختفي الطفلة."
+   },
+   "titles": {
+    "he": "סיילנט היל",
+    "ru": "Сайлент Хилл",
+    "pt": "Terror em Silent Hill",
+    "ar": "سايلنت هيل"
+   }
+  },
+  {
+   "id": "the_eye_2002",
+   "imdbId": "tt0325655",
+   "title": "The Eye",
+   "year": 2002,
+   "director": "Danny Pang, Oxide Chun Pang",
+   "runtimeMin": 98,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 190,
+   "saturation": 20,
+   "synopsisHe": "כנרת צעירה בהונג קונג, עיוורת מילדות, עוברת השתלת קרנית ומתחילה לראות אנשים שאף אחד אחר לא רואה.",
+   "synopsisEn": "A young violinist in Hong Kong, blind since childhood, gets a cornea transplant and begins seeing people no one else can see.",
+   "synopses": {
+    "pt": "Uma jovem violinista de Hong Kong, cega desde a infância, recebe um transplante de córnea e começa a ver pessoas que ninguém mais vê.",
+    "ru": "Молодая скрипачка из Гонконга, слепая с детства, после пересадки роговицы начинает видеть людей, которых не видит никто другой.",
+    "ar": "عازفة كمان شابة في هونغ كونغ، كفيفة منذ طفولتها، تخضع لزراعة قرنية فتبدأ برؤية أناس لا يراهم أحد غيرها."
+   },
+   "titles": {
+    "ru": "Глаз"
+   }
+  },
+  {
+   "id": "the_fog_1980",
+   "imdbId": "tt0080749",
+   "title": "The Fog",
+   "year": 1980,
+   "director": "John Carpenter",
+   "runtimeMin": 90,
+   "genre": "horror",
+   "subgenres": [
+    "ghost",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 200,
+   "saturation": 20,
+   "synopsisHe": "בזמן שעיירת דייגים בקליפורניה חוגגת מאה שנה, ערפל זוהר מתגלגל מהים ומשהו נמצא בתוכו.",
+   "synopsisEn": "As a California fishing town celebrates its hundredth birthday, a glowing fog rolls in from the sea with something inside it.",
+   "synopses": {
+    "pt": "Enquanto uma vila de pescadores da Califórnia comemora cem anos, uma névoa brilhante chega do mar com algo dentro dela.",
+    "ru": "Пока рыбацкий городок в Калифорнии празднует столетие, с моря наползает светящийся туман, и в нём что-то есть.",
+    "ar": "بينما تحتفل بلدة صيادين في كاليفورنيا بعيدها المئوي، يزحف ضباب متوهج من البحر وفي داخله شيء ما."
+   },
+   "titles": {
+    "he": "הערפל",
+    "ru": "Туман",
+    "ar": "الضباب"
+   }
+  },
+  {
+   "id": "phantasm",
+   "imdbId": "tt0079714",
+   "title": "Phantasm",
+   "year": 1979,
+   "director": "Don Coscarelli",
+   "runtimeMin": 89,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "sci_fi"
+   ],
+   "fear": 3,
+   "hue": 230,
+   "saturation": 25,
+   "synopsisHe": "נער שמתאבל על אחיו מתגנב בבית הקברות המקומי ורואה את הקברן הגבוה מאוד מרים לבדו ארון מלא.",
+   "synopsisEn": "A teenage boy grieving his brother sneaks around the local cemetery and sees the very tall undertaker lift a full coffin alone.",
+   "synopses": {
+    "pt": "Um adolescente em luto pelo irmão anda escondido pelo cemitério local e vê o agente funerário muito alto erguer sozinho um caixão cheio.",
+    "ru": "Подросток, оплакивающий брата, тайком бродит по местному кладбищу и видит, как очень высокий гробовщик в одиночку поднимает полный гроб.",
+    "ar": "مراهق يحزن على أخيه يتسلل في المقبرة المحلية فيرى الحانوتي الطويل جدًا يرفع تابوتًا ممتلئًا وحده."
+   },
+   "titles": {
+    "ru": "Фантазм",
+    "pt": "Fantasma - Noite Macabra",
+    "ar": "فانتازم"
+   }
+  },
+  {
+   "id": "the_howling",
+   "imdbId": "tt0082533",
+   "title": "The Howling",
+   "year": 1981,
+   "director": "Joe Dante",
+   "runtimeMin": 91,
+   "genre": "horror",
+   "subgenres": [
+    "creature"
+   ],
+   "fear": 3,
+   "hue": 20,
+   "saturation": 45,
+   "synopsisHe": "אחרי מפגש טראומטי עם רוצח, מגישת חדשות בטלוויזיה נוסעת למקום מרפא מבודד על החוף שתושביו נראים קצת פרועים.",
+   "synopsisEn": "After a traumatic encounter with a killer, a TV news anchor goes to a secluded coastal retreat whose residents seem a bit wild.",
+   "synopses": {
+    "pt": "Depois de um encontro traumático com um assassino, uma apresentadora de TV vai a um retiro isolado no litoral cujos moradores parecem um tanto selvagens.",
+    "ru": "После травмирующей встречи с убийцей телеведущая уезжает в уединённый прибрежный центр отдыха, обитатели которого кажутся немного дикими.",
+    "ar": "بعد لقاء صادم مع قاتل، تذهب مذيعة أخبار تلفزيونية إلى منتجع ساحلي معزول يبدو سكانه متوحشين بعض الشيء."
+   },
+   "titles": {
+    "ru": "Вой"
+   }
+  },
+  {
+   "id": "creepshow",
+   "imdbId": "tt0083767",
+   "title": "Creepshow",
+   "year": 1982,
+   "director": "George A. Romero",
+   "runtimeMin": 120,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "comedy",
+    "zombie"
+   ],
+   "fear": 2,
+   "hue": 120,
+   "saturation": 70,
+   "synopsisHe": "חמישה סיפורים מבעיתים ושובבים בסגנון קומיקס האימה של שנות ה־50, מאב מת שרוצה את העוגה שלו ועד ארגז מתחת למדרגות.",
+   "synopsisEn": "Five gleefully gruesome tales in the style of 1950s horror comics, from a dead father who wants his cake to a crate under the stairs.",
+   "synopses": {
+    "pt": "Cinco histórias alegremente macabras no estilo dos quadrinhos de terror dos anos 50, de um pai morto que quer seu bolo a um caixote debaixo da escada.",
+    "ru": "Пять весело-жутких историй в духе комиксов ужасов 1950-х: от мёртвого отца, требующего свой торт, до ящика под лестницей.",
+    "ar": "خمس حكايات مروّعة ومرحة على طراز قصص الرعب المصورة في الخمسينيات، من أب ميت يريد كعكته إلى صندوق تحت الدرج."
+   },
+   "titles": {
+    "ru": "Калейдоскоп ужасов"
+   }
+  },
+  {
+   "id": "the_brood",
+   "imdbId": "tt0078908",
+   "title": "The Brood",
+   "year": 1979,
+   "director": "David Cronenberg",
+   "runtimeMin": 92,
+   "genre": "horror",
+   "subgenres": [
+    "body",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 0,
+   "saturation": 35,
+   "synopsisHe": "בזמן שאשתו עוברת טיפול קיצוני במרפאה מבודדת, גבר מגלה שהזעם שלה מקבל צורה גופנית.",
+   "synopsisEn": "While his wife undergoes radical therapy at a remote clinic, a man discovers that her rage is taking a physical form.",
+   "synopses": {
+    "pt": "Enquanto a esposa passa por uma terapia radical numa clínica isolada, um homem descobre que a raiva dela está ganhando forma física.",
+    "ru": "Пока его жена проходит радикальную терапию в отдалённой клинике, мужчина обнаруживает, что её ярость обретает плоть.",
+    "ar": "بينما تخضع زوجته لعلاج جذري في عيادة معزولة، يكتشف رجل أن غضبها يتخذ شكلًا جسديًا."
+   },
+   "titles": {
+    "ru": "Выводок"
+   }
+  },
+  {
+   "id": "scanners",
+   "imdbId": "tt0081455",
+   "title": "Scanners",
+   "year": 1981,
+   "director": "David Cronenberg",
+   "runtimeMin": 103,
+   "genre": "horror",
+   "subgenres": [
+    "sci_fi",
+    "body"
+   ],
+   "fear": 3,
+   "hue": 210,
+   "saturation": 30,
+   "synopsisHe": "הומלס בעל כוחות טלפתיים מגויס בידי חברה כדי לאתר רשת מחתרתית מסוכנת של אחרים כמוהו.",
+   "synopsisEn": "A homeless man with telepathic powers is recruited by a company to track down a dangerous underground network of others like him.",
+   "synopses": {
+    "pt": "Um sem-teto com poderes telepáticos é recrutado por uma empresa para rastrear uma perigosa rede clandestina de outros como ele.",
+    "ru": "Бездомного с телепатическими способностями вербует корпорация, чтобы выследить опасную подпольную сеть таких же, как он.",
+    "ar": "رجل مشرد يملك قوى تخاطر تجنّده شركة لتعقب شبكة سرية خطيرة من أمثاله."
+   },
+   "titles": {
+    "he": "שלטון המוח",
+    "ru": "Сканнеры",
+    "ar": "سكانرز"
+   }
+  },
+  {
+   "id": "repulsion",
+   "imdbId": "tt0059646",
+   "title": "Repulsion",
+   "year": 1965,
+   "director": "Roman Polanski",
+   "runtimeMin": 105,
+   "genre": "horror",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "מניקוריסטית צעירה ומופנמת שנשארת לבד בדירה של אחותה בלונדון מאבדת לאט את אחיזתה, כשהקירות נראים כאילו הם נסגרים עליה.",
+   "synopsisEn": "Left alone in her sister's London flat, a withdrawn young manicurist slowly loses her grip as the walls seem to close in.",
+   "synopses": {
+    "pt": "Sozinha no apartamento da irmã em Londres, uma jovem manicure retraída perde aos poucos o controle enquanto as paredes parecem se fechar.",
+    "ru": "Оставшись одна в лондонской квартире сестры, замкнутая молодая маникюрша постепенно теряет связь с реальностью, а стены будто сдвигаются.",
+    "ar": "عاملة تجميل أظافر شابة منطوية تُركت وحدها في شقة أختها في لندن تفقد تماسكها ببطء بينما تبدو الجدران وكأنها تطبق عليها."
+   },
+   "titles": {
+    "he": "רתיעה",
+    "ru": "Отвращение",
+    "ar": "النفور"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "the_tenant",
+   "imdbId": "tt0074811",
+   "title": "The Tenant",
+   "year": 1976,
+   "director": "Roman Polanski",
+   "runtimeMin": 126,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 20,
+   "synopsisHe": "פקיד שקט שוכר דירה בפריז שהדיירת הקודמת בה קפצה מהחלון, והשכנים מצפים שהוא יהפוך להיות היא.",
+   "synopsisEn": "A quiet clerk rents a Paris apartment whose previous tenant threw herself from the window, and the neighbors expect him to become her.",
+   "synopses": {
+    "pt": "Um funcionário tranquilo aluga um apartamento em Paris cuja inquilina anterior se jogou da janela, e os vizinhos esperam que ele se torne ela.",
+    "ru": "Тихий клерк снимает парижскую квартиру, прежняя жилица которой выбросилась из окна, и соседи ждут, что он станет ею.",
+    "ar": "موظف هادئ يستأجر شقة في باريس ألقت المستأجرة السابقة نفسها من نافذتها، ويتوقع الجيران أن يصبح هو إياها."
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "night_of_the_hunter",
+   "imdbId": "tt0048424",
+   "title": "The Night of the Hunter",
+   "year": 1955,
+   "director": "Charles Laughton",
+   "runtimeMin": 93,
+   "genre": "thriller",
+   "subgenres": [
+    "crime",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 220,
+   "saturation": 0,
+   "synopsisHe": "מטיף מטעם עצמו עם המילים אהבה ושנאה מקועקעות על אצבעותיו מתחתן עם אלמנה כדי למצוא את הכסף ששני ילדיה מסתירים.",
+   "synopsisEn": "A self-proclaimed preacher with LOVE and HATE tattooed on his knuckles marries a widow to find the money her two children are hiding.",
+   "synopses": {
+    "pt": "Um pregador autoproclamado com AMOR e ÓDIO tatuados nos dedos se casa com uma viúva para achar o dinheiro que os dois filhos dela escondem.",
+    "ru": "Самозваный проповедник с вытатуированными на пальцах словами ЛЮБОВЬ и НЕНАВИСТЬ женится на вдове, чтобы найти деньги, которые прячут её дети.",
+    "ar": "واعظ نصّب نفسه بنفسه يحمل وشمًا لكلمتي حب وكراهية على أصابعه يتزوج أرملة ليعثر على المال الذي يخفيه طفلاها."
+   }
+  },
+  {
+   "id": "baby_jane",
+   "imdbId": "tt0056687",
+   "title": "What Ever Happened to Baby Jane?",
+   "year": 1962,
+   "director": "Robert Aldrich",
+   "runtimeMin": 135,
+   "genre": "horror",
+   "subgenres": [
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "כוכבת ילדים לשעבר מטפלת באחותה המרותקת לכיסא גלגלים באחוזה מתפוררת בהוליווד, והיריבות הישנה הופכת לאכזרית.",
+   "synopsisEn": "A former child star cares for her wheelchair-bound sister in a decaying Hollywood mansion, and the old rivalry turns cruel.",
+   "synopses": {
+    "pt": "Uma ex-estrela mirim cuida da irmã cadeirante numa mansão decadente de Hollywood, e a velha rivalidade fica cruel.",
+    "ru": "Бывшая звезда-ребёнок ухаживает за сестрой в инвалидном кресле в обветшалом голливудском особняке, и старое соперничество становится жестоким.",
+    "ar": "نجمة طفولة سابقة ترعى أختها المقعدة في قصر متداعٍ بهوليوود، فيتحول التنافس القديم إلى قسوة."
+   },
+   "titles": {
+    "he": "מה קרה לבייבי ג'יין?",
+    "ru": "Что случилось с Бэби Джейн?"
+   }
+  },
+  {
+   "id": "burnt_offerings",
+   "imdbId": "tt0074258",
+   "title": "Burnt Offerings",
+   "year": 1976,
+   "director": "Dan Curtis",
+   "runtimeMin": 116,
+   "genre": "horror",
+   "subgenres": [
+    "haunted_house",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 40,
+   "saturation": 30,
+   "synopsisHe": "משפחה שוכרת בית קיץ ישן ומפואר במחיר מציאה, בתנאי אחד: להשאיר כל יום ארוחה לאישה הזקנה בקומה העליונה.",
+   "synopsisEn": "A family rents a grand old summer house for a bargain, on one condition: they must leave a meal each day for the old woman upstairs.",
+   "synopses": {
+    "pt": "Uma família aluga uma grande casa de verão por uma pechincha, com uma condição: deixar uma refeição por dia para a senhora idosa do andar de cima.",
+    "ru": "Семья за бесценок снимает старый роскошный летний дом при одном условии: каждый день оставлять еду старушке наверху.",
+    "ar": "عائلة تستأجر بيتًا صيفيًا قديمًا فخمًا بسعر زهيد بشرط واحد: ترك وجبة كل يوم للعجوز في الطابق العلوي."
+   },
+   "titles": {
+    "ru": "Сожжённые приношения"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "legend_hell_house",
+   "imdbId": "tt0070294",
+   "title": "The Legend of Hell House",
+   "year": 1973,
+   "director": "John Hough",
+   "runtimeMin": 95,
+   "genre": "horror",
+   "subgenres": [
+    "haunted_house",
+    "ghost"
+   ],
+   "fear": 3,
+   "hue": 300,
+   "saturation": 30,
+   "synopsisHe": "פיזיקאי, אשתו ושני מדיומים מקבלים תשלום כדי לבלות שבוע בבית הרדוף ביותר באנגליה ולהוכיח מה גר בו.",
+   "synopsisEn": "A physicist, his wife and two mediums are paid to spend a week in the most haunted house in England and prove what lives there.",
+   "synopses": {
+    "pt": "Um físico, a esposa e dois médiuns são pagos para passar uma semana na casa mais assombrada da Inglaterra e provar o que vive ali.",
+    "ru": "Физику, его жене и двум медиумам платят за неделю в самом населённом призраками доме Англии, чтобы доказать, что там обитает.",
+    "ar": "فيزيائي وزوجته ووسيطان روحيان يتقاضون أجرًا لقضاء أسبوع في أكثر البيوت المسكونة في إنجلترا وإثبات ما يسكنه."
+   }
+  },
+  {
+   "id": "black_sabbath",
+   "imdbId": "tt0057603",
+   "title": "Black Sabbath",
+   "year": 1963,
+   "director": "Mario Bava",
+   "runtimeMin": 96,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "vampire",
+    "gothic"
+   ],
+   "fear": 3,
+   "hue": 270,
+   "saturation": 70,
+   "synopsisHe": "שלושה סיפורי אימה: אישה שנרדפת בטלפון, משפחה שאב המשפחה חוזר לבקר אותה, ואחות שגונבת טבעת מגופה.",
+   "synopsisEn": "Three tales of terror: a woman stalked by phone, a family visited by a returning patriarch, and a nurse who steals a ring from a corpse.",
+   "synopses": {
+    "pt": "Três histórias de terror: uma mulher perseguida por telefone, uma família visitada pelo patriarca que retorna e uma enfermeira que rouba um anel de um cadáver.",
+    "ru": "Три истории ужаса: женщину преследуют по телефону, к семье возвращается её глава, а медсестра крадёт кольцо у покойницы.",
+    "ar": "ثلاث حكايات رعب: امرأة تُلاحق عبر الهاتف، وعائلة يزورها كبيرها العائد، وممرضة تسرق خاتمًا من جثة."
+   },
+   "titles": {
+    "ru": "Три лика страха"
+   }
+  },
+  {
+   "id": "the_entity",
+   "imdbId": "tt0082334",
+   "title": "The Entity",
+   "year": 1982,
+   "director": "Sidney J. Furie",
+   "runtimeMin": 125,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 4,
+   "hue": 210,
+   "saturation": 25,
+   "synopsisHe": "אם חד־הורית בלוס אנג'לס מותקפת שוב ושוב בידי כוח בלתי נראה, ואף אחד לא מאמין לה.",
+   "synopsisEn": "A single mother in Los Angeles is attacked again and again by an invisible force, and no one believes her.",
+   "synopses": {
+    "pt": "Uma mãe solteira em Los Angeles é atacada repetidamente por uma força invisível, e ninguém acredita nela.",
+    "ru": "Мать-одиночку в Лос-Анджелесе снова и снова атакует невидимая сила, и ей никто не верит.",
+    "ar": "أم عزباء في لوس أنجلوس تتعرض لهجمات متكررة من قوة غير مرئية، ولا يصدقها أحد."
+   },
+   "titles": {
+    "ru": "Существо"
+   }
+  },
+  {
+   "id": "pumpkinhead",
+   "imdbId": "tt0095925",
+   "title": "Pumpkinhead",
+   "year": 1988,
+   "director": "Stan Winston",
+   "runtimeMin": 86,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "folk"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 35,
+   "synopsisHe": "אחרי שבני נוער מהעיר גורמים לתאונה נוראה, אב שכול מבקש ממכשפת ההרים לזמן שד נקמה.",
+   "synopsisEn": "After city teenagers cause a terrible accident, a grieving father asks a mountain witch to summon a demon of vengeance.",
+   "synopses": {
+    "pt": "Depois que adolescentes da cidade causam um acidente terrível, um pai em luto pede a uma bruxa da montanha que invoque um demônio da vingança.",
+    "ru": "После того как городские подростки устраивают ужасную аварию, убитый горем отец просит горную ведьму вызвать демона мести.",
+    "ar": "بعد أن يتسبب مراهقون من المدينة في حادث مروّع، يطلب أب مفجوع من ساحرة الجبل استدعاء شيطان انتقام."
+   },
+   "titles": {
+    "ru": "Тыквоголовый"
+   }
+  },
+  {
+   "id": "serpent_rainbow",
+   "imdbId": "tt0096071",
+   "title": "The Serpent and the Rainbow",
+   "year": 1988,
+   "director": "Wes Craven",
+   "runtimeMin": 98,
+   "genre": "horror",
+   "subgenres": [
+    "zombie",
+    "folk",
+    "supernatural"
+   ],
+   "fear": 3,
+   "hue": 30,
+   "saturation": 45,
+   "synopsisHe": "אנתרופולוג אמריקאי נוסע להאיטי כדי למצוא אבקה שלפי השמועה יוצרת זומבים, בעיצומה של מהפכה פוליטית.",
+   "synopsisEn": "An American anthropologist travels to Haiti to find a powder said to create zombies, in the middle of a political upheaval.",
+   "synopses": {
+    "pt": "Um antropólogo americano viaja ao Haiti em busca de um pó que, dizem, cria zumbis, em meio a uma convulsão política.",
+    "ru": "Американский антрополог едет на Гаити за порошком, который якобы создаёт зомби, в разгар политических потрясений.",
+    "ar": "عالم أنثروبولوجيا أمريكي يسافر إلى هايتي بحثًا عن مسحوق يُقال إنه يصنع الزومبي، في خضم اضطراب سياسي."
+   },
+   "titles": {
+    "ru": "Змей и радуга",
+    "pt": "A Maldição dos Mortos-Vivos"
+   }
+  },
+  {
+   "id": "society_1989",
+   "imdbId": "tt0098354",
+   "title": "Society",
+   "year": 1989,
+   "director": "Brian Yuzna",
+   "runtimeMin": 100,
+   "genre": "horror",
+   "subgenres": [
+    "body",
+    "social",
+    "comedy"
+   ],
+   "fear": 4,
+   "hue": 330,
+   "saturation": 40,
+   "synopsisHe": "נער מבוורלי הילס חושד שמשפחתו העשירה וחבריהם הם לא מה שהם נראים, והמסיבות מוכיחות את זה.",
+   "synopsisEn": "A Beverly Hills teenager suspects that his wealthy family and their friends are not what they seem, and the parties prove it.",
+   "synopses": {
+    "pt": "Um adolescente de Beverly Hills desconfia que sua família rica e os amigos dela não são o que parecem, e as festas provam isso.",
+    "ru": "Подросток из Беверли-Хиллз подозревает, что его богатая семья и её друзья не те, кем кажутся, и вечеринки это подтверждают.",
+    "ar": "مراهق من بيفرلي هيلز يشك في أن عائلته الثرية وأصدقاءها ليسوا كما يبدون، وتثبت الحفلات ذلك."
+   },
+   "titles": {
+    "ru": "Общество"
+   }
+  },
+  {
+   "id": "body_snatchers_1978",
+   "imdbId": "tt0077745",
+   "title": "Invasion of the Body Snatchers",
+   "year": 1978,
+   "director": "Philip Kaufman",
+   "runtimeMin": 116,
+   "genre": "horror",
+   "subgenres": [
+    "sci_fi",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 100,
+   "saturation": 25,
+   "synopsisHe": "פקחי בריאות בסן פרנסיסקו שמים לב שאנשים סביבם הופכים לקרים וחסרי רגש אחרי שמופיעים פרחים מוזרים.",
+   "synopsisEn": "Health inspectors in San Francisco notice that people around them are turning cold and emotionless after strange flowers appear.",
+   "synopses": {
+    "pt": "Inspetores sanitários em San Francisco percebem que as pessoas ao redor estão ficando frias e sem emoção depois que surgem flores estranhas.",
+    "ru": "Санинспекторы в Сан-Франциско замечают, что люди вокруг становятся холодными и бесчувственными после появления странных цветов.",
+    "ar": "مفتشو صحة في سان فرانسيسكو يلاحظون أن الناس حولهم يصبحون باردين بلا مشاعر بعد ظهور أزهار غريبة."
+   },
+   "titles": {
+    "he": "פלישת חוטפי הגופות",
+    "ru": "Вторжение похитителей тел"
+   }
+  },
+  {
+   "id": "life_2017",
+   "imdbId": "tt5442430",
+   "title": "Life",
+   "year": 2017,
+   "director": "Daniel Espinosa",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "sci_fi",
+    "creature",
+    "survival"
+   ],
+   "fear": 3,
+   "hue": 200,
+   "saturation": 30,
+   "synopsisHe": "אסטרונאוטים בתחנת החלל הבינלאומית מחיים תא בודד ממאדים, והוא נעשה חכם ורעב יותר ויותר.",
+   "synopsisEn": "Astronauts on the International Space Station revive a single cell from Mars, and it grows smarter and hungrier.",
+   "synopses": {
+    "pt": "Astronautas na Estação Espacial Internacional reanimam uma única célula de Marte, e ela fica cada vez mais esperta e faminta.",
+    "ru": "Астронавты на Международной космической станции оживляют одну клетку с Марса, и она становится всё умнее и голоднее.",
+    "ar": "رواد فضاء في محطة الفضاء الدولية يعيدون الحياة إلى خلية واحدة من المريخ، فتصبح أذكى وأكثر جوعًا."
+   },
+   "titles": {
+    "he": "סימן חיים",
+    "ru": "Живое",
+    "ar": "حياة"
+   }
+  },
+  {
+   "id": "under_the_skin",
+   "imdbId": "tt1441395",
+   "title": "Under the Skin",
+   "year": 2013,
+   "director": "Jonathan Glazer",
+   "runtimeMin": 108,
+   "genre": "horror",
+   "subgenres": [
+    "sci_fi",
+    "cosmic",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 0,
+   "saturation": 0,
+   "synopsisHe": "אישה מסתורית נוהגת בטנדר ברחבי סקוטלנד ואוספת גברים בודדים שהולכים אחריה לבית חשוך.",
+   "synopsisEn": "A mysterious woman drives a van through Scotland, picking up lonely men who follow her into a dark house.",
+   "synopses": {
+    "pt": "Uma mulher misteriosa dirige uma van pela Escócia, dando carona a homens solitários que a seguem até uma casa escura.",
+    "ru": "Загадочная женщина колесит на фургоне по Шотландии, подбирая одиноких мужчин, которые идут за ней в тёмный дом.",
+    "ar": "امرأة غامضة تقود شاحنة صغيرة عبر اسكتلندا، تقلّ رجالًا وحيدين يتبعونها إلى بيت مظلم."
+   },
+   "titles": {
+    "he": "מתחת לעור",
+    "ru": "Побудь в моей шкуре",
+    "ar": "تحت الجلد"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "the_faculty",
+   "imdbId": "tt0133751",
+   "title": "The Faculty",
+   "year": 1998,
+   "director": "Robert Rodriguez",
+   "runtimeMin": 104,
+   "genre": "horror",
+   "subgenres": [
+    "sci_fi",
+    "creature"
+   ],
+   "fear": 2,
+   "hue": 120,
+   "saturation": 40,
+   "synopsisHe": "תלמידים בתיכון באוהיו שמים לב שהמורים שלהם התחילו להתנהג בצורה מוזרה מאוד, וזה מתפשט.",
+   "synopsisEn": "Students at an Ohio high school notice that their teachers have started acting very strangely, and it is spreading.",
+   "synopses": {
+    "pt": "Alunos de uma escola de Ohio percebem que os professores começaram a agir de um jeito muito estranho, e isso está se espalhando.",
+    "ru": "Ученики школы в Огайо замечают, что учителя стали вести себя очень странно, и это распространяется.",
+    "ar": "طلاب في مدرسة ثانوية بأوهايو يلاحظون أن معلميهم بدأوا يتصرفون بغرابة شديدة، والأمر ينتشر."
+   },
+   "titles": {
+    "he": "סיוט בחדר המורים",
+    "ru": "Факультет"
+   }
+  },
+  {
+   "id": "dog_soldiers",
+   "imdbId": "tt0280609",
+   "title": "Dog Soldiers",
+   "year": 2002,
+   "director": "Neil Marshall",
+   "runtimeMin": 105,
+   "genre": "horror",
+   "subgenres": [
+    "creature",
+    "survival",
+    "comedy"
+   ],
+   "fear": 3,
+   "hue": 100,
+   "saturation": 30,
+   "synopsisHe": "כיתת חיילים בריטים באימון ברמות סקוטלנד מוצאת את צוות הכוחות המיוחדים שהיו אמורים להילחם בו, קרוע לגזרים.",
+   "synopsisEn": "A squad of British soldiers on a training exercise in the Scottish Highlands finds the special forces team they were meant to fight, torn apart.",
+   "synopses": {
+    "pt": "Um esquadrão de soldados britânicos em treinamento nas Terras Altas da Escócia encontra despedaçada a equipe de forças especiais que devia enfrentar.",
+    "ru": "Отделение британских солдат на учениях в Шотландском высокогорье находит разорванной группу спецназа, с которой должно было сражаться.",
+    "ar": "فرقة جنود بريطانيين في تدريب بالمرتفعات الاسكتلندية تجد فريق القوات الخاصة الذي كان يُفترض أن تواجهه ممزقًا."
+   },
+   "titles": {
+    "he": "צבא הכלבים",
+    "ru": "Псы-воины",
+    "ar": "الجنود الكلاب"
+   }
+  },
+  {
+   "id": "severance_2006",
+   "imdbId": "tt0464196",
+   "title": "Severance",
+   "year": 2006,
+   "director": "Christopher Smith",
+   "runtimeMin": 96,
+   "genre": "horror",
+   "subgenres": [
+    "comedy",
+    "survival",
+    "slasher"
+   ],
+   "fear": 3,
+   "hue": 90,
+   "saturation": 35,
+   "synopsisHe": "עובדי מכירות של חברת נשק יוצאים לסוף שבוע של גיבוש ביער בהונגריה, ומישהו שם שונא את החברה שלהם.",
+   "synopsisEn": "Sales staff of a weapons company go on a team-building weekend in a Hungarian forest, and someone there hates their company.",
+   "synopses": {
+    "pt": "Funcionários de vendas de uma empresa de armas fazem um fim de semana de integração numa floresta húngara, e alguém ali odeia a empresa deles.",
+    "ru": "Сотрудники отдела продаж оружейной компании едут на корпоративный тимбилдинг в венгерский лес, а там кто-то ненавидит их фирму.",
+    "ar": "موظفو مبيعات في شركة أسلحة يذهبون في عطلة لتقوية روح الفريق في غابة مجرية، وأحدهم هناك يكره شركتهم."
+   },
+   "titles": {
+    "ru": "Изоляция"
+   }
+  },
+  {
+   "id": "goodnight_mommy",
+   "imdbId": "tt3086442",
+   "title": "Goodnight Mommy",
+   "year": 2014,
+   "director": "Severin Fiala, Veronika Franz",
+   "runtimeMin": 100,
+   "genre": "horror",
+   "subgenres": [
+    "psychological",
+    "mystery"
+   ],
+   "fear": 4,
+   "hue": 90,
+   "saturation": 20,
+   "synopsisHe": "תאומים בבית מבודד באוסטריה משתכנעים שהאישה שחזרה הביתה עם פנים חבושות היא לא אמא שלהם.",
+   "synopsisEn": "Twin boys in a remote Austrian house become convinced that the woman who came home with a bandaged face is not their mother.",
+   "synopses": {
+    "pt": "Gêmeos numa casa isolada na Áustria se convencem de que a mulher que voltou para casa com o rosto enfaixado não é a mãe deles.",
+    "ru": "Мальчики-близнецы в уединённом австрийском доме убеждаются, что женщина с забинтованным лицом, вернувшаяся домой, — не их мать.",
+    "ar": "توأمان في بيت معزول في النمسا يقتنعان بأن المرأة التي عادت إلى البيت بوجه مضمّد ليست أمهما."
+   },
+   "titles": {
+    "ru": "Я вижу, я вижу",
+    "pt": "Ich seh",
+    "ar": "غودنيت مامي"
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "innocents_2021",
+   "imdbId": "tt4028464",
+   "title": "The Innocents",
+   "year": 2021,
+   "director": "Eskil Vogt",
+   "runtimeMin": 117,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 3,
+   "hue": 100,
+   "saturation": 25,
+   "synopsisHe": "בקיץ נורווגי בהיר, ילדים בשכונת שיכונים מגלים שיש להם כוחות נסתרים, והמשחקים שלהם הופכים למסוכנים.",
+   "synopsisEn": "During a bright Norwegian summer, children in a housing estate discover they have hidden powers, and their games turn dangerous.",
+   "synopses": {
+    "pt": "Durante um verão claro na Noruega, crianças de um conjunto habitacional descobrem ter poderes ocultos, e as brincadeiras ficam perigosas.",
+    "ru": "Светлым норвежским летом дети из жилого квартала обнаруживают у себя скрытые способности, и их игры становятся опасными.",
+    "ar": "في صيف نرويجي مشرق، يكتشف أطفال في مجمع سكني أن لديهم قوى خفية، فتصبح ألعابهم خطيرة."
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "thelma_2017",
+   "imdbId": "tt6304046",
+   "title": "Thelma",
+   "year": 2017,
+   "director": "Joachim Trier",
+   "runtimeMin": 116,
+   "genre": "horror",
+   "subgenres": [
+    "supernatural",
+    "psychological"
+   ],
+   "fear": 2,
+   "hue": 210,
+   "saturation": 20,
+   "synopsisHe": "סטודנטית ביישנית ממשפחה דתית קפדנית מתחילה ללמוד באוסלו, מתאהבת ומתחילה לסבול מהתקפים שעושים דברים מוזרים.",
+   "synopsisEn": "A shy student from a strict religious family starts university in Oslo, falls in love, and begins to have seizures that do strange things.",
+   "synopses": {
+    "pt": "Uma estudante tímida de família religiosa rígida começa a faculdade em Oslo, se apaixona e passa a ter convulsões que provocam coisas estranhas.",
+    "ru": "Застенчивая студентка из строгой религиозной семьи поступает в университет в Осло, влюбляется, и у неё начинаются приступы, вызывающие странные вещи.",
+    "ar": "طالبة خجولة من عائلة متدينة صارمة تبدأ دراستها الجامعية في أوسلو، وتقع في الحب، فتبدأ نوبات تسبب أمورًا غريبة."
+   },
+   "tags": [
+    "slow_burn"
+   ]
+  },
+  {
+   "id": "the_loved_ones",
+   "imdbId": "tt1316536",
+   "title": "The Loved Ones",
+   "year": 2009,
+   "director": "Sean Byrne",
+   "runtimeMin": 84,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "psychological",
+    "comedy"
+   ],
+   "fear": 4,
+   "hue": 320,
+   "saturation": 70,
+   "synopsisHe": "נער אוסטרלי דוחה הזמנה של נערה שקטה לנשף בית הספר, והיא ואביה עורכים נשף משלהם.",
+   "synopsisEn": "An Australian teenager turns down a quiet girl's invitation to the school dance, and she and her father throw a prom of their own.",
+   "synopses": {
+    "pt": "Um adolescente australiano recusa o convite de uma garota quieta para o baile da escola, e ela e o pai fazem um baile só deles.",
+    "ru": "Австралийский подросток отказывается пойти на школьный бал с тихой девочкой, и она с отцом устраивают свой собственный бал.",
+    "ar": "مراهق أسترالي يرفض دعوة فتاة هادئة إلى حفل المدرسة، فتقيم هي وأبوها حفلًا خاصًا بهما."
+   },
+   "titles": {
+    "ru": "Любимые"
+   }
+  },
+  {
+   "id": "housebound_2014",
+   "imdbId": "tt3504048",
+   "title": "Housebound",
+   "year": 2014,
+   "director": "Gerard Johnstone",
+   "runtimeMin": 111,
+   "genre": "horror",
+   "subgenres": [
+    "haunted_house",
+    "comedy",
+    "mystery"
+   ],
+   "fear": 2,
+   "hue": 40,
+   "saturation": 30,
+   "synopsisHe": "צעירה בעייתית שנידונה למעצר בית בבית של אמה בניו זילנד מתחילה לשמוע דברים בקירות.",
+   "synopsisEn": "Sentenced to house arrest at her mother's house in New Zealand, a troubled young woman starts hearing things in the walls.",
+   "synopses": {
+    "pt": "Condenada à prisão domiciliar na casa da mãe na Nova Zelândia, uma jovem problemática começa a ouvir coisas nas paredes.",
+    "ru": "Приговорённая к домашнему аресту в доме матери в Новой Зеландии, трудная молодая женщина начинает слышать звуки в стенах.",
+    "ar": "شابة مضطربة محكوم عليها بالإقامة الجبرية في بيت أمها في نيوزيلندا تبدأ بسماع أشياء داخل الجدران."
+   }
+  },
+  {
+   "id": "rare_exports",
+   "imdbId": "tt1401143",
+   "title": "Rare Exports",
+   "year": 2010,
+   "director": "Jalmari Helander",
+   "runtimeMin": 83,
+   "genre": "horror",
+   "subgenres": [
+    "folk",
+    "comedy",
+    "creature"
+   ],
+   "fear": 2,
+   "hue": 200,
+   "saturation": 15,
+   "synopsisHe": "בלפלנד הפינית, חפירה בהר חושפת משהו שנקבר לפני זמן רב, וילדי רועי האיילים מתחילים להיעלם.",
+   "synopsisEn": "In Finnish Lapland, an excavation on a mountain uncovers something buried long ago, and the reindeer herders' children start disappearing.",
+   "synopses": {
+    "pt": "Na Lapônia finlandesa, uma escavação numa montanha revela algo enterrado há muito tempo, e os filhos dos criadores de renas começam a desaparecer.",
+    "ru": "В финской Лапландии раскопки на горе открывают нечто, погребённое давным-давно, и дети оленеводов начинают пропадать.",
+    "ar": "في لابلاند الفنلندية، يكشف حفر في جبل عن شيء دُفن منذ زمن بعيد، ويبدأ أطفال رعاة الرنة بالاختفاء."
+   },
+   "titles": {
+    "ru": "Санта на продажу"
+   }
+  },
+  {
+   "id": "frontiers_2007",
+   "imdbId": "tt0814685",
+   "title": "Frontier(s)",
+   "year": 2007,
+   "director": "Xavier Gens",
+   "runtimeMin": 108,
+   "genre": "horror",
+   "subgenres": [
+    "survival",
+    "slasher"
+   ],
+   "fear": 5,
+   "hue": 0,
+   "saturation": 40,
+   "synopsisHe": "בזמן מהומות בפריז, גנבים צעירים בורחים לפונדק ליד הגבול שמנהלת משפחה עם רעיונות ישנים מאוד.",
+   "synopsisEn": "During riots in Paris, young thieves flee to a guesthouse near the border run by a family with very old ideas.",
+   "synopses": {
+    "pt": "Durante tumultos em Paris, jovens ladrões fogem para uma pousada perto da fronteira administrada por uma família de ideias muito antigas.",
+    "ru": "Во время беспорядков в Париже молодые воры бегут в гостиницу у границы, которой управляет семья с очень старыми взглядами.",
+    "ar": "خلال أعمال شغب في باريس، يفرّ لصوص شبان إلى نُزُل قرب الحدود تديره عائلة ذات أفكار قديمة جدًا."
+   },
+   "titles": {
+    "ru": "Граница"
+   }
   }
  ],
  "collections": [
@@ -9842,7 +11855,16 @@
     "carnival_of_souls",
     "masque_red_death",
     "kwaidan",
-    "haxan"
+    "haxan",
+    "repulsion",
+    "the_tenant",
+    "night_of_the_hunter",
+    "baby_jane",
+    "black_sabbath",
+    "the_fog_1980",
+    "phantasm",
+    "burnt_offerings",
+    "legend_hell_house"
    ],
    "titles": {
     "pt": "Clássicos imperdíveis",
@@ -9871,7 +11893,8 @@
     "nosferatu_2024",
     "godzilla_1954",
     "them_1954",
-    "nosferatu_vampyre_1979"
+    "nosferatu_vampyre_1979",
+    "the_howling"
    ],
    "titles": {
     "pt": "Monstros clássicos",
@@ -9895,7 +11918,8 @@
     "saint_maud",
     "carnival_of_souls",
     "skinamarink",
-    "blackcoats_daughter"
+    "blackcoats_daughter",
+    "the_boy_2016"
    ],
    "titles": {
     "pt": "Terror psicológico",
@@ -9937,7 +11961,19 @@
     "exorcist_iii",
     "final_destination",
     "doctor_sleep",
-    "blackcoats_daughter"
+    "blackcoats_daughter",
+    "insidious_chapter_2",
+    "the_nun_2018",
+    "dead_silence",
+    "stir_of_echoes",
+    "skeleton_key",
+    "silent_hill",
+    "smile_2",
+    "candyman_2021",
+    "the_entity",
+    "phantasm",
+    "innocents_2021",
+    "thelma_2017"
    ],
    "titles": {
     "pt": "Fantasmas, demônios e possessão",
@@ -9960,7 +11996,8 @@
     "cujo",
     "room_1408",
     "the_mist",
-    "geralds_game"
+    "geralds_game",
+    "creepshow"
    ],
    "titles": {
     "pt": "Baseados em Stephen King",
@@ -9998,7 +12035,15 @@
     "sisters_1972",
     "the_stepfather_1987",
     "cam_2018",
-    "geralds_game"
+    "geralds_game",
+    "identity_2003",
+    "copycat_1995",
+    "disturbia",
+    "red_eye",
+    "baby_jane",
+    "repulsion",
+    "the_tenant",
+    "goodnight_mommy"
    ],
    "titles": {
     "pt": "Suspense psicológico",
@@ -10035,7 +12080,13 @@
     "panic_room",
     "the_guest_2014",
     "revenge_2017",
-    "dressed_to_kill"
+    "dressed_to_kill",
+    "night_of_the_hunter",
+    "copycat_1995",
+    "joy_ride",
+    "red_eye",
+    "last_house_left_1972",
+    "vacancy_2007"
    ],
    "titles": {
     "pt": "Crime e investigação",
@@ -10057,7 +12108,12 @@
     "his_house",
     "body_snatchers_1956",
     "freaks",
-    "infinity_pool"
+    "infinity_pool",
+    "the_purge",
+    "eden_lake",
+    "society_1989",
+    "candyman_2021",
+    "body_snatchers_1978"
    ],
    "titles": {
     "pt": "Pesadelos sociais",
@@ -10091,7 +12147,15 @@
     "revenge_2017",
     "crawl_2019",
     "the_shallows",
-    "stake_land"
+    "stake_land",
+    "hostel_2005",
+    "hills_have_eyes_2006",
+    "eden_lake",
+    "vacancy_2007",
+    "the_ruins_2008",
+    "it_comes_at_night",
+    "wrong_turn_2003",
+    "joy_ride"
    ],
    "titles": {
     "pt": "Sobreviva até de manhã",
@@ -10146,7 +12210,21 @@
     "maxxxine",
     "terrifier_2",
     "final_girls",
-    "bay_of_blood"
+    "bay_of_blood",
+    "tcm_2003",
+    "wrong_turn_2003",
+    "house_of_wax_2005",
+    "hatchet_2006",
+    "the_funhouse",
+    "prom_night_1980",
+    "happy_birthday_to_me",
+    "hell_night",
+    "scream_3",
+    "valentine_2001",
+    "haunt_2019",
+    "totally_killer",
+    "frontiers_2007",
+    "hills_have_eyes_1977"
    ],
    "titles": {
     "pt": "Máscaras e lâminas",
@@ -10233,7 +12311,10 @@
     "the_lighthouse",
     "resolution_2012",
     "possession_1981",
-    "banshee_chapter"
+    "banshee_chapter",
+    "under_the_skin",
+    "life_2017",
+    "body_snatchers_1978"
    ],
    "titles": {
     "pt": "Horror cósmico: além das estrelas",
@@ -10271,7 +12352,11 @@
     "longlegs",
     "the_substance",
     "late_night_devil",
-    "exhuma"
+    "exhuma",
+    "smile_2",
+    "candyman_2021",
+    "haunt_2019",
+    "totally_killer"
    ],
    "titles": {
     "pt": "Novos pesadelos",
@@ -10326,6 +12411,42 @@
    }
   },
   {
+   "id": "european_horror",
+   "titleHe": "אימה אירופית",
+   "titleEn": "European horror",
+   "movieIds": [
+    "martyrs",
+    "inside_2007",
+    "them_2006",
+    "frontiers_2007",
+    "high_tension",
+    "raw",
+    "goodnight_mommy",
+    "innocents_2021",
+    "thelma_2017",
+    "let_the_right_one_in",
+    "speak_no_evil",
+    "the_vanishing",
+    "funny_games",
+    "demon_2015",
+    "possession_1981",
+    "severance_2006",
+    "dog_soldiers",
+    "eden_lake",
+    "kill_list",
+    "the_ritual",
+    "lamb",
+    "rare_exports",
+    "hagazussa",
+    "you_wont_be_alone"
+   ],
+   "titles": {
+    "pt": "Terror europeu",
+    "ru": "Европейский хоррор",
+    "ar": "رعب أوروبي"
+   }
+  },
+  {
    "id": "max_fear",
    "titleHe": "מד פחד 5: רק לאמיצים",
    "titleEn": "Fear level 5: brave souls only",
@@ -10364,7 +12485,13 @@
     "terrifier_2",
     "braindead",
     "exorcist_iii",
-    "possession_1981"
+    "possession_1981",
+    "hostel_2005",
+    "hills_have_eyes_2006",
+    "last_house_left_1972",
+    "eden_lake",
+    "frontiers_2007",
+    "tcm_2003"
    ],
    "titles": {
     "pt": "Medo nível 5: só para corajosos",
@@ -10426,7 +12553,12 @@
     "witchfinder_general",
     "dont_torture_duckling",
     "kuroneko",
-    "demon_2015"
+    "demon_2015",
+    "pumpkinhead",
+    "serpent_rainbow",
+    "krampus",
+    "rare_exports",
+    "skeleton_key"
    ],
    "titles": {
     "pt": "Terror folclórico",
@@ -10466,7 +12598,9 @@
     "kuroneko",
     "cure",
     "alive_2020",
-    "godzilla_1954"
+    "godzilla_1954",
+    "the_eye_2002",
+    "the_grudge_2004"
    ],
    "titles": {
     "pt": "Terror asiático",
@@ -10500,7 +12634,9 @@
     "pontypool",
     "alive_2020",
     "night_of_the_creeps",
-    "rec_2"
+    "rec_2",
+    "serpent_rainbow",
+    "creepshow"
    ],
    "titles": {
     "pt": "Os mortos andam",
@@ -10566,7 +12702,11 @@
     "splice",
     "the_blob_1988",
     "slither",
-    "possession_1981"
+    "possession_1981",
+    "the_brood",
+    "scanners",
+    "society_1989",
+    "hostel_2005"
    ],
    "titles": {
     "pt": "Horror corporal",
@@ -10600,7 +12740,13 @@
     "hausu",
     "terrified_2017",
     "room_1408",
-    "grave_encounters"
+    "grave_encounters",
+    "the_grudge_2004",
+    "burnt_offerings",
+    "legend_hell_house",
+    "what_lies_beneath",
+    "housebound_2014",
+    "hell_night"
    ],
    "titles": {
     "pt": "Casas assombradas",
@@ -10637,7 +12783,14 @@
     "troll_hunter",
     "splice",
     "godzilla_1954",
-    "it_2017"
+    "it_2017",
+    "the_howling",
+    "pumpkinhead",
+    "jeepers_creepers",
+    "life_2017",
+    "the_faculty",
+    "dog_soldiers",
+    "the_ruins_2008"
    ],
    "titles": {
     "pt": "Criaturas e monstros",
@@ -10698,7 +12851,18 @@
     "hocus_pocus",
     "coraline",
     "arachnophobia",
-    "tremors"
+    "tremors",
+    "tucker_and_dale",
+    "severance_2006",
+    "housebound_2014",
+    "krampus",
+    "creepshow",
+    "the_frighteners",
+    "totally_killer",
+    "trick_r_treat",
+    "the_loved_ones",
+    "rare_exports",
+    "hatchet_2006"
    ],
    "titles": {
     "pt": "Rindo e gritando",
