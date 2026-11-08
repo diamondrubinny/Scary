@@ -204,7 +204,13 @@ object Categories {
         ?: SUBGENRE_RULES.firstOrNull { (id, _) -> id == collectionId && id != "psychological_thriller" && id != "crime_thriller" }?.second
 
     /** Library rows that go on with films of the full index only (Cinemeta's plots tell these subgenres poorly). */
-    private val INDEX_ONLY_ROWS = mapOf("giallo" to Subgenre.GIALLO, "witches" to Subgenre.WITCH, "cosmic_horror" to Subgenre.COSMIC)
+    private val INDEX_ONLY_ROWS = mapOf(
+        "giallo" to Subgenre.GIALLO,
+        "witches" to Subgenre.WITCH,
+        "cosmic_horror" to Subgenre.COSMIC,
+        "animal_attacks" to Subgenre.ANIMAL,
+        "horror_comedy" to Subgenre.COMEDY,
+    )
 
     /** Subgenres the library has with no row of their own. */
     private val EXTRA_RULES: List<Pair<Subgenre, Rule>> = listOf(

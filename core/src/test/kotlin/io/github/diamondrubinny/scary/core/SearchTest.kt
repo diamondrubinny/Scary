@@ -42,7 +42,7 @@ class SearchTest {
 
     @Test
     fun `finds by director, year and hebrew synopsis`() {
-        assertEquals(setOf("se7en", "zodiac", "fight_club", "gone_girl"), ids("fincher").toSet())
+        assertEquals(setOf("se7en", "zodiac", "fight_club", "gone_girl", "panic_room"), ids("fincher").toSet())
         assertTrue("psycho" in ids("1960"))
         assertTrue("the_shining" in ids("מלון"))
     }
