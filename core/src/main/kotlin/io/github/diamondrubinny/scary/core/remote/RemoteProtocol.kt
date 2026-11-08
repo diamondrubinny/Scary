@@ -118,10 +118,20 @@ object RemoteProtocol {
             if (counter <= last) return Verdict.Replayed
             if (cipher.size > MAX_TEXT * 4 || (!command.takesText && cipher.isNotEmpty())) return Verdict.Malformed
             val text = String(crypt(secret, counter, cipher), Charsets.UTF_8)
-            if (text.length > MAX_TEXT || text.any { it < ' ' }) return Verdict.Malformed
+            if (text.length > MAX_TEXT || !cleanText(command, text)) return Verdict.Malformed
             last = counter
             return Verdict.Accepted(Request(counter, command, text))
         }
+    }
+
+    /**
+     * No control characters, with one exception: [Command.AI_KEY] carries "service\nkey", so it may hold that one
+     * line break (and only one, between two non-empty parts).
+     */
+    private fun cleanText(command: Command, text: String): Boolean {
+        if (command != Command.AI_KEY) return text.none { it < ' ' }
+        val parts = text.split('\n')
+        return parts.size == 2 && parts.all { part -> part.isNotEmpty() && part.none { it < ' ' } }
     }
 
     /** The secret as it goes in the QR code's "#" part: URL-safe base64, no padding. */

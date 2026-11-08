@@ -67,6 +67,28 @@ class RemoteProtocolTest {
     }
 
     @Test
+    fun `an AI key from the phone arrives as service, line break, key`() {
+        val session = RemoteProtocol.Session(secret)
+        val key = "sk-proj-" + "Ab3_x-".repeat(26)
+        val verdict = session.open(RemoteProtocol.seal(secret, 20, Command.AI_KEY, "openai\n$key"))
+        assertEquals(Verdict.Accepted(RemoteProtocol.Request(20, Command.AI_KEY, "openai\n$key")), verdict)
+        // Only that one line break: none, two, an empty part or another control character is refused.
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 21, Command.AI_KEY, "openai$key")))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 22, Command.AI_KEY, "openai\n$key\nx")))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 23, Command.AI_KEY, "openai\n")))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 24, Command.AI_KEY, "openai\n\t$key")))
+        assertTrue(session.open(RemoteProtocol.seal(secret, 25, Command.AI_KEY, "anthropic\nsk-ant-api03-abc")) is Verdict.Accepted)
+    }
+
+    @Test
+    fun `a TMDB read access token from the phone arrives whole`() {
+        val session = RemoteProtocol.Session(secret)
+        val token = "eyJhbGciOiJIUzI1NiJ9." + "eyJhdWQiOiJ".repeat(15) + "." + "Zm9v_-".repeat(7)
+        val verdict = session.open(RemoteProtocol.seal(secret, 30, Command.TMDB_KEY, token))
+        assertEquals(Verdict.Accepted(RemoteProtocol.Request(30, Command.TMDB_KEY, token)), verdict)
+    }
+
+    @Test
     fun `the secret goes in the QR code as URL-safe base64`() {
         val encoded = RemoteProtocol.encodeSecret(ByteArray(32) { 0xFB.toByte() })
         assertTrue(encoded.none { it == '+' || it == '/' || it == '=' })
