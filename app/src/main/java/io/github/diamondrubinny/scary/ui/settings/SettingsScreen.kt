@@ -168,27 +168,32 @@ fun SettingsScreen(
             style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f),
             modifier = Modifier.padding(bottom = 8.dp).semantics { heading() },
         )
-        BasicText(
-            stringResource(R.string.settings_home_section),
-            style = ScaryType.RowTitle,
-            modifier = Modifier.semantics { heading() },
-        )
-        SettingRow(
-            label = stringResource(R.string.settings_default_home),
-            value = stringResource(if (isDefaultHome) R.string.value_home_yes else R.string.value_home_no),
-            onClick = actions.onRequestDefaultHome,
-            modifier = Modifier.focusRequester(firstFocus),
-        )
-        SettingRow(
-            label = stringResource(R.string.settings_home_button),
-            value = stringResource(if (homeButtonServiceOn) R.string.value_home_button_on else R.string.value_home_button_off),
-            onClick = actions.onOpenAccessibility,
-        )
-        BasicText(stringResource(R.string.settings_home_note), style = ScaryType.Caption)
+        // The home screen and the remote's Home button are a TV's: on a phone or a tablet SCARY is an ordinary app.
+        val tv = scaryLayout.tv
+        if (tv) {
+            BasicText(
+                stringResource(R.string.settings_home_section),
+                style = ScaryType.RowTitle,
+                modifier = Modifier.semantics { heading() },
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_default_home),
+                value = stringResource(if (isDefaultHome) R.string.value_home_yes else R.string.value_home_no),
+                onClick = actions.onRequestDefaultHome,
+                modifier = Modifier.focusRequester(firstFocus),
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_home_button),
+                value = stringResource(if (homeButtonServiceOn) R.string.value_home_button_on else R.string.value_home_button_off),
+                onClick = actions.onOpenAccessibility,
+            )
+            BasicText(stringResource(R.string.settings_home_note), style = ScaryType.Caption)
+        }
         SettingRow(
             label = stringResource(R.string.settings_online),
             value = stringResource(if (onlineEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleOnline,
+            modifier = if (tv) Modifier else Modifier.focusRequester(firstFocus),
         )
         BasicText(stringResource(R.string.settings_online_note), style = ScaryType.Caption)
         SettingRow(
@@ -205,13 +210,16 @@ fun SettingsScreen(
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         AiSection(ai, actions)
-        SettingRow(
-            label = stringResource(R.string.settings_phone_remote),
-            value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
-            onClick = actions.onOpenPhoneRemote,
-            modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
-        )
-        BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
+        // The phone remote lets a phone steer the TV.
+        if (tv) {
+            SettingRow(
+                label = stringResource(R.string.settings_phone_remote),
+                value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
+                onClick = actions.onOpenPhoneRemote,
+                modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
+            )
+            BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
+        }
         SettingRow(
             label = stringResource(R.string.settings_rent_country),
             value = when {

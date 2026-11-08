@@ -4,17 +4,14 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
-import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.foundation.Canvas
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.border
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -29,14 +26,18 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,7 +45,11 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import java.util.Locale
+
+/** The smallest a button may be for a finger. */
+val TOUCH_TARGET = 48.dp
 
 @Composable
 fun ScaryButton(
@@ -56,7 +61,9 @@ fun ScaryButton(
 ) {
     FocusSurface(
         onClick = onClick,
-        modifier = if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier,
+        modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
+            // A finger needs 48 dp (WCAG 2.5.5 and Android's guidance); a TV keeps its own size.
+            .heightIn(min = if (scaryLayout.tv) 0.dp else TOUCH_TARGET),
         shape = RoundedCornerShape(6.dp),
         focusedScale = 1.06f,
         containerColor = if (primary) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.6f),
@@ -145,7 +152,7 @@ fun IconCircleButton(
 ) {
     FocusSurface(
         onClick = onClick,
-        modifier = modifier.size(40.dp),
+        modifier = modifier.size(if (scaryLayout.tv) 40.dp else TOUCH_TARGET),
         shape = CircleShape,
         focusedScale = 1.12f,
         containerColor = ScaryColors.Bone.copy(alpha = if (dimmed) 0.04f else 0.1f),

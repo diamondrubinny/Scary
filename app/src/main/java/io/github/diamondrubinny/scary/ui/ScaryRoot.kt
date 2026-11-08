@@ -4,15 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui
 
-import io.github.diamondrubinny.scary.ui.bucket.BucketActions
-import io.github.diamondrubinny.scary.ui.bucket.BucketScreen
-import io.github.diamondrubinny.scary.ui.bucket.BucketPromptDialog
-import io.github.diamondrubinny.scary.ui.components.LocalShowSeriesTag
-import androidx.compose.runtime.CompositionLocalProvider
-import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
 import android.app.Activity
-import android.content.Context
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -21,19 +15,18 @@ import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import io.github.diamondrubinny.scary.launch.HomeRole
-import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -46,39 +39,18 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import io.github.diamondrubinny.scary.R
-import io.github.diamondrubinny.scary.core.model.Language
-import io.github.diamondrubinny.scary.data.LanguageStore
-import io.github.diamondrubinny.scary.data.SettingsRepository
-import io.github.diamondrubinny.scary.ui.apps.AllAppsActions
-import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
-import io.github.diamondrubinny.scary.ui.pin.PinDialog
-import io.github.diamondrubinny.scary.ui.search.SearchScreen
-import io.github.diamondrubinny.scary.ui.settings.SettingsActions
-import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
-import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
-import io.github.diamondrubinny.scary.ui.settings.TmdbKeyDialog
-import io.github.diamondrubinny.scary.ui.settings.CountryPicker
-import io.github.diamondrubinny.scary.ui.components.MessageBanner
-import io.github.diamondrubinny.scary.ui.details.DetailsScreen
-import io.github.diamondrubinny.scary.ui.fx.Atmosphere
-import io.github.diamondrubinny.scary.ui.fx.MovieBackdrop
-import io.github.diamondrubinny.scary.ui.home.AppTile
-import io.github.diamondrubinny.scary.ui.home.HomeActions
-import io.github.diamondrubinny.scary.ui.home.HomeScreen
-import io.github.diamondrubinny.scary.ui.home.HomeViewModel
-import io.github.diamondrubinny.scary.ui.home.LoadingView
-import io.github.diamondrubinny.scary.ui.home.DocumentKind
-import io.github.diamondrubinny.scary.ui.home.Screen
-import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
-import io.github.diamondrubinny.scary.ui.theme.ScaryColors
-import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
-import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
-import io.github.diamondrubinny.scary.ui.stats.StatsScreen
-import io.github.diamondrubinny.scary.ui.taste.TastePickerScreen
-import io.github.diamondrubinny.scary.ui.update.UpdateActions
+import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.ai.AiState
 import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiProvider
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.data.LanguageStore
+import io.github.diamondrubinny.scary.data.SettingsRepository
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
+import io.github.diamondrubinny.scary.launch.HomeButtonService
+import io.github.diamondrubinny.scary.launch.HomeRole
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.system.SleepTimer
 import io.github.diamondrubinny.scary.ui.ai.AiConsentDialog
 import io.github.diamondrubinny.scary.ui.ai.AiKeyDialog
 import io.github.diamondrubinny.scary.ui.ai.AiModelDialog
@@ -86,21 +58,50 @@ import io.github.diamondrubinny.scary.ui.ai.AiProviderDialog
 import io.github.diamondrubinny.scary.ui.ai.AiUrlDialog
 import io.github.diamondrubinny.scary.ui.ai.AskActions
 import io.github.diamondrubinny.scary.ui.ai.AskScreen
-import io.github.diamondrubinny.scary.ui.settings.AiSettingsState
-import io.github.diamondrubinny.scary.ui.settings.LanguageDialog
-import io.github.diamondrubinny.scary.ui.update.UpdateDialog
-import io.github.diamondrubinny.scary.update.UpdateState
-import io.github.diamondrubinny.scary.ScaryApplication
-import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import io.github.diamondrubinny.scary.ui.apps.AllAppsActions
+import io.github.diamondrubinny.scary.ui.apps.AllAppsScreen
+import io.github.diamondrubinny.scary.ui.bucket.BucketActions
+import io.github.diamondrubinny.scary.ui.bucket.BucketPromptDialog
+import io.github.diamondrubinny.scary.ui.bucket.BucketScreen
+import io.github.diamondrubinny.scary.ui.components.LocalShowSeriesTag
+import io.github.diamondrubinny.scary.ui.components.MessageBanner
+import io.github.diamondrubinny.scary.ui.components.minutesLeft
+import io.github.diamondrubinny.scary.ui.details.DetailsScreen
+import io.github.diamondrubinny.scary.ui.details.LaunchOverlay
+import io.github.diamondrubinny.scary.ui.fx.Atmosphere
+import io.github.diamondrubinny.scary.ui.fx.MovieBackdrop
+import io.github.diamondrubinny.scary.ui.home.AppTile
+import io.github.diamondrubinny.scary.ui.home.DocumentKind
+import io.github.diamondrubinny.scary.ui.home.HomeActions
+import io.github.diamondrubinny.scary.ui.home.HomeScreen
+import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import io.github.diamondrubinny.scary.ui.home.LauncherStatus
+import io.github.diamondrubinny.scary.ui.home.LoadingView
+import io.github.diamondrubinny.scary.ui.home.Screen
+import io.github.diamondrubinny.scary.ui.pin.PinDialog
+import io.github.diamondrubinny.scary.ui.remote.OtherApps
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
+import io.github.diamondrubinny.scary.ui.search.SearchScreen
+import io.github.diamondrubinny.scary.ui.settings.AiSettingsState
+import io.github.diamondrubinny.scary.ui.settings.CountryPicker
+import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
+import io.github.diamondrubinny.scary.ui.settings.LanguageDialog
+import io.github.diamondrubinny.scary.ui.settings.SettingsActions
+import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.settings.TmdbAccountActions
 import io.github.diamondrubinny.scary.ui.settings.TmdbAccountScreen
-import io.github.diamondrubinny.scary.data.TmdbAccountRepository
-import io.github.diamondrubinny.scary.ui.remote.OtherApps
-import io.github.diamondrubinny.scary.launch.HomeButtonService
-import io.github.diamondrubinny.scary.system.SleepTimer
-import io.github.diamondrubinny.scary.ui.components.minutesLeft
+import io.github.diamondrubinny.scary.ui.settings.TmdbKeyDialog
+import io.github.diamondrubinny.scary.ui.stats.StatsScreen
+import io.github.diamondrubinny.scary.ui.taste.TastePickerScreen
+import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
+import io.github.diamondrubinny.scary.ui.theme.ScaryColors
+import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
+import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
+import io.github.diamondrubinny.scary.ui.update.UpdateActions
+import io.github.diamondrubinny.scary.ui.update.UpdateDialog
+import io.github.diamondrubinny.scary.update.UpdateState
 
 @Composable
 fun ScaryRoot(viewModel: HomeViewModel) {
@@ -554,7 +555,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     restoreKey = viewModel.lastFocusedKey,
                     resets = resets,
                     actions = actions,
-                    showSetHome = launcherStatus.needsSetup,
+                    // A phone or a tablet keeps its own home screen: SCARY is an ordinary app there.
+                    showSetHome = launcherStatus.needsSetup && scaryLayout.tv,
                     scrollToRow = scrollToRow,
                     onScrolledToRow = viewModel::onScrolledToRow,
                     trailer = trailerSettings,

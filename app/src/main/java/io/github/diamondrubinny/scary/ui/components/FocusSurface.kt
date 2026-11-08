@@ -34,6 +34,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.InputMode
+import androidx.compose.ui.platform.LocalInputModeManager
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -78,10 +80,14 @@ fun FocusSurface(
     content: @Composable BoxScope.(focused: Boolean) -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val focused by interactionSource.collectIsFocusedAsState()
+    val hasFocus by interactionSource.collectIsFocusedAsState()
+    // With a finger (a phone or a tablet), a screen still gives its first button the focus for the remote or a
+    // keyboard, but the glow and the zoom would only look stuck: they show once a key is pressed.
+    val inputMode = LocalInputModeManager.current.inputMode
+    val focused = hasFocus && inputMode == InputMode.Keyboard
     val pressed by interactionSource.collectIsPressedAsState()
     val latestOnFocusChanged by rememberUpdatedState(onFocusChanged)
-    LaunchedEffect(focused) { latestOnFocusChanged(focused) }
+    LaunchedEffect(hasFocus) { latestOnFocusChanged(hasFocus) }
 
     val keyHold = remember { KeyHold() }
     val latestOnClick by rememberUpdatedState(onClick)
