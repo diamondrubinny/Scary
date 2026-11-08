@@ -58,6 +58,9 @@ import kotlinx.coroutines.delay
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+/** Test tag of the top bar's "Ask SCARY ✦" button. */
+const val ASK_BUTTON_TAG = "askButton"
+
 @Composable
 fun TopBar(
     effectsEnabled: Boolean,
@@ -76,6 +79,8 @@ fun TopBar(
     /** The bucket list's button, with how many films it holds; none when null. */
     onOpenBucket: (() -> Unit)? = null,
     bucketCount: Int = 0,
+    /** "Ask SCARY ✦"; none when AI is off. */
+    onAsk: (() -> Unit)? = null,
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Column {
@@ -116,6 +121,13 @@ fun TopBar(
                     onClick = onOpenBucket,
                     modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
                 ) { BucketIcon(it) }
+            }
+            if (onAsk != null) {
+                IconCircleButton(
+                    contentDescription = stringResource(R.string.ai_title),
+                    onClick = onAsk,
+                    modifier = Modifier.testTag(ASK_BUTTON_TAG),
+                ) { BasicText("✦", style = ScaryType.Title.copy(color = it, fontSize = ScaryType.Title.fontSize * 0.9f)) }
             }
             IconCircleButton(
                 contentDescription = stringResource(R.string.search_title),

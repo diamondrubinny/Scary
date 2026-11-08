@@ -60,6 +60,13 @@ data class HomeUiState(
     /** How many films are in "Recently opened" (settings offers to clear them). */
     val recentCount: Int = 0,
     val autoUpdateCheck: Boolean = true,
+    val aiEnabled: Boolean = false,
+    /** The AI section of settings, as stored (keys are not here: only whether each has one, read on demand). */
+    val aiProvider: String = "",
+    val aiModels: Map<String, String> = emptyMap(),
+    val aiCustomUrl: String = "",
+    val aiShareTaste: Boolean = false,
+    val aiHomeRow: Boolean = true,
 ) {
     /** A film's place in the bucket list, from 1; null when it is not in it. */
     fun bucketNumber(movie: Movie): Int? = bucketIds.indexOf(movie.id).takeIf { it >= 0 }?.plus(1)
@@ -161,6 +168,11 @@ sealed interface HomeRow {
         override val key = "taste_invite"
     }
 
+    /** "Ask SCARY": one-press AI requests, and a way to ask in one's own words. */
+    data object AskAi : HomeRow {
+        override val key = "ask_ai"
+    }
+
     /** "What do you feel like tonight?": mood chips, and the chosen mood's movies once one is picked. */
     data class Moods(
         val selected: Mood?,
@@ -221,6 +233,8 @@ sealed interface Screen {
     data object PhoneRemote : Screen
     data object TmdbAccount : Screen
     data object TastePicker : Screen
+    /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
+    data class Ask(val chat: Boolean = false) : Screen
 }
 
 /**

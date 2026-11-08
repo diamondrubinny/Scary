@@ -92,6 +92,9 @@ import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ai.AiChip
+import io.github.diamondrubinny.scary.ui.ai.labelRes
+import io.github.diamondrubinny.scary.ui.ai.promptRes
 import io.github.diamondrubinny.scary.ui.components.TopBar
 import io.github.diamondrubinny.scary.ui.components.WideMovieCard
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
@@ -128,6 +131,8 @@ class HomeActions(
     val onOpenTastePicker: () -> Unit = {},
     /** "Not now" on that invitation. */
     val onDismissTasteInvite: () -> Unit = {},
+    /** A one-press AI request on the "Ask SCARY" row (asked at once), or null for "Ask in your own words". */
+    val onAsk: (AiChip?, String?) -> Unit = { _, _ -> },
 )
 
 val SidePadding = 48.dp
@@ -221,6 +226,7 @@ fun HomeScreen(
             onSelectTab = actions.onSelectTab,
             onOpenBucket = actions.onOpenBucket,
             bucketCount = state.bucketIds.size,
+            onAsk = if (state.aiEnabled) ({ actions.onAsk(null, null) }) else null,
         )
         if (state.picking) {
             // Picking films for the bucket list: the hero gives way to what OK does now, and how many are in.
@@ -494,6 +500,10 @@ private fun HomeRowView(
         TasteInviteView(row, restoreKey, restoreFocus, actions, onRowGone)
         return
     }
+    if (row is HomeRow.AskAi) {
+        AskAiRowView(row, rowState, restoreKey, restoreFocus, actions)
+        return
+    }
     if (row is HomeRow.Collection) {
         // Endless online rows: ask for the next page while there are still plenty of cards to go, and again each time a
         // page arrives while the viewer is still near the end, so the row keeps ahead of the remote without a pause.
@@ -515,6 +525,7 @@ private fun HomeRowView(
         is HomeRow.BecauseYouWatched -> stringResource(R.string.row_because_watched, row.because.displayTitle(language))
         is HomeRow.Watched -> stringResource(R.string.row_watched)
         is HomeRow.TasteInvite -> stringResource(R.string.taste_title)
+        is HomeRow.AskAi -> stringResource(R.string.ai_title)
     }
     Column {
         Row(
@@ -577,7 +588,7 @@ private fun HomeRowView(
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
-                is HomeRow.Moods, is HomeRow.TimePlan, is HomeRow.TasteInvite -> Unit
+                is HomeRow.Moods, is HomeRow.TimePlan, is HomeRow.TasteInvite, is HomeRow.AskAi -> Unit
                 is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved, is HomeRow.BecauseYouWatched,
                 is HomeRow.Watched -> items(
                     when (row) {
@@ -876,6 +887,57 @@ private fun TimePlanRowView(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Test tag of the home screen's "Ask SCARY" row. */
+const val ASK_AI_ROW_TAG = "askAiRow"
+
+/** "Ask SCARY ✦": one press asks for something specific; the last chip opens the screen to ask in one's own words. */
+@Composable
+private fun AskAiRowView(
+    row: HomeRow.AskAi,
+    chipState: LazyListState,
+    restoreKey: String?,
+    restoreFocus: FocusRequester,
+    actions: HomeActions,
+) {
+    Column(Modifier.testTag(ASK_AI_ROW_TAG)) {
+        Row(
+            modifier = Modifier.padding(horizontal = SidePadding),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            BasicText(stringResource(R.string.ai_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            BasicText(stringResource(R.string.ai_row_hint), style = ScaryType.Caption)
+        }
+        LazyRow(
+            state = chipState,
+            contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(AiChip.entries, key = { it.key }) { chip ->
+                val key = "${row.key}:${chip.key}"
+                val prompt = stringResource(chip.promptRes())
+                MoodChip(
+                    label = stringResource(chip.labelRes()),
+                    selected = false,
+                    onClick = { actions.onAsk(chip, prompt) },
+                    onFocused = { actions.onCardFocused(key, null) },
+                    focusRequester = restoreFocus.takeIf { key == restoreKey },
+                )
+            }
+            item(key = "own") {
+                val key = "${row.key}:own"
+                MoodChip(
+                    label = stringResource(R.string.ai_chip_own),
+                    selected = true,
+                    onClick = { actions.onAsk(null, null) },
+                    onFocused = { actions.onCardFocused(key, null) },
+                    focusRequester = restoreFocus.takeIf { key == restoreKey },
+                )
             }
         }
     }

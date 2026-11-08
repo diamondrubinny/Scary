@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.details
 
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.ui.ai.AiStatus
+
 import io.github.diamondrubinny.scary.ui.home.WatchOption
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,6 +41,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.platform.testTag
+import androidx.compose.foundation.background
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
@@ -82,6 +89,10 @@ import io.github.diamondrubinny.scary.ui.fx.chill
 import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
+/** Test tags of "About this film ✦" and its text. */
+const val AI_ABOUT_TAG = "aiAbout"
+const val AI_ABOUT_TEXT_TAG = "aiAboutText"
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun DetailsScreen(
@@ -114,6 +125,10 @@ fun DetailsScreen(
     notForMe: Boolean = false,
     onToggleLoved: (Movie) -> Unit = {},
     onToggleNotForMe: (Movie) -> Unit = {},
+    /** "About this film ✦": the AI's spoiler-free take for this film, when asked; null when AI is off. */
+    about: AiTask<String>? = null,
+    onAbout: (Movie) -> Unit = {},
+    onAiSettings: () -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -189,6 +204,13 @@ fun DetailsScreen(
                                 focusRequester = watchFocus,
                             )
                             ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
+                            if (about != null) {
+                                ScaryButton(
+                                    text = stringResource(R.string.ai_about),
+                                    onClick = { onAbout(movie) },
+                                    modifier = Modifier.testTag(AI_ABOUT_TAG),
+                                )
+                            }
                             ScaryButton(
                                 text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                                 onClick = { onToggleMyList(movie) },
@@ -212,6 +234,25 @@ fun DetailsScreen(
                                     text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
                                     onClick = { onToggleBucket(movie) },
                                 )
+                            }
+                        }
+                        if (about != null && about !is AiTask.Idle) {
+                            AiStatus(about, onRetry = { onAbout(movie) }, onSettings = onAiSettings)
+                            if (about is AiTask.Done) {
+                                Column(
+                                    Modifier
+                                        .background(ScaryColors.Crypt.copy(alpha = 0.85f), RoundedCornerShape(10.dp))
+                                        .padding(16.dp)
+                                        .testTag(AI_ABOUT_TEXT_TAG),
+                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                ) {
+                                    BasicText(stringResource(R.string.ai_about_title), style = ScaryType.Label.copy(color = ScaryColors.Candle))
+                                    BasicText(
+                                        about.value,
+                                        style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                    )
+                                }
                             }
                         }
                         if (elsewhere) {

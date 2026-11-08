@@ -35,6 +35,11 @@ import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.catalog.AutoWatched
 import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.ai.AiAssistant
+import io.github.diamondrubinny.scary.ai.AiChip
+import io.github.diamondrubinny.scary.ai.AiContext
+import io.github.diamondrubinny.scary.core.ai.AiProvider
+import io.github.diamondrubinny.scary.data.AiRepository
 import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.data.OnlinePage
 import kotlinx.coroutines.FlowPreview
@@ -108,6 +113,8 @@ class HomeViewModel(
     private val networkBack: Flow<Unit> = emptyFlow(),
     /** The viewer's TMDB account, when they sign in; null in tests that do not need it. */
     private val tmdbAccount: TmdbAccountRepository? = null,
+    /** AI services (Pollinations' free one by default, or the viewer's own keys); null in tests that do not need it. */
+    private val aiRepository: AiRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -240,6 +247,12 @@ class HomeViewModel(
             bucketIds = prefs.bucketIds,
             recentCount = prefs.recentIds.size,
             autoUpdateCheck = prefs.autoUpdateCheck,
+            aiEnabled = prefs.aiEnabled && aiRepository != null,
+            aiProvider = prefs.aiProvider,
+            aiModels = prefs.aiModels,
+            aiCustomUrl = prefs.aiCustomUrl,
+            aiShareTaste = prefs.aiShareTaste,
+            aiHomeRow = prefs.aiHomeRow,
         )
     }.flowOn(Dispatchers.Default)
 
@@ -465,6 +478,7 @@ class HomeViewModel(
             add(HomeRow.Apps(tiles))
             // A new viewer: until a few films are watched or loved, the rows cannot follow their taste. Ask once.
             if (!taste.known && !prefs.tasteInviteDismissed && !prefs.familyNight) add(HomeRow.TasteInvite)
+            if (prefs.aiEnabled && prefs.aiHomeRow && aiRepository != null) add(HomeRow.AskAi)
             if (films && prefs.seasonalRows) Season.activeOn(today()).forEach { season ->
                 val movies = unseenFirst(season.pick(catalog.movies))
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
@@ -1358,6 +1372,111 @@ class HomeViewModel(
         }
     }
 
+    // AI --------------------------------------------------------------------------------------------------------------
+
+    /** The four AI features (see AiAssistant); null only in tests built without AI. */
+    val ai: AiAssistant? = aiRepository?.let { repository -> AiAssistant(repository, settings, viewModelScope, ::aiContext) }
+
+    /**
+     * What the AI may choose from now: what this screen may show (family night, the parental lock and "Not for me"
+     * applied), the current tab's kind first, and the taste worked out on the TV. The open chat is off while the
+     * parental lock or family night is on.
+     */
+    private fun aiContext(): AiContext? {
+        val shown = visibleCatalog() ?: return null
+        val prefs = latestPrefs ?: return null
+        val state = uiState.value
+        val disliked = prefs.dislikedIds.toHashSet()
+        val everything = shown.movies.filter { it.id !in disliked && !state.isLocked(it) }
+        return AiContext(
+            shelf = everything.filter { it.kind == tab.value }.ifEmpty { everything },
+            everything = everything,
+            taste = Personalize.taste(shown::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds),
+            watched = prefs.watchedIds.toHashSet(),
+            language = language.value,
+            chatBlocked = prefs.familyNight || prefs.parentalEnabled,
+        )
+    }
+
+    /** "Ask SCARY" (the top bar's button, or a chip on the home screen: asked at once). */
+    fun openAsk(chip: AiChip? = null, query: String? = null, chat: Boolean = false) {
+        if (chip != null && query != null) ai?.recommend(query, chip)
+        push(Screen.Ask(chat))
+    }
+
+    /** Suggestions or chat on the "Ask SCARY" screen: the same place in the back stack. */
+    fun setAskTab(chat: Boolean) {
+        backStack.update { stack -> if (stack.last() is Screen.Ask) stack.dropLast(1) + Screen.Ask(chat) else stack }
+    }
+
+    fun setAiEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setAiEnabled(enabled) }
+    }
+
+    fun setAiProvider(provider: AiProvider) {
+        viewModelScope.launch { settings.setAiProvider(provider) }
+    }
+
+    fun setAiModel(provider: AiProvider, model: String?) {
+        viewModelScope.launch { settings.setAiModel(provider, model) }
+    }
+
+    fun setAiShareTaste(enabled: Boolean) {
+        viewModelScope.launch { settings.setAiShareTaste(enabled) }
+    }
+
+    fun setAiHomeRow(enabled: Boolean) {
+        viewModelScope.launch { settings.setAiHomeRow(enabled) }
+    }
+
+    /** A custom OpenAI-compatible address; false when it is not plain HTTPS. */
+    fun setAiCustomUrl(input: String): Boolean {
+        val url = AiProvider.customChatUrl(input) ?: return false
+        viewModelScope.launch {
+            settings.setAiCustomUrl(url)
+            settings.setAiModel(AiProvider.CUSTOM, null)
+        }
+        return true
+    }
+
+    suspend fun aiModels(provider: AiProvider): List<String> = aiRepository?.models(provider).orEmpty()
+
+    fun aiKeyMask(provider: AiProvider): String? = aiRepository?.keyMask(provider)
+
+    /** A key typed on the TV: checked with the service, then kept (and that service chosen). */
+    suspend fun saveAiKey(provider: AiProvider, key: String): AiRepository.KeyResult {
+        val result = aiRepository?.saveKey(provider, key) ?: return AiRepository.KeyResult.STORAGE
+        if (result == AiRepository.KeyResult.SAVED) {
+            settings.setAiProvider(provider)
+            show(R.string.msg_ai_key_saved, provider.displayName)
+        }
+        return result
+    }
+
+    fun deleteAiKey(provider: AiProvider) {
+        aiRepository?.deleteKey(provider)
+        show(R.string.msg_ai_key_deleted)
+    }
+
+    fun deleteAllAiKeys() {
+        aiRepository?.deleteAllKeys()
+        viewModelScope.launch { settings.setAiProvider(AiProvider.DEFAULT) }
+        show(R.string.msg_ai_keys_deleted)
+    }
+
+    /** A key pasted on the phone ("service\nkey"); the phone gets the outcome. */
+    suspend fun remoteAiKey(input: String): String {
+        val provider = AiProvider.fromKey(input.substringBefore('\n').trim())
+            ?.takeIf { it.needsKey || it == AiProvider.CUSTOM } ?: return "ai_invalid"
+        return when (saveAiKey(provider, input.substringAfter('\n', ""))) {
+            AiRepository.KeyResult.SAVED -> "ai_saved"
+            AiRepository.KeyResult.INVALID -> "ai_invalid"
+            AiRepository.KeyResult.REJECTED -> "ai_rejected"
+            AiRepository.KeyResult.UNREACHABLE -> "ai_unreachable"
+            AiRepository.KeyResult.STORAGE -> "ai_storage"
+        }
+    }
+
     /** "Clear recently opened" in settings. Watched, My list and the ratings stay. */
     fun clearRecent() {
         viewModelScope.launch {
@@ -1717,6 +1836,7 @@ class HomeViewModel(
                     container.tvInputsRepository,
                     container.networkWatcher.online,
                     container.tmdbAccount,
+                    container.aiRepository,
                 )
             }
         }

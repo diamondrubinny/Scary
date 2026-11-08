@@ -4,6 +4,11 @@
 
 package io.github.diamondrubinny.scary.ui.search
 
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.core.ai.AiPicks
+import io.github.diamondrubinny.scary.ui.ai.AiStatus
+import io.github.diamondrubinny.scary.ui.components.ScaryButton
+
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -56,6 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
@@ -75,6 +81,9 @@ import io.github.diamondrubinny.scary.ui.home.labelRes
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 
+/** Test tag of the "Smart search ✦" button. */
+const val SMART_SEARCH_TAG = "smartSearch"
+
 /**
  * Offline search over the catalog. Input comes from the TV keyboard, or from the microphone button, which hands
  * over to the TV's own speech recognizer: SCARY never records audio itself and needs no microphone permission.
@@ -93,6 +102,11 @@ fun SearchScreen(
     gridState: LazyGridState = rememberLazyGridState(),
     /** The movie opened from these results, if any: coming back from it, focus lands on its card. */
     returnTo: String? = null,
+    /** "Smart search ✦": the AI's matches for [aiQuery] (a description, not a name); null when AI is off. */
+    smart: AiTask<AiPicks>? = null,
+    aiQuery: String = "",
+    onSmartSearch: (query: String, labels: (Movie) -> List<String>) -> Unit = { _, _ -> },
+    onAiSettings: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -181,6 +195,18 @@ fun SearchScreen(
                     onClick = { runCatching { voiceLauncher.launch(speechIntent) } },
                 ) { color -> MicIcon(color) }
             }
+            // For a description rather than a name ("the film with the doll in the attic").
+            if (smart != null && query.isNotBlank()) {
+                ScaryButton(
+                    text = stringResource(R.string.ai_smart_search),
+                    onClick = {
+                        onSmartSearch(query) { movie ->
+                            (listOf(movie.genre.labelRes()) + movie.subgenres.map { it.labelRes() }).map(resources::getString)
+                        }
+                    },
+                    modifier = Modifier.testTag(SMART_SEARCH_TAG),
+                )
+            }
         }
 
         val status = when {
@@ -204,6 +230,30 @@ fun SearchScreen(
             modifier = Modifier.weight(1f),
             state = gridState,
         ) {
+            // The AI's matches for the description on screen, first: they are what the viewer just asked for.
+            if (smart != null && smart !is AiTask.Idle && aiQuery == query.trim()) {
+                item(span = { GridItemSpan(maxLineSpan) }, key = "ai-header") {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        BasicText(stringResource(R.string.ai_smart_results), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+                        AiStatus(smart, onRetry = { onSmartSearch(query) { emptyList() } }, onSettings = onAiSettings)
+                        if (smart is AiTask.Done && smart.value.picks.isEmpty()) {
+                            BasicText(smart.value.reply.ifEmpty { stringResource(R.string.ai_reply_none) }, style = ScaryType.Body)
+                        }
+                    }
+                }
+                if (smart is AiTask.Done) {
+                    items(smart.value.picks, key = { "ai:" + it.movie.id }) { pick ->
+                        PosterCard(
+                            movie = pick.movie,
+                            onClick = { onOpenMovie(pick.movie) },
+                            onFocused = {},
+                            locked = isLocked(pick.movie),
+                            watched = isWatched(pick.movie),
+                        )
+                    }
+                    item(span = { GridItemSpan(maxLineSpan) }, key = "ai-end") { BasicText(stringResource(R.string.search_library_results), style = ScaryType.RowTitle) }
+                }
+            }
             // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
             val webDone = webSearch.query != query.trim() || !webSearch.loading
             val webEmpty = webSearch.query != query.trim() || webSearch.results.isEmpty()

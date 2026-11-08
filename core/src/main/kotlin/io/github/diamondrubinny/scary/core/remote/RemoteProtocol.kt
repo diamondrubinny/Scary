@@ -38,6 +38,9 @@ object RemoteProtocol {
         PLAY_PAUSE("play"), VOLUME_UP("vol_up"), VOLUME_DOWN("vol_down"), MUTE("mute"),
         SEARCH("search", takesText = true), OPEN("open", takesText = true), TMDB_KEY("tmdb", takesText = true),
 
+        /** An AI service's key, as "service\nkey" (see AiProvider.key). */
+        AI_KEY("ai_key", takesText = true),
+
         /** The page asks whether it is paired; it changes nothing. */
         PING("ping");
 

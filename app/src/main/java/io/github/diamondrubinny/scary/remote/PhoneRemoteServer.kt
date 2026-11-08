@@ -245,7 +245,7 @@ class PhoneRemoteServer(private val context: Context) {
 
     /**
      * Another app is in front (Stremio, Netflix…). Arrows, OK and Back are pressed there by SCARY's accessibility
-     * service, when the viewer turned it on; Home, search, opening a title and the TMDB key bring SCARY back first.
+     * service, when the viewer turned it on; Home, search, opening a title and the TMDB or AI keys bring SCARY back first.
      */
     private suspend fun elsewhere(request: RemoteProtocol.Request): Reply {
         val service = HomeButtonService.instance ?: return Reply("a11y_off")
