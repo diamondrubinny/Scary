@@ -14,6 +14,14 @@ mkdir -p "$OUT"
 shot() { sleep "${2:-3}"; adb exec-out screencap -p > "$OUT/$1.png"; echo "captured $1"; }
 open() { adb shell am start -n "$ACT" "$@" > /dev/null; }
 restart() { adb shell am force-stop "$PKG"; sleep 1; }
+# Scrolls up by about half the screen, whatever its size and orientation.
+scroll() {
+  local size w h
+  size=$(adb shell wm size | tr -d '\r' | awk -F': ' '/Override/ {o=$2} /Physical/ {p=$2} END {print (o != "" ? o : p)}')
+  w=${size%x*}; h=${size#*x}
+  if [ "$(adb shell settings get system user_rotation | tr -d '\r')" = "1" ]; then local t=$w; w=$h; h=$t; fi
+  adb shell input swipe $((w / 2)) $((h * 3 / 4)) $((w / 2)) $((h / 4)) 600
+}
 
 adb install -r dist/scary.apk
 adb shell svc power stayon true || true
@@ -48,11 +56,11 @@ screens() {
   sleep 2
   open --es scary.debug.open home
   shot "$p-01-home" 20
-  adb shell input swipe 500 1500 500 500 400
+  scroll
   shot "$p-02-home-rows" 3
   open --es scary.debug.open details:hereditary
   shot "$p-03-details" 8
-  adb shell input swipe 500 1500 500 500 400
+  scroll
   shot "$p-04-details-below" 3
   open --es scary.debug.open search --es scary.debug.query fincher
   shot "$p-05-search" 8

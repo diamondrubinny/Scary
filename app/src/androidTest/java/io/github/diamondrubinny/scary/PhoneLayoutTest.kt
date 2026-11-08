@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary
 
 import android.content.Intent
 import android.content.res.Configuration
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -18,6 +19,9 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.diamondrubinny.scary.ui.components.TOUCH_TARGET
@@ -109,6 +113,28 @@ class PhoneLayoutTest {
         assertTrue("No phone remote on a phone", rule.onAllNodes(hasTestTag(PHONE_REMOTE_ROW_TAG)).fetchSemanticsNodes().isEmpty())
     }
 
+    /** A finger scrolling the home screen, even one that starts on an app tile, scrolls and opens nothing. */
+    @Test
+    fun scrollingHomeOpensNothing() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        waitFor(hasText(text(R.string.row_apps)))
+        val rows = rule.onNode(hasTestTag(HOME_ROWS_TAG))
+        val apps = rule.onNode(hasText(text(R.string.row_apps))).fetchSemanticsNode().boundsInRoot
+        val top = rows.fetchSemanticsNode().boundsInRoot.top
+        rows.performTouchInput {
+            // From just below the "My apps" title (on its tiles) up towards the top.
+            val startY = (apps.bottom - top + TILE_OFFSET_PX).coerceIn(0f, height - 1f)
+            swipe(Offset(centerX, startY), Offset(centerX, startY / 4f), durationMillis = 400)
+        }
+        rule.waitForIdle()
+        Thread.sleep(SETTLE_MS)
+        assertTrue(
+            "A scroll opened something: SCARY is ${rule.activity.lifecycle.currentState}",
+            rule.activity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED),
+        )
+        assertTrue("Still on the home screen", rule.onAllNodes(hasTestTag(HOME_ROWS_TAG)).fetchSemanticsNodes().isNotEmpty())
+    }
+
     @Test
     fun theAppHasAnIconInTheAppDrawer() {
         val drawer = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(rule.activity.packageName)
@@ -120,5 +146,7 @@ class PhoneLayoutTest {
         const val TIMEOUT_MS = 30_000L
         const val SLACK_PX = 1f
         const val MAX_LISTED = 8
+        const val TILE_OFFSET_PX = 60f
+        const val SETTLE_MS = 1_500L
     }
 }
