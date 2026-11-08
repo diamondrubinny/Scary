@@ -24,6 +24,16 @@ object Personalize {
 
         fun score(movie: Movie): Double = traits(movie).sumOf { weights[it] ?: 0.0 }
 
+        /**
+         * The traits that weigh most, liked ([liked] true, heaviest first) or disliked: keys like "s:GHOST", "t:SLOW_BURN",
+         * "d:198" (the 1980s), "g:HORROR". Directors are left out: a taste summary sent anywhere names no people.
+         */
+        fun leanings(count: Int, liked: Boolean): List<String> = weights.entries
+            .filter { (trait, weight) -> !trait.startsWith("p:") && (if (liked) weight > 0 else weight < 0) }
+            .sortedByDescending { (_, weight) -> if (liked) weight else -weight }
+            .take(count)
+            .map { it.key }
+
         companion object {
             val NONE = Taste(emptyMap(), 0)
         }
