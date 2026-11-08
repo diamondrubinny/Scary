@@ -14,17 +14,17 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -131,6 +131,7 @@ fun TopBar(
  * The top bar on a tablet or phone: the logo and the clock, then the tabs and the buttons in a row of their own that
  * scrolls sideways when it does not fit. The donation code stays on the TV: a phone cannot scan its own screen.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun NarrowTopBar(
     effectsEnabled: Boolean,
@@ -156,10 +157,12 @@ private fun NarrowTopBar(
             if (sleepAtMillis != null) SleepCountdown(sleepAtMillis, Modifier.padding(end = 12.dp))
             Clock()
         }
-        Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        // Wraps to another line rather than scrolling sideways: a button past the edge would be one nobody finds.
+        FlowRow(
+            Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             if (familyNight) {
                 BasicText(
