@@ -874,6 +874,19 @@ class ScaryUiTest {
         }
     }
 
+    /** The first card the taste picker shows that the viewer has not loved before the test. */
+    private fun firstTasteCardOnScreenOrNull(lovedBefore: Set<String>, viewModel: HomeViewModel): io.github.diamondrubinny.scary.core.model.Movie? {
+        val cards = SemanticsMatcher("a taste card") { node ->
+            node.config.getOrNull(SemanticsProperties.TestTag)?.startsWith(tasteCardTag("")) == true
+        }
+        val ids = rule.onAllNodes(cards).fetchSemanticsNodes().mapNotNull { it.config.getOrNull(SemanticsProperties.TestTag)?.removePrefix(tasteCardTag("")) }
+        val catalog = viewModel.tasteCandidates(MediaKind.MOVIE) + viewModel.tasteCandidates(MediaKind.SERIES)
+        return ids.firstOrNull { it !in lovedBefore }?.let { id -> catalog.firstOrNull { it.id == id } }
+    }
+
+    private fun firstTasteCardOnScreen(lovedBefore: Set<String>, viewModel: HomeViewModel) =
+        firstTasteCardOnScreenOrNull(lovedBefore, viewModel) ?: throw AssertionError("no taste card on screen")
+
     @Test
     fun theTastePickerMarksFilmsAndSeriesAsLovedAndDoneGoesBackToSettings() {
         waitForHome()
@@ -888,8 +901,9 @@ class ScaryUiTest {
             rule.onNode(row).performScrollTo().performClick()
             waitFor(hasTestTag(TASTE_PICKER_TAG))
             waitFor(hasText(text(R.string.taste_done)) and isFocused())
-            // The library's best rated film comes first; OK puts a heart on it, read out with its title.
-            val film = viewModel.tasteCandidates(MediaKind.MOVIE).first { it.id !in lovedBefore }
+            // A film on screen (the list can reorder while ratings arrive from the web, so it is read off the
+            // screen, not recomputed); OK puts a heart on it, read out with its title.
+            val film = firstTasteCardOnScreen(lovedBefore, viewModel)
             picked += film.id
             rule.onNodeWithTag(tasteCardTag(film.id)).performScrollTo().performClick()
             waitUntilOrDescribe("${film.title} loved") { film.id in viewModel.uiState.value.lovedIds }
@@ -899,10 +913,10 @@ class ScaryUiTest {
             waitUntilOrDescribe("${film.title} no longer loved") { film.id !in viewModel.uiState.value.lovedIds }
             // The series tab shows series.
             rule.onNodeWithTag(tasteTabTag(MediaKind.SERIES)).performClick()
-            val series = viewModel.tasteCandidates(MediaKind.SERIES).first { it.id !in lovedBefore }
+            waitUntilOrDescribe("a series on the picker") { firstTasteCardOnScreenOrNull(lovedBefore, viewModel)?.kind == MediaKind.SERIES }
+            val series = firstTasteCardOnScreen(lovedBefore, viewModel)
             assertTrue(series.kind == MediaKind.SERIES)
             picked += series.id
-            waitFor(hasTestTag(tasteCardTag(series.id)))
             rule.onNodeWithTag(tasteCardTag(series.id)).performClick()
             waitUntilOrDescribe("${series.title} loved") { series.id in viewModel.uiState.value.lovedIds }
             // Done: back on settings, on the row that opened the picker.
