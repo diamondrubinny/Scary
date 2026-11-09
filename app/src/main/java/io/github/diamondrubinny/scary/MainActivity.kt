@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
+        (application as ScaryApplication).container.updateManager.onLeft()
         ambient.stop()
         viewModel.onBackgrounded()
         val remote = (application as ScaryApplication).container.phoneRemote

@@ -20,6 +20,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.focusable
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
@@ -48,22 +52,31 @@ const val UPDATE_DIALOG_TAG = "updateDialog"
 
 class UpdateActions(
     val onUpdate: () -> Unit,
-    val onLater: () -> Unit,
-    val onSkip: () -> Unit,
+    val onNotNow: () -> Unit,
     val onOpenPermission: () -> Unit,
     val onDismiss: () -> Unit,
 )
 
 /**
- * "A new version of SCARY": what is new, then "Update now", "Later" or "Skip this version". While it works: the
- * download's progress (read out), the one-time permission to install, Android's own install screen, or what went
- * wrong and what to do. Back closes it as "Later" (or cancels a download).
+ * "A new version of SCARY", which is mandatory: what is new and "Update now" only, while the download (started by
+ * itself) shows its progress, read out; then the one-time permission to install and Android's own install screen.
+ * Back does not close it. Only when something blocks the update (a failed download or check, no permission) are
+ * "Try again" and "Not now" offered: SCARY is the TV's home screen, and a popup that could never close would lock it.
  */
 @Composable
 fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions) {
     val firstFocus = remember { FocusRequester() }
-    val offer = state is UpdateState.Available
-    Dialog(onDismissRequest = if (offer) actions.onLater else actions.onDismiss) {
+    // Back and a tap outside close it only where "Not now" is offered (or once Android's screen has taken over).
+    val canPutOff = state is UpdateState.Failed || state is UpdateState.NeedsPermission
+    val closable = canPutOff || state is UpdateState.Installing
+    Dialog(
+        onDismissRequest = when {
+            canPutOff -> actions.onNotNow
+            closable -> actions.onDismiss
+            else -> ({})
+        },
+        properties = DialogProperties(dismissOnBackPress = closable, dismissOnClickOutside = closable),
+    ) {
         LaunchedEffect(state::class) {
             withFrameNanos { }
             runCatching { firstFocus.requestFocus() }
@@ -88,11 +101,14 @@ fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions)
                     val notes = state.manifest.notesFor(language.code)
                     if (notes.isNotEmpty()) BasicText(notes, style = ScaryType.Body)
                     BasicText(stringResource(R.string.update_how), style = ScaryType.Caption)
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 4.dp)) {
-                        ScaryButton(stringResource(R.string.update_now), onClick = actions.onUpdate, primary = true, focusRequester = firstFocus)
-                        ScaryButton(stringResource(R.string.update_later), onClick = actions.onLater)
-                        ScaryButton(stringResource(R.string.update_skip), onClick = actions.onSkip)
-                    }
+                    BasicText(stringResource(R.string.update_required), style = ScaryType.Caption.copy(color = ScaryColors.Candle))
+                    ScaryButton(
+                        stringResource(R.string.update_now),
+                        onClick = actions.onUpdate,
+                        primary = true,
+                        focusRequester = firstFocus,
+                        modifier = Modifier.padding(top = 4.dp),
+                    )
                 }
                 is UpdateState.Downloading -> {
                     val label = stringResource(R.string.update_downloading, state.percent)
@@ -105,13 +121,14 @@ fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions)
                         },
                     )
                     ProgressBar(state.percent)
-                    ScaryButton(stringResource(R.string.update_cancel), onClick = actions.onDismiss, focusRequester = firstFocus)
+                    // Nothing to press: the focus stays in the popup, so the remote does not reach the screen behind it.
+                    Box(Modifier.size(1.dp).focusRequester(firstFocus).focusable())
                 }
                 is UpdateState.NeedsPermission -> {
                     BasicText(stringResource(R.string.update_permission), style = ScaryType.Body)
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         ScaryButton(stringResource(R.string.update_open_settings), onClick = actions.onOpenPermission, primary = true, focusRequester = firstFocus)
-                        ScaryButton(stringResource(R.string.update_cancel), onClick = actions.onDismiss)
+                        ScaryButton(stringResource(R.string.update_not_now), onClick = actions.onNotNow)
                     }
                 }
                 is UpdateState.Installing -> {
@@ -136,7 +153,14 @@ fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions)
                         style = ScaryType.Body,
                         modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                     )
-                    ScaryButton(stringResource(R.string.update_close), onClick = actions.onDismiss, focusRequester = firstFocus)
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        if (state.manifest != null) {
+                            ScaryButton(stringResource(R.string.update_try_again), onClick = actions.onUpdate, primary = true, focusRequester = firstFocus)
+                            ScaryButton(stringResource(R.string.update_not_now), onClick = actions.onNotNow)
+                        } else {
+                            ScaryButton(stringResource(R.string.update_not_now), onClick = actions.onNotNow, focusRequester = firstFocus)
+                        }
+                    }
                 }
                 else -> ScaryButton(stringResource(R.string.update_close), onClick = actions.onDismiss, focusRequester = firstFocus)
             }

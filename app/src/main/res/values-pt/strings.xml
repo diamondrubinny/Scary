@@ -462,10 +462,10 @@
     <string name="update_version">Versão %1$s, build %2$d</string>
     <string name="update_how">Ela vem do repositório oficial do SCARY e é verificada antes de instalar. O Android vai pedir confirmação.</string>
     <string name="update_now">Atualizar agora</string>
-    <string name="update_later">Depois</string>
-    <string name="update_skip">Pular esta versão</string>
+    <string name="update_not_now">Agora não</string>
+    <string name="update_try_again">Tentar de novo</string>
     <string name="update_downloading">Baixando… %1$d%%</string>
-    <string name="update_cancel">Cancelar</string>
+    <string name="update_required">Esta atualização é obrigatória: ela é baixada sozinha e você só confirma.</string>
     <string name="update_permission">Para se atualizar, o SCARY precisa da permissão do Android para instalar apps. Permita uma vez para o SCARY na próxima tela e volte.</string>
     <string name="update_open_settings">Abrir configurações</string>
     <string name="update_installing">Confirme a atualização na tela do Android. O SCARY reinicia quando terminar.</string>
@@ -481,7 +481,7 @@
     <string name="settings_update_available">Build %1$d disponível</string>
     <string name="settings_update_failed">Não foi possível verificar</string>
     <string name="settings_update_auto">Procurar atualizações sozinho</string>
-    <string name="settings_update_note">Só do repositório oficial do SCARY no GitHub, no máximo a cada seis horas, e só é instalada uma atualização assinada com a chave do SCARY. O GitHub vê o endereço IP da TV; nada mais é enviado.</string>
+    <string name="settings_update_note">Só do repositório oficial do SCARY no GitHub, no máximo uma vez por hora, e só é instalada uma atualização assinada com a chave do SCARY. Toda nova versão é obrigatória: ela é baixada sozinha e pede sua confirmação. O GitHub vê o endereço IP da TV; nada mais é enviado.</string>
     <string name="settings_update_not_official">Esta cópia do SCARY não é a versão oficial, então não recebe as atualizações oficiais.</string>
 
     <!-- Ask SCARY (AI) -->

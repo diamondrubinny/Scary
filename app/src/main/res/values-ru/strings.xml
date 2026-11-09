@@ -469,10 +469,10 @@
     <string name="update_version">Версия %1$s, сборка %2$d</string>
     <string name="update_how">Она из официального репозитория SCARY и проверяется перед установкой. Android попросит подтвердить.</string>
     <string name="update_now">Обновить сейчас</string>
-    <string name="update_later">Позже</string>
-    <string name="update_skip">Пропустить эту версию</string>
+    <string name="update_not_now">Не сейчас</string>
+    <string name="update_try_again">Повторить</string>
     <string name="update_downloading">Загрузка… %1$d%%</string>
-    <string name="update_cancel">Отмена</string>
+    <string name="update_required">Это обязательное обновление: оно скачивается само, вам нужно только подтвердить.</string>
     <string name="update_permission">Чтобы обновиться, SCARY нужно разрешение Android на установку приложений. Разрешите один раз для SCARY на следующем экране и вернитесь.</string>
     <string name="update_open_settings">Открыть настройки</string>
     <string name="update_installing">Подтвердите обновление на экране Android. SCARY перезапустится по завершении.</string>
@@ -488,7 +488,7 @@
     <string name="settings_update_available">Доступна сборка %1$d</string>
     <string name="settings_update_failed">Не удалось проверить</string>
     <string name="settings_update_auto">Искать обновления самостоятельно</string>
-    <string name="settings_update_note">Только из официального репозитория SCARY на GitHub, не чаще раза в шесть часов, и устанавливается только обновление, подписанное ключом SCARY. GitHub видит IP-адрес телевизора; больше ничего не отправляется.</string>
+    <string name="settings_update_note">Только из официального репозитория SCARY на GitHub, не чаще раза в час, и устанавливается только обновление, подписанное ключом SCARY. Каждая новая версия обязательна: она скачивается сама и просит подтверждения. GitHub видит IP-адрес телевизора; больше ничего не отправляется.</string>
     <string name="settings_update_not_official">Эта копия SCARY — не официальная сборка, поэтому она не получает официальные обновления.</string>
 
     <!-- Ask SCARY (AI) -->
