@@ -57,8 +57,8 @@ object Updates {
      */
     val OFFICIAL_CERT_SHA256: Set<String> = setOf("5949b2e473f0b4b3e5f1ece023d6194ea186051a01582e5b6cf6cecffc7d791f")
 
-    /** How often to look, at most. */
-    const val CHECK_INTERVAL_MS = 6 * 60 * 60 * 1000L
+    /** How often to look by itself, at most: updates are mandatory, so a new version should not wait long. */
+    const val CHECK_INTERVAL_MS = 60 * 60 * 1000L
 
     /** "Later" asks again after this. */
     const val LATER_MS = 24 * 60 * 60 * 1000L
