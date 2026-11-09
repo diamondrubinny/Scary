@@ -457,10 +457,10 @@
     <string name="update_version">Version %1$s, build %2$d</string>
     <string name="update_how">It comes from SCARY\'s official repository and is checked before installing. Android will ask you to confirm.</string>
     <string name="update_now">Update now</string>
-    <string name="update_later">Later</string>
-    <string name="update_skip">Skip this version</string>
+    <string name="update_not_now">Not now</string>
+    <string name="update_try_again">Try again</string>
     <string name="update_downloading">Downloading… %1$d%%</string>
-    <string name="update_cancel">Cancel</string>
+    <string name="update_required">This update is required: it downloads by itself, and you only confirm it.</string>
     <string name="update_permission">To update itself, SCARY needs Android\'s permission to install apps. Allow it once for SCARY on the next screen, then come back.</string>
     <string name="update_open_settings">Open settings</string>
     <string name="update_installing">Confirm the update on Android\'s screen. SCARY restarts when it is done.</string>
@@ -476,7 +476,7 @@
     <string name="settings_update_available">Available: build %1$d</string>
     <string name="settings_update_failed">Could not check</string>
     <string name="settings_update_auto">Look for updates by itself</string>
-    <string name="settings_update_note">Only from SCARY\'s official repository on GitHub, at most every six hours, and only an update signed with SCARY\'s key is installed. GitHub sees the TV\'s IP address; nothing else is sent.</string>
+    <string name="settings_update_note">Only from SCARY\'s official repository on GitHub, at most once an hour, and only an update signed with SCARY\'s key is installed. Every new version is required: it downloads by itself and asks you to confirm it. GitHub sees the TV\'s IP address; nothing else is sent.</string>
     <string name="settings_update_not_official">This copy of SCARY is not the official build, so it does not get the official updates.</string>
 
     <!-- Ask SCARY (AI) -->

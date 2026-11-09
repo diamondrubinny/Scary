@@ -63,9 +63,12 @@ sealed interface UpdateState {
 
 /**
  * New versions of SCARY from the official repository's "stable" release (see [Updates] for what is trusted and why).
- * Looks by itself at most every six hours while allowed, and when asked in settings; a new version pops up on the
- * home screen; the viewer picks "Update now", "Later" or "Skip this version". Installing always goes through
- * Android's own confirmation: an app cannot install anything silently.
+ * Looks by itself at most once an hour while allowed (at start, on every return to SCARY and while it stays on
+ * screen), and when asked in settings. Every new version is mandatory: the popup comes up by itself, the download
+ * starts at once, and its only choice is "Update now". Installing always goes through Android's own confirmation: an
+ * app cannot install anything silently. Only when something blocks the update (no network, a failed check, no
+ * permission) can the viewer put it off ("Not now", until the next look), since SCARY is the TV's home screen and a
+ * popup that could never close would lock the TV.
  */
 class UpdateManager(
     private val context: Context,
@@ -95,6 +98,17 @@ class UpdateManager(
     @Volatile
     private var started = false
 
+    /**
+     * Whether SCARY is on screen. Automatic looks happen only then, and an update downloaded meanwhile waits for it:
+     * Android's install screen must never come up over a film playing in another app.
+     */
+    @Volatile
+    private var inFront = false
+
+    /** Downloaded and checked while SCARY was away: installed when it comes back. */
+    @Volatile
+    private var readyToInstall: UpdateManifest? = null
+
     init {
         scope.launch {
             delay(STARTUP_DELAY_MS)
@@ -118,7 +132,7 @@ class UpdateManager(
             _state.value = UpdateState.NotOfficial
             return
         }
-        if (!started || busy() || work?.isActive == true) return
+        if (!started || !inFront || busy() || work?.isActive == true) return
         work = scope.launch {
             val prefs = settings.prefs.first()
             if (!prefs.autoUpdateCheck || !prefs.onlineEnabled) return@launch
@@ -157,27 +171,34 @@ class UpdateManager(
         }
         settings.setUpdateLastCheck(now)
         val prefs = settings.prefs.first()
-        when (Updates.decide(manifest, installedVersion, Build.VERSION.SDK_INT, prefs.updateSkippedVersion, prefs.updateLaterUntil, now, manual)) {
-            Updates.Decision.OFFER -> {
+        // Mandatory: a version skipped or put off under an older SCARY is offered all the same (manual = true).
+        when (Updates.decide(manifest, installedVersion, Build.VERSION.SDK_INT, skippedVersion = null, laterUntilMillis = null, nowMillis = now, manual = true)) {
+            Updates.Decision.OFFER, Updates.Decision.SKIPPED, Updates.Decision.LATER -> {
                 _state.value = UpdateState.Available(manifest)
                 _prompt.value = true
+                // The download starts at once: the viewer only confirms the install on Android's screen.
+                startUpdate(manifest)
             }
-            Updates.Decision.SKIPPED, Updates.Decision.LATER -> _state.value = UpdateState.Available(manifest)
             Updates.Decision.UP_TO_DATE, Updates.Decision.TOO_NEW_FOR_DEVICE -> _state.value = UpdateState.UpToDate(installedVersion, now)
         }
     }
 
-    /** "Later": the popup goes, and comes back tomorrow. */
-    fun later() {
+    /**
+     * "Not now", offered only when something blocks the update: the popup goes until the next look (an hour, or the
+     * next return to SCARY), then comes back.
+     */
+    fun notNow() {
+        work?.cancel()
         _prompt.value = false
-        scope.launch { settings.updateLater(System.currentTimeMillis() + Updates.LATER_MS) }
-    }
-
-    /** "Skip this version": not offered again by itself; a newer one will be. */
-    fun skip() {
-        val manifest = (state.value as? UpdateState.Available)?.manifest
-        _prompt.value = false
-        if (manifest != null) scope.launch { settings.skipUpdate(manifest.versionCode) }
+        val current = _state.value
+        val manifest = when (current) {
+            is UpdateState.NeedsPermission -> current.manifest
+            is UpdateState.Failed -> current.manifest
+            else -> null
+        }
+        if (manifest != null) _state.value = UpdateState.Available(manifest)
+        // The next look is due at once when SCARY comes back, not in an hour.
+        scope.launch { settings.setUpdateLastCheck(0L) }
     }
 
     /** Closes the popup after a failure or a cancel, keeping what is known. */
@@ -199,9 +220,18 @@ class UpdateManager(
         if (_state.value is UpdateState.Available) _prompt.value = true
     }
 
-    /** "Update now": download, verify, then hand the APK to Android's installer. */
+    /** "Update now" (and "Try again"): download, verify, then hand the APK to Android's installer. */
     fun updateNow() {
-        val manifest = (state.value as? UpdateState.Available)?.manifest ?: return
+        val manifest = when (val current = state.value) {
+            is UpdateState.Available -> current.manifest
+            is UpdateState.Failed -> current.manifest
+            else -> null
+        } ?: return
+        _prompt.value = true
+        startUpdate(manifest)
+    }
+
+    private fun startUpdate(manifest: UpdateManifest) {
         work?.cancel()
         work = scope.launch {
             _state.value = UpdateState.Downloading(manifest, 0)
@@ -221,15 +251,34 @@ class UpdateManager(
                 return@launch
             }
             downloaded = file
-            installOrAskPermission(manifest)
+            if (inFront) {
+                installOrAskPermission(manifest)
+            } else {
+                readyToInstall = manifest
+                _state.value = UpdateState.Available(manifest)
+            }
         }
     }
 
-    /** Back on screen: if the viewer just allowed installs, carry on. */
+    /** Back on screen: if the viewer just allowed installs, or an update was downloaded meanwhile, carry on. */
     fun onResumed() {
+        inFront = true
         val current = _state.value
-        if (current is UpdateState.NeedsPermission && canInstall()) installOrAskPermission(current.manifest)
-        checkIfDue()
+        val ready = readyToInstall
+        readyToInstall = null
+        when {
+            current is UpdateState.NeedsPermission && canInstall() -> installOrAskPermission(current.manifest)
+            ready != null && current is UpdateState.Available && current.manifest == ready -> {
+                _prompt.value = true
+                installOrAskPermission(ready)
+            }
+            else -> checkIfDue()
+        }
+    }
+
+    /** SCARY left the screen (another app, or the TV went off). */
+    fun onLeft() {
+        inFront = false
     }
 
     /** "Open settings" on the permission step. */
@@ -302,10 +351,10 @@ class UpdateManager(
                 _prompt.value = false
                 downloaded?.delete()
             }
-            // The viewer said no on Android's screen: back to the offer.
+            // The viewer said no on Android's screen: the update is mandatory, so the offer comes straight back.
             PackageInstaller.STATUS_FAILURE_ABORTED -> {
                 if (manifest != null) _state.value = UpdateState.Available(manifest)
-                _prompt.value = false
+                _prompt.value = manifest != null
             }
             else -> {
                 Log.w(TAG, "Install failed with status $status")
@@ -461,9 +510,15 @@ class UpdateManager(
         return out.toByteArray()
     }
 
-    /** For UI tests: shows the popup for [manifest] as if a check had found it. */
+    /** For UI tests: shows the popup for [manifest] as if a check had found it (without downloading anything). */
     fun offerForTest(manifest: UpdateManifest) {
         _state.value = UpdateState.Available(manifest)
+        _prompt.value = true
+    }
+
+    /** For UI tests: the popup as when the download of [manifest] failed. */
+    fun failForTest(manifest: UpdateManifest) {
+        _state.value = UpdateState.Failed(manifest, UpdateState.Reason.UNREACHABLE)
         _prompt.value = true
     }
 
@@ -472,7 +527,8 @@ class UpdateManager(
         const val TIMEOUT_MS = 15_000
         const val BUFFER = 64 * 1024
         const val MAX_REDIRECTS = 4
-        const val PERIODIC_MS = 60 * 60_000L
+        /** How often SCARY asks itself whether a look is due ([Updates.checkDue] decides; no request otherwise). */
+        const val PERIODIC_MS = 15 * 60_000L
         const val STARTUP_DELAY_MS = 30_000L
         val REDIRECTS = setOf(301, 302, 303, 307, 308)
     }
