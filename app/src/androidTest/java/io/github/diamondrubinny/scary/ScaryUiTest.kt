@@ -225,7 +225,8 @@ class ScaryUiTest {
 
     @Test
     fun theCreditsShowUnderTheLogoAndAtTheEndOfTheRows() {
-        waitForHome()
+        // Home's first focus (tonight's pick) scrolls the rows back to the top: scroll to the end only after it.
+        waitForHomeFocus()
         // Required by the NOTICE file (Apache License 2.0); the build fails if it disappears from the screen.
         rule.onNode(hasText(Credit.SHORT)).assertExists()
         rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey(CREDIT_KEY)
