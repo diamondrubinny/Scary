@@ -76,6 +76,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.player.ContinueCard
+import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.ai.AiChip
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.TimeBudget
@@ -138,6 +140,10 @@ class HomeActions(
     val onDismissTasteInvite: () -> Unit = {},
     /** A one-press AI request on the "Ask SCARY" row (asked at once), or null for "Ask in your own words". */
     val onAsk: (AiChip?, String?) -> Unit = { _, _ -> },
+    /** A "Continue watching" card: plays the file from where the viewer stopped (or the spot last marked). */
+    val onContinue: (WatchEntry) -> Unit = {},
+    /** Holding OK on that card: it leaves the row. */
+    val onForgetContinue: (WatchEntry) -> Unit = {},
 )
 
 /** The margin on both sides of every screen: 48dp on a TV, less on tablets and phones (ScaryLayout). */
@@ -551,6 +557,7 @@ private fun HomeRowView(
         }
     }
     val title = when (row) {
+        is HomeRow.ContinueWatching -> stringResource(R.string.row_continue)
         is HomeRow.Recent -> stringResource(R.string.row_recent)
         is HomeRow.MyList -> stringResource(R.string.row_my_list)
         is HomeRow.Apps -> stringResource(R.string.row_apps)
@@ -573,6 +580,7 @@ private fun HomeRowView(
             BasicText(text = title, style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
             // The only row a movie leaves by holding OK: say so where it matters.
             if (row is HomeRow.MyList) BasicText(stringResource(R.string.my_list_hint), style = ScaryType.Caption)
+            if (row is HomeRow.ContinueWatching) BasicText(stringResource(R.string.continue_hint), style = ScaryType.Caption)
         }
         LazyRow(
             state = rowState,
@@ -582,6 +590,20 @@ private fun HomeRowView(
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             when (row) {
+                is HomeRow.ContinueWatching -> items(row.items, key = { it.entry.key }) { item ->
+                    val key = "${row.key}:${item.entry.key}"
+                    ContinueCard(
+                        item = item,
+                        language = language,
+                        onClick = { actions.onContinue(item.entry) },
+                        onLongClick = {
+                            if (row.items.size == 1) onRowGone()
+                            actions.onForgetContinue(item.entry)
+                        },
+                        onFocused = { actions.onCardFocused(key, item.movie?.id) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
                 is HomeRow.Recent -> items(row.movies, key = { it.id }) { movie ->
                     val key = "${row.key}:${movie.id}"
                     WideMovieCard(

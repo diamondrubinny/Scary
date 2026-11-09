@@ -135,8 +135,8 @@ class AppContainer(context: Context) {
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
     val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore)
 
-    /** Where the viewer stopped in each of their files, kept on this TV only. */
-    val playerPositions = io.github.diamondrubinny.scary.data.PlayerPositions(appContext)
+    /** Where the viewer stopped in each of their files and the spots they marked, kept on this TV only. */
+    val watchStore = io.github.diamondrubinny.scary.data.WatchStore(appContext)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
 

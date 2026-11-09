@@ -20,6 +20,15 @@ import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.PlayerSession
 import io.github.diamondrubinny.scary.ui.player.PLAYER_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_TOAST_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_SPEED_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_SEEKBAR_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_MARK_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_BOOKMARK_LIST_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_BOOKMARKS_TAG
+import io.github.diamondrubinny.scary.ui.player.CONTINUE_CARD_TAG
+import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.onNodeWithTag
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_TAG
 import io.github.diamondrubinny.scary.ui.settings.REAL_DEBRID_ROW_TAG
 import org.junit.Assert.assertTrue
@@ -84,6 +93,61 @@ class PlayerTest {
         pressBack()
         rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
         assertTrue("The player session ends with the screen", viewModel().player.value == null)
+    }
+
+    /**
+     * The upgraded player: a spot is marked (a message says so), the marked spots open in a list that Back closes
+     * without leaving the film, the speed changes, and once the player is closed the file waits on the home screen
+     * under "Continue watching".
+     */
+    @Test
+    fun aSpotMarkedInThePlayerWaitsUnderContinueWatching() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        val clip = File(rule.activity.cacheDir, "test-clip.mp4")
+        InstrumentationRegistry.getInstrumentation().context.assets.open("test-clip.mp4").use { input -> clip.outputStream().use(input::copyTo) }
+        val vm = viewModel()
+        // A key as Real-Debrid makes them, so the file goes into the watch history.
+        val session = PlayerSession(
+            key = "d:TESTCLIP",
+            playable = RealDebridRepository.Playable(clip.toURI().toString(), "Test clip") { null },
+            movieId = null,
+            startAtMs = 0L,
+        )
+        try {
+            rule.runOnUiThread { vm.playForTest(session) }
+            waitFor(hasTestTag(PLAYER_TAG))
+            // Paused, the controls stay up.
+            waitFor(hasText(text(R.string.player_pause)))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            waitFor(hasText(text(R.string.player_play)))
+            rule.onNode(hasTestTag(PLAYER_SEEKBAR_TAG)).assertExists()
+
+            rule.onNode(hasTestTag(PLAYER_MARK_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_TOAST_TAG))
+            waitFor(hasTestTag(PLAYER_BOOKMARKS_TAG))
+            rule.onNode(hasTestTag(PLAYER_BOOKMARKS_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_BOOKMARK_LIST_TAG))
+            // Back closes the list, not the film.
+            rule.waitForIdle()
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_BOOKMARK_LIST_TAG)).fetchSemanticsNodes().isEmpty() }
+            rule.onNode(hasTestTag(PLAYER_TAG)).assertExists()
+
+            // The speed goes from normal to the next one.
+            waitFor(hasText(rule.activity.getString(R.string.player_speed, "1×")))
+            rule.onNode(hasTestTag(PLAYER_SPEED_TAG)).performClick()
+            waitFor(hasText(rule.activity.getString(R.string.player_speed, "1.25×")))
+
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+            assertTrue(vm.watchHistory.value.single { it.key == "d:TESTCLIP" }.bookmarks.size == 1)
+            // Home: the file waits under "Continue watching".
+            waitFor(hasTestTag(HOME_ROWS_TAG))
+            rule.waitUntil(TIMEOUT_MS) { runCatching { rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("continue") }.isSuccess }
+            waitFor(hasTestTag(CONTINUE_CARD_TAG))
+        } finally {
+            rule.runOnUiThread { vm.clearWatchHistory() }
+        }
     }
 
     @Test

@@ -58,9 +58,11 @@ import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
 import io.github.diamondrubinny.scary.data.OnlinePage
-import io.github.diamondrubinny.scary.data.PlayerPositions
 import io.github.diamondrubinny.scary.data.Rating
 import io.github.diamondrubinny.scary.data.RealDebridRepository
+import io.github.diamondrubinny.scary.data.WatchStore
+import io.github.diamondrubinny.scary.core.player.WatchHistory
+import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
@@ -122,7 +124,7 @@ class HomeViewModel(
     private val aiRepository: AiRepository? = null,
     /** The viewer's own Real-Debrid account, for the internal player; null in tests that do not need it. */
     private val realDebrid: RealDebridRepository? = null,
-    private val playerPositions: PlayerPositions? = null,
+    private val watchStore: WatchStore? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -211,14 +213,17 @@ class HomeViewModel(
         if (state is CatalogState.Ready) CatalogState.Ready(shown(state.catalog, extras, online, family).also { it.movie("") }) else state
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, CatalogState.Loading)
 
+    /** The internal player's watch history (resume spots and bookmarks), kept on this TV only. */
+    val watchHistory: StateFlow<List<WatchEntry>> = watchStore?.entries ?: MutableStateFlow(emptyList())
+
     /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
-        combine(installedApps, inputs) { a, i -> a to i },
+        combine(installedApps, inputs, watchHistory) { a, i, w -> Triple(a, i, w) },
         combine(mood, decade, timeBudget, tab, picking) { m, d, t, k, p -> HomeChoices(m, d, t, k, p) },
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, (apps, tvInputList), choices, prefs, unlocked ->
+    ) { catalogState, (apps, tvInputList, history), choices, prefs, unlocked ->
         val tiles = appTiles(apps, prefs, tvInputList)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -231,7 +236,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, choices, prefs, unlocked)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, choices, prefs, unlocked, history)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -510,6 +515,7 @@ class HomeViewModel(
         choices: HomeChoices,
         prefs: LauncherPrefs,
         unlocked: Boolean,
+        history: List<WatchEntry> = emptyList(),
     ): HomeUiState {
         // The tab shows its own kind only: films, or series. Search (state.movies) still finds both.
         val catalog = all.ofKind(choices.tab)
@@ -533,6 +539,12 @@ class HomeViewModel(
         val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
         val seenOrLoved = watched + prefs.lovedIds
         val rows = buildList {
+            // The viewer's own files stopped halfway or marked: never on family night, and with the parental lock on,
+            // only once the PIN was given (personal files have no fear level).
+            if (!prefs.familyNight && (!prefs.parentalEnabled || unlocked)) {
+                val going = WatchHistory.continueWatching(history).map { ContinueItem(it, it.movieId?.let(all::movie)) }
+                if (going.isNotEmpty()) add(HomeRow.ContinueWatching(going))
+            }
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
@@ -985,6 +997,13 @@ class HomeViewModel(
     private val _player = MutableStateFlow<PlayerSession?>(null)
     val player: StateFlow<PlayerSession?> = _player.asStateFlow()
 
+    /** "Continue from 1:12:40, or from the start?" for a file with a saved spot. */
+    private val _resumeChoice = MutableStateFlow<ResumeChoice?>(null)
+    val resumeChoice: StateFlow<ResumeChoice?> = _resumeChoice.asStateFlow()
+
+    /** Files already counted as watched in this player session (near the end), so it is said once. */
+    private val markedWatched = HashSet<String>()
+
     /** Settings → Real-Debrid. Family night leaves personal files out, as it does every film without a fear level. */
     fun openRealDebrid() {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
@@ -1001,6 +1020,8 @@ class HomeViewModel(
 
     fun realDebridSignOut() {
         realDebrid?.signOut()
+        // What was watched from the account goes with it.
+        watchStore?.clear()
         _rdFiles.value = RdFilesState.Idle
         _rdMatches.value = null
         show(R.string.rd_signed_out_message)
@@ -1032,12 +1053,33 @@ class HomeViewModel(
         }
     }
 
-    fun playRealDebrid(file: RealDebrid.RdFile, movieId: String?) {
+    fun playRealDebrid(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long? = null) {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
-        guard(null, GatedAction.PlayRealDebrid(file, movieId))
+        guard(null, GatedAction.PlayRealDebrid(file, movieId, startAtMs))
     }
 
-    private fun startPlaying(file: RealDebrid.RdFile, movieId: String?) {
+    /** A file chosen to play: with a saved spot, the viewer picks where to start; otherwise from the start. */
+    private fun startPlaying(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long?) {
+        val saved = watchStore?.entry(file.key)?.positionMs ?: 0L
+        when {
+            startAtMs != null -> play(file, movieId, startAtMs)
+            saved > 0 -> _resumeChoice.value = ResumeChoice(file, movieId, saved)
+            else -> play(file, movieId, 0L)
+        }
+    }
+
+    /** "Continue from …" ([fromSpot]) or "From the start". */
+    fun answerResume(fromSpot: Boolean) {
+        val choice = _resumeChoice.value ?: return
+        _resumeChoice.value = null
+        play(choice.file, choice.movieId, if (fromSpot) choice.positionMs else 0L)
+    }
+
+    fun dismissResume() {
+        _resumeChoice.value = null
+    }
+
+    private fun play(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long) {
         val repository = realDebrid ?: return
         viewModelScope.launch {
             val playable = repository.playable(file)
@@ -1046,28 +1088,103 @@ class HomeViewModel(
                 return@launch
             }
             movieId?.let { settings.pushRecent(it) }
-            _player.value = PlayerSession(file.key, playable, movieId, playerPositions?.read(file.key) ?: 0L)
-            push(Screen.Player)
+            // The file is in the history from the start, so a spot can be marked at once.
+            val old = watchStore?.entry(file.key)
+            watchStore?.update { WatchHistory.progress(it, file.key, file.name, movieId, startAtMs, old?.durationMs ?: 0L, System.currentTimeMillis()) }
+            val next = (repository.files() as? RealDebridRepository.Files.Ready)?.files?.let { files ->
+                WatchHistory.nextInTorrent(file.key, files.map { it.key })?.let { key -> files.firstOrNull { it.key == key } }
+            }
+            val session = PlayerSession(file.key, playable, movieId, startAtMs, next)
+            val replacing = _player.value != null
+            _player.value = session
+            if (!replacing) push(Screen.Player)
         }
     }
 
     /** The player's position, saved now and then and when it closes; near the end the film counts as watched. */
     fun onPlayerProgress(positionMs: Long, durationMs: Long) {
         val session = _player.value ?: return
-        playerPositions?.write(session.key, positionMs, durationMs)
+        watchStore?.update { WatchHistory.progress(it, session.key, "", session.movieId, positionMs, durationMs, System.currentTimeMillis()) }
         val movieId = session.movieId ?: return
-        if (durationMs > 0 && positionMs >= durationMs * PlayerPositions.FINISHED_FRACTION) {
+        if (durationMs > 0 && positionMs >= durationMs * WatchHistory.FINISHED_FRACTION && markedWatched.add(session.key)) {
             viewModelScope.launch { settings.setWatched(movieId, watched = true) }
         }
     }
 
+    /**
+     * "Mark this spot" in the player. A spot within a few seconds of one already marked is that one; either way the
+     * spot is marked now. False only when there is no history to mark it in.
+     */
+    fun addBookmark(positionMs: Long): Boolean {
+        val session = _player.value ?: return false
+        val store = watchStore ?: return false
+        store.update { WatchHistory.addBookmark(it, session.key, positionMs, System.currentTimeMillis()) }
+        return store.entry(session.key) != null
+    }
+
+    fun removeBookmark(positionMs: Long) {
+        val session = _player.value ?: return
+        watchStore?.update { WatchHistory.removeBookmark(it, session.key, positionMs) }
+    }
+
+    /** The next file in the same torrent, from where the viewer stopped in it (or its start). */
+    fun playNext() {
+        val next = _player.value?.next ?: return
+        play(next, null, watchStore?.entry(next.key)?.positionMs ?: 0L)
+    }
+
     fun onPlayerClosed() {
         _player.value = null
+        markedWatched.clear()
     }
+
+    /**
+     * A card under "Continue watching", the movie page's "Continue from", or the Real-Debrid screen's list: the file is
+     * looked up in the account again (its link is never kept), and plays from the saved spot, or the last spot marked.
+     */
+    fun continueWatching(entry: WatchEntry) {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        val repository = realDebrid ?: return
+        if (!repository.signedIn) return show(R.string.rd_continue_signed_out)
+        viewModelScope.launch {
+            when (val files = repository.files()) {
+                is RealDebridRepository.Files.Ready -> {
+                    val file = files.files.firstOrNull { it.key == entry.key }
+                    if (file == null) {
+                        watchStore?.update { WatchHistory.forget(it, entry.key) }
+                        show(R.string.rd_file_gone)
+                    } else {
+                        val start = entry.positionMs.takeIf { it > 0 }
+                            ?: entry.bookmarks.maxByOrNull { it.createdAt }?.positionMs
+                            ?: 0L
+                        playRealDebrid(file, entry.movieId, start)
+                    }
+                }
+                RealDebridRepository.Files.SignedOut -> show(R.string.rd_continue_signed_out)
+                RealDebridRepository.Files.Unreachable -> show(R.string.rd_unreachable)
+            }
+        }
+    }
+
+    /** Holding OK on a "Continue watching" card: it leaves the row (and its bookmarks go). */
+    fun forgetWatching(entry: WatchEntry) {
+        watchStore?.update { WatchHistory.forget(it, entry.key) }
+        show(R.string.continue_removed)
+    }
+
+    /** "Clear watch history" on the Real-Debrid screen. */
+    fun clearWatchHistory() {
+        watchStore?.clear()
+        show(R.string.rd_history_cleared)
+    }
+
+    /** The player's own settings that outlast a film: subtitle size, picture, night sound. */
+    val playerSettings: WatchStore? get() = watchStore
 
     /** UI tests: plays a local file in the internal player, as a Real-Debrid file would. */
     @androidx.annotation.VisibleForTesting
     internal fun playForTest(session: PlayerSession) {
+        watchStore?.update { WatchHistory.progress(it, session.key, session.playable.title, session.movieId, session.startAtMs, 0L, System.currentTimeMillis()) }
         _player.value = session
         push(Screen.Player)
     }
@@ -1199,7 +1316,7 @@ class HomeViewModel(
                 realDebrid?.refreshAccount()
                 loadRealDebridFiles()
             }
-            is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId)
+            is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId, action.startAtMs)
         }
     }
 
@@ -2030,7 +2147,7 @@ class HomeViewModel(
                     container.tmdbAccount,
                     container.aiRepository,
                     container.realDebrid,
-                    container.playerPositions,
+                    container.watchStore,
                 )
             }
         }
