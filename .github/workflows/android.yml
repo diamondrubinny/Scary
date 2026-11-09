@@ -142,7 +142,7 @@ jobs:
     # Only for pushes to this repository, never for pull requests, and only after the release APK passed the
     # emulator smoke test in the screenshots job.
     if: github.event_name == 'push'
-    needs: [build, screenshots]
+    needs: [build, screenshots, screenshots-mobile]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -285,3 +285,66 @@ jobs:
           git add .
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Screenshots for build ${GITHUB_RUN_NUMBER}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots
+
+  screenshots-mobile:
+    # The same APK on a phone emulator: the phone layout tests, then each main screen as a phone and as a tablet
+    # (upright and on its side). Stored on the "screenshots-mobile" branch.
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: scary-apks
+          path: dist
+
+      - name: Prepare APKs
+        run: |
+          cp dist/scary-debug-*.apk dist/scary.apk
+          cp dist/scary-tests-*.apk dist/scary-tests.apk
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run on a phone emulator and capture screens
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash .github/scripts/screenshots-mobile.sh
+
+      - name: Phone layout tests
+        if: always()
+        run: |
+          if [ -f screenshots-mobile/ui-tests.txt ]; then
+            { echo "### Phone and tablet layout tests"; echo '```'; cat screenshots-mobile/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-mobile
+          path: screenshots-mobile/
+          retention-days: 14
+
+      - name: Keep screenshots on the screenshots-mobile branch
+        run: |
+          git init -q out && cd out
+          cp ../screenshots-mobile/*.png ../screenshots-mobile/ui-tests.txt .
+          printf 'SCARY screenshots from a phone emulator (phone and tablet sizes), build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Phone and tablet screenshots for build ${GITHUB_RUN_NUMBER}"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots-mobile

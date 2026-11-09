@@ -4,9 +4,6 @@
 
 package io.github.diamondrubinny.scary.ui.settings
 
-import io.github.diamondrubinny.scary.ui.components.CreditLine
-import io.github.diamondrubinny.scary.ui.components.DataCredit
-import io.github.diamondrubinny.scary.ui.components.SupportScary
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,12 +18,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import io.github.diamondrubinny.scary.ui.components.minutesShown
-import kotlinx.coroutines.delay
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,18 +35,25 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ai.AiTask
+import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.ui.components.CreditLine
+import io.github.diamondrubinny.scary.ui.components.DataCredit
 import io.github.diamondrubinny.scary.ui.components.FearMeter
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
+import io.github.diamondrubinny.scary.ui.components.SupportScary
+import io.github.diamondrubinny.scary.ui.components.minutesShown
 import io.github.diamondrubinny.scary.ui.home.DocumentKind
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
 import io.github.diamondrubinny.scary.update.UpdateState
-import io.github.diamondrubinny.scary.ai.AiTask
-import io.github.diamondrubinny.scary.core.ai.AiProvider
+import kotlinx.coroutines.delay
 
 class SettingsActions(
     val onToggleLanguage: () -> Unit,
@@ -76,6 +78,7 @@ class SettingsActions(
     val onOpenTmdb: () -> Unit,
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
+    val onOpenRealDebrid: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
     val onCheckForUpdates: () -> Unit = {},
@@ -113,6 +116,8 @@ fun SettingsScreen(
     hideWatched: Boolean = false,
     /** The TMDB account's name when signed in, null otherwise. */
     tmdbAccountName: String? = null,
+    /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
+    realDebridName: String? = null,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -158,7 +163,7 @@ fun SettingsScreen(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = SidePadding, vertical = 28.dp)
-            .fillMaxWidth(0.7f),
+            .paneWidth(scaryLayout, 0.7f),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         BasicText(
@@ -166,27 +171,32 @@ fun SettingsScreen(
             style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f),
             modifier = Modifier.padding(bottom = 8.dp).semantics { heading() },
         )
-        BasicText(
-            stringResource(R.string.settings_home_section),
-            style = ScaryType.RowTitle,
-            modifier = Modifier.semantics { heading() },
-        )
-        SettingRow(
-            label = stringResource(R.string.settings_default_home),
-            value = stringResource(if (isDefaultHome) R.string.value_home_yes else R.string.value_home_no),
-            onClick = actions.onRequestDefaultHome,
-            modifier = Modifier.focusRequester(firstFocus),
-        )
-        SettingRow(
-            label = stringResource(R.string.settings_home_button),
-            value = stringResource(if (homeButtonServiceOn) R.string.value_home_button_on else R.string.value_home_button_off),
-            onClick = actions.onOpenAccessibility,
-        )
-        BasicText(stringResource(R.string.settings_home_note), style = ScaryType.Caption)
+        // The home screen and the remote's Home button are a TV's: on a phone or a tablet SCARY is an ordinary app.
+        val tv = scaryLayout.tv
+        if (tv) {
+            BasicText(
+                stringResource(R.string.settings_home_section),
+                style = ScaryType.RowTitle,
+                modifier = Modifier.semantics { heading() },
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_default_home),
+                value = stringResource(if (isDefaultHome) R.string.value_home_yes else R.string.value_home_no),
+                onClick = actions.onRequestDefaultHome,
+                modifier = Modifier.focusRequester(firstFocus),
+            )
+            SettingRow(
+                label = stringResource(R.string.settings_home_button),
+                value = stringResource(if (homeButtonServiceOn) R.string.value_home_button_on else R.string.value_home_button_off),
+                onClick = actions.onOpenAccessibility,
+            )
+            BasicText(stringResource(R.string.settings_home_note), style = ScaryType.Caption)
+        }
         SettingRow(
             label = stringResource(R.string.settings_online),
             value = stringResource(if (onlineEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleOnline,
+            modifier = if (tv) Modifier else Modifier.focusRequester(firstFocus),
         )
         BasicText(stringResource(R.string.settings_online_note), style = ScaryType.Caption)
         SettingRow(
@@ -204,12 +214,21 @@ fun SettingsScreen(
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         AiSection(ai, actions)
         SettingRow(
-            label = stringResource(R.string.settings_phone_remote),
-            value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
-            onClick = actions.onOpenPhoneRemote,
-            modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
+            label = stringResource(R.string.settings_realdebrid),
+            value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
+            onClick = actions.onOpenRealDebrid,
+            modifier = Modifier.testTag(REAL_DEBRID_ROW_TAG),
         )
-        BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
+        // The phone remote lets a phone steer the TV.
+        if (tv) {
+            SettingRow(
+                label = stringResource(R.string.settings_phone_remote),
+                value = stringResource(if (phoneRemoteOn) R.string.value_on else R.string.value_off),
+                onClick = actions.onOpenPhoneRemote,
+                modifier = Modifier.focusRequester(remoteFocus).testTag(PHONE_REMOTE_ROW_TAG),
+            )
+            BasicText(stringResource(R.string.settings_phone_remote_note), style = ScaryType.Caption)
+        }
         SettingRow(
             label = stringResource(R.string.settings_rent_country),
             value = when {
@@ -224,6 +243,7 @@ fun SettingsScreen(
             label = stringResource(R.string.settings_language),
             value = language.nativeName,
             onClick = actions.onToggleLanguage,
+            modifier = Modifier.testTag(LANGUAGE_ROW_TAG),
         )
         SettingRow(
             label = stringResource(R.string.settings_effects),
@@ -417,10 +437,12 @@ fun SettingsScreen(
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
+const val REAL_DEBRID_ROW_TAG = "realDebridRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
 const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"
 const val AI_ENABLED_ROW_TAG = "aiEnabledRow"
+const val LANGUAGE_ROW_TAG = "languageRow"
 const val AI_PROVIDER_ROW_TAG = "aiProviderRow"
 
 /** The AI section's values, as settings show them. */

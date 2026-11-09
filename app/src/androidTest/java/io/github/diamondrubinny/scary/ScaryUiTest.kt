@@ -88,6 +88,9 @@ import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.TMDB_ACCOUNT_TAG
 import androidx.lifecycle.ViewModelProvider
 import io.github.diamondrubinny.scary.ui.home.HomeRow
+import io.github.diamondrubinny.scary.ui.settings.LANGUAGE_DIALOG_TAG
+import io.github.diamondrubinny.scary.ui.settings.LANGUAGE_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.languageTag
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.ui.ai.AI_CONSENT_TAG
 import io.github.diamondrubinny.scary.ui.ai.AI_PROVIDER_TAG
@@ -242,6 +245,22 @@ class ScaryUiTest {
         rule.onNode(hasText(text(R.string.data_credit))).performScrollTo().assertExists()
         rule.onNodeWithContentDescription(text(R.string.donate_qr_description)).performScrollTo().assertExists()
         backToHome()
+    }
+
+    /** The full index (index.json): search finds a well-known film outside the hand-picked library, and it opens. */
+    @Test
+    fun searchFindsAFilmFromTheFullIndex() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextInput("deep red")
+        // Its title as shown: Hebrew where Wikidata has one ("אדום עמוק"), English otherwise.
+        val deepRed = hasContentDescription("Deep Red", substring = true) or hasContentDescription("אדום עמוק", substring = true) or
+            hasContentDescription("Кроваво-красное", substring = true) or hasContentDescription("Profondo rosso", substring = true) or hasContentDescription("أحمر داكن", substring = true)
+        waitFor(deepRed, ONLINE_TIMEOUT_MS)
+        rule.onAllNodes(deepRed)[0].performClick()
+        waitFor(hasText(text(R.string.action_watch_stremio)))
+        pressBack()
     }
 
     @Test
@@ -855,6 +874,19 @@ class ScaryUiTest {
         }
     }
 
+    /** The first card the taste picker shows that the viewer has not loved before the test. */
+    private fun firstTasteCardOnScreenOrNull(lovedBefore: Set<String>, viewModel: HomeViewModel): io.github.diamondrubinny.scary.core.model.Movie? {
+        val cards = SemanticsMatcher("a taste card") { node ->
+            node.config.getOrNull(SemanticsProperties.TestTag)?.startsWith(tasteCardTag("")) == true
+        }
+        val ids = rule.onAllNodes(cards).fetchSemanticsNodes().mapNotNull { it.config.getOrNull(SemanticsProperties.TestTag)?.removePrefix(tasteCardTag("")) }
+        val catalog = viewModel.tasteCandidates(MediaKind.MOVIE) + viewModel.tasteCandidates(MediaKind.SERIES)
+        return ids.firstOrNull { it !in lovedBefore }?.let { id -> catalog.firstOrNull { it.id == id } }
+    }
+
+    private fun firstTasteCardOnScreen(lovedBefore: Set<String>, viewModel: HomeViewModel) =
+        firstTasteCardOnScreenOrNull(lovedBefore, viewModel) ?: throw AssertionError("no taste card on screen")
+
     @Test
     fun theTastePickerMarksFilmsAndSeriesAsLovedAndDoneGoesBackToSettings() {
         waitForHome()
@@ -869,8 +901,9 @@ class ScaryUiTest {
             rule.onNode(row).performScrollTo().performClick()
             waitFor(hasTestTag(TASTE_PICKER_TAG))
             waitFor(hasText(text(R.string.taste_done)) and isFocused())
-            // The library's best rated film comes first; OK puts a heart on it, read out with its title.
-            val film = viewModel.tasteCandidates(MediaKind.MOVIE).first { it.id !in lovedBefore }
+            // A film on screen (the list can reorder while ratings arrive from the web, so it is read off the
+            // screen, not recomputed); OK puts a heart on it, read out with its title.
+            val film = firstTasteCardOnScreen(lovedBefore, viewModel)
             picked += film.id
             rule.onNodeWithTag(tasteCardTag(film.id)).performScrollTo().performClick()
             waitUntilOrDescribe("${film.title} loved") { film.id in viewModel.uiState.value.lovedIds }
@@ -880,10 +913,10 @@ class ScaryUiTest {
             waitUntilOrDescribe("${film.title} no longer loved") { film.id !in viewModel.uiState.value.lovedIds }
             // The series tab shows series.
             rule.onNodeWithTag(tasteTabTag(MediaKind.SERIES)).performClick()
-            val series = viewModel.tasteCandidates(MediaKind.SERIES).first { it.id !in lovedBefore }
+            waitUntilOrDescribe("a series on the picker") { firstTasteCardOnScreenOrNull(lovedBefore, viewModel)?.kind == MediaKind.SERIES }
+            val series = firstTasteCardOnScreen(lovedBefore, viewModel)
             assertTrue(series.kind == MediaKind.SERIES)
             picked += series.id
-            waitFor(hasTestTag(tasteCardTag(series.id)))
             rule.onNodeWithTag(tasteCardTag(series.id)).performClick()
             waitUntilOrDescribe("${series.title} loved") { series.id in viewModel.uiState.value.lovedIds }
             // Done: back on settings, on the row that opened the picker.
@@ -1049,6 +1082,27 @@ class ScaryUiTest {
             waitFor(hasTestTag(aiProviderTag(AiProvider.POLLINATIONS_FREE)) and isFocused())
             pressBack()
             waitForGone(hasTestTag(AI_PROVIDER_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
+    @Test
+    fun theLanguageListShowsEveryLanguageInItselfWithTheCurrentOneChosen() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        val row = hasTestTag(LANGUAGE_ROW_TAG)
+        waitFor(row)
+        val dialog = hasTestTag(LANGUAGE_DIALOG_TAG)
+        withCleanup({
+            rule.onNode(row).performScrollTo().performClick()
+            waitFor(dialog)
+            Language.entries.forEach { waitFor(hasTestTag(languageTag(it)) and hasContentDescription(it.nativeName)) }
+            // The language in use is marked and has the focus.
+            val current = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+            waitFor(hasTestTag(languageTag(current)) and isSelected() and isFocused())
+            pressBack()
+            waitForGone(dialog)
         }) {
             backToHome()
         }

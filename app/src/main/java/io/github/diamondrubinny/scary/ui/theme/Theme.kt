@@ -13,12 +13,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import io.github.diamondrubinny.scary.R
@@ -124,5 +124,10 @@ val LocalReduceMotion = staticCompositionLocalOf { false }
 
 @Composable
 fun ScaryTheme(reduceMotion: Boolean = false, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalReduceMotion provides reduceMotion, content = content)
+    // The layout for this screen's size: the TV layout on TVs, one column on tablets and phones (ScaryLayout).
+    CompositionLocalProvider(
+        LocalReduceMotion provides reduceMotion,
+        LocalScaryLayout provides rememberScaryLayout(),
+        content = content,
+    )
 }

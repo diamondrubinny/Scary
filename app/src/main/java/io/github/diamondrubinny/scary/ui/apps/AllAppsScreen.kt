@@ -4,7 +4,6 @@
 
 package io.github.diamondrubinny.scary.ui.apps
 
-import io.github.diamondrubinny.scary.ui.components.CreditLine
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -41,13 +40,15 @@ import androidx.compose.ui.window.Dialog
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.ui.components.AppTileCard
-import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
+import io.github.diamondrubinny.scary.ui.components.CreditLine
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import io.github.diamondrubinny.scary.ui.home.AppTile
 import io.github.diamondrubinny.scary.ui.home.DrawerApp
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 
 class AllAppsActions(
@@ -151,7 +152,7 @@ private fun AppOptionsDialog(
         }
         Column(
             modifier = Modifier
-                .width(360.dp)
+                .dialogWidth(360.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(10.dp))
                 .border(1.dp, ScaryColors.Bone.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
                 .padding(22.dp),

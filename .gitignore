@@ -13,3 +13,4 @@ dist/
 # Python (tools/promo)
 __pycache__/
 *.pyc
+tools/catalog/.cache/

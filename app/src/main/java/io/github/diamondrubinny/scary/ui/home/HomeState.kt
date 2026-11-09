@@ -102,6 +102,9 @@ sealed interface GatedAction {
     data class SearchIn(val movie: Movie, val app: WatchOption) : GatedAction
     data class SearchEverywhere(val movie: Movie) : GatedAction
     data object Settings : GatedAction
+    /** The viewer's Real-Debrid files: personal files have no fear level, so the parental lock asks for the PIN. */
+    data object RealDebrid : GatedAction
+    data class PlayRealDebrid(val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile, val movieId: String?) : GatedAction
 }
 
 sealed interface PinStep {
@@ -235,7 +238,27 @@ sealed interface Screen {
     data object TastePicker : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
+    /** The viewer's Real-Debrid account and its videos. */
+    data object RealDebrid : Screen
+    /** The internal player, playing the session in HomeViewModel.player. */
+    data object Player : Screen
 }
+
+/** The viewer's Real-Debrid videos, as the account screen shows them. */
+sealed interface RdFilesState {
+    data object Idle : RdFilesState
+    data object Loading : RdFilesState
+    data class Ready(val files: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile>) : RdFilesState
+    data object Unreachable : RdFilesState
+}
+
+/** What the internal player is playing: the file's key (for resuming), a link, and the film it is, if known. */
+class PlayerSession(
+    val key: String,
+    val playable: io.github.diamondrubinny.scary.data.RealDebridRepository.Playable,
+    val movieId: String?,
+    val startAtMs: Long,
+)
 
 /**
  * A streaming app on this TV that a movie page can send the viewer to. [canSearch]: it accepts the title as a search;

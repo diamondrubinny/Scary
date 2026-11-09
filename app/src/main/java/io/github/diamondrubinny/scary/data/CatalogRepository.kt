@@ -5,15 +5,20 @@
 package io.github.diamondrubinny.scary.data
 
 import android.content.Context
+import android.util.Log
+import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.core.catalog.HorrorIndex
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.sync.RefreshPolicy
 import io.github.diamondrubinny.scary.core.sync.RefreshState
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
+import java.io.IOException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -45,6 +50,32 @@ class CatalogRepository(
             val series = context.assets.open(SERIES_PATH).bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
             films.copy(movies = films.movies + series.movies, collections = films.collections + series.collections)
         }.also { bundled = it }
+    }
+
+    private var index: List<Movie>? = null
+
+    /**
+     * The full horror index (index.json, core HorrorIndex), films not in the library: read once, in the background.
+     * Empty if the file cannot be read; SCARY works as before without it.
+     */
+    suspend fun loadIndex(): List<Movie> {
+        val library = loadBundled()
+        return mutex.withLock {
+            index ?: withContext(Dispatchers.Default) {
+                try {
+                    val text = context.assets.open(INDEX_PATH).bufferedReader().use { it.readText() }
+                    val result = HorrorIndex.parse(text, library.movies.mapTo(HashSet()) { it.imdbId })
+                    if (result.dropped > 0) Log.w(TAG, "Index: ${result.dropped} entries dropped")
+                    result.movies
+                } catch (e: CatalogException) {
+                    Log.e(TAG, "Index is invalid: ${e.problems.take(3)}")
+                    emptyList()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Index could not be read", e)
+                    emptyList()
+                }
+            }.also { index = it }
+        }
     }
 
     /**
@@ -135,5 +166,7 @@ class CatalogRepository(
     private companion object {
         const val ASSET_PATH = "catalog.json"
         const val SERIES_PATH = "series.json"
+        const val INDEX_PATH = "index.json"
+        const val TAG = "CatalogRepository"
     }
 }

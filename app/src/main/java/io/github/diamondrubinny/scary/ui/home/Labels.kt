@@ -36,6 +36,14 @@ fun Subgenre.labelRes(): Int = when (this) {
     Subgenre.VAMPIRE -> R.string.subgenre_vampire
     Subgenre.BODY -> R.string.subgenre_body
     Subgenre.HAUNTED_HOUSE -> R.string.subgenre_haunted_house
+    Subgenre.GIALLO -> R.string.subgenre_giallo
+    Subgenre.WITCH -> R.string.subgenre_witch
+    Subgenre.COSMIC -> R.string.subgenre_cosmic
+    Subgenre.ANIMAL -> R.string.subgenre_animal
+    Subgenre.SCI_FI -> R.string.subgenre_sci_fi
+    Subgenre.COMEDY -> R.string.subgenre_comedy
+    Subgenre.GOTHIC -> R.string.subgenre_gothic
+    Subgenre.HOME_INVASION -> R.string.subgenre_home_invasion
 }
 
 fun Mood.labelRes(): Int = when (this) {

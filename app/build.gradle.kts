@@ -20,7 +20,7 @@ android {
         targetSdk = 37
         // CI run number, so every build installs over the previous one.
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
-        versionName = "0.4.1"
+        versionName = "0.5.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -103,6 +103,10 @@ dependencies {
     implementation(libs.coil.network.okhttp)
     // WebMessageListener: the trailer page reports playing, ended and error from one fixed origin only.
     implementation(libs.androidx.webkit)
+    // The internal player for the viewer's own Real-Debrid files (docs/INTERNAL_PLAYER_PLAN.md). Apache 2.0.
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.exoplayer.hls)
+    implementation(libs.media3.ui.compose)
 
     // UI tests, run on the TV emulator in CI (.github/scripts/screenshots.sh).
     androidTestImplementation(platform(libs.compose.bom))

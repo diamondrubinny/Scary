@@ -4,93 +4,97 @@
 
 package io.github.diamondrubinny.scary.ui.details
 
-import io.github.diamondrubinny.scary.ai.AiTask
-import io.github.diamondrubinny.scary.ui.ai.AiStatus
 
-import io.github.diamondrubinny.scary.ui.home.WatchOption
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.platform.testTag
-import androidx.compose.foundation.background
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.R
-import io.github.diamondrubinny.scary.ui.components.QrImage
-import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.brand.Donation
-import androidx.compose.ui.platform.LocalConfiguration
-import java.time.format.FormatStyle
-import java.time.format.DateTimeFormatter
-import java.time.LocalDate
-import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
-import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
-import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
+import io.github.diamondrubinny.scary.core.links.Links
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.ui.ai.AiStatus
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
-import io.github.diamondrubinny.scary.ui.components.rememberArtwork
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
-import androidx.compose.foundation.gestures.BringIntoViewSpec
-import androidx.compose.foundation.relocation.BringIntoViewResponder
-import androidx.compose.foundation.relocation.bringIntoViewResponder
-import androidx.compose.ui.geometry.Rect
-import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
-import io.github.diamondrubinny.scary.ui.home.ProviderOffer
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
+import io.github.diamondrubinny.scary.ui.components.QrImage
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ui.components.rememberArtwork
+import io.github.diamondrubinny.scary.ui.fx.chill
+import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
+import io.github.diamondrubinny.scary.ui.home.ProviderOffer
+import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
 import io.github.diamondrubinny.scary.ui.home.SidePadding
+import io.github.diamondrubinny.scary.ui.home.WatchOption
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
-import io.github.diamondrubinny.scary.ui.fx.chill
-import io.github.diamondrubinny.scary.ui.fx.riseIn
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
+import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
+import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /** Test tags of "About this film ✦" and its text. */
 const val AI_ABOUT_TAG = "aiAbout"
+const val PLAY_RD_TAG = "playRealDebrid"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -131,9 +135,17 @@ fun DetailsScreen(
     aboutWeakLanguage: Boolean = false,
     onAbout: (Movie) -> Unit = {},
     onAiSettings: () -> Unit = {},
+    /** The viewer's own Real-Debrid files that are this film (found in their account only); empty hides the button. */
+    realDebridFiles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile> = emptyList(),
+    onPlayRealDebrid: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
+    // "Play from Real-Debrid" with more than one of the viewer's files for this film: which one.
+    var chooseFile by remember { mutableStateOf(false) }
+    if (chooseFile) {
+        RealDebridChooser(realDebridFiles, onChoose = { chooseFile = false; onPlayRealDebrid(it) }, onDismiss = { chooseFile = false })
+    }
     LaunchedEffect(movie.id) {
         withFrameNanos { }
         runCatching { watchFocus.requestFocus() }
@@ -155,152 +167,178 @@ fun DetailsScreen(
         val halfTrailerPx = with(LocalDensity.current) { (DetailsTrailerSize.height / 2).toPx() }
         val trailerOnScreen by remember(pageScroll, halfTrailerPx) { derivedStateOf { pageScroll.value < halfTrailerPx } }
         // Room for the trailer is kept from the start, so text and buttons never move under the focus when it starts.
-        val trailerSlot = canAutoTrailer(movie, isLocked(movie), trailer, DetailsTrailerSize)
+        // A phone upright plays no trailer by itself, to spare mobile data; the Trailer button still plays it.
+        val autoTrailer = if (scaryLayout.compact) TrailerSettings.Off else trailer
+        val trailerSlot = canAutoTrailer(movie, isLocked(movie), autoTrailer, DetailsTrailerSize)
         Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
-                Row(
-                    modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
-                    horizontalArrangement = Arrangement.spacedBy(36.dp),
-                ) {
-                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
-                        MovieTitle(movie, language, locked = isLocked(movie))
-                        if (movie.displayTitle(language) != movie.title) {
-                            BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
-                        }
-                        MovieMeta(movie)
-                        // Not out yet (TMDB's coming-soon row).
-                        movie.comingOn(LocalDate.now())?.let { date ->
-                            BasicText(
-                                stringResource(R.string.coming_on_long, longDate(date)),
-                                style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
-                            )
-                        }
-                        if (movie.cast.isNotEmpty()) {
-                            BasicText(
-                                stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
-                                style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        }
-                        val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
-                        // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
+                val locked = isLocked(movie)
+                val info: @Composable ColumnScope.() -> Unit = {
+                    BasicText(subgenreLine(movie), style = ScaryType.Eyebrow)
+                    MovieTitle(movie, language, locked = isLocked(movie))
+                    if (movie.displayTitle(language) != movie.title) {
+                        BasicText(stringResource(R.string.original_title, movie.title), style = ScaryType.Caption)
+                    }
+                    MovieMeta(movie)
+                    // Not out yet (TMDB's coming-soon row).
+                    movie.comingOn(LocalDate.now())?.let { date ->
                         BasicText(
-                            movie.synopsis(language),
-                            style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
-                            maxLines = if (elsewhere) 3 else 5,
+                            stringResource(R.string.coming_on_long, longDate(date)),
+                            style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                        )
+                    }
+                    if (movie.cast.isNotEmpty()) {
+                        BasicText(
+                            stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
+                            style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
+                            maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        // Four buttons: in a long language, or at a large system font, the last ones wrap to a second line
-                        // instead of being cut.
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(top = 8.dp),
-                        ) {
+                    }
+                    val elsewhere = watchOptions.isNotEmpty() || canSearchEverywhere
+                    // One line less of synopsis when the apps row is shown, so "More like this" stays on screen.
+                    BasicText(
+                        movie.synopsis(language),
+                        style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                        maxLines = if (elsewhere) 3 else 5,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    // Four buttons: in a long language, or at a large system font, the last ones wrap to a second line
+                    // instead of being cut.
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
+                        ScaryButton(
+                            text = stringResource(R.string.action_watch_stremio),
+                            onClick = { onWatch(movie) },
+                            primary = true,
+                            focusRequester = watchFocus,
+                        )
+                        if (realDebridFiles.isNotEmpty()) {
                             ScaryButton(
-                                text = stringResource(R.string.action_watch_stremio),
-                                onClick = { onWatch(movie) },
-                                primary = true,
-                                focusRequester = watchFocus,
+                                text = stringResource(R.string.action_play_rd),
+                                onClick = { if (realDebridFiles.size == 1) onPlayRealDebrid(realDebridFiles[0]) else chooseFile = true },
+                                modifier = Modifier.testTag(PLAY_RD_TAG),
                             )
-                            ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
-                            if (about != null) {
-                                ScaryButton(
-                                    text = stringResource(R.string.ai_about),
-                                    onClick = { onAbout(movie) },
-                                    modifier = Modifier.testTag(AI_ABOUT_TAG),
-                                )
-                            }
-                            ScaryButton(
-                                text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
-                                onClick = { onToggleMyList(movie) },
-                            )
-                            ScaryButton(
-                                text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
-                                onClick = { onToggleWatched(movie) },
-                            )
-                            // "Loved it" feeds "Because you loved"; "Not for me" keeps the film out of every suggestion.
-                            ScaryButton(
-                                text = stringResource(if (loved) R.string.action_loved else R.string.action_love),
-                                onClick = { onToggleLoved(movie) },
-                            )
-                            ScaryButton(
-                                text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
-                                onClick = { onToggleNotForMe(movie) },
-                            )
-                            // Films only: a series has no end for the next one to follow.
-                            if (onToggleBucket != null && !movie.isSeries) {
-                                ScaryButton(
-                                    text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
-                                    onClick = { onToggleBucket(movie) },
-                                )
-                            }
                         }
-                        if (about != null && about !is AiTask.Idle) {
-                            AiStatus(about, onRetry = { onAbout(movie) }, onSettings = onAiSettings)
-                            if (about is AiTask.Done) {
-                                Column(
-                                    Modifier
-                                        .background(ScaryColors.Crypt.copy(alpha = 0.85f), RoundedCornerShape(10.dp))
-                                        .padding(16.dp)
-                                        .testTag(AI_ABOUT_TEXT_TAG),
-                                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                                ) {
-                                    BasicText(stringResource(R.string.ai_about_title), style = ScaryType.Label.copy(color = ScaryColors.Candle))
-                                    BasicText(
-                                        about.value,
-                                        style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
-                                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
-                                    )
-                                    if (aboutWeakLanguage) BasicText(stringResource(R.string.ai_free_language_note), style = ScaryType.Caption)
-                                }
-                            }
+                        ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
+                        if (about != null) {
+                            ScaryButton(
+                                text = stringResource(R.string.ai_about),
+                                onClick = { onAbout(movie) },
+                                modifier = Modifier.testTag(AI_ABOUT_TAG),
+                            )
                         }
-                        if (elsewhere) {
-                            WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
-                        }
-                        // A locked movie shows no store either, as it shows no art. Series: not yet (TMDB lists them apart).
-                        if (rentOrBuy != null && !isLocked(movie) && !movie.isSeries) {
-                            RentOrBuy(
-                                state = rentOrBuy,
-                                countryName = countryName,
-                                onOffer = { onOffer(movie, it) },
+                        ScaryButton(
+                            text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
+                            onClick = { onToggleMyList(movie) },
+                        )
+                        ScaryButton(
+                            text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
+                            onClick = { onToggleWatched(movie) },
+                        )
+                        // "Loved it" feeds "Because you loved"; "Not for me" keeps the film out of every suggestion.
+                        ScaryButton(
+                            text = stringResource(if (loved) R.string.action_loved else R.string.action_love),
+                            onClick = { onToggleLoved(movie) },
+                        )
+                        ScaryButton(
+                            text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
+                            onClick = { onToggleNotForMe(movie) },
+                        )
+                        // Films only: a series has no end for the next one to follow.
+                        if (onToggleBucket != null && !movie.isSeries) {
+                            ScaryButton(
+                                text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
+                                onClick = { onToggleBucket(movie) },
                             )
                         }
                     }
-                    Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        // The trailer takes the poster's place while it plays, and gives it back when it ends.
-                        AutoTrailer(
-                            movie = movie,
-                            locked = isLocked(movie),
-                            settings = trailer,
-                            playerSize = DetailsTrailerSize,
-                            modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
-                            visible = trailerOnScreen,
-                        ) {
-                            Box(
+                    if (about != null && about !is AiTask.Idle) {
+                        AiStatus(about, onRetry = { onAbout(movie) }, onSettings = onAiSettings)
+                        if (about is AiTask.Done) {
+                            Column(
                                 Modifier
-                                    .size(width = 150.dp, height = 225.dp)
-                                    .clip(RoundedCornerShape(8.dp)),
+                                    .background(ScaryColors.Crypt.copy(alpha = 0.85f), RoundedCornerShape(10.dp))
+                                    .padding(16.dp)
+                                    .testTag(AI_ABOUT_TEXT_TAG),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
                             ) {
-                                PosterArt(movie, Modifier.fillMaxSize())
-                                // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
-                                val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
-                                if (poster != null) {
-                                    AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                                } else {
-                                    BasicText(
-                                        text = movie.title,
-                                        style = ScaryType.Title.mixedLanguage(),
-                                        maxLines = 3,
-                                        modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
-                                    )
-                                }
+                                BasicText(stringResource(R.string.ai_about_title), style = ScaryType.Label.copy(color = ScaryColors.Candle))
+                                BasicText(
+                                    about.value,
+                                    style = ScaryType.Body.copy(color = ScaryColors.Bone).mixedLanguage(),
+                                    modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+                                )
+                                if (aboutWeakLanguage) BasicText(stringResource(R.string.ai_free_language_note), style = ScaryType.Caption)
                             }
                         }
-                        if (!isLocked(movie)) ShareCode(movie, language)
+                    }
+                    if (elsewhere) {
+                        WatchElsewhere(movie, watchOptions, canSearchEverywhere, onSearchIn, onSearchEverywhere)
+                    }
+                    // A locked movie shows no store either, as it shows no art. Series: not yet (TMDB lists them apart).
+                    if (rentOrBuy != null && !isLocked(movie) && !movie.isSeries) {
+                        RentOrBuy(
+                            state = rentOrBuy,
+                            countryName = countryName,
+                            onOffer = { onOffer(movie, it) },
+                        )
+                    }
+                }
+                // The trailer takes the poster's place while it plays, and gives it back when it ends.
+                val poster: @Composable () -> Unit = {
+                    AutoTrailer(
+                        movie = movie,
+                        locked = isLocked(movie),
+                        settings = autoTrailer,
+                        playerSize = DetailsTrailerSize,
+                        modifier = if (trailerSlot) Modifier.width(DetailsTrailerSize.width) else Modifier,
+                        visible = trailerOnScreen,
+                    ) {
+                        Box(
+                            Modifier
+                                .size(width = 150.dp, height = 225.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                        ) {
+                            PosterArt(movie, Modifier.fillMaxSize())
+                            // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
+                            val poster = rememberArtwork(movie.posterUrl.takeUnless { isLocked(movie) })
+                            if (poster != null) {
+                                AsyncImage(model = poster, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                            } else {
+                                BasicText(
+                                    text = movie.title,
+                                    style = ScaryType.Title.mixedLanguage(),
+                                    maxLines = 3,
+                                    modifier = Modifier.align(Alignment.BottomStart).padding(10.dp),
+                                )
+                            }
+                        }
+                    }
+                }
+                // A phone or a tablet upright: the poster on top, then the text and buttons below it, full width. The QR code
+                // to share is for scanning a TV with a phone, so only a TV shows it.
+                if (scaryLayout.narrow) {
+                    Column(
+                        modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        poster()
+                        info()
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
+                        horizontalArrangement = Arrangement.spacedBy(36.dp),
+                    ) {
+                        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp), content = info)
+                        Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            poster()
+                            if (!locked && scaryLayout.tv) ShareCode(movie, language)
+                        }
                     }
                 }
                 if (details.similar.isNotEmpty()) {
@@ -471,3 +509,35 @@ private fun longDate(date: LocalDate): String {
     val locale = LocalConfiguration.current.locales[0]
     return remember(date, locale) { date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
 }
+
+/** The viewer's files for this film, biggest (usually best) first, each with its size. */
+@Composable
+private fun RealDebridChooser(
+    files: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile>,
+    onChoose: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val first = remember { FocusRequester() }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            runCatching { first.requestFocus() }
+        }
+        Column(
+            modifier = Modifier
+                .dialogWidth(640.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(stringResource(R.string.rd_choose_title), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            files.take(MAX_CHOICES).forEachIndexed { i, file ->
+                val label = file.name + io.github.diamondrubinny.scary.ui.realdebrid.size(file.sizeBytes).let { if (it.isEmpty()) "" else " · $it" }
+                ScaryButton(label, onClick = { onChoose(file) }, focusRequester = if (i == 0) first else null)
+            }
+        }
+    }
+}
+
+private const val MAX_CHOICES = 8
+

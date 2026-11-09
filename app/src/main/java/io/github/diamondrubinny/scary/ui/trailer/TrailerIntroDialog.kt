@@ -31,6 +31,7 @@ import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 
 /** Test tag of the first-time explanation of trailers that play by themselves. */
 const val TRAILER_INTRO_TAG = "trailerIntro"
@@ -50,7 +51,7 @@ fun TrailerIntroDialog(onPlay: () -> Unit, onTurnOff: () -> Unit, onDismiss: () 
         }
         Column(
             modifier = Modifier
-                .width(560.dp)
+                .dialogWidth(560.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
                 .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
                 .verticalScroll(rememberScrollState())

@@ -65,8 +65,10 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             // Sound only while the launcher is visible; leaving for Stremio stops it.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // A trailer playing with sound has the room to itself meanwhile.
-                combine(settings.prefs.map { it.soundsEnabled }, viewModel.trailerAudible) { sounds, trailer -> sounds && !trailer }
+                // A trailer playing with sound, or a film in the internal player, has the room to itself meanwhile.
+                combine(settings.prefs.map { it.soundsEnabled }, viewModel.trailerAudible, viewModel.player) { sounds, trailer, film ->
+                    sounds && !trailer && film == null
+                }
                     .distinctUntilChanged()
                     .collect { enabled -> if (enabled) ambient.start() else ambient.stop() }
             }
@@ -178,6 +180,7 @@ class MainActivity : ComponentActivity() {
                 viewModel.openSearch()
             }
             target == "apps" -> viewModel.openAllApps()
+            target == "ask" -> viewModel.openAsk()
             target == "settings" -> viewModel.openSettings()
             target == "pin" -> viewModel.startPinSetup()
             target == "home" -> viewModel.onHomePressed()

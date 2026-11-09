@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -62,6 +62,7 @@ import io.github.diamondrubinny.scary.ui.components.FocusSurface
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import kotlinx.coroutines.launch
 
 /** Test tags of the AI dialogs. */
@@ -87,7 +88,7 @@ private fun AiProvider.termsHost(): String = when (this) {
 private fun DialogBox(tag: String, width: Int = 600, content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
-            .width(width.dp)
+            .dialogWidth(width.dp)
             .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
             .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
             .verticalScroll(rememberScrollState())

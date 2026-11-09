@@ -47,6 +47,8 @@ import io.github.diamondrubinny.scary.ui.home.labelRes
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import io.github.diamondrubinny.scary.ui.theme.paneWidth
+import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import java.time.LocalDate
 import kotlin.math.roundToInt
 
@@ -70,7 +72,7 @@ fun StatsScreen(language: Language, load: suspend () -> Pair<FearStats, FearStat
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = SidePadding, vertical = 28.dp)
-            .fillMaxWidth(0.7f)
+            .paneWidth(scaryLayout, 0.7f)
             .testTag(STATS_SCREEN_TAG),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

@@ -4,16 +4,6 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
-import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
-import io.github.diamondrubinny.scary.core.catalog.Search
-import kotlinx.coroutines.withTimeoutOrNull
-import io.github.diamondrubinny.scary.core.catalog.BucketList
-import io.github.diamondrubinny.scary.core.catalog.BucketReturn
-import io.github.diamondrubinny.scary.core.model.MediaKind
-import io.github.diamondrubinny.scary.core.links.StreamingApps
-import io.github.diamondrubinny.scary.core.links.ResolvedCountry
-import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
-import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -23,81 +13,94 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import io.github.diamondrubinny.scary.AppContainer
 import io.github.diamondrubinny.scary.R
-import io.github.diamondrubinny.scary.core.apps.AppOrdering
-import io.github.diamondrubinny.scary.core.catalog.CatalogException
-import io.github.diamondrubinny.scary.core.catalog.NightPick
-import io.github.diamondrubinny.scary.core.catalog.Similar
-import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
-import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
-import io.github.diamondrubinny.scary.core.links.KnownPackages
-import io.github.diamondrubinny.scary.core.catalog.FamilyNight
-import io.github.diamondrubinny.scary.core.security.ParentalGate
-import io.github.diamondrubinny.scary.core.catalog.AutoWatched
-import io.github.diamondrubinny.scary.core.catalog.Personalize
-import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.ai.AiAssistant
 import io.github.diamondrubinny.scary.ai.AiChip
 import io.github.diamondrubinny.scary.ai.AiContext
 import io.github.diamondrubinny.scary.core.ai.AiProvider
-import io.github.diamondrubinny.scary.data.AiRepository
-import io.github.diamondrubinny.scary.data.TmdbAccountRepository
-import io.github.diamondrubinny.scary.data.OnlinePage
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.debounce
+import io.github.diamondrubinny.scary.core.apps.AppOrdering
+import io.github.diamondrubinny.scary.core.catalog.AutoWatched
+import io.github.diamondrubinny.scary.core.catalog.BucketList
+import io.github.diamondrubinny.scary.core.catalog.BucketReturn
+import io.github.diamondrubinny.scary.core.catalog.CatalogException
+import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.Decades
-import io.github.diamondrubinny.scary.data.TvInputsRepository
-import io.github.diamondrubinny.scary.data.TvInput
-import io.github.diamondrubinny.scary.data.Rating
-import io.github.diamondrubinny.scary.core.catalog.TimePlan
-import io.github.diamondrubinny.scary.core.catalog.TimeBudget
-import io.github.diamondrubinny.scary.core.catalog.Recommender
+import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.catalog.FearStats
 import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
+import io.github.diamondrubinny.scary.core.catalog.Personalize
+import io.github.diamondrubinny.scary.core.catalog.Recommender
+import io.github.diamondrubinny.scary.core.catalog.Search
 import io.github.diamondrubinny.scary.core.catalog.Season
+import io.github.diamondrubinny.scary.core.catalog.Similar
+import io.github.diamondrubinny.scary.core.catalog.TimeBudget
+import io.github.diamondrubinny.scary.core.catalog.TimePlan
+import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
+import io.github.diamondrubinny.scary.core.links.KnownPackages
+import io.github.diamondrubinny.scary.core.links.ResolvedCountry
+import io.github.diamondrubinny.scary.core.links.StreamingApps
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
+import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.security.PinHasher
 import io.github.diamondrubinny.scary.core.security.PinLockout
+import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
+import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
+import io.github.diamondrubinny.scary.data.AiRepository
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
 import io.github.diamondrubinny.scary.data.InstalledAppsRepository
 import io.github.diamondrubinny.scary.data.LauncherPrefs
+import io.github.diamondrubinny.scary.data.OnlinePage
+import io.github.diamondrubinny.scary.data.PlayerPositions
+import io.github.diamondrubinny.scary.data.Rating
+import io.github.diamondrubinny.scary.data.RealDebridRepository
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SavedMoviesRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
+import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.data.TmdbKeyResult
 import io.github.diamondrubinny.scary.data.TmdbRepository
+import io.github.diamondrubinny.scary.data.TvInput
+import io.github.diamondrubinny.scary.data.TvInputsRepository
 import io.github.diamondrubinny.scary.launch.LaunchResult
 import io.github.diamondrubinny.scary.launch.Launcher
+import io.github.diamondrubinny.scary.remote.PhoneRemoteServer
+import java.io.IOException
+import java.time.LocalDate
+import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
-import java.time.LocalDate
-import kotlin.random.Random
+import kotlinx.coroutines.withTimeoutOrNull
 
 class HomeViewModel(
     private val catalogRepository: CatalogRepository,
@@ -115,6 +118,9 @@ class HomeViewModel(
     private val tmdbAccount: TmdbAccountRepository? = null,
     /** AI services (Pollinations' free one by default, or the viewer's own keys); null in tests that do not need it. */
     private val aiRepository: AiRepository? = null,
+    /** The viewer's own Real-Debrid account, for the internal player; null in tests that do not need it. */
+    private val realDebrid: RealDebridRepository? = null,
+    private val playerPositions: PlayerPositions? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -287,12 +293,19 @@ class HomeViewModel(
         viewModelScope.launch {
             tmdb.load()
             tmdbAccount?.load()
+            realDebrid?.load()
             savedMovies.load()
             watchTmdbAccount()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
+            // The full index comes in the background, after the library is on screen.
+            launch { indexMovies.value = catalogRepository.loadIndex() }
+            val index = indexMovies.combine(enrichedIndex) { films, enriched -> films to enriched }
             catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
-                .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) }
+                .combine(online) { (catalog, saved), isOnline -> withSaved(catalog, saved, isOnline) to isOnline }
+                .combine(index) { (catalog, isOnline), (films, enriched) -> withIndex(catalog, films, enriched, isOnline) }
+                // Thousands of films are merged per update: off the main thread.
+                .flowOn(Dispatchers.Default)
                 .catch { e ->
                     when (e) {
                         is CatalogException -> Log.e(TAG, "Bundled catalog is invalid: ${e.problems.take(5)}")
@@ -318,6 +331,50 @@ class HomeViewModel(
             .map { if (online) it else it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) }
             .toList()
         return if (extra.isEmpty()) catalog else catalog.copy(movies = catalog.movies + extra)
+    }
+
+    /** The full horror index (core HorrorIndex): empty until read, and if it cannot be. */
+    private val indexMovies = MutableStateFlow<List<Movie>>(emptyList())
+
+    /** Index films opened once, filled in from Cinemeta (synopsis, length, cast, trailers), by movie id. */
+    private val enrichedIndex = MutableStateFlow<Map<String, Movie>>(emptyMap())
+
+    /**
+     * Adds the full index after everything else: search finds thousands of films, offline too, and a decade, "More like
+     * this" and Ask SCARY choose from all of them. With online data on, each shows Cinemeta's poster for its IMDb id;
+     * off, nothing loads from the web. Films already shown (library, online rows, saved) are not added twice.
+     */
+    private fun withIndex(catalog: Catalog, films: List<Movie>, enriched: Map<String, Movie>, online: Boolean): Catalog {
+        if (films.isEmpty()) return catalog
+        val known = catalog.movies.mapTo(HashSet()) { it.imdbId }
+        val extra = films.asSequence()
+            .filter { it.imdbId !in known }
+            .map { enriched[it.id] ?: it }
+            .map {
+                if (online) it.copy(posterUrl = it.posterUrl ?: Cinemeta.posterUrl(it.imdbId)) else it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null)
+            }
+            .toList()
+        // The library's subgenre rows go on with index films of that subgenre (slashers, zombies…), best known first.
+        val collections = catalog.collections.map { collection ->
+            val subgenre = Categories.subgenreOfRow(collection.id) ?: return@map collection
+            val have = collection.movieIds.toHashSet()
+            val more = extra.asSequence().filter { subgenre in it.subgenres && it.id !in have }.take(INDEX_PER_ROW).map { it.id }.toList()
+            if (more.isEmpty()) collection else collection.copy(movieIds = collection.movieIds + more)
+        }
+        return catalog.copy(movies = catalog.movies + extra, collections = collections)
+    }
+
+    /**
+     * An index film comes with no synopsis: the first time it is opened (online), its details come from Cinemeta. Only
+     * its IMDb id leaves the TV, as for every online row.
+     */
+    private fun fillInIndexFilm(movieId: String) {
+        if (latestPrefs?.onlineEnabled != true || movieId in enrichedIndex.value) return
+        val film = indexMovies.value.firstOrNull { it.id == movieId } ?: return
+        viewModelScope.launch {
+            val meta = cinemeta.meta(film.imdbId, film.kind) ?: return@launch
+            enrichedIndex.update { it + (movieId to Cinemeta.enrich(film, meta)) }
+        }
     }
 
     fun refreshApps() {
@@ -770,6 +827,7 @@ class HomeViewModel(
             return true
         }
         if (backStack.value.size <= 1) return false
+        if (backStack.value.last() == Screen.Player) onPlayerClosed()
         backStack.update { it.dropLast(1) }
         return true
     }
@@ -892,6 +950,108 @@ class HomeViewModel(
 
     fun openTmdbAccount() = push(Screen.TmdbAccount)
 
+    // Real-Debrid and the internal player -------------------------------------------------------------------------------
+
+    val realDebridState: StateFlow<RealDebridRepository.State> =
+        realDebrid?.state ?: MutableStateFlow(RealDebridRepository.State.SignedOut)
+
+    private val _rdFiles = MutableStateFlow<RdFilesState>(RdFilesState.Idle)
+    val rdFiles: StateFlow<RdFilesState> = _rdFiles.asStateFlow()
+
+    /** The viewer's files that are the film on screen, by movie id (the movie page's "Play from Real-Debrid"). */
+    private val _rdMatches = MutableStateFlow<Pair<String, List<RealDebrid.RdFile>>?>(null)
+    val rdMatches: StateFlow<Pair<String, List<RealDebrid.RdFile>>?> = _rdMatches.asStateFlow()
+
+    private val _player = MutableStateFlow<PlayerSession?>(null)
+    val player: StateFlow<PlayerSession?> = _player.asStateFlow()
+
+    /** Settings → Real-Debrid. Family night leaves personal files out, as it does every film without a fear level. */
+    fun openRealDebrid() {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        guard(null, GatedAction.RealDebrid)
+    }
+
+    fun realDebridSignIn() {
+        realDebrid?.startSignIn()
+    }
+
+    fun realDebridCancelSignIn() {
+        realDebrid?.cancelSignIn()
+    }
+
+    fun realDebridSignOut() {
+        realDebrid?.signOut()
+        _rdFiles.value = RdFilesState.Idle
+        _rdMatches.value = null
+        show(R.string.rd_signed_out_message)
+    }
+
+    fun loadRealDebridFiles(force: Boolean = false) {
+        val repository = realDebrid ?: return
+        if (!repository.signedIn) return
+        viewModelScope.launch {
+            _rdFiles.value = RdFilesState.Loading
+            _rdFiles.value = when (val files = repository.files(force)) {
+                is RealDebridRepository.Files.Ready -> RdFilesState.Ready(files.files)
+                RealDebridRepository.Files.SignedOut -> RdFilesState.Idle
+                RealDebridRepository.Files.Unreachable -> RdFilesState.Unreachable
+            }
+        }
+    }
+
+    /** Looks through the viewer's own files for the film being opened; nothing is searched for anywhere else. */
+    private fun findRealDebridFiles(movieId: String) {
+        _rdMatches.value = null
+        val repository = realDebrid ?: return
+        val prefs = latestPrefs ?: return
+        if (!repository.signedIn || !prefs.onlineEnabled || prefs.familyNight) return
+        val movie = movieById(movieId) ?: return
+        viewModelScope.launch {
+            val matches = repository.filesFor(movie)
+            if (matches.isNotEmpty()) _rdMatches.value = movieId to matches
+        }
+    }
+
+    fun playRealDebrid(file: RealDebrid.RdFile, movieId: String?) {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        guard(null, GatedAction.PlayRealDebrid(file, movieId))
+    }
+
+    private fun startPlaying(file: RealDebrid.RdFile, movieId: String?) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val playable = repository.playable(file)
+            if (playable == null) {
+                show(R.string.rd_play_failed)
+                return@launch
+            }
+            movieId?.let { settings.pushRecent(it) }
+            _player.value = PlayerSession(file.key, playable, movieId, playerPositions?.read(file.key) ?: 0L)
+            push(Screen.Player)
+        }
+    }
+
+    /** The player's position, saved now and then and when it closes; near the end the film counts as watched. */
+    fun onPlayerProgress(positionMs: Long, durationMs: Long) {
+        val session = _player.value ?: return
+        playerPositions?.write(session.key, positionMs, durationMs)
+        val movieId = session.movieId ?: return
+        if (durationMs > 0 && positionMs >= durationMs * PlayerPositions.FINISHED_FRACTION) {
+            viewModelScope.launch { settings.setWatched(movieId, watched = true) }
+        }
+    }
+
+    fun onPlayerClosed() {
+        _player.value = null
+    }
+
+    /** UI tests: plays a local file in the internal player, as a Real-Debrid file would. */
+    @androidx.annotation.VisibleForTesting
+    internal fun playForTest(session: PlayerSession) {
+        _player.value = session
+        push(Screen.Player)
+    }
+
     fun startTmdbSignIn() {
         tmdbAccount?.startSignIn { viewModelScope.launch { syncTmdbAccount(0) } }
     }
@@ -987,7 +1147,11 @@ class HomeViewModel(
 
     private fun perform(action: GatedAction) {
         when (action) {
-            is GatedAction.Details -> push(Screen.Details(action.movieId))
+            is GatedAction.Details -> {
+                fillInIndexFilm(action.movieId)
+                findRealDebridFiles(action.movieId)
+                push(Screen.Details(action.movieId))
+            }
             is GatedAction.Watch -> {
                 viewModelScope.launch {
                     settings.pushRecent(action.movie.id)
@@ -1010,6 +1174,12 @@ class HomeViewModel(
                 launcher.searchEverywhere(action.movie, GOOGLE_TV_LABEL)
             }
             GatedAction.Settings -> push(Screen.Settings)
+            GatedAction.RealDebrid -> {
+                push(Screen.RealDebrid)
+                realDebrid?.refreshAccount()
+                loadRealDebridFiles()
+            }
+            is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId)
         }
     }
 
@@ -1821,6 +1991,8 @@ class HomeViewModel(
         private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80
         private const val WEB_SEARCH_DELAY_MS = 700L
+        /** Index films added to each library subgenre row. */
+        private const val INDEX_PER_ROW = 40
 
         fun factory(container: AppContainer): ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -1837,6 +2009,8 @@ class HomeViewModel(
                     container.networkWatcher.online,
                     container.tmdbAccount,
                     container.aiRepository,
+                    container.realDebrid,
+                    container.playerPositions,
                 )
             }
         }
