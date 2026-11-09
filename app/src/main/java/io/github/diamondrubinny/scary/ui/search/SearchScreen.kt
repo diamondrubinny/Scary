@@ -41,6 +41,8 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import android.content.res.Resources
 import java.util.Locale
 import kotlinx.coroutines.withContext
@@ -132,6 +134,16 @@ fun SearchScreen(
     val results = local.movies
     // The library's answer for the query on screen is known (not still being looked up).
     val localDone = local.query == query
+    // A new query's answer starts at the top. The grid otherwise keeps the card it showed first in view (by key), and
+    // when the library's answer comes in above cards already shown, that card ends up at the bottom of the results.
+    // Coming back from a movie is not a new query: the grid stays where it was, on that movie's card.
+    var answered by remember { mutableStateOf(local.query) }
+    LaunchedEffect(local.query) {
+        if (local.query != answered) {
+            answered = local.query
+            gridState.scrollToItem(0)
+        }
+    }
     val fieldFocus = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -299,7 +311,8 @@ fun SearchScreen(
                 )
             }
             // Web results only for the query on screen, and without movies the library already found.
-            if (webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
+            // After the library's answer, never before it: cards are not inserted above the ones on screen.
+            if (localDone && webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
                 val localIds = results.mapTo(HashSet()) { it.imdbId }
                 val web = webSearch.results.filter { it.imdbId !in localIds }
                 item(span = { GridItemSpan(maxLineSpan) }, key = "web-header") {
