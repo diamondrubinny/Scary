@@ -1703,7 +1703,7 @@ class HomeViewModel(
         val query = text.trim().take(MAX_QUERY_LENGTH)
         backStack.value = listOf(Screen.Home, Screen.Search)
         setSearchQuery(query)
-        val library = Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS)
+        val library = withContext(Dispatchers.Default) { Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS) }
         val web = withTimeoutOrNull(REMOTE_WEB_WAIT_MS) {
             webSearch.first { it.query == query.trim() && !it.loading }
         }?.results.orEmpty()

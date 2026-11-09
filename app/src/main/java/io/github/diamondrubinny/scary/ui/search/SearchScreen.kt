@@ -41,6 +41,11 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
+import android.content.res.Resources
+import java.util.Locale
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import androidx.compose.runtime.produceState
 import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.grid.LazyGridState
@@ -112,12 +117,21 @@ fun SearchScreen(
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
-    val results = remember(movies, query, resources) {
-        // Genre names in the current language, so "רוחות" or "ghosts" both work.
-        Search.query(movies, query, labels = { movie ->
-            (listOf(movie.genre.labelRes()) + movie.subgenres.map { it.labelRes() }).map(resources::getString)
-        })
+    // Searching thousands of films is kept off the main thread: on a TV, doing it at each typed letter froze the
+    // screen (and SCARY is the home screen). The normalized text is built once per catalog, in the background; a
+    // search coming back from a movie answers at once from it, so focus can return to that movie's card.
+    val locale = resources.configuration.locales[0]
+    val index by produceState(SearchIndexCache.cached(movies, locale), movies, locale) {
+        value = SearchIndexCache.cached(movies, locale) ?: withContext(Dispatchers.Default) { SearchIndexCache.build(movies, locale, resources) }
     }
+    val local by produceState(index?.let { LocalResults(query, it.query(query), it) } ?: LocalResults("", emptyList()), index, query) {
+        val ready = index ?: return@produceState
+        if (value.query == query && value.index === ready) return@produceState
+        value = LocalResults(query, withContext(Dispatchers.Default) { ready.query(query) }, ready)
+    }
+    val results = local.movies
+    // The library's answer for the query on screen is known (not still being looked up).
+    val localDone = local.query == query
     val fieldFocus = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val keyboard = LocalSoftwareKeyboardController.current
@@ -213,6 +227,7 @@ fun SearchScreen(
 
         val status = when {
             query.isBlank() -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
+            results.isEmpty() && !localDone -> ""
             results.isEmpty() -> stringResource(R.string.search_no_results, query.trim())
             else -> stringResource(R.string.search_count, results.size)
         }
@@ -259,7 +274,7 @@ fun SearchScreen(
             // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
             val webDone = webSearch.query != query.trim() || !webSearch.loading
             val webEmpty = webSearch.query != query.trim() || webSearch.results.isEmpty()
-            if (query.isNotBlank() && results.isEmpty() && webDone && webEmpty) {
+            if (query.isNotBlank() && localDone && results.isEmpty() && webDone && webEmpty) {
                 item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
                     EmptyState(
                         title = stringResource(R.string.empty_search_title),
@@ -338,4 +353,31 @@ private fun Context.canHandle(intent: Intent): Boolean {
         packageManager.queryIntentActivities(intent, 0)
     }
     return matches.isNotEmpty()
+}
+
+/** The library's matches for [query], from [index]. */
+private class LocalResults(val query: String, val movies: List<Movie>, val index: Search.Index? = null)
+
+/**
+ * The last search index built, for the catalog and language it was built from. One at a time: the catalog changes
+ * as online rows load, and only the newest one is searched.
+ */
+private object SearchIndexCache {
+    private class Entry(val movies: List<Movie>, val locale: Locale?, val index: Search.Index)
+
+    @Volatile
+    private var last: Entry? = null
+
+    fun cached(movies: List<Movie>, locale: Locale?): Search.Index? =
+        last?.takeIf { it.movies === movies && it.locale == locale }?.index
+
+    fun build(movies: List<Movie>, locale: Locale?, resources: Resources): Search.Index {
+        cached(movies, locale)?.let { return it }
+        // Genre names in the current language, so "רוחות" or "ghosts" both work; each name is read once.
+        val names = HashMap<Int, String>()
+        fun name(res: Int): String = names.getOrPut(res) { resources.getString(res) }
+        val index = Search.Index(movies) { movie -> (listOf(movie.genre.labelRes()) + movie.subgenres.map { it.labelRes() }).map(::name) }
+        last = Entry(movies, locale, index)
+        return index
+    }
 }
