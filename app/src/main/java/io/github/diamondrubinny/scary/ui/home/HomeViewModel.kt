@@ -95,6 +95,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -205,7 +207,8 @@ class HomeViewModel(
         extraPages,
         settings.prefs.map { it.onlineEnabled to it.familyNight }.distinctUntilChanged(),
     ) { state, extras, (online, family) ->
-        if (state is CatalogState.Ready) CatalogState.Ready(shown(state.catalog, extras, online, family)) else state
+        // The id lookup is built here, off the main thread, not at the first movie page or card that asks.
+        if (state is CatalogState.Ready) CatalogState.Ready(shown(state.catalog, extras, online, family).also { it.movie("") }) else state
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, CatalogState.Loading)
 
     /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
@@ -617,32 +620,48 @@ class HomeViewModel(
         AppOrdering.order(apps, InstalledApp::packageName, InstalledApp::label, prefs.pinned)
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
-    /** The last movie page built, with the catalog it came from: recompositions reuse it instead of sorting again. */
-    private var detailsCache: DetailsCacheEntry? = null
-
-    private class DetailsCacheEntry(val movieId: String, val catalog: Catalog, val prefs: LauncherPrefs?, val details: MovieDetails)
+    /** "More like this" for one movie page, worked out from that catalog. */
+    class SimilarFor(val movieId: String, val catalog: Catalog, val movies: List<Movie>)
 
     /**
-     * Called from composition, so it must stay cheap: "More like this" sorts the whole catalog once per page. Films
-     * marked "not for me" are never in it; among films alike, those that fit the viewer's taste go first, and the ones
-     * they watched go last.
+     * "More like this" for the open movie page, worked out off the main thread: it scores the whole catalog (thousands
+     * of films since the full index), which on a TV froze the page each time the catalog or a setting changed, such as
+     * pressing "Watch". Worked out again only when the movie, the catalog or the viewer's taste changes. Films marked
+     * "not for me" are never in it; among films alike, those that fit the viewer's taste go first, and the ones they
+     * watched go last.
      */
-    fun details(movieId: String): MovieDetails? {
-        val shown = visibleCatalog() ?: return null
-        val prefs = latestPrefs
-        detailsCache?.let { if (it.movieId == movieId && it.catalog === shown && it.prefs === prefs) return it.details }
-        val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        val disliked = prefs?.dislikedIds.orEmpty().toHashSet()
-        val watched = prefs?.watchedIds.orEmpty().toHashSet()
-        val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in disliked }
-        val taste = prefs?.let { Personalize.taste(shown::movie, it.watchedIds, it.lovedIds, it.dislikedIds) } ?: Personalize.Taste.NONE
-        val bonus: (Movie) -> Double = if (taste.known) {
-            { TASTE_WEIGHT * taste.score(it).coerceIn(-TASTE_CAP, TASTE_CAP) / TASTE_CAP }
-        } else {
-            { 0.0 }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val similar: StateFlow<SimilarFor?> = combine(
+        screen.map { (it as? Screen.Details)?.movieId }.distinctUntilChanged(),
+        shownCatalog,
+        settings.prefs.map { Triple(it.watchedIds, it.lovedIds, it.dislikedIds) }.distinctUntilChanged(),
+    ) { movieId, catalogState, taste -> Triple(movieId, (catalogState as? CatalogState.Ready)?.catalog, taste) }
+        .mapLatest { (movieId, shown, taste) ->
+            if (movieId == null || shown == null) return@mapLatest null
+            val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return@mapLatest null
+            val (watchedIds, lovedIds, dislikedIds) = taste
+            val disliked = dislikedIds.toHashSet()
+            val watched = watchedIds.toHashSet()
+            val candidates = shown.movies.filter { it.kind == movie.kind && it.id !in disliked }
+            val viewerTaste = Personalize.taste(shown::movie, watchedIds, lovedIds, dislikedIds)
+            val bonus: (Movie) -> Double = if (viewerTaste.known) {
+                { TASTE_WEIGHT * viewerTaste.score(it).coerceIn(-TASTE_CAP, TASTE_CAP) / TASTE_CAP }
+            } else {
+                { 0.0 }
+            }
+            SimilarFor(movieId, shown, Similar.find(candidates, movie, bonus = bonus) { it.id in watched })
         }
-        return MovieDetails(movie, Similar.find(candidates, movie, bonus = bonus) { it.id in watched })
-            .also { detailsCache = DetailsCacheEntry(movieId, shown, prefs, it) }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /**
+     * The movie page, from composition: cheap, a lookup only. "More like this" is [similar]'s, for this movie (empty
+     * for the moment it takes to work out, the last one while the catalog changes under an open page).
+     */
+    fun details(movieId: String, similarFor: SimilarFor?): MovieDetails? {
+        val shown = visibleCatalog() ?: return null
+        val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
+        return MovieDetails(movie, similarFor?.takeIf { it.movieId == movieId }?.movies.orEmpty())
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -762,6 +781,7 @@ class HomeViewModel(
     val webSearch: StateFlow<WebSearchState> = _webSearch.asStateFlow()
 
     /** Movies from the latest web search, so their pages open even though they are not in the catalog. */
+    @Volatile
     private var webMovies: Map<String, Movie> = emptyMap()
     private var webJob: Job? = null
 
@@ -1703,7 +1723,7 @@ class HomeViewModel(
         val query = text.trim().take(MAX_QUERY_LENGTH)
         backStack.value = listOf(Screen.Home, Screen.Search)
         setSearchQuery(query)
-        val library = Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS)
+        val library = withContext(Dispatchers.Default) { Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS) }
         val web = withTimeoutOrNull(REMOTE_WEB_WAIT_MS) {
             webSearch.first { it.query == query.trim() && !it.loading }
         }?.results.orEmpty()

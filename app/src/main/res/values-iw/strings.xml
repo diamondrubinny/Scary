@@ -477,7 +477,7 @@
     <string name="update_failed_permission_screen">הטלוויזיה הזו מסתירה את מסך ההרשאה. פתחו הגדרות, אפליקציות, SCARY, ואשרו התקנת אפליקציות לא מוכרות.</string>
     <string name="settings_update_check">בדיקת עדכונים</string>
     <string name="settings_update_checking">בודק…</string>
-    <string name="settings_update_up_to_date">מעודכן (build %1$d)</string>
+    <string name="settings_update_up_to_date">מעודכן (build %1$d), נבדק %2$s</string>
     <string name="settings_update_available">build %1$d זמין</string>
     <string name="settings_update_failed">הבדיקה נכשלה</string>
     <string name="settings_update_auto">בדיקת עדכונים אוטומטית</string>

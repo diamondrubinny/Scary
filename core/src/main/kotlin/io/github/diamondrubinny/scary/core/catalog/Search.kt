@@ -40,39 +40,68 @@ object Search {
         text: String,
         labels: (Movie) -> List<String> = { emptyList() },
         limit: Int = 60,
-    ): List<Movie> {
-        val terms = normalize(text).split(' ').filter(String::isNotEmpty)
-        if (terms.isEmpty()) return emptyList()
-        return movies.asSequence()
-            .mapNotNull { movie -> score(movie, terms, labels(movie))?.let { movie to it } }
-            .sortedWith(compareByDescending<Pair<Movie, Int>> { it.second }.thenBy { it.first.title })
-            .map { it.first }
-            .take(limit)
-            .toList()
+    ): List<Movie> = if (terms(text).isEmpty()) emptyList() else Index(movies, labels).query(text, limit)
+
+    private fun terms(text: String): List<String> = normalize(text).split(' ').filter(String::isNotEmpty)
+
+    /**
+     * The catalog's searchable text, normalized once. Normalizing every title and synopsis (five languages) is what
+     * costs: on a TV, doing it for thousands of films at each typed letter froze the screen. Build it off the main
+     * thread when the catalog changes; each [query] then only compares strings.
+     */
+    class Index(movies: List<Movie>, labels: (Movie) -> List<String> = { emptyList() }) {
+        private val entries: List<Entry> = movies.map { movie ->
+            val title = normalize(movie.title + " " + movie.titleHe + " " + movie.titles.values.joinToString(" "))
+            Entry(
+                movie = movie,
+                title = title,
+                titleWords = title.split(' '),
+                director = normalize(movie.director),
+                labels = normalize(labels(movie).joinToString(" ")),
+                synopsis = normalize(movie.synopsisHe + " " + movie.synopsisEn + " " + movie.synopses.values.joinToString(" ")),
+                year = movie.year.toString(),
+            )
+        }
+
+        val size: Int get() = entries.size
+
+        fun query(text: String, limit: Int = 60): List<Movie> {
+            val terms = terms(text)
+            if (terms.isEmpty()) return emptyList()
+            return entries.asSequence()
+                .mapNotNull { entry -> entry.score(terms)?.let { entry.movie to it } }
+                .sortedWith(compareByDescending<Pair<Movie, Int>> { it.second }.thenBy { it.first.title })
+                .map { it.first }
+                .take(limit)
+                .toList()
+        }
     }
 
-    private fun score(movie: Movie, terms: List<String>, labels: List<String>): Int? {
-        val title = normalize(movie.title + " " + movie.titleHe + " " + movie.titles.values.joinToString(" "))
-        val titleWords = title.split(' ')
-        val director = normalize(movie.director)
-        val labelText = normalize(labels.joinToString(" "))
-        val synopsis = normalize(movie.synopsisHe + " " + movie.synopsisEn + " " + movie.synopses.values.joinToString(" "))
-        val year = movie.year.toString()
-
-        var total = 0
-        for (term in terms) {
-            val best = when {
-                title.startsWith(term) -> TITLE_PREFIX
-                titleWords.any { it.startsWith(term) } -> TITLE_WORD
-                term in title -> TITLE_CONTAINS
-                year.startsWith(term) && term.length >= 2 -> YEAR
-                term in director -> DIRECTOR
-                term in labelText -> LABEL
-                term.length >= 2 && term in synopsis -> SYNOPSIS
-                else -> return null
+    private class Entry(
+        val movie: Movie,
+        val title: String,
+        val titleWords: List<String>,
+        val director: String,
+        val labels: String,
+        val synopsis: String,
+        val year: String,
+    ) {
+        fun score(terms: List<String>): Int? {
+            var total = 0
+            for (term in terms) {
+                val best = when {
+                    title.startsWith(term) -> TITLE_PREFIX
+                    titleWords.any { it.startsWith(term) } -> TITLE_WORD
+                    term in title -> TITLE_CONTAINS
+                    year.startsWith(term) && term.length >= 2 -> YEAR
+                    term in director -> DIRECTOR
+                    term in labels -> LABEL
+                    term.length >= 2 && term in synopsis -> SYNOPSIS
+                    else -> return null
+                }
+                total += best
             }
-            total += best
+            return total
         }
-        return total
     }
 }

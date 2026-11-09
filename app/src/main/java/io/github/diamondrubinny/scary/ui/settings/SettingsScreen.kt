@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -53,6 +54,9 @@ import io.github.diamondrubinny.scary.ui.theme.paneWidth
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ui.trailer.TrailerDiagnostics
 import io.github.diamondrubinny.scary.update.UpdateState
+import java.text.DateFormat
+import java.util.Calendar
+import java.util.Date
 import kotlinx.coroutines.delay
 
 class SettingsActions(
@@ -394,7 +398,7 @@ fun SettingsScreen(
                 label = stringResource(R.string.settings_update_check),
                 value = when (updateState) {
                     UpdateState.Checking -> stringResource(R.string.settings_update_checking)
-                    is UpdateState.UpToDate -> stringResource(R.string.settings_update_up_to_date, updateState.versionCode)
+                    is UpdateState.UpToDate -> stringResource(R.string.settings_update_up_to_date, updateState.versionCode, checkedAt(updateState.checkedAt))
                     is UpdateState.Available -> stringResource(R.string.settings_update_available, updateState.manifest.versionCode)
                     is UpdateState.Downloading -> stringResource(R.string.update_downloading, updateState.percent)
                     is UpdateState.Failed -> stringResource(R.string.settings_update_failed)
@@ -576,4 +580,19 @@ private fun SettingRow(
             if (value != null) BasicText(value, style = ScaryType.Label.copy(color = ScaryColors.Candle))
         }
     }
+}
+
+/** When the last check ran, in the viewer's language: the time today, the date and time before that. */
+@Composable
+private fun checkedAt(millis: Long): String {
+    val locale = LocalLocale.current.platformLocale
+    val now = Calendar.getInstance()
+    val then = Calendar.getInstance().apply { timeInMillis = millis }
+    val today = now.get(Calendar.YEAR) == then.get(Calendar.YEAR) && now.get(Calendar.DAY_OF_YEAR) == then.get(Calendar.DAY_OF_YEAR)
+    val format = if (today) {
+        DateFormat.getTimeInstance(DateFormat.SHORT, locale)
+    } else {
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)
+    }
+    return format.format(Date(millis))
 }

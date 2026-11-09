@@ -123,6 +123,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val tmdbKeyMask by viewModel.tmdbKeyMask.collectAsStateWithLifecycle()
     val tmdbDialog by viewModel.tmdbDialog.collectAsStateWithLifecycle()
     val webSearch by viewModel.webSearch.collectAsStateWithLifecycle()
+    val similarFor by viewModel.similar.collectAsStateWithLifecycle()
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
@@ -384,7 +385,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     ScaryTheme(reduceMotion = !state.effectsEnabled || !systemAnimations) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
             val current = screen
-            val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId) }
+            val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId, similarFor) }
             val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
             // A locked movie's art stays off the screen, as on its card.
             MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it })

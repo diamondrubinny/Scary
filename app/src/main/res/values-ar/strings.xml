@@ -499,7 +499,7 @@
     <string name="update_failed_permission_screen">هذا التلفاز يخفي شاشة الإذن. افتح الإعدادات، التطبيقات، SCARY، واسمح بتثبيت التطبيقات غير المعروفة.</string>
     <string name="settings_update_check">البحث عن تحديثات</string>
     <string name="settings_update_checking">جارٍ البحث…</string>
-    <string name="settings_update_up_to_date">محدَّث (البناء %1$d)</string>
+    <string name="settings_update_up_to_date">محدَّث (البناء %1$d)، فُحص %2$s</string>
     <string name="settings_update_available">البناء %1$d متاح</string>
     <string name="settings_update_failed">تعذّر البحث</string>
     <string name="settings_update_auto">البحث عن التحديثات تلقائيًا</string>

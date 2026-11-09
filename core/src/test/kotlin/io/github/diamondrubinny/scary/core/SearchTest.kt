@@ -29,6 +29,15 @@ class SearchTest {
     }
 
     @Test
+    fun `a prepared index answers like a one-off search, for any number of queries`() {
+        val index = Search.Index(catalog.movies)
+        assertEquals(catalog.movies.size, index.size)
+        for (query in listOf("shin", "rec", "carpenter", "1978", "ghost house", "", "   ")) {
+            assertEquals(query, ids(query), index.query(query).map { it.id })
+        }
+    }
+
+    @Test
     fun `title prefix ranks first`() {
         assertEquals("the_shining", ids("shin").first())
         assertEquals("rec", ids("rec").first())

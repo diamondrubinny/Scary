@@ -484,7 +484,7 @@
     <string name="update_failed_permission_screen">Этот телевизор скрывает экран разрешения. Откройте Настройки, Приложения, SCARY и разрешите установку неизвестных приложений.</string>
     <string name="settings_update_check">Проверить обновления</string>
     <string name="settings_update_checking">Проверка…</string>
-    <string name="settings_update_up_to_date">Обновлено (сборка %1$d)</string>
+    <string name="settings_update_up_to_date">Обновлено (сборка %1$d), проверено %2$s</string>
     <string name="settings_update_available">Доступна сборка %1$d</string>
     <string name="settings_update_failed">Не удалось проверить</string>
     <string name="settings_update_auto">Искать обновления самостоятельно</string>
