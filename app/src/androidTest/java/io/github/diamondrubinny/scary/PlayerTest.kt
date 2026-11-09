@@ -77,6 +77,10 @@ class PlayerTest {
         // Playing: the main button offers to pause.
         waitFor(hasText(text(R.string.player_pause)))
         assertTrue(rule.onAllNodes(hasText(text(R.string.player_error))).fetchSemanticsNodes().isEmpty())
+        // A few quiet seconds later the controls hide; the remote's OK still reaches the player and pauses it.
+        rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasText(text(R.string.player_pause))).fetchSemanticsNodes().isEmpty() }
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+        waitFor(hasText(text(R.string.player_play)))
         pressBack()
         rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
         assertTrue("The player session ends with the screen", viewModel().player.value == null)

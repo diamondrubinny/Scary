@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.ui.player
 
 import android.view.KeyEvent as AndroidKeyEvent
+import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -41,6 +42,7 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
@@ -114,6 +116,8 @@ fun PlayerScreen(session: PlayerSession, onProgress: (Long, Long) -> Unit, onClo
     var audioIndex by remember { mutableIntStateOf(-1) }
     var subtitleIndex by remember { mutableIntStateOf(-1) }
     val playPauseFocus = remember { FocusRequester() }
+    // The player itself holds the focus while the controls are hidden, so the remote's keys always reach it.
+    val rootFocus = remember { FocusRequester() }
 
     fun poke() {
         controlsVisible = true
@@ -201,10 +205,12 @@ fun PlayerScreen(session: PlayerSession, onProgress: (Long, Long) -> Unit, onClo
             if (playing && System.currentTimeMillis() - lastInteraction > HIDE_AFTER_MS) controlsVisible = false
         }
     }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(controlsVisible, failed) {
         withFrameNanos { }
-        runCatching { playPauseFocus.requestFocus() }
+        runCatching { if (controlsVisible || failed) playPauseFocus.requestFocus() else rootFocus.requestFocus() }
     }
+    // Back always leaves the player, wherever the focus is.
+    BackHandler { onClose() }
     // The sleep timer pauses the film when it ends.
     LaunchedEffect(player) {
         SleepTimer.ended.collect {
@@ -224,6 +230,10 @@ fun PlayerScreen(session: PlayerSession, onProgress: (Long, Long) -> Unit, onClo
             .background(Color.Black)
             .testTag(PLAYER_TAG)
             .onPreviewKeyEvent { event ->
+                if (event.key.nativeKeyCode == AndroidKeyEvent.KEYCODE_BACK) {
+                    if (event.type == KeyEventType.KeyUp) onClose()
+                    return@onPreviewKeyEvent true
+                }
                 if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
                 when (event.key.nativeKeyCode) {
                     AndroidKeyEvent.KEYCODE_MEDIA_PLAY_PAUSE, AndroidKeyEvent.KEYCODE_SPACE -> { togglePlay(); true }
@@ -238,10 +248,15 @@ fun PlayerScreen(session: PlayerSession, onProgress: (Long, Long) -> Unit, onClo
                     else -> { poke(); false }
                 }
             }
+            .focusRequester(rootFocus)
             .focusable(),
         contentAlignment = Alignment.Center,
     ) {
-        PlayerSurface(player = player, modifier = Modifier.fillMaxHeight().aspectRatio(videoAspect, matchHeightConstraintsFirst = true))
+        // The video surface never takes the focus: keys sent into it would not reach the player's controls.
+        PlayerSurface(
+            player = player,
+            modifier = Modifier.fillMaxHeight().aspectRatio(videoAspect, matchHeightConstraintsFirst = true).focusProperties { canFocus = false },
+        )
         if (cues.isNotBlank()) {
             BasicText(
                 cues,
