@@ -999,7 +999,8 @@ class ScaryUiTest {
             waitFor(hasText(text(R.string.update_required)) and hasAnyAncestor(dialog))
             // "Update now" has the focus and is the only choice: no way to put a working update off.
             waitFor(hasText(text(R.string.update_now)) and isFocused() and hasAnyAncestor(dialog))
-            assertTrue(rule.onAllNodes(hasText(text(R.string.update_not_now))).fetchSemanticsNodes().isEmpty())
+            // In the popup: the home screen behind it has a "Not now" of its own (the taste picker's invitation).
+            assertTrue(rule.onAllNodes(hasText(text(R.string.update_not_now)) and hasAnyAncestor(dialog)).fetchSemanticsNodes().isEmpty())
             // Back does not close it.
             rule.waitForIdle()
             pressBack()
