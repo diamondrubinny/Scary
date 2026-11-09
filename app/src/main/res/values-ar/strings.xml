@@ -484,10 +484,10 @@
     <string name="update_version">الإصدار %1$s، البناء %2$d</string>
     <string name="update_how">يأتي من مستودع SCARY الرسمي ويُفحص قبل التثبيت. سيطلب Android التأكيد.</string>
     <string name="update_now">التحديث الآن</string>
-    <string name="update_later">لاحقًا</string>
-    <string name="update_skip">تخطي هذا الإصدار</string>
+    <string name="update_not_now">ليس الآن</string>
+    <string name="update_try_again">حاول مجددًا</string>
     <string name="update_downloading">جارٍ التنزيل… %1$d%%</string>
-    <string name="update_cancel">إلغاء</string>
+    <string name="update_required">هذا التحديث إلزامي: يُنزَّل تلقائيًا، وما عليك إلا تأكيده.</string>
     <string name="update_permission">ليحدّث نفسه، يحتاج SCARY إذن Android لتثبيت التطبيقات. اسمح بذلك مرة واحدة لـ SCARY في الشاشة التالية، ثم عُد.</string>
     <string name="update_open_settings">فتح الإعدادات</string>
     <string name="update_installing">أكّد التحديث على شاشة Android. يُعاد تشغيل SCARY عند الانتهاء.</string>
@@ -503,7 +503,7 @@
     <string name="settings_update_available">البناء %1$d متاح</string>
     <string name="settings_update_failed">تعذّر البحث</string>
     <string name="settings_update_auto">البحث عن التحديثات تلقائيًا</string>
-    <string name="settings_update_note">فقط من مستودع SCARY الرسمي على GitHub، مرة كل ست ساعات على الأكثر، ولا يُثبَّت إلا تحديث موقّع بمفتاح SCARY. يرى GitHub عنوان IP للتلفاز؛ لا يُرسل أي شيء آخر.</string>
+    <string name="settings_update_note">فقط من مستودع SCARY الرسمي على GitHub، مرة كل ساعة على الأكثر، ولا يُثبَّت إلا تحديث موقّع بمفتاح SCARY. كل إصدار جديد إلزامي: يُنزَّل تلقائيًا ويطلب منك التأكيد. يرى GitHub عنوان IP للتلفاز؛ لا يُرسل أي شيء آخر.</string>
     <string name="settings_update_not_official">هذه النسخة من SCARY ليست الإصدار الرسمي، لذا لا تتلقى التحديثات الرسمية.</string>
 
     <!-- Ask SCARY (AI) -->

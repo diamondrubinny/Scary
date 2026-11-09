@@ -982,7 +982,7 @@ class ScaryUiTest {
     }
 
     @Test
-    fun aNewVersionPopsUpAndLaterOrSkipPutItAway() {
+    fun aNewVersionIsMandatoryAndCanBePutOffOnlyWhenItFails() {
         waitForHomeFocus()
         val container = (rule.activity.application as ScaryApplication).container
         val updates = container.updateManager
@@ -996,30 +996,24 @@ class ScaryUiTest {
             waitFor(dialog)
             waitFor(hasText(text(R.string.update_title)) and hasAnyAncestor(dialog))
             waitFor(hasText("Test notes") and hasAnyAncestor(dialog))
-            // "Update now" has the focus: the popup is answered with the remote's OK.
+            waitFor(hasText(text(R.string.update_required)) and hasAnyAncestor(dialog))
+            // "Update now" has the focus and is the only choice: no way to put a working update off.
             waitFor(hasText(text(R.string.update_now)) and isFocused() and hasAnyAncestor(dialog))
-            rule.onNode(hasText(text(R.string.update_later)) and hasAnyAncestor(dialog)).performClick()
-            waitForGone(dialog)
-            waitUntilOrDescribe("later saved") { runBlocking { container.settingsRepository.prefs.first().updateLaterUntil } != null }
-            // Again, and this time skip the version.
-            rule.runOnUiThread { updates.offerForTest(manifest) }
-            waitFor(dialog)
-            rule.onNode(hasText(text(R.string.update_skip)) and hasAnyAncestor(dialog)).performClick()
-            waitForGone(dialog)
-            waitUntilOrDescribe("skip saved") { runBlocking { container.settingsRepository.prefs.first().updateSkippedVersion } == 999_999 }
-            // Back closes it as "Later".
-            rule.runOnUiThread { updates.offerForTest(manifest) }
-            waitFor(dialog)
-            waitFor(isFocused() and hasAnyAncestor(dialog))
+            // In the popup: the home screen behind it has a "Not now" of its own (the taste picker's invitation).
+            assertTrue(rule.onAllNodes(hasText(text(R.string.update_not_now)) and hasAnyAncestor(dialog)).fetchSemanticsNodes().isEmpty())
+            // Back does not close it.
             rule.waitForIdle()
             pressBack()
+            rule.waitForIdle()
+            rule.onNode(dialog).assertExists()
+            // When the update fails, "Try again" (focused) and "Not now" appear; "Not now" puts it off.
+            rule.runOnUiThread { updates.failForTest(manifest) }
+            waitFor(hasText(text(R.string.update_try_again)) and isFocused() and hasAnyAncestor(dialog))
+            rule.onNode(hasText(text(R.string.update_not_now)) and hasAnyAncestor(dialog)).performClick()
             waitForGone(dialog)
+            waitUntilOrDescribe("the next look due at once") { runBlocking { container.settingsRepository.prefs.first().updateLastCheck } == 0L }
         }) {
             rule.runOnUiThread { updates.dismiss() }
-            runBlocking {
-                container.settingsRepository.skipUpdate(0)
-                container.settingsRepository.updateLater(0)
-            }
             backToHome()
         }
     }

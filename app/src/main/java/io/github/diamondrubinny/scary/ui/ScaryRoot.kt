@@ -753,8 +753,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     actions = remember(updates) {
                         UpdateActions(
                             onUpdate = updates::updateNow,
-                            onLater = updates::later,
-                            onSkip = updates::skip,
+                            onNotNow = updates::notNow,
                             onOpenPermission = updates::openInstallPermission,
                             onDismiss = updates::dismiss,
                         )

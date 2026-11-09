@@ -462,10 +462,10 @@
     <string name="update_version">גרסה %1$s, build %2$d</string>
     <string name="update_how">היא מגיעה מהריפו הרשמי של SCARY ונבדקת לפני ההתקנה. Android יבקש לאשר.</string>
     <string name="update_now">עדכון עכשיו</string>
-    <string name="update_later">אחר כך</string>
-    <string name="update_skip">דילוג על הגרסה הזו</string>
+    <string name="update_not_now">לא עכשיו</string>
+    <string name="update_try_again">לנסות שוב</string>
     <string name="update_downloading">מוריד… %1$d%%</string>
-    <string name="update_cancel">ביטול</string>
+    <string name="update_required">זה עדכון חובה: הוא יורד לבד, ורק צריך לאשר אותו.</string>
     <string name="update_permission">כדי להתעדכן, SCARY צריך את אישור Android להתקנת אפליקציות. אשרו פעם אחת ל־SCARY במסך הבא, וחזרו.</string>
     <string name="update_open_settings">פתיחת ההגדרות</string>
     <string name="update_installing">אשרו את העדכון במסך של Android. SCARY יופעל מחדש בסיום.</string>
@@ -481,7 +481,7 @@
     <string name="settings_update_available">build %1$d זמין</string>
     <string name="settings_update_failed">הבדיקה נכשלה</string>
     <string name="settings_update_auto">בדיקת עדכונים אוטומטית</string>
-    <string name="settings_update_note">רק מהריפו הרשמי של SCARY ב־GitHub, לכל היותר פעם בשש שעות, ומותקן רק עדכון שחתום במפתח של SCARY. ‏GitHub רואה את כתובת ה־IP של הטלוויזיה; שום דבר אחר לא נשלח.</string>
+    <string name="settings_update_note">רק מהריפו הרשמי של SCARY ב־GitHub, לכל היותר פעם בשעה, ומותקן רק עדכון שחתום במפתח של SCARY. כל גרסה חדשה היא עדכון חובה: היא יורדת לבד ומבקשת לאשר. ‏GitHub רואה את כתובת ה־IP של הטלוויזיה; שום דבר אחר לא נשלח.</string>
     <string name="settings_update_not_official">העותק הזה של SCARY אינו הגרסה הרשמית, ולכן הוא לא מקבל את העדכונים הרשמיים.</string>
 
     <!-- Ask SCARY (AI) -->
