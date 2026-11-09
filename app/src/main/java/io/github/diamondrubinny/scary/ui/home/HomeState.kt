@@ -104,7 +104,12 @@ sealed interface GatedAction {
     data object Settings : GatedAction
     /** The viewer's Real-Debrid files: personal files have no fear level, so the parental lock asks for the PIN. */
     data object RealDebrid : GatedAction
-    data class PlayRealDebrid(val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile, val movieId: String?) : GatedAction
+    /** [startAtMs] null: from the saved spot or the start, as the viewer chooses when there is a spot to go back to. */
+    data class PlayRealDebrid(
+        val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile,
+        val movieId: String?,
+        val startAtMs: Long? = null,
+    ) : GatedAction
 }
 
 sealed interface PinStep {
@@ -124,6 +129,11 @@ data class DrawerApp(val app: InstalledApp, val pinned: Boolean, val hidden: Boo
 
 sealed interface HomeRow {
     val key: String
+
+    /** "Continue watching": files of the viewer's Real-Debrid account stopped in the middle or with bookmarks. */
+    data class ContinueWatching(val items: List<ContinueItem>) : HomeRow {
+        override val key = "continue"
+    }
 
     data class Recent(val movies: List<Movie>) : HomeRow {
         override val key = "recent"
@@ -258,7 +268,19 @@ class PlayerSession(
     val playable: io.github.diamondrubinny.scary.data.RealDebridRepository.Playable,
     val movieId: String?,
     val startAtMs: Long,
+    /** The file after this one in the same torrent (a series, a film in parts), offered at the end. */
+    val next: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile? = null,
 )
+
+/** A file with a spot saved: play it from there, or from the start? */
+class ResumeChoice(
+    val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile,
+    val movieId: String?,
+    val positionMs: Long,
+)
+
+/** A card under "Continue watching": the file's history, and the SCARY film it was played for, if known. */
+data class ContinueItem(val entry: io.github.diamondrubinny.scary.core.player.WatchEntry, val movie: Movie?)
 
 /**
  * A streaming app on this TV that a movie page can send the viewer to. [canSearch]: it accepts the title as a search;

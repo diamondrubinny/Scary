@@ -27,6 +27,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,6 +40,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.player.PlayerActions
+import io.github.diamondrubinny.scary.ui.player.ResumeDialog
+import io.github.diamondrubinny.scary.core.player.WatchHistory
 import io.github.diamondrubinny.scary.ScaryApplication
 import io.github.diamondrubinny.scary.ai.AiState
 import io.github.diamondrubinny.scary.ai.AiTask
@@ -162,6 +166,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
     val playerSession by viewModel.player.collectAsStateWithLifecycle()
+    val watchHistory by viewModel.watchHistory.collectAsStateWithLifecycle()
+    val resumeChoice by viewModel.resumeChoice.collectAsStateWithLifecycle()
     var aiDialog by remember { mutableStateOf<AiDialogKind?>(null) }
     var aiKeyVersion by remember { mutableIntStateOf(0) }
     var aiKeyTarget by remember { mutableStateOf<AiProvider?>(null) }
@@ -225,6 +231,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             onOpenTastePicker = viewModel::openTastePicker,
             onDismissTasteInvite = viewModel::dismissTasteInvite,
             onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
+            onContinue = viewModel::continueWatching,
+            onForgetContinue = viewModel::forgetWatching,
         )
     }
     val bucketActions = remember(viewModel) {
@@ -394,11 +402,23 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             val playing = playerSession
             when {
                 // The player covers everything; Back closes it (ScaryRoot's Back pops the screen).
-                current == Screen.Player && playing != null -> PlayerScreen(
-                    session = playing,
-                    onProgress = viewModel::onPlayerProgress,
-                    onClose = { viewModel.back() },
-                )
+                // A new file (the next one in a torrent) is a new player, with nothing carried over from the last one.
+                current == Screen.Player && playing != null -> key(playing) {
+                    PlayerScreen(
+                        session = playing,
+                        bookmarks = watchHistory.firstOrNull { it.key == playing.key }?.bookmarks.orEmpty(),
+                        actions = remember(viewModel) {
+                            PlayerActions(
+                                onProgress = viewModel::onPlayerProgress,
+                                onClose = { viewModel.back() },
+                                onBookmark = viewModel::addBookmark,
+                                onRemoveBookmark = viewModel::removeBookmark,
+                                onPlayNext = viewModel::playNext,
+                            )
+                        },
+                        settings = viewModel.playerSettings,
+                    )
+                }
                 state.loading -> LoadingView()
                 current == Screen.Search -> CompositionLocalProvider(LocalShowSeriesTag provides true) {
                     SearchScreen(
@@ -502,11 +522,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     onAiSettings = viewModel::openSettings,
                     realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
                     onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
+                    continueEntry = if (state.familyNight) null else WatchHistory.forMovie(watchHistory, details.movie.id),
+                    onContinue = viewModel::continueWatching,
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
                 current == Screen.RealDebrid -> RealDebridScreen(
                     state = realDebridState,
                     files = rdFiles,
+                    history = WatchHistory.continueWatching(watchHistory),
                     actions = remember(viewModel) {
                         RealDebridActions(
                             onSignIn = viewModel::realDebridSignIn,
@@ -514,6 +537,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                             onSignOut = viewModel::realDebridSignOut,
                             onRefresh = { viewModel.loadRealDebridFiles(force = true) },
                             onPlay = { viewModel.playRealDebrid(it, movieId = null) },
+                            onContinue = viewModel::continueWatching,
+                            onClearHistory = viewModel::clearWatchHistory,
                         )
                     },
                 )
@@ -621,6 +646,15 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                         viewModel.dismissTmdbDialog()
                         viewModel.openPhoneRemote()
                     },
+                )
+            }
+
+            resumeChoice?.let { choice ->
+                ResumeDialog(
+                    choice = choice,
+                    onContinue = { viewModel.answerResume(fromSpot = true) },
+                    onFromStart = { viewModel.answerResume(fromSpot = false) },
+                    onDismiss = viewModel::dismissResume,
                 )
             }
 

@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.player.continueDetail
+import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.brand.Donation
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.data.RealDebridRepository.Reason
@@ -53,6 +55,10 @@ import java.util.Locale
 const val REAL_DEBRID_TAG = "realDebrid"
 const val REAL_DEBRID_CODE_TAG = "realDebridCode"
 const val REAL_DEBRID_FILES_TAG = "realDebridFiles"
+const val REAL_DEBRID_HISTORY_TAG = "realDebridHistory"
+
+/** Files listed under "Continue watching" here; the home row has them all. */
+private const val HISTORY_SHOWN = 5
 
 class RealDebridActions(
     val onSignIn: () -> Unit,
@@ -60,6 +66,8 @@ class RealDebridActions(
     val onSignOut: () -> Unit,
     val onRefresh: () -> Unit,
     val onPlay: (RealDebrid.RdFile) -> Unit,
+    val onContinue: (WatchEntry) -> Unit = {},
+    val onClearHistory: () -> Unit = {},
 )
 
 /**
@@ -68,7 +76,7 @@ class RealDebridActions(
  * videos. Choosing one plays it in the internal player.
  */
 @Composable
-fun RealDebridScreen(state: State, files: RdFilesState, actions: RealDebridActions) {
+fun RealDebridScreen(state: State, files: RdFilesState, actions: RealDebridActions, history: List<WatchEntry> = emptyList()) {
     val firstFocus = remember { FocusRequester() }
     // Leaving while waiting stops asking Real-Debrid: approving later would not reach the TV anyway.
     val waiting by rememberUpdatedState(state is State.Waiting)
@@ -107,11 +115,19 @@ fun RealDebridScreen(state: State, files: RdFilesState, actions: RealDebridActio
                 is State.SignedIn -> {
                     ScaryButton(stringResource(R.string.rd_refresh), onClick = actions.onRefresh, focusRequester = firstFocus)
                     ScaryButton(stringResource(R.string.rd_sign_out), onClick = actions.onSignOut)
+                    if (history.isNotEmpty()) ScaryButton(stringResource(R.string.rd_clear_history), onClick = actions.onClearHistory)
                 }
             }
         }
         if (state is State.Waiting) {
             WaitingForCode(state, narrow)
+        }
+        if (state is State.SignedIn && history.isNotEmpty()) {
+            // Where the viewer stopped, and the spots they marked: on this TV only.
+            BasicText(stringResource(R.string.row_continue), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag(REAL_DEBRID_HISTORY_TAG)) {
+                history.take(HISTORY_SHOWN).forEach { entry -> HistoryRow(entry) { actions.onContinue(entry) } }
+            }
         }
         if (state is State.SignedIn) {
             BasicText(stringResource(R.string.rd_files_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
@@ -182,6 +198,35 @@ private fun FileRow(file: RealDebrid.RdFile, onClick: () -> Unit) {
                 size(file.sizeBytes),
                 style = ScaryType.Caption.copy(color = if (focused) ScaryColors.Void else ScaryColors.Ash),
                 modifier = Modifier.padding(start = 12.dp).width(80.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun HistoryRow(entry: WatchEntry, onClick: () -> Unit) {
+    val detail = continueDetail(entry)
+    FocusSurface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        focusedScale = 1.02f,
+        containerColor = ScaryColors.Crypt,
+        focusedContainerColor = ScaryColors.Bone,
+        contentDescription = "${entry.name}, $detail",
+    ) { focused ->
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            BasicText(
+                entry.name,
+                style = ScaryType.Body.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone, textDirection = TextDirection.Content),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            BasicText(
+                detail,
+                style = ScaryType.Caption.copy(color = if (focused) ScaryColors.Void else ScaryColors.Candle),
+                modifier = Modifier.padding(start = 12.dp),
             )
         }
     }

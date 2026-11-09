@@ -95,6 +95,7 @@ import java.time.format.FormatStyle
 /** Test tags of "About this film ✦" and its text. */
 const val AI_ABOUT_TAG = "aiAbout"
 const val PLAY_RD_TAG = "playRealDebrid"
+const val CONTINUE_RD_TAG = "continueRealDebrid"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -138,6 +139,9 @@ fun DetailsScreen(
     /** The viewer's own Real-Debrid files that are this film (found in their account only); empty hides the button. */
     realDebridFiles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile> = emptyList(),
     onPlayRealDebrid: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit = {},
+    /** Where the viewer stopped in a file of this film (or marked a spot), to continue from; null when nowhere. */
+    continueEntry: io.github.diamondrubinny.scary.core.player.WatchEntry? = null,
+    onContinue: (io.github.diamondrubinny.scary.core.player.WatchEntry) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -216,6 +220,13 @@ fun DetailsScreen(
                             primary = true,
                             focusRequester = watchFocus,
                         )
+                        if (continueEntry != null) {
+                            ScaryButton(
+                                text = io.github.diamondrubinny.scary.ui.player.continueDetail(continueEntry),
+                                onClick = { onContinue(continueEntry) },
+                                modifier = Modifier.testTag(CONTINUE_RD_TAG),
+                            )
+                        }
                         if (realDebridFiles.isNotEmpty()) {
                             ScaryButton(
                                 text = stringResource(R.string.action_play_rd),
