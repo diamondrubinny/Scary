@@ -78,6 +78,7 @@ class SettingsActions(
     val onOpenTmdb: () -> Unit,
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
+    val onOpenRealDebrid: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
     val onCheckForUpdates: () -> Unit = {},
@@ -115,6 +116,8 @@ fun SettingsScreen(
     hideWatched: Boolean = false,
     /** The TMDB account's name when signed in, null otherwise. */
     tmdbAccountName: String? = null,
+    /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
+    realDebridName: String? = null,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -210,6 +213,12 @@ fun SettingsScreen(
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
         AiSection(ai, actions)
+        SettingRow(
+            label = stringResource(R.string.settings_realdebrid),
+            value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
+            onClick = actions.onOpenRealDebrid,
+            modifier = Modifier.testTag(REAL_DEBRID_ROW_TAG),
+        )
         // The phone remote lets a phone steer the TV.
         if (tv) {
             SettingRow(
@@ -428,6 +437,7 @@ fun SettingsScreen(
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
+const val REAL_DEBRID_ROW_TAG = "realDebridRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
 const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"

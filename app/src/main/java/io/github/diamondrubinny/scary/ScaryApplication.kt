@@ -132,6 +132,11 @@ class AppContainer(context: Context) {
 
     /** The viewer's own TMDB account, only once they sign in. */
     val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
+    /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
+    val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore)
+
+    /** Where the viewer stopped in each of their files, kept on this TV only. */
+    val playerPositions = io.github.diamondrubinny.scary.data.PlayerPositions(appContext)
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
 

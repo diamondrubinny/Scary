@@ -91,7 +91,7 @@ object RealDebrid {
     }
 
     private fun form(vararg fields: Pair<String, String>): String =
-        fields.joinToString("&") { (k, v) -> k + "=" + URLEncoder.encode(v, Charsets.UTF_8) }
+        fields.joinToString("&") { (k, v) -> k + "=" + URLEncoder.encode(v, "UTF-8") }
 
     // Answers -----------------------------------------------------------------------------------------------------------
 

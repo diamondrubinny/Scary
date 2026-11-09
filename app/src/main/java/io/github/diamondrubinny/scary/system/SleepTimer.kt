@@ -81,8 +81,12 @@ object SleepTimer {
         pending.cancel()
     }
 
+    /** Tells SCARY's own player (which has no media session) that the timer ended. */
+    val ended = kotlinx.coroutines.flow.MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
     /** Pauses the player that has the media session: a pause key, pressed and released, as the remote would. */
     fun pauseMedia(context: Context) {
+        ended.tryEmit(Unit)
         val audio = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return
         audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_MEDIA_PAUSE))
         audio.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_MEDIA_PAUSE))

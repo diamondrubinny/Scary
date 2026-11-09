@@ -45,6 +45,7 @@ import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.data.LanguageStore
+import io.github.diamondrubinny.scary.data.RealDebridRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.launch.HomeButtonService
@@ -79,6 +80,9 @@ import io.github.diamondrubinny.scary.ui.home.LauncherStatus
 import io.github.diamondrubinny.scary.ui.home.LoadingView
 import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
+import io.github.diamondrubinny.scary.ui.player.PlayerScreen
+import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
 import io.github.diamondrubinny.scary.ui.remote.OtherApps
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
 import io.github.diamondrubinny.scary.ui.search.SearchScreen
@@ -153,6 +157,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val aiAssistant = viewModel.ai
     val aiStateFlow = remember(aiAssistant) { aiAssistant?.state ?: kotlinx.coroutines.flow.MutableStateFlow(AiState()) }
     val aiState by aiStateFlow.collectAsStateWithLifecycle()
+    val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
+    val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
+    val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
+    val playerSession by viewModel.player.collectAsStateWithLifecycle()
     var aiDialog by remember { mutableStateOf<AiDialogKind?>(null) }
     var aiKeyVersion by remember { mutableIntStateOf(0) }
     var aiKeyTarget by remember { mutableStateOf<AiProvider?>(null) }
@@ -323,6 +331,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleAutoWatched = viewModel::toggleAutoWatched,
         onToggleHideWatched = viewModel::toggleHideWatched,
         onOpenTmdbAccount = viewModel::openTmdbAccount,
+        onOpenRealDebrid = viewModel::openRealDebrid,
         onToggleOnline = viewModel::toggleOnline,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
@@ -381,7 +390,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it })
             Atmosphere(animate = !LocalReduceMotion.current)
 
+            val playing = playerSession
             when {
+                // The player covers everything; Back closes it (ScaryRoot's Back pops the screen).
+                current == Screen.Player && playing != null -> PlayerScreen(
+                    session = playing,
+                    onProgress = viewModel::onPlayerProgress,
+                    onClose = { viewModel.back() },
+                )
                 state.loading -> LoadingView()
                 current == Screen.Search -> CompositionLocalProvider(LocalShowSeriesTag provides true) {
                     SearchScreen(
@@ -422,6 +438,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     autoWatched = state.autoWatched,
                     hideWatched = state.hideWatched,
                     tmdbAccountName = (tmdbAccount as? TmdbAccountRepository.State.SignedIn)?.username,
+                    realDebridName = (realDebridState as? RealDebridRepository.State.SignedIn)?.username,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
@@ -482,8 +499,23 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     aboutWeakLanguage = aiState.weakLanguage,
                     onAbout = { aiAssistant?.about(it) },
                     onAiSettings = viewModel::openSettings,
+                    realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
+                    onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
+                current == Screen.RealDebrid -> RealDebridScreen(
+                    state = realDebridState,
+                    files = rdFiles,
+                    actions = remember(viewModel) {
+                        RealDebridActions(
+                            onSignIn = viewModel::realDebridSignIn,
+                            onCancel = viewModel::realDebridCancelSignIn,
+                            onSignOut = viewModel::realDebridSignOut,
+                            onRefresh = { viewModel.loadRealDebridFiles(force = true) },
+                            onPlay = { viewModel.playRealDebrid(it, movieId = null) },
+                        )
+                    },
+                )
                 current == Screen.TmdbAccount -> TmdbAccountScreen(
                     state = tmdbAccount,
                     actions = remember(viewModel) {
@@ -679,7 +711,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
             }
 
             // A new version of SCARY: over whatever is on screen, but never on top of another question.
-            if (updatePrompt && launching == null && pinDialog == null && tmdbDialog == null && bucketPrompt == null && !trailerIntro) {
+            if (updatePrompt && current != Screen.Player && launching == null && pinDialog == null && tmdbDialog == null && bucketPrompt == null && !trailerIntro) {
                 UpdateDialog(
                     state = updateState,
                     language = language,

@@ -4,95 +4,97 @@
 
 package io.github.diamondrubinny.scary.ui.details
 
-import io.github.diamondrubinny.scary.ai.AiTask
-import io.github.diamondrubinny.scary.ui.ai.AiStatus
 
-import io.github.diamondrubinny.scary.ui.home.WatchOption
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.relocation.BringIntoViewResponder
+import androidx.compose.foundation.relocation.bringIntoViewResponder
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.heading
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.platform.testTag
-import androidx.compose.foundation.background
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.R
-import io.github.diamondrubinny.scary.ui.components.QrImage
-import io.github.diamondrubinny.scary.core.links.Links
+import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.brand.Donation
-import androidx.compose.ui.platform.LocalConfiguration
-import java.time.format.FormatStyle
-import java.time.format.DateTimeFormatter
-import java.time.LocalDate
-import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
-import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
-import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
+import io.github.diamondrubinny.scary.core.links.Links
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.ui.ai.AiStatus
 import io.github.diamondrubinny.scary.ui.components.MovieMeta
 import io.github.diamondrubinny.scary.ui.components.PosterArt
-import io.github.diamondrubinny.scary.ui.components.rememberArtwork
-import androidx.compose.ui.layout.ContentScale
-import coil3.compose.AsyncImage
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
-import androidx.compose.foundation.gestures.BringIntoViewSpec
-import androidx.compose.foundation.relocation.BringIntoViewResponder
-import androidx.compose.foundation.relocation.bringIntoViewResponder
-import androidx.compose.ui.geometry.Rect
-import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
-import io.github.diamondrubinny.scary.ui.home.ProviderOffer
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import io.github.diamondrubinny.scary.ui.components.PosterCard
+import io.github.diamondrubinny.scary.ui.components.QrImage
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ui.components.rememberArtwork
+import io.github.diamondrubinny.scary.ui.fx.chill
+import io.github.diamondrubinny.scary.ui.fx.riseIn
 import io.github.diamondrubinny.scary.ui.home.MovieDetails
+import io.github.diamondrubinny.scary.ui.home.ProviderOffer
+import io.github.diamondrubinny.scary.ui.home.RentOrBuyState
 import io.github.diamondrubinny.scary.ui.home.SidePadding
+import io.github.diamondrubinny.scary.ui.home.WatchOption
 import io.github.diamondrubinny.scary.ui.home.subgenreLine
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
-import io.github.diamondrubinny.scary.ui.fx.chill
-import io.github.diamondrubinny.scary.ui.fx.riseIn
+import io.github.diamondrubinny.scary.ui.theme.dialogWidth
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
+import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
+import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
+import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 /** Test tags of "About this film ✦" and its text. */
 const val AI_ABOUT_TAG = "aiAbout"
+const val PLAY_RD_TAG = "playRealDebrid"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -133,9 +135,17 @@ fun DetailsScreen(
     aboutWeakLanguage: Boolean = false,
     onAbout: (Movie) -> Unit = {},
     onAiSettings: () -> Unit = {},
+    /** The viewer's own Real-Debrid files that are this film (found in their account only); empty hides the button. */
+    realDebridFiles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile> = emptyList(),
+    onPlayRealDebrid: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit = {},
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
+    // "Play from Real-Debrid" with more than one of the viewer's files for this film: which one.
+    var chooseFile by remember { mutableStateOf(false) }
+    if (chooseFile) {
+        RealDebridChooser(realDebridFiles, onChoose = { chooseFile = false; onPlayRealDebrid(it) }, onDismiss = { chooseFile = false })
+    }
     LaunchedEffect(movie.id) {
         withFrameNanos { }
         runCatching { watchFocus.requestFocus() }
@@ -206,6 +216,13 @@ fun DetailsScreen(
                             primary = true,
                             focusRequester = watchFocus,
                         )
+                        if (realDebridFiles.isNotEmpty()) {
+                            ScaryButton(
+                                text = stringResource(R.string.action_play_rd),
+                                onClick = { if (realDebridFiles.size == 1) onPlayRealDebrid(realDebridFiles[0]) else chooseFile = true },
+                                modifier = Modifier.testTag(PLAY_RD_TAG),
+                            )
+                        }
                         ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
                         if (about != null) {
                             ScaryButton(
@@ -492,3 +509,35 @@ private fun longDate(date: LocalDate): String {
     val locale = LocalConfiguration.current.locales[0]
     return remember(date, locale) { date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)) }
 }
+
+/** The viewer's files for this film, biggest (usually best) first, each with its size. */
+@Composable
+private fun RealDebridChooser(
+    files: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile>,
+    onChoose: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val first = remember { FocusRequester() }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            runCatching { first.requestFocus() }
+        }
+        Column(
+            modifier = Modifier
+                .dialogWidth(640.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(stringResource(R.string.rd_choose_title), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            files.take(MAX_CHOICES).forEachIndexed { i, file ->
+                val label = file.name + io.github.diamondrubinny.scary.ui.realdebrid.size(file.sizeBytes).let { if (it.isEmpty()) "" else " · $it" }
+                ScaryButton(label, onClick = { onChoose(file) }, focusRequester = if (i == 0) first else null)
+            }
+        }
+    }
+}
+
+private const val MAX_CHOICES = 8
+
