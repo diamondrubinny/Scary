@@ -46,7 +46,8 @@ sealed interface UpdateState {
     data object NotOfficial : UpdateState
 
     data object Checking : UpdateState
-    data class UpToDate(val versionCode: Long) : UpdateState
+    /** Nothing newer on the stable release, as read at [checkedAt] (wall clock, ms). */
+    data class UpToDate(val versionCode: Long, val checkedAt: Long) : UpdateState
     data class Available(val manifest: UpdateManifest) : UpdateState
     data class Downloading(val manifest: UpdateManifest, val percent: Int) : UpdateState
 
@@ -143,12 +144,13 @@ class UpdateManager(
         val now = System.currentTimeMillis()
         val manifest = (fetched as? Fetched.Text)?.text?.let(Updates::parse)
         if (manifest == null) {
-            _state.value = when {
-                // No stable release yet (404), or one this build does not trust: nothing to offer.
-                fetched !is Fetched.Failed -> UpdateState.UpToDate(installedVersion)
-                manual -> UpdateState.Failed(null, UpdateState.Reason.UNREACHABLE)
-                // Offline: try again at the next chance, without a word.
-                else -> before.takeUnless { it is UpdateState.Checking } ?: UpdateState.Idle
+            // Offline, or no readable update.json: most often the few seconds in which CI replaces the stable
+            // release with a new one. Never reported as "up to date", which would hide that version until the
+            // next look; a check the viewer asked for says it could not check, so they try again.
+            _state.value = if (manual) {
+                UpdateState.Failed(null, UpdateState.Reason.UNREACHABLE)
+            } else {
+                before.takeUnless { it is UpdateState.Checking } ?: UpdateState.Idle
             }
             if (fetched !is Fetched.Failed) settings.setUpdateLastCheck(now)
             return
@@ -161,7 +163,7 @@ class UpdateManager(
                 _prompt.value = true
             }
             Updates.Decision.SKIPPED, Updates.Decision.LATER -> _state.value = UpdateState.Available(manifest)
-            Updates.Decision.UP_TO_DATE, Updates.Decision.TOO_NEW_FOR_DEVICE -> _state.value = UpdateState.UpToDate(installedVersion)
+            Updates.Decision.UP_TO_DATE, Updates.Decision.TOO_NEW_FOR_DEVICE -> _state.value = UpdateState.UpToDate(installedVersion, now)
         }
     }
 

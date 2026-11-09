@@ -477,7 +477,7 @@
     <string name="update_failed_permission_screen">Esta TV esconde a tela de permissão. Abra Configurações, Apps, SCARY, e permita instalar apps desconhecidos.</string>
     <string name="settings_update_check">Procurar atualizações</string>
     <string name="settings_update_checking">Procurando…</string>
-    <string name="settings_update_up_to_date">Atualizado (build %1$d)</string>
+    <string name="settings_update_up_to_date">Atualizado (build %1$d), verificado %2$s</string>
     <string name="settings_update_available">Build %1$d disponível</string>
     <string name="settings_update_failed">Não foi possível verificar</string>
     <string name="settings_update_auto">Procurar atualizações sozinho</string>

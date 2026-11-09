@@ -472,7 +472,7 @@
     <string name="update_failed_permission_screen">This TV hides the permission screen. Open Settings, Apps, SCARY, and allow installing unknown apps.</string>
     <string name="settings_update_check">Check for updates</string>
     <string name="settings_update_checking">Checking…</string>
-    <string name="settings_update_up_to_date">Up to date (build %1$d)</string>
+    <string name="settings_update_up_to_date">Up to date (build %1$d), checked %2$s</string>
     <string name="settings_update_available">Available: build %1$d</string>
     <string name="settings_update_failed">Could not check</string>
     <string name="settings_update_auto">Look for updates by itself</string>
