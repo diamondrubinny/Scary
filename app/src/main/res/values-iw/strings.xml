@@ -667,4 +667,31 @@
         <item quantity="two">המשך · %d קטעים מסומנים</item>
         <item quantity="other">המשך · %d קטעים מסומנים</item>
     </plurals>
+    <string name="settings_stremio_account">חשבון Stremio</string>
+    <string name="stremio_title">חשבון Stremio</string>
+    <string name="stremio_what">חברו את חשבון ה־Stremio שלכם כדי לראות כאן מה התחלתם לראות שם, לסמן את הסרטים שצפיתם בהם, ולסנכרן את "הרשימה שלי" עם הספרייה ב־Stremio. ‏SCARY לא קורא את התוספים שלכם ולא מביא מקורות לצפייה: הצפייה נשארת ב־Stremio.</string>
+    <string name="stremio_sign_in">חיבור</string>
+    <string name="stremio_cancel">ביטול</string>
+    <string name="stremio_sign_out">ניתוק</string>
+    <string name="stremio_sync_now">סנכרון עכשיו</string>
+    <string name="stremio_signed_out">לא מחובר</string>
+    <string name="stremio_waiting">ממתינים לאישור שלכם בטלפון…</string>
+    <string name="stremio_step_open">1. בטלפון, פתחו את %1$s (או סרקו את הקוד) והתחברו ל־Stremio</string>
+    <string name="stremio_step_code">2. ודאו שמופיע הקוד הזה, ואשרו:</string>
+    <string name="stremio_connected">מחובר</string>
+    <string name="stremio_last_sync">מחובר · סונכרן ב־%1$s</string>
+    <string name="stremio_syncing">מסנכרן…</string>
+    <string name="stremio_sync_partial">חלק מהשינויים לא נשלחו ל־Stremio. ננסה שוב.</string>
+    <string name="stremio_unreachable">אין חיבור ל־Stremio. בדקו את האינטרנט ונסו שוב.</string>
+    <string name="stremio_expired">הקוד פג. לחצו "חיבור" כדי לקבל קוד חדש.</string>
+    <string name="stremio_storage">לא הצלחנו לשמור את המפתח בצורה בטוחה בטלוויזיה.</string>
+    <string name="stremio_session_ended">החשבון ב־Stremio נותק (התנתקתם שם). חברו שוב כדי להמשיך לסנכרן.</string>
+    <string name="stremio_privacy">נשלח ל־Stremio: מפתח החשבון, כתובת ה־IP של הטלוויזיה והשינויים בספרייה (הרשימה שלי וסימוני צפייה). שום דבר לא נשלח ל־SCARY. המפתח נשמר מוצפן בטלוויזיה בלבד.</string>
+    <string name="stremio_qr_description">קוד QR לאישור SCARY בחשבון ה־Stremio שלכם</string>
+    <string name="stremio_signed_out_message">חשבון Stremio נותק</string>
+    <string name="msg_stremio_synced">סונכרן עם הספרייה ב־Stremio</string>
+    <string name="row_stremio_continue">להמשיך ב־Stremio</string>
+    <string name="stremio_note_continue">עצרתם ב־%1$s ב־Stremio: "צפייה ב־Stremio" ממשיכה משם</string>
+    <string name="stremio_note_library">בספרייה שלכם ב־Stremio</string>
+    <string name="stremio_note_watched">נצפה ב־Stremio</string>
 </resources>

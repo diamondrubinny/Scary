@@ -132,6 +132,9 @@ class AppContainer(context: Context) {
 
     /** The viewer's own TMDB account, only once they sign in. */
     val tmdbAccount = TmdbAccountRepository(appContext, secretStore, tmdbRepository, settingsRepository, savedMoviesRepository)
+
+    /** The viewer's own Stremio account, only if they connect it (library sync; never add-ons or streams). */
+    val stremio = io.github.diamondrubinny.scary.data.StremioRepository(appContext, secretStore, settingsRepository)
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
     val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore)
 

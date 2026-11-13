@@ -83,6 +83,7 @@ class SettingsActions(
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRealDebrid: () -> Unit = {},
+    val onOpenStremioAccount: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
     val onCheckForUpdates: () -> Unit = {},
@@ -122,6 +123,7 @@ fun SettingsScreen(
     tmdbAccountName: String? = null,
     /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
     realDebridName: String? = null,
+    stremioConnected: Boolean = false,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
     homeButtonServiceOn: Boolean,
@@ -222,6 +224,12 @@ fun SettingsScreen(
             value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
             onClick = actions.onOpenRealDebrid,
             modifier = Modifier.testTag(REAL_DEBRID_ROW_TAG),
+        )
+        SettingRow(
+            label = stringResource(R.string.settings_stremio_account),
+            value = stringResource(if (stremioConnected) R.string.stremio_connected else R.string.stremio_signed_out),
+            onClick = actions.onOpenStremioAccount,
+            modifier = Modifier.testTag(STREMIO_ROW_TAG),
         )
         // The phone remote lets a phone steer the TV.
         if (tv) {
@@ -442,6 +450,7 @@ const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
+const val STREMIO_ROW_TAG = "stremioRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"
 const val UPDATE_CHECK_ROW_TAG = "updateCheckRow"

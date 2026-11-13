@@ -96,6 +96,7 @@ import java.time.format.FormatStyle
 const val AI_ABOUT_TAG = "aiAbout"
 const val PLAY_RD_TAG = "playRealDebrid"
 const val CONTINUE_RD_TAG = "continueRealDebrid"
+const val STREMIO_NOTE_TAG = "stremioNote"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -142,6 +143,8 @@ fun DetailsScreen(
     /** Where the viewer stopped in a file of this film (or marked a spot), to continue from; null when nowhere. */
     continueEntry: io.github.diamondrubinny.scary.core.player.WatchEntry? = null,
     onContinue: (io.github.diamondrubinny.scary.core.player.WatchEntry) -> Unit = {},
+    /** What the viewer's Stremio library says about this film ("Stopped in Stremio at 1:12:40"), when connected. */
+    stremioNote: String? = null,
 ) {
     val movie = details.movie
     val watchFocus = remember { FocusRequester() }
@@ -266,6 +269,9 @@ fun DetailsScreen(
                                 onClick = { onToggleBucket(movie) },
                             )
                         }
+                    }
+                    if (stremioNote != null) {
+                        BasicText(stremioNote, style = ScaryType.Caption.copy(color = ScaryColors.Candle), modifier = Modifier.testTag(STREMIO_NOTE_TAG))
                     }
                     if (about != null && about !is AiTask.Idle) {
                         AiStatus(about, onRetry = { onAbout(movie) }, onSettings = onAiSettings)

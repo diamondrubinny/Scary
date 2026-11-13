@@ -692,4 +692,31 @@
         <item quantity="many">متابعة · %d علامة</item>
         <item quantity="other">متابعة · %d علامة</item>
     </plurals>
+    <string name="settings_stremio_account">حساب Stremio</string>
+    <string name="stremio_title">حساب Stremio</string>
+    <string name="stremio_what">اربط حسابك على Stremio لترى هنا ما بدأت مشاهدته هناك، وتضع علامة على الأفلام التي شاهدتها، وتُبقي "قائمتي" متزامنة مع مكتبتك في Stremio. لا يقرأ SCARY إضافاتك ولا يجلب مصادر للمشاهدة أبدًا: المشاهدة تبقى في Stremio.</string>
+    <string name="stremio_sign_in">ربط</string>
+    <string name="stremio_cancel">إلغاء</string>
+    <string name="stremio_sign_out">فصل</string>
+    <string name="stremio_sync_now">مزامنة الآن</string>
+    <string name="stremio_signed_out">غير مرتبط</string>
+    <string name="stremio_waiting">بانتظار موافقتك على هاتفك…</string>
+    <string name="stremio_step_open">1. على هاتفك، افتح %1$s (أو امسح الرمز) وسجّل الدخول إلى Stremio</string>
+    <string name="stremio_step_code">2. تأكد من ظهور هذا الرمز، ثم وافق:</string>
+    <string name="stremio_connected">مرتبط</string>
+    <string name="stremio_last_sync">مرتبط · تمت المزامنة في %1$s</string>
+    <string name="stremio_syncing">جارٍ المزامنة…</string>
+    <string name="stremio_sync_partial">تعذّر إرسال بعض التغييرات إلى Stremio. ستُعاد المحاولة.</string>
+    <string name="stremio_unreachable">تعذّر الوصول إلى Stremio. تحقّق من الاتصال بالإنترنت وحاول مجددًا.</string>
+    <string name="stremio_expired">انتهت صلاحية الرمز. اضغط "ربط" للحصول على رمز جديد.</string>
+    <string name="stremio_storage">تعذّر حفظ المفتاح بأمان على هذا التلفاز.</string>
+    <string name="stremio_session_ended">فُصل حسابك على Stremio (سجّلت الخروج هناك). اربطه مجددًا لمتابعة المزامنة.</string>
+    <string name="stremio_privacy">يُرسل إلى Stremio: مفتاح الحساب، وعنوان IP للتلفاز، والتغييرات على مكتبتك (قائمتي وعلامات المشاهدة). لا يُرسل شيء إلى SCARY. يُحفظ المفتاح مشفّرًا على هذا التلفاز فقط.</string>
+    <string name="stremio_qr_description">رمز QR للموافقة على SCARY في حسابك على Stremio</string>
+    <string name="stremio_signed_out_message">فُصل حساب Stremio</string>
+    <string name="msg_stremio_synced">تمت المزامنة مع مكتبتك في Stremio</string>
+    <string name="row_stremio_continue">المتابعة في Stremio</string>
+    <string name="stremio_note_continue">توقفت عند %1$s في Stremio: "شاهد في Stremio" يتابع من هناك</string>
+    <string name="stremio_note_library">في مكتبتك على Stremio</string>
+    <string name="stremio_note_watched">شوهد في Stremio</string>
 </resources>
