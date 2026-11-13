@@ -31,6 +31,8 @@ import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.onNodeWithTag
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_TAG
 import io.github.diamondrubinny.scary.ui.settings.REAL_DEBRID_ROW_TAG
+import io.github.diamondrubinny.scary.ui.stremio.STREMIO_TAG
+import io.github.diamondrubinny.scary.ui.settings.STREMIO_ROW_TAG
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -173,6 +175,21 @@ class PlayerTest {
         pressBack()
     }
 
+
+    /** Settings → Stremio account: what connecting does (and never does), and "Connect"; nothing is sent until then. */
+    @Test
+    fun theStremioScreenExplainsAndOffersToConnect() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitFor(hasTestTag(STREMIO_ROW_TAG))
+        rule.onNode(hasTestTag(STREMIO_ROW_TAG)).performScrollTo().performClick()
+        waitFor(hasTestTag(STREMIO_TAG))
+        rule.onNode(hasText(text(R.string.stremio_what))).assertExists()
+        rule.onNode(hasText(text(R.string.stremio_sign_in))).assertExists()
+        rule.onNode(hasText(text(R.string.stremio_privacy))).assertExists()
+        pressBack()
+        rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(STREMIO_TAG)).fetchSemanticsNodes().isEmpty() }
+    }
 
     private companion object {
         const val TIMEOUT_MS = 20_000L

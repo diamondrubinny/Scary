@@ -558,6 +558,7 @@ private fun HomeRowView(
     }
     val title = when (row) {
         is HomeRow.ContinueWatching -> stringResource(R.string.row_continue)
+        is HomeRow.StremioContinue -> stringResource(R.string.row_stremio_continue)
         is HomeRow.Recent -> stringResource(R.string.row_recent)
         is HomeRow.MyList -> stringResource(R.string.row_my_list)
         is HomeRow.Apps -> stringResource(R.string.row_apps)
@@ -601,6 +602,19 @@ private fun HomeRowView(
                             actions.onForgetContinue(item.entry)
                         },
                         onFocused = { actions.onCardFocused(key, item.movie?.id) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+                is HomeRow.StremioContinue -> items(row.items, key = { it.entry.key }) { item ->
+                    val key = "${row.key}:${item.entry.key}"
+                    val movie = item.movie
+                    ContinueCard(
+                        item = item,
+                        language = language,
+                        // The film's page: "Watch in Stremio" there picks up where the viewer stopped.
+                        onClick = { movie?.let(actions.onOpenDetails) },
+                        onLongClick = { movie?.let(actions.onToggleMyList) },
+                        onFocused = { actions.onCardFocused(key, movie?.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }

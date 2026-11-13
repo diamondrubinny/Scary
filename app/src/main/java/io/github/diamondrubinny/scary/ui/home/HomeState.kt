@@ -130,6 +130,11 @@ data class DrawerApp(val app: InstalledApp, val pinned: Boolean, val hidden: Boo
 sealed interface HomeRow {
     val key: String
 
+    /** "Continue in Stremio": films and series stopped in the middle in the viewer's own Stremio account. */
+    data class StremioContinue(val items: List<ContinueItem>) : HomeRow {
+        override val key = "stremio_continue"
+    }
+
     /** "Continue watching": files of the viewer's Real-Debrid account stopped in the middle or with bookmarks. */
     data class ContinueWatching(val items: List<ContinueItem>) : HomeRow {
         override val key = "continue"
@@ -245,6 +250,9 @@ sealed interface Screen {
     data object Bucket : Screen
     data object PhoneRemote : Screen
     data object TmdbAccount : Screen
+
+    /** Settings → Stremio account. */
+    data object StremioAccount : Screen
     data object TastePicker : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen

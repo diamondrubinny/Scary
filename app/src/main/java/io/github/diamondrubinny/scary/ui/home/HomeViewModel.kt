@@ -60,6 +60,9 @@ import io.github.diamondrubinny.scary.data.LauncherPrefs
 import io.github.diamondrubinny.scary.data.OnlinePage
 import io.github.diamondrubinny.scary.data.Rating
 import io.github.diamondrubinny.scary.data.RealDebridRepository
+import io.github.diamondrubinny.scary.data.StremioRepository
+import io.github.diamondrubinny.scary.core.stremio.StremioItem
+import io.github.diamondrubinny.scary.core.stremio.Stremio
 import io.github.diamondrubinny.scary.data.WatchStore
 import io.github.diamondrubinny.scary.core.player.WatchHistory
 import io.github.diamondrubinny.scary.core.player.WatchEntry
@@ -125,6 +128,8 @@ class HomeViewModel(
     /** The viewer's own Real-Debrid account, for the internal player; null in tests that do not need it. */
     private val realDebrid: RealDebridRepository? = null,
     private val watchStore: WatchStore? = null,
+    /** The viewer's own Stremio account, when they connect it; null in tests that do not need it. */
+    private val stremio: StremioRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -216,14 +221,17 @@ class HomeViewModel(
     /** The internal player's watch history (resume spots and bookmarks), kept on this TV only. */
     val watchHistory: StateFlow<List<WatchEntry>> = watchStore?.entries ?: MutableStateFlow(emptyList())
 
+    /** The viewer's Stremio library as last read (empty when not connected). */
+    val stremioLibrary: StateFlow<List<StremioItem>> = stremio?.library ?: MutableStateFlow(emptyList())
+
     /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
-        combine(installedApps, inputs, watchHistory) { a, i, w -> Triple(a, i, w) },
+        combine(installedApps, inputs, watchHistory, stremioLibrary) { a, i, w, st -> HomeSources(a, i, w, st) },
         combine(mood, decade, timeBudget, tab, picking) { m, d, t, k, p -> HomeChoices(m, d, t, k, p) },
         settings.prefs,
         sessionUnlocked,
-    ) { catalogState, (apps, tvInputList, history), choices, prefs, unlocked ->
+    ) { catalogState, (apps, tvInputList, history, stremioItems), choices, prefs, unlocked ->
         val tiles = appTiles(apps, prefs, tvInputList)
         val drawer = drawerApps(apps, prefs)
         when (catalogState) {
@@ -236,7 +244,7 @@ class HomeViewModel(
                 drawer = drawer,
                 nightMaxFear = prefs.nightMaxFear,
             )
-            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, choices, prefs, unlocked, history)
+            is CatalogState.Ready -> buildState(catalogState.catalog, tiles, drawer, choices, prefs, unlocked, history, stremioItems)
         }.copy(
             parentalEnabled = prefs.parentalEnabled,
             lockFromFear = prefs.lockFromFear,
@@ -302,8 +310,10 @@ class HomeViewModel(
             tmdb.load()
             tmdbAccount?.load()
             realDebrid?.load()
+            stremio?.load()
             savedMovies.load()
             watchTmdbAccount()
+            watchStremio()
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
             // The full index comes in the background, after the library is on screen.
             launch { indexMovies.value = catalogRepository.loadIndex() }
@@ -516,6 +526,7 @@ class HomeViewModel(
         prefs: LauncherPrefs,
         unlocked: Boolean,
         history: List<WatchEntry> = emptyList(),
+        stremioItems: List<StremioItem> = emptyList(),
     ): HomeUiState {
         // The tab shows its own kind only: films, or series. Search (state.movies) still finds both.
         val catalog = all.ofKind(choices.tab)
@@ -544,6 +555,17 @@ class HomeViewModel(
             if (!prefs.familyNight && (!prefs.parentalEnabled || unlocked)) {
                 val going = WatchHistory.continueWatching(history).map { ContinueItem(it, it.movieId?.let(all::movie)) }
                 if (going.isNotEmpty()) add(HomeRow.ContinueWatching(going))
+            }
+            // What the viewer stopped in the middle of in Stremio: films SCARY knows (family night's catalog when it is
+            // on), none the parental lock covers.
+            if (stremioItems.isNotEmpty()) {
+                val byImdb = all.movies.associateBy { it.imdbId }
+                val going = Stremio.continueWatching(stremioItems).mapNotNull { item ->
+                    val movie = byImdb[item.imdbId]?.takeUnless(isLocked) ?: return@mapNotNull null
+                    val at = maxOf(item.lastWatched, item.modified)
+                    ContinueItem(WatchEntry("s:${item.imdbId}", movie.title, movie.id, item.offsetMs, item.durationMs, at), movie)
+                }
+                if (going.isNotEmpty()) add(HomeRow.StremioContinue(going))
             }
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
@@ -981,6 +1003,62 @@ class HomeViewModel(
     }
 
     fun openTmdbAccount() = push(Screen.TmdbAccount)
+
+    // The viewer's Stremio account --------------------------------------------------------------------------------------
+
+    val stremioState: StateFlow<StremioRepository.State> =
+        stremio?.state ?: MutableStateFlow(StremioRepository.State.SignedOut)
+
+    /** My list and Watched as the last Stremio sync left them: changes the sync makes itself do not start another. */
+    private var stremioSynced: Pair<List<String>, List<String>>? = null
+
+    private fun watchStremio() {
+        if (stremio == null) return
+        // A first sync once the catalog is there (the sync needs it to know SCARY's films).
+        viewModelScope.launch {
+            catalog.first { it is CatalogState.Ready }
+            syncStremio(0)
+        }
+        viewModelScope.launch { refreshRequests.collect { syncStremio(ACCOUNT_SYNC_GAP_MS) } }
+        viewModelScope.launch {
+            settings.prefs.map { it.myListIds to it.watchedIds }
+                .distinctUntilChanged()
+                .debounce(ACCOUNT_SYNC_DEBOUNCE_MS)
+                .collect { lists -> if (lists != stremioSynced) syncStremio(0) }
+        }
+    }
+
+    private suspend fun syncStremio(minGapMs: Long) {
+        val account = stremio ?: return
+        if (!account.signedIn) return
+        val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
+        val result = account.sync(full, minGapMs) ?: return
+        val prefs = settings.prefs.first()
+        stremioSynced = prefs.myListIds to prefs.watchedIds
+        if (result.addedToMyList + result.addedToWatched > 0) show(R.string.msg_stremio_synced)
+    }
+
+    fun openStremioAccount() = push(Screen.StremioAccount)
+
+    fun startStremioSignIn() {
+        stremio?.startSignIn { viewModelScope.launch { syncStremio(0) } }
+    }
+
+    fun cancelStremioSignIn() {
+        stremio?.cancelSignIn()
+    }
+
+    fun stremioSyncNow() {
+        viewModelScope.launch { syncStremio(0) }
+    }
+
+    fun stremioSignOut() {
+        viewModelScope.launch {
+            stremio?.signOut()
+            stremioSynced = null
+            show(R.string.stremio_signed_out_message)
+        }
+    }
 
     // Real-Debrid and the internal player -------------------------------------------------------------------------------
 
@@ -2148,8 +2226,17 @@ class HomeViewModel(
                     container.aiRepository,
                     container.realDebrid,
                     container.watchStore,
+                    container.stremio,
                 )
             }
         }
     }
 }
+
+/** What the home screen is built from besides the catalog and the viewer's choices. */
+private data class HomeSources(
+    val apps: List<InstalledApp>,
+    val inputs: List<TvInput>,
+    val history: List<WatchEntry>,
+    val stremio: List<StremioItem>,
+)

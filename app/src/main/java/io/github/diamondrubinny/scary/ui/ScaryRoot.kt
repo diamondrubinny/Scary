@@ -40,6 +40,10 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.compose.currentStateAsState
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.ui.player.clock
+import io.github.diamondrubinny.scary.ui.stremio.StremioActions
+import io.github.diamondrubinny.scary.ui.stremio.StremioAccountScreen
+import io.github.diamondrubinny.scary.data.StremioRepository
 import io.github.diamondrubinny.scary.ui.player.PlayerActions
 import io.github.diamondrubinny.scary.ui.player.ResumeDialog
 import io.github.diamondrubinny.scary.core.player.WatchHistory
@@ -167,6 +171,8 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
     val playerSession by viewModel.player.collectAsStateWithLifecycle()
     val watchHistory by viewModel.watchHistory.collectAsStateWithLifecycle()
+    val stremioState by viewModel.stremioState.collectAsStateWithLifecycle()
+    val stremioLibrary by viewModel.stremioLibrary.collectAsStateWithLifecycle()
     val resumeChoice by viewModel.resumeChoice.collectAsStateWithLifecycle()
     var aiDialog by remember { mutableStateOf<AiDialogKind?>(null) }
     var aiKeyVersion by remember { mutableIntStateOf(0) }
@@ -340,6 +346,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
         onToggleAutoWatched = viewModel::toggleAutoWatched,
         onToggleHideWatched = viewModel::toggleHideWatched,
         onOpenTmdbAccount = viewModel::openTmdbAccount,
+        onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
         onToggleOnline = viewModel::toggleOnline,
         onRequestDefaultHome = ::requestDefaultHome,
@@ -460,6 +467,7 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     hideWatched = state.hideWatched,
                     tmdbAccountName = (tmdbAccount as? TmdbAccountRepository.State.SignedIn)?.username,
                     realDebridName = (realDebridState as? RealDebridRepository.State.SignedIn)?.username,
+                    stremioConnected = stremioState is StremioRepository.State.SignedIn,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
                     homeButtonServiceOn = launcherStatus.homeButtonServiceOn,
@@ -523,6 +531,14 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                     realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
                     onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
                     continueEntry = if (state.familyNight) null else WatchHistory.forMovie(watchHistory, details.movie.id),
+                    stremioNote = stremioLibrary.firstOrNull { it.imdbId == details.movie.imdbId }?.let { item ->
+                        when {
+                            item.continuing -> stringResource(R.string.stremio_note_continue, clock(item.offsetMs))
+                            item.watched -> stringResource(R.string.stremio_note_watched)
+                            item.inLibrary -> stringResource(R.string.stremio_note_library)
+                            else -> null
+                        }
+                    },
                     onContinue = viewModel::continueWatching,
                 )
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
@@ -539,6 +555,17 @@ fun ScaryRoot(viewModel: HomeViewModel) {
                             onPlay = { viewModel.playRealDebrid(it, movieId = null) },
                             onContinue = viewModel::continueWatching,
                             onClearHistory = viewModel::clearWatchHistory,
+                        )
+                    },
+                )
+                current == Screen.StremioAccount -> StremioAccountScreen(
+                    state = stremioState,
+                    actions = remember(viewModel) {
+                        StremioActions(
+                            onSignIn = viewModel::startStremioSignIn,
+                            onCancel = viewModel::cancelStremioSignIn,
+                            onSignOut = viewModel::stremioSignOut,
+                            onSync = viewModel::stremioSyncNow,
                         )
                     },
                 )

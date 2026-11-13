@@ -667,4 +667,31 @@
         <item quantity="many">Continuar · %d pontos marcados</item>
         <item quantity="other">Continuar · %d pontos marcados</item>
     </plurals>
+    <string name="settings_stremio_account">Conta Stremio</string>
+    <string name="stremio_title">Conta Stremio</string>
+    <string name="stremio_what">Conecte sua conta Stremio para ver aqui o que você começou a assistir lá, marcar os filmes que assistiu e manter Minha lista em sincronia com sua biblioteca no Stremio. O SCARY nunca lê seus complementos e nunca busca fontes: assistir continua no Stremio.</string>
+    <string name="stremio_sign_in">Conectar</string>
+    <string name="stremio_cancel">Cancelar</string>
+    <string name="stremio_sign_out">Desconectar</string>
+    <string name="stremio_sync_now">Sincronizar agora</string>
+    <string name="stremio_signed_out">Não conectado</string>
+    <string name="stremio_waiting">Esperando você aprovar no celular…</string>
+    <string name="stremio_step_open">1. No celular, abra %1$s (ou leia o código) e entre no Stremio</string>
+    <string name="stremio_step_code">2. Confira se aparece este código e aprove:</string>
+    <string name="stremio_connected">Conectado</string>
+    <string name="stremio_last_sync">Conectado · sincronizado às %1$s</string>
+    <string name="stremio_syncing">Sincronizando…</string>
+    <string name="stremio_sync_partial">Algumas mudanças não foram enviadas ao Stremio. Tentaremos de novo.</string>
+    <string name="stremio_unreachable">Não foi possível acessar o Stremio. Verifique a internet e tente de novo.</string>
+    <string name="stremio_expired">O código expirou. Pressione Conectar para obter um novo.</string>
+    <string name="stremio_storage">Não foi possível guardar a chave com segurança nesta TV.</string>
+    <string name="stremio_session_ended">Sua conta Stremio foi desconectada (você saiu lá). Conecte de novo para continuar sincronizando.</string>
+    <string name="stremio_privacy">Enviado ao Stremio: a chave da conta, o endereço IP da TV e as mudanças na sua biblioteca (Minha lista e assistidos). Nada é enviado ao SCARY. A chave fica criptografada só nesta TV.</string>
+    <string name="stremio_qr_description">Código QR para aprovar o SCARY na sua conta Stremio</string>
+    <string name="stremio_signed_out_message">Conta Stremio desconectada</string>
+    <string name="msg_stremio_synced">Sincronizado com sua biblioteca no Stremio</string>
+    <string name="row_stremio_continue">Continuar no Stremio</string>
+    <string name="stremio_note_continue">Você parou em %1$s no Stremio: Assistir no Stremio continua dali</string>
+    <string name="stremio_note_library">Na sua biblioteca do Stremio</string>
+    <string name="stremio_note_watched">Assistido no Stremio</string>
 </resources>

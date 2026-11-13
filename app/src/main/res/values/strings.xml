@@ -661,4 +661,31 @@
         <item quantity="one">Continue · %d marked spot</item>
         <item quantity="other">Continue · %d marked spots</item>
     </plurals>
+    <string name="settings_stremio_account">Stremio account</string>
+    <string name="stremio_title">Stremio account</string>
+    <string name="stremio_what">Connect your Stremio account to see here what you started watching there, mark the films you watched, and keep My list in step with your Stremio library. SCARY never reads your add-ons and never fetches streams: watching stays in Stremio.</string>
+    <string name="stremio_sign_in">Connect</string>
+    <string name="stremio_cancel">Cancel</string>
+    <string name="stremio_sign_out">Disconnect</string>
+    <string name="stremio_sync_now">Sync now</string>
+    <string name="stremio_signed_out">Not connected</string>
+    <string name="stremio_waiting">Waiting for you to approve on your phone…</string>
+    <string name="stremio_step_open">1. On your phone, open %1$s (or scan the code), and sign in to Stremio</string>
+    <string name="stremio_step_code">2. Check that it shows this code, and approve:</string>
+    <string name="stremio_connected">Connected</string>
+    <string name="stremio_last_sync">Connected · synced at %1$s</string>
+    <string name="stremio_syncing">Syncing…</string>
+    <string name="stremio_sync_partial">Some changes could not be sent to Stremio. They will be tried again.</string>
+    <string name="stremio_unreachable">Stremio could not be reached. Check the internet connection and try again.</string>
+    <string name="stremio_expired">The code expired. Press Connect to get a new one.</string>
+    <string name="stremio_storage">The key could not be stored safely on this TV.</string>
+    <string name="stremio_session_ended">Your Stremio account was disconnected (signed out there). Connect again to keep syncing.</string>
+    <string name="stremio_privacy">Sent to Stremio: your account key, the TV\'s IP address and the changes to your library (My list and watched). Nothing is sent to SCARY. The key is stored encrypted on this TV only.</string>
+    <string name="stremio_qr_description">QR code to approve SCARY in your Stremio account</string>
+    <string name="stremio_signed_out_message">Stremio account disconnected</string>
+    <string name="msg_stremio_synced">Synced with your Stremio library</string>
+    <string name="row_stremio_continue">Continue in Stremio</string>
+    <string name="stremio_note_continue">You stopped at %1$s in Stremio: Watch in Stremio picks it up</string>
+    <string name="stremio_note_library">In your Stremio library</string>
+    <string name="stremio_note_watched">Watched in Stremio</string>
 </resources>

@@ -675,4 +675,31 @@
         <item quantity="many">Продолжить · %d отметок</item>
         <item quantity="other">Продолжить · %d отметки</item>
     </plurals>
+    <string name="settings_stremio_account">Аккаунт Stremio</string>
+    <string name="stremio_title">Аккаунт Stremio</string>
+    <string name="stremio_what">Подключите аккаунт Stremio, чтобы видеть здесь, что вы начали смотреть там, отмечать просмотренные фильмы и синхронизировать «Мой список» с библиотекой Stremio. SCARY никогда не читает ваши дополнения и не ищет источники: смотреть вы продолжаете в Stremio.</string>
+    <string name="stremio_sign_in">Подключить</string>
+    <string name="stremio_cancel">Отмена</string>
+    <string name="stremio_sign_out">Отключить</string>
+    <string name="stremio_sync_now">Синхронизировать</string>
+    <string name="stremio_signed_out">Не подключён</string>
+    <string name="stremio_waiting">Ждём подтверждения на телефоне…</string>
+    <string name="stremio_step_open">1. На телефоне откройте %1$s (или отсканируйте код) и войдите в Stremio</string>
+    <string name="stremio_step_code">2. Убедитесь, что там этот код, и подтвердите:</string>
+    <string name="stremio_connected">Подключён</string>
+    <string name="stremio_last_sync">Подключён · синхронизировано в %1$s</string>
+    <string name="stremio_syncing">Синхронизация…</string>
+    <string name="stremio_sync_partial">Часть изменений не удалось отправить в Stremio. Попробуем ещё раз.</string>
+    <string name="stremio_unreachable">Не удалось связаться со Stremio. Проверьте интернет и попробуйте снова.</string>
+    <string name="stremio_expired">Срок кода истёк. Нажмите «Подключить», чтобы получить новый.</string>
+    <string name="stremio_storage">Не удалось надёжно сохранить ключ на этом телевизоре.</string>
+    <string name="stremio_session_ended">Аккаунт Stremio отключён (вы вышли там). Подключите снова, чтобы продолжить синхронизацию.</string>
+    <string name="stremio_privacy">Отправляется в Stremio: ключ аккаунта, IP-адрес телевизора и изменения в библиотеке («Мой список» и отметки просмотра). В SCARY ничего не отправляется. Ключ хранится в зашифрованном виде только на этом телевизоре.</string>
+    <string name="stremio_qr_description">QR-код для подтверждения SCARY в аккаунте Stremio</string>
+    <string name="stremio_signed_out_message">Аккаунт Stremio отключён</string>
+    <string name="msg_stremio_synced">Синхронизировано с библиотекой Stremio</string>
+    <string name="row_stremio_continue">Продолжить в Stremio</string>
+    <string name="stremio_note_continue">Вы остановились на %1$s в Stremio: «Смотреть в Stremio» продолжит оттуда</string>
+    <string name="stremio_note_library">В вашей библиотеке Stremio</string>
+    <string name="stremio_note_watched">Просмотрено в Stremio</string>
 </resources>
