@@ -57,7 +57,9 @@ class MainActivity : ComponentActivity() {
         val language = LanguageStore.read(this)
         ScaryFonts.useFor(language)
         viewModel.setLanguage(language)
-        if (savedInstanceState == null && CrashGuard.consumeCrashLoop(this)) viewModel.enterSafeMode()
+        if (savedInstanceState == null) {
+            if (CrashGuard.consumeCrashLoop(this)) viewModel.enterSafeMode() else viewModel.leaveSafeMode()
+        }
         setContent { ScaryRoot(viewModel) }
         handleDebugIntent(intent)
 

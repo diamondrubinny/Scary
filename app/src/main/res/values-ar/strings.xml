@@ -29,7 +29,7 @@
     <string name="effects_off_description">مؤثرات الأجواء: متوقفة</string>
     <string name="msg_effects_on">تم تشغيل الضباب وحبيبات الفيلم</string>
     <string name="msg_effects_off">تم إيقاف الضباب وحبيبات الفيلم</string>
-    <string name="msg_safe_mode">أُعيد تشغيل SCARY بعد أخطاء متكررة. تم إيقاف المؤثرات والأصوات، ويمكنك إعادة تشغيلها من الإعدادات.</string>
+    <string name="msg_safe_mode">أُعيد تشغيل SCARY بعد أخطاء متكررة. المؤثرات والأصوات متوقفة مؤقتًا، وستعود عند التشغيل العادي التالي.</string>
     <string name="system_settings">الإعدادات</string>
     <string name="system_settings_description">فتح إعدادات النظام</string>
     <string name="install_app">تثبيت %1$s</string>
@@ -719,4 +719,12 @@
     <string name="stremio_note_continue">توقفت عند %1$s في Stremio: "شاهد في Stremio" يتابع من هناك</string>
     <string name="stremio_note_library">في مكتبتك على Stremio</string>
     <string name="stremio_note_watched">شوهد في Stremio</string>
+    <string name="msg_safe_mode_over">عادت المؤثرات والأصوات.</string>
+    <string name="diag_title">التشخيص</string>
+    <string name="diag_note">إذا تعطّل SCARY أو تجمّد أو لم يعرض أفلامًا من الإنترنت، فإن صورة لهذه الأسطر تساعد على الإصلاح. لا يُحفظ إلا مكان حدوث ذلك في شيفرة SCARY ووقته؛ يبقى على هذا التلفاز ولا يُرسل.</string>
+    <string name="diag_crash">آخر تعطّل: %1$s</string>
+    <string name="diag_freeze">حالات التجمّد: %2$d · آخرها: %1$s</string>
+    <string name="diag_online">أفلام من الإنترنت: %1$s</string>
+    <string name="diag_none">لم تُسجَّل أعطال أو حالات تجمّد.</string>
+    <string name="diag_clear">مسح التشخيص</string>
 </resources>

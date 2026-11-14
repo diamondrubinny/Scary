@@ -245,6 +245,9 @@ class ScaryUiTest {
         // The movie data credit (TMDB's terms) and the donation code are in the same About section.
         rule.onNode(hasText(text(R.string.data_credit))).performScrollTo().assertExists()
         rule.onNodeWithContentDescription(text(R.string.donate_qr_description)).performScrollTo().assertExists()
+        // Diagnostics, for a photo when something goes wrong.
+        rule.onNode(hasText(text(R.string.diag_title))).performScrollTo().assertExists()
+        rule.onNode(hasText(text(R.string.diag_note))).performScrollTo().assertExists()
         backToHome()
     }
 

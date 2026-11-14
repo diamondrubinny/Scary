@@ -28,6 +28,8 @@ object CrashGuard {
                 val times = CrashLoop.record(CrashLoop.parse(prefs.getString(KEY, null)), System.currentTimeMillis())
                 // commit, not apply: the process is about to die.
                 prefs.edit(commit = true) { putString(KEY, CrashLoop.format(times)) }
+                // Where it happened (class, method, line; never the message), for Settings → About → Diagnostics.
+                HealthLog.recordCrash(appContext, error)
             } catch (t: Throwable) {
                 Log.w(TAG, "Could not record crash: ${t.javaClass.simpleName}")
             }

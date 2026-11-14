@@ -307,13 +307,19 @@ class HomeViewModel(
 
     private fun loadCatalog() {
         viewModelScope.launch {
+            // Only the TMDB key and the films kept from online rows are needed before the catalog; the accounts (each an
+            // encrypted read from the Keystore, slow on some TVs) load alongside instead of holding the rows back.
             tmdb.load()
-            tmdbAccount?.load()
-            realDebrid?.load()
-            stremio?.load()
             savedMovies.load()
-            watchTmdbAccount()
-            watchStremio()
+            launch {
+                tmdbAccount?.load()
+                watchTmdbAccount()
+            }
+            launch { realDebrid?.load() }
+            launch {
+                stremio?.load()
+                watchStremio()
+            }
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
             // The full index comes in the background, after the library is on screen.
             launch { indexMovies.value = catalogRepository.loadIndex() }
@@ -2142,12 +2148,21 @@ class HomeViewModel(
         decade.update { if (it == selected) null else selected }
     }
 
-    /** After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) and says so. */
+    /**
+     * After a crash loop: turns off the heavier parts (fog, grain, animations, sounds) for now and says so; the next
+     * normal start turns them back on ([leaveSafeMode]).
+     */
     fun enterSafeMode() {
         viewModelScope.launch {
-            settings.setEffectsEnabled(false)
-            settings.setSoundsEnabled(false)
+            settings.enterSafeMode()
             show(R.string.msg_safe_mode)
+        }
+    }
+
+    /** A normal start: what safe mode turned off comes back, and a message says so. */
+    fun leaveSafeMode() {
+        viewModelScope.launch {
+            if (settings.leaveSafeMode()) show(R.string.msg_safe_mode_over)
         }
     }
 
