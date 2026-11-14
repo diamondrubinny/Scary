@@ -28,7 +28,7 @@
     <string name="effects_off_description">Efeitos de atmosfera: desligados</string>
     <string name="msg_effects_on">Névoa e granulação ligadas</string>
     <string name="msg_effects_off">Névoa e granulação desligadas</string>
-    <string name="msg_safe_mode">O SCARY reiniciou após erros repetidos. Efeitos e sons foram desligados; você pode religá-los nas Configurações.</string>
+    <string name="msg_safe_mode">O SCARY reiniciou após erros repetidos. Efeitos e sons estão desligados por enquanto e voltam na próxima vez que o SCARY iniciar normalmente.</string>
     <string name="system_settings">Configurações</string>
     <string name="system_settings_description">Abrir as configurações do sistema</string>
     <string name="install_app">Instalar %1$s</string>
@@ -694,4 +694,12 @@
     <string name="stremio_note_continue">Você parou em %1$s no Stremio: Assistir no Stremio continua dali</string>
     <string name="stremio_note_library">Na sua biblioteca do Stremio</string>
     <string name="stremio_note_watched">Assistido no Stremio</string>
+    <string name="msg_safe_mode_over">Efeitos e sons voltaram.</string>
+    <string name="diag_title">Diagnóstico</string>
+    <string name="diag_note">Se o SCARY travar, congelar ou não mostrar filmes da internet, uma foto destas linhas ajuda a corrigir. Só onde no código do SCARY aconteceu e quando; fica nesta TV e nunca é enviado.</string>
+    <string name="diag_crash">Último travamento: %1$s</string>
+    <string name="diag_freeze">Congelamentos: %2$d · último: %1$s</string>
+    <string name="diag_online">Filmes da internet: %1$s</string>
+    <string name="diag_none">Nenhum travamento ou congelamento registrado.</string>
+    <string name="diag_clear">Limpar diagnóstico</string>
 </resources>

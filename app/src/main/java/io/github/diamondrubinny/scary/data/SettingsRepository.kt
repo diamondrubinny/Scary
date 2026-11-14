@@ -343,6 +343,35 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSoundsEnabled(enabled: Boolean) = edit { it[SOUNDS] = enabled }
 
+    /**
+     * Safe mode after a crash loop: effects and sounds off for now, and what was on is remembered, so the next normal
+     * start ([leaveSafeMode]) turns it back on instead of leaving SCARY plain for good.
+     */
+    suspend fun enterSafeMode() = edit {
+        if (it[EFFECTS] != false) it[SAFE_EFFECTS] = true
+        if (it[SOUNDS] == true) it[SAFE_SOUNDS] = true
+        it[EFFECTS] = false
+        it[SOUNDS] = false
+    }
+
+    /** A normal start after safe mode: what safe mode turned off comes back. True when something did. */
+    suspend fun leaveSafeMode(): Boolean {
+        var restored = false
+        edit {
+            if (it[SAFE_EFFECTS] == true) {
+                it[EFFECTS] = true
+                restored = true
+            }
+            if (it[SAFE_SOUNDS] == true) {
+                it[SOUNDS] = true
+                restored = true
+            }
+            it.remove(SAFE_EFFECTS)
+            it.remove(SAFE_SOUNDS)
+        }
+        return restored
+    }
+
     suspend fun setOnlineEnabled(enabled: Boolean) = edit { it[ONLINE] = enabled }
 
     suspend fun setFamilyNight(enabled: Boolean) = edit { it[FAMILY_NIGHT] = enabled }
@@ -390,6 +419,8 @@ class SettingsRepository(private val context: Context) {
         private val PIN_LOCKED_UNTIL = longPreferencesKey("parental_pin_locked_until")
         private val LOCK_FROM_FEAR = intPreferencesKey("parental_lock_from_fear")
         private val SOUNDS = booleanPreferencesKey("ambient_sounds")
+        private val SAFE_EFFECTS = booleanPreferencesKey("safe_mode_effects")
+        private val SAFE_SOUNDS = booleanPreferencesKey("safe_mode_sounds")
         private val ONLINE = booleanPreferencesKey("online_artwork")
         private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
         private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")

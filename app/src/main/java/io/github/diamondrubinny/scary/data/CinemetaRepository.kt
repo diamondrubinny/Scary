@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.stability.HealthLog
 import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.CategoryPaging
 import android.content.Context
@@ -38,7 +39,24 @@ data class OnlinePage(val movies: List<CinemetaMeta>, val next: Int?)
 
 /** Fetches artwork and popular rows from Cinemeta and keeps a copy on disk. */
 class CinemetaRepository(context: Context) {
+    private val appContext = context.applicationContext
     private val cacheFile = File(context.filesDir, "cinemeta_cache.json")
+
+    /** The last answer written to HealthLog, and when: a change is written at once, the same answer once a minute. */
+    @Volatile
+    private var lastHealth: String? = null
+
+    @Volatile
+    private var lastHealthAt = 0L
+
+    private fun health(ok: Boolean, problem: String?) {
+        val now = android.os.SystemClock.elapsedRealtime()
+        val kind = if (ok) "OK" else problem ?: "failed"
+        if (kind == lastHealth && now - lastHealthAt < HEALTH_EVERY_MS) return
+        lastHealth = kind
+        lastHealthAt = now
+        HealthLog.recordOnline(appContext, ok, problem)
+    }
 
     /**
      * One online row: a Cinemeta catalog ([catalog] "top" or "year"), its [genre] (a genre name or a year), and the
@@ -344,13 +362,18 @@ class CinemetaRepository(context: Context) {
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("User-Agent", "SCARY-launcher")
             // Cinemeta redirects catalogs to another strem.io host; the redirect must stay on HTTPS.
-            if (connection.responseCode != HttpURLConnection.HTTP_OK || connection.url.protocol != "https") return null
+            val code = connection.responseCode
+            if (code != HttpURLConnection.HTTP_OK || connection.url.protocol != "https") {
+                health(false, "HTTP $code ${connection.url.host}")
+                return null
+            }
             connection.inputStream.use { input ->
                 val bytes = input.readNBytesCompat(MAX_BODY_BYTES + 1)
                 if (bytes.size > MAX_BODY_BYTES) null else String(bytes, Charsets.UTF_8)
-            }
+            }.also { health(it != null, if (it == null) "answer too large" else null) }
         } catch (e: IOException) {
             Log.i(TAG, "Cinemeta request failed: ${e.javaClass.simpleName}")
+            health(false, e.javaClass.simpleName)
             null
         } finally {
             connection?.disconnect()
@@ -374,6 +397,7 @@ class CinemetaRepository(context: Context) {
         const val PARALLEL_REQUESTS = 6
         const val CATEGORY_REQUESTS = 3
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
+        const val HEALTH_EVERY_MS = 60_000L
 
     }
 }

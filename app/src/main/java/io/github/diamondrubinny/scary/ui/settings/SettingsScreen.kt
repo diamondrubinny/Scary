@@ -15,6 +15,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.ui.platform.LocalContext
+import io.github.diamondrubinny.scary.stability.HealthLog
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -425,6 +428,7 @@ fun SettingsScreen(
             // A fork's or a developer's own build: the official repository's updates could not install over it.
             BasicText(stringResource(R.string.settings_update_not_official), style = ScaryType.Caption)
         }
+        Diagnostics()
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
         BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
@@ -605,3 +609,33 @@ private fun checkedAt(millis: Long): String {
     }
     return format.format(Date(millis))
 }
+
+/**
+ * Settings → About → Diagnostics: the last crash, freezes and the online catalog's last answer (HealthLog), so a viewer
+ * can show what went wrong with a photo. Only where in SCARY's code and when; kept on this TV.
+ */
+@Composable
+private fun Diagnostics() {
+    val context = LocalContext.current
+    var report by remember { mutableStateOf(HealthLog.read(context)) }
+    BasicText(stringResource(R.string.diag_title), style = ScaryType.RowTitle, modifier = Modifier.padding(top = 14.dp).semantics { heading() })
+    val code = ScaryType.Caption.copy(textDirection = TextDirection.Ltr)
+    if (report.crash == null && report.freeze == null) BasicText(stringResource(R.string.diag_none), style = ScaryType.Caption)
+    report.crash?.let { BasicText(stringResource(R.string.diag_crash, it), style = code, modifier = Modifier.testTag(DIAG_CRASH_TAG)) }
+    report.freeze?.let { BasicText(stringResource(R.string.diag_freeze, it, report.freezes), style = code, modifier = Modifier.testTag(DIAG_FREEZE_TAG)) }
+    report.online?.let { BasicText(stringResource(R.string.diag_online, it), style = code) }
+    BasicText(stringResource(R.string.diag_note), style = ScaryType.Caption)
+    if (report.crash != null || report.freeze != null) {
+        SettingRow(
+            label = stringResource(R.string.diag_clear),
+            value = null,
+            onClick = {
+                HealthLog.clear(context)
+                report = HealthLog.read(context)
+            },
+        )
+    }
+}
+
+const val DIAG_CRASH_TAG = "diagCrash"
+const val DIAG_FREEZE_TAG = "diagFreeze"

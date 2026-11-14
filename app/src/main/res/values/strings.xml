@@ -29,7 +29,7 @@
     <string name="effects_off_description">Atmosphere effects: off</string>
     <string name="msg_effects_on">Fog and film grain on</string>
     <string name="msg_effects_off">Fog and film grain off</string>
-    <string name="msg_safe_mode">SCARY restarted after repeated errors. Effects and sounds are off; you can turn them back on in Settings.</string>
+    <string name="msg_safe_mode">SCARY restarted after repeated errors. Effects and sounds are off for now, and come back the next time SCARY starts normally.</string>
     <string name="system_settings">Settings</string>
     <string name="system_settings_description">Open system settings</string>
     <string name="install_app">Install %1$s</string>
@@ -688,4 +688,12 @@
     <string name="stremio_note_continue">You stopped at %1$s in Stremio: Watch in Stremio picks it up</string>
     <string name="stremio_note_library">In your Stremio library</string>
     <string name="stremio_note_watched">Watched in Stremio</string>
+    <string name="msg_safe_mode_over">Effects and sounds are back on.</string>
+    <string name="diag_title">Diagnostics</string>
+    <string name="diag_note">If SCARY crashes, freezes or shows no online films, a photo of these lines helps fix it. Only where in SCARY\'s code it happened and when; kept on this TV, never sent.</string>
+    <string name="diag_crash">Last crash: %1$s</string>
+    <string name="diag_freeze">Freezes: %2$d · last: %1$s</string>
+    <string name="diag_online">Online films: %1$s</string>
+    <string name="diag_none">No crashes or freezes recorded.</string>
+    <string name="diag_clear">Clear diagnostics</string>
 </resources>

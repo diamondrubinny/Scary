@@ -28,7 +28,7 @@
     <string name="effects_off_description">Эффекты атмосферы: выключены</string>
     <string name="msg_effects_on">Туман и зернистость включены</string>
     <string name="msg_effects_off">Туман и зернистость выключены</string>
-    <string name="msg_safe_mode">SCARY перезапущен после повторяющихся ошибок. Эффекты и звуки выключены, их можно снова включить в настройках.</string>
+    <string name="msg_safe_mode">SCARY перезапущен после повторяющихся ошибок. Эффекты и звуки пока выключены и вернутся при следующем обычном запуске.</string>
     <string name="system_settings">Настройки</string>
     <string name="system_settings_description">Открыть системные настройки</string>
     <string name="install_app">Установить %1$s</string>
@@ -702,4 +702,12 @@
     <string name="stremio_note_continue">Вы остановились на %1$s в Stremio: «Смотреть в Stremio» продолжит оттуда</string>
     <string name="stremio_note_library">В вашей библиотеке Stremio</string>
     <string name="stremio_note_watched">Просмотрено в Stremio</string>
+    <string name="msg_safe_mode_over">Эффекты и звуки снова включены.</string>
+    <string name="diag_title">Диагностика</string>
+    <string name="diag_note">Если SCARY падает, зависает или не показывает фильмы из интернета, фото этих строк поможет исправить. Сохраняется только место в коде SCARY и время; остаётся на этом телевизоре и никуда не отправляется.</string>
+    <string name="diag_crash">Последний сбой: %1$s</string>
+    <string name="diag_freeze">Зависания: %2$d · последнее: %1$s</string>
+    <string name="diag_online">Фильмы из интернета: %1$s</string>
+    <string name="diag_none">Сбоев и зависаний не записано.</string>
+    <string name="diag_clear">Очистить диагностику</string>
 </resources>

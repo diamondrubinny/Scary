@@ -39,6 +39,7 @@ import io.github.diamondrubinny.scary.data.TmdbAccountRepository
 import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.launch.Launcher
 import io.github.diamondrubinny.scary.stability.CrashGuard
+import io.github.diamondrubinny.scary.stability.HealthLog
 
 class ScaryApplication : Application(), SingletonImageLoader.Factory {
     val container: AppContainer by lazy { AppContainer(this) }
@@ -46,6 +47,7 @@ class ScaryApplication : Application(), SingletonImageLoader.Factory {
     override fun onCreate() {
         super.onCreate()
         CrashGuard.install(this)
+        HealthLog.startFreezeWatch(this)
         watchScreenOff()
         if (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0) {
             // Debug builds only: report disk and network work on the main thread, and leaked resources, in logcat.

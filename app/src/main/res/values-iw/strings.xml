@@ -28,7 +28,7 @@
     <string name="effects_off_description">אפקטי אווירה: כבויים</string>
     <string name="msg_effects_on">ערפל וגרעיניות פועלים</string>
     <string name="msg_effects_off">ערפל וגרעיניות כבויים</string>
-    <string name="msg_safe_mode">SCARY הופעלה מחדש אחרי שגיאות חוזרות. האפקטים והצלילים כובו, ואפשר להחזיר אותם בהגדרות.</string>
+    <string name="msg_safe_mode">SCARY הופעלה מחדש אחרי שגיאות חוזרות. האפקטים והצלילים כבויים לעת עתה, ויחזרו בהפעלה הרגילה הבאה.</string>
     <string name="system_settings">הגדרות</string>
     <string name="system_settings_description">פתיחת הגדרות המערכת</string>
     <string name="install_app">התקנת %1$s</string>
@@ -694,4 +694,12 @@
     <string name="stremio_note_continue">עצרתם ב־%1$s ב־Stremio: "צפייה ב־Stremio" ממשיכה משם</string>
     <string name="stremio_note_library">בספרייה שלכם ב־Stremio</string>
     <string name="stremio_note_watched">נצפה ב־Stremio</string>
+    <string name="msg_safe_mode_over">האפקטים והצלילים חזרו.</string>
+    <string name="diag_title">אבחון</string>
+    <string name="diag_note">אם SCARY קורסת, נתקעת או לא מציגה סרטים מהרשת, צילום של השורות האלה עוזר לתקן. נשמר רק איפה בקוד של SCARY זה קרה ומתי; נשאר בטלוויזיה ולא נשלח.</string>
+    <string name="diag_crash">קריסה אחרונה: %1$s</string>
+    <string name="diag_freeze">היתקעויות: %2$d · אחרונה: %1$s</string>
+    <string name="diag_online">סרטים מהרשת: %1$s</string>
+    <string name="diag_none">לא נרשמו קריסות או היתקעויות.</string>
+    <string name="diag_clear">ניקוי האבחון</string>
 </resources>
