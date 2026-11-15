@@ -88,3 +88,15 @@
   - A retry within the day fetches only the rows and the details of films that have none.
   - The categories refresh with each day's rows, or while they are missing or short.
 - **Checks:** `:core:test` (KeyBacklogTest 6, CinemetaRefreshTest 4), `:app:lintDebug` with no findings, `:app:compileDebugAndroidTestKotlin`, and `check-credit.sh`.
+
+## Follow-up (15.11.2026): a hidden keyboard that swallows the arrows
+- **What happened:** the CI test that reaches "Chat" with arrows only failed in 2 of 5 runs, both on main, always at the same point. The arrow "up" didn't leave the line, and the cursor didn't move either.
+- **The cause:**
+  - when the line takes focus, the on-screen keyboard opens and connects to it;
+  - when the keyboard is hidden from outside (the test does this with the insets controller), it stays "connected" for a moment;
+  - Android hands keys to the keyboard **before** the app, so the arrow never reaches SCARY. The same can happen on TVs with keyboards that behave this way.
+- **The fix:** `ScaryTextField` also catches the arrows **before** the keyboard (`onInterceptKeyBeforeSoftKeyboard`), but only when the keyboard isn't showing.
+  - Visibility is read from the window's real insets, not from Compose, whose state can always say "hidden" in screens that don't follow insets.
+  - While the keyboard is showing, the arrows stay its own, for moving between its keys.
+- **Requires checking in CI:** the test reproduces exactly this situation (a keyboard opened and hidden from outside). A pass in several runs in a row will confirm the cause.
+
