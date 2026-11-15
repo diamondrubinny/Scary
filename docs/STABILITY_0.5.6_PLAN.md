@@ -99,4 +99,9 @@
   - Visibility is read from the window's real insets, not from Compose, whose state can always say "hidden" in screens that don't follow insets.
   - While the keyboard is showing, the arrows stay its own, for moving between its keys.
 - **Requires checking in CI:** the test reproduces exactly this situation (a keyboard opened and hidden from outside). A pass in several runs in a row will confirm the cause.
+- **First CI run of the fix:** "up" did leave the line and the focus reached "Chat", but OK on "Chat" did nothing. The hidden-but-connected keyboard took OK too, even after the focus had left the line, so a fix at the line alone isn't enough.
+- **The full fix (`RemoteKeys.kt`, at the root of the screens):**
+  - whenever no keyboard is showing, the remote's arrows and OK are taken before the keyboard and handed to the activity as usual, so its KeyBacklog filter still applies;
+  - while the keyboard is showing, they stay its own;
+  - this probably also explains the original report ("you can't get into the chat"): with Gboard on the TV, OK on "Chat" could get lost the same way. **Requires checking on the TV.**
 

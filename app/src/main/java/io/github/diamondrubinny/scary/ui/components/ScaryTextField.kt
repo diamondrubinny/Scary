@@ -4,13 +4,10 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
-import android.view.View
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.onInterceptKeyBeforeSoftKeyboard
 import androidx.compose.ui.platform.LocalView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -116,7 +113,3 @@ fun ScaryTextField(
             .onPreviewKeyEvent(::arrows),
     )
 }
-
-/** Whether the on-screen keyboard is showing now, from the window itself (not every screen follows the insets). */
-private fun keyboardShown(view: View): Boolean =
-    ViewCompat.getRootWindowInsets(view)?.isVisible(WindowInsetsCompat.Type.ime()) == true

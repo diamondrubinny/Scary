@@ -112,6 +112,7 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ui.trailer.LocalTrailerPool
 import io.github.diamondrubinny.scary.ui.components.LocalVoiceRequest
+import io.github.diamondrubinny.scary.ui.components.remoteKeysPastHiddenKeyboard
 import io.github.diamondrubinny.scary.ui.components.VoiceRequest
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.trailer.TrailerPool
@@ -419,7 +420,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     }
 
     ScaryTheme(reduceMotion = !state.effectsEnabled || !systemAnimations) {
-        Box(Modifier.fillMaxSize().background(ScaryColors.Void)) {
+        Box(Modifier.fillMaxSize().background(ScaryColors.Void).remoteKeysPastHiddenKeyboard()) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId, similarFor) }
             val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
