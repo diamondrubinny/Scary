@@ -4,6 +4,10 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.onInterceptKeyBeforeSoftKeyboard
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,6 +40,7 @@ import io.github.diamondrubinny.scary.core.input.TextFieldExit
  * cursor, so the buttons and tabs around it (Ask SCARY's "Chat", the microphone, "Send") could not be reached. Here up
  * and down always leave, left and right leave at the edge of the text (core TextFieldExit), and OK opens the keyboard.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ScaryTextField(
     value: String,
@@ -59,6 +64,34 @@ fun ScaryTextField(
         TextDirection.Rtl -> true
         else -> null
     }
+    val view = LocalView.current
+
+    /** Up and down leave the line; left and right leave at the edge of the text; OK opens the keyboard. */
+    fun arrows(event: KeyEvent): Boolean {
+        if (event.type != KeyEventType.KeyDown) return false
+        val arrow = when (event.key) {
+            Key.DirectionUp -> TextFieldExit.Arrow.UP
+            Key.DirectionDown -> TextFieldExit.Arrow.DOWN
+            Key.DirectionLeft -> TextFieldExit.Arrow.LEFT
+            Key.DirectionRight -> TextFieldExit.Arrow.RIGHT
+            Key.DirectionCenter -> {
+                keyboard?.show()
+                return true
+            }
+            else -> return false
+        }
+        val selection = field.selection
+        if (!TextFieldExit.leaves(arrow, field.text, selection.min, selection.max, rightToLeft)) return false
+        return focusManager.moveFocus(
+            when (arrow) {
+                TextFieldExit.Arrow.UP -> FocusDirection.Up
+                TextFieldExit.Arrow.DOWN -> FocusDirection.Down
+                TextFieldExit.Arrow.LEFT -> FocusDirection.Left
+                TextFieldExit.Arrow.RIGHT -> FocusDirection.Right
+            },
+        )
+    }
+
     BasicTextField(
         value = field,
         onValueChange = {
@@ -72,29 +105,11 @@ fun ScaryTextField(
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         interactionSource = interactionSource,
-        modifier = modifier.onPreviewKeyEvent { event ->
-            if (event.type != KeyEventType.KeyDown) return@onPreviewKeyEvent false
-            val arrow = when (event.key) {
-                Key.DirectionUp -> TextFieldExit.Arrow.UP
-                Key.DirectionDown -> TextFieldExit.Arrow.DOWN
-                Key.DirectionLeft -> TextFieldExit.Arrow.LEFT
-                Key.DirectionRight -> TextFieldExit.Arrow.RIGHT
-                Key.DirectionCenter -> {
-                    keyboard?.show()
-                    return@onPreviewKeyEvent true
-                }
-                else -> return@onPreviewKeyEvent false
-            }
-            val selection = field.selection
-            if (!TextFieldExit.leaves(arrow, field.text, selection.min, selection.max, rightToLeft)) return@onPreviewKeyEvent false
-            focusManager.moveFocus(
-                when (arrow) {
-                    TextFieldExit.Arrow.UP -> FocusDirection.Up
-                    TextFieldExit.Arrow.DOWN -> FocusDirection.Down
-                    TextFieldExit.Arrow.LEFT -> FocusDirection.Left
-                    TextFieldExit.Arrow.RIGHT -> FocusDirection.Right
-                },
-            )
-        },
+        // The arrows, first before the on-screen keyboard and then as usual. A keyboard that is hidden but still
+        // connected to the line can take them before the app (seen on emulators, and on some TVs), so up never left
+        // the line; while the keyboard is on screen, the arrows are its own, to move between its keys.
+        modifier = modifier
+            .onInterceptKeyBeforeSoftKeyboard { event -> !keyboardShown(view) && arrows(event) }
+            .onPreviewKeyEvent(::arrows),
     )
 }
