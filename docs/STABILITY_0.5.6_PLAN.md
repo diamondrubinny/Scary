@@ -1,0 +1,60 @@
+# Stability 0.5.6: no running focus, lighter trailers, fuller catalogs (15.11.2026)
+
+**The request:** "leave it as it is, just improve the system more", after the report: "the app freezes and runs by itself between the rows, starts a bit slowly, titles don't tremble, no new films, the catalogs are sparse". Version 0.5.5 already fixed the start, the safe mode that turned effects off, and added diagnostics. This round fixes three causes found in the code.
+
+## 1. Focus running by itself between rows
+**Cause:**
+- When the main thread is stuck for a moment, the remote's presses (and a held key's repeats) wait in Android's queue.
+- When the screen frees up, they all arrive at once, and the focus jumps several rows "by itself".
+
+**Fix:**
+- A press that arrives late (more than 300 ms after it was made) is delivered only if it is the first of the backlog.
+- The presses that piled up behind it, and every late repeat of a held key, are dropped.
+- Only the four arrows are affected; OK, Back and the rest are never dropped.
+- The decision is pure logic in `core` (`KeyBacklog`), with tests.
+
+## 2. Trailers that load the TV
+**Cause:**
+- With trailer autoplay on, every movie the focus rests on creates a new WebView.
+- Every move to another movie destroys that WebView and deletes its storage, all on the main thread.
+- On a weak TV this is exactly the moment the presses pile up (see 1).
+
+**Fix:**
+- One WebView is reused for every trailer: it is emptied (about:blank) between movies and destroyed only when the screen goes away.
+- YouTube's storage is still deleted when the player closes for good, as before.
+
+## 3. Sparse online catalogs
+**Cause:**
+- A daily refresh in which most row pages failed (a weak network, timeouts) was still counted as a success.
+- The rows that came out empty stayed missing for a whole day.
+- The same applied to the categories' pool.
+
+**Fix:**
+- A row whose pages failed keeps yesterday's version.
+- A refresh with failed pages is marked "incomplete" and tried again with the usual backoff (1 minute, then 2, 4…) until it completes.
+- **Diagnostics** gets a line: the last refresh, with how many pages loaded out of how many (for example "rows 28/30 · categories 70/70").
+
+## Privacy and security
+- Nothing new leaves the TV. The diagnostics line holds only counts and a time, and stays on the TV.
+
+## Accessibility
+- The diagnostics line is plain text, read by screen readers. Strings in 5 languages.
+
+## Checks
+- **core:** unit tests for `KeyBacklog` and for the incomplete-refresh merge.
+- **app:** lint, compiling the UI tests, and CI (TV and phone emulators).
+
+## Implementation notes (15.11.2026)
+- **`KeyBacklog`** (core):
+  - Repeats from remotes that stamp every repeat with the press's own time are always delivered, so holding a key keeps scrolling.
+  - The release of a dropped press is dropped with it. The release of a press whose repeats were dropped is not.
+  - The phone remote injects its keys past this filter (`superDispatchKeyEvent`), so it is never affected.
+- **`TrailerPool`:**
+  - Belongs to the screen (`ScaryRoot`, through a CompositionLocal) rather than a static object, so the WebView never outlives the screen (lint: StaticFieldLeak).
+  - It is destroyed when SCARY leaves the screen (ON_STOP), when its renderer stopped, or when another one is already waiting.
+- **Refresh:**
+  - When everything failed (offline), the cache stays exactly as it was.
+  - A film whose details failed keeps the old details.
+  - A retry within the day fetches only the rows and the details of films that have none.
+  - The categories refresh with each day's rows, or while they are missing or short.
+- **Checks:** `:core:test` (KeyBacklogTest 6, CinemetaRefreshTest 4), `:app:lintDebug` with no findings, `:app:compileDebugAndroidTestKotlin`, and `check-credit.sh`.

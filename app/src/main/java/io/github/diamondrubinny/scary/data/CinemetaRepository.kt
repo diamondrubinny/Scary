@@ -14,6 +14,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaCache
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
 import io.github.diamondrubinny.scary.core.cinemeta.OnlineRow
+import io.github.diamondrubinny.scary.core.cinemeta.PageCount
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
@@ -29,6 +30,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
+import java.util.concurrent.atomic.AtomicInteger
 import javax.net.ssl.HttpsURLConnection
 
 /**
@@ -56,6 +58,19 @@ class CinemetaRepository(context: Context) {
         lastHealth = kind
         lastHealthAt = now
         HealthLog.recordOnline(appContext, ok, problem)
+    }
+
+    /** The page counts last written to HealthLog: written again only when they change. */
+    @Volatile
+    private var lastRefreshNote: String? = null
+
+    /** How the last refresh went, for Settings → About → Diagnostics: pages loaded of the rows and of the categories. */
+    fun noteRefresh(cache: CinemetaCache) {
+        val rows = cache.rowPages ?: return
+        val note = "$rows ${cache.categoryPages}"
+        if (note == lastRefreshNote) return
+        lastRefreshNote = note
+        HealthLog.recordRefresh(appContext, rows.loaded, rows.total, cache.categoryPages?.loaded, cache.categoryPages?.total)
     }
 
     /**
@@ -226,37 +241,74 @@ class CinemetaRepository(context: Context) {
     /**
      * Returns fresh data for the library's films and series ([items], IMDb id and kind), or null when the TV is offline
      * or the service is down. Never throws.
+     *
+     * A row whose pages failed keeps its [previous] films (core Cinemeta.keepPrevious) and the cache is marked
+     * incomplete, so it is tried again soon. A retry while [previous] is still recent fetches only the rows (and films
+     * it lacks details for), not every film's details again.
      */
     suspend fun refresh(items: List<Pair<String, MediaKind>>, previous: CinemetaCache? = null): CinemetaCache? = withContext(Dispatchers.IO) {
+        val now = System.currentTimeMillis()
+        val retry = previous != null && !previous.isStale(now)
+        val metaItems = items.distinctBy { it.first }.let { all -> if (retry) all.filter { it.first !in previous!!.metas } else all }
         // A shared pool instead of fixed batches: one slow movie no longer holds up the next ones,
-        // and the three popular rows queue first so whole rows of posters appear early.
+        // and the popular rows queue first so whole rows of posters appear early.
         val pool = Semaphore(PARALLEL_REQUESTS)
-        val (metaList, rows) = coroutineScope {
-            val rows = rowSpecs.map { spec ->
+        val failedPages = AtomicInteger(0)
+        val specs = rowSpecs
+        val (metaList, results) = coroutineScope {
+            val rows = specs.map { spec ->
                 async {
-                    // The pages of one row load side by side; a page that fails just leaves the row shorter.
+                    // The pages of one row load side by side; a page that fails leaves the row to its previous films.
                     val pages = spec.skips.map { skip ->
                         async { pool.withPermit { fetch(Cinemeta.catalogUrl(spec.catalog, spec.genre, skip, spec.kind)) }?.let(Cinemeta::parseCatalog) }
-                    }.awaitAll().filterNotNull()
+                    }.awaitAll()
+                    val failed = pages.count { it == null }
+                    failedPages.addAndGet(failed)
                     // A row keeps only its own kind, even if Cinemeta mixes one in.
-                    val metas = pages.flatten().distinctBy { it.imdbId }.filter { it.kind == spec.kind }
+                    val metas = pages.filterNotNull().flatten().distinctBy { it.imdbId }.filter { it.kind == spec.kind }
                         .let { if (spec.themedOnly) Cinemeta.themed(it) else it }
-                    metas.takeIf { it.isNotEmpty() }?.let {
+                    val row = metas.takeIf { it.isNotEmpty() }?.let {
                         OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
                     }
+                    Triple(spec.id, row, failed > 0)
                 }
             }
-            val metas = items.distinctBy { it.first }.map { (id, kind) ->
+            val metas = metaItems.map { (id, kind) ->
                 async { pool.withPermit { fetch(Cinemeta.metaUrl(id, kind))?.let(Cinemeta::parseMeta) } }
             }
-            metas.awaitAll() to rows.awaitAll().filterNotNull()
+            metas.awaitAll() to rows.awaitAll()
         }
-        val metas = metaList.filterNotNull().associateByTo(LinkedHashMap()) { it.imdbId }
+        val totalPages = specs.sumOf { it.skips.size }
+        // Nothing at all came back (offline): the cache stays as it was, and the next try waits a little longer.
+        if (failedPages.get() == totalPages && metaList.all { it == null }) return@withContext null
+        val metas = LinkedHashMap<String, CinemetaMeta>()
+        // On a retry the films' details are yesterday's; otherwise a film whose details failed keeps its old ones.
+        if (retry) metas.putAll(previous!!.metas)
+        metaList.filterNotNull().forEach { metas[it.imdbId] = it }
+        if (!retry) metaItems.forEach { (id, _) -> if (id !in metas) previous?.metas?.get(id)?.let { metas[id] = it } }
+        val previousRows = previous?.rows?.takeIf { previous.rowsVersion == CinemetaCache.ROWS_VERSION }
+        val rows = Cinemeta.keepPrevious(
+            order = results.map { it.first },
+            fresh = results.mapNotNull { it.second },
+            previous = previousRows,
+            failed = results.filter { it.third }.mapTo(HashSet()) { it.first },
+        )
         if (metas.isEmpty() && rows.isEmpty()) return@withContext null
         // The categories keep yesterday's films until refreshCategories brings today's, right after.
-        val categories = previous?.categories?.takeIf { previous.rowsVersion == CinemetaCache.ROWS_VERSION }.orEmpty()
+        val keepCategories = previous?.takeIf { it.rowsVersion == CinemetaCache.ROWS_VERSION }
+        val categories = keepCategories?.categories.orEmpty()
         categories.values.flatten().forEach { id -> previous?.metas?.get(id)?.let { metas.putIfAbsent(id, it) } }
-        CinemetaCache(System.currentTimeMillis(), metas, rows, CinemetaCache.ROWS_VERSION, categories).also(::save)
+        CinemetaCache(
+            fetchedAtMillis = if (retry) previous!!.fetchedAtMillis else now,
+            metas = metas,
+            rows = rows,
+            rowsVersion = CinemetaCache.ROWS_VERSION,
+            categories = categories,
+            complete = failedPages.get() == 0,
+            categoriesComplete = keepCategories?.categoriesComplete ?: true,
+            rowPages = PageCount(totalPages - failedPages.get(), totalPages),
+            categoryPages = keepCategories?.categoryPages,
+        ).also(::save)
     }
 
     /**
@@ -265,30 +317,41 @@ class CinemetaRepository(context: Context) {
      * Null when no page could be read.
      */
     suspend fun refreshCategories(cache: CinemetaCache): CinemetaCache? = withContext(Dispatchers.IO) {
-        val categoryPool = categoryPool(Semaphore(CATEGORY_REQUESTS))
+        val (categoryPool, pages) = categoryPool(Semaphore(CATEGORY_REQUESTS))
         if (categoryPool.isEmpty()) return@withContext null
-        val categories = Categories.sort(categoryPool)
+        val sorted = Categories.sort(categoryPool)
+        // With pages missing, a category that came out shorter keeps the films it had (their details are in the cache).
+        val categories = if (pages.complete) {
+            sorted
+        } else {
+            (sorted.keys + cache.categories.keys).associateWith { id ->
+                val now = sorted[id].orEmpty()
+                val before = cache.categories[id].orEmpty().filter { it in cache.metas }
+                if (now.size >= before.size) now else (now + before).distinct().take(before.size)
+            }
+        }
         val used = categories.values.flatten().toHashSet()
         val metas = LinkedHashMap(cache.metas)
         categoryPool.forEach { meta -> if (meta.imdbId in used) metas.putIfAbsent(meta.imdbId, meta) }
-        cache.copy(metas = metas, categories = categories).also(::save)
+        cache.copy(metas = metas, categories = categories, categoriesComplete = pages.complete, categoryPages = pages).also(::save)
     }
 
     /**
      * The films and series the categories are filled from: the first pages of Cinemeta's horror, thriller and mystery
-     * catalogs (most popular first), about 3,500 films and 1,500 series. A page that fails just leaves the pool smaller.
+     * catalogs (most popular first), about 3,500 films and 1,500 series, and how many pages loaded. A page that fails
+     * just leaves the pool smaller.
      */
-    private suspend fun categoryPool(pool: Semaphore): List<CinemetaMeta> = coroutineScope {
-        CategoryPaging.POOL.flatMap { (kind, genre, pages) ->
+    private suspend fun categoryPool(pool: Semaphore): Pair<List<CinemetaMeta>, PageCount> = coroutineScope {
+        val pages = CategoryPaging.POOL.flatMap { (kind, genre, pages) ->
             (0 until pages).map { page ->
                 async {
                     pool.withPermit { fetch(Cinemeta.catalogUrl("top", genre, page * Cinemeta.PAGE_SIZE, kind)) }
                         ?.let(Cinemeta::parseCatalog)
                         ?.filter { it.kind == kind }
-                        .orEmpty()
                 }
             }
-        }.awaitAll().flatten().distinctBy { it.imdbId }
+        }.awaitAll()
+        pages.filterNotNull().flatten().distinctBy { it.imdbId } to PageCount(pages.count { it != null }, pages.size)
     }
 
     /**

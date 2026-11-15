@@ -243,3 +243,54 @@ class CinemetaCacheTest {
         assertEquals(listOf("tt0000014"), kept.map { it.imdbId })
     }
 }
+
+class CinemetaRefreshTest {
+    private fun meta(n: Int) = CinemetaMeta(imdbId = "tt%07d".format(n), name = "Movie $n", year = 2026, genres = listOf("Horror"))
+    private fun row(id: String, vararg films: Int) = OnlineRow(id, "ש", id, films.map(::meta))
+    private fun ids(row: OnlineRow?) = row?.metas?.map { it.imdbId.removePrefix("tt").toInt() }
+
+    @Test
+    fun `rows whose pages failed keep yesterday's films after today's`() {
+        val order = listOf("a", "b", "c", "d")
+        val previous = listOf(row("a", 1, 2, 3), row("b", 10, 11), row("c", 20, 21), row("d", 30))
+        // a: one page failed; b: every page failed; c: loaded fine (shrank for real); d: failed, nothing before.
+        val fresh = listOf(row("a", 3, 4), row("c", 22))
+        val kept = Cinemeta.keepPrevious(order, fresh, previous, failed = setOf("a", "b", "d"))
+        assertEquals(listOf("a", "b", "c", "d"), kept.map { it.id })
+        assertEquals(listOf(3, 4, 1, 2), ids(kept[0]))
+        assertEquals(listOf(10, 11), ids(kept[1]))
+        assertEquals(listOf(22), ids(kept[2]))
+        assertEquals(listOf(30), ids(kept[3]))
+    }
+
+    @Test
+    fun `with nothing before, failed rows are just left out`() {
+        val kept = Cinemeta.keepPrevious(listOf("a", "b"), listOf(row("a", 1)), previous = null, failed = setOf("b"))
+        assertEquals(listOf("a"), kept.map { it.id })
+    }
+
+    @Test
+    fun `a kept row never grows past the row limit`() {
+        val big = OnlineRow("a", "ש", "a", (1..Cinemeta.MAX_ROW_MOVIES).map(::meta))
+        val fresh = OnlineRow("a", "ש", "a", (1000..1049).map(::meta))
+        val kept = Cinemeta.keepPrevious(listOf("a"), listOf(fresh), listOf(big), setOf("a")).single()
+        assertEquals(Cinemeta.MAX_ROW_MOVIES, kept.metas.size)
+        assertEquals(1000, ids(kept)!!.first())
+    }
+
+    @Test
+    fun `an incomplete cache asks for its rows again, and old caches read as complete`() {
+        val now = 1_000_000L
+        val partial = CinemetaCache(now, emptyMap(), emptyList(), CinemetaCache.ROWS_VERSION, complete = false)
+        assertTrue(partial.needsRows(now))
+        assertFalse(partial.copy(complete = true).needsRows(now))
+        assertTrue(partial.copy(categoriesComplete = false, categories = mapOf("x" to listOf("tt0000001"))).needsCategories())
+        assertTrue(partial.needsCategories()) // none yet
+        val old = CinemetaCache.decode("""{"fetchedAtMillis":$now,"metas":{},"rows":[],"rowsVersion":${CinemetaCache.ROWS_VERSION}}""")!!
+        assertTrue(old.complete && old.categoriesComplete)
+        assertFalse(old.needsRows(now))
+        val counted = partial.copy(rowPages = io.github.diamondrubinny.scary.core.cinemeta.PageCount(28, 30))
+        assertEquals(counted, CinemetaCache.decode(counted.encode()))
+        assertFalse(counted.rowPages!!.complete)
+    }
+}

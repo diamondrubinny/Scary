@@ -121,31 +121,39 @@ class CatalogRepository(
                     suspend fun fetchWhatIsDue() {
                         val now = System.currentTimeMillis()
                         val knownCinemeta = cinemetaCache
-                        if (RefreshPolicy.due(knownCinemeta == null || knownCinemeta.isStale(now), cinemetaState, now)) {
+                        // Rows with pages missing (a weak network) count as a failure: tried again with backoff until whole.
+                        if (RefreshPolicy.due(knownCinemeta == null || knownCinemeta.needsRows(now), cinemetaState, now)) {
                             val fresh = cinemeta.refresh(base.movies.map { it.imdbId to it.kind }, knownCinemeta)
-                            cinemetaState = RefreshPolicy.after(cinemetaState, fresh != null, System.currentTimeMillis())
+                            cinemetaState = RefreshPolicy.after(cinemetaState, fresh?.complete == true, System.currentTimeMillis())
                             if (fresh != null) {
                                 cinemetaCache = fresh
                                 emit(build())
-                                // Then the categories, in the background of rows already on screen.
-                                val filled = cinemeta.refreshCategories(fresh)
-                                categoriesState = RefreshPolicy.after(categoriesState, filled != null, System.currentTimeMillis())
-                                if (filled != null) {
-                                    cinemetaCache = filled
-                                    emit(build())
+                                // Then the categories, in the background of rows already on screen: with each day's rows,
+                                // or while they are missing or short. A retry of a few rows does not fetch them all again.
+                                if (fresh.fetchedAtMillis != knownCinemeta?.fetchedAtMillis || fresh.needsCategories()) {
+                                    val filled = cinemeta.refreshCategories(fresh)
+                                    categoriesState = RefreshPolicy.after(categoriesState, filled?.categoriesComplete == true, System.currentTimeMillis())
+                                    if (filled != null) {
+                                        cinemetaCache = filled
+                                        emit(build())
+                                    }
                                 }
                             }
                         }
-                        // Categories that failed to fill (the network dropped right then) are tried again, with backoff.
+                        // Categories that failed to fill, or filled in part (the network dropped right then), are tried
+                        // again, with backoff.
                         val withRows = cinemetaCache
-                        if (withRows != null && RefreshPolicy.due(withRows.categories.isEmpty(), categoriesState, now)) {
+                        if (withRows != null && RefreshPolicy.due(withRows.needsCategories(), categoriesState, System.currentTimeMillis())) {
                             val filled = cinemeta.refreshCategories(withRows)
-                            categoriesState = RefreshPolicy.after(categoriesState, filled != null, System.currentTimeMillis())
+                            categoriesState = RefreshPolicy.after(categoriesState, filled?.categoriesComplete == true, System.currentTimeMillis())
                             if (filled != null) {
                                 cinemetaCache = filled
                                 emit(build())
                             }
                         }
+                        // Only after a refresh this round: the copy read from disk at start says nothing new.
+                        val noted = cinemetaCache
+                        if (noted != null && noted !== knownCinemeta) cinemeta.noteRefresh(noted)
                         val knownTmdb = tmdbCache
                         if (hasKey && RefreshPolicy.due(knownTmdb == null || knownTmdb.isStale(now), tmdbState, now)) {
                             // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.

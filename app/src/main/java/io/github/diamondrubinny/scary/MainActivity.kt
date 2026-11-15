@@ -10,6 +10,7 @@ import io.github.diamondrubinny.scary.core.remote.RemoteProtocol.Command
 import android.os.SystemClock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -24,6 +25,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import io.github.diamondrubinny.scary.audio.AmbientPlayer
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.stability.KeyBacklog
 import io.github.diamondrubinny.scary.data.LanguageStore
 import io.github.diamondrubinny.scary.ui.theme.ScaryFonts
 import io.github.diamondrubinny.scary.launch.HomeRole
@@ -148,6 +150,29 @@ class MainActivity : ComponentActivity() {
         )
     }
 
+    private val keyBacklog = KeyBacklog()
+
+    /**
+     * Arrow presses that waited behind a stall arrive all at once and would run the focus across the rows by
+     * themselves: only the first of such a backlog is delivered (core KeyBacklog). Presses on time are untouched.
+     */
+    // Overriding Activity.dispatchKeyEvent is public API; lint flags androidx's own override of it (a known false alarm).
+    @SuppressLint("RestrictedApi")
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.keyCode in ARROWS && event.action != KeyEvent.ACTION_MULTIPLE) {
+            val deliver = keyBacklog.deliver(
+                keyCode = event.keyCode,
+                down = event.action == KeyEvent.ACTION_DOWN,
+                repeatCount = event.repeatCount,
+                madeAt = event.eventTime,
+                now = SystemClock.uptimeMillis(),
+                pressedAt = event.downTime,
+            )
+            if (!deliver) return true
+        }
+        return super.dispatchKeyEvent(event)
+    }
+
     /** The remote's search key, on remotes that deliver it to the app rather than to the assistant. */
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_SEARCH) {
@@ -244,5 +269,6 @@ class MainActivity : ComponentActivity() {
     private companion object {
         const val DEBUG_OPEN = "scary.debug.open"
         const val DEBUG_QUERY = "scary.debug.query"
+        val ARROWS = setOf(KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT)
     }
 }
