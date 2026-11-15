@@ -173,17 +173,21 @@ class MainActivity : ComponentActivity() {
         return super.dispatchKeyEvent(event)
     }
 
-    /** The remote's search key, on remotes that deliver it to the app rather than to the assistant. */
+    /**
+     * The remote's search or microphone key, on remotes that deliver it to the app rather than to the TV's assistant:
+     * dictation into the text field on screen (Ask SCARY, search), or search with dictation.
+     */
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_SEARCH) {
-            viewModel.openSearch()
+        if (keyCode == KeyEvent.KEYCODE_SEARCH || keyCode == KeyEvent.KEYCODE_VOICE_ASSIST) {
+            // Held down: one request, not one per repeat.
+            if (event.repeatCount == 0) viewModel.voiceKey()
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
     override fun onSearchRequested(): Boolean {
-        viewModel.openSearch()
+        viewModel.voiceKey()
         return true
     }
 

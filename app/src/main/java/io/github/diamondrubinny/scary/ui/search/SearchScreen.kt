@@ -9,6 +9,7 @@ import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiPicks
 import io.github.diamondrubinny.scary.ui.ai.AiStatus
+import io.github.diamondrubinny.scary.ui.components.VoiceRequestEffect
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 
 import android.app.Activity
@@ -163,6 +164,8 @@ fun SearchScreen(
         val spoken = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.trim()
         if (result.resultCode == Activity.RESULT_OK && !spoken.isNullOrEmpty()) onQueryChange(spoken)
     }
+    // The remote's search or microphone key: dictation goes straight into the search.
+    VoiceRequestEffect(voiceAvailable) { voiceLauncher.launch(speechIntent) }
 
     val returnFocus = remember { FocusRequester() }
     val firstResultFocus = remember { FocusRequester() }

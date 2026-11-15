@@ -55,6 +55,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.IconCircleButton
 import io.github.diamondrubinny.scary.ui.components.MicIcon
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ui.components.VoiceRequestEffect
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import kotlinx.coroutines.delay
@@ -172,6 +173,8 @@ fun AiInput(
             onSubmit()
         }
     }
+    // The remote's search or microphone key: dictation goes straight into this line.
+    VoiceRequestEffect(voiceAvailable) { voice.launch(speechIntent) }
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             Modifier

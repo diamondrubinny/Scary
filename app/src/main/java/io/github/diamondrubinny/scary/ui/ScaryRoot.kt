@@ -111,6 +111,8 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ui.trailer.LocalTrailerPool
+import io.github.diamondrubinny.scary.ui.components.LocalVoiceRequest
+import io.github.diamondrubinny.scary.ui.components.VoiceRequest
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
 import io.github.diamondrubinny.scary.ui.trailer.TrailerPool
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
@@ -125,7 +127,10 @@ fun ScaryRoot(viewModel: HomeViewModel) {
     DisposableEffect(trailerPool) {
         onDispose { trailerPool.clear() }
     }
-    CompositionLocalProvider(LocalTrailerPool provides trailerPool) {
+    // The remote's search or microphone key: the text field on screen (Ask SCARY, search) starts dictation.
+    val voiceRequested by viewModel.voiceRequested.collectAsStateWithLifecycle()
+    val voiceRequest = remember(voiceRequested) { VoiceRequest(voiceRequested, viewModel::voiceHandled) }
+    CompositionLocalProvider(LocalTrailerPool provides trailerPool, LocalVoiceRequest provides voiceRequest) {
         ScaryScreens(viewModel)
     }
 }

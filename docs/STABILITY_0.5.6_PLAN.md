@@ -34,6 +34,22 @@
 - A refresh with failed pages is marked "incomplete" and tried again with the usual backoff (1 minute, then 2, 4…) until it completes.
 - **Diagnostics** gets a line: the last refresh, with how many pages loaded out of how many (for example "rows 28/30 · categories 70/70").
 
+## 4. The remote's microphone key (owner's report: "acts outside the app, not inside")
+**Cause:**
+- On many remotes the microphone key goes straight to the TV's assistant. Android hands it to the system before any app, so it opens Google Assistant over SCARY. **Requires verification on the owner's remote:** which key code it sends.
+- Remotes that do hand the key to the app (KEYCODE_SEARCH, sometimes KEYCODE_VOICE_ASSIST) only opened the search screen, without listening.
+
+**Fix:**
+- On such remotes, the key starts dictation right away:
+  - into Ask SCARY when it is open;
+  - into search when it is open;
+  - otherwise it opens search and starts dictation.
+- The text goes in and the search (or the question) runs by itself.
+- **Through the TV's own speech recognizer, as with the 🎤 button on screen:** SCARY itself never records audio, and no new permission is needed.
+- **When the remote's key goes to the assistant anyway:**
+  - the 🎤 button next to the line works;
+  - so does the keyboard's own option ("press and hold the microphone to speak"), which holds the remote's key down.
+
 ## Privacy and security
 - Nothing new leaves the TV. The diagnostics line holds only counts and a time, and stays on the TV.
 

@@ -803,6 +803,25 @@ class HomeViewModel(
 
     fun openSearch() = push(Screen.Search)
 
+    private val _voiceRequested = MutableStateFlow(false)
+
+    /** The remote's search or voice key was pressed: the text field on screen starts dictation once it is shown. */
+    val voiceRequested: StateFlow<Boolean> = _voiceRequested.asStateFlow()
+
+    /**
+     * The remote's search or voice key, on remotes that hand it to the app (many send it straight to the TV's assistant,
+     * which no app can take over): dictation into Ask SCARY or search when one is open, otherwise search with dictation.
+     */
+    fun voiceKey() {
+        val current = backStack.value.last()
+        if (current !is Screen.Ask && current != Screen.Search) push(Screen.Search)
+        _voiceRequested.value = true
+    }
+
+    fun voiceHandled() {
+        _voiceRequested.value = false
+    }
+
     fun openDocument(kind: DocumentKind) = push(Screen.Document(kind))
 
     private val _searchQuery = MutableStateFlow("")
