@@ -1046,6 +1046,41 @@ class ScaryUiTest {
         }
     }
 
+    /**
+     * The owner's report: Ask SCARY's "Chat" could not be reached with the remote. Keys injected here come from a
+     * keyboard source, as with many TV remotes, for which Compose's text field kept every arrow for its cursor.
+     */
+    @Test
+    fun theRemoteLeavesAskScarysLineAndReachesTheChatTab() {
+        waitForHomeFocus()
+        val screen = hasTestTag(ASK_SCREEN_TAG)
+        val line = hasContentDescription(text(R.string.ai_title)) and hasAnyAncestor(screen)
+        val chatTab = hasTestTag(askTabTag(chat = true))
+        val suggestTab = hasTestTag(askTabTag(chat = false))
+        withCleanup({
+            rule.onNodeWithTag(ASK_BUTTON_TAG).performClick()
+            waitFor(line and isFocused())
+            // Typed text moves the cursor first; up still leaves a one-line field.
+            rule.onNode(line).performTextInput("like Hereditary")
+            pressKey(KeyEvent.KEYCODE_DPAD_UP)
+            waitUntilOrDescribe("the focus out of the line, on the screen's top row") {
+                rule.onAllNodes(line and isFocused()).fetchSemanticsNodes().isEmpty() &&
+                    rule.onAllNodes(isFocused() and hasAnyAncestor(screen)).fetchSemanticsNodes().isNotEmpty()
+            }
+            // Along the top row to "Chat", whichever end the focus landed on.
+            repeat(4) {
+                if (rule.onAllNodes(chatTab and isFocused()).fetchSemanticsNodes().isNotEmpty()) return@repeat
+                val onSuggest = rule.onAllNodes(suggestTab and isFocused()).fetchSemanticsNodes().isNotEmpty()
+                pressKey(if (onSuggest) KeyEvent.KEYCODE_DPAD_RIGHT else KeyEvent.KEYCODE_DPAD_LEFT)
+            }
+            waitFor(chatTab and isFocused())
+            pressKey(KeyEvent.KEYCODE_DPAD_CENTER)
+            waitFor(hasTestTag(ASK_CHAT_TAG))
+        }) {
+            backToHome()
+        }
+    }
+
     @Test
     fun theAskScaryRowAndAboutThisFilmAskForConsentToo() {
         waitForHome()

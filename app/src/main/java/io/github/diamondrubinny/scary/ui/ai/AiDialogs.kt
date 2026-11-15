@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -55,6 +54,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.data.AiRepository
@@ -206,10 +206,9 @@ fun AiKeyDialog(
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 if (input.isEmpty()) BasicText(keyMask ?: stringResource(R.string.ai_key_hint), style = ScaryType.Body.copy(color = ScaryColors.Ash))
-                BasicTextField(
+                ScaryTextField(
                     value = input,
                     onValueChange = { input = it.trim().take(400) },
-                    singleLine = true,
                     textStyle = ScaryType.BodyStrong.copy(textDirection = TextDirection.Ltr),
                     cursorBrush = SolidColor(ScaryColors.Candle),
                     visualTransformation = PasswordVisualTransformation(),
@@ -264,10 +263,9 @@ fun AiUrlDialog(current: String, onSave: (String) -> Boolean, onDismiss: () -> U
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 if (input.isEmpty()) BasicText("https://…/v1", style = ScaryType.Body.copy(color = ScaryColors.Ash))
-                BasicTextField(
+                ScaryTextField(
                     value = input,
                     onValueChange = { input = it.trim().take(300) },
-                    singleLine = true,
                     textStyle = ScaryType.BodyStrong.copy(textDirection = TextDirection.Ltr),
                     cursorBrush = SolidColor(ScaryColors.Candle),
                     visualTransformation = VisualTransformation.None,

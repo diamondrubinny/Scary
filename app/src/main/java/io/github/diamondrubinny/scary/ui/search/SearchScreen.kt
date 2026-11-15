@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.search
 
+import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.ui.theme.paneWidth
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ai.AiTask
@@ -38,7 +39,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -201,10 +201,9 @@ fun SearchScreen(
                     if (query.isEmpty()) {
                         BasicText(stringResource(R.string.search_hint), style = ScaryType.Body.copy(color = ScaryColors.Ash))
                     }
-                    BasicTextField(
+                    ScaryTextField(
                         value = query,
                         onValueChange = onQueryChange,
-                        singleLine = true,
                         textStyle = ScaryType.BodyStrong.copy(fontSize = ScaryType.Title.fontSize),
                         cursorBrush = SolidColor(ScaryColors.Candle),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

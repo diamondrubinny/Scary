@@ -50,6 +50,20 @@
   - the 🎤 button next to the line works;
   - so does the keyboard's own option ("press and hold the microphone to speak"), which holds the remote's key down.
 
+## 5. "Chat" can't be reached either (owner's report)
+**Cause (verified in the code of Compose foundation 1.12.1):**
+- A text field moves the focus out with the arrows only when the key comes from a device that reports itself as a D-pad.
+- Many TV remotes report a keyboard. The field then kept every arrow for its cursor, and the focus was trapped in it.
+- So "Chat", the 🎤 button, "Send" and "Change" could not be reached. The same applied to the search line and to the key dialogs.
+
+**Fix:**
+- `ScaryTextField`, a single shared field for all five lines:
+  - up and down always leave the line;
+  - left and right move the cursor, and leave the line at the edge of the text, in the text's direction (Hebrew included);
+  - OK opens the keyboard.
+- The rule is pure logic in `core` (`TextFieldExit`), with tests.
+- **A UI test reproduces the report:** its keys are injected as a keyboard, like those remotes. It goes from the line to "Chat" and opens the chat with the arrows only.
+
 ## Privacy and security
 - Nothing new leaves the TV. The diagnostics line holds only counts and a time, and stays on the TV.
 
