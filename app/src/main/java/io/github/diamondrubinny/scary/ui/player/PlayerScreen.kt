@@ -94,6 +94,25 @@ import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
+import android.net.Uri
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.media3.common.Format
+import androidx.media3.common.text.Cue
+import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.core.player.Languages
+import io.github.diamondrubinny.scary.core.player.SubtitleFiles
+import io.github.diamondrubinny.scary.core.player.TrackChoice
+import io.github.diamondrubinny.scary.core.player.TrackInfo
+import io.github.diamondrubinny.scary.core.player.TrackKind
+import io.github.diamondrubinny.scary.core.player.TrackMemory
+import io.github.diamondrubinny.scary.core.player.TrackNames
+import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.io.File
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.player.Bookmark
 import io.github.diamondrubinny.scary.data.WatchStore
@@ -117,6 +136,7 @@ const val PLAYER_BOOKMARK_LIST_TAG = "playerBookmarkList"
 const val PLAYER_SEEKBAR_TAG = "playerSeekBar"
 const val PLAYER_SPEED_TAG = "playerSpeed"
 const val PLAYER_TOAST_TAG = "playerToast"
+const val PLAYER_NO_SOUND_TAG = "playerNoSound"
 
 class PlayerActions(
     /** Where the film is (and how long it is): saved now and then, and when the player closes. */
@@ -170,8 +190,23 @@ fun PlayerScreen(
     var controlsVisible by remember { mutableStateOf(true) }
     var lastInteraction by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var tracks by remember { mutableStateOf(Tracks.EMPTY) }
-    var audioIndex by remember { mutableIntStateOf(-1) }
-    var subtitleIndex by remember { mutableIntStateOf(-1) }
+    // The tracks to play, by TrackInfo.key: chosen by the viewer's languages at the start (core TrackChoice), then
+    // in the track window; null subtitles are none. Kept across reloads (a subtitle file added, the converted stream).
+    var wantedAudio by remember { mutableStateOf<String?>(null) }
+    var wantedText by remember { mutableStateOf<String?>(null) }
+    var tracksChosen by remember { mutableStateOf(false) }
+    var showTracks by remember { mutableStateOf(false) }
+    // Subtitle files of the torrent fetched so far ("x<index>" to the file on the TV), and the one being fetched.
+    val loadedSubtitles = remember { mutableStateMapOf<String, File>() }
+    var loadingSubtitle by remember { mutableStateOf<String?>(null) }
+    var bitmapCues by remember { mutableStateOf<List<Cue>>(emptyList()) }
+    var noAudioDismissed by remember { mutableStateOf(false) }
+    // What is playing: the file's own link, or Real-Debrid's converted (HLS) stream.
+    var mediaUri by remember { mutableStateOf(session.playable.url) }
+    var mediaIsHls by remember { mutableStateOf(false) }
+    val languagesFlow = remember(settings) { settings?.languages ?: MutableStateFlow(LanguagePrefs()) }
+    val languages by languagesFlow.collectAsState()
+    val latestLanguages by rememberUpdatedState(languages)
     var speedIndex by remember { mutableIntStateOf(SPEEDS.indexOf(1f)) }
     var subtitleSize by remember { mutableIntStateOf(settings?.subtitleSize ?: 1) }
     var subtitleDelayMs by remember { mutableLongStateOf(0L) }
@@ -180,16 +215,19 @@ fun PlayerScreen(
     var showBookmarks by remember { mutableStateOf(false) }
     var toast by remember { mutableStateOf<String?>(null) }
     var toastId by remember { mutableIntStateOf(0) }
-    // Delayed subtitles: each cue waits until the film reaches its time plus the delay.
-    val pendingCues = remember { ArrayDeque<Pair<Long, String>>() }
+    // Delayed subtitles: each cue (text, or pictures) waits until the film reaches its time plus the delay.
+    val pendingCues = remember { ArrayDeque<Triple<Long, String, List<Cue>>>() }
     var nextCountdown by remember { mutableIntStateOf(-1) }
     val playPauseFocus = remember { FocusRequester() }
     val bookmarkListFocus = remember { FocusRequester() }
+    val tracksFocus = remember { FocusRequester() }
     val nextFocus = remember { FocusRequester() }
     // The player itself holds the focus while the controls are hidden, so the remote's keys always reach it.
     val rootFocus = remember { FocusRequester() }
     val markedText = stringResource(R.string.player_marked, "%s")
     val markFailedText = stringResource(R.string.player_mark_failed)
+    val subtitleFailedText = stringResource(R.string.player_subtitle_failed)
+    val convertFailedText = stringResource(R.string.player_convert_failed)
 
     fun poke() {
         controlsVisible = true
@@ -204,6 +242,102 @@ fun PlayerScreen(
     fun mark() {
         val at = player.currentPosition
         if (latestActions.onBookmark(at)) say(markedText.replace("%s", clock(at))) else say(markFailedText)
+    }
+
+    /** The file (or converted stream) again, with every subtitle file fetched so far, from where it is now. */
+    fun reloadMedia(at: Long = player.currentPosition) {
+        val subtitles = loadedSubtitles.entries.sortedBy { it.key }.mapNotNull { (id, file) ->
+            val index = id.removePrefix("x").toIntOrNull() ?: return@mapNotNull null
+            val subtitle = session.subtitles.getOrNull(index) ?: return@mapNotNull null
+            MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(file))
+                .setMimeType(SubtitleFiles.mimeType(subtitle.name))
+                .setLanguage(Languages.fromFileName(subtitle.name))
+                .setLabel(subtitle.name)
+                .setId(EXTERNAL_PREFIX + index)
+                .setSelectionFlags(0)
+                .build()
+        }
+        val item = MediaItem.Builder().setUri(mediaUri).apply { if (mediaIsHls) setMimeType(MimeTypes.APPLICATION_M3U8) }.setSubtitleConfigurations(subtitles).build()
+        val play = player.playWhenReady
+        player.setMediaItem(item, at)
+        player.prepare()
+        player.playWhenReady = play
+    }
+
+    /** Fetches a subtitle file of the torrent, then plays on with it; says so when it cannot be read. */
+    fun loadSubtitle(track: TrackInfo) {
+        if (loadingSubtitle != null) return
+        val subtitle = session.subtitles.getOrNull(track.id.removePrefix("x").toIntOrNull() ?: return) ?: return
+        loadingSubtitle = track.id
+        scope.launch {
+            val file = session.fetchSubtitle(subtitle)
+            loadingSubtitle = null
+            if (file == null) {
+                if (wantedText == track.key) wantedText = null
+                say(subtitleFailedText)
+            } else {
+                loadedSubtitles[track.id] = file
+                reloadMedia()
+            }
+        }
+    }
+
+    /** Makes the player play [wantedAudio] and [wantedText], when they are not already playing. */
+    fun applyWanted(described: DescribedTracks) {
+        // Right after a reload the player has no tracks yet: nothing to choose from, nothing to judge.
+        if (described.handles.isEmpty()) return
+        val params = player.trackSelectionParameters.buildUpon()
+        var changed = false
+        wantedAudio?.let { key -> described.infos.firstOrNull { it.kind == TrackKind.AUDIO && it.key == key && it.supported } }?.let { track ->
+            val (group, index) = described.handles[track.id] ?: return@let
+            if (described.selectedAudio != track.id) {
+                params.setTrackTypeDisabled(C.TRACK_TYPE_AUDIO, false).setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, index))
+                changed = true
+            }
+        }
+        val text = wantedText?.let { key -> described.infos.firstOrNull { it.kind == TrackKind.TEXT && it.key == key } }
+        when {
+            wantedText == null -> if (C.TRACK_TYPE_TEXT !in player.trackSelectionParameters.disabledTrackTypes) {
+                params.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true)
+                changed = true
+            }
+            text == null || !text.supported -> Unit
+            text.external && text.id !in described.handles -> if (text.id in loadedSubtitles) {
+                // Fetched, but the player did not take it: said once, rather than fetching it again and again.
+                wantedText = null
+                say(subtitleFailedText)
+            } else {
+                loadSubtitle(text)
+            }
+            described.selectedText != text.id || C.TRACK_TYPE_TEXT in player.trackSelectionParameters.disabledTrackTypes -> {
+                described.handles[text.id]?.let { (group, index) ->
+                    params.setTrackTypeDisabled(C.TRACK_TYPE_TEXT, false).setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, index))
+                    changed = true
+                }
+            }
+        }
+        if (changed) player.trackSelectionParameters = params.build()
+    }
+
+    /** The TV cannot play this file (or its sound): Real-Debrid's converted (HLS) stream, once. */
+    fun switchToConverted(onUnavailable: () -> Unit) {
+        if (triedConverted) return onUnavailable()
+        triedConverted = true
+        val resumeAt = player.currentPosition
+        scope.launch {
+            val converted = session.playable.transcoded()
+            if (converted == null) {
+                onUnavailable()
+            } else {
+                mediaUri = converted
+                mediaIsHls = true
+                noAudioDismissed = false
+                // The converted stream has tracks of its own: the viewer's languages choose among them again.
+                tracksChosen = false
+                reloadMedia(resumeAt)
+                player.play()
+            }
+        }
     }
 
     DisposableEffect(player) {
@@ -238,40 +372,38 @@ fun PlayerScreen(
 
             override fun onCues(cueGroup: CueGroup) {
                 val text = cueGroup.cues.mapNotNull { it.text?.toString() }.joinToString("\n")
+                // Picture subtitles (Blu-ray PGS, DVD VobSub) come as bitmaps.
+                val pictures = cueGroup.cues.filter { it.bitmap != null }
                 if (subtitleDelayMs <= 0) {
                     cues = text
+                    bitmapCues = pictures
                 } else {
-                    pendingCues.addLast(player.currentPosition + subtitleDelayMs to text)
+                    pendingCues.addLast(Triple(player.currentPosition + subtitleDelayMs, text, pictures))
                     while (pendingCues.size > MAX_PENDING_CUES) pendingCues.removeFirst()
                 }
             }
 
             override fun onTracksChanged(newTracks: Tracks) {
                 tracks = newTracks
+                val described = describeTracks(newTracks, session.subtitles)
+                // Once per film: the tracks chosen for this file before, else the viewer's languages.
+                if (!tracksChosen && newTracks.groups.isNotEmpty()) {
+                    val memory = settings?.trackMemory(session.key)
+                    val audio = TrackChoice.pickAudio(described.infos, latestLanguages, memory)
+                    wantedAudio = audio?.key
+                    wantedText = TrackChoice.pickSubtitle(described.infos, latestLanguages, audio?.language, memory)?.key
+                    tracksChosen = true
+                }
+                applyWanted(described)
             }
 
             override fun onPlayerError(error: PlaybackException) {
                 // The TV cannot decode this file (often MKV with DTS or HEVC 10-bit): Real-Debrid's HLS stream, once.
-                if (!triedConverted) {
-                    triedConverted = true
-                    val resumeAt = player.currentPosition
-                    scope.launch {
-                        val converted = session.playable.transcoded()
-                        if (converted == null) {
-                            failed = true
-                        } else {
-                            player.setMediaItem(MediaItem.Builder().setUri(converted).setMimeType(MimeTypes.APPLICATION_M3U8).build(), resumeAt)
-                            player.prepare()
-                            player.play()
-                        }
-                    }
-                } else {
-                    failed = true
-                }
+                switchToConverted { failed = true }
             }
         }
         player.addListener(listener)
-        player.setMediaItem(MediaItem.fromUri(session.playable.url), session.startAtMs)
+        player.setMediaItem(MediaItem.fromUri(mediaUri), session.startAtMs)
         player.prepare()
         player.playWhenReady = true
         onDispose {
@@ -305,7 +437,7 @@ fun PlayerScreen(
                 sinceSave = 0
                 latestActions.onProgress(position, duration)
             }
-            if (playing && !showBookmarks && System.currentTimeMillis() - lastInteraction > HIDE_AFTER_MS) controlsVisible = false
+            if (playing && !showBookmarks && !showTracks && System.currentTimeMillis() - lastInteraction > HIDE_AFTER_MS) controlsVisible = false
         }
     }
     // Delayed subtitles come up when the film reaches their time.
@@ -314,9 +446,12 @@ fun PlayerScreen(
         while (true) {
             delay(CUE_TICK_MS)
             val now = player.currentPosition
-            var shown: String? = null
-            while (pendingCues.isNotEmpty() && pendingCues.first().first <= now) shown = pendingCues.removeFirst().second
-            if (shown != null) cues = shown
+            var shown: Triple<Long, String, List<Cue>>? = null
+            while (pendingCues.isNotEmpty() && pendingCues.first().first <= now) shown = pendingCues.removeFirst()
+            shown?.let {
+                cues = it.second
+                bitmapCues = it.third
+            }
         }
     }
     // The next file's countdown.
@@ -336,11 +471,12 @@ fun PlayerScreen(
         delay(TOAST_MS)
         toast = null
     }
-    LaunchedEffect(controlsVisible, failed, showBookmarks, nextCountdown >= 0) {
+    LaunchedEffect(controlsVisible, failed, showBookmarks, showTracks, nextCountdown >= 0) {
         withFrameNanos { }
         runCatching {
             when {
                 nextCountdown >= 0 -> nextFocus.requestFocus()
+                showTracks -> tracksFocus.requestFocus()
                 showBookmarks -> bookmarkListFocus.requestFocus()
                 controlsVisible || failed -> playPauseFocus.requestFocus()
                 else -> rootFocus.requestFocus()
@@ -352,6 +488,10 @@ fun PlayerScreen(
     fun back() {
         when {
             nextCountdown >= 0 -> nextCountdown = -1
+            showTracks -> {
+                showTracks = false
+                poke()
+            }
             showBookmarks -> {
                 showBookmarks = false
                 poke()
@@ -373,6 +513,11 @@ fun PlayerScreen(
         poke()
     }
 
+    val described = remember(tracks, session) { describeTracks(tracks, session.subtitles) }
+    val audioTracks = remember(described) { TrackChoice.ordered(described.infos, TrackKind.AUDIO) }
+    val textTracks = remember(described) { TrackChoice.ordered(described.infos, TrackKind.TEXT) }
+    val playingAudio = audioTracks.firstOrNull { it.id == described.selectedAudio }
+
     // OK held with the controls hidden marks the spot; a short press plays or pauses.
     var okDown by remember { mutableStateOf(false) }
     var okHeld by remember { mutableStateOf(false) }
@@ -388,7 +533,7 @@ fun PlayerScreen(
                     if (event.type == KeyEventType.KeyUp) back()
                     return@onPreviewKeyEvent true
                 }
-                val hidden = !controlsVisible && !showBookmarks && nextCountdown < 0
+                val hidden = !controlsVisible && !showBookmarks && !showTracks && nextCountdown < 0
                 if (hidden && (code == AndroidKeyEvent.KEYCODE_DPAD_CENTER || code == AndroidKeyEvent.KEYCODE_ENTER)) {
                     when (event.type) {
                         KeyEventType.KeyDown -> {
@@ -444,6 +589,7 @@ fun PlayerScreen(
                     .padding(horizontal = 12.dp, vertical = 4.dp),
             )
         }
+        if (bitmapCues.isNotEmpty()) BitmapSubtitles(bitmapCues, videoAspect)
         if (buffering && !failed) {
             BasicText(stringResource(R.string.player_loading), style = ScaryType.BodyStrong.copy(color = Color.White), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
         }
@@ -485,6 +631,52 @@ fun PlayerScreen(
                 )
             }
         }
+        // The file has sound, but none this TV can play (DTS or TrueHD only): said, instead of a silent film.
+        if (!noAudioDismissed && !failed && TrackChoice.noPlayableAudio(described.infos)) {
+            NoSoundCard(
+                format = described.infos.firstOrNull { it.kind == TrackKind.AUDIO }?.mimeType?.let(TrackNames::format),
+                canConvert = !triedConverted,
+                onConvert = { switchToConverted { say(convertFailedText) } },
+                onDismiss = { noAudioDismissed = true },
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 32.dp),
+            )
+        }
+        if (showTracks) {
+            TrackPicker(
+                state = TrackPickerState(
+                    audio = audioTracks,
+                    text = textTracks,
+                    selectedAudio = described.selectedAudio,
+                    selectedText = described.selectedText,
+                    loadingText = loadingSubtitle,
+                    prefs = languages,
+                ),
+                actions = TrackPickerActions(
+                    onAudio = { track ->
+                        wantedAudio = track.key
+                        applyWanted(described)
+                        settings?.let { it.rememberTracks(session.key, (it.trackMemory(session.key) ?: TrackMemory()).copy(audio = track.key)) }
+                    },
+                    onText = { track ->
+                        // "Off" still shows the forced subtitles of the language heard (they translate foreign passages).
+                        val chosen = track ?: TrackChoice.pickSubtitle(described.infos, languages, playingAudio?.language, TrackMemory(subtitlesOff = true))
+                        wantedText = chosen?.key
+                        applyWanted(described)
+                        settings?.let {
+                            val before = it.trackMemory(session.key) ?: TrackMemory()
+                            it.rememberTracks(session.key, before.copy(subtitle = track?.key, subtitlesOff = track == null))
+                        }
+                    },
+                    onPrefs = { prefs -> settings?.setLanguages(prefs) },
+                    onClose = {
+                        showTracks = false
+                        poke()
+                    },
+                ),
+                focusRequester = tracksFocus,
+                modifier = Modifier.align(Alignment.CenterEnd).padding(32.dp),
+            )
+        }
         if (showBookmarks) {
             BookmarkPanel(
                 bookmarks = bookmarks,
@@ -502,7 +694,7 @@ fun PlayerScreen(
                 modifier = Modifier.align(Alignment.CenterEnd).padding(32.dp),
             )
         }
-        AnimatedVisibility(visible = controlsVisible && !failed && !showBookmarks, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
+        AnimatedVisibility(visible = controlsVisible && !failed && !showBookmarks && !showTracks, enter = fadeIn(), exit = fadeOut(), modifier = Modifier.align(Alignment.BottomCenter)) {
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -518,6 +710,9 @@ fun PlayerScreen(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                     )
+                    audioSummary(playingAudio, audioTracks.indexOf(playingAudio))?.let {
+                        BasicText(it, style = ScaryType.Caption.copy(color = ScaryColors.Ash, textDirection = TextDirection.Content), maxLines = 1)
+                    }
                     InfoLine(position, duration, SPEEDS[speedIndex])
                 }
                 // Time runs left to right on the bar in every language, as left and right jump back and forward.
@@ -558,26 +753,15 @@ fun PlayerScreen(
                     ScaryButton(stringResource(R.string.player_close), onClick = latestActions.onClose)
                 }
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp), itemVerticalAlignment = Alignment.CenterVertically) {
-                    val audio = trackGroups(tracks, C.TRACK_TYPE_AUDIO)
-                    if (audio.size > 1) {
-                        ScaryButton(stringResource(R.string.player_audio, trackLabel(audio.getOrNull(audioIndex), stringResource(R.string.player_track_default))), onClick = {
-                            audioIndex = (audioIndex + 1) % audio.size
-                            select(player, audio[audioIndex])
-                            poke()
-                        })
+                    // Audio and subtitles: every track, its language, format and channels, in one window.
+                    if (audioTracks.size > 1 || textTracks.isNotEmpty()) {
+                        ScaryButton(
+                            stringResource(R.string.player_tracks),
+                            onClick = { showTracks = true },
+                            modifier = Modifier.testTag(PLAYER_TRACKS_BUTTON_TAG),
+                        )
                     }
-                    val text = trackGroups(tracks, C.TRACK_TYPE_TEXT)
-                    if (text.isNotEmpty()) {
-                        val off = stringResource(R.string.player_subtitles_off)
-                        ScaryButton(stringResource(R.string.player_subtitles, if (subtitleIndex < 0) off else trackLabel(text.getOrNull(subtitleIndex), off)), onClick = {
-                            subtitleIndex = if (subtitleIndex + 1 >= text.size) -1 else subtitleIndex + 1
-                            if (subtitleIndex < 0) {
-                                player.trackSelectionParameters = player.trackSelectionParameters.buildUpon().setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build()
-                            } else {
-                                select(player, text[subtitleIndex])
-                            }
-                            poke()
-                        })
+                    if (textTracks.isNotEmpty()) {
                         ScaryButton(
                             stringResource(R.string.player_subtitle_size, stringResource(SUBTITLE_SIZE_LABELS[subtitleSize])),
                             onClick = {
@@ -811,20 +995,137 @@ private fun NextFileCard(
     }
 }
 
-private fun trackGroups(tracks: Tracks, type: Int): List<Tracks.Group> = tracks.groups.filter { it.type == type && it.isSupported }
+/** The id a subtitle file of the torrent gets in the player, so its track is known again ("…x2"). */
+private const val EXTERNAL_PREFIX = "scary-sub-"
 
-/** A track's language (in the TV's language) or label, as the file names it. */
-private fun trackLabel(group: Tracks.Group?, fallback: String): String {
-    val format = group?.getTrackFormat(0) ?: return fallback
-    val language = format.language?.takeIf { it.isNotBlank() && it != C.LANGUAGE_UNDETERMINED }?.let { Locale.forLanguageTag(it).displayLanguage }
-    return format.label?.takeIf(String::isNotBlank) ?: language ?: fallback
+/**
+ * The player's tracks in plain values (core TrackInfo), each with the group and index to select it by, and which play
+ * now. Subtitle files of the torrent are listed whether fetched yet or not ("x<index>").
+ */
+class DescribedTracks(
+    val infos: List<TrackInfo>,
+    val handles: Map<String, Pair<Tracks.Group, Int>>,
+    val selectedAudio: String?,
+    val selectedText: String?,
+)
+
+@OptIn(UnstableApi::class)
+private fun describeTracks(tracks: Tracks, subtitles: List<RealDebrid.RdSubtitle>): DescribedTracks {
+    val infos = mutableListOf<TrackInfo>()
+    val handles = HashMap<String, Pair<Tracks.Group, Int>>()
+    var selectedAudio: String? = null
+    var selectedText: String? = null
+    val loaded = HashSet<String>()
+    tracks.groups.forEachIndexed { groupIndex, group ->
+        val kind = when (group.type) {
+            C.TRACK_TYPE_AUDIO -> TrackKind.AUDIO
+            C.TRACK_TYPE_TEXT -> TrackKind.TEXT
+            else -> return@forEachIndexed
+        }
+        for (index in 0 until group.length) {
+            val format = group.getTrackFormat(index)
+            // A subtitle file of the torrent, added by SCARY: known again by its place in the torrent.
+            val externalIndex = format.id?.substringAfter(EXTERNAL_PREFIX, "")?.toIntOrNull()?.takeIf { kind == TrackKind.TEXT }
+            val id = externalIndex?.let { "x$it" } ?: "g$groupIndex:$index"
+            // Subtitles parsed while the file is read keep their own format in "codecs".
+            val mime = if (format.sampleMimeType == MimeTypes.APPLICATION_MEDIA3_CUES) format.codecs else format.sampleMimeType
+            val info = TrackInfo.of(
+                kind = kind,
+                id = id,
+                language = format.language,
+                label = format.label,
+                mimeType = mime,
+                channels = format.channelCount.takeIf { it != Format.NO_VALUE } ?: 0,
+                isDefault = format.selectionFlags and C.SELECTION_FLAG_DEFAULT != 0,
+                isForced = format.selectionFlags and C.SELECTION_FLAG_FORCED != 0,
+                isCommentary = format.roleFlags and C.ROLE_FLAG_COMMENTARY != 0,
+                isDescription = format.roleFlags and C.ROLE_FLAG_DESCRIBES_VIDEO != 0,
+                isSdh = format.roleFlags and C.ROLE_FLAG_DESCRIBES_MUSIC_AND_SOUND != 0,
+                supported = group.isTrackSupported(index),
+                external = externalIndex != null,
+            )
+            infos += info
+            handles[id] = group to index
+            if (externalIndex != null) loaded += id
+            if (group.isTrackSelected(index)) {
+                if (kind == TrackKind.AUDIO) selectedAudio = id else selectedText = id
+            }
+        }
+    }
+    subtitles.forEachIndexed { index, subtitle ->
+        val id = "x$index"
+        if (id in loaded) return@forEachIndexed
+        infos += TrackInfo.of(
+            kind = TrackKind.TEXT,
+            id = id,
+            language = Languages.fromFileName(subtitle.name),
+            label = subtitle.name,
+            mimeType = SubtitleFiles.mimeType(subtitle.name),
+            external = true,
+        )
+    }
+    return DescribedTracks(infos, handles, selectedAudio, selectedText)
 }
 
-private fun select(player: Player, group: Tracks.Group) {
-    player.trackSelectionParameters = player.trackSelectionParameters.buildUpon()
-        .setTrackTypeDisabled(group.type, false)
-        .setOverrideForType(TrackSelectionOverride(group.mediaTrackGroup, 0))
-        .build()
+/**
+ * Picture subtitles (Blu-ray PGS, DVD VobSub) where the film places them, over the picture as it is fitted to the
+ * screen: each cue's position and size are fractions of the video frame.
+ */
+@Composable
+private fun BitmapSubtitles(cues: List<Cue>, videoAspect: Float) {
+    BoxWithConstraints(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        val screenAspect = if (maxHeight.value > 0) maxWidth.value / maxHeight.value else videoAspect
+        val frameWidth = if (videoAspect > screenAspect) maxWidth else maxHeight * videoAspect
+        val frameHeight = if (videoAspect > screenAspect) maxWidth / videoAspect else maxHeight
+        Box(Modifier.size(frameWidth, frameHeight)) {
+            cues.forEach { cue ->
+                val bitmap = cue.bitmap ?: return@forEach
+                val width = if (cue.size != Cue.DIMEN_UNSET) frameWidth * cue.size else frameWidth * 0.8f
+                val height = if (cue.bitmapHeight != Cue.DIMEN_UNSET) frameHeight * cue.bitmapHeight else width * (bitmap.height.toFloat() / bitmap.width.coerceAtLeast(1))
+                val anchorX = when (cue.positionAnchor) {
+                    Cue.ANCHOR_TYPE_MIDDLE -> width / 2
+                    Cue.ANCHOR_TYPE_END -> width
+                    else -> 0.dp
+                }
+                val anchorY = when (cue.lineAnchor) {
+                    Cue.ANCHOR_TYPE_MIDDLE -> height / 2
+                    Cue.ANCHOR_TYPE_END -> height
+                    else -> 0.dp
+                }
+                val x = if (cue.position != Cue.DIMEN_UNSET) frameWidth * cue.position - anchorX else (frameWidth - width) / 2
+                val y = if (cue.line != Cue.DIMEN_UNSET && cue.lineType == Cue.LINE_TYPE_FRACTION) frameHeight * cue.line - anchorY else frameHeight - height - frameHeight * 0.05f
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.offset(x, y).size(width, height),
+                )
+            }
+        }
+    }
+}
+
+/** "This TV can't play this film's sound (DTS)", with Real-Debrid's converted stream (it has sound) when not tried yet. */
+@Composable
+private fun NoSoundCard(format: String?, canConvert: Boolean, onConvert: () -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .widthIn(max = 620.dp)
+            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(12.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+            .padding(20.dp)
+            .testTag(PLAYER_NO_SOUND_TAG),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        BasicText(
+            if (format != null) stringResource(R.string.player_no_sound_format, format) else stringResource(R.string.player_no_sound),
+            style = ScaryType.BodyStrong,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Assertive },
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (canConvert) ScaryButton(stringResource(R.string.player_play_converted), onClick = onConvert, primary = true)
+            ScaryButton(stringResource(R.string.player_no_sound_dismiss), onClick = onDismiss)
+        }
+    }
 }
 
 private val SPEEDS = listOf(0.75f, 1f, 1.25f, 1.5f)

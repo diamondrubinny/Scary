@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.realdebrid
 
+import io.github.diamondrubinny.scary.core.player.SubtitleFiles
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -152,7 +153,12 @@ object RealDebrid {
         val direct: String? = null,
         /** The download id, for the transcoded stream (downloads only). */
         val downloadId: String? = null,
+        /** Subtitle files from the same torrent that go with this video, best first (core SubtitleFiles). */
+        val subtitles: List<RdSubtitle> = emptyList(),
     )
+
+    /** A subtitle file of the viewer's torrent: its name (with the language in it, often) and the link to fetch it. */
+    data class RdSubtitle(val name: String, val sizeBytes: Long, val link: String)
 
     /** The videos among the viewer's downloads, newest first as the API lists them. */
     fun parseDownloads(text: String): List<RdFile> = array(text)?.mapNotNull { item ->
@@ -189,7 +195,7 @@ object RealDebrid {
                 val file = f as? JsonObject ?: return@mapNotNull null
                 if (file.long("selected") != 1L) return@mapNotNull null
                 val path = file.str("path") ?: return@mapNotNull null
-                path.substringAfterLast('/') to (file.long("bytes")?.coerceAtLeast(0) ?: 0)
+                path.substringAfterLast('/').take(MAX_NAME) to (file.long("bytes")?.coerceAtLeast(0) ?: 0)
             }
         }
         if (selected == null || selected.size != torrent.links.size) {
@@ -199,8 +205,15 @@ object RealDebrid {
                 emptyList()
             }
         }
+        val names = selected.map { it.first }
+        val videos = names.count { isVideo(it, null) }
         return selected.mapIndexedNotNull { i, (name, bytes) ->
-            if (!isVideo(name, null)) null else RdFile("t:${torrent.id}:$i", name, bytes, torrent.links[i])
+            if (!isVideo(name, null)) return@mapIndexedNotNull null
+            // The subtitle files of the same torrent that go with this video, small enough to be subtitles.
+            val subtitles = SubtitleFiles.forVideo(name, names, videos)
+                .filter { selected[it].second in 1..SubtitleFiles.MAX_BYTES.toLong() }
+                .map { RdSubtitle(names[it], selected[it].second, torrent.links[it]) }
+            RdFile("t:${torrent.id}:$i", name, bytes, torrent.links[i], subtitles = subtitles)
         }
     }
 
@@ -231,6 +244,7 @@ object RealDebrid {
 
     private val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "mov", "webm", "ts", "m2ts", "wmv", "mpg", "mpeg")
     private const val MAX_LINKS = 500
+    private const val MAX_NAME = 255
 
     fun isVideo(name: String, mimeType: String?): Boolean =
         mimeType?.startsWith("video/") == true || name.substringAfterLast('.', "").lowercase() in VIDEO_EXTENSIONS

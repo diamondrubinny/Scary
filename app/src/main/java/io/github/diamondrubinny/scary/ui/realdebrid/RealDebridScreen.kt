@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.ui.player.LanguagePrefButtons
 import io.github.diamondrubinny.scary.ui.player.continueDetail
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.brand.Donation
@@ -68,6 +70,8 @@ class RealDebridActions(
     val onPlay: (RealDebrid.RdFile) -> Unit,
     val onContinue: (WatchEntry) -> Unit = {},
     val onClearHistory: () -> Unit = {},
+    /** The languages the player chooses by itself in every film. */
+    val onLanguages: (LanguagePrefs) -> Unit = {},
 )
 
 /**
@@ -76,7 +80,13 @@ class RealDebridActions(
  * videos. Choosing one plays it in the internal player.
  */
 @Composable
-fun RealDebridScreen(state: State, files: RdFilesState, actions: RealDebridActions, history: List<WatchEntry> = emptyList()) {
+fun RealDebridScreen(
+    state: State,
+    files: RdFilesState,
+    actions: RealDebridActions,
+    history: List<WatchEntry> = emptyList(),
+    languages: LanguagePrefs = LanguagePrefs(),
+) {
     val firstFocus = remember { FocusRequester() }
     // Leaving while waiting stops asking Real-Debrid: approving later would not reach the TV anyway.
     val waiting by rememberUpdatedState(state is State.Waiting)
@@ -121,6 +131,11 @@ fun RealDebridScreen(state: State, files: RdFilesState, actions: RealDebridActio
         }
         if (state is State.Waiting) {
             WaitingForCode(state, narrow)
+        }
+        if (state is State.SignedIn) {
+            // The player's languages, for every film: also in the player's "Audio and subtitles" window.
+            BasicText(stringResource(R.string.tracks_every_film), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { LanguagePrefButtons(languages, actions.onLanguages) }
         }
         if (state is State.SignedIn && history.isNotEmpty()) {
             // Where the viewer stopped, and the spots they marked: on this TV only.

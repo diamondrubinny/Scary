@@ -65,6 +65,7 @@ import io.github.diamondrubinny.scary.core.stremio.StremioItem
 import io.github.diamondrubinny.scary.core.stremio.Stremio
 import io.github.diamondrubinny.scary.data.WatchStore
 import io.github.diamondrubinny.scary.core.player.WatchHistory
+import io.github.diamondrubinny.scary.core.player.LanguagePrefs
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.data.RegionDetector
 import io.github.diamondrubinny.scary.data.SavedMoviesRepository
@@ -220,6 +221,13 @@ class HomeViewModel(
 
     /** The internal player's watch history (resume spots and bookmarks), kept on this TV only. */
     val watchHistory: StateFlow<List<WatchEntry>> = watchStore?.entries ?: MutableStateFlow(emptyList())
+
+    /** The languages the internal player chooses by itself (English unless the viewer changes them). */
+    val playerLanguages: StateFlow<LanguagePrefs> = watchStore?.languages ?: MutableStateFlow(LanguagePrefs())
+
+    fun setPlayerLanguages(prefs: LanguagePrefs) {
+        watchStore?.setLanguages(prefs)
+    }
 
     /** The viewer's Stremio library as last read (empty when not connected). */
     val stremioLibrary: StateFlow<List<StremioItem>> = stremio?.library ?: MutableStateFlow(emptyList())
@@ -1197,7 +1205,7 @@ class HomeViewModel(
             val next = (repository.files() as? RealDebridRepository.Files.Ready)?.files?.let { files ->
                 WatchHistory.nextInTorrent(file.key, files.map { it.key })?.let { key -> files.firstOrNull { it.key == key } }
             }
-            val session = PlayerSession(file.key, playable, movieId, startAtMs, next)
+            val session = PlayerSession(file.key, playable, movieId, startAtMs, next, file.subtitles, repository::subtitleFile)
             val replacing = _player.value != null
             _player.value = session
             if (!replacing) push(Screen.Player)

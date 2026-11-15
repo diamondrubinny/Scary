@@ -7,6 +7,8 @@ package io.github.diamondrubinny.scary.data
 import android.os.SystemClock
 import android.util.Log
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.player.Languages
+import io.github.diamondrubinny.scary.core.player.SubtitleFiles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import kotlinx.coroutines.CoroutineScope
@@ -28,10 +30,12 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.put
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.security.MessageDigest
 
 /**
  * The viewer's own Real-Debrid account, only if they connect it (docs/INTERNAL_PLAYER_PLAN.md): SCARY lists the videos
@@ -43,7 +47,11 @@ import java.net.URL
  * encrypted (SecretStore, Android Keystore), sent only to api.real-debrid.com, never logged. Download links carry access
  * too, so they are never stored or logged either. Requests stay well under Real-Debrid's limit of 250 a minute.
  */
-class RealDebridRepository(private val secrets: SecretStore) {
+class RealDebridRepository(
+    private val secrets: SecretStore,
+    /** Where subtitle files from the viewer's torrents are kept as UTF-8 text while they are in use; none in tests. */
+    private val subtitlesDir: File? = null,
+) {
     sealed interface State {
         data object SignedOut : State
 
@@ -239,6 +247,70 @@ class RealDebridRepository(private val secrets: SecretStore) {
         }
     }
 
+    /**
+     * A subtitle file of the viewer's torrent as UTF-8 text on the TV, whatever its own encoding (core SubtitleFiles):
+     * fetched through Real-Debrid like the film, checked for size and form, and kept for the next time (up to
+     * [MAX_SUBTITLE_FILES]). Null when it cannot be fetched or does not read as subtitles. Never run, only read.
+     */
+    suspend fun subtitleFile(subtitle: RealDebrid.RdSubtitle): File? = withContext(Dispatchers.IO) {
+        val dir = subtitlesDir ?: return@withContext null
+        val mimeType = SubtitleFiles.mimeType(subtitle.name) ?: return@withContext null
+        val extension = subtitle.name.substringAfterLast('.').lowercase()
+        val file = File(dir, sha256(subtitle.link) + "." + extension)
+        if (file.isFile && file.length() > 0) return@withContext file.also { it.setLastModified(System.currentTimeMillis()) }
+        val unrestricted = call("POST", RealDebrid.UNRESTRICT_URL, RealDebrid.unrestrictForm(subtitle.link))?.takeIf { it.ok }?.body
+            ?.let(RealDebrid::parseUnrestricted) ?: return@withContext null
+        val bytes = download(unrestricted.url) ?: return@withContext null
+        val text = SubtitleFiles.decode(bytes, mimeType, Languages.fromFileName(subtitle.name)) ?: return@withContext null
+        try {
+            dir.mkdirs()
+            dir.listFiles()?.sortedByDescending { it.lastModified() }?.drop(MAX_SUBTITLE_FILES - 1)?.forEach { it.delete() }
+            val tmp = File(dir, file.name + ".tmp")
+            tmp.writeText(text, Charsets.UTF_8)
+            if (!tmp.renameTo(file)) {
+                tmp.delete()
+                return@withContext null
+            }
+            file
+        } catch (e: IOException) {
+            Log.w(TAG, "Could not keep a subtitle file: ${e.javaClass.simpleName}")
+            null
+        }
+    }
+
+    /** A Real-Debrid download link's content, up to SubtitleFiles.MAX_BYTES; null for anything else. */
+    private fun download(url: String): ByteArray? {
+        if (!RealDebrid.isPlayableUrl(url)) return null
+        var connection: HttpURLConnection? = null
+        return try {
+            connection = (URL(url).openConnection() as HttpURLConnection).apply {
+                connectTimeout = TIMEOUT_MS
+                readTimeout = TIMEOUT_MS
+                instanceFollowRedirects = false
+            }
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) return null
+            connection.inputStream.use { stream ->
+                val out = java.io.ByteArrayOutputStream()
+                val buffer = ByteArray(16 * 1024)
+                while (true) {
+                    val n = stream.read(buffer)
+                    if (n < 0) break
+                    out.write(buffer, 0, n)
+                    if (out.size() > SubtitleFiles.MAX_BYTES) return null
+                }
+                out.toByteArray()
+            }
+        } catch (e: IOException) {
+            Log.w(TAG, "Subtitle download failed: ${e.javaClass.simpleName}")
+            null
+        } finally {
+            connection?.disconnect()
+        }
+    }
+
+    private fun sha256(text: String): String =
+        MessageDigest.getInstance("SHA-256").digest(text.toByteArray()).joinToString("") { "%02x".format(it) }.take(32)
+
     // HTTP --------------------------------------------------------------------------------------------------------------
 
     private class Answer(val code: Int, val body: String?, val total: Int?) {
@@ -341,5 +413,6 @@ class RealDebridRepository(private val secrets: SecretStore) {
         const val CACHE_MS = 5 * 60_000L
         const val BACKOFF_MS = 2 * 60_000L
         const val HTTP_TOO_MANY_REQUESTS = 429
+        const val MAX_SUBTITLE_FILES = 30
     }
 }
