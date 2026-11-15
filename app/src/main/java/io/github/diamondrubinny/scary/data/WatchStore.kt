@@ -6,6 +6,10 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import androidx.core.content.edit
+import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.core.player.Languages
+import io.github.diamondrubinny.scary.core.player.TrackChoice
+import io.github.diamondrubinny.scary.core.player.TrackMemory
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.player.WatchHistory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * The internal player's watch history (core [WatchHistory]): where the viewer stopped in each of their Real-Debrid
  * files and the spots they marked. Kept on this TV only (excluded from backups like everything else), by the file's
  * key in the account, never its link; nothing of it leaves the TV. Also the player's own settings (subtitle size,
- * picture, night sound), which outlast a film.
+ * picture, night sound, the languages to choose), which outlast a film, and the tracks chosen for each file.
  */
 class WatchStore(context: Context) {
     private val prefs = context.getSharedPreferences("player_history", Context.MODE_PRIVATE)
@@ -36,11 +40,49 @@ class WatchStore(context: Context) {
         prefs.edit { putString(HISTORY, WatchHistory.encode(after)) }
     }
 
-    /** "Clear watch history", and signing out of Real-Debrid. */
+    /** "Clear watch history", and signing out of Real-Debrid: the tracks chosen per file go with it. */
     @Synchronized
     fun clear() {
         _entries.value = emptyList()
-        prefs.edit { remove(HISTORY) }
+        memories.clear()
+        prefs.edit {
+            remove(HISTORY)
+            remove(TRACK_MEMORY)
+        }
+    }
+
+    private val _languages = MutableStateFlow(readLanguages())
+
+    /** The languages the player chooses by itself in every file (core LanguagePrefs): English unless changed. */
+    val languages: StateFlow<LanguagePrefs> = _languages.asStateFlow()
+
+    fun setLanguages(value: LanguagePrefs) {
+        _languages.value = value
+        prefs.edit {
+            // "" keeps the file's default audio, or subtitles off.
+            putString(AUDIO_LANGUAGE, value.audio.orEmpty())
+            putString(SUBTITLE_LANGUAGE, value.subtitles.orEmpty())
+        }
+    }
+
+    private fun readLanguages(): LanguagePrefs {
+        fun read(key: String): String? = if (prefs.contains(key)) Languages.normalize(prefs.getString(key, null)) else LanguagePrefs.DEFAULT_LANGUAGE
+        return LanguagePrefs(audio = read(AUDIO_LANGUAGE), subtitles = read(SUBTITLE_LANGUAGE))
+    }
+
+    private val memories: LinkedHashMap<String, TrackMemory> by lazy { TrackChoice.decodeAll(prefs.getString(TRACK_MEMORY, null)) }
+
+    /** The tracks the viewer chose for one file, if they changed any. */
+    @Synchronized
+    fun trackMemory(fileKey: String): TrackMemory? = memories[fileKey]
+
+    @Synchronized
+    fun rememberTracks(fileKey: String, memory: TrackMemory) {
+        if (!WatchHistory.isValidKey(fileKey)) return
+        memories.remove(fileKey)
+        memories[fileKey] = memory
+        while (memories.size > TrackChoice.MAX_FILES) memories.remove(memories.keys.first())
+        prefs.edit { putString(TRACK_MEMORY, TrackChoice.encodeAll(memories)) }
     }
 
     var subtitleSize: Int
@@ -79,6 +121,9 @@ class WatchStore(context: Context) {
         const val SUBTITLE_SIZE = "subtitle_size"
         const val PICTURE = "picture"
         const val NIGHT_SOUND = "night_sound"
+        const val AUDIO_LANGUAGE = "audio_language"
+        const val SUBTITLE_LANGUAGE = "subtitle_language"
+        const val TRACK_MEMORY = "track_memory"
         const val LEGACY_STAMP = "at:"
     }
 }

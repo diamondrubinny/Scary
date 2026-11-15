@@ -5,6 +5,16 @@
 package io.github.diamondrubinny.scary
 
 import android.view.KeyEvent
+import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.isSelected
+import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.core.player.SubtitleFiles
+import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
+import io.github.diamondrubinny.scary.ui.player.PLAYER_SUBTITLES_OFF_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_TRACKS_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.player.PLAYER_TRACKS_TAG
+import io.github.diamondrubinny.scary.ui.player.trackTag
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -152,6 +162,79 @@ class PlayerTest {
         }
     }
 
+    /**
+     * "Audio and subtitles": an MKV with English and Hebrew audio and subtitles plays English by itself (the default
+     * languages); the window lists every track, switches to the Hebrew dub, adds the torrent's Hebrew subtitle file
+     * (Windows-1255, read as Hebrew) and turns subtitles off; Back closes the window, not the film; the choice is kept
+     * for the file.
+     */
+    @Test
+    fun theTrackWindowSwitchesAudioAndSubtitlesAndRemembersThem() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        val context = InstrumentationRegistry.getInstrumentation().context
+        val clip = File(rule.activity.cacheDir, "tracks.mkv")
+        context.assets.open("tracks.mkv").use { input -> clip.outputStream().use(input::copyTo) }
+        val subtitleBytes = context.assets.open("tracks-he-1255.srt").use { it.readBytes() }
+        val container = (rule.activity.application as ScaryApplication).container
+        container.watchStore.setLanguages(LanguagePrefs())
+        val vm = viewModel()
+        val session = PlayerSession(
+            key = "d:TESTTRACKS",
+            playable = RealDebridRepository.Playable(clip.toURI().toString(), "Tracks") { null },
+            movieId = null,
+            startAtMs = 0L,
+            subtitles = listOf(RealDebrid.RdSubtitle("Tracks.heb.srt", subtitleBytes.size.toLong(), "https://real-debrid.com/d/TESTSUB")),
+            // As the repository does: the file read in its own encoding, kept as UTF-8.
+            fetchSubtitle = { subtitle ->
+                SubtitleFiles.decode(subtitleBytes, SubtitleFiles.mimeType(subtitle.name), "he")?.let { text ->
+                    File(rule.activity.cacheDir, "tracks-he-utf8.srt").apply { writeText(text) }
+                }
+            },
+        )
+        fun row(text: String) = hasContentDescription(text, substring = true) and hasAnyAncestor(hasTestTag(PLAYER_TRACKS_TAG))
+        try {
+            rule.runOnUiThread { vm.playForTest(session) }
+            waitFor(hasTestTag(PLAYER_TAG))
+            waitFor(hasText(text(R.string.player_pause)))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            waitFor(hasText(text(R.string.player_play)))
+            waitFor(hasTestTag(PLAYER_TRACKS_BUTTON_TAG))
+            rule.onNode(hasTestTag(PLAYER_TRACKS_BUTTON_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_TRACKS_TAG))
+
+            // English audio (stereo) and English subtitles, by themselves.
+            waitFor(row(text(R.string.track_stereo)) and isSelected())
+            waitFor(row("Hebrew dub"))
+            rule.onNode(hasTestTag(trackTag("x0"))).assertExists()
+            // The Hebrew dub, 5.1.
+            rule.onNode(row("Hebrew dub")).performScrollTo().performClick()
+            waitFor(row("Hebrew dub") and row("5.1") and isSelected())
+            // The torrent's subtitle file: fetched, read as Hebrew, and shown.
+            rule.onNode(hasTestTag(trackTag("x0"))).performScrollTo().performClick()
+            waitFor(hasTestTag(trackTag("x0")) and isSelected(), LONG_TIMEOUT_MS)
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PLAY)
+            waitFor(hasText("שלום מקובץ הכתוביות"), LONG_TIMEOUT_MS)
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            // Off.
+            rule.onNode(hasTestTag(PLAYER_SUBTITLES_OFF_TAG)).performScrollTo().performClick()
+            waitFor(hasTestTag(PLAYER_SUBTITLES_OFF_TAG) and isSelected())
+
+            // Back closes the window, not the film.
+            rule.waitForIdle()
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TRACKS_TAG)).fetchSemanticsNodes().isEmpty() }
+            rule.onNode(hasTestTag(PLAYER_TAG)).assertExists()
+            val memory = container.watchStore.trackMemory("d:TESTTRACKS")
+            assertTrue("Hebrew audio kept for the file: $memory", memory?.audio?.contains("|he|") == true)
+            assertTrue("Subtitles off kept for the file: $memory", memory?.subtitlesOff == true)
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+        } finally {
+            rule.runOnUiThread { vm.clearWatchHistory() }
+            container.watchStore.setLanguages(LanguagePrefs())
+        }
+    }
+
     @Test
     fun aFileThatCannotPlaySaysSoAndCloses() {
         waitFor(hasTestTag(HOME_ROWS_TAG))
@@ -193,5 +276,6 @@ class PlayerTest {
 
     private companion object {
         const val TIMEOUT_MS = 20_000L
+        const val LONG_TIMEOUT_MS = 40_000L
     }
 }

@@ -138,7 +138,7 @@ class AppContainer(context: Context) {
     /** The viewer's own Stremio account, only if they connect it (library sync; never add-ons or streams). */
     val stremio = io.github.diamondrubinny.scary.data.StremioRepository(appContext, secretStore, settingsRepository)
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
-    val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore)
+    val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore, java.io.File(appContext.cacheDir, "subtitles"))
 
     /** Where the viewer stopped in each of their files and the spots they marked, kept on this TV only. */
     val watchStore = io.github.diamondrubinny.scary.data.WatchStore(appContext)

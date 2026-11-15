@@ -278,6 +278,10 @@ class PlayerSession(
     val startAtMs: Long,
     /** The file after this one in the same torrent (a series, a film in parts), offered at the end. */
     val next: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile? = null,
+    /** Subtitle files from the same torrent, offered with the file's own subtitles. */
+    val subtitles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdSubtitle> = emptyList(),
+    /** Fetches one of [subtitles] as a UTF-8 file on the TV; null when it cannot be read. */
+    val fetchSubtitle: suspend (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdSubtitle) -> java.io.File? = { null },
 )
 
 /** A file with a spot saved: play it from there, or from the start? */
