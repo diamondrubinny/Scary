@@ -26,14 +26,28 @@ object HealthLog {
     private const val FREEZE = "last_freeze"
     private const val FREEZES = "freezes"
     private const val ONLINE = "online"
+    private const val REFRESH = "refresh"
     private const val OWN_PACKAGE = "io.github.diamondrubinny.scary"
     private const val FRAMES = 4
 
-    data class Report(val crash: String?, val freeze: String?, val freezes: Int, val online: String?)
+    data class Report(
+        val crash: String?,
+        val freeze: String?,
+        val freezes: Int,
+        val online: String?,
+        /** "15.11 10:30 · 28/30 · 70/70": pages of the online rows, then of the categories, loaded of those asked for. */
+        val refresh: String? = null,
+    )
 
     fun read(context: Context): Report {
         val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
-        return Report(prefs.getString(CRASH, null), prefs.getString(FREEZE, null), prefs.getInt(FREEZES, 0), prefs.getString(ONLINE, null))
+        return Report(
+            prefs.getString(CRASH, null),
+            prefs.getString(FREEZE, null),
+            prefs.getInt(FREEZES, 0),
+            prefs.getString(ONLINE, null),
+            prefs.getString(REFRESH, null),
+        )
     }
 
     fun clear(context: Context) = context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { clear() }
@@ -49,6 +63,13 @@ object HealthLog {
     fun recordOnline(context: Context, ok: Boolean, problem: String?) {
         val line = if (ok) "${stamp()} · OK" else "${stamp()} · ${problem ?: "failed"}"
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(ONLINE, line) }
+    }
+
+    /** The last refresh of the online rows: how many of their pages loaded, and of the categories' pool (once filled). */
+    fun recordRefresh(context: Context, rowsLoaded: Int, rowsTotal: Int, categoriesLoaded: Int?, categoriesTotal: Int?) {
+        val categories = if (categoriesLoaded != null && categoriesTotal != null) " · $categoriesLoaded/$categoriesTotal" else ""
+        val line = "${stamp()} · $rowsLoaded/$rowsTotal$categories"
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(REFRESH, line) }
     }
 
     private fun recordFreeze(context: Context, seconds: Float, frames: Array<StackTraceElement>) {

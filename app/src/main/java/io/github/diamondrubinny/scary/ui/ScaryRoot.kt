@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -109,7 +110,11 @@ import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryTheme
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
+import io.github.diamondrubinny.scary.ui.trailer.LocalTrailerPool
+import io.github.diamondrubinny.scary.ui.components.LocalVoiceRequest
+import io.github.diamondrubinny.scary.ui.components.VoiceRequest
 import io.github.diamondrubinny.scary.ui.trailer.TrailerIntroDialog
+import io.github.diamondrubinny.scary.ui.trailer.TrailerPool
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 import io.github.diamondrubinny.scary.ui.update.UpdateActions
 import io.github.diamondrubinny.scary.ui.update.UpdateDialog
@@ -117,6 +122,21 @@ import io.github.diamondrubinny.scary.update.UpdateState
 
 @Composable
 fun ScaryRoot(viewModel: HomeViewModel) {
+    // One WebView goes from trailer to trailer instead of a new one for each movie, and never outlives this screen.
+    val trailerPool = remember { TrailerPool() }
+    DisposableEffect(trailerPool) {
+        onDispose { trailerPool.clear() }
+    }
+    // The remote's search or microphone key: the text field on screen (Ask SCARY, search) starts dictation.
+    val voiceRequested by viewModel.voiceRequested.collectAsStateWithLifecycle()
+    val voiceRequest = remember(voiceRequested) { VoiceRequest(voiceRequested, viewModel::voiceHandled) }
+    CompositionLocalProvider(LocalTrailerPool provides trailerPool, LocalVoiceRequest provides voiceRequest) {
+        ScaryScreens(viewModel)
+    }
+}
+
+@Composable
+private fun ScaryScreens(viewModel: HomeViewModel) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val screen by viewModel.screen.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()

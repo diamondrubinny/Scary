@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -44,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.data.TmdbKeyResult
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
@@ -99,10 +99,9 @@ fun TmdbKeyDialog(
                         style = ScaryType.Body.copy(color = ScaryColors.Ash),
                     )
                 }
-                BasicTextField(
+                ScaryTextField(
                     value = input,
                     onValueChange = { input = it.take(MAX_INPUT) },
-                    singleLine = true,
                     // Keys are Latin: keep them left to right even in the Hebrew layout.
                     textStyle = ScaryType.BodyStrong.copy(textDirection = TextDirection.Ltr),
                     cursorBrush = SolidColor(ScaryColors.Candle),

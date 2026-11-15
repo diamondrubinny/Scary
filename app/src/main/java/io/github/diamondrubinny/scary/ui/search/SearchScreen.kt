@@ -4,11 +4,13 @@
 
 package io.github.diamondrubinny.scary.ui.search
 
+import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.ui.theme.paneWidth
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
 import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiPicks
 import io.github.diamondrubinny.scary.ui.ai.AiStatus
+import io.github.diamondrubinny.scary.ui.components.VoiceRequestEffect
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
 
 import android.app.Activity
@@ -37,7 +39,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -163,6 +164,8 @@ fun SearchScreen(
         val spoken = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()?.trim()
         if (result.resultCode == Activity.RESULT_OK && !spoken.isNullOrEmpty()) onQueryChange(spoken)
     }
+    // The remote's search or microphone key: dictation goes straight into the search.
+    VoiceRequestEffect(voiceAvailable) { voiceLauncher.launch(speechIntent) }
 
     val returnFocus = remember { FocusRequester() }
     val firstResultFocus = remember { FocusRequester() }
@@ -198,10 +201,9 @@ fun SearchScreen(
                     if (query.isEmpty()) {
                         BasicText(stringResource(R.string.search_hint), style = ScaryType.Body.copy(color = ScaryColors.Ash))
                     }
-                    BasicTextField(
+                    ScaryTextField(
                         value = query,
                         onValueChange = onQueryChange,
-                        singleLine = true,
                         textStyle = ScaryType.BodyStrong.copy(fontSize = ScaryType.Title.fontSize),
                         cursorBrush = SolidColor(ScaryColors.Candle),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),

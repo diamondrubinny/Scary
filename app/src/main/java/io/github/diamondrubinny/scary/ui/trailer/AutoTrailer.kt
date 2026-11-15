@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.ui.trailer
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -39,6 +40,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
@@ -49,6 +51,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.createBitmap
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
@@ -225,6 +228,7 @@ private fun TrailerWebView(
     val latestOnMessage by rememberUpdatedState(onMessage)
     val latestOnPaused by rememberUpdatedState(onPaused)
     val holder = remember { arrayOfNulls<WebView>(1) }
+    val pool = LocalTrailerPool.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     DisposableEffect(lifecycle) {
         val observer = LifecycleEventObserver { _, event ->
@@ -241,12 +245,13 @@ private fun TrailerWebView(
     }
     AndroidView(
         factory = { context ->
-            TrailerWebViews.create(context, videoId, host, muted) { latestOnMessage(it) }?.also { holder[0] = it }
+            (pool?.take(context, videoId, host, muted) { latestOnMessage(it) }
+                ?: TrailerWebViews.create(context, videoId, host, muted) { latestOnMessage(it) })?.also { holder[0] = it }
                 ?: View(context).also { view -> view.post { latestOnMessage(TrailerEvent.ERROR.wire) } }
         },
         onRelease = { view ->
             holder[0] = null
-            (view as? WebView)?.let(TrailerWebViews::release)
+            (view as? WebView)?.let { web -> if (pool == null || !pool.keep(web)) TrailerWebViews.release(web) }
         },
         modifier = modifier,
     )
@@ -261,12 +266,28 @@ private object TrailerWebViews {
 
     // JavaScript: the page is SCARY's own (TrailerEmbed), and the YouTube player needs it. The bridge (below) takes
     // four words and nothing else.
+    /** Where a WebView's messages go: the trailer showing in it now, none while it waits in a [TrailerPool]. */
+    class Sink {
+        var target: ((String) -> Unit)? = null
+
+        /** The renderer stopped: this WebView is never used again. */
+        var broken = false
+
+        fun send(message: String) {
+            target?.invoke(message)
+        }
+    }
+
+    fun sinkOf(web: WebView): Sink? = web.tag as? Sink
+
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface", "AddJavascriptInterface")
     fun create(context: Context, videoId: String, host: TrailerHost, muted: Boolean, onMessage: (String) -> Unit): WebView? {
         if (!available) return null
         var web: WebView? = null
         return try {
             val view = WebView(context).also { web = it }
+            val sink = Sink().also { it.target = onMessage }
+            view.tag = sink
             val version = WebViewCompat.getCurrentWebViewPackage(context)?.versionName ?: "?"
             // Only SCARY's own page, in the main frame, may report, and only the four events it knows. Older WebViews
             // (many TVs never update theirs) lack the listener: a plain bridge then carries the same words. Any frame
@@ -274,11 +295,11 @@ private object TrailerWebViews {
             // player.
             if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_MESSAGE_LISTENER)) {
                 WebViewCompat.addWebMessageListener(view, TrailerEmbed.CHANNEL, setOf(TrailerEmbed.ORIGIN)) { _, message, _, isMainFrame, _ ->
-                    message.data?.takeIf { isMainFrame }?.let(onMessage)
+                    message.data?.takeIf { isMainFrame }?.let(sink::send)
                 }
                 TrailerDiagnostics.loading("WebView $version")
             } else {
-                view.addJavascriptInterface(TrailerBridge(onMessage), TrailerEmbed.CHANNEL)
+                view.addJavascriptInterface(TrailerBridge(sink::send), TrailerEmbed.CHANNEL)
                 TrailerDiagnostics.loading("WebView $version (bridge)")
             }
             view.setBackgroundColor(Color.BLACK)
@@ -303,7 +324,10 @@ private object TrailerWebViews {
                 setAcceptCookie(false)
                 setAcceptThirdPartyCookies(view, false)
             }
-            view.webViewClient = TrailerClient(onMessage)
+            view.webViewClient = TrailerClient {
+                sink.broken = true
+                sink.send(it)
+            }
             val debuggable = context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
             view.webChromeClient = object : WebChromeClient() {
                 // No grey "play" placeholder while the video loads.
@@ -326,13 +350,92 @@ private object TrailerWebViews {
         }
     }
 
+    /** Closes a trailer for good: the page stops, the WebView is destroyed and the player's storage deleted. */
     fun release(web: WebView) {
+        sinkOf(web)?.target = null
         web.stopLoading()
         web.webChromeClient = null
         web.destroy()
         WebStorage.getInstance().deleteAllData()
     }
 }
+
+/**
+ * The WebView of the last trailer, emptied, waiting for the next one: creating and destroying one for every movie the
+ * focus rests on is heavy on a TV's main thread, and the remote's presses pile up behind it (core KeyBacklog). One per
+ * screen (ScaryRoot), so it never outlives it; the waiting WebView also goes when SCARY leaves the screen, so none is
+ * kept while another app runs. Main thread only.
+ */
+class TrailerPool {
+    private var spare: WebView? = null
+    private var observer: Pair<Lifecycle, LifecycleEventObserver>? = null
+
+    /** The waiting WebView, loaded with [videoId], when it belongs to this screen ([context]) and still works. */
+    fun take(context: Context, videoId: String, host: TrailerHost, muted: Boolean, onMessage: (String) -> Unit): WebView? {
+        val view = spare ?: return null
+        spare = null
+        val sink = TrailerWebViews.sinkOf(view)
+        if (view.context !== context || sink == null || sink.broken) {
+            TrailerWebViews.release(view)
+            return null
+        }
+        sink.target = onMessage
+        view.onResume()
+        TrailerDiagnostics.loading(TrailerDiagnostics.webViewDescription)
+        view.loadDataWithBaseURL(TrailerEmbed.BASE_URL, TrailerEmbed.html(videoId, muted, host), "text/html", "utf-8", null)
+        return view
+    }
+
+    /**
+     * Keeps [web] for the next trailer, emptied, with the player's storage deleted as when it closed before. False when
+     * it cannot be kept (one is already waiting, its renderer stopped, or SCARY is not on screen): the caller destroys it.
+     */
+    fun keep(web: WebView): Boolean {
+        val sink = TrailerWebViews.sinkOf(web)
+        val lifecycle = lifecycleOf(web.context)
+        if (sink == null || sink.broken || spare != null || lifecycle == null || !lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+            return false
+        }
+        sink.target = null
+        web.stopLoading()
+        (web.parent as? ViewGroup)?.removeView(web)
+        web.loadUrl("about:blank")
+        web.onPause()
+        WebStorage.getInstance().deleteAllData()
+        spare = web
+        if (observer?.first !== lifecycle) {
+            dropObserver()
+            val stop = LifecycleEventObserver { _, event -> if (event == Lifecycle.Event.ON_STOP) clear() }
+            lifecycle.addObserver(stop)
+            observer = lifecycle to stop
+        }
+        return true
+    }
+
+    /** Destroys the waiting WebView: SCARY left the screen, or the screen itself is going. */
+    fun clear() {
+        spare?.let(TrailerWebViews::release)
+        spare = null
+        dropObserver()
+    }
+
+    private fun dropObserver() {
+        observer?.let { (lifecycle, stop) -> lifecycle.removeObserver(stop) }
+        observer = null
+    }
+
+    private fun lifecycleOf(context: Context): Lifecycle? {
+        var current: Context? = context
+        while (current != null) {
+            if (current is LifecycleOwner) return current.lifecycle
+            current = (current as? ContextWrapper)?.baseContext
+        }
+        return null
+    }
+}
+
+/** The screen's [TrailerPool]; without one, every trailer gets a WebView of its own, as before. */
+val LocalTrailerPool = staticCompositionLocalOf<TrailerPool?> { null }
 
 // onRenderProcessGone is right below; androidx.webkit's lint check does not see overrides in Kotlin classes.
 @SuppressLint("MissingOnRenderProcessGone")
@@ -381,6 +484,9 @@ object TrailerDiagnostics {
     /** Whether YouTube's player said it was ready for the trailer now loading. */
     var wasReady = false
         private set
+
+    /** The WebView last described, for a reused one. */
+    val webViewDescription: String get() = webView
 
     fun loading(webViewDescription: String) {
         webView = webViewDescription

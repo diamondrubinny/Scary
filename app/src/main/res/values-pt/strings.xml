@@ -700,6 +700,7 @@
     <string name="diag_crash">Último travamento: %1$s</string>
     <string name="diag_freeze">Congelamentos: %2$d · último: %1$s</string>
     <string name="diag_online">Filmes da internet: %1$s</string>
+    <string name="diag_refresh">Última atualização (páginas carregadas: fileiras · categorias): %1$s</string>
     <string name="diag_none">Nenhum travamento ou congelamento registrado.</string>
     <string name="diag_clear">Limpar diagnóstico</string>
 </resources>

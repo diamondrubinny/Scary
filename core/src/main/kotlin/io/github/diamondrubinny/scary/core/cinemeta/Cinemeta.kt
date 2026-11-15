@@ -382,6 +382,25 @@ object Cinemeta {
     /** The collection id an online row gets in the merged catalog. */
     fun onlineCollectionId(rowId: String): String = "online_$rowId"
 
+    /**
+     * Today's online rows, in [order], where a row with a failed page ([failed], by row id) keeps what it had before:
+     * today's films first, then yesterday's that today's pages did not bring (up to [MAX_ROW_MOVIES]). A weak network
+     * leaves rows as they were instead of short or missing for a day.
+     */
+    fun keepPrevious(order: List<String>, fresh: List<OnlineRow>, previous: List<OnlineRow>?, failed: Set<String>): List<OnlineRow> {
+        val today = fresh.associateBy { it.id }
+        val before = previous.orEmpty().associateBy { it.id }
+        return order.mapNotNull { id ->
+            val now = today[id]
+            val old = before[id]
+            when {
+                id !in failed || old == null -> now
+                now == null -> old
+                else -> now.copy(metas = (now.metas + old.metas).distinctBy { it.imdbId }.take(MAX_ROW_MOVIES))
+            }
+        }
+    }
+
     fun merge(base: Catalog, metas: Map<String, CinemetaMeta>, rows: List<OnlineRow>, perRow: Int = MAX_ROW_MOVIES): Catalog {
         val curated = base.movies.map { m -> metas[m.imdbId]?.let { enrich(m, it) } ?: m }
         val byImdb = curated.associateBy { it.imdbId }.toMutableMap()
@@ -412,6 +431,12 @@ object Cinemeta {
     }
 }
 
+/** How many pages of a refresh loaded, out of how many were asked for. */
+@Serializable
+data class PageCount(val loaded: Int, val total: Int) {
+    val complete: Boolean get() = loaded >= total
+}
+
 /** What SCARY keeps on disk between launches so artwork shows instantly and works offline. */
 @Serializable
 data class CinemetaCache(
@@ -422,9 +447,23 @@ data class CinemetaCache(
     val rowsVersion: Int = 1,
     /** More films for the library's categories (core Categories), IMDb ids by collection id; their details are in [metas]. */
     val categories: Map<String, List<String>> = emptyMap(),
+    /** False when some row pages failed: their rows kept the previous version, and the refresh is tried again soon. */
+    val complete: Boolean = true,
+    /** The same for the categories' pool. */
+    val categoriesComplete: Boolean = true,
+    /** Pages of the last row refresh that loaded, and how many there were: for Settings → About → Diagnostics. */
+    val rowPages: PageCount? = null,
+    /** The same for the categories' pool. */
+    val categoryPages: PageCount? = null,
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
+
+    /** Whether the rows should be fetched again: missing pages are, as well as old data. */
+    fun needsRows(nowMillis: Long): Boolean = !complete || isStale(nowMillis)
+
+    /** Whether the categories should be filled again. */
+    fun needsCategories(): Boolean = categories.isEmpty() || !categoriesComplete
 
     fun encode(): String = cacheJson.encodeToString(serializer(), this)
 

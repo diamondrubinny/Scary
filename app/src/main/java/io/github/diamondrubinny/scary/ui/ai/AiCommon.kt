@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -47,6 +46,7 @@ import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.ai.AiChip
 import io.github.diamondrubinny.scary.ai.AiError
@@ -55,6 +55,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.IconCircleButton
 import io.github.diamondrubinny.scary.ui.components.MicIcon
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import io.github.diamondrubinny.scary.ui.components.VoiceRequestEffect
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import kotlinx.coroutines.delay
@@ -172,6 +173,8 @@ fun AiInput(
             onSubmit()
         }
     }
+    // The remote's search or microphone key: dictation goes straight into this line.
+    VoiceRequestEffect(voiceAvailable) { voice.launch(speechIntent) }
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         Box(
             Modifier
@@ -181,10 +184,9 @@ fun AiInput(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             if (value.isEmpty()) BasicText(hint, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1)
-            BasicTextField(
+            ScaryTextField(
                 value = value,
                 onValueChange = { onValueChange(it.take(MAX_INPUT)) },
-                singleLine = true,
                 textStyle = ScaryType.BodyStrong,
                 cursorBrush = SolidColor(ScaryColors.Candle),
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send),
