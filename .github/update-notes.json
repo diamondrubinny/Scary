@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.5.8: every library row now goes on as you scroll, including the twelve that never changed (Stephen King, giallo, witches, cosmic horror, Spanish, Israeli and European horror…); \"New nightmares\" now shows this year's and last year's horror and stays up to date; with your TMDB key, rows go on with TMDB's results first.",
-  "he": "SCARY 0.5.8: כל שורות הספרייה ממשיכות עכשיו בגלילה, כולל שתים־עשרה שלא השתנו אף פעם (סטיבן קינג, ג׳אלו, מכשפות, אימה קוסמית, אימה ספרדית, ישראלית ואירופית…); \"סיוטים חדשים\" מציגה עכשיו את אימת השנה ושנה שעברה ומתעדכנת; עם מפתח TMDB, השורות ממשיכות קודם מ־TMDB.",
-  "ar": "SCARY 0.5.8: كل صفوف المكتبة تستمر الآن مع التمرير، ومنها الاثنا عشر التي لم تتغير أبدًا (ستيفن كينغ، جالو، الساحرات، الرعب الكوني، الرعب الإسباني والإسرائيلي والأوروبي…)؛ \"كوابيس جديدة\" تعرض الآن رعب هذا العام والعام الماضي وتبقى محدّثة؛ مع مفتاح TMDB تستمر الصفوف أولًا من TMDB.",
-  "pt": "SCARY 0.5.8: todas as fileiras da biblioteca agora continuam ao rolar, inclusive as doze que nunca mudavam (Stephen King, giallo, bruxas, terror cósmico, terror espanhol, israelense e europeu…); \"Novos pesadelos\" agora mostra o terror deste ano e do anterior e fica atualizada; com sua chave do TMDB, as fileiras continuam primeiro com o TMDB.",
-  "ru": "SCARY 0.5.8: все ряды библиотеки теперь продолжаются при прокрутке, включая двенадцать, которые никогда не менялись (Стивен Кинг, джалло, ведьмы, космический ужас, испанские, израильские и европейские ужасы…); «Новые кошмары» показывают ужасы этого и прошлого года и обновляются; с вашим ключом TMDB ряды продолжаются сначала из TMDB."
+  "en": "SCARY 0.5.9: the \"Israeli horror\" row is gone from the home screen.",
+  "he": "SCARY 0.5.9: שורת \"אימה ישראלית\" הוסרה ממסך הבית.",
+  "ar": "SCARY 0.5.9: أُزيل صف \"رعب إسرائيلي\" من الشاشة الرئيسية.",
+  "pt": "SCARY 0.5.9: a fileira \"Terror israelense\" saiu da tela inicial.",
+  "ru": "SCARY 0.5.9: ряд «Израильский хоррор» убран с главного экрана."
 }

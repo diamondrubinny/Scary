@@ -88,3 +88,8 @@
 - **Requires verification:** the TMDB genre id for "Comedy" (35) was not checked against the API (that needs a key). Without it, the "horror comedy" row from TMDB would be empty and would fall back to Cinemeta.
 - **Tests:** `NewCategoriesTest` (4) and `TmdbCategoryTest` (2), plus all the existing ones.
 
+## Update (16.11.2026): the "Israeli horror" row was removed, version 0.5.9
+- **At the owner's request.** The row is gone from the library (27 rows left), together with its rule and its TMDB filter (`TmdbCategory.ISRAELI_HORROR`).
+- **The films stay in the library,** so search and "More like this" still find them. Five of the row's eight films are also in other rows (crime thrillers, found footage, zombies, creatures, European and folk horror). Three are in no row now: Rabies, Children of the Fall and Cats on a Pedal Boat.
+- **A cache written by 0.5.8 may still hold the row's films.** They are ignored (the row no longer exists) and dropped at the next daily refresh.
+

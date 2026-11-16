@@ -59,7 +59,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 
 **Why SCARY?**
 
-- 🩸 **450 hand-picked films** with a fear meter (1–5) in 28 rows (giallo, witches, cosmic horror, slashers, Israeli horror and more), an offline index of about 3,900 more horror films (from Wikidata, checked against IMDb) for search and the decade rows, plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
+- 🩸 **450 hand-picked films** with a fear meter (1–5) in 27 rows (giallo, witches, cosmic horror, slashers, Spanish horror and more), an offline index of about 3,900 more horror films (from Wikidata, checked against IMDb) for search and the decade rows, plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
 - 🌙 **"What do you feel like tonight?"**: eight moods, from mind games and "short and sharp" to "slow-burn dread" and "no sleep tonight", or pick a decade, alone or with a mood. "Surprise me" picks from your choice. Plus special rows for Halloween and Friday the 13th.
 - 🧟 **Rows for every kind of fear**: found footage, folk horror, Asian horror, zombies, vampires, body horror, haunted houses and creatures, next to the classics, slashers and psychological thrillers.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.

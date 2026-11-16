@@ -82,7 +82,6 @@ enum class TmdbCategory(val collectionId: String) {
     CLASSIC_MONSTERS("classic_monsters"),
     HORROR_COMEDY("horror_comedy"),
     SPANISH_HORROR("spanish_horror"),
-    ISRAELI_HORROR("israeli_horror"),
     MAX_FEAR("max_fear"),
     ;
 
@@ -219,11 +218,6 @@ object Tmdb {
                 "with_genres" to "$HORROR",
                 "sort_by" to "popularity.desc",
                 "vote_count.gte" to "10",
-            )
-            TmdbCategory.ISRAELI_HORROR -> listOf(
-                "with_original_language" to "he",
-                "with_genres" to "$HORROR|$THRILLER",
-                "sort_by" to "popularity.desc",
             )
             TmdbCategory.MAX_FEAR -> listOf(
                 "with_genres" to "$HORROR",
