@@ -169,6 +169,25 @@ class PlayerTracksTest {
     private val srt = "1\n00:00:01,000 --> 00:00:03,000\n%s\n"
 
     @Test
+    fun `closing marks written at the start of a hebrew line go to its end`() {
+        // From a real Hebrew subtitle file of the online service (visual order, with <i> tags).
+        val visual = "<i>.זה מפחיד אותנו רק מלחשוב על זה</i>\n\n<i>,כשתשמעו את זה\n.תחשבו שהשתגענו</i>\n\n?מה אמרת\n- !שלום"
+        val fixed = "<i>זה מפחיד אותנו רק מלחשוב על זה.</i>\n\n<i>כשתשמעו את זה,\nתחשבו שהשתגענו.</i>\n\nמה אמרת?\n- !שלום"
+        assertEquals(fixed, SubtitleFiles.fixRtlPunctuation(visual))
+        // Fixed once: text already in logical order is not touched again.
+        assertEquals(fixed, SubtitleFiles.fixRtlPunctuation(fixed))
+        // Left alone: an ellipsis, English lines, time lines, cue numbers, a file with no RTL letters.
+        val same = "1\n00:00:01,000 --> 00:00:03,000\n...אני לא יודע\n.Hello there\n"
+        assertEquals(same, SubtitleFiles.fixRtlPunctuation(same))
+        assertEquals(".Hello", SubtitleFiles.fixRtlPunctuation(".Hello"))
+        // Through decode, for SRT; an ASS file is not rewritten.
+        val srtVisual = "1\n00:00:01,000 --> 00:00:03,000\n.שלום עולם\n"
+        assertEquals("1\n00:00:01,000 --> 00:00:03,000\nשלום עולם.\n", SubtitleFiles.decode(srtVisual.toByteArray(Charsets.UTF_8), "application/x-subrip", "he"))
+        val ass = "[Script Info]\nDialogue: 0,0:00:01.00,0:00:02.00,Default,,0,0,0,,.שלום\n"
+        assertEquals(ass, SubtitleFiles.decode(ass.toByteArray(Charsets.UTF_8), "text/x-ssa", "he"))
+    }
+
+    @Test
     fun `hebrew subtitles in windows-1255 are read as hebrew, not gibberish`() {
         val line = srt.format("שלום, מה שלומך?")
         val bytes = line.toByteArray(Charset.forName("windows-1255"))

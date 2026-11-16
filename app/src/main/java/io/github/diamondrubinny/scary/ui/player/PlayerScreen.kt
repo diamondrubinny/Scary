@@ -305,61 +305,6 @@ fun PlayerScreen(
         }
     }
 
-    /** Asks the service what it has for this film (once the viewer allows it); [then] runs when there is something. */
-    fun searchOnline(then: (List<OnlineSubtitles.Entry>) -> Unit = {}) {
-        val source = session.online ?: return
-        if (!latestOnlineAllowed || onlinePhase == OnlinePhase.SEARCHING) return
-        onlinePhase = OnlinePhase.SEARCHING
-        scope.launch {
-            val found = source.search()
-            onlineEntries = found.orEmpty()
-            onlinePhase = when {
-                found == null -> OnlinePhase.UNREACHABLE
-                found.isEmpty() -> OnlinePhase.NONE
-                else -> OnlinePhase.READY
-            }
-            if (!found.isNullOrEmpty()) then(found)
-        }
-    }
-
-    /**
-     * The best subtitle in [language] for this file, fetched and played. [auto]: chosen by the player itself (no
-     * message when nothing is found, "Subtitles found" when it is) rather than by the viewer in the window.
-     */
-    fun fetchOnline(language: String, auto: Boolean, entries: List<OnlineSubtitles.Entry>) {
-        val source = session.online ?: return
-        if (loadingOnline != null || !latestOnlineAllowed) return
-        val best = OnlineSubtitles.best(entries, language, session.playable.title, player.videoFormat?.frameRate?.takeIf { it > 0f }?.toDouble())
-        if (best == null) {
-            if (!auto) say(onlineNoneText)
-            return
-        }
-        val key = TrackInfo.of(TrackKind.TEXT, "o", best.language, best.label, null, online = true).key
-        fun remember() {
-            if (auto) return
-            settings?.let { it.rememberTracks(session.key, (it.trackMemory(session.key) ?: TrackMemory()).copy(subtitle = key, subtitlesOff = false)) }
-        }
-        if (onlineFetched.any { it.entry.id == best.id }) {
-            wantedText = key
-            remember()
-            return
-        }
-        loadingOnline = language
-        scope.launch {
-            val file = source.fetch(best)
-            loadingOnline = null
-            if (file == null) {
-                if (!auto) say(subtitleFailedText)
-            } else {
-                onlineFetched += OnlineFetched(best, file)
-                wantedText = key
-                remember()
-                reloadMedia()
-                if (auto) say(onlineFoundText.replace("%s", languageNameIn(language, viewerLocale)))
-            }
-        }
-    }
-
     /** Makes the player play [wantedAudio] and [wantedText], when they are not already playing. */
     fun applyWanted(described: DescribedTracks) {
         // Right after a reload the player has no tracks yet: nothing to choose from, nothing to judge.
@@ -395,6 +340,65 @@ fun PlayerScreen(
             }
         }
         if (changed) player.trackSelectionParameters = params.build()
+    }
+
+    /** Asks the service what it has for this film (once the viewer allows it); [then] runs when there is something. */
+    fun searchOnline(then: (List<OnlineSubtitles.Entry>) -> Unit = {}) {
+        val source = session.online ?: return
+        if (!latestOnlineAllowed || onlinePhase == OnlinePhase.SEARCHING) return
+        onlinePhase = OnlinePhase.SEARCHING
+        scope.launch {
+            val found = source.search()
+            onlineEntries = found.orEmpty()
+            onlinePhase = when {
+                found == null -> OnlinePhase.UNREACHABLE
+                found.isEmpty() -> OnlinePhase.NONE
+                else -> OnlinePhase.READY
+            }
+            if (!found.isNullOrEmpty()) then(found)
+        }
+    }
+
+    /**
+     * The best subtitle in [language] for this file, fetched and played. [auto]: chosen by the player itself (no
+     * message when nothing is found, "Subtitles found" when it is) rather than by the viewer in the window.
+     */
+    fun fetchOnline(language: String, auto: Boolean, entries: List<OnlineSubtitles.Entry>) {
+        val source = session.online ?: return
+        if (loadingOnline != null || !latestOnlineAllowed) return
+        val best = OnlineSubtitles.best(entries, language, session.playable.title, player.videoFormat?.frameRate?.takeIf { it > 0f }?.toDouble())
+        if (best == null) {
+            if (!auto) say(onlineNoneText)
+            return
+        }
+        val key = TrackInfo.of(TrackKind.TEXT, "o", best.language, best.label, null, online = true).key
+        fun remember() {
+            if (auto) return
+            settings?.let { it.rememberTracks(session.key, (it.trackMemory(session.key) ?: TrackMemory()).copy(subtitle = key, subtitlesOff = false)) }
+        }
+        if (onlineFetched.any { it.entry.id == best.id }) {
+            // Already added to the player: just play it.
+            wantedText = key
+            remember()
+            applyWanted(describeTracks(tracks, session.subtitles))
+            return
+        }
+        loadingOnline = language
+        val chosenBefore = wantedText
+        scope.launch {
+            val file = source.fetch(best)
+            loadingOnline = null
+            if (file == null) {
+                if (!auto) say(subtitleFailedText)
+            } else {
+                onlineFetched += OnlineFetched(best, file)
+                // A subtitle found by itself never takes the place of one the viewer picked while it was being fetched.
+                if (!auto || wantedText == chosenBefore) wantedText = key
+                remember()
+                reloadMedia()
+                if (auto && wantedText == key) say(onlineFoundText.replace("%s", languageNameIn(language, viewerLocale)))
+            }
+        }
     }
 
     /** The TV cannot play this file (or its sound): Real-Debrid's converted (HLS) stream, once. */

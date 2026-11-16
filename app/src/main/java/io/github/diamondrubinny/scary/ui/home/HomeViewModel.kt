@@ -1235,7 +1235,7 @@ class HomeViewModel(
             }
             // The film SCARY knows this file for (its IMDb id is exact); else the file's name is read when subtitles are searched.
             val film = movieId?.let(::movieById)
-            val online = subtitleRepository?.source(file.name, film?.imdbId, film?.isSeries ?: false)
+            val online = subtitleRepository?.source(file.name, film?.imdbId?.takeIf { it.isNotBlank() }, film?.isSeries ?: false)
             val session = PlayerSession(file.key, playable, movieId, startAtMs, next, file.subtitles, repository::subtitleFile, online)
             val replacing = _player.value != null
             _player.value = session

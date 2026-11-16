@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.5.10: American films no longer fill the European, Spanish and Asian horror rows. A quality check now tells them apart by original language, and Settings → About → Diagnostics shows what it kept out.",
-  "he": "SCARY 0.5.10: סרטים אמריקאיים כבר לא ממלאים את שורות האימה האירופית, הספרדית והאסייתית. בדיקת איכות מפרידה ביניהם לפי שפת המקור, והגדרות ← אודות ← אבחון מראה מה הוצא.",
-  "ar": "SCARY 0.5.10: لم تعد الأفلام الأمريكية تملأ صفوف الرعب الأوروبي والإسباني والآسيوي. فحص جودة يميّزها حسب لغة الأصل، والإعدادات ← حول ← التشخيص يعرض ما استُبعد.",
-  "pt": "SCARY 0.5.10: filmes americanos não enchem mais as fileiras de terror europeu, espanhol e asiático. Uma verificação de qualidade os separa pelo idioma original, e Configurações → Sobre → Diagnóstico mostra o que ficou de fora.",
-  "ru": "SCARY 0.5.10: американские фильмы больше не заполняют ряды европейских, испанских и азиатских ужасов. Проверка качества отделяет их по языку оригинала, а Настройки → О приложении → Диагностика показывает, что исключено."
+  "en": "SCARY 0.5.11: the player finds subtitles online by the film's name, by itself when your language is missing, or from Audio and subtitles → Find subtitles online (it can be turned off). Also: American films no longer fill the European, Spanish and Asian horror rows.",
+  "he": "SCARY 0.5.11: הנגן מוצא כתוביות באינטרנט לפי שם הסרט, מעצמו כשחסרה שפה שלכם, או מ\"שמע וכתוביות\" ← \"חיפוש כתוביות באינטרנט\" (אפשר לכבות). בנוסף: סרטים אמריקאיים כבר לא ממלאים את שורות האימה האירופית, הספרדית והאסייתית.",
+  "ar": "SCARY 0.5.11: يجد المشغّل الترجمة على الإنترنت حسب اسم الفيلم، من تلقاء نفسه عند غياب لغتك، أو من «الصوت والترجمة» ← «البحث عن ترجمة على الإنترنت» (يمكن إيقافه). وأيضًا: لم تعد الأفلام الأمريكية تملأ صفوف الرعب الأوروبي والإسباني والآسيوي.",
+  "pt": "SCARY 0.5.11: o player encontra legendas na internet pelo nome do filme, sozinho quando falta o seu idioma, ou em Áudio e legendas → Buscar legendas na internet (dá para desligar). Também: filmes americanos não enchem mais as fileiras de terror europeu, espanhol e asiático.",
+  "ru": "SCARY 0.5.11: плеер находит субтитры в интернете по названию фильма: сам, если нет вашего языка, или в «Звук и субтитры» → «Поиск субтитров в интернете» (можно выключить). Также: американские фильмы больше не заполняют ряды европейских, испанских и азиатских ужасов."
 }

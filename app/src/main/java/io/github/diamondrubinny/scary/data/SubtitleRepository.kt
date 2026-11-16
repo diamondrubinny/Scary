@@ -41,6 +41,8 @@ class SubtitleRepository(
     /** The subtitles for one played file. [imdbId] is the film's when SCARY knows it; else it is found from [fileName]. */
     fun source(fileName: String, imdbId: String?, series: Boolean): OnlineSubtitleSource {
         val guess = FileNames.guess(fileName)
+        // An id that is not an IMDb id is no id: the film is then found by its file name.
+        val known = imdbId?.takeIf { OnlineSubtitles.searchUrl(it) != null }
         val lock = Mutex()
         var resolved: Target? = null
         var tried = false
@@ -49,8 +51,8 @@ class SubtitleRepository(
         suspend fun target(): Target? = lock.withLock {
             if (tried) return@withLock resolved
             val found = when {
-                imdbId != null && !series -> Target(imdbId, null, null)
-                imdbId != null -> if (guess.isEpisode) Target(imdbId, guess.season, guess.episode) else null
+                known != null && !series -> Target(known, null, null)
+                known != null -> if (guess.isEpisode) Target(known, guess.season, guess.episode) else null
                 else -> lookup(guess)
             }
             // A film that was told stays told; a failed lookup (offline) is tried again next time.

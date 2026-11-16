@@ -71,3 +71,32 @@ The service returns many subtitles for one film (35 to 98). They are ranked by:
 - **Hebrew coverage on the keyless service is thin** (*The Shining*: none). With the official API, more, but it needs the viewer's own key and account.
 - **A subtitle can still be out of step** for a rare cut. The existing subtitle delay buttons stay for that.
 - **Not measured on a real TV or against a real account.**
+
+## Approved (16.11.2026)
+- **Source:** Stremio's OpenSubtitles add-on (keyless).
+- **When:** by itself when the file and its torrent have no subtitles in the viewer's subtitle language, and always from the window.
+
+## Implementation notes (16.11.2026), version 0.5.11
+- **core:**
+  - `player/OnlineSubtitles.kt`:
+    - the search address (only a real IMDb id; a series with season and episode);
+    - the answer parsed without trusting any field: each link must be HTTPS on `strem.io` or a subdomain, with no credentials, port or fragment; at most 300 entries; labels cleaned; `pob` is Portuguese, `heb` is Hebrew;
+    - the languages offered (the viewer's own first, then by count);
+    - the ranking (release words in common with the played file, then frame rate, then plain before hearing impaired, then the service's order);
+    - choosing the film among Cinemeta's results (title word for word, year within one).
+  - `player/FileNames.kt`: title, year, season and episode from a file name. `FileMatch` shares its list of quality words.
+  - `TrackInfo.online`: a subtitle found online is known by its language and release, so the choice comes back for the file.
+  - Tests: `OnlineSubtitlesTest` (12), on 11 of the 98 entries of the real answer for *The Conjuring*.
+- **app:**
+  - `SubtitleRepository`: HTTPS only, no redirects, 1 MB for the list and 2 MB per subtitle, decoded like a torrent's file (`SubtitleFiles.decode`), kept in `SubtitleCache` (now shared with the torrent's files: the newest 30 together).
+  - `PlayerSession.online`: `OnlineSubtitleSource(search, fetch)`. A film SCARY knows is searched by its IMDb id; a file from the Real-Debrid screen is read by name, and only Cinemeta sees the guessed title.
+  - The track window has a "Find subtitles online" section: the setting, what leaves the TV, and the languages with their counts. Choosing one fetches the best subtitle of that language and plays it.
+  - The search starts by itself when the window opens, and at the start of a film that has no (non-forced) subtitles in the viewer's language. A subtitle chosen online before for the file comes back the same way.
+  - The setting (`WatchStore.onlineSubtitles`) is **on by default**, because the owner asked for it to work by itself. It is also on the Real-Debrid screen. Off: nothing is sent.
+  - Strings in 5 languages.
+  - **Hebrew punctuation:** many Hebrew files from the service are in visual order (".זה מפחיד": the full stop at the start of the line, shown on the wrong side). `SubtitleFiles` now moves a single closing mark at the start of an RTL line to its end, for SRT and WebVTT (also the torrent's files); an ellipsis, English lines and ASS files are left alone.
+- **UI tests** (`PlayerTest`, with a fake service): the automatic search and the message, Hebrew with one press and the choice kept for the file; nothing searched while the setting is off; an unreachable service is said and retried.
+- **Not done / requires verification:**
+  - the HTTP layer of `SubtitleRepository` was not run against the live service from the TV (it was checked from this machine: the answers and downloads are as the tests assume);
+  - Stremio's and OpenSubtitles' terms, and the legal status of fetching subtitles (see PRIVACY.md and TERMS.md);
+  - whether a search on by default needs consent first (a question for the legal review).

@@ -76,7 +76,39 @@ object SubtitleFiles {
             bytes.startsWith(0xFE, 0xFF) -> String(bytes, 2, bytes.size - 2, Charsets.UTF_16BE)
             else -> strictUtf8(bytes) ?: String(bytes, singleByteCharset(bytes, languageHint))
         }.replace("\r\n", "\n").replace('\r', '\n').removePrefix("﻿")
-        return text.takeIf { looksLikeSubtitles(it, mimeType) }
+        if (!looksLikeSubtitles(text, mimeType)) return null
+        // Many Hebrew and Arabic files are written in visual order, with a sentence's closing mark at the start of its
+        // line; the time-coded formats are fixed here, ASS (with its own fields and styles) is left as it is.
+        return if (mimeType == "text/x-ssa") text else fixRtlPunctuation(text)
+    }
+
+    private val TAGS_AT_START = Regex("^(?:<[^>]*>|\\{[^}]*\\})*")
+    private val TAGS_AT_END = Regex("(?:<[^>]*>|\\{[^}]*\\})*$")
+    private const val CLOSING_MARKS = ".,!?:;"
+
+    /**
+     * A closing mark at the start of a Hebrew or Arabic line (".זה מפחיד אותנו") moves to the end ("זה מפחיד אותנו."),
+     * where it belongs in the text's own direction; without this it shows at the wrong side of the line. Only a single
+     * mark or a short run of them ("?!") before RTL letters, after any tags such as <i>; an ellipsis ("...") and any
+     * line that is not RTL are left alone, and so are time lines and cue numbers.
+     */
+    fun fixRtlPunctuation(text: String): String {
+        if (text.none { it in '\u0590'..'\u06FF' }) return text
+        return text.split('\n').joinToString("\n") { line -> fixLine(line) }
+    }
+
+    private fun fixLine(line: String): String {
+        if (line.length < 2 || line.contains("-->")) return line
+        val lead = TAGS_AT_START.find(line)?.value.orEmpty()
+        val rest = line.substring(lead.length)
+        val marks = rest.takeWhile { it in CLOSING_MARKS }
+        if (marks.isEmpty() || marks.length > 2 || marks.count { it == '.' } > 1) return line
+        val body = rest.substring(marks.length).trimStart()
+        // The first letter decides the line's direction.
+        val first = body.firstOrNull { it.isLetter() } ?: return line
+        if (first !in '\u0590'..'\u06FF') return line
+        val trailing = TAGS_AT_END.find(body)?.value.orEmpty()
+        return lead + body.substring(0, body.length - trailing.length).trimEnd() + marks + trailing
     }
 
     private fun ByteArray.startsWith(vararg prefix: Int) = size >= prefix.size && prefix.indices.all { this[it].toInt() and 0xFF == prefix[it] }
