@@ -6,10 +6,13 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import android.util.Log
+import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import io.github.diamondrubinny.scary.core.tmdb.TmdbAuth
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCache
+import io.github.diamondrubinny.scary.core.tmdb.TmdbCategory
+import io.github.diamondrubinny.scary.core.tmdb.TmdbResult
 import io.github.diamondrubinny.scary.core.tmdb.TmdbRow
 import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
 import io.github.diamondrubinny.scary.core.tmdb.WatchProviders
@@ -128,6 +131,33 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
             }
         }.filterNotNull()
         OnlinePage(metas, if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
+    }
+
+    /**
+     * Page [page] of the library row [collectionId]'s TMDB results (TmdbCategory), as Cinemeta-style entries with
+     * their IMDb ids, loaded while the viewer scrolls (memory only). Null without a key, for rows TMDB has no filter
+     * for, or when TMDB does not answer: the row then goes on from Cinemeta.
+     */
+    suspend fun loadCategoryPage(collectionId: String, page: Int, language: Language): OnlinePage? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val category = TmdbCategory.of(collectionId) ?: return@withContext null
+        if (page !in 1..Tmdb.MAX_PAGE) return@withContext OnlinePage(emptyList(), null)
+        val results = body(Tmdb.discoverUrl(category, LocalDate.now(), language, page), key)?.let(Tmdb::parseDiscover)
+            ?: return@withContext null
+        OnlinePage(withImdbIds(results, key, language), if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
+    }
+
+    /** Discover results with their IMDb ids (one request each, a few at a time); those without one are left out. */
+    private suspend fun withImdbIds(results: List<TmdbResult>, key: TmdbAuth, language: Language): List<CinemetaMeta> = coroutineScope {
+        results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
+            chunk.map { r ->
+                async {
+                    val known = synchronized(tmdbIds) { imdbIds[r.tmdbId] }
+                    val imdbId = known ?: body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.also { remember(it, r.tmdbId) }
+                    imdbId?.let { Tmdb.toMeta(r, it, language) }
+                }
+            }.awaitAll()
+        }.filterNotNull()
     }
 
     /** IMDb id to TMDB id, so a movie page opened again needs one request, not two (and the account's lists). */

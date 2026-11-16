@@ -72,6 +72,26 @@ enum class TmdbRow(
 }
 
 /**
+ * Library rows that go on, while the viewer scrolls, with TMDB's discover results when they have a TMDB key: the rows
+ * whose subject TMDB's own filters say well (genres, original language, release dates, rating). Parameters are fixed
+ * here, never taken from input. Rows whose subject needs words (witches, zombies…) go on from Cinemeta's catalogs.
+ */
+enum class TmdbCategory(val collectionId: String) {
+    NEW_NIGHTMARES("new_nightmares"),
+    GIALLO("giallo"),
+    CLASSIC_MONSTERS("classic_monsters"),
+    HORROR_COMEDY("horror_comedy"),
+    SPANISH_HORROR("spanish_horror"),
+    ISRAELI_HORROR("israeli_horror"),
+    MAX_FEAR("max_fear"),
+    ;
+
+    companion object {
+        fun of(collectionId: String): TmdbCategory? = entries.firstOrNull { it.collectionId == collectionId }
+    }
+}
+
+/**
  * TMDB helpers. Responses are untrusted: everything is optional, image paths must look like TMDB file names,
  * and ids are numeric. The key itself never appears in anything this object returns except the auth value.
  */
@@ -83,6 +103,7 @@ object Tmdb {
     const val HORROR = 27
     const val THRILLER = 53
     const val MYSTERY = 9648
+    const val COMEDY = 35
 
     private val json = Json { ignoreUnknownKeys = true }
     private val v3Key = Regex("^[0-9a-fA-F]{32}$")
@@ -159,6 +180,55 @@ object Tmdb {
                 "sort_by" to "popularity.desc",
                 "primary_release_date.gte" to today.plusDays(1).toString(),
                 "primary_release_date.lte" to today.plusMonths(6).toString(),
+            )
+        } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to page.toString())
+        return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
+    }
+
+    /** Page [page] of the discover results that go on the library row [category] (see TmdbCategory). */
+    fun discoverUrl(category: TmdbCategory, today: LocalDate, language: Language, page: Int = 1): String {
+        require(page in 1..MAX_PAGE) { "invalid page" }
+        val params = when (category) {
+            // The last twelve months, most talked about first: never a list that stops at last year's films.
+            TmdbCategory.NEW_NIGHTMARES -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "popularity.desc",
+                "primary_release_date.gte" to today.minusYears(1).toString(),
+                "primary_release_date.lte" to today.toString(),
+                "vote_count.gte" to "10",
+            )
+            TmdbCategory.GIALLO -> listOf(
+                "with_original_language" to "it",
+                "with_genres" to "$HORROR|$THRILLER|$MYSTERY",
+                "primary_release_date.lte" to "1985-12-31",
+                "sort_by" to "vote_count.desc",
+            )
+            TmdbCategory.CLASSIC_MONSTERS -> listOf(
+                "with_genres" to "$HORROR",
+                "primary_release_date.lte" to "1965-12-31",
+                "sort_by" to "vote_count.desc",
+            )
+            // Comma: horror and comedy both.
+            TmdbCategory.HORROR_COMEDY -> listOf(
+                "with_genres" to "$HORROR,$COMEDY",
+                "sort_by" to "popularity.desc",
+                "vote_count.gte" to "50",
+            )
+            TmdbCategory.SPANISH_HORROR -> listOf(
+                "with_original_language" to "es",
+                "with_genres" to "$HORROR",
+                "sort_by" to "popularity.desc",
+                "vote_count.gte" to "10",
+            )
+            TmdbCategory.ISRAELI_HORROR -> listOf(
+                "with_original_language" to "he",
+                "with_genres" to "$HORROR|$THRILLER",
+                "sort_by" to "popularity.desc",
+            )
+            TmdbCategory.MAX_FEAR -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "vote_average.desc",
+                "vote_count.gte" to "2000",
             )
         } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to page.toString())
         return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }

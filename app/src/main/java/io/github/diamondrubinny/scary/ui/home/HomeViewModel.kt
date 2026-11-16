@@ -23,6 +23,7 @@ import io.github.diamondrubinny.scary.core.catalog.BucketList
 import io.github.diamondrubinny.scary.core.catalog.BucketReturn
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.core.tmdb.TmdbCategory
 import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.core.catalog.FamilyNight
 import io.github.diamondrubinny.scary.core.catalog.FearStats
@@ -721,7 +722,11 @@ class HomeViewModel(
             catalog
         } else {
             extras.entries.fold(catalog) { acc, (key, metas) ->
-                val collectionId = if (key.startsWith(CATEGORY_PREFIX)) key.removePrefix(CATEGORY_PREFIX) else Cinemeta.onlineCollectionId(key)
+                val collectionId = when {
+                    key.startsWith(CATEGORY_PREFIX) -> key.removePrefix(CATEGORY_PREFIX)
+                    key.startsWith(TMDB_CATEGORY_PREFIX) -> key.removePrefix(TMDB_CATEGORY_PREFIX)
+                    else -> Cinemeta.onlineCollectionId(key)
+                }
                 Cinemeta.extend(acc, collectionId, metas)
             }
         }
@@ -733,6 +738,9 @@ class HomeViewModel(
 
     private val paging = HashMap<String, RowPaging>()
 
+    /** Library rows TMDB did not answer for while scrolling: they go on from Cinemeta until SCARY restarts. */
+    private val tmdbUnanswered = HashSet<String>()
+
     /**
      * The viewer is near the end of a home row: every online row (Cinemeta's, and TMDB's with a key) loads its next
      * page, with no cap but the catalog's own end; rows that walk back through the years go on from year to year.
@@ -742,9 +750,19 @@ class HomeViewModel(
     fun onNearRowEnd(rowKey: String) {
         if (latestPrefs?.onlineEnabled == false || latestPrefs?.familyNight == true) return
         val collectionId = rowKey.removePrefix("collection:").takeIf { it != rowKey } ?: return
-        // A library category goes on past its films from the daily pool (CategoryPaging), kept under "cat:<id>".
+        // A library category goes on past its films from the daily pool. With a TMDB key, rows TMDB has a filter for
+        // go on with its results first (kept under "tcat:<id>"); when TMDB has no more, or does not answer, the row goes
+        // on from Cinemeta's catalogs (CategoryPaging, kept under "cat:<id>").
         if (collectionId in Categories.ids) {
-            loadMore(CATEGORY_PREFIX + collectionId, start = 0) { cursor -> cinemeta.loadCategoryPage(collectionId, cursor) }
+            val tmdbKey = TMDB_CATEGORY_PREFIX + collectionId
+            val tmdbDone = paging[tmdbKey]?.next == null && tmdbKey in paging
+            if (tmdb.hasKey && TmdbCategory.of(collectionId) != null && !tmdbDone && collectionId !in tmdbUnanswered) {
+                loadMore(tmdbKey, start = 1) { page ->
+                    tmdb.loadCategoryPage(collectionId, page, language.value).also { if (it == null) tmdbUnanswered += collectionId }
+                }
+            } else {
+                loadMore(CATEGORY_PREFIX + collectionId, start = 0) { cursor -> cinemeta.loadCategoryPage(collectionId, cursor) }
+            }
             return
         }
         val rowId = collectionId.removePrefix(Cinemeta.onlineCollectionId("")).takeIf { it != collectionId } ?: return
@@ -2236,6 +2254,7 @@ class HomeViewModel(
 
         /** A library category's pages in [extraPages], next to the online rows' ids. */
         private const val CATEGORY_PREFIX = "cat:"
+        private const val TMDB_CATEGORY_PREFIX = "tcat:"
         private const val MAX_TASTE_CANDIDATES = 120
 
         /** How much the taste may move a film in "More like this": up to one shared genre's worth. */

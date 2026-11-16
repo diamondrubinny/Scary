@@ -53,6 +53,8 @@ data class CinemetaMeta(
     val country: String = "",
     /** Years that run on ("2025–", "1977–1979"): what a series has, even when Cinemeta files it as a film. */
     val runsOn: Boolean = false,
+    /** The writers Cinemeta lists, the source author among them ("Stephen King" for Carrie). */
+    val writer: List<String> = emptyList(),
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -101,6 +103,8 @@ object Cinemeta {
     private const val MAX_TEXT_LENGTH = 1_500
     private const val MAX_COUNTRY_LENGTH = 120
     private const val MAX_CAST = 6
+    private const val MAX_WRITERS = 6
+    private const val MAX_NAME_LENGTH = 80
     private const val MAX_TRAILERS = 4
     private const val MIN_SEARCH_LENGTH = 3
     private const val MAX_SEARCH_LENGTH = 60
@@ -283,6 +287,7 @@ object Cinemeta {
             ongoing = ongoing,
             country = o.str("country")?.trim()?.take(MAX_COUNTRY_LENGTH).orEmpty(),
             runsOn = span != null && span.groupValues[1].isNotEmpty(),
+            writer = o.strList("writer").map { it.take(MAX_NAME_LENGTH) }.take(MAX_WRITERS),
         )
     }
 
@@ -353,14 +358,22 @@ object Cinemeta {
      * Adds a further page of movies to the end of the online row [collectionId] (an endless row). Movies already in the
      * catalog are reused rather than duplicated; the row keeps its order and stops at [maxRow].
      */
-    fun extend(base: Catalog, collectionId: String, metas: List<CinemetaMeta>, maxRow: Int = MAX_ENDLESS_ROW_MOVIES): Catalog {
+    fun extend(
+        base: Catalog,
+        collectionId: String,
+        metas: List<CinemetaMeta>,
+        maxRow: Int = MAX_ENDLESS_ROW_MOVIES,
+        /** The row's own films give way to [metas] ("New nightmares"); kept only when [metas] brings none. */
+        replace: Boolean = false,
+    ): Catalog {
         val index = base.collections.indexOfFirst { it.id == collectionId }
         if (index < 0 || metas.isEmpty()) return base
         val collection = base.collections[index]
         val byImdb = base.movies.associateByTo(HashMap()) { it.imdbId }
         val added = mutableListOf<Movie>()
         val newIds = metas.mapNotNull { meta -> idFor(meta, byImdb, added) }
-        val ids = (collection.movieIds + newIds).distinct().take(maxRow)
+        if (replace && newIds.isEmpty()) return base
+        val ids = ((if (replace) emptyList() else collection.movieIds) + newIds).distinct().take(maxRow)
         val kept = ids.toHashSet()
         val collections = base.collections.toMutableList().also { it[index] = collection.copy(movieIds = ids) }
         return base.copy(movies = base.movies + added.filter { it.id in kept }, collections = collections)
@@ -472,9 +485,10 @@ data class CinemetaCache(
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
-         * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta).
+         * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta; 9: writers,
+         * and the twelve categories that had no rule).
          */
-        const val ROWS_VERSION = 8
+        const val ROWS_VERSION = 9
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

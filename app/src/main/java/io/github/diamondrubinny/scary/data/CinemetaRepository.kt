@@ -361,6 +361,15 @@ class CinemetaRepository(context: Context) {
     suspend fun loadCategoryPage(categoryId: String, cursor: Int): OnlinePage? = withContext(Dispatchers.IO) {
         val kind = if (categoryId.startsWith("series_")) MediaKind.SERIES else MediaKind.MOVIE
         val startYear = LocalDate.now().year
+        // New films: only the catalogs of this year and the last, not back through the decades for nothing.
+        if (categoryId in Categories.replacesCurated) {
+            if (EndlessCursor.yearsBack(cursor) > NEW_YEARS_BACK) return@withContext OnlinePage(emptyList(), null)
+            val year = startYear - EndlessCursor.yearsBack(cursor)
+            val metas = fetch(Cinemeta.catalogUrl("year", year.toString(), EndlessCursor.skip(cursor), kind))?.let(Cinemeta::parseCatalog)
+                ?: return@withContext null
+            val next = EndlessCursor.after(cursor, metas.size, yearChain = true)?.takeIf { EndlessCursor.yearsBack(it) <= NEW_YEARS_BACK }
+            return@withContext OnlinePage(metas.filter { it.kind == kind && Categories.matches(categoryId, it, startYear) }, next)
+        }
         val page = CategoryPaging.page(kind, cursor, startYear) ?: return@withContext OnlinePage(emptyList(), null)
         val url = runCatching {
             val genre = page.genre
@@ -461,6 +470,9 @@ class CinemetaRepository(context: Context) {
         const val CATEGORY_REQUESTS = 3
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val HEALTH_EVERY_MS = 60_000L
+
+        /** "New nightmares" reads this year's catalog and the last one's. */
+        const val NEW_YEARS_BACK = 1
 
     }
 }
