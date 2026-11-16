@@ -116,9 +116,11 @@ class AppContainer(context: Context) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val networkWatcher = NetworkWatcher(appContext)
 
-    val cinemetaRepository = CinemetaRepository(appContext)
     private val secretStore = SecretStore(appContext)
     val tmdbRepository = TmdbRepository(appContext, secretStore)
+
+    /** Asks TMDB (with the viewer's key) for the language of films whose origin is unclear (core Origin). */
+    val cinemetaRepository = CinemetaRepository(appContext) { ids -> tmdbRepository.originalLanguages(ids) }
 
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)

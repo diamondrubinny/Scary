@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.cinemeta
 
 import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
+import io.github.diamondrubinny.scary.core.catalog.RowAudit
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.MediaKind
@@ -18,6 +19,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.longOrNull
 import kotlinx.serialization.json.jsonObject
 
 /** The fields SCARY uses from a Cinemeta movie, already validated. */
@@ -56,8 +58,10 @@ data class CinemetaMeta(
     val runsOn: Boolean = false,
     /** The writers Cinemeta lists, the source author among them ("Stephen King" for Carrie). */
     val writer: List<String> = emptyList(),
-    /** ISO 639-1 code of the film's original language, when TMDB gave it ("hi"); empty for Cinemeta's own entries. */
+    /** ISO 639-1 code of the film's original language, when TMDB gave it ("hi"), or the app looked it up (core Origin). */
     val originalLanguage: String = "",
+    /** The film's id on TMDB, which Cinemeta's catalogs carry; 0 when unknown. */
+    val tmdbId: Long = 0,
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -291,6 +295,7 @@ object Cinemeta {
             country = o.str("country")?.trim()?.take(MAX_COUNTRY_LENGTH).orEmpty(),
             runsOn = span != null && span.groupValues[1].isNotEmpty(),
             writer = o.strList("writer").map { it.take(MAX_NAME_LENGTH) }.take(MAX_WRITERS),
+            tmdbId = (o["moviedb_id"] as? JsonPrimitive)?.takeIf { !it.isString }?.longOrNull?.takeIf { it > 0 } ?: 0,
         )
     }
 
@@ -481,8 +486,9 @@ data class CinemetaCache(
      */
     fun withoutHidden(): CinemetaCache = copy(
         rows = rows.mapNotNull(OriginFilter::visible),
-        categories = categories.mapValues { (_, ids) -> ids.filter { id -> metas[id]?.let { !OriginFilter.hides(it) } ?: true } }
-            .filterValues { it.isNotEmpty() },
+        // The same quality check as the rows are built with (core RowAudit): hidden origins, off-theme films, American
+        // films in rows about a place (an older cache had them there), duplicates.
+        categories = RowAudit.clean(categories, metas).first,
     )
 
     /** Whether the rows should be fetched again: missing pages are, as well as old data. */
@@ -499,9 +505,10 @@ data class CinemetaCache(
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
          * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta; 9: writers,
-         * and the twelve categories that had no rule).
+         * and the twelve categories that had no rule; 10: TMDB ids and original languages, rows about a place checked
+         * against American films).
          */
-        const val ROWS_VERSION = 9
+        const val ROWS_VERSION = 10
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

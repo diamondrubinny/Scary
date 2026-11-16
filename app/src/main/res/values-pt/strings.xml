@@ -722,6 +722,7 @@
     <string name="diag_freeze">Congelamentos: %2$d · último: %1$s</string>
     <string name="diag_online">Filmes da internet: %1$s</string>
     <string name="diag_refresh">Última atualização (páginas carregadas: fileiras · categorias): %1$s</string>
+    <string name="diag_quality">Verificação de origem (filmes fora das fileiras de lugar · à espera do idioma): %1$s</string>
     <string name="diag_none">Nenhum travamento ou congelamento registrado.</string>
     <string name="diag_clear">Limpar diagnóstico</string>
 </resources>
