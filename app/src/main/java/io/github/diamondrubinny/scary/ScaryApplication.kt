@@ -140,6 +140,12 @@ class AppContainer(context: Context) {
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
     val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore, java.io.File(appContext.cacheDir, "subtitles"))
 
+    /** Subtitles found online by the film's name, for the internal player; kept in the same cache as the torrent's. */
+    val subtitleRepository = io.github.diamondrubinny.scary.data.SubtitleRepository(
+        io.github.diamondrubinny.scary.data.SubtitleCache(java.io.File(appContext.cacheDir, "subtitles")),
+        cinemetaRepository,
+    )
+
     /** Where the viewer stopped in each of their files and the spots they marked, kept on this TV only. */
     val watchStore = io.github.diamondrubinny.scary.data.WatchStore(appContext)
     val launcher = Launcher(appContext, appsRepository)

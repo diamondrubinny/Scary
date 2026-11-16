@@ -643,6 +643,17 @@
     <string name="track_unsupported">esta TV não consegue reproduzir</string>
     <string name="player_subtitle_loading">carregando…</string>
     <string name="player_subtitle_failed">Não foi possível carregar estas legendas.</string>
+    <string name="tracks_online">Buscar legendas na internet</string>
+    <string name="tracks_online_on">Buscar legendas na internet: ligado</string>
+    <string name="tracks_online_off">Buscar legendas na internet: desligado</string>
+    <string name="tracks_online_privacy">Um serviço de legendas (o complemento OpenSubtitles do Stremio) recebe o número do filme no IMDb e o idioma, com o endereço desta TV. Para um arquivo que o SCARY não conhece, o título lido do nome dele vai para o Cinemeta, para achar esse número. Nunca suas contas ou seu histórico.</string>
+    <string name="tracks_online_searching">Buscando legendas…</string>
+    <string name="tracks_online_unreachable">Não foi possível acessar o serviço de legendas.</string>
+    <string name="tracks_online_none">Nenhuma legenda foi encontrada na internet para este filme.</string>
+    <string name="tracks_online_search">Buscar de novo</string>
+    <string name="tracks_online_count">Legendas: %1$d</string>
+    <string name="track_online">encontrada na internet</string>
+    <string name="player_online_found">Legendas encontradas: %1$s</string>
     <string name="player_convert_failed">Não há versão convertida deste arquivo.</string>
     <string name="player_no_sound">Esta TV não consegue reproduzir o som deste filme.</string>
     <string name="player_no_sound_format">Esta TV não consegue reproduzir o som deste filme (%1$s).</string>

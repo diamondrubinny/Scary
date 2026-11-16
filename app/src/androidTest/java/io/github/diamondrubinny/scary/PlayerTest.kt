@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.isSelected
 import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.core.player.OnlineSubtitles
 import io.github.diamondrubinny.scary.core.player.SubtitleFiles
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.ui.player.PLAYER_SUBTITLES_OFF_TAG
@@ -28,7 +29,12 @@ import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.data.RealDebridRepository
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
+import io.github.diamondrubinny.scary.ui.home.OnlineSubtitleSource
 import io.github.diamondrubinny.scary.ui.home.PlayerSession
+import io.github.diamondrubinny.scary.ui.player.ONLINE_SEARCH_TAG
+import io.github.diamondrubinny.scary.ui.player.ONLINE_TOGGLE_TAG
+import io.github.diamondrubinny.scary.ui.player.languageNameIn
+import io.github.diamondrubinny.scary.ui.player.onlineLanguageTag
 import io.github.diamondrubinny.scary.ui.player.PLAYER_TAG
 import io.github.diamondrubinny.scary.ui.player.PLAYER_TOAST_TAG
 import io.github.diamondrubinny.scary.ui.player.PLAYER_SPEED_TAG
@@ -227,6 +233,176 @@ class PlayerTest {
             val memory = container.watchStore.trackMemory("d:TESTTRACKS")
             assertTrue("Hebrew audio kept for the file: $memory", memory?.audio?.contains("|he|") == true)
             assertTrue("Subtitles off kept for the file: $memory", memory?.subtitlesOff == true)
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+        } finally {
+            rule.runOnUiThread { vm.clearWatchHistory() }
+            container.watchStore.setLanguages(LanguagePrefs())
+        }
+    }
+
+    private fun onlineEntry(id: String, language: String, release: String) = OnlineSubtitles.Entry(
+        id = id,
+        url = "https://subs5.strem.io/test/$id",
+        language = language,
+        fileName = "Tracks.$language.srt",
+        release = release,
+        format = null,
+        fps = null,
+        hearingImpaired = false,
+        order = id.toInt(),
+    )
+
+    /** A fake service: what it lists, the subtitle text for each language, and how often it was asked. */
+    private class FakeService(val entries: List<OnlineSubtitles.Entry>?, val texts: Map<String, String>, val cacheDir: File) {
+        var searches = 0
+        var fetched = mutableListOf<String>()
+        val source = OnlineSubtitleSource(
+            search = {
+                searches++
+                entries
+            },
+            fetch = { entry ->
+                fetched += entry.language
+                texts[entry.language]?.let { text -> File(cacheDir, "online-${entry.id}.srt").apply { writeText("1\n00:00:00,500 --> 00:00:05,500\n$text\n\n", Charsets.UTF_8) } }
+            },
+        )
+    }
+
+    private fun frenchAndHebrew() = listOf(
+        onlineEntry("1", "fr", "Tracks.720p.WEB"),
+        onlineEntry("2", "he", "Tracks.720p.WEB"),
+        onlineEntry("3", "he", "Tracks.1080p.BluRay"),
+    )
+
+    private fun playClipWith(service: FakeService, key: String): PlayerSession {
+        val clip = File(rule.activity.cacheDir, "tracks.mkv")
+        InstrumentationRegistry.getInstrumentation().context.assets.open("tracks.mkv").use { input -> clip.outputStream().use(input::copyTo) }
+        return PlayerSession(
+            key = key,
+            playable = RealDebridRepository.Playable(clip.toURI().toString(), "Tracks.2013.720p.WEB.mkv") { null },
+            movieId = null,
+            startAtMs = 0L,
+            online = service.source,
+        )
+    }
+
+    /**
+     * Subtitles found online by the film's name: the viewer wants French subtitles, the file has none, so the player
+     * searches by itself and says what it found; the window then lists the languages the service has and the viewer
+     * adds Hebrew with one press; both are remembered for the file.
+     */
+    @Test
+    fun subtitlesAreFoundOnlineByThemselvesWhenTheFileHasNoneInTheViewersLanguage() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        val container = (rule.activity.application as ScaryApplication).container
+        val service = FakeService(frenchAndHebrew(), mapOf("fr" to "Bonjour du service", "he" to "שלום מהשירות"), rule.activity.cacheDir)
+        container.watchStore.setOnlineSubtitles(true)
+        // French: neither in the file nor among the torrent's files.
+        container.watchStore.setLanguages(LanguagePrefs(audio = null, subtitles = "fr"))
+        val vm = viewModel()
+        val locale = rule.activity.resources.configuration.locales[0]
+        try {
+            rule.runOnUiThread { vm.playForTest(playClipWith(service, "d:TESTONLINE")) }
+            waitFor(hasTestTag(PLAYER_TAG))
+            waitFor(hasText(text(R.string.player_pause)))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            // Said, by itself: "Subtitles found: French".
+            waitFor(hasText(rule.activity.getString(R.string.player_online_found, languageNameIn("fr", locale))), LONG_TIMEOUT_MS)
+            assertTrue("one search, and only the French subtitle fetched: ${service.fetched}", service.searches == 1 && service.fetched == listOf("fr"))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PLAY)
+            waitFor(hasText("Bonjour du service"), LONG_TIMEOUT_MS)
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+
+            // The window: the languages the service has, the viewer's own first, French playing.
+            waitFor(hasTestTag(PLAYER_TRACKS_BUTTON_TAG))
+            rule.onNode(hasTestTag(PLAYER_TRACKS_BUTTON_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_TRACKS_TAG))
+            waitFor(hasTestTag(onlineLanguageTag("fr")) and isSelected())
+            rule.onNode(hasTestTag(onlineLanguageTag("he"))).assertExists()
+            // Hebrew with one press: the best of its two subtitles (the one made for this WEB release).
+            rule.onNode(hasTestTag(onlineLanguageTag("he"))).performScrollTo().performClick()
+            waitFor(hasTestTag(onlineLanguageTag("he")) and isSelected(), LONG_TIMEOUT_MS)
+            assertTrue("Hebrew fetched once: ${service.fetched}", service.fetched == listOf("fr", "he"))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PLAY)
+            waitFor(hasText("שלום מהשירות"), LONG_TIMEOUT_MS)
+            val memory = container.watchStore.trackMemory("d:TESTONLINE")
+            assertTrue("The viewer's choice is kept for the file: $memory", memory?.subtitle?.contains("|o|he|") == true)
+            // The search ran once for the whole film, not again when the window opened.
+            assertTrue("one search: ${service.searches}", service.searches == 1)
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TRACKS_TAG)).fetchSemanticsNodes().isEmpty() }
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+        } finally {
+            rule.runOnUiThread { vm.clearWatchHistory() }
+            container.watchStore.setLanguages(LanguagePrefs())
+            container.watchStore.setOnlineSubtitles(true)
+        }
+    }
+
+    /** With "Find subtitles online" off nothing is searched, by itself or in the window, until the viewer turns it on. */
+    @Test
+    fun nothingIsSearchedOnlineWhileTheSettingIsOff() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        val container = (rule.activity.application as ScaryApplication).container
+        val service = FakeService(frenchAndHebrew(), mapOf("fr" to "Bonjour du service"), rule.activity.cacheDir)
+        container.watchStore.setOnlineSubtitles(false)
+        container.watchStore.setLanguages(LanguagePrefs(audio = null, subtitles = "fr"))
+        val vm = viewModel()
+        try {
+            rule.runOnUiThread { vm.playForTest(playClipWith(service, "d:TESTONLINEOFF")) }
+            waitFor(hasTestTag(PLAYER_TAG))
+            waitFor(hasText(text(R.string.player_pause)))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            waitFor(hasText(text(R.string.player_play)))
+            waitFor(hasTestTag(PLAYER_TRACKS_BUTTON_TAG))
+            rule.onNode(hasTestTag(PLAYER_TRACKS_BUTTON_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_TRACKS_TAG))
+            waitFor(hasTestTag(ONLINE_TOGGLE_TAG))
+            rule.onNode(hasText(text(R.string.tracks_online_off))).assertExists()
+            rule.onAllNodes(hasTestTag(onlineLanguageTag("fr"))).fetchSemanticsNodes().let { assertTrue("no language rows while off", it.isEmpty()) }
+            assertTrue("nothing was asked while off: ${service.searches}", service.searches == 0 && service.fetched.isEmpty())
+            // Turned on in the window: the search runs and the languages appear (nothing is picked by itself).
+            rule.onNode(hasTestTag(ONLINE_TOGGLE_TAG)).performScrollTo().performClick()
+            waitFor(hasTestTag(onlineLanguageTag("fr")), LONG_TIMEOUT_MS)
+            assertTrue("one search after turning it on: ${service.searches}", service.searches == 1 && service.fetched.isEmpty())
+            rule.onNode(hasTestTag(ONLINE_TOGGLE_TAG)).assertExists()
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TRACKS_TAG)).fetchSemanticsNodes().isEmpty() }
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+        } finally {
+            rule.runOnUiThread { vm.clearWatchHistory() }
+            container.watchStore.setLanguages(LanguagePrefs())
+            container.watchStore.setOnlineSubtitles(true)
+        }
+    }
+
+    /** A service that cannot be reached is said so in the window, with "Search again"; the film plays on. */
+    @Test
+    fun anUnreachableSubtitleServiceIsSaidAndRetried() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        val container = (rule.activity.application as ScaryApplication).container
+        val service = FakeService(null, emptyMap(), rule.activity.cacheDir)
+        container.watchStore.setOnlineSubtitles(true)
+        container.watchStore.setLanguages(LanguagePrefs(audio = null, subtitles = "fr"))
+        val vm = viewModel()
+        try {
+            rule.runOnUiThread { vm.playForTest(playClipWith(service, "d:TESTONLINEDOWN")) }
+            waitFor(hasTestTag(PLAYER_TAG))
+            waitFor(hasText(text(R.string.player_pause)))
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_MEDIA_PAUSE)
+            waitFor(hasTestTag(PLAYER_TRACKS_BUTTON_TAG))
+            rule.onNode(hasTestTag(PLAYER_TRACKS_BUTTON_TAG)).performClick()
+            waitFor(hasTestTag(PLAYER_TRACKS_TAG))
+            waitFor(hasText(text(R.string.tracks_online_unreachable)), LONG_TIMEOUT_MS)
+            val before = service.searches
+            rule.onNode(hasTestTag(ONLINE_SEARCH_TAG)).performScrollTo().performClick()
+            rule.waitUntil(LONG_TIMEOUT_MS) { service.searches > before }
+            pressBack()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TRACKS_TAG)).fetchSemanticsNodes().isEmpty() }
+            rule.onNode(hasTestTag(PLAYER_TAG)).assertExists()
             pressBack()
             rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
         } finally {

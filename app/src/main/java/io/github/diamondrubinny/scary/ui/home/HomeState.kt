@@ -282,6 +282,18 @@ class PlayerSession(
     val subtitles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdSubtitle> = emptyList(),
     /** Fetches one of [subtitles] as a UTF-8 file on the TV; null when it cannot be read. */
     val fetchSubtitle: suspend (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdSubtitle) -> java.io.File? = { null },
+    /** Subtitles found online by the film's name; null when this file cannot be searched (tests, no repository). */
+    val online: OnlineSubtitleSource? = null,
+)
+
+/**
+ * Subtitles for one played file from the online service (docs/SUBTITLE_SEARCH_PLAN.md). [search] lists what the service
+ * has for the film: null when it cannot be reached, empty when the film is not known or has none. [fetch] brings one
+ * of them as a UTF-8 file on the TV; null when it cannot be read.
+ */
+class OnlineSubtitleSource(
+    val search: suspend () -> List<io.github.diamondrubinny.scary.core.player.OnlineSubtitles.Entry>?,
+    val fetch: suspend (io.github.diamondrubinny.scary.core.player.OnlineSubtitles.Entry) -> java.io.File?,
 )
 
 /** A file with a spot saved: play it from there, or from the start? */

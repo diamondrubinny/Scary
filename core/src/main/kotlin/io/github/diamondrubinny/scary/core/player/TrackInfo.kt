@@ -36,13 +36,20 @@ data class TrackInfo(
     val supported: Boolean = true,
     /** A subtitle file from the same torrent, fetched when chosen. */
     val external: Boolean = false,
+    /** A subtitle found online by the film's name (core OnlineSubtitles), fetched and added by the player. */
+    val online: Boolean = false,
 ) {
     /**
      * The same track again (after the file reloads, or when it is played another day): what a choice is remembered by.
      * A subtitle file is known by its index among the torrent's ([id]), the file's own tracks by what they are.
      */
     val key: String
-        get() = if (external) "${kind.name}|x|$id" else listOf(kind.name, language.orEmpty(), label.orEmpty(), mimeType.orEmpty(), channels).joinToString("|")
+        get() = when {
+            // An online subtitle is known by its language and release; its place in the player changes with every fetch.
+            online -> "${kind.name}|$ONLINE_MARK|${language.orEmpty()}|${label.orEmpty()}"
+            external -> "${kind.name}|x|$id"
+            else -> listOf(kind.name, language.orEmpty(), label.orEmpty(), mimeType.orEmpty(), channels).joinToString("|")
+        }
 
     val isBitmapSubtitle: Boolean get() = kind == TrackKind.TEXT && TrackNames.isBitmapSubtitle(mimeType)
 
@@ -64,6 +71,7 @@ data class TrackInfo(
             isSdh: Boolean = false,
             supported: Boolean = true,
             external: Boolean = false,
+            online: Boolean = false,
         ): TrackInfo = TrackInfo(
             kind = kind,
             id = id,
@@ -78,7 +86,16 @@ data class TrackInfo(
             isSdh = isSdh || Regex("\\b(sdh|cc|hearing impaired)\\b", RegexOption.IGNORE_CASE).containsMatchIn(label.orEmpty()),
             supported = supported,
             external = external,
+            online = online,
         )
+
+        private const val ONLINE_MARK = "o"
+
+        /** The language of a remembered online subtitle ([key] of a track found online), else null. */
+        fun onlineLanguageOf(key: String?): String? {
+            val parts = key?.split('|') ?: return null
+            return if (parts.size >= 3 && parts[0] == TrackKind.TEXT.name && parts[1] == ONLINE_MARK) parts[2].takeIf { it.isNotEmpty() } else null
+        }
 
         /** Control characters out, whitespace folded, at most [MAX_LABEL] characters; nothing left is no label. */
         fun cleanLabel(label: String?): String? =

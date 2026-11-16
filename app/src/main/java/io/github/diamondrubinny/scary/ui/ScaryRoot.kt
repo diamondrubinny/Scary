@@ -159,6 +159,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
     val tmdbAccount by viewModel.tmdbAccountState.collectAsStateWithLifecycle()
     val playerLanguages by viewModel.playerLanguages.collectAsStateWithLifecycle()
+    val playerOnlineSubtitles by viewModel.playerOnlineSubtitles.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -569,6 +570,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     files = rdFiles,
                     history = WatchHistory.continueWatching(watchHistory),
                     languages = playerLanguages,
+                    onlineSubtitles = playerOnlineSubtitles,
                     actions = remember(viewModel) {
                         RealDebridActions(
                             onSignIn = viewModel::realDebridSignIn,
@@ -579,6 +581,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onContinue = viewModel::continueWatching,
                             onClearHistory = viewModel::clearWatchHistory,
                             onLanguages = viewModel::setPlayerLanguages,
+                            onOnlineSubtitles = viewModel::setPlayerOnlineSubtitles,
                         )
                     },
                 )

@@ -51,7 +51,7 @@ object TrackChoice {
         }
         val language = prefs.subtitles ?: return forcedFor(text, audioLanguage)
         val inLanguage = text.filter { it.language == language }
-        return inLanguage.sortedWith(compareBy<TrackInfo>({ it.isForced }, { it.isSdh }, { it.external }, { !it.isDefault })).firstOrNull()
+        return inLanguage.sortedWith(compareBy<TrackInfo>({ it.isForced }, { it.isSdh }, { it.external || it.online }, { !it.isDefault })).firstOrNull()
             ?: forcedFor(text, audioLanguage)
     }
 
@@ -65,7 +65,7 @@ object TrackChoice {
 
     /** The tracks as the window lists them: the file's order, with tracks this TV cannot play last. */
     fun ordered(tracks: List<TrackInfo>, kind: TrackKind): List<TrackInfo> =
-        tracks.filter { it.kind == kind }.withIndex().sortedWith(compareBy({ !it.value.supported }, { it.value.external }, { it.index })).map { it.value }
+        tracks.filter { it.kind == kind }.withIndex().sortedWith(compareBy({ !it.value.supported }, { it.value.external || it.value.online }, { it.index })).map { it.value }
 
     /** The file has sound, but none of it plays on this TV (DTS or TrueHD only, on a TV without them). */
     fun noPlayableAudio(tracks: List<TrackInfo>): Boolean {

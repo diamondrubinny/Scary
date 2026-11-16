@@ -650,6 +650,17 @@
     <string name="track_unsupported">этот телевизор не может это воспроизвести</string>
     <string name="player_subtitle_loading">загрузка…</string>
     <string name="player_subtitle_failed">Не удалось загрузить эти субтитры.</string>
+    <string name="tracks_online">Поиск субтитров в интернете</string>
+    <string name="tracks_online_on">Поиск субтитров в интернете: включён</string>
+    <string name="tracks_online_off">Поиск субтитров в интернете: выключен</string>
+    <string name="tracks_online_privacy">Сервис субтитров (дополнение OpenSubtitles для Stremio) получает номер фильма в IMDb и язык, вместе с адресом этого телевизора. Для файла, который SCARY не знает, название из его имени уходит в Cinemeta, чтобы найти этот номер. Никогда ваши аккаунты или история.</string>
+    <string name="tracks_online_searching">Ищем субтитры…</string>
+    <string name="tracks_online_unreachable">Не удалось связаться с сервисом субтитров.</string>
+    <string name="tracks_online_none">Для этого фильма в интернете субтитры не найдены.</string>
+    <string name="tracks_online_search">Искать снова</string>
+    <string name="tracks_online_count">Субтитры: %1$d</string>
+    <string name="track_online">найдены в интернете</string>
+    <string name="player_online_found">Найдены субтитры: %1$s</string>
     <string name="player_convert_failed">Для этого файла нет преобразованной версии.</string>
     <string name="player_no_sound">Этот телевизор не может воспроизвести звук этого фильма.</string>
     <string name="player_no_sound_format">Этот телевизор не может воспроизвести звук этого фильма (%1$s).</string>

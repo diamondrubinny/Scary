@@ -25,7 +25,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextDirection
@@ -33,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.player.LanguagePrefs
+import io.github.diamondrubinny.scary.core.player.OnlineSubtitles
 import io.github.diamondrubinny.scary.core.player.TrackInfo
 import io.github.diamondrubinny.scary.core.player.TrackKind
 import io.github.diamondrubinny.scary.core.player.TrackNames
@@ -48,9 +51,30 @@ const val PLAYER_TRACKS_BUTTON_TAG = "playerTracksButton"
 const val PLAYER_SUBTITLES_OFF_TAG = "playerSubtitlesOff"
 const val PREF_AUDIO_TAG = "prefAudioLanguage"
 const val PREF_SUBTITLES_TAG = "prefSubtitleLanguage"
+const val ONLINE_TOGGLE_TAG = "onlineSubtitlesToggle"
+const val ONLINE_SEARCH_TAG = "onlineSubtitlesSearch"
+const val ONLINE_STATUS_TAG = "onlineSubtitlesStatus"
+
+/** An online subtitle language row's test tag: "onlineLanguage:<code>". */
+fun onlineLanguageTag(code: String) = "onlineLanguage:$code"
 
 /** A track row's test tag: "track:<id>". */
 fun trackTag(id: String) = "track:$id"
+
+/** Where the search for subtitles online stands. */
+enum class OnlinePhase { IDLE, SEARCHING, READY, UNREACHABLE, NONE }
+
+/** The "Find subtitles online" section: the viewer's choice, the search, and the languages the film has. */
+class OnlinePickerState(
+    /** The viewer allows searching online (the setting). */
+    val enabled: Boolean,
+    val phase: OnlinePhase,
+    val languages: List<OnlineSubtitles.LanguageCount>,
+    /** The language being fetched now. */
+    val loading: String?,
+    /** The language of the online subtitle playing now. */
+    val playing: String?,
+)
 
 /** What the track window shows and changes. */
 class TrackPickerState(
@@ -62,6 +86,8 @@ class TrackPickerState(
     /** A subtitle file being fetched. */
     val loadingText: String?,
     val prefs: LanguagePrefs,
+    /** Null when this file cannot be searched (no film, no service): the section is not shown. */
+    val online: OnlinePickerState? = null,
 )
 
 class TrackPickerActions(
@@ -70,6 +96,10 @@ class TrackPickerActions(
     val onText: (TrackInfo?) -> Unit,
     val onPrefs: (LanguagePrefs) -> Unit,
     val onClose: () -> Unit,
+    val onOnlineEnabled: (Boolean) -> Unit = {},
+    val onOnlineSearch: () -> Unit = {},
+    /** The best subtitle in this language, fetched and played. */
+    val onOnlineLanguage: (String) -> Unit = {},
 )
 
 /**
@@ -124,10 +154,64 @@ fun TrackPicker(state: TrackPickerState, actions: TrackPickerActions, focusReque
                 modifier = Modifier.testTag(trackTag(track.id)),
             )
         }
+        state.online?.let { OnlineSection(it, actions) }
         Heading(stringResource(R.string.tracks_every_film))
         LanguagePrefButtons(state.prefs, actions.onPrefs)
         ScaryButton(stringResource(R.string.player_close), onClick = actions.onClose)
     }
+}
+
+/**
+ * "Find subtitles online": the setting (with what leaves the TV), and, while it is on, the languages the film has
+ * subtitles in, each with how many; choosing one brings the best subtitle of that language and plays it.
+ */
+@Composable
+private fun OnlineSection(online: OnlinePickerState, actions: TrackPickerActions) {
+    Heading(stringResource(R.string.tracks_online))
+    OnlineSubtitlesToggle(online.enabled, actions.onOnlineEnabled)
+    if (!online.enabled) return
+    BasicText(stringResource(R.string.tracks_online_privacy), style = ScaryType.Caption.copy(color = ScaryColors.Ash, textDirection = TextDirection.Content))
+    val status = when (online.phase) {
+        OnlinePhase.SEARCHING -> stringResource(R.string.tracks_online_searching)
+        OnlinePhase.UNREACHABLE -> stringResource(R.string.tracks_online_unreachable)
+        OnlinePhase.NONE -> stringResource(R.string.tracks_online_none)
+        else -> null
+    }
+    status?.let {
+        BasicText(
+            it,
+            style = ScaryType.Body.copy(textDirection = TextDirection.Content),
+            modifier = Modifier.testTag(ONLINE_STATUS_TAG).semantics { liveRegion = LiveRegionMode.Polite },
+        )
+    }
+    when (online.phase) {
+        OnlinePhase.IDLE, OnlinePhase.UNREACHABLE, OnlinePhase.NONE ->
+            ScaryButton(stringResource(R.string.tracks_online_search), onClick = actions.onOnlineSearch, modifier = Modifier.testTag(ONLINE_SEARCH_TAG))
+        OnlinePhase.READY -> online.languages.forEach { entry ->
+            TrackRow(
+                title = languageName(entry.language),
+                details = listOfNotNull(
+                    stringResource(R.string.tracks_online_count, entry.count),
+                    stringResource(R.string.player_subtitle_loading).takeIf { entry.language == online.loading },
+                ).joinToString(" · "),
+                selected = entry.language == online.playing,
+                enabled = true,
+                onClick = { actions.onOnlineLanguage(entry.language) },
+                modifier = Modifier.testTag(onlineLanguageTag(entry.language)),
+            )
+        }
+        OnlinePhase.SEARCHING -> Unit
+    }
+}
+
+/** "Find subtitles online: on" / "off": a press turns it the other way. In the track window and on the Real-Debrid screen. */
+@Composable
+fun OnlineSubtitlesToggle(on: Boolean, onChange: (Boolean) -> Unit) {
+    ScaryButton(
+        stringResource(if (on) R.string.tracks_online_on else R.string.tracks_online_off),
+        onClick = { onChange(!on) },
+        modifier = Modifier.testTag(ONLINE_TOGGLE_TAG),
+    )
 }
 
 /**
@@ -188,8 +272,10 @@ private fun TrackRow(title: String, details: String, selected: Boolean, enabled:
 
 /** A language's name in the viewer's language, capitalized ("English", "עברית"). */
 @Composable
-fun languageName(code: String): String {
-    val viewer = LocalLocale.current.platformLocale
+fun languageName(code: String): String = languageNameIn(code, LocalLocale.current.platformLocale)
+
+/** The same, for messages built outside a composable. */
+fun languageNameIn(code: String, viewer: Locale): String {
     val name = Locale.forLanguageTag(code).getDisplayLanguage(viewer)
     return name.replaceFirstChar { if (it.isLowerCase()) it.titlecase(viewer) else it.toString() }.ifBlank { code }
 }
@@ -218,6 +304,7 @@ fun trackDetails(track: TrackInfo, loading: Boolean): String {
     if (track.isCommentary) parts += stringResource(R.string.track_commentary)
     if (track.isDescription) parts += stringResource(R.string.track_description)
     if (track.external) parts += stringResource(R.string.track_external)
+    if (track.online) parts += stringResource(R.string.track_online)
     if (!track.supported) parts += stringResource(R.string.track_unsupported)
     if (loading) parts += stringResource(R.string.player_subtitle_loading)
     return parts.distinct().joinToString(" · ")

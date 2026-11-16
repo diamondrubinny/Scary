@@ -665,6 +665,17 @@
     <string name="track_unsupported">لا يستطيع هذا التلفاز تشغيله</string>
     <string name="player_subtitle_loading">جارٍ التحميل…</string>
     <string name="player_subtitle_failed">تعذّر تحميل هذه الترجمة.</string>
+    <string name="tracks_online">البحث عن ترجمة على الإنترنت</string>
+    <string name="tracks_online_on">البحث عن ترجمة على الإنترنت: مفعّل</string>
+    <string name="tracks_online_off">البحث عن ترجمة على الإنترنت: متوقف</string>
+    <string name="tracks_online_privacy">تتلقى خدمة الترجمة (إضافة OpenSubtitles من Stremio) رقم IMDb للفيلم واللغة، مع عنوان هذا التلفزيون. وبالنسبة إلى ملف لا يعرفه SCARY، يُرسَل العنوان المقروء من اسمه إلى Cinemeta للعثور على هذا الرقم. لا تُرسَل أبدًا حساباتك أو سجل مشاهدتك.</string>
+    <string name="tracks_online_searching">جارٍ البحث عن ترجمة…</string>
+    <string name="tracks_online_unreachable">تعذّر الوصول إلى خدمة الترجمة.</string>
+    <string name="tracks_online_none">لم يُعثر على ترجمة لهذا الفيلم على الإنترنت.</string>
+    <string name="tracks_online_search">ابحث مرة أخرى</string>
+    <string name="tracks_online_count">الترجمات: %1$d</string>
+    <string name="track_online">وُجدت على الإنترنت</string>
+    <string name="player_online_found">وُجدت ترجمة: %1$s</string>
     <string name="player_convert_failed">لا تتوفر نسخة محوّلة لهذا الملف.</string>
     <string name="player_no_sound">لا يستطيع هذا التلفاز تشغيل صوت هذا الفيلم.</string>
     <string name="player_no_sound_format">لا يستطيع هذا التلفاز تشغيل صوت هذا الفيلم (%1$s).</string>

@@ -414,6 +414,16 @@ class CinemetaRepository(context: Context) {
         Cinemeta.searchResults(metas.map { meta -> full[meta.imdbId]?.copy(type = meta.type) ?: meta }, known)
     }
 
+    /**
+     * Cinemeta's search results for a title, to tell which film a file is (the player's online subtitles): only the
+     * title text and the TV's IP reach Cinemeta. Null when the query is invalid or Cinemeta cannot be reached.
+     */
+    suspend fun lookup(title: String, kind: MediaKind): List<CinemetaMeta>? = withContext(Dispatchers.IO) {
+        val url = Cinemeta.searchUrl(title, kind) ?: return@withContext null
+        // A result that does not say its type is the type it was searched as.
+        fetch(url)?.let(Cinemeta::parseCatalog)?.map { if (it.kind == kind) it else it.copy(type = CinemetaMeta.typeOf(kind)) }
+    }
+
     /** One film's details from Cinemeta (synopsis, length, cast, trailers): only its IMDb id leaves the TV. */
     suspend fun meta(imdbId: String, kind: MediaKind): CinemetaMeta? = withContext(Dispatchers.IO) {
         fetch(Cinemeta.metaUrl(imdbId, kind))?.let(Cinemeta::parseMeta)?.takeIf { it.imdbId == imdbId }
