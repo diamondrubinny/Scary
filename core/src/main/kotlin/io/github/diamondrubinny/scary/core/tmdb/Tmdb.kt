@@ -46,6 +46,8 @@ data class TmdbResult(
     val genreIds: List<Int>,
     /** ISO date (2026-11-14), when TMDB gives a valid one. */
     val releaseDate: String? = null,
+    /** ISO 639-1 code of the film's original language ("en", "hi"), when TMDB gives a valid one. */
+    val originalLanguage: String = "",
 )
 
 /** How a key is sent: a v4 read-access token goes in a header, a v3 key in the query string. */
@@ -110,6 +112,7 @@ object Tmdb {
     private val imagePath = Regex("^/[A-Za-z0-9_\\-]{5,64}\\.(jpg|jpeg|png|webp)$")
     private val imdbPattern = Regex("^tt\\d{7,8}$")
     private val isoDate = Regex("^\\d{4}-\\d{2}-\\d{2}$")
+    private val languageCode = Regex("^[a-z]{2,3}$")
     private val hebrew = Regex("[\\u0590-\\u05FF]")
     private val cyrillic = Regex("[\\u0400-\\u04FF]")
     private val arabic = Regex("[\\u0600-\\u06FF]")
@@ -276,6 +279,7 @@ object Tmdb {
         localDescription = localOverview,
         localLanguage = if (localTitle.isBlank() && localOverview.isBlank()) "" else language.code,
         releaseDate = result.releaseDate.orEmpty(),
+        originalLanguage = result.originalLanguage,
         genres = buildList {
             if (HORROR in result.genreIds) add("Horror")
             if (THRILLER in result.genreIds) add("Thriller")
@@ -342,6 +346,7 @@ object Tmdb {
             rating = (o["vote_average"] as? JsonPrimitive)?.doubleOrNull?.takeIf { it in 0.0..10.0 },
             genreIds = (o["genre_ids"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.toIntOrNull() }.orEmpty(),
             releaseDate = o.text("release_date").takeIf(isoDate::matches),
+            originalLanguage = o.text("original_language").lowercase().takeIf(languageCode::matches).orEmpty(),
         )
     }
 
@@ -357,13 +362,18 @@ data class TmdbCache(
     val language: String = "",
     val info: Map<String, TmdbInfo>,
     val rows: List<OnlineRow>,
+    /** Which shape of rows this cache holds; a cache of an older one is read as missing and fetched again at once. */
+    val rowsVersion: Int = 1,
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = 24L * 60 * 60 * 1000): Boolean =
-        nowMillis - fetchedAtMillis !in 0..maxAgeMillis
+        rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
 
     fun encode(): String = cacheJson.encodeToString(serializer(), this)
 
     companion object {
+        /** 2: the rows' films carry their original language, and those in Arabic or Indian languages are left out. */
+        const val ROWS_VERSION = 2
+
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): TmdbCache? =

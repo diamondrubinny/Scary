@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.data
 import io.github.diamondrubinny.scary.stability.HealthLog
 import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.CategoryPaging
+import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
@@ -224,7 +225,7 @@ class CinemetaRepository(context: Context) {
         val url = runCatching { Cinemeta.catalogUrl(spec.catalog, genre, skip, spec.kind) }.getOrNull()
             ?: return@withContext OnlinePage(emptyList(), null)
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
-        val ofKind = metas.filter { it.kind == spec.kind }
+        val ofKind = OriginFilter.visible(metas).filter { it.kind == spec.kind }
         OnlinePage(
             movies = if (spec.themedOnly) Cinemeta.themed(ofKind) else ofKind,
             next = EndlessCursor.after(cursor, metas.size, spec.yearChain),
@@ -234,8 +235,9 @@ class CinemetaRepository(context: Context) {
     private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
         mapOf("he" to he, "en" to en, "pt" to pt, "ru" to ru, "ar" to ar)
 
+    /** The copy on disk, without the Arab and Indian films an older version of SCARY may have kept in it. */
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
-        if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()
+        if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()?.withoutHidden()
     }
 
     /**
@@ -265,7 +267,8 @@ class CinemetaRepository(context: Context) {
                     val failed = pages.count { it == null }
                     failedPages.addAndGet(failed)
                     // A row keeps only its own kind, even if Cinemeta mixes one in.
-                    val metas = pages.filterNotNull().flatten().distinctBy { it.imdbId }.filter { it.kind == spec.kind }
+                    // Arab and Indian films stay off the shelves (core OriginFilter), as in every row below.
+                    val metas = OriginFilter.visible(pages.filterNotNull().flatten().distinctBy { it.imdbId }).filter { it.kind == spec.kind }
                         .let { if (spec.themedOnly) Cinemeta.themed(it) else it }
                     val row = metas.takeIf { it.isNotEmpty() }?.let {
                         OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
@@ -347,6 +350,7 @@ class CinemetaRepository(context: Context) {
                 async {
                     pool.withPermit { fetch(Cinemeta.catalogUrl("top", genre, page * Cinemeta.PAGE_SIZE, kind)) }
                         ?.let(Cinemeta::parseCatalog)
+                        ?.let(OriginFilter::visible)
                         ?.filter { it.kind == kind }
                 }
             }
@@ -368,7 +372,7 @@ class CinemetaRepository(context: Context) {
             val metas = fetch(Cinemeta.catalogUrl("year", year.toString(), EndlessCursor.skip(cursor), kind))?.let(Cinemeta::parseCatalog)
                 ?: return@withContext null
             val next = EndlessCursor.after(cursor, metas.size, yearChain = true)?.takeIf { EndlessCursor.yearsBack(it) <= NEW_YEARS_BACK }
-            return@withContext OnlinePage(metas.filter { it.kind == kind && Categories.matches(categoryId, it, startYear) }, next)
+            return@withContext OnlinePage(OriginFilter.visible(metas).filter { it.kind == kind && Categories.matches(categoryId, it, startYear) }, next)
         }
         val page = CategoryPaging.page(kind, cursor, startYear) ?: return@withContext OnlinePage(emptyList(), null)
         val url = runCatching {
@@ -377,7 +381,7 @@ class CinemetaRepository(context: Context) {
         }.getOrNull() ?: return@withContext OnlinePage(emptyList(), null)
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
         OnlinePage(
-            movies = metas.filter { it.kind == kind && Categories.matches(categoryId, it) },
+            movies = OriginFilter.visible(metas).filter { it.kind == kind && Categories.matches(categoryId, it) },
             next = CategoryPaging.after(kind, cursor, metas.size, startYear),
         )
     }

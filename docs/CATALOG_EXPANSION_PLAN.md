@@ -93,3 +93,15 @@
 - **The films stay in the library,** so search and "More like this" still find them. Five of the row's eight films are also in other rows (crime thrillers, found footage, zombies, creatures, European and folk horror). Three are in no row now: Rabies, Children of the Fall and Cats on a Pedal Boat.
 - **A cache written by 0.5.8 may still hold the row's films.** They are ignored (the row no longer exists) and dropped at the next daily refresh.
 
+## Update (16.11.2026): Arab and Indian films hidden everywhere, version 0.5.9
+- **At the owner's request** ("hide them everywhere", chosen over adding rows for them). One rule, in `core/catalog/OriginFilter.kt`, applied to every way a film reaches a shelf:
+  - **Cinemeta's rows, endless pages and categories:** a film is hidden when the **first** country Cinemeta lists is India or an Arab League member. A co-production led by another country stays ("United States, India" shows).
+  - **TMDB's rows and endless pages** (daily rows, the library rows that go on from TMDB): TMDB's results carry no country, so a film whose original language is Arabic, Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi, Punjabi, Gujarati, Odia or Assamese is hidden. An English-language film made in India is not caught. Urdu and Persian are not hidden (Pakistani and Iranian, not Arab or Indian).
+  - **The offline index:** 117 of its 3,862 films were removed (`build_index.py --prune`), and a new build drops them too; the other entries are byte for byte as they were. It now holds 3,745 films.
+  - **"Asian horror" no longer counts India** as Asia.
+  - **Caches from 0.5.8** are cleaned when read (Cinemeta's) or read as missing and fetched again at once (TMDB's, version 2), so no hidden film shows even for the first minute.
+- **What is not hidden:** search and the movie pages it opens, films the viewer saved or added to My list (their own choice), and the TMDB account's lists.
+- **Edge cases of the first-country rule** (found in the index): *The Pyramid* (2014) and *V/H/S/Beyond* (2024) are Hollywood films that Cinemeta lists with Morocco or the United Arab Emirates first, and *Wingrave* (2007) with Egypt first. They are hidden with the rest.
+- **A fixed rule, not a setting:** it applies to everyone who installs SCARY from this repository. Making it a switch in Settings is a small change if wanted.
+- **Tests:** `OriginFilterTest` (7).
+

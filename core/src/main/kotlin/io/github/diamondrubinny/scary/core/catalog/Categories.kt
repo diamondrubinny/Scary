@@ -303,7 +303,7 @@ object Categories {
     /** A film's first country, as Cinemeta lists it (co-productions name the main one first). */
     private val ASIA = setOf(
         "japan", "south korea", "korea", "china", "hong kong", "taiwan", "thailand", "indonesia", "philippines",
-        "malaysia", "india", "vietnam", "singapore",
+        "malaysia", "vietnam", "singapore",
     )
 }
 
