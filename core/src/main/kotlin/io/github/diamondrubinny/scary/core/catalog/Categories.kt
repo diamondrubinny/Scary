@@ -9,6 +9,7 @@ import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.cinemeta.EndlessCursor
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Subgenre
+import java.time.LocalDate
 
 /**
  * Fills the library's categories (its curated rows: zombies, vampires, haunted houses…) with more films from
@@ -20,18 +21,38 @@ import io.github.diamondrubinny.scary.core.model.Subgenre
 object Categories {
 
     /** The categories with a rule: the library's collection ids. */
-    val ids: Set<String> get() = RULES.keys + setOf(ASIAN_HORROR, CLASSICS, SERIES_MUST)
+    val ids: Set<String> get() = RULES.keys + setOf(ASIAN_HORROR, CLASSICS, SERIES_MUST) + OWN_RULES
 
-    /** Whether [meta] belongs in the category [collectionId]: films for film categories, series for series ones. */
-    fun matches(collectionId: String, meta: CinemetaMeta): Boolean {
+    /**
+     * Categories whose films are only what the catalogs bring: "New nightmares" shows films of this year and the last,
+     * not the library's picks of past years (they come back only when nothing online could be read).
+     */
+    val replacesCurated: Set<String> = setOf(NEW_NIGHTMARES)
+
+    /**
+     * Whether [meta] belongs in the category [collectionId]: films for film categories, series for series ones.
+     * [thisYear] is the year "New nightmares" counts back from.
+     */
+    fun matches(collectionId: String, meta: CinemetaMeta, thisYear: Int = LocalDate.now().year): Boolean {
         if (!Cinemeta.onTheme(meta)) return false
         val series = collectionId.startsWith(SERIES_PREFIX)
         if ((meta.kind == MediaKind.SERIES) != series) return false
         val genres = meta.genres.mapTo(HashSet()) { it.lowercase() }
         val horror = "horror" in genres
         val thriller = "thriller" in genres || "mystery" in genres
+        val country = meta.country.substringBefore(',').trim().lowercase()
+        val year = meta.year ?: 0
         return when (collectionId) {
-            ASIAN_HORROR -> horror && meta.country.substringBefore(',').trim().lowercase() in ASIA
+            ASIAN_HORROR -> horror && country in ASIA
+            NEW_NIGHTMARES -> horror && year in (thisYear - 1)..thisYear
+            STEPHEN_KING -> (horror || thriller) && meta.writer.any { it.trim().equals("Stephen King", ignoreCase = true) }
+            GIALLO -> (horror || thriller) && country == "italy" && year in 1..GIALLO_LAST_YEAR
+            CLASSIC_MONSTERS -> horror && year in 1..CLASSIC_MONSTERS_LAST_YEAR
+            HORROR_COMEDY -> horror && "comedy" in genres
+            SPANISH_HORROR -> horror && country in SPANISH_SPEAKING
+            ISRAELI_HORROR -> (horror || thriller) && meta.country.split(',').any { it.trim().equals("Israel", ignoreCase = true) }
+            EUROPEAN_HORROR -> horror && country in EUROPE
+            MAX_FEAR -> horror && (meta.imdbRating ?: 0.0) >= TOP_RATED
             CLASSICS -> horror && (meta.year ?: 0) in 1..1989 && (meta.imdbRating ?: 0.0) >= CLASSIC_RATING
             SERIES_MUST -> horror && (meta.imdbRating ?: 0.0) >= MUST_SEE_RATING
             else -> RULES[collectionId]?.let { applies(it, meta, genres) } == true
@@ -70,10 +91,15 @@ object Categories {
      * [pool] sorted into the categories, in the pool's order (Cinemeta's: most popular first), at most [max] each,
      * and without the films a category already holds ([known] IMDb ids per category).
      */
-    fun sort(pool: List<CinemetaMeta>, known: Map<String, Set<String>> = emptyMap(), max: Int = MAX_PER_CATEGORY): Map<String, List<String>> =
+    fun sort(
+        pool: List<CinemetaMeta>,
+        known: Map<String, Set<String>> = emptyMap(),
+        max: Int = MAX_PER_CATEGORY,
+        thisYear: Int = LocalDate.now().year,
+    ): Map<String, List<String>> =
         ids.associateWith { id ->
             val skip = known[id].orEmpty()
-            pool.asSequence().filter { it.imdbId !in skip && matches(id, it) }.map { it.imdbId }.distinct().take(max).toList()
+            pool.asSequence().filter { it.imdbId !in skip && matches(id, it, thisYear) }.map { it.imdbId }.distinct().take(max).toList()
         }.filterValues { it.isNotEmpty() }
 
     private class Rule(
@@ -158,6 +184,23 @@ object Categories {
             excludedWords = words("zombie", "vampir", "werewol"),
         ),
         "haunted_houses" to Rule(words(*hauntedHouse)),
+        // "Covens?" whole: "coven" alone also starts "Alien: Covenant" (checked on Cinemeta's 1,000 most popular horror films).
+        "witches" to Rule(words("witch", "covens?\\b", "sorceress", "warlock", "black magic")),
+        // Tightened on the same films: "otherworldly", "another dimension" and "the void" also took alien and slasher films.
+        "cosmic_horror" to Rule(
+            words(
+                "lovecraft", "cosmic (?:horror|terror|entity|being|force)", "eldritch", "cthulhu", "elder gods?",
+                "ancient (?:god|gods|being|beings|entity|entities)\\b", "old ones", "from beyond",
+            ),
+            excludedWords = words("alien", "extraterrestr", "ufo"),
+        ),
+        "animal_attacks" to Rule(
+            words(
+                "sharks?\\b", "crocodile", "alligator", "piranha", "killer (?:bees|ants|snakes?|spiders?|bears?|dogs?|whales?|rats|birds)",
+                "bear attack", "pack of wolves", "wolves", "giant snake", "anaconda", "python", "venomous", "swarm",
+            ),
+            excludedWords = words("vampir", "zombie", "werewol", "alien"),
+        ),
         "creatures" to Rule(words(*creatures), excludedWords = words("vampir", "zombie")),
         // The series tab's rows.
         "series_ghosts" to Rule(words(*supernatural, *hauntedHouse)),
@@ -219,12 +262,45 @@ object Categories {
     )
 
     private const val ASIAN_HORROR = "asian_horror"
+    private const val NEW_NIGHTMARES = "new_nightmares"
+    private const val STEPHEN_KING = "stephen_king"
+    private const val GIALLO = "giallo"
+    private const val CLASSIC_MONSTERS = "classic_monsters"
+    private const val HORROR_COMEDY = "horror_comedy"
+    private const val SPANISH_HORROR = "spanish_horror"
+    private const val ISRAELI_HORROR = "israeli_horror"
+    private const val EUROPEAN_HORROR = "european_horror"
+    private const val MAX_FEAR = "max_fear"
+
+    /** The categories with rules of their own (writer, country, years, genres, rating) rather than words. */
+    private val OWN_RULES = setOf(
+        NEW_NIGHTMARES, STEPHEN_KING, GIALLO, CLASSIC_MONSTERS, HORROR_COMEDY, SPANISH_HORROR, ISRAELI_HORROR,
+        EUROPEAN_HORROR, MAX_FEAR,
+    )
+    private const val GIALLO_LAST_YEAR = 1985
+    private const val CLASSIC_MONSTERS_LAST_YEAR = 1965
+
+    /** "Fear level 5" goes on with horror this well rated, after the library's own picks. */
+    private const val TOP_RATED = 7.5
     private const val CLASSICS = "classics"
     private const val SERIES_MUST = "series_must"
     private const val SERIES_PREFIX = "series_"
     private const val CLASSIC_RATING = 7.2
     private const val MUST_SEE_RATING = 8.0
     const val MAX_PER_CATEGORY = 300
+
+    private val SPANISH_SPEAKING = setOf(
+        "spain", "mexico", "argentina", "chile", "colombia", "peru", "uruguay", "venezuela", "cuba", "bolivia", "ecuador",
+        "paraguay", "dominican republic", "costa rica", "guatemala", "puerto rico",
+    )
+
+    /** Europe without the United Kingdom and Ireland, whose horror fills the other rows already. */
+    private val EUROPE = setOf(
+        "france", "germany", "italy", "spain", "belgium", "netherlands", "denmark", "sweden", "norway", "finland",
+        "iceland", "austria", "switzerland", "poland", "czech republic", "czechia", "hungary", "romania", "bulgaria",
+        "greece", "portugal", "serbia", "croatia", "slovenia", "slovakia", "estonia", "latvia", "lithuania", "ukraine",
+        "russia", "west germany", "east germany", "luxembourg",
+    )
 
     /** A film's first country, as Cinemeta lists it (co-productions name the main one first). */
     private val ASIA = setOf(

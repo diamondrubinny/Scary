@@ -106,7 +106,10 @@ class CatalogRepository(
                             // The library's categories go on with films from Cinemeta (core Categories), after their own.
                             cache.categories.entries.fold(Cinemeta.merge(base, cache.metas, cache.rows)) { acc, (collectionId, ids) ->
                                 val curated = acc.collections.firstOrNull { it.id == collectionId }?.movieIds?.size ?: 0
-                                Cinemeta.extend(acc, collectionId, ids.mapNotNull(cache.metas::get), maxRow = curated + Categories.MAX_PER_CATEGORY)
+                                // "New nightmares" is this year's and last year's films only, not the library's past picks.
+                                val replace = collectionId in Categories.replacesCurated
+                                val max = (if (replace) 0 else curated) + Categories.MAX_PER_CATEGORY
+                                Cinemeta.extend(acc, collectionId, ids.mapNotNull(cache.metas::get), maxRow = max, replace = replace)
                             }
                         } ?: base
                         val cache = tmdbCache ?: return withCinemeta
