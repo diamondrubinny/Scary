@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.5.9: the \"Israeli horror\" row is gone, and Arab and Indian films no longer show in any row (search still finds them).",
-  "he": "SCARY 0.5.9: שורת \"אימה ישראלית\" הוסרה, וסרטים ערביים והודיים לא מופיעים יותר באף שורה (החיפוש עדיין מוצא אותם).",
-  "ar": "SCARY 0.5.9: أُزيل صف \"رعب إسرائيلي\"، ولم تعد الأفلام العربية والهندية تظهر في أي صف (البحث ما زال يجدها).",
-  "pt": "SCARY 0.5.9: a fileira \"Terror israelense\" saiu, e filmes árabes e indianos não aparecem mais em nenhuma fileira (a busca ainda os encontra).",
-  "ru": "SCARY 0.5.9: ряд «Израильский хоррор» убран, а арабские и индийские фильмы больше не показываются ни в одном ряду (поиск их по-прежнему находит)."
+  "en": "SCARY 0.5.11: the player finds subtitles online by the film's name, by itself when your language is missing, or from Audio and subtitles → Find subtitles online (it can be turned off). Also: American films no longer fill the European, Spanish and Asian horror rows.",
+  "he": "SCARY 0.5.11: הנגן מוצא כתוביות באינטרנט לפי שם הסרט, מעצמו כשחסרה שפה שלכם, או מ\"שמע וכתוביות\" ← \"חיפוש כתוביות באינטרנט\" (אפשר לכבות). בנוסף: סרטים אמריקאיים כבר לא ממלאים את שורות האימה האירופית, הספרדית והאסייתית.",
+  "ar": "SCARY 0.5.11: يجد المشغّل الترجمة على الإنترنت حسب اسم الفيلم، من تلقاء نفسه عند غياب لغتك، أو من «الصوت والترجمة» ← «البحث عن ترجمة على الإنترنت» (يمكن إيقافه). وأيضًا: لم تعد الأفلام الأمريكية تملأ صفوف الرعب الأوروبي والإسباني والآسيوي.",
+  "pt": "SCARY 0.5.11: o player encontra legendas na internet pelo nome do filme, sozinho quando falta o seu idioma, ou em Áudio e legendas → Buscar legendas na internet (dá para desligar). Também: filmes americanos não enchem mais as fileiras de terror europeu, espanhol e asiático.",
+  "ru": "SCARY 0.5.11: плеер находит субтитры в интернете по названию фильма: сам, если нет вашего языка, или в «Звук и субтитры» → «Поиск субтитров в интернете» (можно выключить). Также: американские фильмы больше не заполняют ряды европейских, испанских и азиатских ужасов."
 }

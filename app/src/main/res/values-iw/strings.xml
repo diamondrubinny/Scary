@@ -643,6 +643,17 @@
     <string name="track_unsupported">הטלוויזיה לא יכולה לנגן אותה</string>
     <string name="player_subtitle_loading">טוען…</string>
     <string name="player_subtitle_failed">לא הצלחנו לטעון את הכתוביות האלה.</string>
+    <string name="tracks_online">חיפוש כתוביות באינטרנט</string>
+    <string name="tracks_online_on">חיפוש כתוביות באינטרנט: פעיל</string>
+    <string name="tracks_online_off">חיפוש כתוביות באינטרנט: כבוי</string>
+    <string name="tracks_online_privacy">שירות כתוביות (תוסף OpenSubtitles של Stremio) מקבל את מספר ה־IMDb של הסרט ואת השפה, יחד עם כתובת הטלוויזיה הזו. עבור קובץ ש־SCARY לא מכיר, הכותרת שנקראת משם הקובץ נשלחת ל־Cinemeta כדי למצוא את המספר. לעולם לא החשבונות או ההיסטוריה שלך.</string>
+    <string name="tracks_online_searching">מחפש כתוביות…</string>
+    <string name="tracks_online_unreachable">לא הצלחנו להגיע לשירות הכתוביות.</string>
+    <string name="tracks_online_none">לא נמצאו כתוביות באינטרנט לסרט הזה.</string>
+    <string name="tracks_online_search">חפש שוב</string>
+    <string name="tracks_online_count">כתוביות: %1$d</string>
+    <string name="track_online">נמצאו באינטרנט</string>
+    <string name="player_online_found">נמצאו כתוביות: %1$s</string>
     <string name="player_convert_failed">אין גרסה מומרת לקובץ הזה.</string>
     <string name="player_no_sound">הטלוויזיה לא יכולה לנגן את הסאונד של הסרט הזה.</string>
     <string name="player_no_sound_format">הטלוויזיה לא יכולה לנגן את הסאונד של הסרט הזה (%1$s).</string>
@@ -722,6 +733,7 @@
     <string name="diag_freeze">היתקעויות: %2$d · אחרונה: %1$s</string>
     <string name="diag_online">סרטים מהרשת: %1$s</string>
     <string name="diag_refresh">רענון אחרון (עמודים שנטענו: שורות · קטגוריות): %1$s</string>
+    <string name="diag_quality">בדיקת מוצא (סרטים שהוצאו משורות לפי מקום · ממתינים לשפה): %1$s</string>
     <string name="diag_none">לא נרשמו קריסות או היתקעויות.</string>
     <string name="diag_clear">ניקוי האבחון</string>
 </resources>

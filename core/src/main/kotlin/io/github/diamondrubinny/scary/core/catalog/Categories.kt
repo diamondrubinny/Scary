@@ -20,6 +20,14 @@ import java.time.LocalDate
  */
 object Categories {
 
+    /** The rows that are about a place, each with its region: their films go through [Origin]. */
+    val PLACE_ROWS: Map<String, Origin.Region> = mapOf(
+        "asian_horror" to Origin.Region.ASIA,
+        "giallo" to Origin.Region.ITALY,
+        "spanish_horror" to Origin.Region.SPANISH,
+        "european_horror" to Origin.Region.EUROPE,
+    )
+
     /** The categories with a rule: the library's collection ids. */
     val ids: Set<String> get() = RULES.keys + setOf(ASIAN_HORROR, CLASSICS, SERIES_MUST) + OWN_RULES
 
@@ -40,17 +48,16 @@ object Categories {
         val genres = meta.genres.mapTo(HashSet()) { it.lowercase() }
         val horror = "horror" in genres
         val thriller = "thriller" in genres || "mystery" in genres
-        val country = meta.country.substringBefore(',').trim().lowercase()
         val year = meta.year ?: 0
         return when (collectionId) {
-            ASIAN_HORROR -> horror && country in ASIA
+            ASIAN_HORROR -> horror && Origin.verdict(Origin.Region.ASIA, meta) == Origin.Verdict.IN
             NEW_NIGHTMARES -> horror && year in (thisYear - 1)..thisYear
             STEPHEN_KING -> (horror || thriller) && meta.writer.any { it.trim().equals("Stephen King", ignoreCase = true) }
-            GIALLO -> (horror || thriller) && country == "italy" && year in 1..GIALLO_LAST_YEAR
+            GIALLO -> (horror || thriller) && year in 1..GIALLO_LAST_YEAR && Origin.verdict(Origin.Region.ITALY, meta) == Origin.Verdict.IN
             CLASSIC_MONSTERS -> horror && year in 1..CLASSIC_MONSTERS_LAST_YEAR
             HORROR_COMEDY -> horror && "comedy" in genres
-            SPANISH_HORROR -> horror && country in SPANISH_SPEAKING
-            EUROPEAN_HORROR -> horror && country in EUROPE
+            SPANISH_HORROR -> horror && Origin.verdict(Origin.Region.SPANISH, meta) == Origin.Verdict.IN
+            EUROPEAN_HORROR -> horror && Origin.verdict(Origin.Region.EUROPE, meta) == Origin.Verdict.IN
             MAX_FEAR -> horror && (meta.imdbRating ?: 0.0) >= TOP_RATED
             CLASSICS -> horror && (meta.year ?: 0) in 1..1989 && (meta.imdbRating ?: 0.0) >= CLASSIC_RATING
             SERIES_MUST -> horror && (meta.imdbRating ?: 0.0) >= MUST_SEE_RATING
@@ -98,7 +105,11 @@ object Categories {
     ): Map<String, List<String>> =
         ids.associateWith { id ->
             val skip = known[id].orEmpty()
-            pool.asSequence().filter { it.imdbId !in skip && matches(id, it, thisYear) }.map { it.imdbId }.distinct().take(max).toList()
+            val matching = pool.asSequence().filter { it.imdbId !in skip && matches(id, it, thisYear) }
+            // A row about a place lists the films its countries say first, then those only their language says.
+            val region = PLACE_ROWS[id]
+            val ordered = if (region == null) matching else matching.sortedBy { Origin.fit(region, it) }
+            ordered.map { it.imdbId }.distinct().take(max).toList()
         }.filterValues { it.isNotEmpty() }
 
     private class Rule(
@@ -286,25 +297,6 @@ object Categories {
     private const val CLASSIC_RATING = 7.2
     private const val MUST_SEE_RATING = 8.0
     const val MAX_PER_CATEGORY = 300
-
-    private val SPANISH_SPEAKING = setOf(
-        "spain", "mexico", "argentina", "chile", "colombia", "peru", "uruguay", "venezuela", "cuba", "bolivia", "ecuador",
-        "paraguay", "dominican republic", "costa rica", "guatemala", "puerto rico",
-    )
-
-    /** Europe without the United Kingdom and Ireland, whose horror fills the other rows already. */
-    private val EUROPE = setOf(
-        "france", "germany", "italy", "spain", "belgium", "netherlands", "denmark", "sweden", "norway", "finland",
-        "iceland", "austria", "switzerland", "poland", "czech republic", "czechia", "hungary", "romania", "bulgaria",
-        "greece", "portugal", "serbia", "croatia", "slovenia", "slovakia", "estonia", "latvia", "lithuania", "ukraine",
-        "russia", "west germany", "east germany", "luxembourg",
-    )
-
-    /** A film's first country, as Cinemeta lists it (co-productions name the main one first). */
-    private val ASIA = setOf(
-        "japan", "south korea", "korea", "china", "hong kong", "taiwan", "thailand", "indonesia", "philippines",
-        "malaysia", "vietnam", "singapore",
-    )
 }
 
 /**

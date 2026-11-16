@@ -149,6 +149,16 @@ object Tmdb {
         return "$API/find/$imdbId?external_source=imdb_id&language=${language.tmdbTag}"
     }
 
+    /** A film's details, of which only the original language is read (core Origin). */
+    fun movieUrl(tmdbId: Long): String {
+        require(tmdbId > 0) { "invalid TMDB id" }
+        return "$API/movie/$tmdbId"
+    }
+
+    /** "de", "is": the film's original language from [movieUrl]'s answer; null when it is missing or not a language code. */
+    fun parseOriginalLanguage(text: String): String? =
+        (root(text)?.get("original_language") as? JsonPrimitive)?.contentOrNull?.trim()?.lowercase()?.takeIf(languageCode::matches)
+
     fun externalIdsUrl(tmdbId: Long): String {
         require(tmdbId > 0) { "invalid TMDB id" }
         return "$API/movie/$tmdbId/external_ids"

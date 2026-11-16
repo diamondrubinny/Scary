@@ -27,6 +27,7 @@ object HealthLog {
     private const val FREEZES = "freezes"
     private const val ONLINE = "online"
     private const val REFRESH = "refresh"
+    private const val QUALITY = "quality"
     private const val OWN_PACKAGE = "io.github.diamondrubinny.scary"
     private const val FRAMES = 4
 
@@ -37,6 +38,8 @@ object HealthLog {
         val online: String?,
         /** "15.11 10:30 · 28/30 · 70/70": pages of the online rows, then of the categories, loaded of those asked for. */
         val refresh: String? = null,
+        /** "16.11 21:10 · 41 · 3": American films kept out of the rows about a place, and those waiting for a language. */
+        val quality: String? = null,
     )
 
     fun read(context: Context): Report {
@@ -47,6 +50,7 @@ object HealthLog {
             prefs.getInt(FREEZES, 0),
             prefs.getString(ONLINE, null),
             prefs.getString(REFRESH, null),
+            prefs.getString(QUALITY, null),
         )
     }
 
@@ -70,6 +74,12 @@ object HealthLog {
         val categories = if (categoriesLoaded != null && categoriesTotal != null) " · $categoriesLoaded/$categoriesTotal" else ""
         val line = "${stamp()} · $rowsLoaded/$rowsTotal$categories"
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(REFRESH, line) }
+    }
+
+    /** The origin check of the last refresh (core RowAudit.held): counts only, never a film's name. */
+    fun recordQuality(context: Context, keptOut: Int, unclear: Int) {
+        val line = "${stamp()} · $keptOut · $unclear"
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(QUALITY, line) }
     }
 
     private fun recordFreeze(context: Context, seconds: Float, frames: Array<StackTraceElement>) {

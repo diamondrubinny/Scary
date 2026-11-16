@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core.realdebrid
 
 import io.github.diamondrubinny.scary.core.catalog.Search
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.player.FileNames
 
 /**
  * Which of the viewer's own files are a given film: "The.Shining.1980.1080p.BluRay.x264.mkv" is The Shining (1980).
@@ -19,12 +20,6 @@ object FileMatch {
     private val yearPattern = Regex("(?<![0-9])(19[0-9]{2}|20[0-9]{2})(?![0-9])")
     private val episodePattern = Regex("(?i)\\bS\\d{1,2}\\s?E\\d{1,3}\\b|\\b\\d{1,2}x\\d{2}\\b")
 
-    /** Words that start the technical part of a release name when there is no year. */
-    private val qualityWords = setOf(
-        "2160p", "1080p", "720p", "480p", "4k", "uhd", "bluray", "bdrip", "brrip", "webrip", "web", "webdl", "hdtv", "dvdrip",
-        "remux", "x264", "x265", "h264", "h265", "hevc", "hdr", "proper", "repack", "extended", "unrated", "remastered",
-    )
-
     fun parse(fileName: String): Parsed {
         val base = fileName.substringBeforeLast('.').takeIf { '.' in fileName && fileName.substringAfterLast('.').length in 2..5 } ?: fileName
         val spaced = base.replace(Regex("[._]+"), " ").replace(Regex("[\\[\\](){}]"), " ").trim()
@@ -34,7 +29,7 @@ object FileMatch {
         val titlePart = if (year != null) {
             spaced.substring(0, year.range.first)
         } else {
-            spaced.split(' ').takeWhile { it.lowercase() !in qualityWords }.joinToString(" ")
+            spaced.split(' ').takeWhile { it.lowercase() !in FileNames.QUALITY_WORDS }.joinToString(" ")
         }
         return Parsed(Search.normalize(titlePart).trim(), year?.value?.toInt(), episode)
     }

@@ -638,6 +638,17 @@
     <string name="track_unsupported">this TV can\'t play it</string>
     <string name="player_subtitle_loading">loading…</string>
     <string name="player_subtitle_failed">These subtitles could not be loaded.</string>
+    <string name="tracks_online">Find subtitles online</string>
+    <string name="tracks_online_on">Find subtitles online: on</string>
+    <string name="tracks_online_off">Find subtitles online: off</string>
+    <string name="tracks_online_privacy">A subtitle service (Stremio\'s OpenSubtitles add-on) receives the film\'s IMDb number and the language, with this TV\'s address. For a file SCARY does not know, the title read from its name goes to Cinemeta to find that number. Never your accounts or your history.</string>
+    <string name="tracks_online_searching">Searching for subtitles…</string>
+    <string name="tracks_online_unreachable">The subtitle service could not be reached.</string>
+    <string name="tracks_online_none">No subtitles were found online for this film.</string>
+    <string name="tracks_online_search">Search again</string>
+    <string name="tracks_online_count">Subtitles: %1$d</string>
+    <string name="track_online">found online</string>
+    <string name="player_online_found">Subtitles found: %1$s</string>
     <string name="player_convert_failed">No converted version of this file is available.</string>
     <string name="player_no_sound">This TV can\'t play this film\'s sound.</string>
     <string name="player_no_sound_format">This TV can\'t play this film\'s sound (%1$s).</string>
@@ -716,6 +727,7 @@
     <string name="diag_freeze">Freezes: %2$d · last: %1$s</string>
     <string name="diag_online">Online films: %1$s</string>
     <string name="diag_refresh">Last refresh (pages loaded: rows · categories): %1$s</string>
+    <string name="diag_quality">Origin check (films kept out of rows about a place · waiting for a language): %1$s</string>
     <string name="diag_none">No crashes or freezes recorded.</string>
     <string name="diag_clear">Clear diagnostics</string>
 </resources>

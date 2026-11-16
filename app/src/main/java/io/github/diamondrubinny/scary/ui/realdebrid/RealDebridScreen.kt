@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.player.LanguagePrefs
 import io.github.diamondrubinny.scary.ui.player.LanguagePrefButtons
+import io.github.diamondrubinny.scary.ui.player.OnlineSubtitlesToggle
 import io.github.diamondrubinny.scary.ui.player.continueDetail
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.brand.Donation
@@ -72,6 +73,8 @@ class RealDebridActions(
     val onClearHistory: () -> Unit = {},
     /** The languages the player chooses by itself in every film. */
     val onLanguages: (LanguagePrefs) -> Unit = {},
+    /** Whether the player may look for subtitles online by the film's name. */
+    val onOnlineSubtitles: (Boolean) -> Unit = {},
 )
 
 /**
@@ -86,6 +89,7 @@ fun RealDebridScreen(
     actions: RealDebridActions,
     history: List<WatchEntry> = emptyList(),
     languages: LanguagePrefs = LanguagePrefs(),
+    onlineSubtitles: Boolean = true,
 ) {
     val firstFocus = remember { FocusRequester() }
     // Leaving while waiting stops asking Real-Debrid: approving later would not reach the TV anyway.
@@ -135,7 +139,12 @@ fun RealDebridScreen(
         if (state is State.SignedIn) {
             // The player's languages, for every film: also in the player's "Audio and subtitles" window.
             BasicText(stringResource(R.string.tracks_every_film), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) { LanguagePrefButtons(languages, actions.onLanguages) }
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                LanguagePrefButtons(languages, actions.onLanguages)
+                OnlineSubtitlesToggle(onlineSubtitles, actions.onOnlineSubtitles)
+            }
+            // What leaves the TV when it is on, in plain words.
+            BasicText(stringResource(R.string.tracks_online_privacy), style = ScaryType.Caption.copy(color = ScaryColors.Ash))
         }
         if (state is State.SignedIn && history.isNotEmpty()) {
             // Where the viewer stopped, and the spots they marked: on this TV only.

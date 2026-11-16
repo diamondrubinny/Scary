@@ -17,6 +17,12 @@ import io.github.diamondrubinny.scary.core.tmdb.TmdbResult
 import io.github.diamondrubinny.scary.core.tmdb.TmdbRow
 import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
 import io.github.diamondrubinny.scary.core.tmdb.WatchProviders
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.put
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -193,6 +199,67 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         offers
     }
 
+    private val languagesFile = File(context.filesDir, "origin_languages.json")
+    private val languages = LinkedHashMap<Long, String>()
+    private var languagesLoaded = false
+
+    /**
+     * The original language of films by TMDB id ("is" for Lamb), for the rows about a place (core Origin): an American
+     * film with a European producer is told from a European one by it. Only the ids of films whose origin is unclear are
+     * asked about, a few at a time, and each answer is kept on the TV for good (a film's language does not change; a
+     * film TMDB does not know is kept as unknown). Empty without a key. Never throws.
+     */
+    suspend fun originalLanguages(ids: List<Long>): Map<Long, String> = withContext(Dispatchers.IO) {
+        val wanted = ids.filter { it > 0 }.distinct()
+        synchronized(languages) { loadLanguages() }
+        val key = auth
+        val missing = if (key == null) emptyList() else synchronized(languages) { wanted.filter { it !in languages } }.take(MAX_LANGUAGE_LOOKUPS)
+        if (key != null && missing.isNotEmpty()) {
+            missing.chunked(PARALLEL_REQUESTS).forEach { chunk ->
+                coroutineScope { chunk.map { id -> async { id to fetchLanguage(id, key) } }.awaitAll() }.forEach { (id, language) ->
+                    if (language != null) synchronized(languages) { languages[id] = language }
+                }
+            }
+            synchronized(languages) {
+                while (languages.size > MAX_LANGUAGES) languages.remove(languages.keys.first())
+                saveLanguages()
+            }
+        }
+        synchronized(languages) { wanted.mapNotNull { id -> languages[id]?.takeIf { it != NO_LANGUAGE }?.let { id to it } }.toMap() }
+    }
+
+    /** The film's language; [NO_LANGUAGE] when TMDB does not know the film (kept); null when it could not be asked (tried again later). */
+    private fun fetchLanguage(tmdbId: Long, key: TmdbAuth): String? {
+        val answer = get(Tmdb.movieUrl(tmdbId), key) ?: return null
+        return when {
+            answer.ok -> answer.body?.let(Tmdb::parseOriginalLanguage) ?: NO_LANGUAGE
+            answer.code == HttpURLConnection.HTTP_NOT_FOUND -> NO_LANGUAGE
+            else -> null
+        }
+    }
+
+    private fun loadLanguages() {
+        if (languagesLoaded) return
+        languagesLoaded = true
+        runCatching {
+            Json.parseToJsonElement(languagesFile.takeIf { it.exists() }?.readText() ?: return).jsonObject.forEach { (id, value) ->
+                val language = (value as? JsonPrimitive)?.contentOrNull
+                if (id.toLongOrNull()?.takeIf { it > 0 } != null && language != null && (language == NO_LANGUAGE || language.length in 2..3)) {
+                    languages[id.toLong()] = language
+                }
+            }
+        }
+    }
+
+    private fun saveLanguages() {
+        runCatching {
+            val text = buildJsonObject { languages.forEach { (id, language) -> put(id.toString(), language) } }.toString()
+            val tmp = File(languagesFile.parentFile, languagesFile.name + ".tmp")
+            tmp.writeText(text)
+            if (!tmp.renameTo(languagesFile)) tmp.delete()
+        }.onFailure { Log.w(TAG, "Could not save film languages: ${it.javaClass.simpleName}") }
+    }
+
     /** An answer from TMDB: the status code, and the body of a successful (2xx) answer. */
     data class Response(val code: Int, val body: String?) {
         val ok: Boolean get() = code in 200..299
@@ -321,6 +388,9 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val PROVIDERS_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
         const val MAX_IDS = 5_000
+        const val MAX_LANGUAGE_LOOKUPS = 300
+        const val MAX_LANGUAGES = 6_000
+        const val NO_LANGUAGE = "-"
         val METHODS = setOf("GET", "POST", "DELETE")
     }
 }

@@ -62,6 +62,7 @@ import io.github.diamondrubinny.scary.data.OnlinePage
 import io.github.diamondrubinny.scary.data.Rating
 import io.github.diamondrubinny.scary.data.RealDebridRepository
 import io.github.diamondrubinny.scary.data.StremioRepository
+import io.github.diamondrubinny.scary.data.SubtitleRepository
 import io.github.diamondrubinny.scary.core.stremio.StremioItem
 import io.github.diamondrubinny.scary.core.stremio.Stremio
 import io.github.diamondrubinny.scary.data.WatchStore
@@ -132,6 +133,8 @@ class HomeViewModel(
     private val watchStore: WatchStore? = null,
     /** The viewer's own Stremio account, when they connect it; null in tests that do not need it. */
     private val stremio: StremioRepository? = null,
+    /** Subtitles found online by the film's name, for the internal player; null in tests that do not need it. */
+    private val subtitleRepository: SubtitleRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -228,6 +231,13 @@ class HomeViewModel(
 
     fun setPlayerLanguages(prefs: LanguagePrefs) {
         watchStore?.setLanguages(prefs)
+    }
+
+    /** Whether the player may look for subtitles online by the film's name (see WatchStore.onlineSubtitles). */
+    val playerOnlineSubtitles: StateFlow<Boolean> = watchStore?.onlineSubtitles ?: MutableStateFlow(true)
+
+    fun setPlayerOnlineSubtitles(on: Boolean) {
+        watchStore?.setOnlineSubtitles(on)
     }
 
     /** The viewer's Stremio library as last read (empty when not connected). */
@@ -1223,7 +1233,10 @@ class HomeViewModel(
             val next = (repository.files() as? RealDebridRepository.Files.Ready)?.files?.let { files ->
                 WatchHistory.nextInTorrent(file.key, files.map { it.key })?.let { key -> files.firstOrNull { it.key == key } }
             }
-            val session = PlayerSession(file.key, playable, movieId, startAtMs, next, file.subtitles, repository::subtitleFile)
+            // The film SCARY knows this file for (its IMDb id is exact); else the file's name is read when subtitles are searched.
+            val film = movieId?.let(::movieById)
+            val online = subtitleRepository?.source(file.name, film?.imdbId?.takeIf { it.isNotBlank() }, film?.isSeries ?: false)
+            val session = PlayerSession(file.key, playable, movieId, startAtMs, next, file.subtitles, repository::subtitleFile, online)
             val replacing = _player.value != null
             _player.value = session
             if (!replacing) push(Screen.Player)
@@ -2288,6 +2301,7 @@ class HomeViewModel(
                     container.realDebrid,
                     container.watchStore,
                     container.stremio,
+                    container.subtitleRepository,
                 )
             }
         }

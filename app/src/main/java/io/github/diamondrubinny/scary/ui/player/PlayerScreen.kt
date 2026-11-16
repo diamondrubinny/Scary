@@ -46,6 +46,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -104,6 +105,7 @@ import androidx.media3.common.Format
 import androidx.media3.common.text.Cue
 import io.github.diamondrubinny.scary.core.player.LanguagePrefs
 import io.github.diamondrubinny.scary.core.player.Languages
+import io.github.diamondrubinny.scary.core.player.OnlineSubtitles
 import io.github.diamondrubinny.scary.core.player.SubtitleFiles
 import io.github.diamondrubinny.scary.core.player.TrackChoice
 import io.github.diamondrubinny.scary.core.player.TrackInfo
@@ -199,6 +201,16 @@ fun PlayerScreen(
     // Subtitle files of the torrent fetched so far ("x<index>" to the file on the TV), and the one being fetched.
     val loadedSubtitles = remember { mutableStateMapOf<String, File>() }
     var loadingSubtitle by remember { mutableStateOf<String?>(null) }
+    // Subtitles found online (core OnlineSubtitles): what the service has for this film, the ones fetched and added to the
+    // player so far (track id "o<index>"), and the language being fetched.
+    val onlineSetting = remember(settings) { settings?.onlineSubtitles ?: MutableStateFlow(true) }
+    val onlineAllowed by onlineSetting.collectAsState()
+    val latestOnlineAllowed by rememberUpdatedState(onlineAllowed)
+    var onlinePhase by remember { mutableStateOf(OnlinePhase.IDLE) }
+    var onlineEntries by remember { mutableStateOf<List<OnlineSubtitles.Entry>>(emptyList()) }
+    val onlineFetched = remember { mutableStateListOf<OnlineFetched>() }
+    var loadingOnline by remember { mutableStateOf<String?>(null) }
+    val viewerLocale = LocalLocale.current.platformLocale
     var bitmapCues by remember { mutableStateOf<List<Cue>>(emptyList()) }
     var noAudioDismissed by remember { mutableStateOf(false) }
     // What is playing: the file's own link, or Real-Debrid's converted (HLS) stream.
@@ -227,6 +239,8 @@ fun PlayerScreen(
     val markedText = stringResource(R.string.player_marked, "%s")
     val markFailedText = stringResource(R.string.player_mark_failed)
     val subtitleFailedText = stringResource(R.string.player_subtitle_failed)
+    val onlineFoundText = stringResource(R.string.player_online_found, "%s")
+    val onlineNoneText = stringResource(R.string.tracks_online_none)
     val convertFailedText = stringResource(R.string.player_convert_failed)
 
     fun poke() {
@@ -257,7 +271,16 @@ fun PlayerScreen(
                 .setSelectionFlags(0)
                 .build()
         }
-        val item = MediaItem.Builder().setUri(mediaUri).apply { if (mediaIsHls) setMimeType(MimeTypes.APPLICATION_M3U8) }.setSubtitleConfigurations(subtitles).build()
+        val online = onlineFetched.mapIndexed { index, fetched ->
+            MediaItem.SubtitleConfiguration.Builder(Uri.fromFile(fetched.file))
+                .setMimeType(OnlineSubtitles.mimeType(fetched.entry))
+                .setLanguage(fetched.entry.language)
+                .setLabel(fetched.entry.label)
+                .setId(ONLINE_PREFIX + index)
+                .setSelectionFlags(0)
+                .build()
+        }
+        val item = MediaItem.Builder().setUri(mediaUri).apply { if (mediaIsHls) setMimeType(MimeTypes.APPLICATION_M3U8) }.setSubtitleConfigurations(subtitles + online).build()
         val play = player.playWhenReady
         player.setMediaItem(item, at)
         player.prepare()
@@ -317,6 +340,65 @@ fun PlayerScreen(
             }
         }
         if (changed) player.trackSelectionParameters = params.build()
+    }
+
+    /** Asks the service what it has for this film (once the viewer allows it); [then] runs when there is something. */
+    fun searchOnline(then: (List<OnlineSubtitles.Entry>) -> Unit = {}) {
+        val source = session.online ?: return
+        if (!latestOnlineAllowed || onlinePhase == OnlinePhase.SEARCHING) return
+        onlinePhase = OnlinePhase.SEARCHING
+        scope.launch {
+            val found = source.search()
+            onlineEntries = found.orEmpty()
+            onlinePhase = when {
+                found == null -> OnlinePhase.UNREACHABLE
+                found.isEmpty() -> OnlinePhase.NONE
+                else -> OnlinePhase.READY
+            }
+            if (!found.isNullOrEmpty()) then(found)
+        }
+    }
+
+    /**
+     * The best subtitle in [language] for this file, fetched and played. [auto]: chosen by the player itself (no
+     * message when nothing is found, "Subtitles found" when it is) rather than by the viewer in the window.
+     */
+    fun fetchOnline(language: String, auto: Boolean, entries: List<OnlineSubtitles.Entry>) {
+        val source = session.online ?: return
+        if (loadingOnline != null || !latestOnlineAllowed) return
+        val best = OnlineSubtitles.best(entries, language, session.playable.title, player.videoFormat?.frameRate?.takeIf { it > 0f }?.toDouble())
+        if (best == null) {
+            if (!auto) say(onlineNoneText)
+            return
+        }
+        val key = TrackInfo.of(TrackKind.TEXT, "o", best.language, best.label, null, online = true).key
+        fun remember() {
+            if (auto) return
+            settings?.let { it.rememberTracks(session.key, (it.trackMemory(session.key) ?: TrackMemory()).copy(subtitle = key, subtitlesOff = false)) }
+        }
+        if (onlineFetched.any { it.entry.id == best.id }) {
+            // Already added to the player: just play it.
+            wantedText = key
+            remember()
+            applyWanted(describeTracks(tracks, session.subtitles))
+            return
+        }
+        loadingOnline = language
+        val chosenBefore = wantedText
+        scope.launch {
+            val file = source.fetch(best)
+            loadingOnline = null
+            if (file == null) {
+                if (!auto) say(subtitleFailedText)
+            } else {
+                onlineFetched += OnlineFetched(best, file)
+                // A subtitle found by itself never takes the place of one the viewer picked while it was being fetched.
+                if (!auto || wantedText == chosenBefore) wantedText = key
+                remember()
+                reloadMedia()
+                if (auto && wantedText == key) say(onlineFoundText.replace("%s", languageNameIn(language, viewerLocale)))
+            }
+        }
     }
 
     /** The TV cannot play this file (or its sound): Real-Debrid's converted (HLS) stream, once. */
@@ -393,6 +475,16 @@ fun PlayerScreen(
                     wantedAudio = audio?.key
                     wantedText = TrackChoice.pickSubtitle(described.infos, latestLanguages, audio?.language, memory)?.key
                     tracksChosen = true
+                    // No subtitles in the viewer's language (none in the file, none in the torrent): look online by itself.
+                    // A subtitle the viewer chose online for this file before comes back the same way.
+                    val preferred = latestLanguages.subtitles
+                    val language = TrackInfo.onlineLanguageOf(memory?.subtitle)
+                        ?: preferred?.takeIf { l ->
+                            memory?.subtitlesOff != true && described.infos.none { it.kind == TrackKind.TEXT && it.language == l && !it.isForced }
+                        }
+                    if (language != null && session.online != null && latestOnlineAllowed) {
+                        searchOnline { found -> fetchOnline(language, auto = true, entries = found) }
+                    }
                 }
                 applyWanted(described)
             }
@@ -439,6 +531,10 @@ fun PlayerScreen(
             }
             if (playing && !showBookmarks && !showTracks && System.currentTimeMillis() - lastInteraction > HIDE_AFTER_MS) controlsVisible = false
         }
+    }
+    // The window shows what the service has for this film as soon as it opens (when the viewer allows searching online).
+    LaunchedEffect(showTracks, onlineAllowed) {
+        if (showTracks && onlineAllowed && onlinePhase == OnlinePhase.IDLE) searchOnline()
     }
     // Delayed subtitles come up when the film reaches their time.
     LaunchedEffect(player, subtitleDelayMs) {
@@ -650,6 +746,15 @@ fun PlayerScreen(
                     selectedText = described.selectedText,
                     loadingText = loadingSubtitle,
                     prefs = languages,
+                    online = session.online?.let {
+                        OnlinePickerState(
+                            enabled = onlineAllowed,
+                            phase = onlinePhase,
+                            languages = OnlineSubtitles.languages(onlineEntries, listOf(languages.subtitles, playingAudio?.language)),
+                            loading = loadingOnline,
+                            playing = described.infos.firstOrNull { it.id == described.selectedText && it.online }?.language,
+                        )
+                    },
                 ),
                 actions = TrackPickerActions(
                     onAudio = { track ->
@@ -672,6 +777,12 @@ fun PlayerScreen(
                         showTracks = false
                         poke()
                     },
+                    onOnlineEnabled = { on -> settings?.setOnlineSubtitles(on) },
+                    onOnlineSearch = {
+                        onlinePhase = OnlinePhase.IDLE
+                        searchOnline()
+                    },
+                    onOnlineLanguage = { language -> fetchOnline(language, auto = false, entries = onlineEntries) },
                 ),
                 focusRequester = tracksFocus,
                 modifier = Modifier.align(Alignment.CenterEnd).padding(32.dp),
@@ -998,6 +1109,12 @@ private fun NextFileCard(
 /** The id a subtitle file of the torrent gets in the player, so its track is known again ("…x2"). */
 private const val EXTERNAL_PREFIX = "scary-sub-"
 
+/** The id a subtitle found online gets in the player ("…o1"): its track is known by its place in the list fetched. */
+private const val ONLINE_PREFIX = "scary-online-"
+
+/** A subtitle found online and fetched: what the service said, and the UTF-8 file on the TV. */
+private class OnlineFetched(val entry: OnlineSubtitles.Entry, val file: File)
+
 /**
  * The player's tracks in plain values (core TrackInfo), each with the group and index to select it by, and which play
  * now. Subtitle files of the torrent are listed whether fetched yet or not ("x<index>").
@@ -1026,7 +1143,8 @@ private fun describeTracks(tracks: Tracks, subtitles: List<RealDebrid.RdSubtitle
             val format = group.getTrackFormat(index)
             // A subtitle file of the torrent, added by SCARY: known again by its place in the torrent.
             val externalIndex = format.id?.substringAfter(EXTERNAL_PREFIX, "")?.toIntOrNull()?.takeIf { kind == TrackKind.TEXT }
-            val id = externalIndex?.let { "x$it" } ?: "g$groupIndex:$index"
+            val onlineIndex = format.id?.substringAfter(ONLINE_PREFIX, "")?.toIntOrNull()?.takeIf { kind == TrackKind.TEXT }
+            val id = externalIndex?.let { "x$it" } ?: onlineIndex?.let { "o$it" } ?: "g$groupIndex:$index"
             // Subtitles parsed while the file is read keep their own format in "codecs".
             val mime = if (format.sampleMimeType == MimeTypes.APPLICATION_MEDIA3_CUES) format.codecs else format.sampleMimeType
             val info = TrackInfo.of(
@@ -1043,6 +1161,7 @@ private fun describeTracks(tracks: Tracks, subtitles: List<RealDebrid.RdSubtitle
                 isSdh = format.roleFlags and C.ROLE_FLAG_DESCRIBES_MUSIC_AND_SOUND != 0,
                 supported = group.isTrackSupported(index),
                 external = externalIndex != null,
+                online = onlineIndex != null,
             )
             infos += info
             handles[id] = group to index

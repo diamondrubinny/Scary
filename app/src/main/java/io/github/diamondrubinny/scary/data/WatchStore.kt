@@ -70,6 +70,19 @@ class WatchStore(context: Context) {
         return LanguagePrefs(audio = read(AUDIO_LANGUAGE), subtitles = read(SUBTITLE_LANGUAGE))
     }
 
+    private val _onlineSubtitles = MutableStateFlow(prefs.getBoolean(ONLINE_SUBTITLES, true))
+
+    /**
+     * Whether the player may look for subtitles online by the film's name (on unless the viewer turns it off). Off sends
+     * nothing: no search, no film id.
+     */
+    val onlineSubtitles: StateFlow<Boolean> = _onlineSubtitles.asStateFlow()
+
+    fun setOnlineSubtitles(value: Boolean) {
+        _onlineSubtitles.value = value
+        prefs.edit { putBoolean(ONLINE_SUBTITLES, value) }
+    }
+
     private val memories: LinkedHashMap<String, TrackMemory> by lazy { TrackChoice.decodeAll(prefs.getString(TRACK_MEMORY, null)) }
 
     /** The tracks the viewer chose for one file, if they changed any. */
@@ -124,6 +137,7 @@ class WatchStore(context: Context) {
         const val AUDIO_LANGUAGE = "audio_language"
         const val SUBTITLE_LANGUAGE = "subtitle_language"
         const val TRACK_MEMORY = "track_memory"
+        const val ONLINE_SUBTITLES = "online_subtitles"
         const val LEGACY_STAMP = "at:"
     }
 }
