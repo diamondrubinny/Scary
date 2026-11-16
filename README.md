@@ -59,7 +59,7 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 
 **Why SCARY?**
 
-- 🩸 **450 hand-picked films** with a fear meter (1–5) in 28 rows (giallo, witches, cosmic horror, slashers, Israeli horror and more), an offline index of about 3,900 more horror films (from Wikidata, checked against IMDb) for search and the decade rows, plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
+- 🩸 **450 hand-picked films** with a fear meter (1–5) in 27 rows (giallo, witches, cosmic horror, slashers, Spanish horror and more), an offline index of about 3,700 more horror films (from Wikidata, checked against IMDb) for search and the decade rows, plus 6 rows from the web (popular, new this year, thrillers, mysteries, and one that walks back year by year) that keep loading as you scroll, with no limit: tens of thousands of films, refreshed every day.
 - 🌙 **"What do you feel like tonight?"**: eight moods, from mind games and "short and sharp" to "slow-burn dread" and "no sleep tonight", or pick a decade, alone or with a mood. "Surprise me" picks from your choice. Plus special rows for Halloween and Friday the 13th.
 - 🧟 **Rows for every kind of fear**: found footage, folk horror, Asian horror, zombies, vampires, body horror, haunted houses and creatures, next to the classics, slashers and psychological thrillers.
 - 😱 **The shiver**: the movie's logo trembles and flickers like a dying bulb, and the screen goes dark just before the movie opens.
@@ -126,7 +126,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **למה SCARY?**
 
-- 🩸 **450 סרטים שנבחרו ביד** עם מד פחד (1–5) ב־28 שורות (ג׳אלו, מכשפות, אימה קוסמית, סלאשרים, אימה ישראלית ועוד), אינדקס של כ־3,900 סרטי אימה נוספים שעובד גם בלי אינטרנט (מ־Wikidata, נבדק מול IMDb) לחיפוש ולשורות העשורים, ועוד 6 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות, ואחת שהולכת אחורה שנה אחרי שנה) שממשיכות להיטען כשגוללים, בלי הגבלה: עשרות אלפי סרטים שמתעדכנים כל יום.
+- 🩸 **450 סרטים שנבחרו ביד** עם מד פחד (1–5) ב־27 שורות (ג׳אלו, מכשפות, אימה קוסמית, סלאשרים, אימה ספרדית ועוד), אינדקס של כ־3,700 סרטי אימה נוספים שעובד גם בלי אינטרנט (מ־Wikidata, נבדק מול IMDb) לחיפוש ולשורות העשורים, ועוד 6 שורות מהרשת (פופולרי, חדש השנה, מותחנים, תעלומות, ואחת שהולכת אחורה שנה אחרי שנה) שממשיכות להיטען כשגוללים, בלי הגבלה: עשרות אלפי סרטים שמתעדכנים כל יום.
 - 🌙 **"מה בא לך הלילה?"**: שמונה מצבי רוח, ממשחקי מוח ו"קצר וחד" ועד "אימה שמתבשלת לאט" ו"לא לישון הלילה", או בחירת עשור, לבד או יחד עם מצב רוח. "הפתע אותי" בוחר מתוך הבחירה שלכם. ושורות מיוחדות להלואין ולשישי ה־13.
 - 🧟 **שורה לכל סוג של פחד**: פוטג' שנמצא, אימה פולקלורית, אימה אסייתית, זומבים, ערפדים, אימת הגוף, בתים רדופים ויצורים, לצד הקלאסיקות, הסלאשרים והמותחנים הפסיכולוגיים.
 - 😱 **צמרמורת**: הלוגו של הסרט רועד ומהבהב כמו נורה גוססת, ומסך חשוך רגע לפני שהסרט נפתח.
@@ -189,7 +189,7 @@ SCARY הופך את ה־Android TV שלכם לאולם קולנוע של אימ�
 
 **لماذا SCARY؟**
 
-- 🩸 **450 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5) في 28 صفًا، وفهرس لنحو 3,900 فيلم رعب إضافي يعمل دون إنترنت للبحث وصفوف العقود، و6 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض، وصف يعود عامًا بعد عام) تواصل التحميل كلما تابعت التمرير بلا حدود: عشرات آلاف الأفلام التي تتجدد يوميًا.
+- 🩸 **450 فيلمًا مختارًا بعناية** مع مقياس للرعب (1–5) في 27 صفًا، وفهرس لنحو 3,700 فيلم رعب إضافي يعمل دون إنترنت للبحث وصفوف العقود، و6 صفوف من الإنترنت (الرائج، جديد هذا العام، الإثارة، الغموض، وصف يعود عامًا بعد عام) تواصل التحميل كلما تابعت التمرير بلا حدود: عشرات آلاف الأفلام التي تتجدد يوميًا.
 - 🌙 **«ماذا تريد أن تشاهد الليلة؟»**: ثمانية أمزجة من ألعاب العقل و«قصير وحاد» إلى «رعب يتصاعد ببطء» و«لا نوم الليلة»، أو اختر عقدًا وحده أو مع مزاج. و«فاجئني» يختار من اختيارك. وصفوف خاصة بالهالوين والجمعة 13.
 - 🧟 **صف لكل نوع من الخوف**: لقطات عُثر عليها، رعب فولكلوري، رعب آسيوي، زومبي، مصاصو دماء، رعب الجسد، بيوت مسكونة ومخلوقات، إلى جانب الكلاسيكيات وأفلام القتلة والإثارة النفسية.
 - 😱 **قشعريرة**: شعار الفيلم يرتجف ويخفت كمصباح يحتضر، وشاشة مظلمة قبل أن يُفتح الفيلم.

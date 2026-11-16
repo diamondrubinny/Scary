@@ -12391,26 +12391,6 @@
    }
   },
   {
-   "id": "israeli_horror",
-   "titleHe": "אימה ישראלית",
-   "titleEn": "Israeli horror",
-   "movieIds": [
-    "rabies_2010",
-    "big_bad_wolves",
-    "jeruzalem",
-    "cannon_fodder",
-    "children_of_the_fall",
-    "the_golem_2018",
-    "cats_pedal_boat",
-    "demon_2015"
-   ],
-   "titles": {
-    "pt": "Terror israelense",
-    "ru": "Израильский хоррор",
-    "ar": "رعب إسرائيلي"
-   }
-  },
-  {
    "id": "european_horror",
    "titleHe": "אימה אירופית",
    "titleEn": "European horror",

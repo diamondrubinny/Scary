@@ -8,13 +8,16 @@ Builds app/src/main/assets/index.json: every well-known horror film on Wikidata 
 
     python3 -I tools/catalog/build_index.py            # fetch, check, write
     python3 -I tools/catalog/build_index.py --check    # only check the file already there
+    python3 -I tools/catalog/build_index.py --prune    # drop the hidden Arab and Indian films from the file there
 
 "Well-known" means at least MIN_SITELINKS Wikipedias have an article on it; IMDb (through Cinemeta) must call it
 horror too, which drops the films Wikidata mislabels.
 For each film: its IMDb id, its title in SCARY's five languages where Wikidata has one, its year, its director, and
 the subgenres SCARY has rows for. No fear level and no synopsis: those are never made up (the app loads the synopsis
 and poster from Cinemeta when the film is opened, as for its other online rows). Films already in the hand-picked
-catalog or the series list are left out.
+catalog or the series list are left out. So are Arab and Indian films (the owner's choice, 16.11.2026): a film whose first
+IMDb country, as Cinemeta lists it, is one of HIDDEN_COUNTRIES. The app applies the same rule to its online rows
+(core OriginFilter); keep the two lists in step.
 """
 import datetime
 import json
@@ -32,7 +35,7 @@ CATALOG = os.path.join(ROOT, "app/src/main/assets/catalog.json")
 SERIES = os.path.join(ROOT, "app/src/main/assets/series.json")
 ENDPOINT = "https://query.wikidata.org/sparql"
 CINEMETA = "https://v3-cinemeta.strem.io/meta/movie/{}.json"
-CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "cinemeta-genres.json")
+CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "cinemeta-info.json")
 USER_AGENT = "SCARY-catalog-builder/1.0 (https://github.com/diamondrubinny/Scary)"
 MIN_SITELINKS = 5
 LANGS = ["en", "he", "ru", "pt", "ar"]
@@ -43,6 +46,17 @@ GENRE = re.compile(r"^[A-Za-z][A-Za-z -]{1,23}$")
 # Never on SCARY's shelves, as in core's Cinemeta.OFF_THEME_GENRES: documentaries and titles for children.
 OFF_THEME = {"Documentary", "Family", "Animation", "Kids"}
 EXCLUDED = set()  # IMDb ids of films Wikidata files under horror by mistake; add as they are found.
+# Kept off every shelf, as core's OriginFilter: the first country Cinemeta lists is India or an Arab League member.
+HIDDEN_COUNTRIES = {
+    "india",
+    "algeria", "bahrain", "comoros", "djibouti", "egypt", "iraq", "jordan", "kuwait", "lebanon", "libya", "mauritania",
+    "morocco", "oman", "palestine", "palestinian territories", "state of palestine", "qatar", "saudi arabia", "somalia",
+    "sudan", "syria", "tunisia", "united arab emirates", "yemen",
+}
+
+
+def hidden(country):
+    return (country or "").split(",")[0].strip().lower() in HIDDEN_COUNTRIES
 
 # Horror genres a film must be filed under directly (checked by label on Wikidata, 8 Nov 2026). Following "subclass of
 # horror" instead let in action and science fiction films (Gravity, John Wick) through broad genre chains.
@@ -186,11 +200,11 @@ def fetch():
     return films
 
 
-def cinemeta_genres(imdb_ids):
+def cinemeta_info(imdb_ids):
     """
-    IMDb's genres for each film, through Cinemeta (the same public service the app uses). Wikidata files some
-    well-known non-horror films under horror (Gravity, John Wick: Chapter 2); a film stays only if IMDb calls it
-    horror too. Also proves each IMDb id exists. Cached between runs (tools/catalog/.cache, not committed).
+    IMDb's genres and first country for each film, through Cinemeta (the same public service the app uses). Wikidata
+    files some well-known non-horror films under horror (Gravity, John Wick: Chapter 2); a film stays only if IMDb
+    calls it horror too. Also proves each IMDb id exists. Cached between runs (tools/catalog/.cache, not committed).
     """
     cache = {}
     if os.path.exists(CACHE):
@@ -204,10 +218,11 @@ def cinemeta_genres(imdb_ids):
                 with urllib.request.urlopen(request, timeout=30) as response:
                     meta = json.load(response).get("meta") or {}
                 genres = meta.get("genre") or meta.get("genres") or []
-                return imdb, [g for g in genres if isinstance(g, str)][:10]
+                country = meta.get("country") if isinstance(meta.get("country"), str) else ""
+                return imdb, {"g": [g for g in genres if isinstance(g, str)][:10], "c": country[:120]}
             except urllib.error.HTTPError as error:
                 if error.code == 404:
-                    return imdb, []
+                    return imdb, {"g": [], "c": ""}
                 time.sleep(2 * (attempt + 1))
             except Exception:
                 time.sleep(2 * (attempt + 1))
@@ -216,9 +231,9 @@ def cinemeta_genres(imdb_ids):
     missing = [i for i in imdb_ids if i not in cache]
     print(f"Cinemeta: {len(imdb_ids) - len(missing)} cached, {len(missing)} to ask", file=sys.stderr)
     with ThreadPoolExecutor(max_workers=6) as pool:
-        for done, (imdb, genres) in enumerate(pool.map(one, missing), 1):
-            if genres is not None:
-                cache[imdb] = genres
+        for done, (imdb, info) in enumerate(pool.map(one, missing), 1):
+            if info is not None:
+                cache[imdb] = info
             if done % 500 == 0:
                 print(f"  {done}/{len(missing)}", file=sys.stderr)
     os.makedirs(os.path.dirname(CACHE), exist_ok=True)
@@ -248,7 +263,8 @@ def build(films):
         current = by_imdb.get(film["imdb"])
         if current is None or film["p"] > current["p"]:
             by_imdb[film["imdb"]] = film
-    genres = cinemeta_genres(sorted(by_imdb))
+    info = cinemeta_info(sorted(by_imdb))
+    genres = {i: v["g"] for i, v in info.items()}
     unknown = [i for i in by_imdb if i not in genres]
     if len(unknown) > len(by_imdb) // 20:
         sys.exit(f"Cinemeta did not answer for {len(unknown)} films; run again later.")
@@ -256,10 +272,12 @@ def build(films):
     print(f"Left out {len(not_horror)} films IMDb does not call horror, {len(unknown)} not checked", file=sys.stderr)
     off_theme = [i for i in by_imdb if set(genres.get(i, [])) & OFF_THEME]
     print(f"Left out {len(off_theme)} for children or documentaries (as the app's online rows do)", file=sys.stderr)
+    hidden_ids = {i for i in by_imdb if hidden(info.get(i, {}).get("c"))}
+    print(f"Left out {len(hidden_ids)} Arab and Indian films", file=sys.stderr)
     out = []
     for film in sorted(by_imdb.values(), key=lambda f: (-f["p"], f["imdb"])):
         imdb_genres = genres.get(film["imdb"], [])
-        if "Horror" not in imdb_genres or set(imdb_genres) & OFF_THEME:
+        if "Horror" not in imdb_genres or set(imdb_genres) & OFF_THEME or film["imdb"] in hidden_ids:
             continue
         entry = {"imdb": film["imdb"], "t": {lang: film["t"][lang] for lang in LANGS if lang in film["t"]}, "y": film["y"], "p": film["p"]}
         # IMDb's other genres ("Mystery", "Sci-Fi"), as Cinemeta's rows carry them: "More like this" reads them.
@@ -308,7 +326,30 @@ def check(index):
     print(f"Decades: {dict(sorted(decades.items()))}", file=sys.stderr)
 
 
+def prune():
+    """Drops the hidden Arab and Indian films from the index already there, leaving every other entry as it is."""
+    with open(OUT, encoding="utf-8") as handle:
+        index = json.load(handle)
+    imdb_ids = [f["imdb"] for f in index["films"]]
+    info = cinemeta_info(imdb_ids)
+    unknown = [i for i in imdb_ids if i not in info]
+    if len(unknown) > len(imdb_ids) // 20:
+        sys.exit(f"Cinemeta did not answer for {len(unknown)} films; run again later.")
+    gone = [f for f in index["films"] if hidden(info.get(f["imdb"], {}).get("c"))]
+    for film in gone:
+        print(f"  left out {film['imdb']} {film['t'].get('en')} ({film['y']}): {info[film['imdb']]['c']}", file=sys.stderr)
+    index["films"] = [f for f in index["films"] if f not in gone]
+    print(f"Left out {len(gone)} Arab and Indian films; {len(unknown)} not checked", file=sys.stderr)
+    check(index)
+    with open(OUT, "w", encoding="utf-8") as handle:
+        json.dump(index, handle, ensure_ascii=False, separators=(",", ":"))
+        handle.write("\n")
+
+
 def main():
+    if "--prune" in sys.argv:
+        prune()
+        return
     if "--check" in sys.argv:
         with open(OUT, encoding="utf-8") as handle:
             check(json.load(handle))

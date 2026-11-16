@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import android.util.Log
+import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
@@ -81,7 +82,9 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
     /** The cache only counts when it was fetched in the current UI language. */
     suspend fun cached(language: Language): TmdbCache? = withContext(Dispatchers.IO) {
         if (auth == null || !cacheFile.exists()) return@withContext null
-        runCatching { TmdbCache.decode(cacheFile.readText()) }.getOrNull()?.takeIf { it.language == language.code }
+        // A cache written before the rows carried their language (version 1) may hold Arab and Indian films: not shown.
+        runCatching { TmdbCache.decode(cacheFile.readText()) }.getOrNull()
+            ?.takeIf { it.language == language.code && it.rowsVersion >= TmdbCache.ROWS_VERSION }
     }
 
     /** Hebrew info for the given movies plus the discover rows. Null without a key or when offline. */
@@ -94,7 +97,8 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         }.filterNotNull().toMap()
         val today = LocalDate.now()
         val rows = TmdbRow.entries.mapNotNull { row ->
-            val results = body(Tmdb.discoverUrl(row, today, language), key)?.let(Tmdb::parseDiscover).orEmpty().take(ROW_SIZE)
+            val results = body(Tmdb.discoverUrl(row, today, language), key)?.let(Tmdb::parseDiscover).orEmpty()
+                .filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }.take(ROW_SIZE)
             val metas = coroutineScope {
                 results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
                     chunk.map { r ->
@@ -105,7 +109,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
             metas.takeIf { it.isNotEmpty() }?.let { Tmdb.rowOf(row, it) }
         }
         if (info.isEmpty() && rows.isEmpty()) return@withContext null
-        TmdbCache(System.currentTimeMillis(), language.code, info, rows).also { cache ->
+        TmdbCache(System.currentTimeMillis(), language.code, info, rows, TmdbCache.ROWS_VERSION).also { cache ->
             runCatching { cacheFile.writeText(cache.encode()) }
                 .onFailure { Log.w(TAG, "Could not save TMDB cache: ${it.javaClass.simpleName}") }
         }
@@ -124,8 +128,10 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         if (page !in 1..Tmdb.MAX_PAGE) return@withContext OnlinePage(emptyList(), null)
         val results = body(Tmdb.discoverUrl(row, LocalDate.now(), language, page), key)?.let(Tmdb::parseDiscover)
             ?: return@withContext null
+        // A page is counted by what TMDB sent (its end is TMDB's), but only films that may be shown get their IMDb id.
+        val shown = results.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
         val metas = coroutineScope {
-            results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
+            shown.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
                 chunk.map { r -> async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it, language) } } }
                     .awaitAll()
             }
@@ -144,7 +150,10 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         if (page !in 1..Tmdb.MAX_PAGE) return@withContext OnlinePage(emptyList(), null)
         val results = body(Tmdb.discoverUrl(category, LocalDate.now(), language, page), key)?.let(Tmdb::parseDiscover)
             ?: return@withContext null
-        OnlinePage(withImdbIds(results, key, language), if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
+        OnlinePage(
+            withImdbIds(results.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }, key, language),
+            if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1,
+        )
     }
 
     /** Discover results with their IMDb ids (one request each, a few at a time); those without one are left out. */

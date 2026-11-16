@@ -50,7 +50,6 @@ object Categories {
             CLASSIC_MONSTERS -> horror && year in 1..CLASSIC_MONSTERS_LAST_YEAR
             HORROR_COMEDY -> horror && "comedy" in genres
             SPANISH_HORROR -> horror && country in SPANISH_SPEAKING
-            ISRAELI_HORROR -> (horror || thriller) && meta.country.split(',').any { it.trim().equals("Israel", ignoreCase = true) }
             EUROPEAN_HORROR -> horror && country in EUROPE
             MAX_FEAR -> horror && (meta.imdbRating ?: 0.0) >= TOP_RATED
             CLASSICS -> horror && (meta.year ?: 0) in 1..1989 && (meta.imdbRating ?: 0.0) >= CLASSIC_RATING
@@ -268,13 +267,12 @@ object Categories {
     private const val CLASSIC_MONSTERS = "classic_monsters"
     private const val HORROR_COMEDY = "horror_comedy"
     private const val SPANISH_HORROR = "spanish_horror"
-    private const val ISRAELI_HORROR = "israeli_horror"
     private const val EUROPEAN_HORROR = "european_horror"
     private const val MAX_FEAR = "max_fear"
 
     /** The categories with rules of their own (writer, country, years, genres, rating) rather than words. */
     private val OWN_RULES = setOf(
-        NEW_NIGHTMARES, STEPHEN_KING, GIALLO, CLASSIC_MONSTERS, HORROR_COMEDY, SPANISH_HORROR, ISRAELI_HORROR,
+        NEW_NIGHTMARES, STEPHEN_KING, GIALLO, CLASSIC_MONSTERS, HORROR_COMEDY, SPANISH_HORROR,
         EUROPEAN_HORROR, MAX_FEAR,
     )
     private const val GIALLO_LAST_YEAR = 1985
@@ -305,7 +303,7 @@ object Categories {
     /** A film's first country, as Cinemeta lists it (co-productions name the main one first). */
     private val ASIA = setOf(
         "japan", "south korea", "korea", "china", "hong kong", "taiwan", "thailand", "indonesia", "philippines",
-        "malaysia", "india", "vietnam", "singapore",
+        "malaysia", "vietnam", "singapore",
     )
 }
 

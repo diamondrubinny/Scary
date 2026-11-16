@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.core.cinemeta
 
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.MediaKind
@@ -55,6 +56,8 @@ data class CinemetaMeta(
     val runsOn: Boolean = false,
     /** The writers Cinemeta lists, the source author among them ("Stephen King" for Carrie). */
     val writer: List<String> = emptyList(),
+    /** ISO 639-1 code of the film's original language, when TMDB gave it ("hi"); empty for Cinemeta's own entries. */
+    val originalLanguage: String = "",
 ) {
     val kind: MediaKind get() = if (type == TYPE_SERIES) MediaKind.SERIES else MediaKind.MOVIE
 
@@ -471,6 +474,16 @@ data class CinemetaCache(
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
+
+    /**
+     * The cache without the films kept off the shelves (core OriginFilter): in the online rows, and in the categories'
+     * lists (their films' details stay in [metas]). A cache written before the choice shows no hidden film either.
+     */
+    fun withoutHidden(): CinemetaCache = copy(
+        rows = rows.mapNotNull(OriginFilter::visible),
+        categories = categories.mapValues { (_, ids) -> ids.filter { id -> metas[id]?.let { !OriginFilter.hides(it) } ?: true } }
+            .filterValues { it.isNotEmpty() },
+    )
 
     /** Whether the rows should be fetched again: missing pages are, as well as old data. */
     fun needsRows(nowMillis: Long): Boolean = !complete || isStale(nowMillis)

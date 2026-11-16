@@ -134,8 +134,6 @@ class NewCategoriesTest {
         assertFalse(Categories.matches("horror_comedy", film("Just Funny", "", "Comedy")))
         assertTrue(Categories.matches("spanish_horror", film("REC", "", "Horror", country = "Spain")))
         assertTrue(Categories.matches("spanish_horror", film("Tigers Are Not Afraid", "", "Horror", country = "Mexico")))
-        assertTrue(Categories.matches("israeli_horror", film("Big Bad Wolves", "", "Crime", "Thriller", country = "Israel")))
-        assertTrue(Categories.matches("israeli_horror", film("Rabies", "", "Horror", country = "Israel, United States")))
         assertTrue(Categories.matches("european_horror", film("Martyrs", "", "Horror", country = "France, Canada")))
         assertFalse(Categories.matches("european_horror", film("British", "", "Horror", country = "United Kingdom")))
         assertTrue(Categories.matches("max_fear", film("Top Rated", "", "Horror", rating = 8.1)))
@@ -160,7 +158,7 @@ class NewCategoriesTest {
     fun `every new category is one the library has, and series stay out of them`() {
         val films = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText()).collections.map { it.id }.toSet()
         val added = listOf(
-            "new_nightmares", "stephen_king", "giallo", "classic_monsters", "horror_comedy", "spanish_horror", "israeli_horror",
+            "new_nightmares", "stephen_king", "giallo", "classic_monsters", "horror_comedy", "spanish_horror",
             "european_horror", "max_fear", "witches", "cosmic_horror", "animal_attacks",
         )
         assertTrue(Categories.ids.containsAll(added))
