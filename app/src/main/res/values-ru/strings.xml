@@ -741,6 +741,7 @@
     <string name="diag_freeze">Зависания: %2$d · последнее: %1$s</string>
     <string name="diag_online">Фильмы из интернета: %1$s</string>
     <string name="diag_refresh">Последнее обновление (загружено страниц: ряды · категории): %1$s</string>
+    <string name="diag_quality">Проверка происхождения (фильмов исключено из рядов по месту · ждут язык): %1$s</string>
     <string name="diag_none">Сбоев и зависаний не записано.</string>
     <string name="diag_clear">Очистить диагностику</string>
 </resources>

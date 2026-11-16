@@ -7,7 +7,9 @@ package io.github.diamondrubinny.scary.data
 import io.github.diamondrubinny.scary.stability.HealthLog
 import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.CategoryPaging
+import io.github.diamondrubinny.scary.core.catalog.Origin
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
+import io.github.diamondrubinny.scary.core.catalog.RowAudit
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
@@ -41,7 +43,11 @@ import javax.net.ssl.HttpsURLConnection
 data class OnlinePage(val movies: List<CinemetaMeta>, val next: Int?)
 
 /** Fetches artwork and popular rows from Cinemeta and keeps a copy on disk. */
-class CinemetaRepository(context: Context) {
+class CinemetaRepository(
+    context: Context,
+    /** The original language of films by TMDB id (core Origin), for those whose origin is unclear; empty without a TMDB key. */
+    private val languages: suspend (List<Long>) -> Map<Long, String> = { emptyMap() },
+) {
     private val appContext = context.applicationContext
     private val cacheFile = File(context.filesDir, "cinemeta_cache.json")
 
@@ -235,7 +241,20 @@ class CinemetaRepository(context: Context) {
     private fun titles(he: String, en: String, pt: String, ru: String, ar: String) =
         mapOf("he" to he, "en" to en, "pt" to pt, "ru" to ru, "ar" to ar)
 
-    /** The copy on disk, without the Arab and Indian films an older version of SCARY may have kept in it. */
+    /**
+     * [metas] with the original language filled in for the films whose origin is unclear (they list the United States
+     * along with a European, Spanish-language or Asian country): one TMDB lookup each, kept on the TV, at most
+     * [MAX_LANGUAGE_LOOKUPS] per call. Without an answer they stay as they are and are held back (core Origin).
+     */
+    private suspend fun withLanguages(metas: List<CinemetaMeta>): List<CinemetaMeta> {
+        val ids = metas.filter { Origin.needsLanguage(it) && it.tmdbId > 0 }.map { it.tmdbId }.distinct().take(MAX_LANGUAGE_LOOKUPS)
+        if (ids.isEmpty()) return metas
+        val found = runCatching { languages(ids) }.getOrDefault(emptyMap())
+        if (found.isEmpty()) return metas
+        return metas.map { meta -> found[meta.tmdbId]?.let { meta.copy(originalLanguage = it) } ?: meta }
+    }
+
+    /** The copy on disk, cleaned: no Arab and Indian films, and no American films in rows about a place (older versions kept them). */
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
         if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()?.withoutHidden()
     }
@@ -320,8 +339,12 @@ class CinemetaRepository(context: Context) {
      * Null when no page could be read.
      */
     suspend fun refreshCategories(cache: CinemetaCache): CinemetaCache? = withContext(Dispatchers.IO) {
-        val (categoryPool, pages) = categoryPool(Semaphore(CATEGORY_REQUESTS))
-        if (categoryPool.isEmpty()) return@withContext null
+        val (fetched, pages) = categoryPool(Semaphore(CATEGORY_REQUESTS))
+        if (fetched.isEmpty()) return@withContext null
+        // American films with a European producer are told from European ones by language (core Origin).
+        val categoryPool = withLanguages(fetched)
+        val held = RowAudit.held(categoryPool)
+        HealthLog.recordQuality(appContext, held.keptOut, held.unclear)
         val sorted = Categories.sort(categoryPool)
         // With pages missing, a category that came out shorter keeps the films it had (their details are in the cache).
         val categories = if (pages.complete) {
@@ -379,7 +402,8 @@ class CinemetaRepository(context: Context) {
             val genre = page.genre
             if (genre != null) Cinemeta.catalogUrl("top", genre, page.skip, kind) else Cinemeta.catalogUrl("year", page.year.toString(), page.skip, kind)
         }.getOrNull() ?: return@withContext OnlinePage(emptyList(), null)
-        val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        val fetched = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
+        val metas = if (categoryId in Categories.PLACE_ROWS) withLanguages(fetched) else fetched
         OnlinePage(
             movies = OriginFilter.visible(metas).filter { it.kind == kind && Categories.matches(categoryId, it) },
             next = CategoryPaging.after(kind, cursor, metas.size, startYear),
@@ -487,6 +511,9 @@ class CinemetaRepository(context: Context) {
 
         /** "New nightmares" reads this year's catalog and the last one's. */
         const val NEW_YEARS_BACK = 1
+
+        /** Language lookups for films of unclear origin: per refresh of the pool, then it asks again (answers are kept). */
+        const val MAX_LANGUAGE_LOOKUPS = 300
 
     }
 }

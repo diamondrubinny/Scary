@@ -733,6 +733,7 @@
     <string name="diag_freeze">היתקעויות: %2$d · אחרונה: %1$s</string>
     <string name="diag_online">סרטים מהרשת: %1$s</string>
     <string name="diag_refresh">רענון אחרון (עמודים שנטענו: שורות · קטגוריות): %1$s</string>
+    <string name="diag_quality">בדיקת מוצא (סרטים שהוצאו משורות לפי מקום · ממתינים לשפה): %1$s</string>
     <string name="diag_none">לא נרשמו קריסות או היתקעויות.</string>
     <string name="diag_clear">ניקוי האבחון</string>
 </resources>
