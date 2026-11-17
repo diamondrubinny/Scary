@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary
 
+import androidx.activity.compose.setContent
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -47,7 +48,8 @@ class RealDebridFilmsTest {
         val other = film("shining97", "The Shining", 1997)
         val file = RealDebrid.RdFile("d:1", "The.Shining.mkv", 4_000_000_000, "https://real-debrid.com/d/1")
         val said = mutableListOf<Pair<String, String?>>()
-        rule.setContent {
+        // In place of the app's own screen: the rule's setContent refuses an activity that already has content.
+        rule.runOnUiThread { rule.activity.setContent {
             ScaryTheme {
                 RealDebridScreen(
                     state = RealDebridRepository.State.SignedIn("viewer", true, "2027-01-01"),
@@ -64,7 +66,7 @@ class RealDebridFilmsTest {
                     fileFilms = mapOf(file.key to shining),
                 )
             }
-        }
+        } }
         // The film SCARY took the file for, under its name.
         rule.onNode(hasTestTag(filmTag("shining"))).assertExists()
         rule.onNode(hasText("The Shining (1980)")).assertExists()
