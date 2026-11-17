@@ -41,6 +41,8 @@ data class StremioItem(
     val modified: Long,
     /** The item exactly as Stremio sent it: changes are made on a copy, so nothing SCARY does not know is lost. */
     val raw: JsonObject,
+    /** A series' last episode in Stremio's own id ("tt0944947:1:2": season 1, episode 2), when it says one. */
+    val videoId: String? = null,
 ) {
     val isMovie: Boolean get() = type == Stremio.MOVIE
 
@@ -140,6 +142,8 @@ object Stremio {
             .toList()
     }
 
+    private val EPISODE_ID = Regex("^tt\\d{7,8}:\\d{1,2}:\\d{1,3}$")
+
     private fun parseItem(o: JsonObject): StremioItem? {
         val id = o.string("_id")?.takeIf(IMDB::matches) ?: return null
         val type = o.string("type")?.takeIf { it == MOVIE || it == SERIES } ?: return null
@@ -160,6 +164,7 @@ object Stremio {
             lastWatched = time(state.string("lastWatched")),
             modified = time(o.string("_mtime")),
             raw = o,
+            videoId = state.string("video_id")?.takeIf { type == SERIES && it.startsWith("$id:") && EPISODE_ID.matches(it) },
         )
     }
 

@@ -609,6 +609,14 @@
     <string name="value_rd_none">Not connected</string>
     <string name="action_play_rd">Play from Real-Debrid</string>
     <string name="rd_choose_title">Which of your files?</string>
+    <string name="rd_film_title">Which film is this file?</string>
+    <string name="rd_film_none">Not a film from the library</string>
+    <string name="rd_film_guess">Let SCARY guess again</string>
+    <string name="rd_film_hint">Hold OK on a file to choose which film it is.</string>
+    <string name="rd_file_is">is the film %1$s</string>
+    <string name="rd_choose_episode">Choose an episode</string>
+    <string name="rd_season">Season %1$d</string>
+    <string name="rd_episode">Episode %1$d</string>
     <string name="player_loading">Loading…</string>
     <string name="player_error">This file cannot be played on this TV.</string>
     <string name="player_close">Close</string>
@@ -728,6 +736,7 @@
     <string name="diag_online">Online films: %1$s</string>
     <string name="diag_refresh">Last refresh (pages loaded: rows · categories): %1$s</string>
     <string name="diag_quality">Origin check (films kept out of rows about a place · waiting for a language): %1$s</string>
+    <string name="diag_startup">Start: %1$s (time to the first rows, last and average of the last starts)</string>
     <string name="diag_none">No crashes or freezes recorded.</string>
     <string name="diag_clear">Clear diagnostics</string>
 </resources>

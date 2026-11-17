@@ -150,8 +150,21 @@ fun DetailsScreen(
     val watchFocus = remember { FocusRequester() }
     // "Play from Real-Debrid" with more than one of the viewer's files for this film: which one.
     var chooseFile by remember { mutableStateOf(false) }
+    // A series' files are its episodes (by season and episode, from the names), picked from a list of their own.
+    val episodes = remember(movie.id, realDebridFiles) {
+        if (movie.isSeries) io.github.diamondrubinny.scary.core.realdebrid.FileMatch.forSeries(movie, realDebridFiles) else emptyList()
+    }
     if (chooseFile) {
-        RealDebridChooser(realDebridFiles, onChoose = { chooseFile = false; onPlayRealDebrid(it) }, onDismiss = { chooseFile = false })
+        if (episodes.isNotEmpty()) {
+            EpisodePicker(
+                episodes,
+                startSeason = episodes.firstOrNull { it.file.key == continueEntry?.key }?.season,
+                onChoose = { chooseFile = false; onPlayRealDebrid(it) },
+                onDismiss = { chooseFile = false },
+            )
+        } else {
+            RealDebridChooser(realDebridFiles, onChoose = { chooseFile = false; onPlayRealDebrid(it) }, onDismiss = { chooseFile = false })
+        }
     }
     LaunchedEffect(movie.id) {
         withFrameNanos { }
@@ -233,7 +246,7 @@ fun DetailsScreen(
                         if (realDebridFiles.isNotEmpty()) {
                             ScaryButton(
                                 text = stringResource(R.string.action_play_rd),
-                                onClick = { if (realDebridFiles.size == 1) onPlayRealDebrid(realDebridFiles[0]) else chooseFile = true },
+                                onClick = { if (realDebridFiles.size == 1 && episodes.isEmpty()) onPlayRealDebrid(realDebridFiles[0]) else chooseFile = true },
                                 modifier = Modifier.testTag(PLAY_RD_TAG),
                             )
                         }
@@ -557,4 +570,70 @@ private fun RealDebridChooser(
 }
 
 private const val MAX_CHOICES = 8
+
+/** Test tags of the episode picker. */
+const val EPISODE_PICKER_TAG = "episodePicker"
+fun seasonTag(season: Int) = "season:$season"
+fun episodeTag(season: Int, episode: Int) = "episode:$season:$episode"
+
+/**
+ * The viewer's own episode files of a series: its seasons as buttons (when there is more than one), and the episodes of
+ * the chosen season, each playing its biggest file (usually the best quality). Arrows and OK only.
+ */
+@Composable
+private fun EpisodePicker(
+    episodes: List<io.github.diamondrubinny.scary.core.realdebrid.FileMatch.Episode>,
+    startSeason: Int?,
+    onChoose: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val seasons = remember(episodes) { episodes.map { it.season }.distinct() }
+    var season by remember { androidx.compose.runtime.mutableIntStateOf(startSeason?.takeIf { it in seasons } ?: seasons.first()) }
+    // One row per episode: the biggest file (the list is sorted so), the others being the same episode again.
+    val rows = remember(episodes, season) { episodes.filter { it.season == season }.distinctBy { it.episode } }
+    val first = remember { FocusRequester() }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        LaunchedEffect(season) {
+            withFrameNanos { }
+            runCatching { first.requestFocus() }
+        }
+        Column(
+            modifier = Modifier
+                .dialogWidth(640.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .padding(22.dp)
+                .testTag(EPISODE_PICKER_TAG),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(stringResource(R.string.rd_choose_episode), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            if (seasons.size > 1) {
+                androidx.compose.foundation.lazy.LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(seasons) { number ->
+                        ScaryButton(
+                            stringResource(R.string.rd_season, number),
+                            onClick = { season = number },
+                            primary = number == season,
+                            modifier = Modifier.testTag(seasonTag(number)),
+                        )
+                    }
+                }
+            }
+            androidx.compose.foundation.lazy.LazyColumn(
+                modifier = Modifier.heightIn(max = 360.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(rows.size) { i ->
+                    val row = rows[i]
+                    val size = io.github.diamondrubinny.scary.ui.realdebrid.size(row.file.sizeBytes).let { if (it.isEmpty()) "" else " · $it" }
+                    ScaryButton(
+                        stringResource(R.string.rd_episode, row.episode) + size,
+                        onClick = { onChoose(row.file) },
+                        focusRequester = if (i == 0) first else null,
+                        modifier = Modifier.testTag(episodeTag(row.season, row.episode)),
+                    )
+                }
+            }
+        }
+    }
+}
 

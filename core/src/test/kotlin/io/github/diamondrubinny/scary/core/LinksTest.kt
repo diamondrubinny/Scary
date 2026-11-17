@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.links.Links
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertThrows
 import org.junit.Test
 
@@ -37,5 +38,14 @@ class LinksTest {
             "https://www.youtube.com/results?search_query=Rosemary%27s+Baby+1968+trailer",
             Links.youTubeTrailerSearch("Rosemary's Baby", 1968),
         )
+    }
+
+    @Test
+    fun `an episode link names the series and Stremio's own episode id`() {
+        assertEquals("stremio:///detail/series/tt0944947/tt0944947:1:2", Links.stremioEpisode("tt0944947:1:2"))
+        listOf("tt0944947", "tt0944947:1", "tt0944947:1:2/../x", "x:1:2", "tt0944947:100:2", "tt0944947:1:2:3", "").forEach {
+            val rejected = try { Links.stremioEpisode(it); false } catch (e: IllegalArgumentException) { true }
+            assertTrue("rejects $it", rejected)
+        }
     }
 }

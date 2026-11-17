@@ -626,6 +626,7 @@ private fun Diagnostics() {
     report.online?.let { BasicText(stringResource(R.string.diag_online, it), style = code) }
     report.refresh?.let { BasicText(stringResource(R.string.diag_refresh, it), style = code) }
     report.quality?.let { BasicText(stringResource(R.string.diag_quality, it), style = code) }
+    report.startup?.let { BasicText(stringResource(R.string.diag_startup, it), style = code) }
     BasicText(stringResource(R.string.diag_note), style = ScaryType.Caption)
     if (report.crash != null || report.freeze != null) {
         SettingRow(

@@ -621,6 +621,14 @@
     <string name="value_rd_none">Не подключено</string>
     <string name="action_play_rd">Смотреть из Real-Debrid</string>
     <string name="rd_choose_title">Какой из ваших файлов?</string>
+    <string name="rd_film_title">Какому фильму принадлежит файл?</string>
+    <string name="rd_film_none">Не фильм из библиотеки</string>
+    <string name="rd_film_guess">Пусть SCARY угадает снова</string>
+    <string name="rd_film_hint">Удерживайте OK на файле, чтобы выбрать, какому фильму он принадлежит.</string>
+    <string name="rd_file_is">фильм %1$s</string>
+    <string name="rd_choose_episode">Какая серия?</string>
+    <string name="rd_season">Сезон %1$d</string>
+    <string name="rd_episode">Серия %1$d</string>
     <string name="player_loading">Загрузка…</string>
     <string name="player_error">Этот файл нельзя воспроизвести на этом ТВ.</string>
     <string name="player_close">Закрыть</string>
@@ -742,6 +750,7 @@
     <string name="diag_online">Фильмы из интернета: %1$s</string>
     <string name="diag_refresh">Последнее обновление (загружено страниц: ряды · категории): %1$s</string>
     <string name="diag_quality">Проверка происхождения (фильмов исключено из рядов по месту · ждут язык): %1$s</string>
+    <string name="diag_startup">Запуск: %1$s (время до первых рядов, последний и среднее по последним запускам)</string>
     <string name="diag_none">Сбоев и зависаний не записано.</string>
     <string name="diag_clear">Очистить диагностику</string>
 </resources>

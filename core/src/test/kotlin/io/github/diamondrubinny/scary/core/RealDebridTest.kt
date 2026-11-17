@@ -128,6 +128,95 @@ class RealDebridTest {
         assertEquals(listOf("d:2", "d:1"), FileMatch.forMovie(shining, files).map { it.key })
     }
 
+    private fun series(title: String, year: Int, endYear: Int? = null, ongoing: Boolean = false, he: String = "") =
+        movie(title, year, he).copy(kind = io.github.diamondrubinny.scary.core.model.MediaKind.SERIES, endYear = endYear, ongoing = ongoing)
+
+    @Test
+    fun `episode files are matched to their series, by season and episode`() {
+        val dark = series("Dark", 2017, endYear = 2020)
+        val files = listOf(
+            RealDebrid.RdFile("d:1", "Dark.S01E02.1080p.WEB.x264.mkv", 3_000, "https://real-debrid.com/d/1"),
+            RealDebrid.RdFile("d:2", "Dark.S01E01.720p.WEB.mkv", 1_000, "https://real-debrid.com/d/2"),
+            RealDebrid.RdFile("d:3", "Dark S02E01 2160p.mkv", 5_000, "https://real-debrid.com/d/3"),
+            RealDebrid.RdFile("d:4", "Dark.S01E01.2160p.WEB.mkv", 4_000, "https://real-debrid.com/d/4"),
+            RealDebrid.RdFile("d:5", "Dark.Waters.2019.mkv", 9_000, "https://real-debrid.com/d/5"),
+            RealDebrid.RdFile("d:6", "Dark.Matter.S01E01.mkv", 2_000, "https://real-debrid.com/d/6"),
+            RealDebrid.RdFile("d:7", "Dark.1x03.mkv", 2_000, "https://real-debrid.com/d/7"),
+        )
+        val episodes = FileMatch.forSeries(dark, files)
+        // By season and episode; an episode with two files has the bigger one first.
+        assertEquals(listOf("d:4", "d:2", "d:1", "d:7", "d:3"), episodes.map { it.file.key })
+        assertEquals(listOf(1 to 1, 1 to 1, 1 to 2, 1 to 3, 2 to 1), episodes.map { it.season to it.episode })
+        // A film is not an episode, and a series' files are never a film's.
+        assertFalse(FileMatch.matches(dark, FileMatch.parse("Dark.Waters.2019.mkv")))
+        assertFalse(FileMatch.matches(movie("Dark", 2017), FileMatch.parse("Dark.S01E01.mkv")))
+        // A year in the name is the show's: another show of the same name from another era is not it.
+        assertTrue(FileMatch.matches(dark, FileMatch.parse("Dark.2017.S01E01.mkv")))
+        assertFalse(FileMatch.matches(dark, FileMatch.parse("Dark.1999.S01E01.mkv")))
+        // A show still running, and one with a year inside its run.
+        assertTrue(FileMatch.matches(series("The Bear", 2022, ongoing = true), FileMatch.parse("The.Bear.2022.S03E05.mkv")))
+        assertTrue(FileMatch.matches(series("Dark", 2017, endYear = 2020), FileMatch.parse("Dark.2019.S03E01.mkv")))
+        // A Hebrew title.
+        assertTrue(FileMatch.matches(series("Dark", 2017, he = "אפל"), FileMatch.parse("אפל.S01E01.mkv")))
+        // Two letters are not a title.
+        assertFalse(FileMatch.matches(series("Us", 2020), FileMatch.parse("Us.S01E01.mkv")))
+    }
+
+    @Test
+    fun `spelling variants of a title are the same title`() {
+        assertTrue(FileMatch.matches(movie("Alien 3", 1992), FileMatch.parse("Alien³.1992.mkv")))
+        assertTrue(FileMatch.matches(movie("Alien³", 1992), FileMatch.parse("Alien.3.1992.1080p.mkv")))
+        assertTrue(FileMatch.matches(movie("Scream VI", 2023), FileMatch.parse("Scream.6.2023.mkv")))
+        assertTrue(FileMatch.matches(movie("Friday the 13th Part 2", 1981), FileMatch.parse("Friday.the.13th.Part.II.1981.mkv")))
+        assertTrue(FileMatch.matches(movie("Friday the 13th: Part 2", 1981), FileMatch.parse("Friday.the.13th.2.1981.mkv")))
+        assertTrue(FileMatch.matches(movie("The Conjuring", 2013), FileMatch.parse("Conjuring.2013.mkv")))
+        assertTrue(FileMatch.matches(movie("Conjuring", 2013), FileMatch.parse("The.Conjuring.2013.mkv")))
+        assertTrue(FileMatch.matches(movie("Tom & Jerry", 2021), FileMatch.parse("Tom.and.Jerry.2021.mkv")))
+        // Different films stay different.
+        assertFalse(FileMatch.matches(movie("Alien 3", 1992), FileMatch.parse("Alien.2.1992.mkv")))
+        assertFalse(FileMatch.matches(movie("Scream", 1996), FileMatch.parse("Scream.2.1996.mkv")))
+        assertFalse(FileMatch.matches(movie("The Conjuring", 2013), FileMatch.parse("The.Conjuring.2.2016.mkv")))
+    }
+
+    @Test
+    fun `an index finds the film of a file without trying every film`() {
+        val films = listOf(
+            movie("The Shining", 1980), movie("The Shining", 1997).copy(id = "shining-1997"), movie("Alien 3", 1992),
+            movie("Rosemary's Baby", 1968), series("Dark", 2017, endYear = 2020),
+        )
+        val index = FileMatch.Index(films)
+        assertEquals(listOf("the shining"), index.find("The.Shining.1980.1080p.mkv").map { it.id })
+        assertEquals(listOf("shining-1997"), index.find("The.Shining.1997.mkv").map { it.id })
+        assertEquals(listOf("alien 3"), index.find("Alien³.1992.mkv").map { it.id })
+        assertEquals(listOf("dark"), index.find("Dark.S02E03.2160p.mkv").map { it.id })
+        assertTrue(index.find("Unknown.Film.2001.mkv").isEmpty())
+        // Without a year, both films with that title fit: the nearest year first does not apply, so both are offered.
+        assertEquals(setOf("the shining", "shining-1997"), index.find("The.Shining.1080p.BluRay.mkv").map { it.id }.toSet())
+        // A loose list to correct a guess from: titles that hold the file's title or are held by it.
+        assertEquals(setOf("the shining", "shining-1997"), index.similar("Shining.Redrum.2020.mkv").map { it.id }.toSet())
+        assertTrue(index.similar("Something.Else.mkv").isEmpty())
+        assertEquals(setOf("the shining", "shining-1997"), index.similar("Shining.mkv").map { it.id }.toSet())
+        assertTrue(index.similar("ab.mkv").isEmpty())
+    }
+
+    @Test
+    fun `the viewer's corrections are kept, bounded and read back safely`() {
+        var map = io.github.diamondrubinny.scary.core.realdebrid.RdMatches.with(emptyMap(), "d:ABC", "cm_tt0081505")
+        map = io.github.diamondrubinny.scary.core.realdebrid.RdMatches.with(map, "t:XYZ:1", "")
+        assertEquals("cm_tt0081505", io.github.diamondrubinny.scary.core.realdebrid.RdMatches.film(map, "d:ABC"))
+        assertEquals("", io.github.diamondrubinny.scary.core.realdebrid.RdMatches.film(map, "t:XYZ:1"))
+        assertNull(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.film(map, "d:other"))
+        assertEquals(map, io.github.diamondrubinny.scary.core.realdebrid.RdMatches.decode(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.encode(map)))
+        assertNull(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.film(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.with(map, "d:ABC", null), "d:ABC"))
+        // Hostile or damaged storage.
+        assertTrue(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.decode("{broken").isEmpty())
+        assertTrue(io.github.diamondrubinny.scary.core.realdebrid.RdMatches.decode("""{"d:A":5,"bad key!":"x","d:B":"ok"}""").keys == setOf("d:B"))
+        var many = emptyMap<String, String>()
+        repeat(400) { many = io.github.diamondrubinny.scary.core.realdebrid.RdMatches.with(many, "d:K$it", "id$it") }
+        assertEquals(300, many.size)
+        assertFalse("d:K0" in many)
+    }
+
     private fun assertThrows(block: () -> Unit) {
         try {
             block()

@@ -41,13 +41,22 @@ class Launcher(
         return if (intent != null && start(intent)) LaunchResult.Opened else LaunchResult.Failed(label)
     }
 
-    fun openInStremio(movie: Movie): LaunchResult {
+    /**
+     * The film's page in Stremio. A series opens on the episode the viewer stopped at ([episodeId], Stremio's own id for
+     * it) when that is known, else on its page, where its seasons and episodes are; when Stremio does not take the
+     * episode's link, the series' page is tried before the app alone.
+     */
+    fun openInStremio(movie: Movie, episodeId: String? = null): LaunchResult {
         if (!apps.isInstalled(KnownPackages.STREMIO)) return openStoreFor(KnownPackages.STREMIO, STREMIO_LABEL)
-        // A series opens on its page in Stremio, where its seasons and episodes are.
-        val link = if (movie.isSeries) Links.stremioSeries(movie.imdbId) else Links.stremioMovie(movie.imdbId)
-        val deepLink = Intent(Intent.ACTION_VIEW, link.toUri())
-            .setPackage(KnownPackages.STREMIO)
-        if (start(deepLink)) return LaunchResult.Opened
+        val links = when {
+            !movie.isSeries -> listOf(Links.stremioMovie(movie.imdbId))
+            episodeId != null && episodeId.startsWith(movie.imdbId + ":") ->
+                listOfNotNull(runCatching { Links.stremioEpisode(episodeId) }.getOrNull(), Links.stremioSeries(movie.imdbId))
+            else -> listOf(Links.stremioSeries(movie.imdbId))
+        }
+        for (link in links) {
+            if (start(Intent(Intent.ACTION_VIEW, link.toUri()).setPackage(KnownPackages.STREMIO))) return LaunchResult.Opened
+        }
         return when (launchApp(KnownPackages.STREMIO, STREMIO_LABEL)) {
             LaunchResult.Opened -> LaunchResult.OpenedAppOnly(movie.title)
             else -> LaunchResult.Failed(STREMIO_LABEL)

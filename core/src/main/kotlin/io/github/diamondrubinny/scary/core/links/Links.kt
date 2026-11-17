@@ -35,6 +35,17 @@ object Links {
         return "stremio:///detail/series/$imdbId"
     }
 
+    private val episodePattern = Regex("^(tt\\d{7,8}):\\d{1,2}:\\d{1,3}$")
+
+    /**
+     * An episode's page in Stremio ("tt0944947:1:2": season 1, episode 2), where its sources are listed. The video id
+     * is Stremio's own form for episodes; like the other links it is not documented and must be verified on the device.
+     */
+    fun stremioEpisode(videoId: String): String {
+        val match = episodePattern.matchEntire(videoId) ?: throw IllegalArgumentException("invalid episode id")
+        return "stremio:///detail/series/${match.groupValues[1]}/$videoId"
+    }
+
     fun playStoreMarket(packageName: String): String {
         require(packagePattern.matches(packageName)) { "invalid package name" }
         return "market://details?id=$packageName"
