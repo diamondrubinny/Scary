@@ -7,7 +7,7 @@ package io.github.diamondrubinny.scary
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
@@ -30,13 +30,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * The Real-Debrid screen's file list, composed on its own with fake data: each file shows the film SCARY took it for,
+ * The Real-Debrid screen's file list, composed on its own (in place of the app's screen) with fake data: each file shows the film SCARY took it for,
  * and holding OK on a file opens "Which film is this file?", where the viewer's word is passed on.
  */
 @RunWith(AndroidJUnit4::class)
 class RealDebridFilmsTest {
     @get:Rule
-    val rule = createComposeRule()
+    val rule = createAndroidComposeRule<MainActivity>()
 
     private fun film(id: String, title: String, year: Int) =
         Movie(id = id, imdbId = "tt0000001", title = title, year = year, genre = Genre.HORROR)
