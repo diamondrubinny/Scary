@@ -46,6 +46,7 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.security.PinHasher
@@ -1129,6 +1130,52 @@ class HomeViewModel(
     private val _rdFiles = MutableStateFlow<RdFilesState>(RdFilesState.Idle)
     val rdFiles: StateFlow<RdFilesState> = _rdFiles.asStateFlow()
 
+    /** The catalog's title index for recognising files, built once per catalog (off the main thread). */
+    private var fileIndex: Pair<Catalog, FileMatch.Index>? = null
+
+    private fun indexOf(catalog: Catalog): FileMatch.Index =
+        fileIndex?.takeIf { it.first === catalog }?.second ?: FileMatch.Index(catalog.movies).also { fileIndex = catalog to it }
+
+    /**
+     * The film or series each of the viewer's files is, by file key: what the viewer said ([WatchStore.fileFilms]),
+     * else the one film the file's name fits (two that fit are none: the viewer decides). Files that are none are absent.
+     */
+    val rdFileFilms: StateFlow<Map<String, Movie>> = combine(
+        _rdFiles,
+        shownCatalog,
+        watchStore?.fileFilms ?: MutableStateFlow(emptyMap()),
+    ) { files, state, corrections ->
+        val catalog = (state as? CatalogState.Ready)?.catalog
+        if (files !is RdFilesState.Ready || catalog == null) {
+            emptyMap()
+        } else {
+            val index = indexOf(catalog)
+            buildMap {
+                for (file in files.files) {
+                    val said = corrections[file.key]
+                    val movie = when {
+                        said == "" -> null
+                        said != null -> catalog.movie(said)
+                        else -> index.find(file.name).singleOrNull()
+                    }
+                    if (movie != null) put(file.key, movie)
+                }
+            }
+        }
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.Eagerly, emptyMap())
+
+    /** Films a file may be, for the viewer to choose from when correcting its guess: the nearest titles first. */
+    suspend fun rdFileCandidates(file: RealDebrid.RdFile): List<Movie> = withContext(Dispatchers.Default) {
+        val catalog = visibleCatalog() ?: return@withContext emptyList()
+        val index = indexOf(catalog)
+        (index.find(file.name) + index.similar(file.name)).distinctBy { it.id }.take(CANDIDATES_SHOWN)
+    }
+
+    /** The viewer's word on which film a file is: a film id, "" for "not a film in the library", null to let SCARY guess. */
+    fun setRdFileFilm(file: RealDebrid.RdFile, movieId: String?) {
+        watchStore?.setFileFilm(file.key, movieId)
+    }
+
     /** The viewer's files that are the film on screen, by movie id (the movie page's "Play from Real-Debrid"). */
     private val _rdMatches = MutableStateFlow<Pair<String, List<RealDebrid.RdFile>>?>(null)
     val rdMatches: StateFlow<Pair<String, List<RealDebrid.RdFile>>?> = _rdMatches.asStateFlow()
@@ -1194,7 +1241,9 @@ class HomeViewModel(
 
     fun playRealDebrid(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long? = null) {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
-        guard(null, GatedAction.PlayRealDebrid(file, movieId, startAtMs))
+        // A file played from the Real-Debrid screen is the film SCARY (or the viewer) says it is, so its subtitles and
+        // its place under "Continue watching" belong to that film.
+        guard(null, GatedAction.PlayRealDebrid(file, movieId ?: rdFileFilms.value[file.key]?.id, startAtMs))
     }
 
     /** A file chosen to play: with a saved spot, the viewer picks where to start; otherwise from the start. */
@@ -1436,7 +1485,9 @@ class HomeViewModel(
                     settings.pushRecent(action.movie.id)
                     savedMovies.save(action.movie, language.value, keptOnline())
                 }
-                launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie) }
+                // A series the viewer stopped in the middle of in Stremio opens on that episode.
+                val episode = stremioLibrary.value.firstOrNull { it.imdbId == action.movie.imdbId }?.takeIf { it.offsetMs > 0 }?.videoId
+                launchWithShiver(action.movie, Launcher.STREMIO_LABEL) { launcher.openInStremio(action.movie, episode) }
             }
             is GatedAction.Trailer -> report(launcher.openTrailer(action.movie))
             is GatedAction.SearchIn -> {
@@ -2269,6 +2320,7 @@ class HomeViewModel(
         private const val CATEGORY_PREFIX = "cat:"
         private const val TMDB_CATEGORY_PREFIX = "tcat:"
         private const val MAX_TASTE_CANDIDATES = 120
+        private const val CANDIDATES_SHOWN = 8
 
         /** How much the taste may move a film in "More like this": up to one shared genre's worth. */
         private const val TASTE_WEIGHT = 1.5

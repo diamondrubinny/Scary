@@ -9,13 +9,23 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.player.FileNames
 
 /**
- * Which of the viewer's own files are a given film: "The.Shining.1980.1080p.BluRay.x264.mkv" is The Shining (1980).
- * The title in the file name must be the film's title (in any of its languages) word for word, and the year, when
- * the name has one, within a year of the film's. Episodes ("S01E02") are never a film. Nothing is looked up anywhere:
- * this only reads names the viewer's account already lists.
+ * Which of the viewer's own files are a given film or series: "The.Shining.1980.1080p.BluRay.x264.mkv" is The Shining
+ * (1980); "Dark.S01E02.720p.WEB.mkv" is episode 2 of season 1 of Dark. The title in the file name must be the title
+ * (in any of the languages SCARY knows) word for word, apart from spelling variants ("Alien³" is "Alien 3", "Part II"
+ * is "Part 2", a leading "The" does not count). For a film the year, when the name has one, is within a year of the
+ * film's; a film is never an episode and an episode is never a film. Nothing is looked up anywhere: this only reads
+ * names the viewer's account already lists.
  */
 object FileMatch {
-    data class Parsed(val title: String, val year: Int?, val episode: Boolean)
+    data class Parsed(
+        val title: String,
+        val year: Int?,
+        val episode: Boolean,
+        /** The title before the season and episode marker, for episodes; empty otherwise. */
+        val showTitle: String = "",
+        val season: Int? = null,
+        val episodeNumber: Int? = null,
+    )
 
     private val yearPattern = Regex("(?<![0-9])(19[0-9]{2}|20[0-9]{2})(?![0-9])")
     private val episodePattern = Regex("(?i)\\bS\\d{1,2}\\s?E\\d{1,3}\\b|\\b\\d{1,2}x\\d{2}\\b")
@@ -31,24 +41,106 @@ object FileMatch {
         } else {
             spaced.split(' ').takeWhile { it.lowercase() !in FileNames.QUALITY_WORDS }.joinToString(" ")
         }
-        return Parsed(Search.normalize(titlePart).trim(), year?.value?.toInt(), episode)
+        val guess = FileNames.guess(fileName)
+        return Parsed(
+            title = Search.normalize(titlePart).trim(),
+            year = year?.value?.toInt(),
+            episode = episode,
+            showTitle = if (guess.isEpisode) Search.normalize(guess.title).trim() else "",
+            season = guess.season,
+            episodeNumber = guess.episode,
+        )
     }
 
     fun matches(movie: Movie, parsed: Parsed): Boolean {
-        if (parsed.episode && !movie.isSeries) return false
+        if (movie.isSeries) return matchesSeries(movie, parsed)
+        if (parsed.episode) return false
         if (parsed.title.length < 2) return false
         if (parsed.year != null && kotlin.math.abs(parsed.year - movie.year) > 1) return false
-        // Compared without spaces: "Rosemarys.Baby" is "Rosemary's Baby".
-        val titles = (listOf(movie.title, movie.titleHe) + movie.titles.values).filter(String::isNotBlank).map { compact(Search.normalize(it)) }
-        val title = compact(parsed.title)
+        val title = key(parsed.title)
         // A file with no year must match a longer title exactly, so "It" or "Us" alone never claims a random file.
         if (parsed.year == null && title.length < 6) return false
-        return title in titles
+        return title in titleKeys(movie)
     }
 
-    private fun compact(text: String): String = text.replace(" ", "")
+    private fun matchesSeries(movie: Movie, parsed: Parsed): Boolean {
+        if (parsed.season == null || parsed.episodeNumber == null || parsed.showTitle.length < 2) return false
+        // A year in the name is the show's first year (or within its run).
+        if (parsed.year != null) {
+            val inRun = parsed.year >= movie.year - 1 && (movie.ongoing || parsed.year <= (movie.endYear ?: movie.year) + 1)
+            if (!inRun) return false
+        }
+        val title = key(parsed.showTitle)
+        // The season and episode already narrow it, so a short title is enough (but not one or two letters).
+        return title.length >= 3 && title in titleKeys(movie)
+    }
 
-    /** The viewer's files that are [movie], biggest first (usually the best quality). */
+    internal fun titleKeys(movie: Movie): Set<String> =
+        (listOf(movie.title, movie.titleHe) + movie.titles.values).filter(String::isNotBlank).mapTo(HashSet()) { key(Search.normalize(it)) }
+
+    private val ROMAN = mapOf("ii" to "2", "iii" to "3", "iv" to "4", "v" to "5", "vi" to "6", "vii" to "7", "viii" to "8", "ix" to "9", "x" to "10")
+    private val ARTICLES = setOf("the", "a", "an")
+
+    /**
+     * A title's comparison key: lowercase words with spelling variants made one ("Alien³" and "Alien 3", "Part II" and
+     * "Part 2", "&" and "and"), a leading article dropped, and the spaces taken out ("Rosemarys Baby").
+     */
+    internal fun key(normalized: String): String {
+        val text = normalized.replace('¹', '1').replace('²', '2').replace('³', '3')
+        // "&" is already a separator after normalizing, so "and" is dropped too: "Tom & Jerry" is "Tom and Jerry".
+        val words = Search.normalize(text).split(' ').filter { it.isNotEmpty() && it != "and" }.toMutableList()
+        for (i in words.indices) if (i > 0) ROMAN[words[i]]?.let { words[i] = it }
+        // "Part 2", "Chapter 2": the number is what counts.
+        val kept = words.filterIndexed { i, w -> !((w == "part" || w == "chapter") && words.getOrNull(i + 1)?.firstOrNull()?.isDigit() == true) }
+        val noArticle = if (kept.size > 1 && kept.first() in ARTICLES) kept.drop(1) else kept
+        return noArticle.joinToString("")
+    }
+
+    /** The viewer's files that are [movie], biggest first (usually the best quality). For a series, see [forSeries]. */
     fun forMovie(movie: Movie, files: List<RealDebrid.RdFile>): List<RealDebrid.RdFile> =
         files.filter { matches(movie, parse(it.name)) }.sortedByDescending { it.sizeBytes }
+
+    /** One of the viewer's files for an episode of a series. */
+    data class Episode(val season: Int, val episode: Int, val file: RealDebrid.RdFile)
+
+    /**
+     * The viewer's episode files of [series], by season and episode, the biggest file first when an episode has several
+     * (usually the best quality).
+     */
+    fun forSeries(series: Movie, files: List<RealDebrid.RdFile>): List<Episode> =
+        files.mapNotNull { file ->
+            val parsed = parse(file.name)
+            if (matchesSeries(series, parsed)) Episode(parsed.season ?: return@mapNotNull null, parsed.episodeNumber ?: return@mapNotNull null, file) else null
+        }.sortedWith(compareBy<Episode>({ it.season }, { it.episode }).thenByDescending { it.file.sizeBytes })
+
+    /**
+     * The films and series of a catalog by their title keys, to tell which one a file is without comparing the file with
+     * every film each time. Built once per catalog.
+     */
+    class Index(movies: Collection<Movie>) {
+        private val byKey: Map<String, List<Movie>> = HashMap<String, MutableList<Movie>>().also { map ->
+            for (movie in movies) for (key in titleKeys(movie)) map.getOrPut(key) { ArrayList(1) }.add(movie)
+        }
+
+        /** The films that [fileName] is by the rules of [matches], the likeliest first (nearest year, best rated). */
+        fun find(fileName: String): List<Movie> {
+            val parsed = parse(fileName)
+            val key = key(if (parsed.episode) parsed.showTitle else parsed.title)
+            return byKey[key].orEmpty().distinctBy { it.id }.filter { matches(it, parsed) }
+                .sortedWith(compareBy<Movie>({ parsed.year?.let { y -> kotlin.math.abs(y - it.year) } ?: 0 }, { -(it.imdbRating ?: 0.0) }))
+        }
+
+        /**
+         * Films that [fileName] may be when no rule says so: a title that holds, or is held by, the file's title. For
+         * the viewer to choose from when correcting a guess; at most [limit], the closest titles first.
+         */
+        fun similar(fileName: String, limit: Int = 8): List<Movie> {
+            val parsed = parse(fileName)
+            val wanted = key(if (parsed.episode) parsed.showTitle else parsed.title)
+            if (wanted.length < 3) return emptyList()
+            return byKey.entries.filter { (key, _) -> key.length >= 3 && (key.contains(wanted) || (key.length >= 4 && wanted.contains(key))) }
+                .sortedWith(compareBy({ kotlin.math.abs(it.key.length - wanted.length) }, { it.key }))
+                .flatMap { it.value }.distinctBy { it.id }.take(limit)
+        }
+    }
 }

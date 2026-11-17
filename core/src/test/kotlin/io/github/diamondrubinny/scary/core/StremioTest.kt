@@ -101,4 +101,16 @@ class StremioTest {
         assertEquals("libraryItem", body["collection"]!!.jsonPrimitive.content)
         assertTrue(Stremio.libraryGetBody("KEY12345").contains("\"all\":true"))
     }
+
+    @Test
+    fun `a series' last episode is read from its state, and nothing else is trusted as one`() {
+        fun library(type: String, id: String, video: String) =
+            """{"result":[{"_id":"$id","name":"Dark","type":"$type","state":{"timeOffset":120000,"duration":3000000,"video_id":"$video"}}]}"""
+        assertEquals("tt5753856:2:3", Stremio.parseLibrary(library("series", "tt5753856", "tt5753856:2:3"))!!.single().videoId)
+        // Another show's id, a malformed one, an id on a film, or none.
+        assertNull(Stremio.parseLibrary(library("series", "tt5753856", "tt0944947:2:3"))!!.single().videoId)
+        assertNull(Stremio.parseLibrary(library("series", "tt5753856", "tt5753856:2:3/../x"))!!.single().videoId)
+        assertNull(Stremio.parseLibrary(library("movie", "tt5753856", "tt5753856:2:3"))!!.single().videoId)
+        assertNull(Stremio.parseLibrary(library("series", "tt5753856", ""))!!.single().videoId)
+    }
 }

@@ -614,6 +614,14 @@
     <string name="value_rd_none">לא מחובר</string>
     <string name="action_play_rd">ניגון מ־Real-Debrid</string>
     <string name="rd_choose_title">איזה מהקבצים שלך?</string>
+    <string name="rd_film_title">לאיזה סרט שייך הקובץ?</string>
+    <string name="rd_film_none">לא סרט מהספרייה</string>
+    <string name="rd_film_guess">תנו ל־SCARY לנחש שוב</string>
+    <string name="rd_film_hint">החזיקו OK על קובץ כדי לבחור לאיזה סרט הוא שייך.</string>
+    <string name="rd_file_is">הסרט %1$s</string>
+    <string name="rd_choose_episode">איזה פרק?</string>
+    <string name="rd_season">עונה %1$d</string>
+    <string name="rd_episode">פרק %1$d</string>
     <string name="player_loading">טוען…</string>
     <string name="player_error">אי אפשר לנגן את הקובץ הזה בטלוויזיה הזו.</string>
     <string name="player_close">סגירה</string>
@@ -734,6 +742,7 @@
     <string name="diag_online">סרטים מהרשת: %1$s</string>
     <string name="diag_refresh">רענון אחרון (עמודים שנטענו: שורות · קטגוריות): %1$s</string>
     <string name="diag_quality">בדיקת מוצא (סרטים שהוצאו משורות לפי מקום · ממתינים לשפה): %1$s</string>
+    <string name="diag_startup">התחלה: %1$s (הזמן עד השורות הראשונות, האחרון והממוצע של ההפעלות האחרונות)</string>
     <string name="diag_none">לא נרשמו קריסות או היתקעויות.</string>
     <string name="diag_clear">ניקוי האבחון</string>
 </resources>

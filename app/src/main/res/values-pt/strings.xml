@@ -614,6 +614,14 @@
     <string name="value_rd_none">Não conectado</string>
     <string name="action_play_rd">Reproduzir do Real-Debrid</string>
     <string name="rd_choose_title">Qual dos seus arquivos?</string>
+    <string name="rd_film_title">De que filme é este arquivo?</string>
+    <string name="rd_film_none">Não é um filme da biblioteca</string>
+    <string name="rd_film_guess">Deixar o SCARY adivinhar de novo</string>
+    <string name="rd_film_hint">Segure OK sobre um arquivo para escolher de que filme ele é.</string>
+    <string name="rd_file_is">é o filme %1$s</string>
+    <string name="rd_choose_episode">Qual episódio?</string>
+    <string name="rd_season">Temporada %1$d</string>
+    <string name="rd_episode">Episódio %1$d</string>
     <string name="player_loading">Carregando…</string>
     <string name="player_error">Este arquivo não pode ser reproduzido nesta TV.</string>
     <string name="player_close">Fechar</string>
@@ -734,6 +742,7 @@
     <string name="diag_online">Filmes da internet: %1$s</string>
     <string name="diag_refresh">Última atualização (páginas carregadas: fileiras · categorias): %1$s</string>
     <string name="diag_quality">Verificação de origem (filmes fora das fileiras de lugar · à espera do idioma): %1$s</string>
+    <string name="diag_startup">Início: %1$s (tempo até as primeiras fileiras, o último e a média dos últimos inícios)</string>
     <string name="diag_none">Nenhum travamento ou congelamento registrado.</string>
     <string name="diag_clear">Limpar diagnóstico</string>
 </resources>

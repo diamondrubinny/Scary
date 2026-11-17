@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.stability
 
 import android.content.Context
+import android.os.Process
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -28,6 +29,8 @@ object HealthLog {
     private const val ONLINE = "online"
     private const val REFRESH = "refresh"
     private const val QUALITY = "quality"
+    private const val STARTS = "starts"
+    private const val MAX_STARTS = 5
     private const val OWN_PACKAGE = "io.github.diamondrubinny.scary"
     private const val FRAMES = 4
 
@@ -40,6 +43,8 @@ object HealthLog {
         val refresh: String? = null,
         /** "16.11 21:10 · 41 · 3": American films kept out of the rows about a place, and those waiting for a language. */
         val quality: String? = null,
+        /** "16.11 21:10 · 3.2 s · 3.0 s on average of 5": how long SCARY took, from opening, to show its first rows. */
+        val startup: String? = null,
     )
 
     fun read(context: Context): Report {
@@ -51,6 +56,7 @@ object HealthLog {
             prefs.getString(ONLINE, null),
             prefs.getString(REFRESH, null),
             prefs.getString(QUALITY, null),
+            startupLine(prefs.getString(STARTS, null)),
         )
     }
 
@@ -80,6 +86,36 @@ object HealthLog {
     fun recordQuality(context: Context, keptOut: Int, unclear: Int) {
         val line = "${stamp()} · $keptOut · $unclear"
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(QUALITY, line) }
+    }
+
+    private val firstRowsRecorded = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Called when the home screen has drawn its first rows: how long since this process started, once per start. The
+     * last [MAX_STARTS] are kept so a slow start can be told from one slow morning. Only a time and a duration.
+     */
+    fun recordFirstRows(context: Context) {
+        if (!firstRowsRecorded.compareAndSet(false, true)) return
+        val millis = SystemClock.elapsedRealtime() - Process.getStartElapsedRealtime()
+        if (millis !in 1..MAX_START_MS) return
+        val prefs = context.getSharedPreferences(FILE, Context.MODE_PRIVATE)
+        val kept = (prefs.getString(STARTS, null)?.split(';').orEmpty().filter { it.isNotBlank() } + "${stamp()}|$millis").takeLast(MAX_STARTS)
+        prefs.edit { putString(STARTS, kept.joinToString(";")) }
+    }
+
+    private const val MAX_START_MS = 10 * 60_000L
+
+    /** "16.11 21:10 · 3.2 s · 3.0 s on average of 5" from the stored starts; null when there are none. */
+    private fun startupLine(stored: String?): String? {
+        val starts = stored?.split(';').orEmpty().mapNotNull { entry ->
+            val parts = entry.split('|')
+            val millis = parts.getOrNull(1)?.toLongOrNull()?.takeIf { it in 1..MAX_START_MS } ?: return@mapNotNull null
+            parts[0] to millis
+        }
+        val last = starts.lastOrNull() ?: return null
+        fun seconds(ms: Long) = String.format(Locale.ROOT, "%.1f s", ms / 1000.0)
+        val average = starts.sumOf { it.second } / starts.size
+        return "${last.first} · ${seconds(last.second)} · ${seconds(average)} / ${starts.size}"
     }
 
     private fun recordFreeze(context: Context, seconds: Float, frames: Array<StackTraceElement>) {

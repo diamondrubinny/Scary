@@ -274,6 +274,12 @@ fun HomeScreen(
             // While picking, each poster shows its place in the bucket list.
             LocalBucketNumber provides if (state.picking) state::bucketNumber else null,
         ) {
+            // How long SCARY took, from opening, to draw its first rows: kept in Diagnostics, once per start.
+            val startContext = androidx.compose.ui.platform.LocalContext.current
+            LaunchedEffect(Unit) {
+                withFrameNanos { }
+                io.github.diamondrubinny.scary.stability.HealthLog.recordFirstRows(startContext)
+            }
             LazyColumn(
                 state = listState,
                 modifier = Modifier

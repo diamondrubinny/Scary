@@ -4,6 +4,13 @@
 
 package io.github.diamondrubinny.scary.ui.realdebrid
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalConfiguration
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.Movie
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -75,7 +82,19 @@ class RealDebridActions(
     val onLanguages: (LanguagePrefs) -> Unit = {},
     /** Whether the player may look for subtitles online by the film's name. */
     val onOnlineSubtitles: (Boolean) -> Unit = {},
+    /** The films a file may be, to choose from when correcting SCARY's guess. */
+    val onCandidates: suspend (RealDebrid.RdFile) -> List<Movie> = { emptyList() },
+    /** The viewer's word on a file's film: a film id, "" for "not a film in the library", null to let SCARY guess. */
+    val onSetFilm: (RealDebrid.RdFile, String?) -> Unit = { _, _ -> },
 )
+
+/** Test tags of the file correction window. */
+const val REAL_DEBRID_FILM_TAG = "realDebridFilm"
+const val REAL_DEBRID_NOT_A_FILM_TAG = "realDebridNotAFilm"
+const val REAL_DEBRID_GUESS_AGAIN_TAG = "realDebridGuessAgain"
+
+/** A file's film row on the Real-Debrid screen: the film's id for the test tag. */
+fun filmTag(movieId: String) = "film:$movieId"
 
 /**
  * The viewer's Real-Debrid account: what connecting does (only their own files are played; SCARY looks for nothing
@@ -90,7 +109,13 @@ fun RealDebridScreen(
     history: List<WatchEntry> = emptyList(),
     languages: LanguagePrefs = LanguagePrefs(),
     onlineSubtitles: Boolean = true,
+    /** The film or series each file is (by file key), by SCARY's guess or the viewer's word; files that are none are absent. */
+    fileFilms: Map<String, Movie> = emptyMap(),
 ) {
+    var correcting by remember { mutableStateOf<RealDebrid.RdFile?>(null) }
+    correcting?.let { file ->
+        FilmChooser(file, fileFilms[file.key], actions, onDone = { correcting = null })
+    }
     val firstFocus = remember { FocusRequester() }
     // Leaving while waiting stops asking Real-Debrid: approving later would not reach the TV anyway.
     val waiting by rememberUpdatedState(state is State.Waiting)
@@ -155,6 +180,10 @@ fun RealDebridScreen(
         }
         if (state is State.SignedIn) {
             BasicText(stringResource(R.string.rd_files_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
+            // How to correct a guess, in plain words (holding OK is the remote's long press).
+            if (fileFilms.isNotEmpty() || (files as? RdFilesState.Ready)?.files?.isNotEmpty() == true) {
+                BasicText(stringResource(R.string.rd_film_hint), style = ScaryType.Caption.copy(color = ScaryColors.Ash))
+            }
             when (files) {
                 RdFilesState.Idle, RdFilesState.Loading -> BasicText(stringResource(R.string.rd_files_loading), style = ScaryType.Caption)
                 RdFilesState.Unreachable -> BasicText(stringResource(R.string.rd_unreachable), style = ScaryType.Caption)
@@ -165,7 +194,7 @@ fun RealDebridScreen(
                         modifier = Modifier.fillMaxWidth().weight(1f).testTag(REAL_DEBRID_FILES_TAG),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(files.files, key = { it.key }) { file -> FileRow(file) { actions.onPlay(file) } }
+                        items(files.files, key = { it.key }) { file -> FileRow(file, fileFilms[file.key], onLongClick = { correcting = file }) { actions.onPlay(file) } }
                     }
                 }
             }
@@ -200,28 +229,93 @@ private fun WaitingForCode(state: State.Waiting, narrow: Boolean) {
 }
 
 @Composable
-private fun FileRow(file: RealDebrid.RdFile, onClick: () -> Unit) {
+private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Unit, onClick: () -> Unit) {
+    val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
+    val filmLabel = film?.let { "${it.displayTitle(language)} (${it.yearsLabel})" }
     FocusSurface(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
+        onLongClick = onLongClick,
+        modifier = Modifier.fillMaxWidth().then(if (film != null) Modifier.testTag(filmTag(film.id)) else Modifier),
         shape = RoundedCornerShape(8.dp),
         focusedScale = 1.02f,
         containerColor = ScaryColors.Crypt,
         focusedContainerColor = ScaryColors.Bone,
-        contentDescription = stringResource(R.string.rd_play_file, file.name),
+        contentDescription = listOfNotNull(stringResource(R.string.rd_play_file, file.name), filmLabel?.let { stringResource(R.string.rd_file_is, it) }).joinToString(", "),
     ) { focused ->
         Row(Modifier.padding(horizontal = 18.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
-            BasicText(
-                file.name,
-                style = ScaryType.Body.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone, textDirection = TextDirection.Content),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f),
-            )
+            Column(Modifier.weight(1f)) {
+                BasicText(
+                    file.name,
+                    style = ScaryType.Body.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone, textDirection = TextDirection.Content),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (filmLabel != null) {
+                    BasicText(
+                        filmLabel,
+                        style = ScaryType.Caption.copy(color = if (focused) ScaryColors.Void else ScaryColors.Candle, textDirection = TextDirection.Content),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
             BasicText(
                 size(file.sizeBytes),
                 style = ScaryType.Caption.copy(color = if (focused) ScaryColors.Void else ScaryColors.Ash),
                 modifier = Modifier.padding(start = 12.dp).width(80.dp),
+            )
+        }
+    }
+}
+
+/**
+ * "Which film is this file?": the films it may be (nearest titles first), "Not a film from the library", and "Let
+ * SCARY guess again". The viewer's word is kept on this TV, and decides which film the file's subtitles and "Continue
+ * watching" belong to.
+ */
+@Composable
+private fun FilmChooser(file: RealDebrid.RdFile, current: Movie?, actions: RealDebridActions, onDone: () -> Unit) {
+    val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
+    var candidates by remember(file.key) { mutableStateOf<List<Movie>?>(null) }
+    LaunchedEffect(file.key) { candidates = actions.onCandidates(file) }
+    val first = remember { FocusRequester() }
+    LaunchedEffect(candidates == null) {
+        withFrameNanos { }
+        runCatching { first.requestFocus() }
+    }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 640.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .padding(22.dp)
+                .testTag(REAL_DEBRID_FILM_TAG),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(stringResource(R.string.rd_film_title), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            BasicText(file.name, style = ScaryType.Caption.copy(color = ScaryColors.Ash, textDirection = TextDirection.Content), maxLines = 2, overflow = TextOverflow.Ellipsis)
+            val shown = candidates
+            if (shown == null) {
+                BasicText(stringResource(R.string.rd_files_loading), style = ScaryType.Caption, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            }
+            shown?.forEachIndexed { i, movie ->
+                ScaryButton(
+                    "${movie.displayTitle(language)} (${movie.yearsLabel})" + if (movie.id == current?.id) " ✓" else "",
+                    onClick = { actions.onSetFilm(file, movie.id); onDone() },
+                    focusRequester = if (i == 0) first else null,
+                    modifier = Modifier.testTag(filmTag(movie.id)),
+                )
+            }
+            ScaryButton(
+                stringResource(R.string.rd_film_none),
+                onClick = { actions.onSetFilm(file, ""); onDone() },
+                focusRequester = if (shown.isNullOrEmpty()) first else null,
+                modifier = Modifier.testTag(REAL_DEBRID_NOT_A_FILM_TAG),
+            )
+            ScaryButton(
+                stringResource(R.string.rd_film_guess),
+                onClick = { actions.onSetFilm(file, null); onDone() },
+                modifier = Modifier.testTag(REAL_DEBRID_GUESS_AGAIN_TAG),
             )
         }
     }

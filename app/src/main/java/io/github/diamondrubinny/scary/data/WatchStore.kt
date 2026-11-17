@@ -12,6 +12,7 @@ import io.github.diamondrubinny.scary.core.player.TrackChoice
 import io.github.diamondrubinny.scary.core.player.TrackMemory
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.player.WatchHistory
+import io.github.diamondrubinny.scary.core.realdebrid.RdMatches
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,9 +46,11 @@ class WatchStore(context: Context) {
     fun clear() {
         _entries.value = emptyList()
         memories.clear()
+        _fileFilms.value = emptyMap()
         prefs.edit {
             remove(HISTORY)
             remove(TRACK_MEMORY)
+            remove(FILE_FILMS)
         }
     }
 
@@ -81,6 +84,22 @@ class WatchStore(context: Context) {
     fun setOnlineSubtitles(value: Boolean) {
         _onlineSubtitles.value = value
         prefs.edit { putBoolean(ONLINE_SUBTITLES, value) }
+    }
+
+    private val _fileFilms = MutableStateFlow<Map<String, String>>(RdMatches.decode(prefs.getString(FILE_FILMS, null)))
+
+    /**
+     * Which film the viewer says each of their Real-Debrid files is (file key to film id, "" for "not a film in the
+     * library"), when SCARY's guess from the name was wrong. On this TV only, not backed up.
+     */
+    val fileFilms: StateFlow<Map<String, String>> = _fileFilms.asStateFlow()
+
+    /** Sets (or, with null, clears) the film of one file. */
+    @Synchronized
+    fun setFileFilm(fileKey: String, movieId: String?) {
+        val next = RdMatches.with(_fileFilms.value, fileKey, movieId)
+        _fileFilms.value = next
+        prefs.edit { putString(FILE_FILMS, RdMatches.encode(next)) }
     }
 
     private val memories: LinkedHashMap<String, TrackMemory> by lazy { TrackChoice.decodeAll(prefs.getString(TRACK_MEMORY, null)) }
@@ -138,6 +157,7 @@ class WatchStore(context: Context) {
         const val SUBTITLE_LANGUAGE = "subtitle_language"
         const val TRACK_MEMORY = "track_memory"
         const val ONLINE_SUBTITLES = "online_subtitles"
+        const val FILE_FILMS = "file_films"
         const val LEGACY_STAMP = "at:"
     }
 }
