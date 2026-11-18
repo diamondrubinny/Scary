@@ -343,6 +343,25 @@ if [ -f dist/scary-release.apk ]; then
     adb shell cmd package compile -f -m speed-profile "$PKG" > /dev/null || true
     echo "speed-profile: $(cold_start)"
   } | tee "$OUT/startup.txt"
+
+  # Frames, from the system's own statistics (gfxinfo): how many the home screen draws while nothing is touched (the
+  # ambient effects alone; fewer is a calmer GPU), and how smooth moving through it is. An emulator's numbers are for
+  # comparing one build with another, not for what a TV shows.
+  frame_stat() { adb shell dumpsys gfxinfo "$PKG" | tr -d '\r' | awk -F': ' -v k="$1" 'index($1, k) {print $2; exit}'; }
+  {
+    echo "Frames of the release build (emulator, API 30 TV)"
+    adb shell am force-stop "$PKG"
+    open
+    sleep 15
+    adb shell dumpsys gfxinfo "$PKG" reset > /dev/null
+    sleep 10
+    echo "idle 10 s on the home screen: $(frame_stat 'Total frames rendered') frames"
+    adb shell dumpsys gfxinfo "$PKG" reset > /dev/null
+    for _ in $(seq 1 10); do key KEYCODE_DPAD_DOWN; sleep 0.3; done
+    for _ in $(seq 1 20); do key KEYCODE_DPAD_RIGHT; sleep 0.2; done
+    for _ in $(seq 1 10); do key KEYCODE_DPAD_UP; sleep 0.3; done
+    echo "moving (10 down, 20 right, 10 up): $(frame_stat 'Total frames rendered') frames, janky $(frame_stat 'Janky frames'), 50th $(frame_stat '50th percentile'), 90th $(frame_stat '90th percentile'), 95th $(frame_stat '95th percentile'), 99th $(frame_stat '99th percentile')"
+  } | tee "$OUT/frames.txt"
   adb shell am force-stop "$PKG"
 fi
 
