@@ -306,7 +306,8 @@ fun HomeScreen(
                         )
                     }
                 }
-                items(state.rows, key = { it.key }) { row ->
+                // Rows of one kind are built alike: telling the list lets it reuse one that scrolled away for the next.
+                items(state.rows, key = { it.key }, contentType = { it::class }) { row ->
                     CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                         Box(Modifier.bringIntoViewResponder(FromRowTitle)) {
                             HomeRowView(row, language, rowStates(row.key), restoreKey, restoreFocus, actions, state::isLocked, state::isWatched, showSetHome) {

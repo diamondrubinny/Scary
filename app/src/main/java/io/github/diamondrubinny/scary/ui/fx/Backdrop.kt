@@ -5,16 +5,12 @@
 package io.github.diamondrubinny.scary.ui.fx
 
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LongState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,17 +26,17 @@ import androidx.compose.ui.unit.LayoutDirection
 import coil3.compose.AsyncImage
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.rememberArtwork
-import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import kotlinx.coroutines.delay
 
 /**
  * The selected movie's background art behind the whole screen, darkened on the text side and toward the rows
  * so text stays readable. Waits a moment before switching, so fast scrolling does not decode every image.
- * The art drifts slowly (a Ken Burns zoom and pan) unless motion is reduced.
+ * The art drifts slowly (a Ken Burns zoom and pan) with the screen's ambient clock ([time], see [rememberAmbientTime]);
+ * it stays still while that clock does (motion reduced).
  */
 @Composable
-fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
+fun MovieBackdrop(movie: Movie?, time: LongState, modifier: Modifier = Modifier) {
     var shown by remember { mutableStateOf(movie) }
     LaunchedEffect(movie) {
         // Same movie with new data (artwork just arrived): update at once. Another movie: wait for scrolling to settle.
@@ -48,7 +44,6 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
         shown = movie
     }
     val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-    val drift = kenBurns(enabled = !LocalReduceMotion.current)
 
     Box(modifier.fillMaxSize()) {
         HeroBackdrop(shown)
@@ -64,7 +59,7 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
                         .fillMaxSize()
                         // Read in the draw phase only, so the drift never recomposes the screen.
                         .graphicsLayer {
-                            val t = drift()
+                            val t = kenBurns(time.longValue)
                             val scale = 1f + KEN_BURNS_ZOOM * t
                             scaleX = scale
                             scaleY = scale
@@ -102,18 +97,10 @@ fun MovieBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
     }
 }
 
-/** 0 to 1 and back, slowly; always 0 when motion is reduced. */
-@Composable
-private fun kenBurns(enabled: Boolean): () -> Float {
-    if (!enabled) return { 0f }
-    val transition = rememberInfiniteTransition(label = "kenBurns")
-    val progress = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(tween(KEN_BURNS_MS, easing = LinearEasing), RepeatMode.Reverse),
-        label = "kenBurnsProgress",
-    )
-    return { progress.value }
+/** 0 to 1 and back, slowly: where the drift is at [timeMs] of the ambient clock. */
+private fun kenBurns(timeMs: Long): Float {
+    val phase = (timeMs % (2L * KEN_BURNS_MS)).toFloat() / KEN_BURNS_MS
+    return if (phase <= 1f) phase else 2f - phase
 }
 
 private const val SWITCH_DELAY_MS = 350L

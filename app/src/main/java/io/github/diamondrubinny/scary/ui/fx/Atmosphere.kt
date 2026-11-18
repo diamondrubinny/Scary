@@ -7,15 +7,12 @@ package io.github.diamondrubinny.scary.ui.fx
 import android.graphics.Bitmap
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.LongState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -71,12 +68,14 @@ fun HeroBackdrop(movie: Movie?, modifier: Modifier = Modifier) {
 private class Puff(val x: Float, val y: Float, val radius: Float, val speed: Float, val alpha: Float)
 
 /**
- * Fog, film grain and a slowly breathing vignette. No flashes: the fastest change is the grain shifting
- * about eight times a second at 6% opacity, and the vignette cycle lasts seven seconds.
- * When [animate] is false everything is drawn once and stays still.
+ * Fog, film grain and a slowly breathing vignette, moving with the screen's ambient clock ([time], see
+ * [rememberAmbientTime]). No flashes: the fastest change is the grain shifting about eight times a second at 6%
+ * opacity, and the vignette cycle lasts seven seconds. While the clock stands still everything stays as drawn.
+ *
+ * Its brushes are made once for the screen's size, not for every frame: a frame only moves them.
  */
 @Composable
-fun Atmosphere(animate: Boolean, modifier: Modifier = Modifier) {
+fun Atmosphere(time: LongState, modifier: Modifier = Modifier) {
     val puffs = remember {
         val random = Random(13)
         List(7) {
@@ -91,55 +90,45 @@ fun Atmosphere(animate: Boolean, modifier: Modifier = Modifier) {
     }
     val grain = remember { noiseTile(NOISE_TILE_PX) }
     val grainBrush = remember(grain) { ShaderBrush(ImageShader(grain, TileMode.Repeated, TileMode.Repeated)) }
-    val time = remember { mutableLongStateOf(0L) }
-
-    LaunchedEffect(animate) {
-        if (!animate) return@LaunchedEffect
-        val start = withFrameMillis { it } - time.longValue
-        while (true) {
-            // About 30 fps is plenty for fog and keeps weak TV GPUs cool.
-            withFrameMillis { time.longValue = it - start }
-            delay(FRAME_DELAY_MS)
-        }
-    }
-
-    Canvas(modifier.fillMaxSize()) {
-        val seconds = time.longValue / 1000f
-        val w = size.width
-        val h = size.height
-
-        for (p in puffs) {
-            val x = ((p.x + p.speed * seconds) % 1.6f + 1.6f) % 1.6f - 0.3f
-            val center = Offset(x * w, p.y * h)
-            val radius = p.radius * w
-            drawCircle(
-                brush = Brush.radialGradient(
+    Box(
+        modifier.fillMaxSize().drawWithCache {
+            val w = size.width
+            val h = size.height
+            // Each puff's light, around the origin: drawing moves it to where the puff is.
+            val puffBrushes = puffs.map { p ->
+                Brush.radialGradient(
                     colors = listOf(Color(0xFFC8C3B9).copy(alpha = p.alpha), Color.Transparent),
-                    center = center,
-                    radius = radius,
-                ),
-                radius = radius,
-                center = center,
-            )
-        }
-
-        val step = time.longValue / GRAIN_STEP_MS
-        val tile = NOISE_TILE_PX.toFloat()
-        val dx = (step * 37 % NOISE_TILE_PX).toFloat()
-        val dy = (step * 53 % NOISE_TILE_PX).toFloat()
-        translate(-dx, -dy) {
-            drawRect(grainBrush, size = Size(w + tile, h + tile), alpha = 0.06f)
-        }
-
-        val breathe = 0.9f + 0.1f * sin(seconds * (2f * Math.PI.toFloat() / VIGNETTE_PERIOD_S))
-        drawRect(
-            brush = Brush.radialGradient(
-                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f * breathe)),
+                    center = Offset.Zero,
+                    radius = (p.radius * w).coerceAtLeast(1f),
+                )
+            }
+            val vignette = Brush.radialGradient(
+                colors = listOf(Color.Transparent, Color.Black.copy(alpha = VIGNETTE_ALPHA)),
                 center = Offset(w / 2, h * 0.4f),
-                radius = maxOf(w, h) * 0.75f,
-            ),
-        )
-    }
+                radius = maxOf(w, h, 1f) * 0.75f,
+            )
+            val tile = NOISE_TILE_PX.toFloat()
+            val grainSize = Size(w + tile, h + tile)
+            onDrawBehind {
+                val now = time.longValue
+                val seconds = now / 1000f
+                puffs.forEachIndexed { i, p ->
+                    val x = ((p.x + p.speed * seconds) % 1.6f + 1.6f) % 1.6f - 0.3f
+                    translate(x * w, p.y * h) {
+                        drawCircle(brush = puffBrushes[i], radius = p.radius * w, center = Offset.Zero)
+                    }
+                }
+                val step = now / GRAIN_STEP_MS
+                val dx = (step * 37 % NOISE_TILE_PX).toFloat()
+                val dy = (step * 53 % NOISE_TILE_PX).toFloat()
+                translate(-dx, -dy) {
+                    drawRect(grainBrush, size = grainSize, alpha = 0.06f)
+                }
+                val breathe = 0.9f + 0.1f * sin(seconds * (2f * Math.PI.toFloat() / VIGNETTE_PERIOD_S))
+                drawRect(vignette, alpha = breathe)
+            }
+        },
+    )
 }
 
 private fun noiseTile(sizePx: Int): ImageBitmap {
@@ -152,6 +141,6 @@ private fun noiseTile(sizePx: Int): ImageBitmap {
 }
 
 private const val NOISE_TILE_PX = 128
-private const val FRAME_DELAY_MS = 16L
+private const val VIGNETTE_ALPHA = 0.8f
 private const val GRAIN_STEP_MS = 120L
 private const val VIGNETTE_PERIOD_S = 7f
