@@ -71,6 +71,19 @@ enum class TmdbRow(
 
     /** Horror films out in the next six months, most anticipated first. */
     COMING_SOON("tmdb_coming_soon", "בקרוב בקולנוע", "Coming soon to cinemas", "Em breve nos cinemas", "Скоро в кино", "قريبًا في السينما"),
+
+    /** Out in the last two months. */
+    JUST_RELEASED("tmdb_just_released", "יצאו עכשיו", "Just released", "Acabaram de sair", "Только что вышли", "صدرت للتو"),
+    POPULAR_HORROR("tmdb_popular_horror", "האימה הכי פופולרית", "Most popular horror", "Terror mais popular", "Самые популярные ужасы", "أشهر أفلام الرعب"),
+    NEW_THRILLERS("tmdb_new_thrillers", "מותחנים חדשים", "New thrillers", "Suspenses recentes", "Новые триллеры", "أفلام إثارة جديدة"),
+
+    /** Well rated by those who saw them, and seen by few. */
+    HIDDEN_GEMS("tmdb_hidden_gems", "פנינים נסתרות", "Hidden gems", "Joias escondidas", "Скрытые жемчужины", "جواهر خفية"),
+    SEVENTIES("tmdb_70s", "אימת שנות ה־70", "Horror of the 70s", "Terror dos anos 70", "Ужасы 70-х", "رعب السبعينيات"),
+    EIGHTIES("tmdb_80s", "אימת שנות ה־80", "Horror of the 80s", "Terror dos anos 80", "Ужасы 80-х", "رعب الثمانينيات"),
+    NINETIES("tmdb_90s", "אימת שנות ה־90", "Horror of the 90s", "Terror dos anos 90", "Ужасы 90-х", "رعب التسعينيات"),
+    TWO_THOUSANDS("tmdb_2000s", "אימת שנות ה־2000", "Horror of the 2000s", "Terror dos anos 2000", "Ужасы 2000-х", "رعب الألفينات"),
+    TWENTY_TENS("tmdb_2010s", "אימת שנות ה־2010", "Horror of the 2010s", "Terror dos anos 2010", "Ужасы 2010-х", "رعب العقد الثاني من الألفية"),
 }
 
 /**
@@ -193,9 +206,51 @@ object Tmdb {
                 "primary_release_date.gte" to today.plusDays(1).toString(),
                 "primary_release_date.lte" to today.plusMonths(6).toString(),
             )
+            TmdbRow.JUST_RELEASED -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "popularity.desc",
+                "primary_release_date.gte" to today.minusDays(JUST_RELEASED_DAYS).toString(),
+                "primary_release_date.lte" to today.toString(),
+            )
+            TmdbRow.POPULAR_HORROR -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "popularity.desc",
+                "vote_count.gte" to "200",
+            )
+            TmdbRow.NEW_THRILLERS -> listOf(
+                "with_genres" to "$THRILLER",
+                "sort_by" to "popularity.desc",
+                "primary_release_date.gte" to today.minusYears(1).toString(),
+                "primary_release_date.lte" to today.toString(),
+                "vote_count.gte" to "40",
+            )
+            // Loved by those who saw them, seen by few: a high average over a modest number of votes.
+            TmdbRow.HIDDEN_GEMS -> listOf(
+                "with_genres" to "$HORROR",
+                "sort_by" to "vote_average.desc",
+                "vote_average.gte" to "6.8",
+                "vote_count.gte" to "150",
+                "vote_count.lte" to "1500",
+            )
+            TmdbRow.SEVENTIES -> decade(1970)
+            TmdbRow.EIGHTIES -> decade(1980)
+            TmdbRow.NINETIES -> decade(1990)
+            TmdbRow.TWO_THOUSANDS -> decade(2000)
+            TmdbRow.TWENTY_TENS -> decade(2010)
         } + listOf("include_adult" to "false", "language" to language.tmdbTag, "page" to page.toString())
         return "$API/discover/movie?" + params.joinToString("&") { (k, v) -> "$k=" + Links.urlEncode(v) }
     }
+
+    private const val JUST_RELEASED_DAYS = 60L
+
+    /** A decade's horror, the films most people know first. */
+    private fun decade(from: Int): List<Pair<String, String>> = listOf(
+        "with_genres" to "$HORROR",
+        "sort_by" to "vote_count.desc",
+        "primary_release_date.gte" to "$from-01-01",
+        "primary_release_date.lte" to "${from + 9}-12-31",
+        "vote_count.gte" to "50",
+    )
 
     /** Page [page] of the discover results that go on the library row [category] (see TmdbCategory). */
     fun discoverUrl(category: TmdbCategory, today: LocalDate, language: Language, page: Int = 1): String {
@@ -374,15 +429,33 @@ data class TmdbCache(
     val rows: List<OnlineRow>,
     /** Which shape of rows this cache holds; a cache of an older one is read as missing and fetched again at once. */
     val rowsVersion: Int = 1,
+    /**
+     * When the rows were last read: they are read again every few hours (a few dozen requests once the films' ids are
+     * known), the library's translations ([fetchedAtMillis], one request per film) once a day. 0 before this was kept.
+     */
+    val rowsFetchedAtMillis: Long = 0,
 ) {
     fun isStale(nowMillis: Long, maxAgeMillis: Long = 24L * 60 * 60 * 1000): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
 
+    /** Whether the rows should be read again: old translations, or rows older than [ROWS_MAX_AGE_MS]. */
+    fun needsRows(nowMillis: Long): Boolean =
+        isStale(nowMillis) || nowMillis - (if (rowsFetchedAtMillis > 0) rowsFetchedAtMillis else fetchedAtMillis) !in 0..ROWS_MAX_AGE_MS
+
     fun encode(): String = cacheJson.encodeToString(serializer(), this)
 
     companion object {
-        /** 2: the rows' films carry their original language, and those in Arabic or Indian languages are left out. */
-        const val ROWS_VERSION = 2
+        /**
+         * 2: the rows' films carry their original language, and those in Arabic or Indian languages are left out;
+         * 3: nine more rows, and three pages of each.
+         */
+        const val ROWS_VERSION = 3
+
+        /** The rows are read again after this long: three times a day, as Cinemeta's. */
+        const val ROWS_MAX_AGE_MS = 8L * 60 * 60 * 1000
+
+        /** Pages of each row read at a refresh (20 films each); the row goes on from the next while the viewer scrolls. */
+        const val ROW_PAGES = 3
 
         private val cacheJson = Json { ignoreUnknownKeys = true }
 

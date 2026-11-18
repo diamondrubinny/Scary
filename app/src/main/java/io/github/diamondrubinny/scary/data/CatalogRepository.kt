@@ -165,10 +165,12 @@ class CatalogRepository(
                         val noted = cinemetaCache
                         if (noted != null && noted !== knownCinemeta) cinemeta.noteRefresh(noted)
                         val knownTmdb = tmdbCache
-                        if (hasKey && RefreshPolicy.due(knownTmdb == null || knownTmdb.isStale(now), tmdbState, now)) {
+                        // TMDB's rows, like Cinemeta's, are read again every few hours (and when the viewer asks); the
+                        // library's translations once a day.
+                        if (hasKey && (asked || RefreshPolicy.due(knownTmdb == null || knownTmdb.needsRows(now), tmdbState, now))) {
                             // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.
                             val ids = build().movies.filterNot { it.isSeries }.map { it.imdbId }
-                            val fresh = tmdb.refresh(ids, lang)
+                            val fresh = tmdb.refresh(ids, lang, knownTmdb)
                             tmdbState = RefreshPolicy.after(tmdbState, fresh != null, System.currentTimeMillis())
                             if (fresh != null) {
                                 tmdbCache = fresh
