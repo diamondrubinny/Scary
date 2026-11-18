@@ -30,6 +30,9 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
+import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -93,36 +96,55 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
             ?.takeIf { it.language == language.code && it.rowsVersion >= TmdbCache.ROWS_VERSION }
     }
 
-    /** Hebrew info for the given movies plus the discover rows. Null without a key or when offline. */
-    suspend fun refresh(imdbIds: List<String>, language: Language): TmdbCache? = withContext(Dispatchers.IO) {
+    /**
+     * The library's films' text in the viewer's language ([imdbIds], one request each) plus the discover rows (TmdbRow,
+     * [TmdbCache.ROW_PAGES] pages each). Null without a key or when nothing could be read.
+     *
+     * While [previous] is still the day's (same language), only the rows are read again and the text of films it lacks:
+     * that is the round made every few hours, a few dozen requests once the films' IMDb ids are known. A row whose
+     * pages failed keeps its previous films.
+     */
+    suspend fun refresh(imdbIds: List<String>, language: Language, previous: TmdbCache? = null): TmdbCache? = withContext(Dispatchers.IO) {
         val key = auth ?: return@withContext null
-        val info = coroutineScope {
-            imdbIds.distinct().chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                chunk.map { id -> async { body(Tmdb.findUrl(id, language), key)?.let { Tmdb.parseFind(it, language) }?.let { id to it } } }.awaitAll()
-            }
+        val now = System.currentTimeMillis()
+        val kept = previous?.takeIf { it.language == language.code && !it.isStale(now) }
+        val wanted = imdbIds.distinct().let { all -> if (kept != null) all.filter { it !in kept.info } else all }
+        val pool = Semaphore(PARALLEL_REQUESTS)
+        val fresh = coroutineScope {
+            wanted.map { id -> async { pool.withPermit { body(Tmdb.findUrl(id, language), key) }?.let { Tmdb.parseFind(it, language) }?.let { id to it } } }.awaitAll()
         }.filterNotNull().toMap()
+        val info = kept?.info.orEmpty() + fresh
         val today = LocalDate.now()
-        val rows = TmdbRow.entries.mapNotNull { row ->
-            val results = body(Tmdb.discoverUrl(row, today, language), key)?.let(Tmdb::parseDiscover).orEmpty()
-                .filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }.take(ROW_SIZE)
-            val metas = coroutineScope {
-                results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                    chunk.map { r ->
-                        async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it, language) } }
+        val results = coroutineScope {
+            TmdbRow.entries.map { row ->
+                async {
+                    val pages = (1..TmdbCache.ROW_PAGES).map { page ->
+                        async { pool.withPermit { body(Tmdb.discoverUrl(row, today, language, page), key) }?.let(Tmdb::parseDiscover) }
                     }.awaitAll()
+                    // Films in Arabic or Indian languages stay off the shelves (core OriginFilter), before their ids are asked for.
+                    val shown = pages.filterNotNull().flatten().distinctBy { it.tmdbId }.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
+                    val metas = withImdbIds(shown, key, language, pool).distinctBy { it.imdbId }
+                    Triple(row.id, metas.takeIf { it.isNotEmpty() }?.let { Tmdb.rowOf(row, it) }, pages.any { it == null })
                 }
-            }.filterNotNull()
-            metas.takeIf { it.isNotEmpty() }?.let { Tmdb.rowOf(row, it) }
+            }.awaitAll()
         }
+        val rows = Cinemeta.keepPrevious(
+            order = results.map { it.first },
+            fresh = results.mapNotNull { it.second },
+            previous = previous?.takeIf { it.language == language.code && it.rowsVersion == TmdbCache.ROWS_VERSION }?.rows,
+            failed = results.filter { it.third }.mapTo(HashSet()) { it.first },
+        )
         if (info.isEmpty() && rows.isEmpty()) return@withContext null
-        TmdbCache(System.currentTimeMillis(), language.code, info, rows, TmdbCache.ROWS_VERSION).also { cache ->
+        // Every page failed (offline): the copy on disk stays as it was, and the next try waits.
+        if (results.all { it.second == null && it.third } && fresh.isEmpty()) return@withContext null
+        TmdbCache(kept?.fetchedAtMillis ?: now, language.code, info, rows, TmdbCache.ROWS_VERSION, rowsFetchedAtMillis = now).also { cache ->
             runCatching { cacheFile.writeText(cache.encode()) }
                 .onFailure { Log.w(TAG, "Could not save TMDB cache: ${it.javaClass.simpleName}") }
         }
     }
 
-    /** Where a TMDB row goes on after the daily refresh (its first page); null for rows that are not TMDB's. */
-    fun endlessStart(rowId: String): Int? = TmdbRow.entries.firstOrNull { it.id == rowId }?.let { 2 }
+    /** Where a TMDB row goes on after the pages read at a refresh; null for rows that are not TMDB's. */
+    fun endlessStart(rowId: String): Int? = TmdbRow.entries.firstOrNull { it.id == rowId }?.let { TmdbCache.ROW_PAGES + 1 }
 
     /**
      * Page [page] of the TMDB row [rowId], as Cinemeta-style entries with their IMDb ids, loaded while the viewer
@@ -135,13 +157,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         val results = body(Tmdb.discoverUrl(row, LocalDate.now(), language, page), key)?.let(Tmdb::parseDiscover)
             ?: return@withContext null
         // A page is counted by what TMDB sent (its end is TMDB's), but only films that may be shown get their IMDb id.
-        val shown = results.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
-        val metas = coroutineScope {
-            shown.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-                chunk.map { r -> async { body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.let { Tmdb.toMeta(r, it, language) } } }
-                    .awaitAll()
-            }
-        }.filterNotNull()
+        val metas = withImdbIds(results.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }, key, language)
         OnlinePage(metas, if (results.isEmpty() || page >= Tmdb.MAX_PAGE) null else page + 1)
     }
 
@@ -163,16 +179,24 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
     }
 
     /** Discover results with their IMDb ids (one request each, a few at a time); those without one are left out. */
-    private suspend fun withImdbIds(results: List<TmdbResult>, key: TmdbAuth, language: Language): List<CinemetaMeta> = coroutineScope {
-        results.chunked(PARALLEL_REQUESTS).flatMap { chunk ->
-            chunk.map { r ->
-                async {
-                    val known = synchronized(tmdbIds) { imdbIds[r.tmdbId] }
-                    val imdbId = known ?: body(Tmdb.externalIdsUrl(r.tmdbId), key)?.let(Tmdb::parseImdbId)?.also { remember(it, r.tmdbId) }
-                    imdbId?.let { Tmdb.toMeta(r, it, language) }
-                }
-            }.awaitAll()
-        }.filterNotNull()
+    /**
+     * The results as Cinemeta-style entries with their IMDb ids: from the ids already known, else one request each,
+     * never more than [pool] allows at a time (TMDB answers "too many requests" to a burst, and those films would be
+     * missing from the row).
+     */
+    private suspend fun withImdbIds(
+        results: List<TmdbResult>,
+        key: TmdbAuth,
+        language: Language,
+        pool: Semaphore = Semaphore(PARALLEL_REQUESTS),
+    ): List<CinemetaMeta> = coroutineScope {
+        results.map { r ->
+            async {
+                val known = synchronized(tmdbIds) { imdbIds[r.tmdbId] }
+                val imdbId = known ?: pool.withPermit { body(Tmdb.externalIdsUrl(r.tmdbId), key) }?.let(Tmdb::parseImdbId)?.also { remember(it, r.tmdbId, save = false) }
+                imdbId?.let { Tmdb.toMeta(r, it, language) }
+            }
+        }.awaitAll().filterNotNull().also { saveIds() }
     }
 
     /** IMDb id to TMDB id, so a movie page opened again needs one request, not two (and the account's lists). */
@@ -301,7 +325,8 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
     private var idsLoaded = false
 
     /** Both ways, and on disk: syncing a list of hundreds of films looks each one up once, not every time. */
-    private fun remember(imdbId: String, tmdbId: Long) {
+    /** [save] false when many are remembered in a row (a row's page): the caller writes them once, with [saveIds]. */
+    private fun remember(imdbId: String, tmdbId: Long, save: Boolean = true) {
         synchronized(tmdbIds) {
             loadIds()
             if (tmdbIds[imdbId] == tmdbId && imdbIds[tmdbId] == imdbId) return
@@ -311,6 +336,18 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
             }
             tmdbIds[imdbId] = tmdbId
             imdbIds[tmdbId] = imdbId
+            idsUnsaved = true
+        }
+        if (save) saveIds()
+    }
+
+    private var idsUnsaved = false
+
+    /** Writes the ids to the TV when any were remembered since the last write. */
+    private fun saveIds() {
+        synchronized(tmdbIds) {
+            if (!idsUnsaved) return
+            idsUnsaved = false
             runCatching { idsFile.writeText(Tmdb.encodeIds(tmdbIds)) }
                 .onFailure { Log.w(TAG, "Could not save TMDB ids: ${it.javaClass.simpleName}") }
         }
@@ -383,11 +420,10 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val SECRET_NAME = "tmdb_key"
         const val TIMEOUT_MS = 10_000
         const val PARALLEL_REQUESTS = 4
-        const val ROW_SIZE = 20
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val PROVIDERS_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
-        const val MAX_IDS = 5_000
+        const val MAX_IDS = 20_000
         const val MAX_LANGUAGE_LOOKUPS = 300
         const val MAX_LANGUAGES = 6_000
         const val NO_LANGUAGE = "-"

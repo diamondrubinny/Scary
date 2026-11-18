@@ -476,7 +476,16 @@ data class CinemetaCache(
     val rowPages: PageCount? = null,
     /** The same for the categories' pool. */
     val categoryPages: PageCount? = null,
+    /**
+     * When the rows were last read. The rows (a few dozen catalog pages) are read again every few hours, so new films
+     * show the same day; the library's own films' details ([fetchedAtMillis], hundreds of requests) once a day. 0 in a
+     * cache written before this: the rows are then as old as the details.
+     */
+    val rowsFetchedAtMillis: Long = 0,
 ) {
+    /** When the rows on screen were read. */
+    val rowsReadAtMillis: Long get() = if (rowsFetchedAtMillis > 0) rowsFetchedAtMillis else fetchedAtMillis
+
     fun isStale(nowMillis: Long, maxAgeMillis: Long = DEFAULT_MAX_AGE_MS): Boolean =
         rowsVersion < ROWS_VERSION || nowMillis - fetchedAtMillis !in 0..maxAgeMillis
 
@@ -492,7 +501,7 @@ data class CinemetaCache(
     )
 
     /** Whether the rows should be fetched again: missing pages are, as well as old data. */
-    fun needsRows(nowMillis: Long): Boolean = !complete || isStale(nowMillis)
+    fun needsRows(nowMillis: Long): Boolean = !complete || isStale(nowMillis) || nowMillis - rowsReadAtMillis !in 0..ROWS_MAX_AGE_MS
 
     /** Whether the categories should be filled again. */
     fun needsCategories(): Boolean = categories.isEmpty() || !categoriesComplete
@@ -501,14 +510,17 @@ data class CinemetaCache(
 
     companion object {
         const val DEFAULT_MAX_AGE_MS = 24L * 60 * 60 * 1000
+
+        /** The rows are read again after this long: three times a day. */
+        const val ROWS_MAX_AGE_MS = 8L * 60 * 60 * 1000
         /**
          * Bumped whenever the cached data changes shape (3: popular rows one page, deeper rows right after them;
          * 4: every trailer of a movie, not only the first; 5: series and their rows; 6: endless popular rows and rows
          * back through the years; 7: five more genre rows; 8: the library's categories filled from Cinemeta; 9: writers,
          * and the twelve categories that had no rule; 10: TMDB ids and original languages, rows about a place checked
-         * against American films).
+         * against American films; 11: three pages of each popular row, six of each year, and the "in the spotlight" rows).
          */
-        const val ROWS_VERSION = 10
+        const val ROWS_VERSION = 11
         private val cacheJson = Json { ignoreUnknownKeys = true }
 
         fun decode(text: String): CinemetaCache? =

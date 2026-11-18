@@ -2,6 +2,8 @@
 // Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
 // Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 
+@file:OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+
 package io.github.diamondrubinny.scary.ui
 
 import android.app.Activity
@@ -20,6 +22,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.layout.LazyLayoutCacheWindow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -33,6 +36,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import io.github.diamondrubinny.scary.ui.fx.rememberAmbientTime
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -161,12 +167,13 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val playerLanguages by viewModel.playerLanguages.collectAsStateWithLifecycle()
     val playerOnlineSubtitles by viewModel.playerOnlineSubtitles.collectAsStateWithLifecycle()
     val rdFileFilms by viewModel.rdFileFilms.collectAsStateWithLifecycle()
+    val filmsReadAt by viewModel.filmsReadAt.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
 
     // Scroll positions survive a trip to the details screen and back.
-    val homeListState = rememberLazyListState()
+    val homeListState = rememberLazyListState(cacheWindow = RowsCacheWindow)
     // Search keeps its scroll position and the movie it opened, so Back from that movie lands on it again.
     val searchGrid = rememberLazyGridState()
     var searchOpenedId by remember { mutableStateOf<String?>(null) }
@@ -373,6 +380,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
         onToggleOnline = viewModel::toggleOnline,
+        onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
         onOpenTmdb = viewModel::openTmdbDialog,
@@ -426,9 +434,18 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             val current = screen
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId, similarFor) }
             val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
-            // A locked movie's art stays off the screen, as on its card.
-            MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it })
-            Atmosphere(animate = !LocalReduceMotion.current)
+            // The background (art, tinted light, fog, grain): not under the player, which covers everything, so a film
+            // plays with nothing else being drawn. Kept as one finished picture (an offscreen layer), so moving through
+            // the rows above it costs the TV one picture per frame instead of every gradient again; the picture itself
+            // is redrawn only when the slow ambient clock steps.
+            if (current != Screen.Player) {
+                val ambient = rememberAmbientTime(running = !LocalReduceMotion.current)
+                Box(Modifier.fillMaxSize().graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }) {
+                    // A locked movie's art stays off the screen, as on its card.
+                    MovieBackdrop(backdropMovie?.let { if (state.isLocked(it)) it.copy(posterUrl = null, backgroundUrl = null, logoUrl = null) else it }, ambient)
+                    Atmosphere(ambient)
+                }
+            }
 
             val playing = playerSession
             when {
@@ -476,6 +493,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
+                    filmsReadAt = filmsReadAt,
                     language = language,
                     effectsEnabled = state.effectsEnabled,
                     nightMaxFear = state.nightMaxFear,
@@ -667,7 +685,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     state = state,
                     language = language,
                     listState = homeListState,
-                    rowStates = { key -> rowStates.getOrPut(key) { LazyListState() } },
+                    rowStates = { key -> rowStates.getOrPut(key) { LazyListState(cacheWindow = CardsCacheWindow) } },
                     restoreKey = viewModel.lastFocusedKey,
                     resets = resets,
                     actions = actions,
@@ -861,3 +879,12 @@ private fun Context.versionName(): String = try {
 
 /** Which AI settings dialog is open. */
 private enum class AiDialogKind { PROVIDER, KEY, KEY_FOR, URL, MODEL }
+
+/**
+ * How far past the screen's edge the lists keep their items ready (Compose's cache window): the next row down, and the
+ * next few posters along a row, are put together in the idle time between frames, so the frame in which they scroll
+ * into view has nothing left to build. Behind, a little is kept so that turning back is as smooth.
+ */
+private val RowsCacheWindow = LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f)
+
+private val CardsCacheWindow = LazyLayoutCacheWindow(aheadFraction = 0.5f, behindFraction = 0.25f)

@@ -261,6 +261,9 @@ jobs:
           if [ -f screenshots/ui-tests.txt ]; then
             { echo "### UI tests"; echo '```'; cat screenshots/ui-tests.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           fi
+          if [ -f screenshots/frames.txt ]; then
+            { echo "### Frames (release)"; echo '```'; cat screenshots/frames.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -f screenshots/startup.txt ]; then
             { echo "### Cold start (release)"; echo '```'; cat screenshots/startup.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
             median=$(grep '^speed-profile:' screenshots/startup.txt | cut -d: -f2 | tr ' ' '\n' | sed '/^$/d' | sort -n | sed -n 2p)

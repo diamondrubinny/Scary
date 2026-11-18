@@ -55,6 +55,14 @@
     <string name="settings_title">SCARY settings</string>
     <string name="settings_language">Language</string>
     <string name="settings_effects">Fog and film grain</string>
+    <string name="value_effects_tv_off">On, but the TV removes animations</string>
+    <string name="settings_refresh_films">Refresh films now</string>
+    <string name="settings_refresh_films_last">Last read: %1$s</string>
+    <string name="settings_refresh_films_never">Not read yet</string>
+    <string name="msg_refreshing">Reading new films…</string>
+    <string name="msg_refresh_recent">The films were read a moment ago.</string>
+    <string name="msg_refresh_offline">Online movie data is off.</string>
+    <string name="diag_motion">Motion: TV animation scale %1$s (0 = the TV removes animations, and titles stay still)</string>
     <string name="value_on">On</string>
     <string name="value_off">Off</string>
     <string name="settings_night_fear">Tonight’s pick intensity</string>

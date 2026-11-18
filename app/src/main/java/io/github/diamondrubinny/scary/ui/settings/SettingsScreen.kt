@@ -39,6 +39,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
+import io.github.diamondrubinny.scary.data.SettingsRepository
 import io.github.diamondrubinny.scary.ai.AiTask
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import io.github.diamondrubinny.scary.core.model.Language
@@ -80,6 +81,8 @@ class SettingsActions(
     val onTurnOffLock: () -> Unit,
     val onToggleFamilyNight: () -> Unit,
     val onToggleOnline: () -> Unit,
+    /** Reads the online rows again now. */
+    val onRefreshFilms: () -> Unit = {},
     val onRequestDefaultHome: () -> Unit,
     val onOpenAccessibility: () -> Unit,
     val onOpenTmdb: () -> Unit,
@@ -146,6 +149,8 @@ fun SettingsScreen(
     updateState: UpdateState = UpdateState.Idle,
     autoUpdateCheck: Boolean = true,
     ai: AiSettingsState = AiSettingsState(),
+    /** When the online rows were last read (wall clock); null when never. */
+    filmsReadAt: Long? = null,
 ) {
     val firstFocus = remember { FocusRequester() }
     val privacyFocus = remember { FocusRequester() }
@@ -208,6 +213,16 @@ fun SettingsScreen(
             modifier = if (tv) Modifier else Modifier.focusRequester(firstFocus),
         )
         BasicText(stringResource(R.string.settings_online_note), style = ScaryType.Caption)
+        if (onlineEnabled) {
+            // New films arrive by themselves a few times a day; this reads them now, and shows when they last were.
+            val readAt = filmsReadAt?.let { at -> remember(at) { java.text.SimpleDateFormat("dd.MM HH:mm", java.util.Locale.ROOT).format(java.util.Date(at)) } }
+            SettingRow(
+                label = stringResource(R.string.settings_refresh_films),
+                value = readAt?.let { stringResource(R.string.settings_refresh_films_last, it) } ?: stringResource(R.string.settings_refresh_films_never),
+                onClick = actions.onRefreshFilms,
+                modifier = Modifier.testTag(REFRESH_FILMS_ROW_TAG),
+            )
+        }
         SettingRow(
             label = stringResource(R.string.settings_tmdb),
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
@@ -260,10 +275,19 @@ fun SettingsScreen(
             onClick = actions.onToggleLanguage,
             modifier = Modifier.testTag(LANGUAGE_ROW_TAG),
         )
+        // The TV's own "Remove animations" (an accessibility setting) always wins: said here, so a still screen has a reason.
+        val tvAnimations = SettingsRepository.systemAnimationsEnabled(LocalContext.current)
         SettingRow(
             label = stringResource(R.string.settings_effects),
-            value = stringResource(if (effectsEnabled) R.string.value_on else R.string.value_off),
+            value = stringResource(
+                when {
+                    effectsEnabled && !tvAnimations -> R.string.value_effects_tv_off
+                    effectsEnabled -> R.string.value_on
+                    else -> R.string.value_off
+                },
+            ),
             onClick = actions.onToggleEffects,
+            modifier = Modifier.testTag(EFFECTS_ROW_TAG),
         )
         SettingRow(
             label = stringResource(R.string.settings_night_fear),
@@ -627,6 +651,9 @@ private fun Diagnostics() {
     report.refresh?.let { BasicText(stringResource(R.string.diag_refresh, it), style = code) }
     report.quality?.let { BasicText(stringResource(R.string.diag_quality, it), style = code) }
     report.startup?.let { BasicText(stringResource(R.string.diag_startup, it), style = code) }
+    // Why titles do or do not move: SCARY's own switch, and the TV's animation scale (0 removes every animation).
+    val scale = remember { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }
+    BasicText(stringResource(R.string.diag_motion, scale.toString()), style = code)
     BasicText(stringResource(R.string.diag_note), style = ScaryType.Caption)
     if (report.crash != null || report.freeze != null) {
         SettingRow(
@@ -641,4 +668,6 @@ private fun Diagnostics() {
 }
 
 const val DIAG_CRASH_TAG = "diagCrash"
+const val REFRESH_FILMS_ROW_TAG = "refreshFilmsRow"
+const val EFFECTS_ROW_TAG = "effectsRow"
 const val DIAG_FREEZE_TAG = "diagFreeze"

@@ -195,4 +195,50 @@ class TmdbTest {
         assertEquals(cache, TmdbCache.decode(text))
         assertFalse("api_key" in text)
     }
+
+    @Test
+    fun `the new rows ask TMDB only with fixed filters it documents`() {
+        val today = LocalDate.of(2026, 11, 18)
+        fun url(row: TmdbRow, page: Int = 1) = Tmdb.discoverUrl(row, today, Language.EN, page)
+        // Out in the last two months.
+        url(TmdbRow.JUST_RELEASED).let {
+            assertTrue("with_genres=27" in it)
+            assertTrue("primary_release_date.gte=2026-09-19" in it)
+            assertTrue("primary_release_date.lte=2026-11-18" in it)
+        }
+        url(TmdbRow.POPULAR_HORROR).let { assertTrue("sort_by=popularity.desc" in it && "vote_count.gte=200" in it) }
+        url(TmdbRow.NEW_THRILLERS).let { assertTrue("with_genres=53" in it && "primary_release_date.gte=2025-11-18" in it) }
+        // Well rated, seen by few.
+        url(TmdbRow.HIDDEN_GEMS).let {
+            assertTrue("sort_by=vote_average.desc" in it && "vote_average.gte=6.8" in it)
+            assertTrue("vote_count.gte=150" in it && "vote_count.lte=1500" in it)
+        }
+        // A decade is its ten years, the best known films first.
+        url(TmdbRow.EIGHTIES, page = 3).let {
+            assertTrue("primary_release_date.gte=1980-01-01" in it && "primary_release_date.lte=1989-12-31" in it)
+            assertTrue("sort_by=vote_count.desc" in it && it.endsWith("page=3"))
+        }
+        assertTrue("primary_release_date.lte=2019-12-31" in url(TmdbRow.TWENTY_TENS))
+        // Every row: no adult films, a title in each language, an id of its own.
+        TmdbRow.entries.forEach { row ->
+            assertTrue(row.id, "include_adult=false" in url(row))
+            assertTrue(row.id, listOf(row.titleHe, row.titleEn, row.titlePt, row.titleRu, row.titleAr).none { it.isBlank() })
+        }
+        assertEquals(TmdbRow.entries.size, TmdbRow.entries.map { it.id }.toSet().size)
+    }
+
+    @Test
+    fun `tmdb's rows are read again after a few hours, the translations once a day`() {
+        val read = 2_000_000_000L
+        val hour = 60L * 60 * 1000
+        val cache = io.github.diamondrubinny.scary.core.tmdb.TmdbCache(read, "he", emptyMap(), emptyList(), io.github.diamondrubinny.scary.core.tmdb.TmdbCache.ROWS_VERSION, rowsFetchedAtMillis = read)
+        assertFalse(cache.needsRows(read + 7 * hour))
+        assertTrue(cache.needsRows(read + 9 * hour))
+        assertFalse(cache.isStale(read + 9 * hour))
+        assertFalse(cache.copy(rowsFetchedAtMillis = read + 9 * hour).needsRows(read + 10 * hour))
+        assertTrue(cache.copy(rowsFetchedAtMillis = read + 20 * hour).needsRows(read + 25 * hour))
+        // A cache from before the rows had an age of their own, and one of an older shape.
+        assertTrue(cache.copy(rowsFetchedAtMillis = 0).needsRows(read + 9 * hour))
+        assertTrue(cache.copy(rowsVersion = 2).needsRows(read))
+    }
 }

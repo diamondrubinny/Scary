@@ -293,4 +293,28 @@ class CinemetaRefreshTest {
         assertEquals(counted, CinemetaCache.decode(counted.encode()))
         assertFalse(counted.rowPages!!.complete)
     }
+
+    @Test
+    fun `the rows are read again after a few hours, the films' details once a day`() {
+        val day = 24L * 60 * 60 * 1000
+        val read = 1_000_000_000L
+        val cache = CinemetaCache(read, emptyMap(), emptyList(), CinemetaCache.ROWS_VERSION, rowsFetchedAtMillis = read)
+        assertFalse(cache.needsRows(read + 7 * 60 * 60 * 1000))
+        // Nine hours on: the rows are due, the details are not.
+        assertTrue(cache.needsRows(read + 9 * 60 * 60 * 1000))
+        assertFalse(cache.isStale(read + 9 * 60 * 60 * 1000))
+        // Rows read again since: not due, though the details are from the morning.
+        val again = cache.copy(rowsFetchedAtMillis = read + 9 * 60 * 60 * 1000)
+        assertFalse(again.needsRows(read + 10 * 60 * 60 * 1000))
+        assertEquals(read + 9 * 60 * 60 * 1000, again.rowsReadAtMillis)
+        // A day on, everything is.
+        assertTrue(again.isStale(read + day + 1))
+        // A cache from before this: the rows are as old as the details; a clock that went backwards reads again.
+        val before = CinemetaCache(read, emptyMap(), emptyList(), CinemetaCache.ROWS_VERSION)
+        assertEquals(read, before.rowsReadAtMillis)
+        assertTrue(before.needsRows(read + 9 * 60 * 60 * 1000))
+        assertTrue(again.needsRows(read))
+        // And it survives being written and read.
+        assertEquals(again.rowsFetchedAtMillis, CinemetaCache.decode(again.encode())!!.rowsFetchedAtMillis)
+    }
 }

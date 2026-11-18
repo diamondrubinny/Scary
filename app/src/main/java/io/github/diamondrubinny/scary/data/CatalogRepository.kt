@@ -84,6 +84,11 @@ class CatalogRepository(
      * stays up for days, so each signal on [refresh] (back on screen, network back, a timer) fetches again whatever is
      * missing or old ([RefreshPolicy]); a failed fetch is retried later, not given up on.
      */
+    private val freshRowsAsked = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** "Refresh films now": the next signal on the catalog's refresh flow reads the online rows again, due or not. */
+    fun askForFreshRows() = freshRowsAsked.set(true)
+
     @OptIn(ExperimentalCoroutinesApi::class)
     fun catalog(
         onlineEnabled: Flow<Boolean>,
@@ -125,7 +130,9 @@ class CatalogRepository(
                         val now = System.currentTimeMillis()
                         val knownCinemeta = cinemetaCache
                         // Rows with pages missing (a weak network) count as a failure: tried again with backoff until whole.
-                        if (RefreshPolicy.due(knownCinemeta == null || knownCinemeta.needsRows(now), cinemetaState, now)) {
+                        // Asked for by the viewer: read now, whatever the schedule and the backoff say.
+                        val asked = freshRowsAsked.getAndSet(false)
+                        if (asked || RefreshPolicy.due(knownCinemeta == null || knownCinemeta.needsRows(now), cinemetaState, now)) {
                             val fresh = cinemeta.refresh(base.movies.map { it.imdbId to it.kind }, knownCinemeta)
                             cinemetaState = RefreshPolicy.after(cinemetaState, fresh?.complete == true, System.currentTimeMillis())
                             if (fresh != null) {
@@ -158,10 +165,12 @@ class CatalogRepository(
                         val noted = cinemetaCache
                         if (noted != null && noted !== knownCinemeta) cinemeta.noteRefresh(noted)
                         val knownTmdb = tmdbCache
-                        if (hasKey && RefreshPolicy.due(knownTmdb == null || knownTmdb.isStale(now), tmdbState, now)) {
+                        // TMDB's rows, like Cinemeta's, are read again every few hours (and when the viewer asks); the
+                        // library's translations once a day.
+                        if (hasKey && (asked || RefreshPolicy.due(knownTmdb == null || knownTmdb.needsRows(now), tmdbState, now))) {
                             // TMDB's Hebrew titles and synopses are for films; series keep Cinemeta's and the library's.
                             val ids = build().movies.filterNot { it.isSeries }.map { it.imdbId }
-                            val fresh = tmdb.refresh(ids, lang)
+                            val fresh = tmdb.refresh(ids, lang, knownTmdb)
                             tmdbState = RefreshPolicy.after(tmdbState, fresh != null, System.currentTimeMillis())
                             if (fresh != null) {
                                 tmdbCache = fresh

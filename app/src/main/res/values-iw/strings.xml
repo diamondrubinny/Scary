@@ -54,6 +54,14 @@
     <string name="settings_title">הגדרות SCARY</string>
     <string name="settings_language">שפה</string>
     <string name="settings_effects">ערפל וגרעיניות</string>
+    <string name="value_effects_tv_off">פעיל, אבל הטלוויזיה מסירה אנימציות</string>
+    <string name="settings_refresh_films">רענון הסרטים עכשיו</string>
+    <string name="settings_refresh_films_last">נקראו לאחרונה: %1$s</string>
+    <string name="settings_refresh_films_never">עדיין לא נקראו</string>
+    <string name="msg_refreshing">קורא סרטים חדשים…</string>
+    <string name="msg_refresh_recent">הסרטים נקראו לפני רגע.</string>
+    <string name="msg_refresh_offline">המידע מהרשת כבוי.</string>
+    <string name="diag_motion">תנועה: סולם האנימציות של הטלוויזיה %1$s (0 = הטלוויזיה מסירה אנימציות, והכותרות לא זזות)</string>
     <string name="value_on">פועלים</string>
     <string name="value_off">כבויים</string>
     <string name="settings_night_fear">עוצמת הסרט של הלילה</string>

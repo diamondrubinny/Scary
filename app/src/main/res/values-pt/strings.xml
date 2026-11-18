@@ -54,6 +54,14 @@
     <string name="settings_title">Configurações do SCARY</string>
     <string name="settings_language">Idioma</string>
     <string name="settings_effects">Névoa e granulação</string>
+    <string name="value_effects_tv_off">Ligado, mas a TV remove as animações</string>
+    <string name="settings_refresh_films">Atualizar os filmes agora</string>
+    <string name="settings_refresh_films_last">Última leitura: %1$s</string>
+    <string name="settings_refresh_films_never">Ainda não lidos</string>
+    <string name="msg_refreshing">Lendo filmes novos…</string>
+    <string name="msg_refresh_recent">Os filmes foram lidos agora há pouco.</string>
+    <string name="msg_refresh_offline">Os dados online dos filmes estão desligados.</string>
+    <string name="diag_motion">Movimento: escala de animação da TV %1$s (0 = a TV remove as animações, e os títulos ficam parados)</string>
     <string name="value_on">Ligado</string>
     <string name="value_off">Desligado</string>
     <string name="settings_night_fear">Intensidade do filme da noite</string>

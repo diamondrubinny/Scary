@@ -1682,6 +1682,25 @@ class HomeViewModel(
         }
     }
 
+    /** When the online rows were last read (wall clock), for Settings; null before any were. */
+    val filmsReadAt: StateFlow<Long?> = cinemeta.rowsReadAt
+
+    private var askedFreshAt = 0L
+
+    /**
+     * "Refresh films now" in Settings: the online rows are read again at once. Not more than once in two minutes, so a
+     * held key does not hammer the service; the row's "last read" time changes when the new rows are in.
+     */
+    fun refreshFilmsNow() {
+        if (latestPrefs?.onlineEnabled == false) return show(R.string.msg_refresh_offline)
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (askedFreshAt != 0L && now - askedFreshAt < REFRESH_NOW_EVERY_MS) return show(R.string.msg_refresh_recent)
+        askedFreshAt = now
+        catalogRepository.askForFreshRows()
+        refreshRequests.tryEmit(Unit)
+        show(R.string.msg_refreshing)
+    }
+
     fun toggleOnline() {
         val enabled = !(latestPrefs?.onlineEnabled ?: true)
         viewModelScope.launch { settings.setOnlineEnabled(enabled) }
@@ -2307,6 +2326,7 @@ class HomeViewModel(
         private const val STOP_TIMEOUT_MS = 5_000L
         /** How often to look whether online data is old while SCARY stays on screen; a look fetches only what is due. */
         private const val REFRESH_CHECK_MS = 30 * 60_000L
+        private const val REFRESH_NOW_EVERY_MS = 2 * 60_000L
 
         /** A sync with the TMDB account when SCARY is back on screen, at most this often. */
         private const val ACCOUNT_SYNC_GAP_MS = 15 * 60_000L
