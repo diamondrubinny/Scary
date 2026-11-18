@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.horizontalScroll
+import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -158,6 +160,14 @@ fun SettingsScreen(
     val statsFocus = remember { FocusRequester() }
     val remoteFocus = remember { FocusRequester() }
     val tasteFocus = remember { FocusRequester() }
+    // The list is long: it is in sections, each with a heading and a button in the jump bar that goes to its first row.
+    val filmsFocus = remember { FocusRequester() }
+    val displayFocus = remember { FocusRequester() }
+    val rowsFocus = remember { FocusRequester() }
+    val soundFocus = remember { FocusRequester() }
+    val parentsFocus = remember { FocusRequester() }
+    val aiFocus = remember { FocusRequester() }
+    val aboutFocus = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
         // Back from a document lands on the row that opened it, not at the top.
@@ -187,6 +197,18 @@ fun SettingsScreen(
         )
         // The home screen and the remote's Home button are a TV's: on a phone or a tablet SCARY is an ordinary app.
         val tv = scaryLayout.tv
+        SettingsJumpBar(
+            listOfNotNull(
+                JumpTarget("home", R.string.settings_home_section, firstFocus).takeIf { tv },
+                JumpTarget("films", R.string.settings_section_films, filmsFocus),
+                JumpTarget("display", R.string.settings_section_display, displayFocus),
+                JumpTarget("rows", R.string.settings_section_rows, rowsFocus),
+                JumpTarget("sound", R.string.settings_section_sound, soundFocus),
+                JumpTarget("parents", R.string.settings_section_parents, parentsFocus),
+                JumpTarget("ai", R.string.settings_ai_section, aiFocus),
+                JumpTarget("about", R.string.settings_about, aboutFocus),
+            ),
+        )
         if (tv) {
             BasicText(
                 stringResource(R.string.settings_home_section),
@@ -206,23 +228,14 @@ fun SettingsScreen(
             )
             BasicText(stringResource(R.string.settings_home_note), style = ScaryType.Caption)
         }
+        SectionHeading(R.string.settings_section_films)
         SettingRow(
             label = stringResource(R.string.settings_online),
             value = stringResource(if (onlineEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleOnline,
-            modifier = if (tv) Modifier else Modifier.focusRequester(firstFocus),
+            modifier = (if (tv) Modifier else Modifier.focusRequester(firstFocus)).focusRequester(filmsFocus),
         )
         BasicText(stringResource(R.string.settings_online_note), style = ScaryType.Caption)
-        if (onlineEnabled) {
-            // New films arrive by themselves a few times a day; this reads them now, and shows when they last were.
-            val readAt = filmsReadAt?.let { at -> remember(at) { java.text.SimpleDateFormat("dd.MM HH:mm", java.util.Locale.ROOT).format(java.util.Date(at)) } }
-            SettingRow(
-                label = stringResource(R.string.settings_refresh_films),
-                value = readAt?.let { stringResource(R.string.settings_refresh_films_last, it) } ?: stringResource(R.string.settings_refresh_films_never),
-                onClick = actions.onRefreshFilms,
-                modifier = Modifier.testTag(REFRESH_FILMS_ROW_TAG),
-            )
-        }
         SettingRow(
             label = stringResource(R.string.settings_tmdb),
             value = tmdbKeyMask ?: stringResource(R.string.value_tmdb_none),
@@ -236,7 +249,16 @@ fun SettingsScreen(
         )
         // The credit is English only; keep its punctuation in place inside a right-to-left layout.
         BasicText(stringResource(R.string.tmdb_attribution), style = ScaryType.Caption.mixedLanguage())
-        AiSection(ai, actions)
+        if (onlineEnabled) {
+            // New films arrive by themselves a few times a day; this reads them now, and shows when they last were.
+            val readAt = filmsReadAt?.let { at -> remember(at) { java.text.SimpleDateFormat("dd.MM HH:mm", java.util.Locale.ROOT).format(java.util.Date(at)) } }
+            SettingRow(
+                label = stringResource(R.string.settings_refresh_films),
+                value = readAt?.let { stringResource(R.string.settings_refresh_films_last, it) } ?: stringResource(R.string.settings_refresh_films_never),
+                onClick = actions.onRefreshFilms,
+                modifier = Modifier.testTag(REFRESH_FILMS_ROW_TAG),
+            )
+        }
         SettingRow(
             label = stringResource(R.string.settings_realdebrid),
             value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
@@ -269,11 +291,12 @@ fun SettingsScreen(
             onClick = actions.onOpenRentCountry,
         )
         BasicText(stringResource(R.string.settings_rent_country_note), style = ScaryType.Caption)
+        SectionHeading(R.string.settings_section_display)
         SettingRow(
             label = stringResource(R.string.settings_language),
             value = language.nativeName,
             onClick = actions.onToggleLanguage,
-            modifier = Modifier.testTag(LANGUAGE_ROW_TAG),
+            modifier = Modifier.testTag(LANGUAGE_ROW_TAG).focusRequester(displayFocus),
         )
         // The TV's own "Remove animations" (an accessibility setting) always wins: said here, so a still screen has a reason.
         val tvAnimations = SettingsRepository.systemAnimationsEnabled(LocalContext.current)
@@ -289,10 +312,12 @@ fun SettingsScreen(
             onClick = actions.onToggleEffects,
             modifier = Modifier.testTag(EFFECTS_ROW_TAG),
         )
+        SectionHeading(R.string.settings_section_rows)
         SettingRow(
             label = stringResource(R.string.settings_night_fear),
             value = stringResource(R.string.settings_night_fear_value, nightMaxFear),
             onClick = actions.onCycleNightFear,
+            modifier = Modifier.focusRequester(rowsFocus),
             trailing = { FearMeter(nightMaxFear) },
         )
         SettingRow(
@@ -345,10 +370,12 @@ fun SettingsScreen(
             onClick = actions.onOpenStats,
             modifier = Modifier.focusRequester(statsFocus).testTag(STATS_ROW_TAG),
         )
+        SectionHeading(R.string.settings_section_sound)
         SettingRow(
             label = stringResource(R.string.settings_sounds),
             value = stringResource(if (soundsEnabled) R.string.value_on else R.string.value_off),
             onClick = actions.onToggleSounds,
+            modifier = Modifier.focusRequester(soundFocus),
         )
         SettingRow(
             label = stringResource(R.string.settings_trailer_autoplay),
@@ -389,10 +416,12 @@ fun SettingsScreen(
             modifier = Modifier.testTag(SLEEP_ROW_TAG),
         )
         BasicText(stringResource(R.string.settings_sleep_timer_note), style = ScaryType.Caption)
+        SectionHeading(R.string.settings_section_parents)
         SettingRow(
             label = stringResource(R.string.settings_parental),
             value = stringResource(if (parentalEnabled) R.string.value_lock_on else R.string.value_lock_off),
             onClick = if (parentalEnabled) actions.onTurnOffLock else actions.onSetupPin,
+            modifier = Modifier.focusRequester(parentsFocus),
         )
         if (parentalEnabled) {
             SettingRow(
@@ -417,17 +446,19 @@ fun SettingsScreen(
             stringResource(if (parentalEnabled) R.string.settings_family_night_note else R.string.settings_family_night_note_no_pin),
             style = ScaryType.Caption,
         )
-        SettingRow(
-            label = stringResource(R.string.settings_system),
-            value = null,
-            onClick = actions.onSystemSettings,
-        )
+        AiSection(ai, actions, aiFocus)
         BasicText(
             stringResource(R.string.settings_about),
             style = ScaryType.RowTitle,
             modifier = Modifier.padding(top = 14.dp).semantics { heading() },
         )
         BasicText(stringResource(R.string.settings_about_text, versionName), style = ScaryType.Body)
+        SettingRow(
+            label = stringResource(R.string.settings_system),
+            value = null,
+            onClick = actions.onSystemSettings,
+            modifier = Modifier.focusRequester(aboutFocus),
+        )
         if (updateState != UpdateState.NotOfficial) {
             SettingRow(
                 label = stringResource(R.string.settings_update_check),
@@ -504,7 +535,7 @@ data class AiSettingsState(
  * deleting every key (asked twice).
  */
 @Composable
-private fun AiSection(ai: AiSettingsState, actions: SettingsActions) {
+private fun AiSection(ai: AiSettingsState, actions: SettingsActions, firstRow: FocusRequester) {
     BasicText(
         stringResource(R.string.settings_ai_section),
         style = ScaryType.RowTitle,
@@ -514,7 +545,7 @@ private fun AiSection(ai: AiSettingsState, actions: SettingsActions) {
         label = stringResource(R.string.settings_ai_enabled),
         value = stringResource(if (ai.enabled) R.string.value_on else R.string.value_off),
         onClick = actions.onToggleAi,
-        modifier = Modifier.testTag(AI_ENABLED_ROW_TAG),
+        modifier = Modifier.testTag(AI_ENABLED_ROW_TAG).focusRequester(firstRow),
     )
     if (!ai.enabled) return
     SettingRow(
@@ -588,6 +619,40 @@ const val STATS_ROW_TAG = "statsRow"
 
 /** Test tag of the "Play trailers by themselves" row. */
 const val TRAILER_AUTOPLAY_ROW_TAG = "trailerAutoplayRow"
+
+/** A section of the settings and the row its jump button goes to. */
+private class JumpTarget(val key: String, @param:androidx.annotation.StringRes val title: Int, val firstRow: FocusRequester)
+
+/** Test tags of the jump bar and its buttons ("settingsJump:films"). */
+const val SETTINGS_JUMP_TAG = "settingsJump"
+fun settingsJumpTag(key: String) = "settingsJump:$key"
+
+/**
+ * "Jump to": one button per section of the settings, in a line under the title. A press moves the focus to that
+ * section's first row (the list scrolls with it), so the last setting is two presses away, not forty rows down.
+ */
+@Composable
+private fun SettingsJumpBar(targets: List<JumpTarget>) {
+    BasicText(stringResource(R.string.settings_jump), style = ScaryType.Caption.copy(color = ScaryColors.Ash))
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()).testTag(SETTINGS_JUMP_TAG),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        targets.forEach { target ->
+            ScaryButton(
+                text = stringResource(target.title),
+                onClick = { runCatching { target.firstRow.requestFocus() } },
+                modifier = Modifier.testTag(settingsJumpTag(target.key)),
+            )
+        }
+    }
+}
+
+/** A section's title in the list: a heading for screen readers too. */
+@Composable
+private fun SectionHeading(@androidx.annotation.StringRes title: Int) {
+    BasicText(stringResource(title), style = ScaryType.RowTitle, modifier = Modifier.padding(top = 14.dp).semantics { heading() })
+}
 
 @Composable
 private fun SettingRow(

@@ -4,6 +4,16 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.input.InputMode
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -141,30 +151,69 @@ fun MovieMeta(movie: Movie, modifier: Modifier = Modifier) {
     }
 }
 
-/** Round icon button for the top bar. Icons are drawn, so no icon font or vector assets are needed. */
+/**
+ * Round icon button for the top bar. Icons are drawn, so no icon font or vector assets are needed.
+ *
+ * An icon alone has to be guessed: while the remote's focus is on the button, its name shows right under it
+ * ([showLabel]). The name is drawn outside the button's own space, so nothing around it moves; screen readers already
+ * read the name from the button itself, so the written one is not read twice.
+ */
 @Composable
 fun IconCircleButton(
     contentDescription: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     dimmed: Boolean = false,
+    showLabel: Boolean = true,
     icon: @Composable (Color) -> Unit,
 ) {
-    FocusSurface(
-        onClick = onClick,
-        modifier = modifier.size(if (scaryLayout.tv) 40.dp else TOUCH_TARGET),
-        shape = CircleShape,
-        focusedScale = 1.12f,
-        containerColor = ScaryColors.Bone.copy(alpha = if (dimmed) 0.04f else 0.1f),
-        focusedContainerColor = ScaryColors.Bone,
-        borderColor = ScaryColors.Bone.copy(alpha = 0.15f),
-        contentDescription = contentDescription,
-    ) { focused ->
-        Box(Modifier.align(Alignment.Center)) {
-            icon(if (focused) ScaryColors.Void else ScaryColors.Bone.copy(alpha = if (dimmed) 0.55f else 1f))
+    var hasFocus by remember { mutableStateOf(false) }
+    // Only with a remote or a keyboard: a finger sees what it touches open at once.
+    val byKeys = LocalInputModeManager.current.inputMode == InputMode.Keyboard
+    Box(contentAlignment = Alignment.BottomCenter) {
+        FocusSurface(
+            onClick = onClick,
+            modifier = modifier.size(if (scaryLayout.tv) 40.dp else TOUCH_TARGET),
+            shape = CircleShape,
+            focusedScale = 1.12f,
+            containerColor = ScaryColors.Bone.copy(alpha = if (dimmed) 0.04f else 0.1f),
+            focusedContainerColor = ScaryColors.Bone,
+            borderColor = ScaryColors.Bone.copy(alpha = 0.15f),
+            contentDescription = contentDescription,
+            onFocusChanged = { hasFocus = it },
+        ) { focused ->
+            Box(Modifier.align(Alignment.Center)) {
+                icon(if (focused) ScaryColors.Void else ScaryColors.Bone.copy(alpha = if (dimmed) 0.55f else 1f))
+            }
+        }
+        if (showLabel && hasFocus && byKeys) {
+            BasicText(
+                contentDescription,
+                style = ScaryType.Caption.copy(color = ScaryColors.Bone),
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .zIndex(2f)
+                    // Takes no room: measured freely (up to a width that fits beside the screen's edge), then centred
+                    // under the button.
+                    .layout { measurable, _ ->
+                        val placeable = measurable.measure(Constraints(maxWidth = LABEL_MAX_WIDTH.roundToPx()))
+                        layout(0, 0) { placeable.place(-placeable.width / 2, LABEL_GAP.roundToPx()) }
+                    }
+                    .background(ScaryColors.Void.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .testTag(ICON_LABEL_TAG)
+                    .clearAndSetSemantics { },
+            )
         }
     }
 }
+
+/** The name shown under a focused icon button. */
+const val ICON_LABEL_TAG = "iconLabel"
+private val LABEL_MAX_WIDTH = 220.dp
+private val LABEL_GAP = 8.dp
 
 @Composable
 fun FogIcon(color: Color, modifier: Modifier = Modifier) {

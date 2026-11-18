@@ -100,6 +100,12 @@
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">В ролях: %1$s</string>
     <string name="settings_home_section">Главный экран</string>
+    <string name="settings_jump">Перейти к</string>
+    <string name="settings_section_films">Фильмы и аккаунты</string>
+    <string name="settings_section_display">Язык и эффекты</string>
+    <string name="settings_section_rows">Ряды и вкус</string>
+    <string name="settings_section_sound">Звук, трейлеры и сон</string>
+    <string name="settings_section_parents">Родители</string>
     <string name="settings_default_home">SCARY как главный экран</string>
     <string name="value_home_yes">Активно</string>
     <string name="value_home_no">Не задано</string>

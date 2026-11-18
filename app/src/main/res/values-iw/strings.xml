@@ -100,6 +100,12 @@
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">בכיכובם: %1$s</string>
     <string name="settings_home_section">מסך הבית</string>
+    <string name="settings_jump">קפיצה אל</string>
+    <string name="settings_section_films">סרטים וחשבונות</string>
+    <string name="settings_section_display">שפה ואפקטים</string>
+    <string name="settings_section_rows">שורות וטעם</string>
+    <string name="settings_section_sound">קול, טריילרים ושינה</string>
+    <string name="settings_section_parents">הורים</string>
     <string name="settings_default_home">SCARY כמסך הבית</string>
     <string name="value_home_yes">פעיל</string>
     <string name="value_home_no">לא מוגדר</string>

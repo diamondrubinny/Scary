@@ -100,6 +100,12 @@
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">Com %1$s</string>
     <string name="settings_home_section">Tela inicial</string>
+    <string name="settings_jump">Ir para</string>
+    <string name="settings_section_films">Filmes e contas</string>
+    <string name="settings_section_display">Idioma e efeitos</string>
+    <string name="settings_section_rows">Fileiras e gosto</string>
+    <string name="settings_section_sound">Som, trailers e sono</string>
+    <string name="settings_section_parents">Pais</string>
     <string name="settings_default_home">SCARY como tela inicial</string>
     <string name="value_home_yes">Ativo</string>
     <string name="value_home_no">Não definido</string>

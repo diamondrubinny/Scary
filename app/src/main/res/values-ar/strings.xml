@@ -101,6 +101,12 @@
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">بطولة %1$s</string>
     <string name="settings_home_section">الشاشة الرئيسية</string>
+    <string name="settings_jump">الانتقال إلى</string>
+    <string name="settings_section_films">الأفلام والحسابات</string>
+    <string name="settings_section_display">اللغة والمؤثرات</string>
+    <string name="settings_section_rows">الصفوف والذوق</string>
+    <string name="settings_section_sound">الصوت والإعلانات والنوم</string>
+    <string name="settings_section_parents">الأهل</string>
     <string name="settings_default_home">SCARY كشاشة رئيسية</string>
     <string name="value_home_yes">مفعّل</string>
     <string name="value_home_no">غير مضبوط</string>
