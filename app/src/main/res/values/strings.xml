@@ -101,6 +101,12 @@
     <string name="imdb_rating">IMDb %1$s</string>
     <string name="cast_line">Starring %1$s</string>
     <string name="settings_home_section">Home screen</string>
+    <string name="settings_jump">Jump to</string>
+    <string name="settings_section_films">Films and accounts</string>
+    <string name="settings_section_display">Language and effects</string>
+    <string name="settings_section_rows">Rows and taste</string>
+    <string name="settings_section_sound">Sound, trailers and sleep</string>
+    <string name="settings_section_parents">Parents</string>
     <string name="settings_default_home">SCARY as the home screen</string>
     <string name="value_home_yes">Active</string>
     <string name="value_home_no">Not set</string>

@@ -55,6 +55,9 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
+import io.github.diamondrubinny.scary.ui.components.ICON_LABEL_TAG
+import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
+import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
 import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.settings.REFRESH_FILMS_ROW_TAG
@@ -269,6 +272,42 @@ class ScaryUiTest {
         rule.onNode(hasTestTag(REFRESH_FILMS_ROW_TAG)).performScrollTo().performClick()
         waitFor(hasText(text(R.string.msg_refresh_recent)))
         rule.onNode(hasText(text(R.string.diag_motion).substringBefore("%"), substring = true)).performScrollTo().assertExists()
+        backToHome()
+    }
+
+    /**
+     * Ease of use: an icon button says its name while the remote's focus is on it, and the settings' jump bar takes the
+     * focus straight to a section far down the list.
+     */
+    @Test
+    fun iconsSayTheirNamesAndSettingsJumpToASection() {
+        waitForHome()
+        // A key press, so SCARY knows a remote is in use (a touch hides the focus marks, and the names with them).
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
+        rule.waitForIdle()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performSemanticsAction(SemanticsActions.RequestFocus)
+        rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(ICON_LABEL_TAG), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitFor(hasTestTag(SETTINGS_JUMP_TAG))
+        // As with the remote: the focus goes to the jump button, and OK presses it (a key, so the focus stays in use).
+        fun pressWithRemote(tag: String) {
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_UP)
+            rule.waitForIdle()
+            rule.onNode(hasTestTag(tag)).performScrollTo().performSemanticsAction(SemanticsActions.RequestFocus)
+            rule.waitForIdle()
+            InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_CENTER)
+            rule.waitForIdle()
+        }
+        // "About" is the last section: its first row takes the focus, wherever the list was.
+        pressWithRemote(settingsJumpTag("about"))
+        waitFor(hasContentDescription(text(R.string.settings_system)) and isFocused())
+        // And back up to the films and accounts.
+        pressWithRemote(settingsJumpTag("films"))
+        waitFor(hasContentDescription(text(R.string.settings_online), substring = true) and isFocused())
+        // Every section has its heading in the list.
+        listOf(R.string.settings_section_films, R.string.settings_section_display, R.string.settings_section_rows, R.string.settings_section_sound, R.string.settings_section_parents)
+            .forEach { title -> rule.onAllNodes(hasText(text(title))).fetchSemanticsNodes().let { assertTrue("heading and jump button for ${text(title)}", it.size >= 2) } }
         backToHome()
     }
 
