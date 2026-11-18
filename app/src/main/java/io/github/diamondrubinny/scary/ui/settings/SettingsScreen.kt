@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.horizontalScroll
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.gestures.BringIntoViewSpec
+import androidx.compose.foundation.gestures.LocalBringIntoViewSpec
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
@@ -111,6 +115,7 @@ class SettingsActions(
     val onOpenAccessibilityStatement: () -> Unit,
 )
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SettingsScreen(
     language: Language,
@@ -182,6 +187,9 @@ fun SettingsScreen(
         runCatching { target.requestFocus() }
     }
 
+    // The TV's own rule puts every focused row at 30% of the screen, which pushed the title off as soon as the screen
+    // opened: here a row scrolls only when it nears an edge (SettingsScroll).
+    CompositionLocalProvider(LocalBringIntoViewSpec provides SettingsScroll) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -502,6 +510,7 @@ fun SettingsScreen(
             modifier = Modifier.focusRequester(statementFocus),
         )
     }
+    }
 }
 
 /** Test tag of the phone remote's row. */
@@ -619,6 +628,24 @@ const val STATS_ROW_TAG = "statsRow"
 
 /** Test tag of the "Play trailers by themselves" row. */
 const val TRAILER_AUTOPLAY_ROW_TAG = "trailerAutoplayRow"
+
+/**
+ * How the settings scroll to the focused row: it is kept between a tenth and three quarters of the screen's height, so
+ * the rows after it stay in sight while going down, and nothing moves while it is already there.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+private object SettingsScroll : BringIntoViewSpec {
+    override fun calculateScrollDistance(offset: Float, size: Float, containerSize: Float): Float {
+        val top = containerSize * 0.1f
+        val bottom = containerSize * 0.75f
+        return when {
+            offset < top -> offset - top
+            // Never so far that the row's own top leaves the window (a row taller than it).
+            offset + size > bottom -> minOf(offset + size - bottom, offset - top).coerceAtLeast(0f)
+            else -> 0f
+        }
+    }
+}
 
 /** A section of the settings and the row its jump button goes to. */
 private class JumpTarget(val key: String, @param:androidx.annotation.StringRes val title: Int, val firstRow: FocusRequester)
