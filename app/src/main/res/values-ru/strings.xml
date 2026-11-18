@@ -54,6 +54,14 @@
     <string name="settings_title">Настройки SCARY</string>
     <string name="settings_language">Язык</string>
     <string name="settings_effects">Туман и зернистость</string>
+    <string name="value_effects_tv_off">Включено, но телевизор убирает анимацию</string>
+    <string name="settings_refresh_films">Обновить фильмы сейчас</string>
+    <string name="settings_refresh_films_last">Прочитаны: %1$s</string>
+    <string name="settings_refresh_films_never">Ещё не прочитаны</string>
+    <string name="msg_refreshing">Читаем новые фильмы…</string>
+    <string name="msg_refresh_recent">Фильмы прочитаны только что.</string>
+    <string name="msg_refresh_offline">Данные о фильмах из сети выключены.</string>
+    <string name="diag_motion">Движение: масштаб анимации телевизора %1$s (0 = телевизор убирает анимацию, и названия неподвижны)</string>
     <string name="value_on">Вкл.</string>
     <string name="value_off">Выкл.</string>
     <string name="settings_night_fear">Насколько страшный фильм ночи</string>

@@ -22,6 +22,9 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -74,7 +77,7 @@ class CinemetaRepository(
     /** How the last refresh went, for Settings → About → Diagnostics: pages loaded of the rows and of the categories. */
     fun noteRefresh(cache: CinemetaCache) {
         val rows = cache.rowPages ?: return
-        val note = "$rows ${cache.categoryPages}"
+        val note = "$rows ${cache.categoryPages} ${cache.rowsReadAtMillis}"
         if (note == lastRefreshNote) return
         lastRefreshNote = note
         HealthLog.recordRefresh(appContext, rows.loaded, rows.total, cache.categoryPages?.loaded, cache.categoryPages?.total)
@@ -85,7 +88,8 @@ class CinemetaRepository(
      * catalog pages to join ([skips], 50 movies each). Year catalogs mix every genre, so they keep only horror,
      * thriller and mystery ([themedOnly]). An [endless] row keeps loading further pages while the viewer scrolls. A
      * popular row is the first page of its genre and its "deeper" row starts at the next one, so no movie falls in
-     * between and no page is loaded twice. Rows keep every movie of their pages (MAX_ROW_MOVIES is three pages).
+     * between and no page is loaded twice. Rows keep every movie of their pages (MAX_ROW_MOVIES is three pages); a year
+     * catalog mixes every genre, so six of its pages leave about a hundred films (measured 18.11.2026).
      */
     private data class RowSpec(
         val id: String,
@@ -106,30 +110,37 @@ class CinemetaRepository(
             val year = LocalDate.now().year
             return listOf(
                 RowSpec(
-                    "horror_popular", "top", "Horror", listOf(0),
+                    "horror_popular", "top", "Horror", listOf(0, 50, 100),
                     titles("פופולרי עכשיו באימה", "Popular horror right now", "Terror em alta agora", "Популярные ужасы сейчас", "رعب رائج الآن"),
                     endless = true,
                 ),
                 RowSpec(
-                    "horror_new", "year", year.toString(), listOf(0, 50, 100),
+                    "horror_new", "year", year.toString(), YEAR_PAGES,
                     titles("חדש השנה", "New this year", "Novos deste ano", "Новинки этого года", "جديد هذا العام"),
                     themedOnly = true,
                     endless = true,
                 ),
                 RowSpec(
-                    "thriller_popular", "top", "Thriller", listOf(0),
+                    "thriller_popular", "top", "Thriller", listOf(0, 50, 100),
                     titles("מותחנים פופולריים", "Popular thrillers", "Suspenses populares", "Популярные триллеры", "أفلام إثارة رائجة"),
                     endless = true,
                 ),
                 RowSpec(
-                    "mystery_popular", "top", "Mystery", listOf(0, 50),
+                    "mystery_popular", "top", "Mystery", listOf(0, 50, 100),
                     titles("תעלומות שכולם רואים", "Mysteries everyone is watching", "Mistérios que todos estão vendo", "Загадки, которые смотрят все", "ألغاز يشاهدها الجميع"),
                     endless = true,
                 ),
                 RowSpec(
-                    "horror_last_year", "year", (year - 1).toString(), listOf(0, 50, 100),
+                    "horror_last_year", "year", (year - 1).toString(), YEAR_PAGES,
                     titles("הפחדים של שנה שעברה", "Last year's scares", "Os sustos do ano passado", "Страхи прошлого года", "مخاوف العام الماضي"),
                     themedOnly = true,
+                    endless = true,
+                ),
+                // Cinemeta's "featured" catalog: mostly this year's films that people are looking at, many of them not yet
+                // in the popular catalog (measured 18.11.2026: 83 of its first 145 were new to six pages of it).
+                RowSpec(
+                    "horror_featured", "imdbRating", "Horror", listOf(0, 50, 100),
+                    titles("אימה שמדברים עליה עכשיו", "Horror in the spotlight", "Terror em destaque", "Ужасы в центре внимания", "رعب تحت الأضواء"),
                     endless = true,
                 ),
                 // Back through the years, one after another, as far as the catalog goes: the row with no end.
@@ -162,19 +173,19 @@ class CinemetaRepository(
                 ),
                 // The series tab.
                 RowSpec(
-                    "series_horror", "top", "Horror", listOf(0, 50),
+                    "series_horror", "top", "Horror", listOf(0, 50, 100),
                     titles("סדרות אימה פופולריות", "Popular horror series", "Séries de terror em alta", "Популярные хоррор-сериалы", "مسلسلات رعب رائجة"),
                     endless = true,
                     kind = MediaKind.SERIES,
                 ),
                 RowSpec(
-                    "series_thriller", "top", "Thriller", listOf(0),
+                    "series_thriller", "top", "Thriller", listOf(0, 50, 100),
                     titles("סדרות מתח פופולריות", "Popular thriller series", "Séries de suspense em alta", "Популярные сериалы-триллеры", "مسلسلات إثارة رائجة"),
                     endless = true,
                     kind = MediaKind.SERIES,
                 ),
                 RowSpec(
-                    "series_mystery", "top", "Mystery", listOf(0),
+                    "series_mystery", "top", "Mystery", listOf(0, 50, 100),
                     titles("סדרות תעלומה", "Mystery series", "Séries de mistério", "Сериалы-загадки", "مسلسلات غموض"),
                     endless = true,
                     kind = MediaKind.SERIES,
@@ -194,7 +205,7 @@ class CinemetaRepository(
                     kind = MediaKind.SERIES,
                 ),
                 RowSpec(
-                    "series_new", "year", year.toString(), listOf(0, 50),
+                    "series_new", "year", year.toString(), YEAR_PAGES,
                     titles("סדרות חדשות השנה", "New series this year", "Séries novas deste ano", "Новые сериалы этого года", "مسلسلات جديدة هذا العام"),
                     themedOnly = true,
                     endless = true,
@@ -254,9 +265,15 @@ class CinemetaRepository(
         return metas.map { meta -> found[meta.tmdbId]?.let { meta.copy(originalLanguage = it) } ?: meta }
     }
 
+    private val _rowsReadAt = MutableStateFlow<Long?>(null)
+
+    /** When the rows on screen were last read from Cinemeta (wall clock); null before any were. For Settings. */
+    val rowsReadAt: StateFlow<Long?> = _rowsReadAt.asStateFlow()
+
     /** The copy on disk, cleaned: no Arab and Indian films, and no American films in rows about a place (older versions kept them). */
     suspend fun cached(): CinemetaCache? = withContext(Dispatchers.IO) {
-        if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()?.withoutHidden()
+        (if (!cacheFile.exists()) null else runCatching { CinemetaCache.decode(cacheFile.readText()) }.getOrNull()?.withoutHidden())
+            ?.also { _rowsReadAt.value = it.rowsReadAtMillis }
     }
 
     /**
@@ -322,6 +339,8 @@ class CinemetaRepository(
         categories.values.flatten().forEach { id -> previous?.metas?.get(id)?.let { metas.putIfAbsent(id, it) } }
         CinemetaCache(
             fetchedAtMillis = if (retry) previous!!.fetchedAtMillis else now,
+            // The rows were read now either way: a rows-only round (every few hours) keeps the day's details.
+            rowsFetchedAtMillis = now,
             metas = metas,
             rows = rows,
             rowsVersion = CinemetaCache.ROWS_VERSION,
@@ -454,6 +473,7 @@ class CinemetaRepository(
     }
 
     private fun save(cache: CinemetaCache) {
+        _rowsReadAt.value = cache.rowsReadAtMillis
         try {
             val tmp = File(cacheFile.parentFile, cacheFile.name + ".tmp")
             tmp.writeText(cache.encode())
@@ -508,6 +528,9 @@ class CinemetaRepository(
         const val CATEGORY_REQUESTS = 3
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val HEALTH_EVERY_MS = 60_000L
+
+        /** A year's catalog mixes every genre: six pages leave about a hundred horror, thriller and mystery films. */
+        val YEAR_PAGES = listOf(0, 50, 100, 150, 200, 250)
 
         /** "New nightmares" reads this year's catalog and the last one's. */
         const val NEW_YEARS_BACK = 1

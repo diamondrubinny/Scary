@@ -55,6 +55,14 @@
     <string name="settings_title">إعدادات SCARY</string>
     <string name="settings_language">اللغة</string>
     <string name="settings_effects">الضباب وحبيبات الفيلم</string>
+    <string name="value_effects_tv_off">مفعّل، لكن التلفزيون يزيل الحركات</string>
+    <string name="settings_refresh_films">تحديث الأفلام الآن</string>
+    <string name="settings_refresh_films_last">آخر قراءة: %1$s</string>
+    <string name="settings_refresh_films_never">لم تُقرأ بعد</string>
+    <string name="msg_refreshing">جارٍ قراءة أفلام جديدة…</string>
+    <string name="msg_refresh_recent">قُرئت الأفلام قبل لحظات.</string>
+    <string name="msg_refresh_offline">بيانات الأفلام من الشبكة متوقفة.</string>
+    <string name="diag_motion">الحركة: مقياس حركات التلفزيون %1$s (0 = التلفزيون يزيل الحركات، والعناوين لا تتحرك)</string>
     <string name="value_on">مفعّل</string>
     <string name="value_off">متوقف</string>
     <string name="settings_night_fear">شدة اختيار الليلة</string>

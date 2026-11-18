@@ -161,6 +161,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val playerLanguages by viewModel.playerLanguages.collectAsStateWithLifecycle()
     val playerOnlineSubtitles by viewModel.playerOnlineSubtitles.collectAsStateWithLifecycle()
     val rdFileFilms by viewModel.rdFileFilms.collectAsStateWithLifecycle()
+    val filmsReadAt by viewModel.filmsReadAt.collectAsStateWithLifecycle()
     var countryPicker by remember { mutableStateOf(false) }
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val settingsLabel = stringResource(R.string.system_settings)
@@ -373,6 +374,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
         onToggleOnline = viewModel::toggleOnline,
+        onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
         onOpenAccessibility = ::openAccessibility,
         onOpenTmdb = viewModel::openTmdbDialog,
@@ -476,6 +478,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 current is Screen.Document -> DocumentScreen(current.kind)
                 current == Screen.AllApps -> AllAppsScreen(apps = state.drawer, actions = allAppsActions)
                 current == Screen.Settings -> SettingsScreen(
+                    filmsReadAt = filmsReadAt,
                     language = language,
                     effectsEnabled = state.effectsEnabled,
                     nightMaxFear = state.nightMaxFear,

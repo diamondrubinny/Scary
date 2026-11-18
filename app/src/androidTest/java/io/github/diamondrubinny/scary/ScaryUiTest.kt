@@ -55,7 +55,9 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
+import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
+import io.github.diamondrubinny.scary.ui.settings.REFRESH_FILMS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.SLEEP_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.STATS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.stats.STATS_SCREEN_TAG
@@ -248,6 +250,25 @@ class ScaryUiTest {
         // Diagnostics, for a photo when something goes wrong.
         rule.onNode(hasText(text(R.string.diag_title))).performScrollTo().assertExists()
         rule.onNode(hasText(text(R.string.diag_note))).performScrollTo().assertExists()
+        backToHome()
+    }
+
+    /**
+     * Settings offer to read the films again now and say when they last were; a second press right away is answered
+     * without asking the service again. Diagnostics say whether the TV removes animations (why a title stays still).
+     */
+    @Test
+    fun settingsOfferToRefreshTheFilmsNow() {
+        waitForHome()
+        // The night's film has its title on the home screen (it shivers when effects are on).
+        rule.onNode(hasTestTag(HERO_TITLE_TAG)).assertExists()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitFor(hasTestTag(REFRESH_FILMS_ROW_TAG))
+        rule.onNode(hasTestTag(REFRESH_FILMS_ROW_TAG)).performScrollTo().performClick()
+        waitFor(hasText(text(R.string.msg_refreshing)))
+        rule.onNode(hasTestTag(REFRESH_FILMS_ROW_TAG)).performScrollTo().performClick()
+        waitFor(hasText(text(R.string.msg_refresh_recent)))
+        rule.onNode(hasText(text(R.string.diag_motion).substringBefore("%"), substring = true)).performScrollTo().assertExists()
         backToHome()
     }
 

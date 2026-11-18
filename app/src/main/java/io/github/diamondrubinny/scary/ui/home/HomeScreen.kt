@@ -98,6 +98,7 @@ import io.github.diamondrubinny.scary.ui.components.ScaryButton
 import io.github.diamondrubinny.scary.ui.components.TopBar
 import io.github.diamondrubinny.scary.ui.components.WideMovieCard
 import io.github.diamondrubinny.scary.ui.components.tryRequestFocus
+import io.github.diamondrubinny.scary.ui.fx.chill
 import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.LocalScaryLayout
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
@@ -152,6 +153,7 @@ val SidePadding: Dp
 
 /** The list of home rows, for UI tests. */
 const val HOME_ROWS_TAG = "homeRows"
+const val HERO_TITLE_TAG = "heroTitle"
 
 /** Test tag of a home row's list of cards. */
 fun rowTag(rowKey: String): String = "row:$rowKey"
@@ -477,7 +479,9 @@ private fun HeroText(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 autoSize = ScaryType.DisplayFit,
-                modifier = Modifier.semantics { heading() },
+                // The title comes out of the dark, trembles, its light dips twice, and a smaller shiver returns every
+                // few seconds (fx Chill): again for each new film. Still when effects are off or the TV removes animations.
+                modifier = Modifier.semantics { heading() }.chill(movie.id).testTag(HERO_TITLE_TAG),
             )
             MovieMeta(movie)
             // The film page always has it; here it gives way to the rows while they have the focus.
