@@ -15,20 +15,25 @@
 | Image memory (Coil) | Already limited by itself (a share of the memory, less on low-memory TVs) and trimmed when the system asks. Left as it is. |
 
 ## What was done (version 0.5.14)
-1. **One slow clock for the background** (`fx/Ambient.kt`): fog, grain and the art's drift step 12 times a second (they move a few pixels a second). The screen is redrawn a fifth as often when nothing happens.
+1. **One slow clock for the background** (`fx/Ambient.kt`): fog, grain and the art's drift step 12 times a second (they move a few pixels a second). By design the screen is redrawn a fifth as often when nothing happens (not measurable on the emulator, see below).
 2. **The background is one finished picture** (an offscreen layer): moving through the rows above it costs the TV one picture per frame, not sixteen full-screen gradients. The fog's brushes are made once per screen size.
 3. **Nothing is drawn under the player.** The background is not there while a film plays.
 4. **The lists prepare ahead** (Compose's cache window): the next row down and the next posters along are built in the idle time between frames. Rows say their kind, so they are reused.
 5. **Unchanged films are not drawn again** (`compose-stability.conf`): `:core`'s classes and Kotlin's collections count as stable.
 6. **A measurement in CI** (`.github/scripts/screenshots.sh`, "Frames" in the run's summary): frames drawn in 10 idle seconds on the home screen, and frame times while moving through it. So the next change that makes it heavier shows.
 
-## Measured (CI, release build, TV emulator)
+## Measured (CI, release build, TV emulator, one run each, 18.11.2026)
 | | Before (0.5.13) | After (0.5.14) |
 |---|---|---|
-| Frames drawn in 10 idle seconds on the home screen | see below | see below |
-| Janky frames while moving (10 down, 20 right, 10 up) | see below | see below |
+| Moving through the home screen (10 down, 20 right, 10 up): median frame | 250 ms | **150 ms** |
+| The same: 90th / 95th / 99th percentile | 300 / 350 / 400 ms | 250 / 300 / 350 ms |
+| The same: frames drawn | 394 | 420 |
+| Frames drawn in 10 idle seconds on the home screen | 74 | 72 |
 
-An emulator draws with the computer's processor, not a TV's graphics chip: its numbers compare one build with another and say nothing of what a TV shows.
+- **Moving got faster on the emulator:** the median frame took 40% less time.
+- **The idle count shows nothing here, and that is the measurement's limit, not a result.** The emulator draws with the computer's processor and needs about 140 ms for one frame, so it could not draw even the 12 frames a second the new clock asks for: it was drawing as fast as it could before and after. That the screen is redrawn a fifth as often when idle (60 steps a second down to 12) is by design and was **not measured**; it needs a real TV. The idle line now also reports the frame time, which an emulator can show.
+- One run of each: the difference between two runs of the same build is not known.
+- An emulator's numbers compare one build with another and say nothing of what a TV shows.
 
 ## Stability
 - Nothing was found in the code that crashes; the crash guard and the freeze watch from 0.5.5 stay. **What the owner's TV recorded is not known:** a photo of Settings → About → Diagnostics (crash, freeze, start time, motion) is what the next fix should come from.

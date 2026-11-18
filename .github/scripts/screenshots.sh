@@ -355,7 +355,7 @@ if [ -f dist/scary-release.apk ]; then
     sleep 15
     adb shell dumpsys gfxinfo "$PKG" reset > /dev/null
     sleep 10
-    echo "idle 10 s on the home screen: $(frame_stat 'Total frames rendered') frames"
+    echo "idle 10 s on the home screen: $(frame_stat 'Total frames rendered') frames, 50th $(frame_stat '50th percentile'), 90th $(frame_stat '90th percentile')"
     adb shell dumpsys gfxinfo "$PKG" reset > /dev/null
     for _ in $(seq 1 10); do key KEYCODE_DPAD_DOWN; sleep 0.3; done
     for _ in $(seq 1 20); do key KEYCODE_DPAD_RIGHT; sleep 0.2; done
