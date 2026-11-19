@@ -241,4 +241,39 @@ class TmdbTest {
         assertTrue(cache.copy(rowsFetchedAtMillis = 0).needsRows(read + 9 * hour))
         assertTrue(cache.copy(rowsVersion = 2).needsRows(read))
     }
+
+    @Test
+    fun `a film's series is read from TMDB in the order the films came out`() {
+        // A film's details: only the series' id is read from "belongs_to_collection".
+        val film = """{"id":948,"title":"Halloween","belongs_to_collection":{"id":91361,"name":"Halloween Collection","poster_path":"/p.jpg","backdrop_path":"/b.jpg"}}"""
+        assertEquals(91361L, Tmdb.parseCollectionId(film))
+        assertEquals(null, Tmdb.parseCollectionId("""{"id":694,"title":"The Shining","belongs_to_collection":null}"""))
+        assertEquals(null, Tmdb.parseCollectionId("""{"id":694,"belongs_to_collection":{"id":"x"}}"""))
+        assertEquals(null, Tmdb.parseCollectionId("not json"))
+        assertEquals("https://api.themoviedb.org/3/collection/91361?language=he-IL", Tmdb.collectionUrl(91361, Language.HE))
+
+        val collection = """{"id":91361,"name":"Halloween Collection","overview":"...","parts":[
+            {"adult":false,"id":11281,"title":"Halloween II","original_title":"Halloween II","release_date":"1981-10-30","genre_ids":[27,53],"vote_average":6.4,"poster_path":"/2.jpg","original_language":"en"},
+            {"adult":false,"id":948,"title":"Halloween","original_title":"Halloween","release_date":"1978-10-24","genre_ids":[27,53],"vote_average":7.6,"poster_path":"/1.jpg","original_language":"en"},
+            {"adult":false,"id":999001,"title":"Halloween: The Next One","original_title":"Halloween: The Next One","release_date":"","genre_ids":[27]},
+            {"adult":true,"id":999002,"title":"Not this one","release_date":"1990-01-01","genre_ids":[27]},
+            {"adult":false,"id":10676,"name":"Halloween III: Season of the Witch","original_name":"Halloween III","release_date":"1982-10-22","genre_ids":[27]},
+            {"id":948,"title":"Halloween again","release_date":"1978-10-24"},
+            "junk", {"id":0,"title":"No id"}, {"id":5,"release_date":"2000-01-01"}
+        ]}"""
+        val franchise = Tmdb.parseCollection(collection)!!
+        assertEquals(91361L, franchise.id)
+        assertEquals("Halloween Collection", franchise.name)
+        // By release date; the film with no date yet comes last; the adult title, the repeat and the junk are gone.
+        assertEquals(listOf(948L, 11281L, 10676L, 999001L), franchise.parts.map { it.tmdbId })
+        assertEquals("Halloween III: Season of the Witch", franchise.parts[2].title)
+        assertEquals(1978, franchise.parts.first().year)
+        // One film is not a series; neither is an answer of another shape.
+        assertEquals(null, Tmdb.parseCollection("""{"id":1,"name":"Solo","parts":[{"id":2,"title":"Only","release_date":"2001-01-01"}]}"""))
+        assertEquals(null, Tmdb.parseCollection("""{"success":false,"status_code":34}"""))
+        assertEquals(null, Tmdb.parseCollection("[]"))
+        // A very long series has an end.
+        val long = (1..100).joinToString(",") { """{"id":$it,"title":"Part $it","release_date":"19${(it % 90 + 10)}-01-01"}""" }
+        assertEquals(Tmdb.MAX_FRANCHISE, Tmdb.parseCollection("""{"id":7,"name":"Long","parts":[$long]}""")!!.parts.size)
+    }
 }

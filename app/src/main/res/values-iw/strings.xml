@@ -8,6 +8,10 @@
     <string name="row_apps">האפליקציות שלי</string>
     <string name="row_more_like">עוד כאלה</string>
     <string name="row_more_from_director">עוד מהבמאי %1$s</string>
+    <string name="row_franchise">כל הסדרה: %1$s</string>
+    <string name="action_franchise_bucket">להוסיף את כולם לרשימת המשאלות</string>
+    <string name="msg_franchise_bucket">נוספו לרשימת המשאלות: %1$s סרטים, לפי הסדר.</string>
+    <string name="msg_franchise_bucket_none">כולם כבר ברשימת המשאלות.</string>
     <string name="minutes">%1$d דק׳</string>
     <string name="fear_short">מד פחד %1$d/5</string>
     <string name="fear_description">רמת פחד %1$d מתוך 5</string>
@@ -92,6 +96,19 @@
     <string name="search_hint">שם סרט, במאי, שנה או סוג אימה</string>
     <string name="search_no_results">לא מצאנו סרטים עבור %1$s.</string>
     <string name="search_count">תוצאות: %1$d</string>
+    <string name="filter_kind_all">סרטים וסדרות</string>
+    <string name="filter_kind_films">רק סרטים</string>
+    <string name="filter_kind_series">רק סדרות</string>
+    <string name="filter_years_any">כל השנים</string>
+    <string name="filter_years">שנים: %1$s</string>
+    <string name="filter_years_before">לפני %1$s</string>
+    <string name="filter_fear_any">כל רמת פחד</string>
+    <string name="filter_fear">רמת פחד: %1$s</string>
+    <string name="filter_unwatched_off">גם מה שנצפה</string>
+    <string name="filter_unwatched_on">רק מה שלא נצפה</string>
+    <string name="filter_clear">ניקוי הסינון</string>
+    <string name="search_no_filter_results">אין תוצאות שמתאימות לסינון הזה.</string>
+    <string name="search_filter_hint">אפשר להסיר סינון אחד או לנקות את כולם. רמת הפחד ידועה רק לסרטים שנבחרו ביד לספרייה.</string>
     <string name="pin_title_verify">הזינו את קוד ההורים</string>
     <string name="pin_title_create">בחרו קוד הורים חדש, 4 עד 8 ספרות</string>
     <string name="pin_title_confirm">הזינו שוב את הקוד לאישור</string>
@@ -422,6 +439,12 @@
     <!-- Sorting by what you watch -->
     <string name="row_because_watched">כי צפית ב־%1$s</string>
     <string name="row_watched">צפית</string>
+    <string name="row_now_out">יצא עכשיו</string>
+    <string name="action_remind">הזכירו לי</string>
+    <string name="action_reminded">תזכורת פעילה</string>
+    <string name="msg_remind_set">%1$s יופיע בשורת "יצא עכשיו" במסך הבית כשייצא.</string>
+    <string name="msg_remind_off">התזכורת ל־%1$s הוסרה.</string>
+    <string name="msg_remind_full">עד %1$s תזכורות. הסירו אחת קודם.</string>
     <string name="settings_hide_watched">הסתרת סרטים שצפיתי</string>
     <string name="settings_hide_watched_note">כבוי: סרטים שצפיתם עוברים לסוף כל שורה. פעיל: הם יוצאים מהשורות ומחכים בשורת "צפית". בכל מקרה, השורות שאתם צופים מהן הכי הרבה עולות למעלה, והחישוב נעשה בטלוויזיה.</string>
     <!-- TMDB account -->

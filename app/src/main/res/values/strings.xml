@@ -9,6 +9,10 @@
     <string name="row_apps">My apps</string>
     <string name="row_more_like">More like this</string>
     <string name="row_more_from_director">More from %1$s</string>
+    <string name="row_franchise">The whole series: %1$s</string>
+    <string name="action_franchise_bucket">Add them all to the bucket list</string>
+    <string name="msg_franchise_bucket">Added to the bucket list: %1$s films, in order.</string>
+    <string name="msg_franchise_bucket_none">They are all in the bucket list already.</string>
     <string name="minutes">%1$d min</string>
     <string name="fear_short">Fear %1$d/5</string>
     <string name="fear_description">Fear level %1$d of 5</string>
@@ -93,6 +97,19 @@
     <string name="search_hint">Title, director, year or kind of horror</string>
     <string name="search_no_results">No movies found for %1$s.</string>
     <string name="search_count">Results: %1$d</string>
+    <string name="filter_kind_all">Films and series</string>
+    <string name="filter_kind_films">Films only</string>
+    <string name="filter_kind_series">Series only</string>
+    <string name="filter_years_any">Any year</string>
+    <string name="filter_years">Years: %1$s</string>
+    <string name="filter_years_before">Before %1$s</string>
+    <string name="filter_fear_any">Any fear level</string>
+    <string name="filter_fear">Fear level: %1$s</string>
+    <string name="filter_unwatched_off">Watched too</string>
+    <string name="filter_unwatched_on">Not watched yet</string>
+    <string name="filter_clear">Clear filters</string>
+    <string name="search_no_filter_results">Nothing fits these filters.</string>
+    <string name="search_filter_hint">Take a filter off, or clear them all. The fear level is known only for the hand-picked library.</string>
     <string name="pin_title_verify">Enter the parental PIN</string>
     <string name="pin_title_create">Choose a new parental PIN, 4 to 8 digits</string>
     <string name="pin_title_confirm">Enter the PIN again to confirm</string>
@@ -421,6 +438,12 @@
     <!-- Sorting by what you watch -->
     <string name="row_because_watched">Because you watched %1$s</string>
     <string name="row_watched">Watched</string>
+    <string name="row_now_out">Now out</string>
+    <string name="action_remind">Remind me</string>
+    <string name="action_reminded">Reminder set</string>
+    <string name="msg_remind_set">%1$s will show in “Now out” on the home screen once it is released.</string>
+    <string name="msg_remind_off">The reminder for %1$s was removed.</string>
+    <string name="msg_remind_full">Up to %1$s reminders. Remove one first.</string>
     <string name="settings_hide_watched">Hide films I\'ve watched</string>
     <string name="settings_hide_watched_note">Off: films you\'ve watched go to the end of each row. On: they leave the rows and wait in a Watched row. Either way, the rows you watch most move up, worked out on this TV.</string>
     <!-- TMDB account -->

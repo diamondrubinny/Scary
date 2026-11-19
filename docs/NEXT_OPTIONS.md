@@ -101,3 +101,35 @@ Built in stages, the small ones first.
 - **Saving the file uses the browser's download of a page-made file** (`a download` with a blob). It works in Chrome on Android and Safari on iOS 13 and later by their documentation; **requires a check on the owner's phone**, since the page is served over plain HTTP on the home network.
 - **The file is not encrypted on the phone.** It holds no secret, but it does show what was watched. A password on the file was left out: it would need a strong key-derivation function in the page's own JavaScript (no Web Crypto on plain HTTP).
 - **Privacy law:** the file is the viewer's own data moved by the viewer between their own devices; SCARY's maker never receives it. **Needs legal review** before it is described as a data-portability feature.
+
+## Stage 4 (19.11.2026), version 0.5.21: C, D, H
+
+### C. Search filters
+- **Under the search field:** four buttons. OK on one moves it to its next value and back to "any": films and series / films only / series only; any year / each decade from this one back to the 1970s / before 1970; any fear level / 1–2 / 3 / 4–5; watched too / not watched yet. "Clear filters" shows once one is set.
+- **With no text, a filter alone picks the films** (up to 120, the best rated first): "the 1980s, fear 4–5, not watched yet" is a way to browse.
+- **A filter narrows before the limit is taken,** so matches are never hidden behind films it left out. The web's results pass the same filter.
+- **Limit:** the fear level is known only for the hand-picked library. A film from the web or the offline index has none, so it fits no fear band (the empty state says so).
+- **Accessibility:** each button says its value in words; number ranges are kept left-to-right in Hebrew and Arabic; the search key on the keyboard goes straight to the results, past the filters.
+- **Files:** core `catalog/SearchFilter.kt`, `Search.Index.query(accept)` and `browse`; app `SearchScreen` (`FilterRow`), `HomeViewModel.searchFilter`. Tests: `SearchTest`, `ScaryUiTest.searchFiltersNarrowTheResultsAndClear`.
+- **Privacy:** nothing leaves the TV; the filter is not stored.
+
+### D. "Remind me" on Coming soon
+- **On the page of a film that is not out yet:** "Remind me". When its day comes, the film shows in a "Now out" row at the top of the home screen for 45 days, or until it is watched or the reminder is taken off (the same button, on the film's page).
+- **A film whose release moved** to a later day waits for the new day (when the catalog still holds it with that date).
+- **No notification is scheduled** and nothing runs in the background: the row is worked out when the home screen is built. SCARY is the home screen, so that is where a reminder is seen.
+- **Up to 40 reminders,** kept on the TV only (`release_reminders`: film id and day). The film's details are kept with the saved films, so it can be shown after it leaves the coming-soon row. Not in the backup file yet.
+- **"Now out" is in Settings → Home screen rows,** like every row.
+- **Files:** core `catalog/Reminders.kt`; `Cinemeta.fromMovie` keeps the release date; app `SettingsRepository.toggleReminder`, `HomeViewModel.toggleReminder` and the row in `buildState`, `HomeRow.NowOut`, the button on `DetailsScreen`. Tests: `RemindersTest`, `ScaryUiTest.aRemindedFilmShowsInNowOutAndLeavesWhenTheReminderIsRemoved`.
+- **Needs a TMDB key** to see films that are not out yet (the coming-soon row is TMDB's).
+
+### H. The whole series, in order
+- **On a film's page, with the viewer's TMDB key:** a row "The whole series: <name>" with every film of the series in the order they came out (an announced film with no date yet is not shown), and one button: "Add them all to the bucket list" (the films that are out, in order, until the list's 30 are full; films the parental lock covers are left out).
+- **What is asked of TMDB,** all in the official API description (`/3/find/{external_id}`, `/3/movie/{movie_id}` for `belongs_to_collection`, `/3/collection/{collection_id}`, `/3/movie/{movie_id}/external_ids`): the film's id, the series' id, and the IMDb id of each of its films this TV has not asked about before (kept on the TV afterwards). Nothing about the viewer. Kept in memory for the session.
+- **Not on family night** (only the library shows then), not for series, and not without a key or with online data off.
+- **Files:** core `Tmdb.parseCollectionId`, `collectionUrl`, `parseCollection`; app `TmdbRepository.franchise`, `HomeViewModel.loadFranchise` and `addFranchiseToBucket`, the row on `DetailsScreen`. Tests: `TmdbTest` (answers written from the API description).
+- **Requires verification on the TV with a key:** the answers were read from TMDB's API description, not from a live request (there is no key in this workspace). The description names a part's title `name`; live answers are known to use `title`. Both are read.
+
+### After an independent review (19.11.2026)
+- **Fixed in search:** coming back from a film to results picked by a filter alone lands on that film's card; "Clear filters" hands its focus to the first filter when it leaves; a search from the phone clears a filter left on the TV, so the TV shows what the phone lists.
+- **Fixed in "Remind me":** a release that moved is waited for by its new day (reminders are kept 400 days past the day stored, and shown by the day the catalog gives now); taking off an old reminder says so; the button hands its focus to "Watch" when it leaves the page.
+- **Fixed in the series row:** it no longer stays on family night, with online data off, after the key is removed or in another language; a series that arrived with films missing (a request that failed) is shown as it is but asked for again on the next visit.

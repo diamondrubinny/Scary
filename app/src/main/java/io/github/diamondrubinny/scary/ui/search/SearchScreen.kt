@@ -4,6 +4,11 @@
 
 package io.github.diamondrubinny.scary.ui.search
 
+import io.github.diamondrubinny.scary.core.model.MediaKind
+import io.github.diamondrubinny.scary.core.catalog.SearchFilter
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.horizontalScroll
 import io.github.diamondrubinny.scary.ui.components.ScaryTextField
 import io.github.diamondrubinny.scary.ui.theme.paneWidth
 import io.github.diamondrubinny.scary.ui.theme.scaryLayout
@@ -93,6 +98,11 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryType
 
 /** Test tag of the "Smart search ✦" button. */
 const val SMART_SEARCH_TAG = "smartSearch"
+const val SEARCH_FILTER_KIND_TAG = "searchFilterKind"
+const val SEARCH_FILTER_YEARS_TAG = "searchFilterYears"
+const val SEARCH_FILTER_FEAR_TAG = "searchFilterFear"
+const val SEARCH_FILTER_UNWATCHED_TAG = "searchFilterUnwatched"
+const val SEARCH_FILTER_CLEAR_TAG = "searchFilterClear"
 
 /**
  * Offline search over the catalog. Input comes from the TV keyboard, or from the microphone button, which hands
@@ -117,6 +127,9 @@ fun SearchScreen(
     aiQuery: String = "",
     onSmartSearch: (query: String, labels: (Movie) -> List<String>) -> Unit = { _, _ -> },
     onAiSettings: () -> Unit = {},
+    /** Narrows the results; with no text, a filter alone picks the films. */
+    filter: SearchFilter = SearchFilter.NONE,
+    onFilterChange: (SearchFilter) -> Unit = {},
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
@@ -127,21 +140,24 @@ fun SearchScreen(
     val index by produceState(SearchIndexCache.cached(movies, locale), movies, locale) {
         value = SearchIndexCache.cached(movies, locale) ?: withContext(Dispatchers.Default) { SearchIndexCache.build(movies, locale, resources) }
     }
-    val local by produceState(index?.let { LocalResults(query, it.query(query), it) } ?: LocalResults("", emptyList()), index, query) {
+    val latestIsWatched by rememberUpdatedState(isWatched)
+    val local by produceState(
+        index?.let { LocalResults(query, it.answer(query, filter, isWatched), it, filter) } ?: LocalResults("", emptyList()), index, query, filter,
+    ) {
         val ready = index ?: return@produceState
-        if (value.query == query && value.index === ready) return@produceState
-        value = LocalResults(query, withContext(Dispatchers.Default) { ready.query(query) }, ready)
+        if (value.query == query && value.index === ready && value.filter == filter) return@produceState
+        value = LocalResults(query, withContext(Dispatchers.Default) { ready.answer(query, filter, latestIsWatched) }, ready, filter)
     }
     val results = local.movies
-    // The library's answer for the query on screen is known (not still being looked up).
-    val localDone = local.query == query
+    // The library's answer for the query and filter on screen is known (not still being looked up).
+    val localDone = local.query == query && local.filter == filter
     // A new query's answer starts at the top. The grid otherwise keeps the card it showed first in view (by key), and
     // when the library's answer comes in above cards already shown, that card ends up at the bottom of the results.
     // Coming back from a movie is not a new query: the grid stays where it was, on that movie's card.
-    var answered by remember { mutableStateOf(local.query) }
-    LaunchedEffect(local.query) {
-        if (local.query != answered) {
-            answered = local.query
+    var answered by remember { mutableStateOf(local.query to local.filter) }
+    LaunchedEffect(local.query, local.filter) {
+        if (local.query to local.filter != answered) {
+            answered = local.query to local.filter
             gridState.scrollToItem(0)
         }
     }
@@ -173,7 +189,8 @@ fun SearchScreen(
         withFrameNanos { }
         // An empty search starts in the text field. Coming back from a movie keeps the query, and focus goes back to
         // that movie's card (or the first result, or the field), so the remote is never left pointing at nothing.
-        if (query.isEmpty() || !(returnFocus.tryRequestFocus() || firstResultFocus.tryRequestFocus())) {
+        // (Films picked by a filter alone, with no text, are results like any others.)
+        if ((query.isEmpty() && !filter.active) || !(returnFocus.tryRequestFocus() || firstResultFocus.tryRequestFocus())) {
             fieldFocus.tryRequestFocus()
         }
     }
@@ -209,7 +226,8 @@ fun SearchScreen(
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             keyboard?.hide()
-                            focusManager.moveFocus(FocusDirection.Down)
+                            // Straight to the results, past the filters; with none yet, one step down.
+                            if (!firstResultFocus.tryRequestFocus()) focusManager.moveFocus(FocusDirection.Down)
                         }),
                         interactionSource = fieldInteraction,
                         modifier = Modifier
@@ -239,9 +257,18 @@ fun SearchScreen(
             }
         }
 
+        // "Clear filters" leaves the screen when pressed: the focus it held goes to the first filter.
+        val filterFocus = remember { FocusRequester() }
+        val clearFilters = {
+            filterFocus.tryRequestFocus()
+            onFilterChange(SearchFilter.NONE)
+        }
+        FilterRow(filter, onFilterChange, filterFocus, clearFilters)
+
         val status = when {
-            query.isBlank() -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
+            query.isBlank() && !filter.active -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
             results.isEmpty() && !localDone -> ""
+            results.isEmpty() && filter.active -> stringResource(R.string.search_no_filter_results)
             results.isEmpty() -> stringResource(R.string.search_no_results, query.trim())
             else -> stringResource(R.string.search_count, results.size)
         }
@@ -287,15 +314,27 @@ fun SearchScreen(
             }
             // Nothing in the library, and the web has nothing either (or is off): say so, and offer a way forward.
             val webDone = webSearch.query != query.trim() || !webSearch.loading
-            val webEmpty = webSearch.query != query.trim() || webSearch.results.isEmpty()
-            if (query.isNotBlank() && localDone && results.isEmpty() && webDone && webEmpty) {
+            // The web's results pass the same filter (a film from the web has no scare rating, so it fits no fear band).
+            val webResults = if (filter.active) webSearch.results.filter { filter.matches(it, isWatched(it)) } else webSearch.results
+            val webEmpty = webSearch.query != query.trim() || webResults.isEmpty()
+            if ((query.isNotBlank() || filter.active) && localDone && results.isEmpty() && webDone && webEmpty) {
                 item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
-                    EmptyState(
-                        title = stringResource(R.string.empty_search_title),
-                        body = stringResource(R.string.empty_search_body),
-                        actionLabel = stringResource(R.string.surprise_me),
-                        onAction = onSurprise,
-                    )
+                    if (filter.active) {
+                        // The filters are the likely reason: the way forward is to take them off.
+                        EmptyState(
+                            title = stringResource(R.string.search_no_filter_results),
+                            body = stringResource(R.string.search_filter_hint),
+                            actionLabel = stringResource(R.string.filter_clear),
+                            onAction = clearFilters,
+                        )
+                    } else {
+                        EmptyState(
+                            title = stringResource(R.string.empty_search_title),
+                            body = stringResource(R.string.empty_search_body),
+                            actionLabel = stringResource(R.string.surprise_me),
+                            onAction = onSurprise,
+                        )
+                    }
                 }
             }
             items(results, key = { it.id }) { movie ->
@@ -316,7 +355,7 @@ fun SearchScreen(
             // After the library's answer, never before it: cards are not inserted above the ones on screen.
             if (localDone && webSearch.query.isNotEmpty() && webSearch.query == query.trim()) {
                 val localIds = results.mapTo(HashSet()) { it.imdbId }
-                val web = webSearch.results.filter { it.imdbId !in localIds }
+                val web = webResults.filter { it.imdbId !in localIds }
                 item(span = { GridItemSpan(maxLineSpan) }, key = "web-header") {
                     WebHeader(webSearch, web.isEmpty())
                 }
@@ -371,7 +410,71 @@ private fun Context.canHandle(intent: Intent): Boolean {
 }
 
 /** The library's matches for [query], from [index]. */
-private class LocalResults(val query: String, val movies: List<Movie>, val index: Search.Index? = null)
+private class LocalResults(val query: String, val movies: List<Movie>, val index: Search.Index? = null, val filter: SearchFilter = SearchFilter.NONE)
+
+/** The library's answer: the text's matches, narrowed by the filter; with no text, what the filter alone picks. */
+private fun Search.Index.answer(query: String, filter: SearchFilter, isWatched: (Movie) -> Boolean): List<Movie> = when {
+    query.isBlank() -> if (filter.active) browse { filter.matches(it, isWatched(it)) } else emptyList()
+    filter.active -> query(query) { filter.matches(it, isWatched(it)) }
+    else -> query(query)
+}
+
+/** Number ranges ("1980–1989", "4–5") read left to right in every language. */
+private fun ltr(text: String): String = "\u2066$text\u2069"
+
+/**
+ * The filters, under the search field: OK on one moves it to its next value and back to "any". Each says its value in
+ * words, so nothing depends on colour; "Clear filters" shows once one is set.
+ */
+@Composable
+private fun FilterRow(filter: SearchFilter, onChange: (SearchFilter) -> Unit, firstFocus: FocusRequester, onClear: () -> Unit) {
+    val thisYear = remember { java.time.LocalDate.now().year }
+    Row(
+        modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = SidePadding).padding(top = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        ScaryButton(
+            text = stringResource(
+                when (filter.kind) {
+                    null -> R.string.filter_kind_all
+                    MediaKind.MOVIE -> R.string.filter_kind_films
+                    MediaKind.SERIES -> R.string.filter_kind_series
+                },
+            ),
+            onClick = { onChange(filter.nextKind()) },
+            modifier = Modifier.testTag(SEARCH_FILTER_KIND_TAG),
+            focusRequester = firstFocus,
+        )
+        ScaryButton(
+            text = when (val decade = filter.decade) {
+                null -> stringResource(R.string.filter_years_any)
+                SearchFilter.OLDER -> stringResource(R.string.filter_years_before, ltr(SearchFilter.OLDEST_DECADE.toString()))
+                else -> stringResource(R.string.filter_years, ltr("$decade–${decade + 9}"))
+            },
+            onClick = { onChange(filter.nextDecade(thisYear)) },
+            modifier = Modifier.testTag(SEARCH_FILTER_YEARS_TAG),
+        )
+        ScaryButton(
+            text = filter.fear?.let { stringResource(R.string.filter_fear, ltr(if (it.levels.first == it.levels.last) "${it.levels.first}" else "${it.levels.first}–${it.levels.last}")) }
+                ?: stringResource(R.string.filter_fear_any),
+            onClick = { onChange(filter.nextFear()) },
+            modifier = Modifier.testTag(SEARCH_FILTER_FEAR_TAG),
+        )
+        ScaryButton(
+            text = stringResource(if (filter.unwatchedOnly) R.string.filter_unwatched_on else R.string.filter_unwatched_off),
+            onClick = { onChange(filter.copy(unwatchedOnly = !filter.unwatchedOnly)) },
+            modifier = Modifier.testTag(SEARCH_FILTER_UNWATCHED_TAG),
+        )
+        if (filter.active) {
+            ScaryButton(
+                text = stringResource(R.string.filter_clear),
+                onClick = onClear,
+                modifier = Modifier.testTag(SEARCH_FILTER_CLEAR_TAG),
+            )
+        }
+    }
+}
 
 /**
  * The last search index built, for the catalog and language it was built from. One at a time: the catalog changes

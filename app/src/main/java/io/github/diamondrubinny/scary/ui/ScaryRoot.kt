@@ -154,6 +154,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val watchOptions by viewModel.watchOptions.collectAsStateWithLifecycle()
     val canSearchEverywhere by viewModel.canSearchEverywhere.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchFilter by viewModel.searchFilter.collectAsStateWithLifecycle()
     val pinDialog by viewModel.pinDialog.collectAsStateWithLifecycle()
     val launcherStatus by viewModel.launcherStatus.collectAsStateWithLifecycle()
     val tmdbKeyMask by viewModel.tmdbKeyMask.collectAsStateWithLifecycle()
@@ -161,6 +162,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val webSearch by viewModel.webSearch.collectAsStateWithLifecycle()
     val similarFor by viewModel.similar.collectAsStateWithLifecycle()
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
+    val franchise by viewModel.franchise.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
     val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
@@ -491,6 +493,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                         movies = state.movies,
                         query = searchQuery,
                         onQueryChange = viewModel::setSearchQuery,
+                        filter = searchFilter,
+                        onFilterChange = viewModel::setSearchFilter,
                         onOpenMovie = {
                             searchOpenedId = it.id
                             viewModel.openDetails(it.id)
@@ -587,6 +591,11 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onToggleNotForMe = { viewModel.toggleNotForMe(it, language) },
                     inBucket = details.movie.id in state.bucketIds,
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
+                    franchise = franchise?.takeIf { it.movieId == details.movie.id },
+                    onLoadFranchise = { viewModel.loadFranchise(it, language) },
+                    onFranchiseToBucket = { viewModel.addFranchiseToBucket(it, language) },
+                    reminded = details.movie.id in state.remindedIds,
+                    onToggleReminder = { viewModel.toggleReminder(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
                     aboutWeakLanguage = aiState.weakLanguage,
                     onAbout = { aiAssistant?.about(it) },

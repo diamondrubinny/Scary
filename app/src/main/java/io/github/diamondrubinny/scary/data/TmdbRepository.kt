@@ -223,6 +223,41 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         offers
     }
 
+    /** A film's series (TMDB "collection") by the film's TMDB id; a film that stands alone is kept as null. In memory only. */
+    private val franchises = object : LinkedHashMap<Long, OnlineFranchise?>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, OnlineFranchise?>) = size > FRANCHISES_KEPT
+    }
+
+    /** A series of films, each with its IMDb id, in the order they came out. */
+    data class OnlineFranchise(val name: String, val language: Language, val films: List<CinemetaMeta>)
+
+    /**
+     * The whole series a film belongs to ("Halloween", all thirteen, in order), in [language]. Asked for with the
+     * viewer's own key: the film's TMDB id, the series' id, and the IMDb id of each of its films TMDB has not told
+     * this TV before. Nothing about the viewer is sent. Null without a key, when the film stands alone, or when TMDB
+     * cannot be reached. Never throws.
+     */
+    suspend fun franchise(imdbId: String, language: Language): OnlineFranchise? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val tmdbId = tmdbIdOf(imdbId) ?: return@withContext null
+        synchronized(franchises) {
+            if (franchises.containsKey(tmdbId)) {
+                val kept = franchises[tmdbId]
+                if (kept == null || kept.language == language) return@withContext kept
+            }
+        }
+        val film = body(Tmdb.movieUrl(tmdbId), key) ?: return@withContext null
+        val collectionId = Tmdb.parseCollectionId(film)
+        val found = collectionId?.let { id -> body(Tmdb.collectionUrl(id, language), key)?.let(Tmdb::parseCollection) }
+        // The series' id was read but the series itself did not arrive: not remembered, so the next visit asks again.
+        if (collectionId != null && found == null) return@withContext null
+        val result = found?.let { OnlineFranchise(it.name, language, withImdbIds(it.parts, key, language)) }
+        // A film whose IMDb id did not arrive is missing from the series: what there is is shown, but not remembered,
+        // so the next visit asks for the rest. A film that stands alone is remembered as such.
+        if (found == null || result?.films?.size == found.parts.size) synchronized(franchises) { franchises[tmdbId] = result?.takeIf { it.films.size >= 2 } }
+        result?.takeIf { it.films.size >= 2 }
+    }
+
     private val languagesFile = File(context.filesDir, "origin_languages.json")
     private val languages = LinkedHashMap<Long, String>()
     private var languagesLoaded = false
@@ -422,6 +457,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val PARALLEL_REQUESTS = 4
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val PROVIDERS_KEPT = 40
+        const val FRANCHISES_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
         const val MAX_IDS = 20_000
         const val MAX_LANGUAGE_LOOKUPS = 300

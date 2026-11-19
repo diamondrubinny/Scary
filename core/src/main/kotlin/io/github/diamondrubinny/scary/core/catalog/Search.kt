@@ -65,17 +65,35 @@ object Search {
 
         val size: Int get() = entries.size
 
-        fun query(text: String, limit: Int = 60): List<Movie> {
+        /**
+         * The films that match [text], best first; [accept] narrows them (a [SearchFilter]) before the limit is
+         * taken, so a filter never hides matches behind ones it left out.
+         */
+        fun query(text: String, limit: Int = 60, accept: (Movie) -> Boolean = { true }): List<Movie> {
             val terms = terms(text)
             if (terms.isEmpty()) return emptyList()
             return entries.asSequence()
+                .filter { accept(it.movie) }
                 .mapNotNull { entry -> entry.score(terms)?.let { entry.movie to it } }
                 .sortedWith(compareByDescending<Pair<Movie, Int>> { it.second }.thenBy { it.first.title })
                 .map { it.first }
                 .take(limit)
                 .toList()
         }
+
+        /**
+         * With no text and a filter set, the filter alone picks: the films [accept] lets through, the best rated
+         * first (the library's hand-picked films before the rest, which often have no rating), then by title.
+         */
+        fun browse(limit: Int = BROWSE_LIMIT, accept: (Movie) -> Boolean): List<Movie> =
+            entries.asSequence().map { it.movie }.filter(accept)
+                .sortedWith(compareByDescending<Movie> { it.imdbRating ?: 0.0 }.thenByDescending { it.curated }.thenBy { it.title })
+                .take(limit)
+                .toList()
     }
+
+    /** As many as a remote can reasonably scroll through. */
+    const val BROWSE_LIMIT = 120
 
     private class Entry(
         val movie: Movie,
