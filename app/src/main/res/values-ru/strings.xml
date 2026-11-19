@@ -58,6 +58,14 @@
     <string name="value_effects_tv_off">Включено, но телевизор убирает анимацию</string>
     <string name="settings_refresh_films">Обновить фильмы сейчас</string>
     <string name="settings_origins">Арабские и индийские фильмы</string>
+    <string name="settings_home_rows">Ряды главного экрана</string>
+    <string name="home_rows_all">Все показаны</string>
+    <string name="home_rows_hidden_count">Скрыто: %1$d</string>
+    <string name="home_rows_note">Любой ряд главного экрана можно выключить. Выключенный ряд не строится, а его фильмы переходят в другие ряды. «Мои приложения» показываются всегда.</string>
+    <string name="home_rows_show_all">Показать все ряды</string>
+    <string name="value_row_shown">Показан</string>
+    <string name="value_row_hidden">Скрыт</string>
+    <string name="home_rows_because">Подборки по тому, что вам понравилось и что вы смотрели</string>
     <string name="value_origins_hidden">Скрыты</string>
     <string name="value_origins_shown">Показаны</string>
     <string name="settings_origins_note">Скрыты: этих фильмов нет ни в одном ряду (поиск их находит). Показаны: они вернутся после повторного чтения фильмов.</string>

@@ -58,6 +58,14 @@
     <string name="value_effects_tv_off">פעיל, אבל הטלוויזיה מסירה אנימציות</string>
     <string name="settings_refresh_films">רענון הסרטים עכשיו</string>
     <string name="settings_origins">סרטים ערביים והודיים</string>
+    <string name="settings_home_rows">שורות מסך הבית</string>
+    <string name="home_rows_all">הכול מוצג</string>
+    <string name="home_rows_hidden_count">מוסתרות: %1$d</string>
+    <string name="home_rows_note">אפשר לכבות כל שורה במסך הבית. שורה כבויה לא נבנית, והסרטים שלה עוברים לשורות האחרות. "האפליקציות שלי" מוצגת תמיד.</string>
+    <string name="home_rows_show_all">להציג את כל השורות</string>
+    <string name="value_row_shown">מוצגת</string>
+    <string name="value_row_hidden">מוסתרת</string>
+    <string name="home_rows_because">המלצות לפי מה שאהבתם וצפיתם</string>
     <string name="value_origins_hidden">מוסתרים</string>
     <string name="value_origins_shown">מוצגים</string>
     <string name="settings_origins_note">מוסתרים: הסרטים האלה לא מופיעים באף שורה (החיפוש עדיין מוצא אותם). מוצגים: הם חוזרים אחרי שהסרטים נקראים מחדש.</string>

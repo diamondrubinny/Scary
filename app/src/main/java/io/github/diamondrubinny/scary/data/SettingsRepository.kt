@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.core.links.Region
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import android.content.Context
@@ -68,6 +69,8 @@ data class LauncherPrefs(
     val hideWatched: Boolean = false,
     /** Arab and Indian films stay off the shelves (core OriginFilter); on unless the viewer chooses to show them. */
     val hideOrigins: Boolean = true,
+    /** Home screen rows the viewer turned off (core HomeRowChoices keys). */
+    val hiddenRows: Set<String> = emptySet(),
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
     /** Look for a new version of SCARY by itself (official builds only). */
@@ -137,6 +140,7 @@ class SettingsRepository(private val context: Context) {
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 hideOrigins = p[HIDE_ORIGINS] ?: true,
+                hiddenRows = HomeRowChoices.sanitize(p[HIDDEN_ROWS].orEmpty()),
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
                 autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
                 updateSkippedVersion = p[UPDATE_SKIPPED],
@@ -201,6 +205,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
 
     suspend fun setHideOrigins(enabled: Boolean) = edit { it[HIDE_ORIGINS] = enabled }
+
+    suspend fun setHiddenRows(keys: Set<String>) = edit { it[HIDDEN_ROWS] = HomeRowChoices.sanitize(keys) }
 
     suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
 
@@ -433,6 +439,7 @@ class SettingsRepository(private val context: Context) {
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val HIDE_ORIGINS = booleanPreferencesKey("hide_arab_indian")
+        private val HIDDEN_ROWS = stringSetPreferencesKey("hidden_home_rows")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
         private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")

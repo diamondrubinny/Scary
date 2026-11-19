@@ -58,3 +58,13 @@ Built in stages, the small ones first.
   - **Limits:** the 117 films taken out of the offline index stay out of it (search on the web still finds them); "Asian horror" still does not count India as Asia.
 - **Tests:** `SimilarTest`, `PlayerTracksTest`, `OriginFilterTest`; UI: the director row on a film's page, the colour button, the switch's row.
 - **Not checked on a real TV.**
+
+## Stage 2, built: choose the home screen's rows (19.11.2026), version 0.5.19
+- **Settings → Rows and taste → Home screen rows** opens a list of every row of the home screen, each "Shown" or "Hidden"; OK on a row turns it the other way. The list holds the fixed rows (Continue watching, Continue in Stremio, Recently opened, My list, the suggestions from what the viewer loved and watched, Moods, "How much time do you have?") and every row the catalog holds now, films' and series'.
+- **A row turned off is not built at all:** its films are free for the other rows (the "no repeats" rule gives them to the next row that fits), and the home screen is shorter, which also means less to draw on a weak TV.
+- **"My apps" and the hero are not in the list:** a launcher without its apps row leaves the viewer with no way out to other apps.
+- **"Show all the rows"** appears once a row is off, and also clears rows that were turned off and no longer exist in the catalog.
+- **Stored on this TV only** (`hidden_home_rows`, at most 300 keys, each checked against a strict pattern before it is kept). Nothing is sent anywhere. Not behind the PIN: it hides rows, it does not unlock anything; family night and the content lock apply as before, whatever is shown.
+- **Accessibility:** each row reads "<row name>: Shown" or "…: Hidden"; the state is words, never colour alone; arrows and OK only; RTL follows the app.
+- **Files:** core `catalog/HomeRowChoices.kt` (+ `RowsTest`); app `SettingsRepository` (`hiddenRows`), `HomeViewModel` (`buildState` gating, `rowChoices`, `toggleHomeRow`), `ui/settings/HomeRowsScreen.kt`, `SettingsScreen` (the row), `ScaryRoot` (the screen, focus back on the row), strings in 5 languages, `ScaryUiTest.aHomeRowIsTurnedOffAndBackOn`.
+- **Limit:** rows are turned off by their kind or their collection id. A collection whose id changes in a later catalog shows again (the old key is simply never matched).

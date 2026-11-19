@@ -59,6 +59,14 @@
     <string name="value_effects_tv_off">On, but the TV removes animations</string>
     <string name="settings_refresh_films">Refresh films now</string>
     <string name="settings_origins">Arab and Indian films</string>
+    <string name="settings_home_rows">Home screen rows</string>
+    <string name="home_rows_all">All shown</string>
+    <string name="home_rows_hidden_count">Hidden: %1$d</string>
+    <string name="home_rows_note">Each row of the home screen can be turned off. A row turned off is not built, and its films go to the other rows. "My apps" always shows.</string>
+    <string name="home_rows_show_all">Show all the rows</string>
+    <string name="value_row_shown">Shown</string>
+    <string name="value_row_hidden">Hidden</string>
+    <string name="home_rows_because">Suggestions from what you loved and watched</string>
     <string name="value_origins_hidden">Hidden</string>
     <string name="value_origins_shown">Shown</string>
     <string name="settings_origins_note">Hidden: these films are in no row (search still finds them). Shown: they come back after the films are read again.</string>

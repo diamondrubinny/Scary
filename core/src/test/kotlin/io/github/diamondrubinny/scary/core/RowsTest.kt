@@ -106,4 +106,19 @@ class RowsTest {
         assertEquals(EndlessCursor.FIRST_YEAR, CategoryPaging.page(MediaKind.MOVIE, c, year)!!.year)
         assertFalse(CategoryPaging.POOL.isEmpty())
     }
+
+    @Test
+    fun `rows the viewer turned off are kept by key, and only well-formed keys`() {
+        val choices = io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
+        var hidden = choices.toggled(emptySet(), choices.MOODS)
+        hidden = choices.toggled(hidden, choices.collectionKey("online_horror_popular"))
+        assertEquals(setOf("moods", "c:online_horror_popular"), hidden)
+        // A second press turns it back on.
+        assertEquals(setOf("c:online_horror_popular"), choices.toggled(hidden, choices.MOODS))
+        // Damaged storage: odd keys are dropped, and the list has an end.
+        assertEquals(setOf("time"), choices.sanitize(listOf("time", "", "bad key!", "x".repeat(200))))
+        assertEquals(choices.MAX, choices.sanitize((1..500).map { "c:row$it" }).size)
+        // "My apps" has no key: it cannot be turned off.
+        assertFalse("apps" in choices.FIXED)
+    }
 }

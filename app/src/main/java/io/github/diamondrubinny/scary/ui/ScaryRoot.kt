@@ -106,6 +106,7 @@ import io.github.diamondrubinny.scary.ui.settings.CountryPicker
 import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
 import io.github.diamondrubinny.scary.ui.settings.LanguageDialog
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
+import io.github.diamondrubinny.scary.ui.settings.HomeRowsScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.settings.TmdbAccountActions
 import io.github.diamondrubinny.scary.ui.settings.TmdbAccountScreen
@@ -305,6 +306,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     var fromStats by remember { mutableStateOf(false) }
     var fromRemote by remember { mutableStateOf(false) }
     var fromTaste by remember { mutableStateOf(false) }
+    var fromRows by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
         if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote &&
             screen != Screen.TastePicker
@@ -313,6 +315,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = false
             fromRemote = false
             fromTaste = false
+            fromRows = false
         }
     }
     val settingsActions = SettingsActions(
@@ -338,6 +341,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = true
             fromRemote = false
             fromTaste = false
+            fromRows = false
             viewModel.openStats()
         },
         onOpenPhoneRemote = {
@@ -345,6 +349,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = false
             fromRemote = true
             fromTaste = false
+            fromRows = false
             viewModel.openPhoneRemote()
         },
         onOpenTastePicker = {
@@ -352,7 +357,16 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = false
             fromRemote = false
             fromTaste = true
+            fromRows = false
             viewModel.openTastePicker()
+        },
+        onOpenHomeRows = {
+            lastDocument = null
+            fromStats = false
+            fromRemote = false
+            fromTaste = false
+            fromRows = true
+            viewModel.openHomeRows()
         },
         onClearRecent = viewModel::clearRecent,
         onToggleAi = { viewModel.setAiEnabled(!state.aiEnabled) },
@@ -399,6 +413,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = false
             fromRemote = false
             fromTaste = false
+            fromRows = false
             viewModel.openDocument(DocumentKind.Privacy)
         },
         onOpenAccessibilityStatement = {
@@ -406,6 +421,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             fromStats = false
             fromRemote = false
             fromTaste = false
+            fromRows = false
             viewModel.openDocument(DocumentKind.Accessibility)
         },
     )
@@ -528,6 +544,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     lovedCount = state.lovedIds.size,
                     recentCount = state.recentCount,
                     returningFromTaste = fromTaste,
+                    returningFromRows = fromRows,
+                    hiddenRowCount = state.hiddenRows.size,
                     updateState = updateState,
                     autoUpdateCheck = state.autoUpdateCheck,
                     ai = AiSettingsState(
@@ -666,6 +684,14 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onOpenSettings = viewModel::openSettings,
                         )
                     },
+                )
+                current == Screen.HomeRows -> HomeRowsScreen(
+                    // Asked again whenever a row is turned, or the catalog's rows change.
+                    choices = remember(state.hiddenRows, state.rows.size) { viewModel.rowChoices(state.hiddenRows) },
+                    hiddenCount = state.hiddenRows.size,
+                    language = language,
+                    onToggle = viewModel::toggleHomeRow,
+                    onShowAll = { viewModel.toggleHomeRow(null) },
                 )
                 current == Screen.TastePicker -> TastePickerScreen(
                     // A new function whenever what the posters come from changes, so the screen picks them again (not at each pick).

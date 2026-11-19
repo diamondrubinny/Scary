@@ -59,6 +59,14 @@
     <string name="value_effects_tv_off">مفعّل، لكن التلفزيون يزيل الحركات</string>
     <string name="settings_refresh_films">تحديث الأفلام الآن</string>
     <string name="settings_origins">الأفلام العربية والهندية</string>
+    <string name="settings_home_rows">صفوف الشاشة الرئيسية</string>
+    <string name="home_rows_all">الكل ظاهر</string>
+    <string name="home_rows_hidden_count">مخفية: %1$d</string>
+    <string name="home_rows_note">يمكن إيقاف أي صف في الشاشة الرئيسية. الصف الموقوف لا يُبنى، وتنتقل أفلامه إلى الصفوف الأخرى. «تطبيقاتي» يظهر دائمًا.</string>
+    <string name="home_rows_show_all">إظهار كل الصفوف</string>
+    <string name="value_row_shown">ظاهر</string>
+    <string name="value_row_hidden">مخفي</string>
+    <string name="home_rows_because">اقتراحات مما أحببته وشاهدته</string>
     <string name="value_origins_hidden">مخفية</string>
     <string name="value_origins_shown">ظاهرة</string>
     <string name="settings_origins_note">مخفية: لا تظهر هذه الأفلام في أي صف (البحث ما زال يجدها). ظاهرة: تعود بعد قراءة الأفلام من جديد.</string>

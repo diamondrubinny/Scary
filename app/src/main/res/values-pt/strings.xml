@@ -58,6 +58,14 @@
     <string name="value_effects_tv_off">Ligado, mas a TV remove as animações</string>
     <string name="settings_refresh_films">Atualizar os filmes agora</string>
     <string name="settings_origins">Filmes árabes e indianos</string>
+    <string name="settings_home_rows">Fileiras da tela inicial</string>
+    <string name="home_rows_all">Todas visíveis</string>
+    <string name="home_rows_hidden_count">Ocultas: %1$d</string>
+    <string name="home_rows_note">Cada fileira da tela inicial pode ser desligada. Uma fileira desligada não é montada, e os filmes dela vão para as outras. "Meus apps" aparece sempre.</string>
+    <string name="home_rows_show_all">Mostrar todas as fileiras</string>
+    <string name="value_row_shown">Visível</string>
+    <string name="value_row_hidden">Oculta</string>
+    <string name="home_rows_because">Sugestões pelo que você adorou e assistiu</string>
     <string name="value_origins_hidden">Ocultos</string>
     <string name="value_origins_shown">Visíveis</string>
     <string name="settings_origins_note">Ocultos: esses filmes não aparecem em nenhuma fileira (a busca ainda os encontra). Visíveis: voltam depois que os filmes forem lidos de novo.</string>

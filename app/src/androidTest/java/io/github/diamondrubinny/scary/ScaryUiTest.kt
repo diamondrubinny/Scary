@@ -44,6 +44,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -60,6 +61,11 @@ import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
 import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
 import io.github.diamondrubinny.scary.ui.details.BY_DIRECTOR_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.ORIGINS_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SCREEN_TAG
+import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SHOW_ALL_TAG
+import io.github.diamondrubinny.scary.ui.settings.homeRowChoiceTag
+import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.settings.REFRESH_FILMS_ROW_TAG
@@ -336,6 +342,33 @@ class ScaryUiTest {
         waitFor(hasTestTag(ORIGINS_ROW_TAG))
         rule.onNode(hasTestTag(ORIGINS_ROW_TAG)).performScrollTo().assertExists()
         rule.onNode(hasText(text(R.string.value_origins_hidden))).assertExists()
+        backToHome()
+    }
+
+    /** Settings → Home screen rows: a row turned off leaves the home screen, and "Show all the rows" brings it back. */
+    @Test
+    fun aHomeRowIsTurnedOffAndBackOn() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitFor(hasTestTag(HOME_ROWS_ROW_TAG))
+        rule.onNode(hasTestTag(HOME_ROWS_ROW_TAG)).performScrollTo().performClick()
+        waitFor(hasTestTag(HOME_ROWS_SCREEN_TAG))
+        val moods = hasTestTag(homeRowChoiceTag(HomeRowChoices.MOODS))
+        rule.onNode(hasTestTag(HOME_ROWS_SCREEN_TAG)).performScrollToNode(moods)
+        waitFor(moods and hasContentDescription(text(R.string.value_row_shown), substring = true))
+        rule.onNode(moods).performClick()
+        waitFor(moods and hasContentDescription(text(R.string.value_row_hidden), substring = true))
+        backToHome()
+        waitForGone(hasText(text(R.string.row_moods)))
+
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        // Settings say how many rows are off.
+        waitFor(hasTestTag(HOME_ROWS_ROW_TAG) and hasContentDescription(rule.activity.getString(R.string.home_rows_hidden_count, 1), substring = true))
+        rule.onNode(hasTestTag(HOME_ROWS_ROW_TAG)).performScrollTo().performClick()
+        waitFor(hasTestTag(HOME_ROWS_SCREEN_TAG))
+        rule.onNode(hasTestTag(HOME_ROWS_SCREEN_TAG)).performScrollToNode(hasTestTag(HOME_ROWS_SHOW_ALL_TAG))
+        rule.onNode(hasTestTag(HOME_ROWS_SHOW_ALL_TAG)).performClick()
+        waitForGone(hasTestTag(HOME_ROWS_SHOW_ALL_TAG))
         backToHome()
     }
 
