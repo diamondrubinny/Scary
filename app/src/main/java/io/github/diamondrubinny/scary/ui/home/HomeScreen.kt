@@ -602,7 +602,8 @@ private fun HomeRowView(
     }
     Column {
         Row(
-            modifier = Modifier.padding(horizontal = SidePadding),
+            // A little air above: the focus outline of the buttons over the first row is drawn outside them.
+            modifier = Modifier.padding(horizontal = SidePadding).padding(top = 6.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {

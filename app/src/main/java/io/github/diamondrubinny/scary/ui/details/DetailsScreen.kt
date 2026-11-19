@@ -577,7 +577,7 @@ private fun WatchElsewhere(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.padding(top = 4.dp)) {
         BasicText(
             stringResource(R.string.watch_elsewhere),
-            style = ScaryType.Eyebrow,
+            style = ScaryType.RowTitle,
             modifier = Modifier.semantics { heading() },
         )
         LazyRow(

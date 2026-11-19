@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -86,7 +87,9 @@ fun DonateMini(modifier: Modifier = Modifier) {
             size = MINI_QR_SIZE,
             description = stringResource(R.string.donate_qr_description),
         )
-        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption)
+        // Two lines at most, in a narrow column: a long sentence (Russian) must not widen the logo's side and push the
+        // top bar's words off the screen.
+        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption, maxLines = 2, modifier = Modifier.widthIn(max = 120.dp))
     }
 }
 

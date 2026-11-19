@@ -64,7 +64,7 @@ fun RentOrBuy(
         }
         BasicText(
             text = if (country != null) stringResource(R.string.rent_buy_title, country) else stringResource(R.string.rent_buy_title_plain),
-            style = ScaryType.Eyebrow,
+            style = ScaryType.RowTitle,
             modifier = Modifier.semantics { heading() },
         )
         when (state) {

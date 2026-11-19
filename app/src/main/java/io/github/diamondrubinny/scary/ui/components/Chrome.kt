@@ -68,6 +68,7 @@ import kotlinx.coroutines.delay
 /** Test tag of the top bar's "Ask SCARY ✦" button. */
 const val ASK_BUTTON_TAG = "askButton"
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TopBar(
     onOpenSettings: () -> Unit,
@@ -117,13 +118,21 @@ fun TopBar(
                     .padding(horizontal = 14.dp, vertical = 5.dp),
             )
         }
-        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 28.dp))
-        Spacer(Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 20.dp))
+        // The words take the room that is left and wrap to a second line when a language's words are long (Russian,
+        // Portuguese) or the text is enlarged: none is ever pushed off the bar, and the clock is never squeezed. The
+        // logo's side is three lines tall anyway, so a second line costs no height.
+        FlowRow(
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
-            Spacer(Modifier.width(10.dp))
-            if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
-            Clock()
+            Row(Modifier.padding(start = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
+                Clock()
+            }
         }
     }
 }
@@ -227,7 +236,7 @@ internal fun NavWord(
         contentDescription = description,
     ) { focused ->
         Column(
-            modifier = Modifier.align(Alignment.Center).padding(horizontal = 9.dp, vertical = 5.dp),
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = 8.dp, vertical = 5.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicText(
@@ -259,7 +268,8 @@ fun Clock(modifier: Modifier = Modifier) {
             delay(MILLIS_PER_MINUTE - System.currentTimeMillis() % MILLIS_PER_MINUTE)
         }
     }
-    BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier)
+    // One line always: a clock squeezed for room must not fall apart into a column of digits.
+    BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier, maxLines = 1, softWrap = false)
 }
 
 /** The sleep timer at a glance: a moon and the minutes left. Not focusable; its words are read with the top bar. */
