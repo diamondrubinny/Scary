@@ -100,7 +100,7 @@ fun StatsScreen(language: Language, load: suspend () -> Pair<FearStats, FearStat
 private fun StatsCard(title: String, stats: FearStats, language: Language, modifier: Modifier = Modifier) {
     val interaction = remember { MutableInteractionSource() }
     val focused by interaction.collectIsFocusedAsState()
-    val shape = RoundedCornerShape(10.dp)
+    val shape = RoundedCornerShape(4.dp)
     Column(
         modifier
             .fillMaxWidth()

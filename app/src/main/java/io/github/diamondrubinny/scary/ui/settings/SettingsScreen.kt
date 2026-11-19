@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.settings
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -713,14 +716,15 @@ internal fun SettingRow(
     modifier: Modifier = Modifier,
     trailing: (@Composable () -> Unit)? = null,
 ) {
+    // Noir: a setting is a line of words, parted from the next by a hairline; no box. The focus is the outline.
     FocusSurface(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
-        focusedScale = 1.02f,
-        containerColor = ScaryColors.Crypt,
-        focusedContainerColor = ScaryColors.Crypt,
-        borderColor = ScaryColors.Bone.copy(alpha = 0.1f),
+        modifier = modifier.fillMaxWidth().drawBehind {
+            drawLine(ScaryColors.Line, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+        },
+        shape = RoundedCornerShape(3.dp),
+        focusedScale = 1.01f,
+        containerColor = Color.Transparent,
         contentDescription = if (value != null) "$label: $value" else label,
     ) {
         Row(

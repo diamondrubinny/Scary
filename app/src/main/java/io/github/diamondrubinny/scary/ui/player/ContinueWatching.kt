@@ -141,8 +141,8 @@ fun ResumeDialog(choice: ResumeChoice, onContinue: () -> Unit, onFromStart: () -
         Column(
             modifier = Modifier
                 .dialogWidth(560.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .testTag(RESUME_DIALOG_TAG),

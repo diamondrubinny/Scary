@@ -314,7 +314,7 @@ fun DetailsScreen(
                         if (about is AiTask.Done) {
                             Column(
                                 Modifier
-                                    .background(ScaryColors.Crypt.copy(alpha = 0.85f), RoundedCornerShape(10.dp))
+                                    .background(ScaryColors.Crypt.copy(alpha = 0.85f), RoundedCornerShape(4.dp))
                                     .padding(16.dp)
                                     .testTag(AI_ABOUT_TEXT_TAG),
                                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -354,7 +354,7 @@ fun DetailsScreen(
                         Box(
                             Modifier
                                 .size(width = 150.dp, height = 225.dp)
-                                .clip(RoundedCornerShape(8.dp)),
+                                .clip(RoundedCornerShape(4.dp)),
                         ) {
                             PosterArt(movie, Modifier.fillMaxSize())
                             // A locked movie's art stays hidden, as on its card: the session may have locked again since it opened.
@@ -646,7 +646,7 @@ private fun RealDebridChooser(
         Column(
             modifier = Modifier
                 .dialogWidth(640.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
                 .padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -690,7 +690,7 @@ private fun EpisodePicker(
         Column(
             modifier = Modifier
                 .dialogWidth(640.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
                 .padding(22.dp)
                 .testTag(EPISODE_PICKER_TAG),
             verticalArrangement = Arrangement.spacedBy(10.dp),

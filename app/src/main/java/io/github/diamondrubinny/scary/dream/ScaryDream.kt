@@ -226,9 +226,9 @@ class ScaryDream : DreamService() {
         title = TextView(this).apply {
             typeface = font(
                 when (language) {
-                    Language.RU -> R.font.oswald_semibold
-                    Language.AR -> R.font.rakkas_regular
-                    else -> R.font.karantina_bold
+                    // The same title faces as the app (ScaryFonts): Rubik, and Cairo for Arabic.
+                    Language.AR -> R.font.cairo_bold
+                    else -> R.font.rubik_bold
                 },
             )
             setTextSize(TypedValue.COMPLEX_UNIT_SP, 64f)

@@ -101,7 +101,7 @@ fun QrImage(code: QrCode, size: Dp, description: String, modifier: Modifier = Mo
     Canvas(
         modifier
             .size(size)
-            .background(Color.White, RoundedCornerShape(6.dp))
+            .background(Color.White, RoundedCornerShape(4.dp))
             .semantics { contentDescription = description },
     ) {
         val modules = code.size + 2 * QrCode.QUIET_ZONE

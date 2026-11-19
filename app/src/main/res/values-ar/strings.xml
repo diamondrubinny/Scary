@@ -30,8 +30,6 @@
     <string name="subgenre_survival">نجاة</string>
     <string name="subgenre_mystery">غموض</string>
     <string name="subgenre_crime">جريمة</string>
-    <string name="effects_on_description">مؤثرات الأجواء: مفعّلة</string>
-    <string name="effects_off_description">مؤثرات الأجواء: متوقفة</string>
     <string name="msg_effects_on">تم تشغيل الضباب وحبيبات الفيلم</string>
     <string name="msg_effects_off">تم إيقاف الضباب وحبيبات الفيلم</string>
     <string name="msg_safe_mode">أُعيد تشغيل SCARY بعد أخطاء متكررة. المؤثرات والأصوات متوقفة مؤقتًا، وستعود عند التشغيل العادي التالي.</string>
@@ -380,6 +378,11 @@
     <string name="stats_loved">أفلام محبوبة</string>
     <string name="tab_movies">أفلام</string>
     <string name="tab_series">مسلسلات</string>
+    <string name="nav_search">بحث</string>
+    <string name="nav_surprise">مفاجأة</string>
+    <string name="nav_ask">اسأل ✦</string>
+    <string name="nav_settings">الإعدادات</string>
+    <string name="nav_bucket_count">Bucket list (%1$d)</string>
     <string name="series_tag">مسلسل</string>
     <string name="minutes_episode">%1$d دقيقة للحلقة</string>
     <string name="bucket_title">Bucket list</string>

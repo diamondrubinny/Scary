@@ -128,8 +128,8 @@ fun TrackPicker(state: TrackPickerState, actions: TrackPickerActions, focusReque
     Column(
         modifier
             .widthIn(max = 560.dp)
-            .background(ScaryColors.Crypt.copy(alpha = 0.96f), RoundedCornerShape(12.dp))
-            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+            .background(ScaryColors.Crypt.copy(alpha = 0.96f), RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
             .padding(20.dp)
             .verticalScroll(rememberScrollState())
             .testTag(PLAYER_TRACKS_TAG),
@@ -285,7 +285,7 @@ private fun TrackRow(title: String, details: String, selected: Boolean, enabled:
             .fillMaxWidth()
             .alpha(if (enabled) 1f else 0.5f)
             .semantics { this.selected = selected },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(4.dp),
         focusedScale = 1.02f,
         containerColor = if (selected) ScaryColors.Void else ScaryColors.Void.copy(alpha = 0.5f),
         focusedContainerColor = ScaryColors.Bone,

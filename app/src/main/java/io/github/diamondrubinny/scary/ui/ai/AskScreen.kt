@@ -316,7 +316,7 @@ private fun Bubble(turn: AiMessage) {
             style = ScaryType.Body.copy(color = if (mine) ScaryColors.Bone else ScaryColors.Void).mixedLanguage(),
             modifier = Modifier
                 .widthIn(max = 720.dp)
-                .background(if (mine) ScaryColors.Crypt else ScaryColors.Bone, RoundedCornerShape(12.dp))
+                .background(if (mine) ScaryColors.Crypt else ScaryColors.Bone, RoundedCornerShape(4.dp))
                 .padding(horizontal = 16.dp, vertical = 10.dp)
                 .semantics { if (!mine) liveRegion = LiveRegionMode.Polite }
                 // Focusable, so the remote can walk up a long conversation and the list scrolls with it.

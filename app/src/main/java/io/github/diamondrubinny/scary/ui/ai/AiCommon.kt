@@ -179,8 +179,8 @@ fun AiInput(
         Box(
             Modifier
                 .weight(1f)
-                .background(ScaryColors.Crypt, RoundedCornerShape(10.dp))
-                .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
                 .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             if (value.isEmpty()) BasicText(hint, style = ScaryType.Body.copy(color = ScaryColors.Ash), maxLines = 1)

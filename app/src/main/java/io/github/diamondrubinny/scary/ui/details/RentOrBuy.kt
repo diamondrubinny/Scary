@@ -135,7 +135,7 @@ private fun OfferCard(offer: ProviderOffer, onOffer: (ProviderOffer) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
         ) {
-            Box(Modifier.size(32.dp).clip(RoundedCornerShape(6.dp)).background(ScaryColors.Crypt)) {
+            Box(Modifier.size(32.dp).clip(RoundedCornerShape(4.dp)).background(ScaryColors.Crypt)) {
                 offer.provider.logoUrl?.let { logo ->
                     // The name is always written beside it; the logo only helps recognise the store.
                     AsyncImage(model = logo, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(32.dp))
@@ -158,13 +158,13 @@ private fun OfferCard(offer: ProviderOffer, onOffer: (ProviderOffer) -> Unit) {
         // Nothing to open on this TV: not a button, so the remote never lands on a press that does nothing.
         Box(
             Modifier
-                .background(ScaryColors.Void.copy(alpha = 0.4f), RoundedCornerShape(6.dp))
+                .background(ScaryColors.Void.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                 .semantics(mergeDescendants = true) { contentDescription = description },
         ) { content(false) }
     } else {
         FocusSurface(
             onClick = { onOffer(offer) },
-            shape = RoundedCornerShape(6.dp),
+            shape = RoundedCornerShape(4.dp),
             focusedScale = 1.06f,
             containerColor = ScaryColors.Void.copy(alpha = 0.6f),
             focusedContainerColor = ScaryColors.Bone,

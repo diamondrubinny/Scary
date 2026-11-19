@@ -197,7 +197,7 @@ private fun BucketRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ScaryColors.Crypt.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
+            .background(ScaryColors.Crypt.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
             .padding(horizontal = 16.dp, vertical = 10.dp)
             .testTag(bucketItemTag(id)),
         verticalAlignment = Alignment.CenterVertically,
@@ -274,8 +274,8 @@ fun BucketPromptDialog(
         Column(
             modifier = Modifier
                 .dialogWidth(600.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .testTag(BUCKET_PROMPT_TAG),

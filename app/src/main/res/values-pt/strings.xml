@@ -29,8 +29,6 @@
     <string name="subgenre_survival">Sobrevivência</string>
     <string name="subgenre_mystery">Mistério</string>
     <string name="subgenre_crime">Crime</string>
-    <string name="effects_on_description">Efeitos de atmosfera: ligados</string>
-    <string name="effects_off_description">Efeitos de atmosfera: desligados</string>
     <string name="msg_effects_on">Névoa e granulação ligadas</string>
     <string name="msg_effects_off">Névoa e granulação desligadas</string>
     <string name="msg_safe_mode">O SCARY reiniciou após erros repetidos. Efeitos e sons estão desligados por enquanto e voltam na próxima vez que o SCARY iniciar normalmente.</string>
@@ -370,6 +368,11 @@
     <string name="stats_loved">Filmes amados</string>
     <string name="tab_movies">Filmes</string>
     <string name="tab_series">Séries</string>
+    <string name="nav_search">Buscar</string>
+    <string name="nav_surprise">Surpresa</string>
+    <string name="nav_ask">Perguntar ✦</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="nav_bucket_count">Bucket list (%1$d)</string>
     <string name="series_tag">Série</string>
     <string name="minutes_episode">%1$d min por episódio</string>
     <string name="bucket_title">Bucket list</string>

@@ -95,7 +95,7 @@ fun DocumentScreen(kind: DocumentKind) {
 private fun Paragraph(text: String, modifier: Modifier = Modifier, mixed: Boolean = false) {
     val interactionSource = remember { MutableInteractionSource() }
     val focused by interactionSource.collectIsFocusedAsState()
-    val shape = RoundedCornerShape(8.dp)
+    val shape = RoundedCornerShape(4.dp)
     Box(
         modifier
             .fillMaxWidth()

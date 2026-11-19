@@ -236,7 +236,7 @@ private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Un
         onClick = onClick,
         onLongClick = onLongClick,
         modifier = Modifier.fillMaxWidth().then(if (film != null) Modifier.testTag(filmTag(film.id)) else Modifier),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(4.dp),
         focusedScale = 1.02f,
         containerColor = ScaryColors.Crypt,
         focusedContainerColor = ScaryColors.Bone,
@@ -287,7 +287,7 @@ private fun FilmChooser(file: RealDebrid.RdFile, current: Movie?, actions: RealD
         Column(
             modifier = Modifier
                 .widthIn(max = 640.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
                 .padding(22.dp)
                 .testTag(REAL_DEBRID_FILM_TAG),
             verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -327,7 +327,7 @@ private fun HistoryRow(entry: WatchEntry, onClick: () -> Unit) {
     FocusSurface(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(4.dp),
         focusedScale = 1.02f,
         containerColor = ScaryColors.Crypt,
         focusedContainerColor = ScaryColors.Bone,

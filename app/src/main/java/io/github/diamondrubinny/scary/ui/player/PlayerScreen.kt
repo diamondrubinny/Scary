@@ -692,7 +692,7 @@ fun PlayerScreen(
                         start = 48.dp,
                         end = 48.dp,
                     )
-                    .then(if (subtitleLook.background) Modifier.background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp)) else Modifier)
+                    .then(if (subtitleLook.background) Modifier.background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(4.dp)) else Modifier)
                     .padding(horizontal = 12.dp, vertical = 4.dp)
                     .testTag(PLAYER_SUBTITLE_TAG),
             )
@@ -718,7 +718,7 @@ fun PlayerScreen(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .padding(top = 32.dp)
-                    .background(ScaryColors.Candle, RoundedCornerShape(8.dp))
+                    .background(ScaryColors.Candle, RoundedCornerShape(4.dp))
                     .padding(horizontal = 18.dp, vertical = 10.dp)
                     .testTag(PLAYER_TOAST_TAG)
                     .semantics { liveRegion = LiveRegionMode.Polite },
@@ -1025,10 +1025,10 @@ private fun SeekBar(position: Long, duration: Long, bookmarks: List<Bookmark>, o
                 Modifier
                     .fillMaxWidth()
                     .height(if (focused) 10.dp else 6.dp)
-                    .background(Color.White.copy(alpha = 0.25f), RoundedCornerShape(5.dp))
-                    .then(if (focused) Modifier.border(2.dp, ScaryColors.Candle, RoundedCornerShape(5.dp)) else Modifier),
+                    .background(Color.White.copy(alpha = 0.25f), RoundedCornerShape(4.dp))
+                    .then(if (focused) Modifier.border(2.dp, ScaryColors.Candle, RoundedCornerShape(4.dp)) else Modifier),
             ) {
-                Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(ScaryColors.Blood, RoundedCornerShape(5.dp)))
+                Box(Modifier.fillMaxWidth(fraction).fillMaxHeight().background(ScaryColors.Blood, RoundedCornerShape(4.dp)))
             }
             // The marked spots, as small ticks along the bar.
             if (duration > 0) {
@@ -1058,8 +1058,8 @@ private fun BookmarkPanel(
     Column(
         modifier
             .widthIn(max = 460.dp)
-            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(12.dp))
-            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
             .padding(20.dp)
             .verticalScroll(rememberScrollState())
             .testTag(PLAYER_BOOKMARK_LIST_TAG),
@@ -1073,7 +1073,7 @@ private fun BookmarkPanel(
                 FocusSurface(
                     onClick = { onJump(mark.positionMs) },
                     modifier = (if (index == 0) Modifier.focusRequester(focusRequester) else Modifier).weight(1f),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(4.dp),
                     focusedScale = 1.03f,
                     containerColor = ScaryColors.Void,
                     focusedContainerColor = ScaryColors.Bone,
@@ -1109,8 +1109,8 @@ private fun NextFileCard(
     Column(
         modifier
             .widthIn(max = 520.dp)
-            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(12.dp))
-            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -1250,8 +1250,8 @@ private fun NoSoundCard(format: String?, canConvert: Boolean, onConvert: () -> U
     Column(
         modifier
             .widthIn(max = 620.dp)
-            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(12.dp))
-            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+            .background(ScaryColors.Crypt.copy(alpha = 0.95f), RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.6f), RoundedCornerShape(4.dp))
             .padding(20.dp)
             .testTag(PLAYER_NO_SOUND_TAG),
         verticalArrangement = Arrangement.spacedBy(12.dp),

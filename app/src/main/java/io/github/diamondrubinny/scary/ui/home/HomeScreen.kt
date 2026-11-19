@@ -234,8 +234,6 @@ fun HomeScreen(
 
     Column(Modifier.fillMaxSize()) {
         TopBar(
-            effectsEnabled = state.effectsEnabled,
-            onToggleEffects = actions.onToggleEffects,
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
@@ -801,7 +799,7 @@ fun LoadingView(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SkeletonBlock(modifier: Modifier) {
-    Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(6.dp)))
+    Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(4.dp)))
 }
 
 /** Cards from the end of a row at which its next page starts loading. */
@@ -1106,16 +1104,16 @@ internal fun MoodChip(
         onFocusChanged = { if (it) onFocused() },
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .semantics { this.selected = selected },
-        shape = RoundedCornerShape(50),
-        focusedScale = 1.06f,
-        containerColor = if (selected) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.6f),
-        focusedContainerColor = ScaryColors.Bone,
-        borderColor = if (selected) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
-        focusedBorderColor = ScaryColors.Candle,
+        // Noir: a chip is a word in a hairline frame. The chosen one has a bone frame and bone words (and says so to
+        // TalkBack); the focus is the outline, as everywhere.
+        shape = RoundedCornerShape(4.dp),
+        focusedScale = 1.04f,
+        containerColor = Color.Transparent,
+        borderColor = if (selected) ScaryColors.Bone else ScaryColors.Line,
     ) { focused ->
         BasicText(
             text = label,
-            style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+            style = ScaryType.Label.copy(color = if (focused || selected) ScaryColors.Bone else ScaryColors.Ash),
             maxLines = 1,
             modifier = Modifier
                 .align(Alignment.Center)
@@ -1152,7 +1150,7 @@ private fun ContinueMenu(
         Column(
             modifier = Modifier
                 .widthIn(max = 560.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
                 .padding(22.dp)
                 .testTag(CONTINUE_MENU_TAG),
             verticalArrangement = Arrangement.spacedBy(10.dp),
