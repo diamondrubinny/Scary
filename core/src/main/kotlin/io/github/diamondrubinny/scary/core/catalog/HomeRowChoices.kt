@@ -18,9 +18,10 @@ object HomeRowChoices {
     const val BECAUSE = "because"
     const val MOODS = "moods"
     const val TIME = "time"
+    const val NOW_OUT = "nowout"
 
     /** The fixed kinds, in the order the home screen shows them. */
-    val FIXED = listOf(CONTINUE, STREMIO, RECENT, MY_LIST, BECAUSE, MOODS, TIME)
+    val FIXED = listOf(CONTINUE, STREMIO, NOW_OUT, RECENT, MY_LIST, BECAUSE, MOODS, TIME)
 
     const val COLLECTION_PREFIX = "c:"
 

@@ -47,6 +47,8 @@ data class HomeUiState(
     val hideOrigins: Boolean = true,
     /** Home screen rows the viewer turned off (core HomeRowChoices keys). */
     val hiddenRows: Set<String> = emptySet(),
+    /** Films with a "Remind me" set. */
+    val remindedIds: Set<String> = emptySet(),
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
@@ -78,6 +80,9 @@ data class HomeUiState(
 
     fun isWatched(movie: Movie): Boolean = movie.id in watchedIds
 }
+
+/** The whole series a film belongs to, its films in the order they came out (TMDB, with the viewer's key). */
+data class FranchiseUi(val movieId: String, val name: String, val movies: List<Movie>)
 
 /** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */
 data class WebSearchState(
@@ -172,6 +177,11 @@ sealed interface HomeRow {
     /** "Because you watched X": films like the one the viewer watched most recently. */
     data class BecauseYouWatched(val because: Movie, val movies: List<Movie>) : HomeRow {
         override val key = "because_watched"
+    }
+
+    /** "Now out": films the viewer asked to be reminded of, whose release day has come. */
+    data class NowOut(val movies: List<Movie>) : HomeRow {
+        override val key = "now_out"
     }
 
     /** Films the viewer watched, newest first: shown when watched films are hidden from the other rows. */

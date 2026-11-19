@@ -598,6 +598,7 @@ private fun HomeRowView(
         is HomeRow.BecauseYouLoved -> stringResource(R.string.row_because_loved, row.because.displayTitle(language))
         is HomeRow.BecauseYouWatched -> stringResource(R.string.row_because_watched, row.because.displayTitle(language))
         is HomeRow.Watched -> stringResource(R.string.row_watched)
+        is HomeRow.NowOut -> stringResource(R.string.row_now_out)
         is HomeRow.TasteInvite -> stringResource(R.string.taste_title)
         is HomeRow.AskAi -> stringResource(R.string.ai_title)
     }
@@ -690,8 +691,9 @@ private fun HomeRowView(
                 }
                 is HomeRow.Moods, is HomeRow.TimePlan, is HomeRow.TasteInvite, is HomeRow.AskAi -> Unit
                 is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved, is HomeRow.BecauseYouWatched,
-                is HomeRow.Watched -> items(
+                is HomeRow.Watched, is HomeRow.NowOut -> items(
                     when (row) {
+                        is HomeRow.NowOut -> row.movies
                         is HomeRow.Collection -> row.movies
                         is HomeRow.BecauseYouLoved -> row.movies
                         is HomeRow.BecauseYouWatched -> row.movies

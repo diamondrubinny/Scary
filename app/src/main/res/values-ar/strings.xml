@@ -9,6 +9,10 @@
     <string name="row_apps">تطبيقاتي</string>
     <string name="row_more_like">أفلام مشابهة</string>
     <string name="row_more_from_director">المزيد من المخرج %1$s</string>
+    <string name="row_franchise">السلسلة كاملة: %1$s</string>
+    <string name="action_franchise_bucket">أضفها كلها إلى قائمة الأمنيات</string>
+    <string name="msg_franchise_bucket">أُضيف إلى قائمة الأمنيات: %1$s أفلام، بالترتيب.</string>
+    <string name="msg_franchise_bucket_none">كلها موجودة في قائمة الأمنيات.</string>
     <string name="minutes">%1$d دقيقة</string>
     <string name="fear_short">الرعب %1$d/5</string>
     <string name="fear_description">مستوى الرعب %1$d من 5</string>
@@ -93,6 +97,19 @@
     <string name="search_hint">العنوان أو المخرج أو السنة أو نوع الرعب</string>
     <string name="search_no_results">لم يُعثر على أفلام لـ %1$s.</string>
     <string name="search_count">النتائج: %1$d</string>
+    <string name="filter_kind_all">أفلام ومسلسلات</string>
+    <string name="filter_kind_films">أفلام فقط</string>
+    <string name="filter_kind_series">مسلسلات فقط</string>
+    <string name="filter_years_any">كل السنوات</string>
+    <string name="filter_years">السنوات: %1$s</string>
+    <string name="filter_years_before">قبل %1$s</string>
+    <string name="filter_fear_any">أي مستوى رعب</string>
+    <string name="filter_fear">مستوى الرعب: %1$s</string>
+    <string name="filter_unwatched_off">مع ما شوهد</string>
+    <string name="filter_unwatched_on">ما لم يُشاهد فقط</string>
+    <string name="filter_clear">مسح التصفية</string>
+    <string name="search_no_filter_results">لا شيء يطابق هذه التصفية.</string>
+    <string name="search_filter_hint">أزل تصفية واحدة أو امسحها كلها. مستوى الرعب معروف فقط لأفلام المكتبة المختارة يدويًا.</string>
     <string name="pin_title_verify">أدخل رمز PIN للرقابة الأبوية</string>
     <string name="pin_title_create">اختر رمز PIN جديدًا للرقابة الأبوية، من 4 إلى 8 أرقام</string>
     <string name="pin_title_confirm">أدخل الرمز مرة أخرى للتأكيد</string>
@@ -432,6 +449,12 @@
     <!-- Sorting by what you watch -->
     <string name="row_because_watched">لأنك شاهدت %1$s</string>
     <string name="row_watched">شوهد</string>
+    <string name="row_now_out">صدر الآن</string>
+    <string name="action_remind">ذكّرني</string>
+    <string name="action_reminded">التذكير مفعّل</string>
+    <string name="msg_remind_set">سيظهر %1$s في صف «صدر الآن» على الشاشة الرئيسية عند صدوره.</string>
+    <string name="msg_remind_off">أُزيل التذكير بـ %1$s.</string>
+    <string name="msg_remind_full">حتى %1$s تذكيرًا. أزل واحدًا أولًا.</string>
     <string name="settings_hide_watched">إخفاء الأفلام التي شاهدتها</string>
     <string name="settings_hide_watched_note">عند الإيقاف: تنتقل الأفلام التي شاهدتها إلى نهاية كل صف. عند التشغيل: تخرج من الصفوف وتنتظر في صف «شوهد». وفي الحالتين تصعد الصفوف التي تشاهد منها أكثر، ويجري الحساب على هذا التلفزيون.</string>
     <!-- TMDB account -->

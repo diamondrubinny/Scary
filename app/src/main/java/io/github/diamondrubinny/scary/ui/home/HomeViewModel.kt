@@ -34,7 +34,9 @@ import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Recommender
+import io.github.diamondrubinny.scary.core.catalog.Reminders
 import io.github.diamondrubinny.scary.core.catalog.Search
+import io.github.diamondrubinny.scary.core.catalog.SearchFilter
 import io.github.diamondrubinny.scary.core.catalog.Season
 import io.github.diamondrubinny.scary.core.catalog.Similar
 import io.github.diamondrubinny.scary.core.catalog.TimeBudget
@@ -288,6 +290,7 @@ class HomeViewModel(
             hideWatched = prefs.hideWatched,
             hideOrigins = prefs.hideOrigins,
             hiddenRows = prefs.hiddenRows,
+            remindedIds = prefs.reminders.mapTo(HashSet()) { it.id },
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
@@ -486,6 +489,57 @@ class HomeViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    private val _franchise = MutableStateFlow<FranchiseUi?>(null)
+    private var franchiseJob: Job? = null
+
+    /** The whole series of the film whose page is open, in order; null while unknown, or when it stands alone. */
+    val franchise: StateFlow<FranchiseUi?> = _franchise.asStateFlow()
+
+    /**
+     * Asks TMDB for the series the film belongs to (films only, with the viewer's key and online data on; not on
+     * family night, where only the library is shown). The page calls it again when the key or online data change.
+     */
+    fun loadFranchise(movie: Movie, language: Language) {
+        if (_franchise.value?.movieId == movie.id) return
+        franchiseJob?.cancel()
+        _franchise.value = null
+        val prefs = latestPrefs
+        if (movie.isSeries || prefs == null || !prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) return
+        franchiseJob = viewModelScope.launch {
+            val found = tmdb.franchise(movie.imdbId, language) ?: return@launch
+            val known = visibleCatalog()?.movies.orEmpty().associateBy { it.imdbId }
+            // A film the library holds is shown as the library has it; the others as TMDB describes them.
+            val movies = found.films.mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }
+            if (movies.size < 2) return@launch
+            webMovies = webMovies + movies.filter { it.imdbId !in known }.associateBy { it.id }
+            _franchise.value = FranchiseUi(movie.id, found.name, movies)
+        }
+    }
+
+    /**
+     * "Add them all to the bucket list": the series' films that are out, in order, after what the list holds, until
+     * it is full. Films the parental lock covers are left out.
+     */
+    fun addFranchiseToBucket(movies: List<Movie>, language: Language) {
+        val prefs = latestPrefs ?: return
+        val day = today()
+        val wanted = movies.filter { film ->
+            !film.isSeries && film.comingOn(day) == null && !ParentalGate.isLocked(prefs.parentalEnabled, isSessionUnlocked(), prefs.lockFromFear, film)
+        }
+        viewModelScope.launch {
+            val before = settings.prefs.first().bucketIds
+            val after = settings.updateBucket { current -> (current + wanted.map { it.id }.filter { it !in current }).take(BucketList.MAX_SIZE) }
+            val added = wanted.filter { it.id in after && it.id !in before }
+            val keep = keptOnline()
+            for (film in added) savedMovies.save(film, language, keep)
+            when {
+                added.isNotEmpty() -> show(R.string.msg_franchise_bucket, added.size.toString())
+                after.size >= BucketList.MAX_SIZE -> show(R.string.msg_bucket_full, BucketList.MAX_SIZE.toString())
+                else -> show(R.string.msg_franchise_bucket_none)
+            }
+        }
+    }
+
     /** Loads the offers for a movie page. The page calls it again when the key, the country or online data change. */
     fun loadRentOrBuy(movie: Movie) {
         rentJob?.cancel()
@@ -607,6 +661,14 @@ class HomeViewModel(
                     ContinueItem(WatchEntry(STREMIO_ENTRY_PREFIX + item.imdbId, movie.title, movie.id, item.offsetMs, item.durationMs, at), movie)
                 }
                 if (going.isNotEmpty()) add(HomeRow.StremioContinue(going))
+            }
+            // "Remind me": the films whose day has come. One whose release moved to a later day waits for it; one the
+            // viewer has watched since has done its job.
+            if (prefs.reminders.isNotEmpty() && HomeRowChoices.NOW_OUT !in off) {
+                val day = today()
+                val out = Reminders.due(prefs.reminders, day.toEpochDay()).mapNotNull(catalog::movie)
+                    .filter { it.comingOn(day) == null && it.id !in watched }
+                if (out.isNotEmpty()) add(HomeRow.NowOut(out))
             }
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
             if (recent.isNotEmpty() && HomeRowChoices.RECENT !in off) add(HomeRow.Recent(recent))
@@ -892,6 +954,15 @@ class HomeViewModel(
     fun setSearchQuery(text: String) {
         _searchQuery.value = text.take(MAX_QUERY_LENGTH)
         scheduleWebSearch(_searchQuery.value)
+    }
+
+    private val _searchFilter = MutableStateFlow(SearchFilter.NONE)
+
+    /** What narrows the search (films or series, years, fear, not watched yet); kept like the query. */
+    val searchFilter: StateFlow<SearchFilter> = _searchFilter.asStateFlow()
+
+    fun setSearchFilter(filter: SearchFilter) {
+        _searchFilter.value = filter
     }
 
     private val _webSearch = MutableStateFlow(WebSearchState())
@@ -1533,7 +1604,7 @@ class HomeViewModel(
     /** IMDb ids of the online movies on My list and Recently opened: their saved details must stay. */
     private suspend fun keptOnline(): Set<String> {
         val prefs = settings.prefs.first()
-        return (prefs.myListIds + prefs.recentIds + prefs.bucketIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        return (prefs.myListIds + prefs.recentIds + prefs.bucketIds + prefs.reminders.map { it.id }).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
     }
 
     fun watch(movie: Movie) {
@@ -1947,6 +2018,7 @@ class HomeViewModel(
     fun rowChoices(off: Set<String>): List<RowChoice> {
         val fixed = listOf(
             HomeRowChoices.CONTINUE to R.string.row_continue, HomeRowChoices.STREMIO to R.string.row_stremio_continue,
+            HomeRowChoices.NOW_OUT to R.string.row_now_out,
             HomeRowChoices.RECENT to R.string.row_recent, HomeRowChoices.MY_LIST to R.string.row_my_list,
             HomeRowChoices.BECAUSE to R.string.home_rows_because, HomeRowChoices.MOODS to R.string.row_moods,
             HomeRowChoices.TIME to R.string.row_time,
@@ -2229,6 +2301,32 @@ class HomeViewModel(
     }
 
     /** A film in or out of the bucket list. Not a series (it has no end), and not a locked film. */
+    /**
+     * "Remind me" on a film that is not out yet: it will show in "Now out" once its day comes. A second press takes
+     * the reminder off (also after the film is out, which takes it out of the row).
+     */
+    fun toggleReminder(movie: Movie, language: Language) {
+        val title = movie.displayTitle(language)
+        viewModelScope.launch {
+            val current = settings.prefs.first().reminders
+            val has = current.any { it.id == movie.id }
+            val day = movie.comingOn(today())?.toEpochDay()
+            // Already out and no reminder: there is nothing to wait for.
+            if (!has && day == null) return@launch
+            if (!has && Reminders.pruned(current, today().toEpochDay()).size >= Reminders.MAX) {
+                show(R.string.msg_remind_full, Reminders.MAX.toString())
+                return@launch
+            }
+            if (settings.toggleReminder(movie.id, day ?: 0L, today().toEpochDay())) {
+                // Its details are kept, so it can be shown after it leaves the coming-soon row.
+                savedMovies.save(movie, language, keptOnline())
+                show(R.string.msg_remind_set, title)
+            } else {
+                show(R.string.msg_remind_off, title)
+            }
+        }
+    }
+
     fun toggleBucket(movie: Movie, language: Language) {
         val title = movie.displayTitle(language)
         if (movie.isSeries) {

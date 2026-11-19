@@ -8,6 +8,10 @@
     <string name="row_apps">Meus apps</string>
     <string name="row_more_like">Mais como este</string>
     <string name="row_more_from_director">Mais de %1$s</string>
+    <string name="row_franchise">A série completa: %1$s</string>
+    <string name="action_franchise_bucket">Adicionar todos à lista de desejos</string>
+    <string name="msg_franchise_bucket">Adicionados à lista de desejos: %1$s filmes, em ordem.</string>
+    <string name="msg_franchise_bucket_none">Todos já estão na lista de desejos.</string>
     <string name="minutes">%1$d min</string>
     <string name="fear_short">Medo %1$d/5</string>
     <string name="fear_description">Nível de medo %1$d de 5</string>
@@ -92,6 +96,19 @@
     <string name="search_hint">Título, diretor, ano ou tipo de terror</string>
     <string name="search_no_results">Nenhum filme encontrado para %1$s.</string>
     <string name="search_count">Resultados: %1$d</string>
+    <string name="filter_kind_all">Filmes e séries</string>
+    <string name="filter_kind_films">Só filmes</string>
+    <string name="filter_kind_series">Só séries</string>
+    <string name="filter_years_any">Qualquer ano</string>
+    <string name="filter_years">Anos: %1$s</string>
+    <string name="filter_years_before">Antes de %1$s</string>
+    <string name="filter_fear_any">Qualquer nível de medo</string>
+    <string name="filter_fear">Nível de medo: %1$s</string>
+    <string name="filter_unwatched_off">Assistidos também</string>
+    <string name="filter_unwatched_on">Só não assistidos</string>
+    <string name="filter_clear">Limpar filtros</string>
+    <string name="search_no_filter_results">Nada combina com estes filtros.</string>
+    <string name="search_filter_hint">Tire um filtro ou limpe todos. O nível de medo só é conhecido para a biblioteca escolhida à mão.</string>
     <string name="pin_title_verify">Digite o PIN dos pais</string>
     <string name="pin_title_create">Escolha um novo PIN dos pais, de 4 a 8 dígitos</string>
     <string name="pin_title_confirm">Digite o PIN de novo para confirmar</string>
@@ -422,6 +439,12 @@
     <!-- Sorting by what you watch -->
     <string name="row_because_watched">Porque você assistiu %1$s</string>
     <string name="row_watched">Vistos</string>
+    <string name="row_now_out">Já saiu</string>
+    <string name="action_remind">Lembrar-me</string>
+    <string name="action_reminded">Lembrete ativo</string>
+    <string name="msg_remind_set">%1$s vai aparecer em “Já saiu” na tela inicial quando for lançado.</string>
+    <string name="msg_remind_off">O lembrete de %1$s foi removido.</string>
+    <string name="msg_remind_full">Até %1$s lembretes. Remova um primeiro.</string>
     <string name="settings_hide_watched">Esconder filmes que já vi</string>
     <string name="settings_hide_watched_note">Desligado: os filmes que você viu vão para o fim de cada fileira. Ligado: eles saem das fileiras e ficam numa fileira Vistos. De todo jeito, as fileiras de que você mais assiste sobem, com o cálculo feito nesta TV.</string>
     <!-- TMDB account -->

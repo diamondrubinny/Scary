@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.ui.details
 
 
+import io.github.diamondrubinny.scary.ui.home.FranchiseUi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.BringIntoViewSpec
@@ -98,6 +99,7 @@ const val PLAY_RD_TAG = "playRealDebrid"
 const val CONTINUE_RD_TAG = "continueRealDebrid"
 const val STREMIO_NOTE_TAG = "stremioNote"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
+const val REMIND_TAG = "remindMe"
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -128,6 +130,13 @@ fun DetailsScreen(
     /** In the bucket list (films only), and its button. */
     inBucket: Boolean = false,
     onToggleBucket: ((Movie) -> Unit)? = null,
+    /** The whole series the film belongs to, in order (TMDB); null when unknown or when it stands alone. */
+    franchise: FranchiseUi? = null,
+    onLoadFranchise: (Movie) -> Unit = {},
+    onFranchiseToBucket: ((List<Movie>) -> Unit)? = null,
+    /** "Remind me" is set for this film; its button shows on a film not out yet, or one with a reminder. */
+    reminded: Boolean = false,
+    onToggleReminder: ((Movie) -> Unit)? = null,
     notForMe: Boolean = false,
     onToggleLoved: (Movie) -> Unit = {},
     onToggleNotForMe: (Movie) -> Unit = {},
@@ -171,6 +180,7 @@ fun DetailsScreen(
         runCatching { watchFocus.requestFocus() }
     }
     LaunchedEffect(movie.id, offersKey) { onLoadOffers(movie) }
+    LaunchedEffect(movie.id, offersKey) { onLoadFranchise(movie) }
 
     // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
     // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
@@ -275,6 +285,14 @@ fun DetailsScreen(
                             text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
                             onClick = { onToggleNotForMe(movie) },
                         )
+                        // Not out yet: "Remind me" brings it to the home screen's "Now out" row on its day.
+                        if (onToggleReminder != null && (reminded || movie.comingOn(LocalDate.now()) != null)) {
+                            ScaryButton(
+                                text = stringResource(if (reminded) R.string.action_reminded else R.string.action_remind),
+                                onClick = { onToggleReminder(movie) },
+                                modifier = Modifier.testTag(REMIND_TAG),
+                            )
+                        }
                         // Films only: a series has no end for the next one to follow.
                         if (onToggleBucket != null && !movie.isSeries) {
                             ScaryButton(
@@ -395,6 +413,40 @@ fun DetailsScreen(
                         }
                     }
                 }
+                // The whole series, in the order the films came out (TMDB, with the viewer's key). The film whose page
+                // this is stays in its place, so the order reads at a glance; OK on it does nothing.
+                if (franchise != null && franchise.movies.size >= 2 && !isLocked(movie)) {
+                    BasicText(
+                        text = stringResource(R.string.row_franchise, franchise.name),
+                        style = ScaryType.RowTitle.mixedLanguage(),
+                        modifier = Modifier
+                            .padding(start = SidePadding, end = SidePadding, top = 20.dp)
+                            .semantics { heading() },
+                    )
+                    if (onFranchiseToBucket != null) {
+                        ScaryButton(
+                            text = stringResource(R.string.action_franchise_bucket),
+                            onClick = { onFranchiseToBucket(franchise.movies) },
+                            modifier = Modifier.padding(start = SidePadding, end = SidePadding, top = 8.dp).testTag(FRANCHISE_BUCKET_TAG),
+                        )
+                    }
+                    LazyRow(
+                        modifier = Modifier.testTag(FRANCHISE_ROW_TAG),
+                        contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        items(franchise.movies, key = { "franchise:" + it.id }) { part ->
+                            PosterCard(
+                                movie = part,
+                                onClick = { if (part.id != movie.id) onOpenSimilar(part) },
+                                onFocused = {},
+                                width = 92.dp,
+                                locked = isLocked(part),
+                                watched = isWatched(part),
+                            )
+                        }
+                    }
+                }
                 // The director's other films, from the library and the offline index: nothing is asked online.
                 if (details.byDirector.isNotEmpty() && !isLocked(movie)) {
                     BasicText(
@@ -425,6 +477,10 @@ fun DetailsScreen(
         }
     }
 }
+
+/** The film's whole series on its page, and the button that puts it in the bucket list. */
+const val FRANCHISE_ROW_TAG = "franchiseRow"
+const val FRANCHISE_BUCKET_TAG = "franchiseBucket"
 
 /** The "More from this director" row on a film's page. */
 const val BY_DIRECTOR_ROW_TAG = "byDirectorRow"

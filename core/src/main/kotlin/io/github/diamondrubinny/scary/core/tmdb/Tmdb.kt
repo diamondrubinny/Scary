@@ -14,6 +14,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.jsonObject
@@ -49,6 +50,9 @@ data class TmdbResult(
     /** ISO 639-1 code of the film's original language ("en", "hi"), when TMDB gives a valid one. */
     val originalLanguage: String = "",
 )
+
+/** A series of films as TMDB holds it ("Halloween Collection"), its films in the order they came out. */
+data class TmdbFranchise(val id: Long, val name: String, val parts: List<TmdbResult>)
 
 /** How a key is sent: a v4 read-access token goes in a header, a v3 key in the query string. */
 sealed interface TmdbAuth {
@@ -171,6 +175,41 @@ object Tmdb {
     /** "de", "is": the film's original language from [movieUrl]'s answer; null when it is missing or not a language code. */
     fun parseOriginalLanguage(text: String): String? =
         (root(text)?.get("original_language") as? JsonPrimitive)?.contentOrNull?.trim()?.lowercase()?.takeIf(languageCode::matches)
+
+    /**
+     * The id of the series of films a film belongs to ("Halloween Collection"), from [movieUrl]'s answer
+     * (`belongs_to_collection`); null when the film stands alone.
+     */
+    fun parseCollectionId(text: String): Long? =
+        ((root(text)?.get("belongs_to_collection") as? JsonObject)?.get("id") as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 }
+
+    /** A series of films ("collection" in TMDB's words), in [language]. */
+    fun collectionUrl(collectionId: Long, language: Language): String {
+        require(collectionId > 0) { "invalid collection id" }
+        return "$API/collection/$collectionId?language=${language.tmdbTag}"
+    }
+
+    /**
+     * The films of a series in the order they came out; films without a date (announced only) come last, and adult
+     * titles are left out. Null when the answer is not a collection or holds fewer than two films.
+     */
+    fun parseCollection(text: String): TmdbFranchise? {
+        val o = root(text) ?: return null
+        val id = (o["id"] as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 } ?: return null
+        val parts = (o["parts"] as? JsonArray).orEmpty().asSequence().take(MAX_FRANCHISE * 2)
+            .mapNotNull { it as? JsonObject }
+            .filterNot { (it["adult"] as? JsonPrimitive)?.booleanOrNull == true }
+            .mapNotNull(::toResult)
+            .distinctBy { it.tmdbId }
+            .sortedWith(compareBy<TmdbResult> { it.releaseDate == null }.thenBy { it.releaseDate.orEmpty() }.thenBy { it.tmdbId })
+            .take(MAX_FRANCHISE)
+            .toList()
+        if (parts.size < 2) return null
+        return TmdbFranchise(id, o.text("name"), parts)
+    }
+
+    /** The longest series shown: the longest horror series have about thirty films. */
+    const val MAX_FRANCHISE = 40
 
     fun externalIdsUrl(tmdbId: Long): String {
         require(tmdbId > 0) { "invalid TMDB id" }
@@ -399,11 +438,12 @@ object Tmdb {
 
     private fun toResult(o: JsonObject): TmdbResult? {
         val id = (o["id"] as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 } ?: return null
-        val title = o.text("title").ifBlank { return null }
+        // A collection's films are described with "name" in TMDB's API description and answer with "title": either is read.
+        val title = o.text("title").ifBlank { o.text("name") }.ifBlank { return null }
         return TmdbResult(
             tmdbId = id,
             title = title,
-            originalTitle = o.text("original_title"),
+            originalTitle = o.text("original_title").ifBlank { o.text("original_name") },
             overview = o.text("overview").take(1_500),
             year = o.text("release_date").take(4).toIntOrNull()?.takeIf { it in 1895..2100 },
             poster = (o["poster_path"] as? JsonPrimitive)?.contentOrNull,

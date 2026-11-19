@@ -244,6 +244,8 @@ object Cinemeta {
         type = CinemetaMeta.typeOf(movie.kind),
         endYear = movie.endYear,
         ongoing = movie.ongoing,
+        // Kept with a saved film, so "Remind me" knows it is not out yet after it leaves the coming-soon row.
+        releaseDate = movie.releaseDate.orEmpty(),
     )
 
     fun parseMeta(text: String): CinemetaMeta? =

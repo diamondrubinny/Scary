@@ -23,6 +23,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import io.github.diamondrubinny.scary.core.apps.PinnedList
 import io.github.diamondrubinny.scary.core.catalog.MyList
+import io.github.diamondrubinny.scary.core.catalog.Reminders
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
 import io.github.diamondrubinny.scary.core.catalog.BucketList
 import io.github.diamondrubinny.scary.core.catalog.RecentList
@@ -73,6 +74,8 @@ data class LauncherPrefs(
     val hideOrigins: Boolean = true,
     /** Home screen rows the viewer turned off (core HomeRowChoices keys). */
     val hiddenRows: Set<String> = emptySet(),
+    /** "Remind me": films not out yet, each with its day; shown in "Now out" once the day comes. */
+    val reminders: List<Reminders.Reminder> = emptyList(),
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
     /** Look for a new version of SCARY by itself (official builds only). */
@@ -143,6 +146,7 @@ class SettingsRepository(private val context: Context) {
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 hideOrigins = p[HIDE_ORIGINS] ?: true,
                 hiddenRows = HomeRowChoices.sanitize(p[HIDDEN_ROWS].orEmpty()),
+                reminders = Reminders.decode(p[REMINDERS]),
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
                 autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
                 updateSkippedVersion = p[UPDATE_SKIPPED],
@@ -207,6 +211,20 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
 
     suspend fun setHideOrigins(enabled: Boolean) = edit { it[HIDE_ORIGINS] = enabled }
+
+    /**
+     * "Remind me" for a film coming out on [day] (days since 1970), or off if it has one. Returns true when it was
+     * set. Films long out of "Now out" are dropped on the way.
+     */
+    suspend fun toggleReminder(movieId: String, day: Long, today: Long): Boolean {
+        var set = false
+        edit {
+            val current = Reminders.pruned(Reminders.decode(it[REMINDERS]), today)
+            set = current.none { reminder -> reminder.id == movieId }
+            it[REMINDERS] = Reminders.encode(Reminders.toggle(current, movieId, day))
+        }
+        return set
+    }
 
     suspend fun setHiddenRows(keys: Set<String>) = edit { it[HIDDEN_ROWS] = HomeRowChoices.sanitize(keys) }
 
@@ -497,6 +515,7 @@ class SettingsRepository(private val context: Context) {
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val HIDE_ORIGINS = booleanPreferencesKey("hide_arab_indian")
         private val HIDDEN_ROWS = stringSetPreferencesKey("hidden_home_rows")
+        private val REMINDERS = stringPreferencesKey("release_reminders")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
         private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")

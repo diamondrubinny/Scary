@@ -8,6 +8,10 @@
     <string name="row_apps">Мои приложения</string>
     <string name="row_more_like">Похожие фильмы</string>
     <string name="row_more_from_director">Ещё от режиссёра %1$s</string>
+    <string name="row_franchise">Вся серия: %1$s</string>
+    <string name="action_franchise_bucket">Добавить все в список желаний</string>
+    <string name="msg_franchise_bucket">Добавлено в список желаний: %1$s, по порядку.</string>
+    <string name="msg_franchise_bucket_none">Все они уже в списке желаний.</string>
     <string name="minutes">%1$d мин</string>
     <string name="fear_short">Страх %1$d/5</string>
     <string name="fear_description">Уровень страха %1$d из 5</string>
@@ -92,6 +96,19 @@
     <string name="search_hint">Название, режиссёр, год или жанр ужасов</string>
     <string name="search_no_results">По запросу %1$s ничего не найдено.</string>
     <string name="search_count">Найдено: %1$d</string>
+    <string name="filter_kind_all">Фильмы и сериалы</string>
+    <string name="filter_kind_films">Только фильмы</string>
+    <string name="filter_kind_series">Только сериалы</string>
+    <string name="filter_years_any">Любой год</string>
+    <string name="filter_years">Годы: %1$s</string>
+    <string name="filter_years_before">До %1$s</string>
+    <string name="filter_fear_any">Любой уровень страха</string>
+    <string name="filter_fear">Уровень страха: %1$s</string>
+    <string name="filter_unwatched_off">И просмотренное</string>
+    <string name="filter_unwatched_on">Только непросмотренное</string>
+    <string name="filter_clear">Сбросить фильтры</string>
+    <string name="search_no_filter_results">Под эти фильтры ничего не подходит.</string>
+    <string name="search_filter_hint">Снимите один фильтр или сбросьте все. Уровень страха известен только для отобранной вручную библиотеки.</string>
     <string name="pin_title_verify">Введите родительский PIN-код</string>
     <string name="pin_title_create">Придумайте родительский PIN-код из 4–8 цифр</string>
     <string name="pin_title_confirm">Введите PIN-код ещё раз</string>
@@ -425,6 +442,12 @@
     <!-- Sorting by what you watch -->
     <string name="row_because_watched">Потому что вы смотрели «%1$s»</string>
     <string name="row_watched">Просмотренные</string>
+    <string name="row_now_out">Уже вышло</string>
+    <string name="action_remind">Напомнить</string>
+    <string name="action_reminded">Напоминание включено</string>
+    <string name="msg_remind_set">«%1$s» появится в ряду «Уже вышло» на главном экране, когда выйдет.</string>
+    <string name="msg_remind_off">Напоминание о «%1$s» снято.</string>
+    <string name="msg_remind_full">Не больше %1$s напоминаний. Сначала снимите одно.</string>
     <string name="settings_hide_watched">Скрывать просмотренные фильмы</string>
     <string name="settings_hide_watched_note">Выключено: просмотренные фильмы уходят в конец каждой подборки. Включено: они убираются из подборок и ждут в подборке «Просмотренные». В обоих случаях подборки, из которых вы смотрите чаще, поднимаются выше; всё считается на этом телевизоре.</string>
     <!-- TMDB account -->
