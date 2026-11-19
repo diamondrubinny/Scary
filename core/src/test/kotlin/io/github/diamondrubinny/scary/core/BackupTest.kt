@@ -82,6 +82,14 @@ class BackupTest {
     }
 
     @Test
+    fun aSeriesNeverGoesInTheBucketList() {
+        val read = Backup.decode(Backup.encode(Snapshot(myList = listOf("s1"), bucket = listOf("f1", "s1"), series = setOf("s1")), "x", 20_000))!!
+        assertEquals(listOf("f1"), read.bucket)
+        assertEquals(listOf("s1"), read.myList)
+        assertEquals(listOf("k", "f1"), Backup.merge(Snapshot(bucket = listOf("k")), read).bucket)
+    }
+
+    @Test
     fun listsAreCapped() {
         val many = (1..3_000).map { "f$it" }
         val read = Backup.decode(Backup.encode(Snapshot(myList = many, watched = many, loved = many, bucket = many), "x", 20_000))!!

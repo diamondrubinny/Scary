@@ -12,7 +12,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -53,6 +56,16 @@ fun HomeRowsScreen(
     LaunchedEffect(Unit) {
         withFrameNanos { }
         runCatching { first.requestFocus() }
+    }
+    // "Show all the rows" leaves the screen once nothing is hidden: the focus it held goes to the first row, so the
+    // remote is never left pointing at nothing.
+    var hadHidden by remember { mutableStateOf(hiddenCount > 0) }
+    LaunchedEffect(hiddenCount) {
+        if (hadHidden && hiddenCount == 0) {
+            withFrameNanos { }
+            runCatching { first.requestFocus() }
+        }
+        hadHidden = hiddenCount > 0
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize().paneWidth(scaryLayout, 0.7f).testTag(HOME_ROWS_SCREEN_TAG),

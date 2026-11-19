@@ -122,7 +122,8 @@ object Backup {
         val loved = clean(snapshot.loved, MAX_RATED)
         // Loved and "not for me" exclude each other; a film in both is loved.
         val disliked = clean(snapshot.disliked.filterNot(loved::contains), MAX_RATED)
-        val bucket = clean(snapshot.bucket, MAX_BUCKET)
+        // The bucket list is films only: an id the file itself marks as a series does not go in.
+        val bucket = clean(snapshot.bucket.filterNot(snapshot.series::contains), MAX_BUCKET)
         val listed = (myList + watched + loved + disliked + bucket).toSet()
         val watchedSet = watched.toSet()
         return Snapshot(

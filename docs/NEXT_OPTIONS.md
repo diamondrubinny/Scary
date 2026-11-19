@@ -92,6 +92,11 @@ Built in stages, the small ones first.
 - **After a restore:** films found online that this TV has not kept get their details from Cinemeta by IMDb id (one at a time, only with online data on), so they show in My list and the bucket list.
 - **Works whatever app is in front:** the backup needs no screen.
 
+### After an independent review (19.11.2026)
+- **Nothing found in the security of the backup path** (signing, replay, the large-body address, the keystreams, a crafted file).
+- **Fixed:** coming back from "Home screen rows" lands on its row in Settings; "Show all the rows" hands its focus to the first row when it leaves; a restore no longer lets the saved details of "Recently opened" films be dropped; a series a file lists in the bucket list is left out (the bucket list is films only).
+- **Known limit:** with online data off, films found online that the TV does not know come back as ids only, and show once online data is on and the file is restored again.
+
 ### Limits, to verify on a real phone
 - **Saving the file uses the browser's download of a page-made file** (`a download` with a blob). It works in Chrome on Android and Safari on iOS 13 and later by their documentation; **requires a check on the owner's phone**, since the page is served over plain HTTP on the home network.
 - **The file is not encrypted on the phone.** It holds no secret, but it does show what was watched. A password on the file was left out: it would need a strong key-derivation function in the page's own JavaScript (no Web Crypto on plain HTTP).
