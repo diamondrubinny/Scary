@@ -27,7 +27,15 @@ class RemindersTest {
         // The latest out first; not yet out and long out are not there.
         assertEquals(listOf("today", "lastWeek"), Reminders.due(list, today))
         assertEquals(listOf("later", "today", "lastWeek"), Reminders.due(list, today + 1))
-        assertEquals(listOf("later", "today", "lastWeek"), Reminders.pruned(list, today).map { it.id })
+        // Long out of the row, a reminder is still kept for a while: its film's release may have moved.
+        assertEquals(listOf("later", "today", "lastWeek", "old"), Reminders.pruned(list, today).map { it.id })
+        assertEquals(listOf("later", "today"), Reminders.pruned(list + Reminder("gone", today - Reminders.KEEP_DAYS - 1), today + Reminders.KEEP_DAYS).map { it.id })
+        // A release that moved two months later: the film waits for its new day, then shows.
+        val moved = Reminders.withDays(listOf(Reminder("film", today - 50), Reminder("other", today - 3))) { id -> (today + 10).takeIf { id == "film" } }
+        assertEquals(listOf("other"), Reminders.due(moved, today))
+        assertEquals(listOf("film", "other"), Reminders.due(moved, today + 10))
+        // A day that is not a date is not taken.
+        assertEquals(listOf(Reminder("film", today)), Reminders.withDays(listOf(Reminder("film", today))) { 5L })
         assertEquals(emptyList<String>(), Reminders.due(emptyList(), today))
     }
 

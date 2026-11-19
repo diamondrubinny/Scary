@@ -189,7 +189,8 @@ fun SearchScreen(
         withFrameNanos { }
         // An empty search starts in the text field. Coming back from a movie keeps the query, and focus goes back to
         // that movie's card (or the first result, or the field), so the remote is never left pointing at nothing.
-        if (query.isEmpty() || !(returnFocus.tryRequestFocus() || firstResultFocus.tryRequestFocus())) {
+        // (Films picked by a filter alone, with no text, are results like any others.)
+        if ((query.isEmpty() && !filter.active) || !(returnFocus.tryRequestFocus() || firstResultFocus.tryRequestFocus())) {
             fieldFocus.tryRequestFocus()
         }
     }
@@ -256,7 +257,13 @@ fun SearchScreen(
             }
         }
 
-        FilterRow(filter, onFilterChange)
+        // "Clear filters" leaves the screen when pressed: the focus it held goes to the first filter.
+        val filterFocus = remember { FocusRequester() }
+        val clearFilters = {
+            filterFocus.tryRequestFocus()
+            onFilterChange(SearchFilter.NONE)
+        }
+        FilterRow(filter, onFilterChange, filterFocus, clearFilters)
 
         val status = when {
             query.isBlank() && !filter.active -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
@@ -318,7 +325,7 @@ fun SearchScreen(
                             title = stringResource(R.string.search_no_filter_results),
                             body = stringResource(R.string.search_filter_hint),
                             actionLabel = stringResource(R.string.filter_clear),
-                            onAction = { onFilterChange(SearchFilter.NONE) },
+                            onAction = clearFilters,
                         )
                     } else {
                         EmptyState(
@@ -420,7 +427,7 @@ private fun ltr(text: String): String = "\u2066$text\u2069"
  * words, so nothing depends on colour; "Clear filters" shows once one is set.
  */
 @Composable
-private fun FilterRow(filter: SearchFilter, onChange: (SearchFilter) -> Unit) {
+private fun FilterRow(filter: SearchFilter, onChange: (SearchFilter) -> Unit, firstFocus: FocusRequester, onClear: () -> Unit) {
     val thisYear = remember { java.time.LocalDate.now().year }
     Row(
         modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()).padding(horizontal = SidePadding).padding(top = 12.dp),
@@ -437,6 +444,7 @@ private fun FilterRow(filter: SearchFilter, onChange: (SearchFilter) -> Unit) {
             ),
             onClick = { onChange(filter.nextKind()) },
             modifier = Modifier.testTag(SEARCH_FILTER_KIND_TAG),
+            focusRequester = firstFocus,
         )
         ScaryButton(
             text = when (val decade = filter.decade) {
@@ -461,7 +469,7 @@ private fun FilterRow(filter: SearchFilter, onChange: (SearchFilter) -> Unit) {
         if (filter.active) {
             ScaryButton(
                 text = stringResource(R.string.filter_clear),
-                onClick = { onChange(SearchFilter.NONE) },
+                onClick = onClear,
                 modifier = Modifier.testTag(SEARCH_FILTER_CLEAR_TAG),
             )
         }

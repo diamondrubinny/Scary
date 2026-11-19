@@ -31,8 +31,18 @@ object Reminders {
     fun due(current: List<Reminder>, today: Long): List<String> =
         current.filter { it.day <= today && today - it.day <= SHOW_DAYS }.sortedByDescending { it.day }.map { it.id }
 
-    /** Without the films whose time in "Now out" has passed. */
-    fun pruned(current: List<Reminder>, today: Long): List<Reminder> = current.filter { today - it.day <= SHOW_DAYS }
+    /**
+     * Without the films long out. Far later than [SHOW_DAYS]: the day stored is the one known when the viewer asked,
+     * and a film whose release moved must not be forgotten while it still waits ([withDays]).
+     */
+    fun pruned(current: List<Reminder>, today: Long): List<Reminder> = current.filter { today - it.day <= KEEP_DAYS }
+
+    /** How long a reminder is kept after the day stored with it. */
+    const val KEEP_DAYS = 400L
+
+    /** Each reminder with the day [dayOf] gives its film now, when it knows one: a release that moved is waited for. */
+    fun withDays(current: List<Reminder>, dayOf: (String) -> Long?): List<Reminder> =
+        current.map { reminder -> dayOf(reminder.id)?.takeIf { it in DAYS }?.let { reminder.copy(day = it) } ?: reminder }
 
     fun encode(reminders: List<Reminder>): String = clean(reminders).joinToString(",") { "${it.id}@${it.day}" }
 

@@ -289,7 +289,12 @@ fun DetailsScreen(
                         if (onToggleReminder != null && (reminded || movie.comingOn(LocalDate.now()) != null)) {
                             ScaryButton(
                                 text = stringResource(if (reminded) R.string.action_reminded else R.string.action_remind),
-                                onClick = { onToggleReminder(movie) },
+                                onClick = {
+                                    // Taken off a film that is already out, the button leaves the page: the focus
+                                    // it held goes to "Watch", so the remote is never left pointing at nothing.
+                                    if (reminded && movie.comingOn(LocalDate.now()) == null) runCatching { watchFocus.requestFocus() }
+                                    onToggleReminder(movie)
+                                },
                                 modifier = Modifier.testTag(REMIND_TAG),
                             )
                         }

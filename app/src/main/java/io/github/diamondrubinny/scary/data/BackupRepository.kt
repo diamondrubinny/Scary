@@ -86,8 +86,8 @@ class BackupRepository(
         val kept = savedMovies.items.value.mapTo(HashSet()) { it.imdbId }
         val listed = (lists.myList + lists.bucket).distinct().filter { it.startsWith(Cinemeta.ID_PREFIX) }
         // Everything whose saved details must stay, as when a film is saved from its page: the restored lists, and
-        // what the TV already keeps for Recently opened.
-        val keep = (listed + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        // what the TV already keeps for Recently opened and "Remind me".
+        val keep = (listed + prefs.recentIds + prefs.reminders.map { it.id }).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
         val found = ArrayList<CinemetaMeta>()
         for (id in listed) {
             val imdb = id.removePrefix(Cinemeta.ID_PREFIX)

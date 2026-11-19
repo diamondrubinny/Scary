@@ -251,9 +251,11 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         val found = collectionId?.let { id -> body(Tmdb.collectionUrl(id, language), key)?.let(Tmdb::parseCollection) }
         // The series' id was read but the series itself did not arrive: not remembered, so the next visit asks again.
         if (collectionId != null && found == null) return@withContext null
-        val result = found?.let { OnlineFranchise(it.name, language, withImdbIds(it.parts, key, language)) }?.takeIf { it.films.size >= 2 }
-        synchronized(franchises) { franchises[tmdbId] = result }
-        result
+        val result = found?.let { OnlineFranchise(it.name, language, withImdbIds(it.parts, key, language)) }
+        // A film whose IMDb id did not arrive is missing from the series: what there is is shown, but not remembered,
+        // so the next visit asks for the rest. A film that stands alone is remembered as such.
+        if (found == null || result?.films?.size == found.parts.size) synchronized(franchises) { franchises[tmdbId] = result?.takeIf { it.films.size >= 2 } }
+        result?.takeIf { it.films.size >= 2 }
     }
 
     private val languagesFile = File(context.filesDir, "origin_languages.json")

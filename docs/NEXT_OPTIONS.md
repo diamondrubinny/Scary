@@ -123,8 +123,13 @@ Built in stages, the small ones first.
 - **Needs a TMDB key** to see films that are not out yet (the coming-soon row is TMDB's).
 
 ### H. The whole series, in order
-- **On a film's page, with the viewer's TMDB key:** a row "The whole series: <name>" with every film of the series in the order they came out (announced films without a date last), and one button: "Add them all to the bucket list" (the films that are out, in order, until the list's 30 are full; films the parental lock covers are left out).
+- **On a film's page, with the viewer's TMDB key:** a row "The whole series: <name>" with every film of the series in the order they came out (an announced film with no date yet is not shown), and one button: "Add them all to the bucket list" (the films that are out, in order, until the list's 30 are full; films the parental lock covers are left out).
 - **What is asked of TMDB,** all in the official API description (`/3/find/{external_id}`, `/3/movie/{movie_id}` for `belongs_to_collection`, `/3/collection/{collection_id}`, `/3/movie/{movie_id}/external_ids`): the film's id, the series' id, and the IMDb id of each of its films this TV has not asked about before (kept on the TV afterwards). Nothing about the viewer. Kept in memory for the session.
 - **Not on family night** (only the library shows then), not for series, and not without a key or with online data off.
 - **Files:** core `Tmdb.parseCollectionId`, `collectionUrl`, `parseCollection`; app `TmdbRepository.franchise`, `HomeViewModel.loadFranchise` and `addFranchiseToBucket`, the row on `DetailsScreen`. Tests: `TmdbTest` (answers written from the API description).
 - **Requires verification on the TV with a key:** the answers were read from TMDB's API description, not from a live request (there is no key in this workspace). The description names a part's title `name`; live answers are known to use `title`. Both are read.
+
+### After an independent review (19.11.2026)
+- **Fixed in search:** coming back from a film to results picked by a filter alone lands on that film's card; "Clear filters" hands its focus to the first filter when it leaves; a search from the phone clears a filter left on the TV, so the TV shows what the phone lists.
+- **Fixed in "Remind me":** a release that moved is waited for by its new day (reminders are kept 400 days past the day stored, and shown by the day the catalog gives now); taking off an old reminder says so; the button hands its focus to "Watch" when it leaves the page.
+- **Fixed in the series row:** it no longer stays on family night, with online data off, after the key is removed or in another language; a series that arrived with films missing (a request that failed) is shown as it is but asked for again on the next visit.

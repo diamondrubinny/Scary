@@ -219,9 +219,11 @@ class SettingsRepository(private val context: Context) {
     suspend fun toggleReminder(movieId: String, day: Long, today: Long): Boolean {
         var set = false
         edit {
-            val current = Reminders.pruned(Reminders.decode(it[REMINDERS]), today)
-            set = current.none { reminder -> reminder.id == movieId }
-            it[REMINDERS] = Reminders.encode(Reminders.toggle(current, movieId, day))
+            // Whether one is set is read from everything stored (what the film's page shows), before old ones are dropped.
+            val stored = Reminders.decode(it[REMINDERS])
+            set = stored.none { reminder -> reminder.id == movieId }
+            val current = Reminders.pruned(stored, today).filter { reminder -> reminder.id != movieId }
+            it[REMINDERS] = Reminders.encode(if (set) Reminders.toggle(current, movieId, day) else current)
         }
         return set
     }

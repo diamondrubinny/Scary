@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import androidx.annotation.StringRes
 import io.github.diamondrubinny.scary.core.catalog.Mood
@@ -82,7 +83,7 @@ data class HomeUiState(
 }
 
 /** The whole series a film belongs to, its films in the order they came out (TMDB, with the viewer's key). */
-data class FranchiseUi(val movieId: String, val name: String, val movies: List<Movie>)
+data class FranchiseUi(val movieId: String, val name: String, val movies: List<Movie>, val language: Language? = null)
 
 /** Web search under the library results: [loading] while waiting, [failed] when Cinemeta could not be reached. */
 data class WebSearchState(

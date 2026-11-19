@@ -500,11 +500,17 @@ class HomeViewModel(
      * family night, where only the library is shown). The page calls it again when the key or online data change.
      */
     fun loadFranchise(movie: Movie, language: Language) {
-        if (_franchise.value?.movieId == movie.id) return
+        val prefs = latestPrefs
+        // Whether it may show at all comes first: a series loaded earlier must not stay on family night, with online
+        // data off or after the key is removed.
+        if (movie.isSeries || prefs == null || !prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) {
+            franchiseJob?.cancel()
+            _franchise.value = null
+            return
+        }
+        if (_franchise.value?.let { it.movieId == movie.id && it.language == language } == true) return
         franchiseJob?.cancel()
         _franchise.value = null
-        val prefs = latestPrefs
-        if (movie.isSeries || prefs == null || !prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) return
         franchiseJob = viewModelScope.launch {
             val found = tmdb.franchise(movie.imdbId, language) ?: return@launch
             val known = visibleCatalog()?.movies.orEmpty().associateBy { it.imdbId }
@@ -512,7 +518,7 @@ class HomeViewModel(
             val movies = found.films.mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }
             if (movies.size < 2) return@launch
             webMovies = webMovies + movies.filter { it.imdbId !in known }.associateBy { it.id }
-            _franchise.value = FranchiseUi(movie.id, found.name, movies)
+            _franchise.value = FranchiseUi(movie.id, found.name, movies, language)
         }
     }
 
@@ -666,7 +672,11 @@ class HomeViewModel(
             // viewer has watched since has done its job.
             if (prefs.reminders.isNotEmpty() && HomeRowChoices.NOW_OUT !in off) {
                 val day = today()
-                val out = Reminders.due(prefs.reminders, day.toEpochDay()).mapNotNull(catalog::movie)
+                // The day the catalog gives the film now, when it holds one: a release that moved is waited for.
+                val current = Reminders.withDays(prefs.reminders) { id ->
+                    catalog.movie(id)?.releaseDate?.let { runCatching { LocalDate.parse(it) }.getOrNull() }?.toEpochDay()
+                }
+                val out = Reminders.due(current, day.toEpochDay()).mapNotNull(catalog::movie)
                     .filter { it.comingOn(day) == null && it.id !in watched }
                 if (out.isNotEmpty()) add(HomeRow.NowOut(out))
             }
@@ -2230,6 +2240,8 @@ class HomeViewModel(
     suspend fun remoteSearch(text: String): List<PhoneRemoteServer.Result> {
         val query = text.trim().take(MAX_QUERY_LENGTH)
         backStack.value = listOf(Screen.Home, Screen.Search)
+        // The TV shows what the phone lists: a filter left on from an earlier search would hide some of it.
+        _searchFilter.value = SearchFilter.NONE
         setSearchQuery(query)
         val library = withContext(Dispatchers.Default) { Search.query(uiState.value.movies, query, limit = REMOTE_RESULTS) }
         val web = withTimeoutOrNull(REMOTE_WEB_WAIT_MS) {
