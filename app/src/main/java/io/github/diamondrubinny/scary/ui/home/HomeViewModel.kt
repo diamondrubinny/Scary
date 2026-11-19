@@ -30,6 +30,7 @@ import io.github.diamondrubinny.scary.core.catalog.FearStats
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
+import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Recommender
@@ -55,6 +56,7 @@ import io.github.diamondrubinny.scary.core.security.PinLockout
 import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
 import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import io.github.diamondrubinny.scary.data.AiRepository
+import io.github.diamondrubinny.scary.data.BackupRepository
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
@@ -138,6 +140,8 @@ class HomeViewModel(
     private val stremio: StremioRepository? = null,
     /** Subtitles found online by the film's name, for the internal player; null in tests that do not need it. */
     private val subtitleRepository: SubtitleRepository? = null,
+    /** The viewer's backup, made and restored from the phone remote; null in tests that do not need it. */
+    private val backups: BackupRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -283,6 +287,7 @@ class HomeViewModel(
             autoWatched = prefs.autoWatched,
             hideWatched = prefs.hideWatched,
             hideOrigins = prefs.hideOrigins,
+            hiddenRows = prefs.hiddenRows,
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
@@ -583,16 +588,18 @@ class HomeViewModel(
             if (hideWatched) movies.filter { it.id !in watched } else Personalize.watchedLast(movies) { it.id in watched }
         val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
         val seenOrLoved = watched + prefs.lovedIds
+        // Rows the viewer turned off in Settings are not built at all.
+        val off = prefs.hiddenRows
         val rows = buildList {
             // The viewer's own files stopped halfway or marked: never on family night, and with the parental lock on,
             // only once the PIN was given (personal files have no fear level).
             if (!prefs.familyNight && (!prefs.parentalEnabled || unlocked)) {
                 val going = WatchHistory.continueWatching(history).map { ContinueItem(it, it.movieId?.let(all::movie)) }
-                if (going.isNotEmpty()) add(HomeRow.ContinueWatching(going))
+                if (going.isNotEmpty() && HomeRowChoices.CONTINUE !in off) add(HomeRow.ContinueWatching(going))
             }
             // What the viewer stopped in the middle of in Stremio: films SCARY knows (family night's catalog when it is
             // on), none the parental lock covers.
-            if (stremioItems.isNotEmpty()) {
+            if (stremioItems.isNotEmpty() && HomeRowChoices.STREMIO !in off) {
                 val byImdb = all.movies.associateBy { it.imdbId }
                 val going = Stremio.continueWatching(stremioItems).mapNotNull { item ->
                     val movie = byImdb[item.imdbId]?.takeUnless(isLocked) ?: return@mapNotNull null
@@ -602,7 +609,7 @@ class HomeViewModel(
                 if (going.isNotEmpty()) add(HomeRow.StremioContinue(going))
             }
             val recent = prefs.recentIds.mapNotNull(catalog::movie)
-            if (recent.isNotEmpty()) add(HomeRow.Recent(recent))
+            if (recent.isNotEmpty() && HomeRowChoices.RECENT !in off) add(HomeRow.Recent(recent))
             add(HomeRow.Apps(tiles))
             // A new viewer: until a few films are watched or loved, the rows cannot follow their taste. Ask once.
             if (!taste.known && !prefs.tasteInviteDismissed && !prefs.familyNight) add(HomeRow.TasteInvite)
@@ -612,11 +619,12 @@ class HomeViewModel(
                 if (movies.isNotEmpty()) add(HomeRow.Seasonal(season, movies))
             }
             val myList = prefs.myListIds.mapNotNull(catalog::movie)
-            if (myList.isNotEmpty()) add(HomeRow.MyList(myList))
+            if (myList.isNotEmpty() && HomeRowChoices.MY_LIST !in off) add(HomeRow.MyList(myList))
             // Moods, decades, time plans and recommendations are about films: a series has no single length or year.
             if (films) {
                 val loved = Recommender.becauseYouLoved(catalog.movies, prefs.lovedIds, exclude = watched + disliked, isLocked = isLocked)
-                loved?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
+                val suggest = HomeRowChoices.BECAUSE !in off
+                if (suggest) loved?.let { add(HomeRow.BecauseYouLoved(it.because, it.movies)) }
                 // Not the same films twice: "Because you watched" skips the loved row's seed and its films.
                 Recommender.becauseYouWatched(
                     catalog.movies,
@@ -624,8 +632,8 @@ class HomeViewModel(
                     exclude = disliked + prefs.lovedIds + loved?.movies?.map { it.id }.orEmpty(),
                     skipSeeds = setOfNotNull(loved?.because?.id),
                     isLocked = isLocked,
-                )?.let { add(HomeRow.BecauseYouWatched(it.because, it.movies)) }
-                add(
+                )?.takeIf { suggest }?.let { add(HomeRow.BecauseYouWatched(it.because, it.movies)) }
+                if (HomeRowChoices.MOODS !in off) add(
                     HomeRow.Moods(
                         selected = selectedMood,
                         movies = unseenFirst(Decades.pick(catalog.movies, selectedMood, selectedDecade)),
@@ -633,7 +641,7 @@ class HomeViewModel(
                         decades = Decades.available(catalog.movies),
                     ),
                 )
-                add(
+                if (HomeRowChoices.TIME !in off) add(
                     HomeRow.TimePlan(
                         selected = budget,
                         plan = budget?.let { TimePlan.plan(catalog.movies, it, today(), exclude = disliked, watched = watched, isLocked = isLocked) },
@@ -647,7 +655,7 @@ class HomeViewModel(
             // Family night can empty a row; an empty row is not shown.
             val collections = catalog.collections
                 .map { collection -> collection to catalog.moviesOf(collection) }
-                .filter { (_, movies) -> movies.isNotEmpty() }
+                .filter { (collection, movies) -> movies.isNotEmpty() && HomeRowChoices.collectionKey(collection.id) !in off }
             val online = Cinemeta.onlineCollectionId("")
             val ordered = Personalize.byTaste(collections, taste) { (_, movies) -> Personalize.rowScore(movies, taste, seenOrLoved) }
             // Each film once down the screen: a film from the web only in the first row that reaches it; library films
@@ -1470,6 +1478,21 @@ class HomeViewModel(
         }
     }
 
+    /** What the phone remote did with the viewer's backup, said on the TV; a restore can change the hidden films. */
+    private fun onBackupEvent(event: BackupRepository.Event) {
+        when (event) {
+            BackupRepository.Event.Saved -> show(R.string.msg_backup_sent)
+            is BackupRepository.Event.Restored -> {
+                if (event.originsChanged) {
+                    if (OriginFilter.enabled) extraPages.update { pages -> pages.mapValues { (_, metas) -> OriginFilter.visible(metas) } }
+                    refreshRequests.tryEmit(Unit)
+                }
+                val added = event.added.myList + event.added.watched + event.added.rated + event.added.bucket
+                if (added > 0) show(R.string.msg_restore_done, added.toString()) else show(R.string.msg_restore_nothing)
+            }
+        }
+    }
+
     fun toggleHideWatched() {
         viewModelScope.launch { settings.setHideWatched(!settings.prefs.first().hideWatched) }
     }
@@ -1914,6 +1937,33 @@ class HomeViewModel(
     fun toggleLovedQuietly(movie: Movie) = rate(movie, Rating.LOVED, quiet = true)
 
     fun openTastePicker() = push(Screen.TastePicker)
+
+    fun openHomeRows() = push(Screen.HomeRows)
+
+    /**
+     * Settings → Home screen rows: the fixed kinds, then every row the catalog holds now (films' and series'), each
+     * with whether it shows ([off] holds the keys of the rows turned off).
+     */
+    fun rowChoices(off: Set<String>): List<RowChoice> {
+        val fixed = listOf(
+            HomeRowChoices.CONTINUE to R.string.row_continue, HomeRowChoices.STREMIO to R.string.row_stremio_continue,
+            HomeRowChoices.RECENT to R.string.row_recent, HomeRowChoices.MY_LIST to R.string.row_my_list,
+            HomeRowChoices.BECAUSE to R.string.home_rows_because, HomeRowChoices.MOODS to R.string.row_moods,
+            HomeRowChoices.TIME to R.string.row_time,
+        ).map { (key, title) -> RowChoice(key, title, null, key !in off) }
+        val collections = visibleCatalog()?.collections.orEmpty().distinctBy { it.id }.map { collection ->
+            val key = HomeRowChoices.collectionKey(collection.id)
+            RowChoice(key, null, collection, key !in off)
+        }
+        return fixed + collections
+    }
+
+    /** A row turned on or off; null turns every row back on. */
+    fun toggleHomeRow(key: String?) {
+        viewModelScope.launch {
+            settings.setHiddenRows(if (key == null) emptySet() else HomeRowChoices.toggled(settings.prefs.first().hiddenRows, key))
+        }
+    }
 
     /** "Not now" on the home screen's invitation; settings still offer the picker. */
     fun dismissTasteInvite() {
@@ -2374,6 +2424,7 @@ class HomeViewModel(
         loadCatalog()
         refreshApps()
         viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
+        backups?.let { repository -> viewModelScope.launch { repository.events.collect(::onBackupEvent) } }
     }
 
     companion object {
@@ -2434,6 +2485,7 @@ class HomeViewModel(
                     container.watchStore,
                     container.stremio,
                     container.subtitleRepository,
+                    container.backups,
                 )
             }
         }

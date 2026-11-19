@@ -45,6 +45,8 @@ data class HomeUiState(
     val autoWatched: Boolean = true,
     val hideWatched: Boolean = false,
     val hideOrigins: Boolean = true,
+    /** Home screen rows the viewer turned off (core HomeRowChoices keys). */
+    val hiddenRows: Set<String> = emptySet(),
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
@@ -260,6 +262,8 @@ sealed interface Screen {
     /** Settings → Stremio account. */
     data object StremioAccount : Screen
     data object TastePicker : Screen
+    /** Settings → Home screen rows: each row on or off. */
+    data object HomeRows : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */
@@ -367,3 +371,9 @@ data class UserMessage(val id: Long, @StringRes val text: Int, val args: List<St
  * then leaves the list), otherwise the viewer may go back to it. [next] is the film after it, if any.
  */
 data class BucketPrompt(val current: Movie, val next: Movie?, val finished: Boolean)
+
+/**
+ * One line of Settings → Home screen rows: a fixed kind of row ([title], a string resource) or a collection (a library
+ * category, a row from the web or from TMDB), and whether it shows.
+ */
+data class RowChoice(val key: String, @param:androidx.annotation.StringRes val title: Int?, val collection: MovieCollection?, val shown: Boolean)

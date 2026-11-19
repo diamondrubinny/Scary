@@ -148,6 +148,12 @@ class AppContainer(context: Context) {
         cinemetaRepository,
     )
 
+    /** The viewer's backup: made for the paired phone, and merged back from a file it sends. */
+    val backups = io.github.diamondrubinny.scary.data.BackupRepository(
+        settingsRepository, savedMoviesRepository, cinemetaRepository, catalogRepository, scope,
+        appVersion = runCatching { appContext.packageManager.getPackageInfo(appContext.packageName, 0).versionName }.getOrNull().orEmpty(),
+    ).also { phoneRemote.backups = it }
+
     /** Where the viewer stopped in each of their files and the spots they marked, kept on this TV only. */
     val watchStore = io.github.diamondrubinny.scary.data.WatchStore(appContext)
     val launcher = Launcher(appContext, appsRepository)

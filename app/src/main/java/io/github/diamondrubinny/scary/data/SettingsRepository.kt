@@ -4,6 +4,8 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.backup.Backup
+import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.core.links.Region
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import android.content.Context
@@ -31,6 +33,7 @@ import io.github.diamondrubinny.scary.core.security.PinHash
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.io.IOException
 import java.time.LocalDate
@@ -68,6 +71,8 @@ data class LauncherPrefs(
     val hideWatched: Boolean = false,
     /** Arab and Indian films stay off the shelves (core OriginFilter); on unless the viewer chooses to show them. */
     val hideOrigins: Boolean = true,
+    /** Home screen rows the viewer turned off (core HomeRowChoices keys). */
+    val hiddenRows: Set<String> = emptySet(),
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
     /** Look for a new version of SCARY by itself (official builds only). */
@@ -137,6 +142,7 @@ class SettingsRepository(private val context: Context) {
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 hideOrigins = p[HIDE_ORIGINS] ?: true,
+                hiddenRows = HomeRowChoices.sanitize(p[HIDDEN_ROWS].orEmpty()),
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
                 autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
                 updateSkippedVersion = p[UPDATE_SKIPPED],
@@ -201,6 +207,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
 
     suspend fun setHideOrigins(enabled: Boolean) = edit { it[HIDE_ORIGINS] = enabled }
+
+    suspend fun setHiddenRows(keys: Set<String>) = edit { it[HIDDEN_ROWS] = HomeRowChoices.sanitize(keys) }
 
     suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
 
@@ -272,6 +280,61 @@ class SettingsRepository(private val context: Context) {
             stored = StoredLists(RecentList.decode(p[MY_LIST]), RecentList.decode(p[LOVED]), RecentList.decode(p[WATCHED]))
         }
         return stored
+    }
+
+    /** The TV's lists before and after a restore, and whether the rule for hidden films changed with it. */
+    data class Restored(val before: Backup.Snapshot, val after: Backup.Snapshot, val originsChanged: Boolean)
+
+    /** The viewer's lists and plain switches, as a backup holds them ([series]: the listed ids that are series). */
+    suspend fun backupSnapshot(series: Set<String>): Backup.Snapshot {
+        val p = prefs.first()
+        return Backup.sanitize(
+            Backup.Snapshot(
+                myList = p.myListIds, watched = p.watchedIds, watchedDays = p.watchedDays, loved = p.lovedIds,
+                disliked = p.dislikedIds, bucket = p.bucketIds, series = series, hiddenRows = p.hiddenRows,
+                switches = mapOf(
+                    "seasonal_rows" to p.seasonalRows, "auto_watched" to p.autoWatched, "hide_watched" to p.hideWatched,
+                    "hide_origins" to p.hideOrigins, "trailer_autoplay" to p.trailerAutoplay, "trailer_sound" to p.trailerSound,
+                ),
+            ),
+        )
+    }
+
+    /**
+     * A backup file merged into the TV's lists, in one write (Backup.merge: nothing the TV holds is removed). Only the
+     * lists, the home rows turned off and the switches of Backup.SWITCHES are touched: never the PIN, the lock,
+     * family night, an account or a key.
+     */
+    suspend fun applyBackup(file: Backup.Snapshot): Restored {
+        var result = Restored(Backup.Snapshot(), Backup.Snapshot(), false)
+        edit { p ->
+            val here = Backup.Snapshot(
+                myList = RecentList.decode(p[MY_LIST]), watched = RecentList.decode(p[WATCHED]), watchedDays = decodeDays(p[WATCHED_DAYS]),
+                loved = RecentList.decode(p[LOVED]), disliked = RecentList.decode(p[DISLIKED]), bucket = RecentList.decode(p[BUCKET]),
+                hiddenRows = p[HIDDEN_ROWS].orEmpty(),
+            )
+            val merged = Backup.merge(here, file)
+            p[MY_LIST] = RecentList.encode(merged.myList.take(MyList.MAX_SIZE))
+            p[WATCHED] = RecentList.encode(merged.watched.take(WatchedList.MAX_SIZE))
+            p[WATCHED_DAYS] = encodeDays(merged.watchedDays)
+            p[LOVED] = RecentList.encode(merged.loved.take(MAX_RATED))
+            p[DISLIKED] = RecentList.encode(merged.disliked.take(MAX_RATED))
+            p[BUCKET] = RecentList.encode(merged.bucket.take(BucketList.MAX_SIZE))
+            p[HIDDEN_ROWS] = HomeRowChoices.sanitize(merged.hiddenRows)
+            val hidOrigins = p[HIDE_ORIGINS] ?: true
+            for ((name, value) in file.switches) {
+                when (name) {
+                    "seasonal_rows" -> p[SEASONAL_ROWS] = value
+                    "auto_watched" -> p[AUTO_WATCHED] = value
+                    "hide_watched" -> p[HIDE_WATCHED] = value
+                    "hide_origins" -> p[HIDE_ORIGINS] = value
+                    "trailer_autoplay" -> p[TRAILER_AUTOPLAY] = value
+                    "trailer_sound" -> p[TRAILER_SOUND] = value
+                }
+            }
+            result = Restored(Backup.sanitize(here), merged, (p[HIDE_ORIGINS] ?: true) != hidOrigins)
+        }
+        return result
     }
 
     suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
@@ -433,6 +496,7 @@ class SettingsRepository(private val context: Context) {
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val HIDE_ORIGINS = booleanPreferencesKey("hide_arab_indian")
+        private val HIDDEN_ROWS = stringSetPreferencesKey("hidden_home_rows")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
         private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")

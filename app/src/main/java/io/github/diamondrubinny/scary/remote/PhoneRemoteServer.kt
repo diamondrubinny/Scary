@@ -46,6 +46,10 @@ import java.util.concurrent.atomic.AtomicInteger
  * PHONE_REMOTE_PLAN.md). It serves the remote page (assets/remote) to anyone, since it holds no secret, and takes only
  * commands signed with the secret from the QR code (RemoteProtocol). It stops after [IDLE_MS] without a command, on
  * "Disconnect", or after [MAX_BAD_SIGNATURES] forged commands. Nothing is stored; nothing leaves the home network.
+ *
+ * The viewer's backup (docs/NEXT_OPTIONS.md, stage 3) goes to the phone and comes back through the same signed
+ * commands: the backup's text is encrypted and signed in the answer, and a file to restore is taken at its own
+ * address, the only one that reads a body longer than a few kilobytes.
  */
 class PhoneRemoteServer(private val context: Context) {
 
@@ -64,8 +68,23 @@ class PhoneRemoteServer(private val context: Context) {
     /** One search result for the phone: a movie's id, title in the TV's language, and years. */
     data class Result(val id: String, val title: String, val years: String)
 
-    /** The answer to a command: a status word the page knows (remote.js STATUS_WORDS), and search results. */
-    data class Reply(val status: String, val results: List<Result> = emptyList())
+    /**
+     * The answer to a command: a status word the page knows (remote.js STATUS_WORDS), and search results. [answer] is
+     * text for the paired phone only (the backup): it is never written as it is, only encrypted and signed.
+     */
+    data class Reply(val status: String, val results: List<Result> = emptyList(), val answer: String? = null)
+
+    /** The viewer's backup, made and read back (BackupRepository); set once by the app's container. */
+    interface Backups {
+        /** The backup file's text, or null when it could not be made. */
+        suspend fun backup(): String?
+
+        /** Merges a backup file into the TV's lists; the status word for the phone. */
+        suspend fun restore(text: String): String
+    }
+
+    @Volatile
+    var backups: Backups? = null
 
     /** What SCARY's screen does with a command; set by MainActivity while it exists. */
     fun interface Handler {
@@ -192,8 +211,19 @@ class PhoneRemoteServer(private val context: Context) {
                             return
                         }
                         val body = String(readExactly(input, length) ?: return, Charsets.UTF_8)
-                        val (code, reply) = command(body)
-                        respondJson(output, code, reply)
+                        val (code, reply) = command(body, large = false)
+                        respondJson(output, code, reply.first, reply.second)
+                    }
+                    // A backup file to restore: the one address that reads a long body, and takes nothing else.
+                    method == "POST" && path == "/api/big" -> {
+                        val length = headers["content-length"]?.toIntOrNull()
+                        if (length == null || length !in 1..RemoteProtocol.MAX_LARGE_BODY) {
+                            respondJson(output, 413, Reply("malformed"))
+                            return
+                        }
+                        val body = String(readExactly(input, length) ?: return, Charsets.UTF_8)
+                        val (code, reply) = command(body, large = true)
+                        respondJson(output, code, reply.first, reply.second)
                     }
                     else -> respond(output, 404, "text/plain; charset=utf-8", "Not found".toByteArray())
                 }
@@ -203,23 +233,25 @@ class PhoneRemoteServer(private val context: Context) {
         }
     }
 
-    private suspend fun command(body: String): Pair<Int, Reply> {
-        if (!allowedNow()) return 429 to Reply("busy")
-        val current = session ?: return 410 to Reply("off")
-        return when (val verdict = current.open(body)) {
+    /** The status code and the reply, with the reply's [Reply.answer] sealed for the phone when it has one. */
+    private suspend fun command(body: String, large: Boolean): Pair<Int, Pair<Reply, RemoteProtocol.SealedAnswer?>> {
+        if (!allowedNow()) return 429 to (Reply("busy") to null)
+        val current = session ?: return 410 to (Reply("off") to null)
+        return when (val verdict = current.open(body, large)) {
             is Verdict.Accepted -> {
                 val request = verdict.request
                 // A ping only says the page is open; it does not keep the remote on.
                 if (request.command != Command.PING) lastCommandAt = SystemClock.elapsedRealtime()
                 (state.value as? State.On)?.takeIf { !it.connected }?.let { _state.value = it.copy(connected = true) }
-                200 to handle(request)
+                val reply = handle(request)
+                200 to (reply to reply.answer?.let { current.sealAnswer(request.counter, it) })
             }
             Verdict.BadSignature -> {
                 if (badSignatures.incrementAndGet() >= MAX_BAD_SIGNATURES) stop(StopReason.FORGED)
-                401 to Reply("bad_signature")
+                401 to (Reply("bad_signature") to null)
             }
-            Verdict.Replayed -> 409 to Reply("replay")
-            Verdict.Malformed -> 400 to Reply("malformed")
+            Verdict.Replayed -> 409 to (Reply("replay") to null)
+            Verdict.Malformed -> 400 to (Reply("malformed") to null)
         }
     }
 
@@ -238,6 +270,9 @@ class PhoneRemoteServer(private val context: Context) {
             Command.VOLUME_DOWN -> audio?.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI)
             Command.MUTE -> audio?.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_TOGGLE_MUTE, AudioManager.FLAG_SHOW_UI)
             Command.PING -> Unit
+            // The backup needs no screen: it works whatever app is in front.
+            Command.BACKUP -> return backups?.backup()?.let { Reply("backup", answer = it) } ?: Reply("backup_failed")
+            Command.RESTORE -> return Reply(backups?.restore(request.text) ?: "restore_failed")
             else -> return handler?.handle(request)?.takeUnless { it.status == NOT_FRONT } ?: elsewhere(request)
         }
         return Reply("ok")
@@ -317,9 +352,13 @@ class PhoneRemoteServer(private val context: Context) {
         return bytes
     }
 
-    private fun respondJson(output: java.io.OutputStream, code: Int, reply: Reply) {
+    private fun respondJson(output: java.io.OutputStream, code: Int, reply: Reply, sealed: RemoteProtocol.SealedAnswer? = null) {
         val json = buildJsonObject {
             put("s", reply.status)
+            if (sealed != null) {
+                put("b", sealed.cipher)
+                put("t", sealed.tag)
+            }
             if (reply.results.isNotEmpty()) {
                 putJsonArray("r") {
                     reply.results.forEach { result ->

@@ -97,6 +97,7 @@ class SettingsActions(
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRealDebrid: () -> Unit = {},
     val onOpenStremioAccount: () -> Unit = {},
+    val onOpenHomeRows: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
     val onClearRecent: () -> Unit = {},
     val onCheckForUpdates: () -> Unit = {},
@@ -156,6 +157,9 @@ fun SettingsScreen(
     lovedCount: Int = 0,
     recentCount: Int = 0,
     returningFromTaste: Boolean = false,
+    returningFromRows: Boolean = false,
+    /** How many home screen rows the viewer turned off. */
+    hiddenRowCount: Int = 0,
     updateState: UpdateState = UpdateState.Idle,
     autoUpdateCheck: Boolean = true,
     ai: AiSettingsState = AiSettingsState(),
@@ -168,6 +172,7 @@ fun SettingsScreen(
     val statsFocus = remember { FocusRequester() }
     val remoteFocus = remember { FocusRequester() }
     val tasteFocus = remember { FocusRequester() }
+    val homeRowsFocus = remember { FocusRequester() }
     // The list is long: it is in sections, each with a heading and a button in the jump bar that goes to its first row.
     val filmsFocus = remember { FocusRequester() }
     val displayFocus = remember { FocusRequester() }
@@ -183,6 +188,7 @@ fun SettingsScreen(
             returningFromStats -> statsFocus
             returningFromRemote -> remoteFocus
             returningFromTaste -> tasteFocus
+            returningFromRows -> homeRowsFocus
             returningFrom == DocumentKind.Privacy -> privacyFocus
             returningFrom == DocumentKind.Accessibility -> statementFocus
             else -> firstFocus
@@ -357,6 +363,12 @@ fun SettingsScreen(
         )
         BasicText(stringResource(R.string.settings_hide_watched_note), style = ScaryType.Caption)
         SettingRow(
+            label = stringResource(R.string.settings_home_rows),
+            value = if (hiddenRowCount > 0) stringResource(R.string.home_rows_hidden_count, hiddenRowCount) else stringResource(R.string.home_rows_all),
+            onClick = actions.onOpenHomeRows,
+            modifier = Modifier.focusRequester(homeRowsFocus).testTag(HOME_ROWS_ROW_TAG),
+        )
+        SettingRow(
             label = stringResource(R.string.taste_title),
             value = pluralStringResource(R.plurals.settings_taste_value, lovedCount, lovedCount),
             onClick = actions.onOpenTastePicker,
@@ -527,6 +539,7 @@ fun SettingsScreen(
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
 const val ORIGINS_ROW_TAG = "originsRow"
+const val HOME_ROWS_ROW_TAG = "homeRowsRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
 const val STREMIO_ROW_TAG = "stremioRow"
@@ -693,7 +706,7 @@ private fun SectionHeading(@androidx.annotation.StringRes title: Int) {
 }
 
 @Composable
-private fun SettingRow(
+internal fun SettingRow(
     label: String,
     value: String?,
     onClick: () -> Unit,
