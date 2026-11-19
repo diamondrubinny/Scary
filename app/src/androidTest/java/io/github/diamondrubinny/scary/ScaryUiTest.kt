@@ -980,7 +980,18 @@ class ScaryUiTest {
             rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
             if (HomeButtonService.instance == null) {
-                val off = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                // SCARY is the home app here, and now and then the emulator brings it back to the front by itself
+                // right after the settings open: then Back reaches SCARY, which answers "ok". That says nothing about
+                // other apps, so the settings are opened again and the question is asked again.
+                var off = ""
+                for (attempt in 1..3) {
+                    if (scaryInFront()) {
+                        rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                        waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+                    }
+                    off = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.BACK))
+                    if ("\"a11y_off\"" in off) break
+                }
                 assertTrue(off, "\"a11y_off\"" in off)
             }
             // On: Back from the phone closes the other app, and the arrows go as far as this Android allows.
@@ -1303,7 +1314,6 @@ class ScaryUiTest {
         val screen = hasTestTag(ASK_SCREEN_TAG)
         val line = hasContentDescription(text(R.string.ai_title)) and hasAnyAncestor(screen)
         val chatTab = hasTestTag(askTabTag(chat = true))
-        val suggestTab = hasTestTag(askTabTag(chat = false))
         withCleanup({
             rule.onNodeWithTag(ASK_BUTTON_TAG).performClick()
             waitFor(line and isFocused())
@@ -1314,11 +1324,13 @@ class ScaryUiTest {
                 rule.onAllNodes(line and isFocused()).fetchSemanticsNodes().isEmpty() &&
                     rule.onAllNodes(isFocused() and hasAnyAncestor(screen)).fetchSemanticsNodes().isNotEmpty()
             }
-            // Along the top row to "Chat", whichever end the focus landed on.
+            // Along the top row to "Chat", from whichever side the focus landed on: by where the two are on the screen,
+            // so the test holds in Hebrew and Arabic (where "Chat" is to the left of "Suggestions") as in English.
             repeat(4) {
                 if (rule.onAllNodes(chatTab and isFocused()).fetchSemanticsNodes().isNotEmpty()) return@repeat
-                val onSuggest = rule.onAllNodes(suggestTab and isFocused()).fetchSemanticsNodes().isNotEmpty()
-                pressKey(if (onSuggest) KeyEvent.KEYCODE_DPAD_RIGHT else KeyEvent.KEYCODE_DPAD_LEFT)
+                val chatX = rule.onNode(chatTab).fetchSemanticsNode().boundsInRoot.center.x
+                val focusedX = rule.onAllNodes(isFocused() and hasAnyAncestor(screen)).fetchSemanticsNodes().firstOrNull()?.boundsInRoot?.center?.x
+                pressKey(if (focusedX != null && focusedX < chatX) KeyEvent.KEYCODE_DPAD_RIGHT else KeyEvent.KEYCODE_DPAD_LEFT)
             }
             waitFor(chatTab and isFocused())
             pressKey(KeyEvent.KEYCODE_DPAD_CENTER)
