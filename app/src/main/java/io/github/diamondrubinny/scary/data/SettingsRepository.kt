@@ -66,6 +66,8 @@ data class LauncherPrefs(
     val autoWatched: Boolean = true,
     /** Watched films leave the home rows (a "Watched" row keeps them) instead of going to the end of each row. */
     val hideWatched: Boolean = false,
+    /** Arab and Indian films stay off the shelves (core OriginFilter); on unless the viewer chooses to show them. */
+    val hideOrigins: Boolean = true,
     /** The viewer said "Not now" to picking films they love, on the home screen. */
     val tasteInviteDismissed: Boolean = false,
     /** Look for a new version of SCARY by itself (official builds only). */
@@ -134,6 +136,7 @@ class SettingsRepository(private val context: Context) {
                 watchedIds = RecentList.decode(p[WATCHED]),
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
+                hideOrigins = p[HIDE_ORIGINS] ?: true,
                 tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
                 autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
                 updateSkippedVersion = p[UPDATE_SKIPPED],
@@ -196,6 +199,8 @@ class SettingsRepository(private val context: Context) {
     suspend fun setAutoWatched(enabled: Boolean) = edit { it[AUTO_WATCHED] = enabled }
 
     suspend fun setHideWatched(enabled: Boolean) = edit { it[HIDE_WATCHED] = enabled }
+
+    suspend fun setHideOrigins(enabled: Boolean) = edit { it[HIDE_ORIGINS] = enabled }
 
     suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
 
@@ -427,6 +432,7 @@ class SettingsRepository(private val context: Context) {
         private val WATCHED = stringPreferencesKey("watched_movie_ids")
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
+        private val HIDE_ORIGINS = booleanPreferencesKey("hide_arab_indian")
         private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
         private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")

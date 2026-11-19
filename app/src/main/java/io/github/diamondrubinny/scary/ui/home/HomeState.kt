@@ -44,6 +44,7 @@ data class HomeUiState(
     val watchedIds: Set<String> = emptySet(),
     val autoWatched: Boolean = true,
     val hideWatched: Boolean = false,
+    val hideOrigins: Boolean = true,
     val trailerAutoplay: Boolean = true,
     val trailerSound: Boolean = false,
     val trailerIntroSeen: Boolean = false,
@@ -234,7 +235,12 @@ sealed interface AppTile {
     }
 }
 
-data class MovieDetails(val movie: Movie, val similar: List<Movie>)
+data class MovieDetails(
+    val movie: Movie,
+    val similar: List<Movie>,
+    /** The director's other films in the library and the offline index; empty when the director is not known. */
+    val byDirector: List<Movie> = emptyList(),
+)
 
 /** Read-only texts reachable from settings. */
 enum class DocumentKind { Privacy, Accessibility }

@@ -58,6 +58,8 @@ import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
 import io.github.diamondrubinny.scary.ui.components.ICON_LABEL_TAG
 import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
 import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
+import io.github.diamondrubinny.scary.ui.details.BY_DIRECTOR_ROW_TAG
+import io.github.diamondrubinny.scary.ui.settings.ORIGINS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.settings.REFRESH_FILMS_ROW_TAG
@@ -308,6 +310,32 @@ class ScaryUiTest {
         // Every section has its heading in the list.
         listOf(R.string.settings_section_films, R.string.settings_section_display, R.string.settings_section_rows, R.string.settings_section_sound, R.string.settings_section_parents)
             .forEach { title -> rule.onAllNodes(hasText(text(title))).fetchSemanticsNodes().let { assertTrue("heading and jump button for ${text(title)}", it.size >= 2) } }
+        backToHome()
+    }
+
+    /**
+     * A film's page has a second row, the director's other films (from the library and the offline index, nothing
+     * asked online); and Settings say whether Arab and Indian films are hidden, as SCARY comes.
+     */
+    @Test
+    fun aFilmPageShowsMoreFromItsDirectorAndSettingsShowTheHiddenFilmsSwitch() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextInput("prince of darkness")
+        val film = hasContentDescription("Prince of Darkness", substring = true)
+        waitFor(film)
+        rule.onAllNodes(film)[0].performClick()
+        waitFor(hasText(text(R.string.row_more_like)))
+        // John Carpenter has five more films in the library.
+        waitFor(hasText(rule.activity.getString(R.string.row_more_from_director, "John Carpenter")))
+        rule.onNode(hasTestTag(BY_DIRECTOR_ROW_TAG)).performScrollTo().assertExists()
+        backToHome()
+
+        rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
+        waitFor(hasTestTag(ORIGINS_ROW_TAG))
+        rule.onNode(hasTestTag(ORIGINS_ROW_TAG)).performScrollTo().assertExists()
+        rule.onNode(hasText(text(R.string.value_origins_hidden))).assertExists()
         backToHome()
     }
 

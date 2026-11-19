@@ -15,6 +15,7 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.sync.RefreshPolicy
 import io.github.diamondrubinny.scary.core.sync.RefreshState
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
@@ -84,6 +85,14 @@ class CatalogRepository(
      * stays up for days, so each signal on [refresh] (back on screen, network back, a timer) fetches again whatever is
      * missing or old ([RefreshPolicy]); a failed fetch is retried later, not given up on.
      */
+    private val freshAllAsked = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * The rule for hidden films changed (Settings): what is held is filtered again at once, and everything online is
+     * read anew at the next signal on the catalog's refresh flow, rows and categories alike.
+     */
+    fun askForFreshAll() = freshAllAsked.set(true)
+
     private val freshRowsAsked = java.util.concurrent.atomic.AtomicBoolean(false)
 
     /** "Refresh films now": the next signal on the catalog's refresh flow reads the online rows again, due or not. */
@@ -128,7 +137,15 @@ class CatalogRepository(
                     var categoriesState = RefreshState()
                     suspend fun fetchWhatIsDue() {
                         val now = System.currentTimeMillis()
-                        val knownCinemeta = cinemetaCache
+                        // The hidden-films rule changed: hide at once what is held (works offline too), then read all
+                        // of it again as if nothing were kept, so films now allowed come in.
+                        val everything = freshAllAsked.getAndSet(false)
+                        if (everything) {
+                            cinemetaCache = cinemetaCache?.withoutHidden()
+                            tmdbCache = tmdbCache?.let { it.copy(rows = it.rows.mapNotNull(OriginFilter::visible)) }
+                            emit(build())
+                        }
+                        val knownCinemeta = if (everything) null else cinemetaCache
                         // Rows with pages missing (a weak network) count as a failure: tried again with backoff until whole.
                         // Asked for by the viewer: read now, whatever the schedule and the backoff say.
                         val asked = freshRowsAsked.getAndSet(false)
@@ -164,7 +181,7 @@ class CatalogRepository(
                         // Only after a refresh this round: the copy read from disk at start says nothing new.
                         val noted = cinemetaCache
                         if (noted != null && noted !== knownCinemeta) cinemeta.noteRefresh(noted)
-                        val knownTmdb = tmdbCache
+                        val knownTmdb = if (everything) null else tmdbCache
                         // TMDB's rows, like Cinemeta's, are read again every few hours (and when the viewer asks); the
                         // library's translations once a day.
                         if (hasKey && (asked || RefreshPolicy.due(knownTmdb == null || knownTmdb.needsRows(now), tmdbState, now))) {

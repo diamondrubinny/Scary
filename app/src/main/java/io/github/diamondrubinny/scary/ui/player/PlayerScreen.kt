@@ -60,6 +60,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.nativeKeyCode
@@ -221,7 +223,10 @@ fun PlayerScreen(
     val latestLanguages by rememberUpdatedState(languages)
     var speedIndex by remember { mutableIntStateOf(SPEEDS.indexOf(1f)) }
     var subtitleSize by remember { mutableIntStateOf(settings?.subtitleSize ?: 1) }
-    var subtitleDelayMs by remember { mutableLongStateOf(0L) }
+    // The delay the viewer set for this file comes back with it.
+    var subtitleDelayMs by remember { mutableLongStateOf(settings?.trackMemory(session.key)?.subtitleDelayMs ?: 0L) }
+    // How subtitles look, in every film (WatchStore): colour, a dark box behind them, and how high they sit.
+    var subtitleLook by remember { mutableStateOf(SubtitleLook(settings?.subtitleColor ?: 0, settings?.subtitleBackground ?: true, settings?.subtitlePosition ?: 0)) }
     var picture by remember { mutableIntStateOf(settings?.pictureMode ?: PICTURE_FIT) }
     var nightOn by remember { mutableStateOf(settings?.nightSound == true && NightSound.supported) }
     var showBookmarks by remember { mutableStateOf(false) }
@@ -672,17 +677,24 @@ fun PlayerScreen(
             BasicText(
                 cues,
                 style = ScaryType.Body.copy(
-                    color = Color.White,
+                    color = if (subtitleLook.color == SubtitleLook.YELLOW) SubtitleYellow else Color.White,
                     fontSize = SUBTITLE_SIZES_SP[subtitleSize].sp,
                     lineHeight = (SUBTITLE_SIZES_SP[subtitleSize] * 1.25f).sp,
                     textAlign = TextAlign.Center,
                     textDirection = TextDirection.Content,
+                    // Without the dark box, a black edge keeps the words readable over a bright picture.
+                    shadow = if (subtitleLook.background) null else Shadow(Color.Black, Offset(2f, 2f), blurRadius = 6f),
                 ),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(bottom = if (controlsVisible) 230.dp else 48.dp, start = 48.dp, end = 48.dp)
-                    .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp))
-                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                    .padding(
+                        bottom = (if (controlsVisible) 230.dp else 48.dp) + (if (subtitleLook.position == SubtitleLook.HIGHER && !controlsVisible) SUBTITLE_RAISE else 0.dp),
+                        start = 48.dp,
+                        end = 48.dp,
+                    )
+                    .then(if (subtitleLook.background) Modifier.background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(6.dp)) else Modifier)
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                    .testTag(PLAYER_SUBTITLE_TAG),
             )
         }
         if (bitmapCues.isNotEmpty()) BitmapSubtitles(bitmapCues, videoAspect)
@@ -746,6 +758,7 @@ fun PlayerScreen(
                     selectedText = described.selectedText,
                     loadingText = loadingSubtitle,
                     prefs = languages,
+                    look = subtitleLook,
                     online = session.online?.let {
                         OnlinePickerState(
                             enabled = onlineAllowed,
@@ -776,6 +789,12 @@ fun PlayerScreen(
                     onClose = {
                         showTracks = false
                         poke()
+                    },
+                    onLook = { look ->
+                        subtitleLook = look
+                        settings?.subtitleColor = look.color
+                        settings?.subtitleBackground = look.background
+                        settings?.subtitlePosition = look.position
                     },
                     onOnlineEnabled = { on -> settings?.setOnlineSubtitles(on) },
                     onOnlineSearch = {
@@ -885,6 +904,8 @@ fun PlayerScreen(
                             stringResource(R.string.player_subtitle_delay, String.format(Locale.ROOT, "%.1f", subtitleDelayMs / 1000f)),
                             onClick = {
                                 subtitleDelayMs = if (subtitleDelayMs >= MAX_SUBTITLE_DELAY_MS) 0L else subtitleDelayMs + SUBTITLE_DELAY_STEP_MS
+                                // Kept for this file: a film whose subtitles run early still does next time.
+                                settings?.let { it.rememberTracks(session.key, (it.trackMemory(session.key) ?: TrackMemory()).copy(subtitleDelayMs = subtitleDelayMs)) }
                                 pendingCues.clear()
                                 poke()
                             },
@@ -1263,6 +1284,13 @@ private const val HIDE_AFTER_MS = 5_000L
 private const val TOAST_MS = 2_500L
 private const val NEXT_COUNTDOWN_S = 10
 private const val SUBTITLE_DELAY_STEP_MS = 500L
+
+/** The subtitles' text on screen, for tests. */
+const val PLAYER_SUBTITLE_TAG = "playerSubtitle"
+private val SubtitleYellow = Color(0xFFFFE066)
+
+/** How much higher "higher" subtitles sit. */
+private val SUBTITLE_RAISE = 110.dp
 private const val MAX_SUBTITLE_DELAY_MS = 5_000L
 private const val MAX_PENDING_CUES = 200
 

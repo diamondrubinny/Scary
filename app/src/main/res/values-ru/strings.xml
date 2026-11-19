@@ -7,6 +7,7 @@
     <string name="row_recent">Недавно открытые</string>
     <string name="row_apps">Мои приложения</string>
     <string name="row_more_like">Похожие фильмы</string>
+    <string name="row_more_from_director">Ещё от режиссёра %1$s</string>
     <string name="minutes">%1$d мин</string>
     <string name="fear_short">Страх %1$d/5</string>
     <string name="fear_description">Уровень страха %1$d из 5</string>
@@ -56,6 +57,12 @@
     <string name="settings_effects">Туман и зернистость</string>
     <string name="value_effects_tv_off">Включено, но телевизор убирает анимацию</string>
     <string name="settings_refresh_films">Обновить фильмы сейчас</string>
+    <string name="settings_origins">Арабские и индийские фильмы</string>
+    <string name="value_origins_hidden">Скрыты</string>
+    <string name="value_origins_shown">Показаны</string>
+    <string name="settings_origins_note">Скрыты: этих фильмов нет ни в одном ряду (поиск их находит). Показаны: они вернутся после повторного чтения фильмов.</string>
+    <string name="msg_origins_hidden">Арабские и индийские фильмы скрыты.</string>
+    <string name="msg_origins_shown">Арабские и индийские фильмы появятся после повторного чтения фильмов.</string>
     <string name="settings_refresh_films_last">Прочитаны: %1$s</string>
     <string name="settings_refresh_films_never">Ещё не прочитаны</string>
     <string name="msg_refreshing">Читаем новые фильмы…</string>
@@ -657,6 +664,15 @@
     <string name="tracks_audio">Звук</string>
     <string name="tracks_subtitles">Субтитры</string>
     <string name="tracks_every_film">В каждом фильме</string>
+    <string name="tracks_look">Вид субтитров</string>
+    <string name="tracks_look_color">Цвет: %1$s</string>
+    <string name="tracks_look_white">белый</string>
+    <string name="tracks_look_yellow">жёлтый</string>
+    <string name="tracks_look_background_on">Тёмный фон: есть</string>
+    <string name="tracks_look_background_off">Тёмный фон: нет</string>
+    <string name="tracks_look_position">Положение: %1$s</string>
+    <string name="tracks_look_bottom">внизу</string>
+    <string name="tracks_look_higher">выше</string>
     <string name="tracks_pref_audio">Язык звука: %1$s</string>
     <string name="tracks_pref_subtitles">Язык субтитров: %1$s</string>
     <string name="tracks_as_in_file">как в файле</string>

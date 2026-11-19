@@ -90,4 +90,27 @@ class SimilarTest {
         assertEquals(listOf("Horror", "Action"), movie.genres)
         assertEquals(MediaKind.MOVIE, movie.kind)
     }
+
+    @Test
+    fun `more from this director is the director's other films, the best rated first`() {
+        fun film(id: String, director: String, year: Int, rating: Double? = null) = io.github.diamondrubinny.scary.core.model.Movie(
+            id = id, imdbId = "tt" + id.hashCode().toString().takeLast(7).padStart(7, '0'), title = id, year = year, director = director,
+            genre = io.github.diamondrubinny.scary.core.model.Genre.HORROR, imdbRating = rating,
+        )
+        val hillHouse = film("gerald", "Mike Flanagan", 2017, 6.5)
+        val films = listOf(
+            hillHouse, film("oculus", "Mike Flanagan", 2013, 6.5), film("doctor sleep", "MIKE FLANAGAN", 2019, 7.3),
+            film("hush", "Mike Flanagan, Someone Else", 2016, 6.6), film("the shining", "Stanley Kubrick", 1980, 8.4),
+            film("nameless", "", 2001), film("short name", "Li", 2005),
+        )
+        val more = io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, hillHouse)
+        assertEquals(listOf("doctor sleep", "hush", "oculus"), more.map { it.id })
+        // Films already watched wait at the end.
+        assertEquals("doctor sleep", io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, hillHouse) { it.id == "doctor sleep" }.last().id)
+        // No director, or a name too short to trust: no row.
+        assertTrue(io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, films.first { it.id == "nameless" }).isEmpty())
+        assertTrue(io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, films.first { it.id == "short name" }).isEmpty())
+        // A film with two directors is among each one's.
+        assertTrue(io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, films.first { it.id == "hush" }).size == 3)
+    }
 }

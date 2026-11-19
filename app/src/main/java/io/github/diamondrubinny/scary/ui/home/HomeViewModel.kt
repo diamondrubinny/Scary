@@ -30,6 +30,7 @@ import io.github.diamondrubinny.scary.core.catalog.FearStats
 import io.github.diamondrubinny.scary.core.catalog.Mood
 import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.PendingWatch
+import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Recommender
 import io.github.diamondrubinny.scary.core.catalog.Search
@@ -281,6 +282,7 @@ class HomeViewModel(
             watchedIds = prefs.watchedIds.toSet(),
             autoWatched = prefs.autoWatched,
             hideWatched = prefs.hideWatched,
+            hideOrigins = prefs.hideOrigins,
             trailerAutoplay = prefs.trailerAutoplay,
             trailerSound = prefs.trailerSound,
             trailerIntroSeen = prefs.trailerIntroSeen,
@@ -333,6 +335,8 @@ class HomeViewModel(
         viewModelScope.launch {
             // Only the TMDB key and the films kept from online rows are needed before the catalog; the accounts (each an
             // encrypted read from the Keystore, slow on some TVs) load alongside instead of holding the rows back.
+            // Before any row is built: whether Arab and Indian films stay hidden (the viewer's choice in Settings).
+            OriginFilter.enabled = settings.prefs.first().hideOrigins
             tmdb.load()
             savedMovies.load()
             launch {
@@ -685,7 +689,7 @@ class HomeViewModel(
             .map { DrawerApp(it, pinned = it.packageName in prefs.pinned, hidden = it.packageName in prefs.hidden) }
 
     /** "More like this" for one movie page, worked out from that catalog. */
-    class SimilarFor(val movieId: String, val catalog: Catalog, val movies: List<Movie>)
+    class SimilarFor(val movieId: String, val catalog: Catalog, val movies: List<Movie>, val byDirector: List<Movie> = emptyList())
 
     /**
      * "More like this" for the open movie page, worked out off the main thread: it scores the whole catalog (thousands
@@ -713,7 +717,13 @@ class HomeViewModel(
             } else {
                 { 0.0 }
             }
-            SimilarFor(movieId, shown, Similar.find(candidates, movie, bonus = bonus) { it.id in watched })
+            SimilarFor(
+                movieId,
+                shown,
+                Similar.find(candidates, movie, bonus = bonus) { it.id in watched },
+                // The director's other films, from everything SCARY holds (the library, the rows and the offline index).
+                Similar.byDirector(candidates, movie) { it.id in watched },
+            )
         }
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
@@ -725,7 +735,8 @@ class HomeViewModel(
     fun details(movieId: String, similarFor: SimilarFor?): MovieDetails? {
         val shown = visibleCatalog() ?: return null
         val movie = shown.movie(movieId) ?: webMovieIfAllowed(movieId) ?: return null
-        return MovieDetails(movie, similarFor?.takeIf { it.movieId == movieId }?.movies.orEmpty())
+        val forThis = similarFor?.takeIf { it.movieId == movieId }
+        return MovieDetails(movie, forThis?.movies.orEmpty(), forThis?.byDirector.orEmpty())
     }
 
     /** The catalog as the viewer may see it: with pages loaded while scrolling, and on family night only gentle movies. */
@@ -1440,6 +1451,23 @@ class HomeViewModel(
 
     fun toggleAutoWatched() {
         viewModelScope.launch { settings.setAutoWatched(!settings.prefs.first().autoWatched) }
+    }
+
+    /**
+     * Settings: Arab and Indian films hidden (as SCARY comes) or shown. Hidden takes effect at once; shown needs the
+     * films read again, which starts right away.
+     */
+    fun toggleHiddenOrigins() {
+        viewModelScope.launch {
+            val hide = !settings.prefs.first().hideOrigins
+            settings.setHideOrigins(hide)
+            OriginFilter.enabled = hide
+            // Pages loaded while scrolling are kept in memory: those too lose what is hidden now.
+            if (hide) extraPages.update { pages -> pages.mapValues { (_, metas) -> OriginFilter.visible(metas) } }
+            catalogRepository.askForFreshAll()
+            refreshRequests.tryEmit(Unit)
+            show(if (hide) R.string.msg_origins_hidden else R.string.msg_origins_shown)
+        }
     }
 
     fun toggleHideWatched() {

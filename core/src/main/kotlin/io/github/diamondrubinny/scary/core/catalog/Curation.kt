@@ -49,6 +49,24 @@ object NightPick {
  * accident of an id order, while one page always shows the same row. Films [isWatched] says were seen come last.
  */
 object Similar {
+    /** The most films shown in "More from this director". */
+    const val MAX_BY_DIRECTOR = 30
+
+    /**
+     * The other films of [movie]'s director (any of them, when it has several), the best rated first and then the
+     * newest; never [movie] itself, and those [watched] go to the end. Empty when the director is not known.
+     */
+    fun byDirector(candidates: List<Movie>, movie: Movie, limit: Int = MAX_BY_DIRECTOR, watched: (Movie) -> Boolean = { false }): List<Movie> {
+        val names = directors(movie)
+        if (names.isEmpty()) return emptyList()
+        return candidates.asSequence()
+            .filter { it.id != movie.id && it.imdbId != movie.imdbId && directors(it).any(names::contains) }
+            .distinctBy { it.imdbId }
+            .sortedWith(compareBy<Movie>({ watched(it) }, { -(it.imdbRating ?: 0.0) }, { -it.year }, { it.title }))
+            .take(limit)
+            .toList()
+    }
+
     fun find(
         movies: List<Movie>,
         movie: Movie,

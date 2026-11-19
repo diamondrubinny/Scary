@@ -106,4 +106,17 @@ class OriginFilterTest {
         assertFalse(old.copy(rowsVersion = TmdbCache.ROWS_VERSION).isStale(1_000L))
         assertEquals(1, TmdbCache.decode("""{"fetchedAtMillis":1,"info":{},"rows":[]}""")!!.rowsVersion)
     }
+
+    @Test
+    fun `with the rule turned off nothing is hidden, and it comes back when turned on`() {
+        try {
+            OriginFilter.enabled = false
+            assertFalse(OriginFilter.hidesCountry("India"))
+            assertFalse(OriginFilter.hidesLanguage("ar"))
+        } finally {
+            OriginFilter.enabled = true
+        }
+        assertTrue(OriginFilter.hidesCountry("India"))
+        assertTrue(OriginFilter.hidesLanguage("ar"))
+    }
 }

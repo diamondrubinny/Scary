@@ -137,6 +137,21 @@ class WatchStore(context: Context) {
         get() = prefs.getInt(SUBTITLE_SIZE, 1).coerceIn(0, 2)
         set(value) = prefs.edit { putInt(SUBTITLE_SIZE, value.coerceIn(0, 2)) }
 
+    /** How subtitles look in every film: 0 white, 1 yellow. */
+    var subtitleColor: Int
+        get() = prefs.getInt(SUBTITLE_COLOR, 0).coerceIn(0, 1)
+        set(value) = prefs.edit { putInt(SUBTITLE_COLOR, value.coerceIn(0, 1)) }
+
+    /** A dark box behind the subtitles (on unless turned off). */
+    var subtitleBackground: Boolean
+        get() = prefs.getBoolean(SUBTITLE_BACKGROUND, true)
+        set(value) = prefs.edit { putBoolean(SUBTITLE_BACKGROUND, value) }
+
+    /** Where the subtitles sit: 0 at the bottom, 1 higher (clear of a film's own burnt-in text or a TV's cut edge). */
+    var subtitlePosition: Int
+        get() = prefs.getInt(SUBTITLE_POSITION, 0).coerceIn(0, 1)
+        set(value) = prefs.edit { putInt(SUBTITLE_POSITION, value.coerceIn(0, 1)) }
+
     var pictureMode: Int
         get() = prefs.getInt(PICTURE, 0).coerceIn(0, 2)
         set(value) = prefs.edit { putInt(PICTURE, value.coerceIn(0, 2)) }
@@ -167,6 +182,9 @@ class WatchStore(context: Context) {
     private companion object {
         const val HISTORY = "history"
         const val SUBTITLE_SIZE = "subtitle_size"
+        const val SUBTITLE_COLOR = "subtitle_color"
+        const val SUBTITLE_BACKGROUND = "subtitle_background"
+        const val SUBTITLE_POSITION = "subtitle_position"
         const val PICTURE = "picture"
         const val NIGHT_SOUND = "night_sound"
         const val AUDIO_LANGUAGE = "audio_language"

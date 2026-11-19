@@ -76,6 +76,7 @@ class SettingsActions(
     val onToggleSeasonalRows: () -> Unit,
     val onToggleAutoWatched: () -> Unit,
     val onToggleHideWatched: () -> Unit = {},
+    val onToggleHiddenOrigins: () -> Unit = {},
     val onSystemSettings: () -> Unit,
     val onToggleSounds: () -> Unit,
     val onToggleTrailerAutoplay: () -> Unit,
@@ -132,6 +133,8 @@ fun SettingsScreen(
     seasonalRows: Boolean,
     autoWatched: Boolean,
     hideWatched: Boolean = false,
+    /** Arab and Indian films stay off the shelves; false when the viewer chose to show them. */
+    hideOrigins: Boolean = true,
     /** The TMDB account's name when signed in, null otherwise. */
     tmdbAccountName: String? = null,
     /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
@@ -267,6 +270,13 @@ fun SettingsScreen(
                 modifier = Modifier.testTag(REFRESH_FILMS_ROW_TAG),
             )
         }
+        SettingRow(
+            label = stringResource(R.string.settings_origins),
+            value = stringResource(if (hideOrigins) R.string.value_origins_hidden else R.string.value_origins_shown),
+            onClick = actions.onToggleHiddenOrigins,
+            modifier = Modifier.testTag(ORIGINS_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_origins_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_realdebrid),
             value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
@@ -516,6 +526,7 @@ fun SettingsScreen(
 /** Test tag of the phone remote's row. */
 const val PHONE_REMOTE_ROW_TAG = "phoneRemoteRow"
 const val HIDE_WATCHED_ROW_TAG = "hideWatchedRow"
+const val ORIGINS_ROW_TAG = "originsRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
 const val STREMIO_ROW_TAG = "stremioRow"

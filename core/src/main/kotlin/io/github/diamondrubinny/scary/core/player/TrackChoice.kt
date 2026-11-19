@@ -25,7 +25,13 @@ data class LanguagePrefs(val audio: String? = DEFAULT_LANGUAGE, val subtitles: S
 }
 
 /** What the viewer chose for one file, kept so it comes back with "Continue watching". */
-data class TrackMemory(val audio: String? = null, val subtitle: String? = null, val subtitlesOff: Boolean = false)
+data class TrackMemory(
+    val audio: String? = null,
+    val subtitle: String? = null,
+    val subtitlesOff: Boolean = false,
+    /** How much later the subtitles show for this file, in milliseconds (0 to [TrackChoice.MAX_DELAY_MS]). */
+    val subtitleDelayMs: Long = 0,
+)
 
 /** Which audio and subtitle tracks to play: what the viewer chose for this file, else their languages, else the file's. */
 object TrackChoice {
@@ -82,7 +88,11 @@ object TrackChoice {
         memory.audio?.let { put("a", it) }
         memory.subtitle?.let { put("s", it) }
         if (memory.subtitlesOff) put("off", true)
+        if (memory.subtitleDelayMs > 0) put("d", memory.subtitleDelayMs)
     }.toString()
+
+    /** The longest subtitle delay kept for a file. */
+    const val MAX_DELAY_MS = 5_000L
 
     /** Files whose choices are kept; the oldest go first. */
     const val MAX_FILES = 60
@@ -109,6 +119,7 @@ object TrackChoice {
         val o = runCatching { json.parseToJsonElement(text).jsonObject }.getOrNull() ?: return null
         fun key(name: String) = (o[name] as? JsonPrimitive)?.takeIf { it.isString }?.contentOrNull?.takeIf { it.length <= MAX_KEY }
         val off = (o["off"] as? JsonPrimitive)?.takeIf { !it.isString }?.contentOrNull == "true"
-        return TrackMemory(key("a"), key("s"), off).takeIf { it.audio != null || it.subtitle != null || it.subtitlesOff }
+        val delay = (o["d"] as? JsonPrimitive)?.takeIf { !it.isString }?.contentOrNull?.toLongOrNull()?.takeIf { it in 1..MAX_DELAY_MS } ?: 0L
+        return TrackMemory(key("a"), key("s"), off, delay).takeIf { it.audio != null || it.subtitle != null || it.subtitlesOff || it.subtitleDelayMs > 0 }
     }
 }
