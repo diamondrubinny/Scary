@@ -689,6 +689,12 @@
     <string name="rd_continue_signed_out">Conecte o Real-Debrid de novo nas configurações para continuar assistindo.</string>
     <string name="rd_file_gone">Esse arquivo não está mais na sua conta Real-Debrid e foi removido de Continuar assistindo.</string>
     <string name="continue_removed">Removido de Continuar assistindo</string>
+    <string name="continue_menu_watched">Já vi: marcar como visto e tirar desta fileira</string>
+    <string name="continue_menu_remove">Só tirar desta fileira</string>
+    <string name="continue_menu_my_list">Minha lista: adicionar ou remover</string>
+    <string name="continue_menu_note_stremio">No Stremio nada muda; se você tocar de novo lá, ele volta para cá.</string>
+    <string name="continue_menu_note_file">O ponto em que você parou neste arquivo é esquecido; o arquivo continua na sua conta.</string>
+    <string name="continue_watched_removed">Marcado como visto e tirado da fileira</string>
     <string name="rd_history_cleared">Histórico de exibição apagado</string>
     <string name="rd_clear_history">Apagar histórico de exibição</string>
     <string name="player_marked">Ponto marcado em %1$s</string>

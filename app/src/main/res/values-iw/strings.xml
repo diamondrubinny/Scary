@@ -689,6 +689,12 @@
     <string name="rd_continue_signed_out">כדי להמשיך לצפות, חברו שוב את Real-Debrid בהגדרות.</string>
     <string name="rd_file_gone">הקובץ כבר לא נמצא בחשבון ה־Real-Debrid שלכם, ולכן הוסר מ"המשך צפייה".</string>
     <string name="continue_removed">הוסר מ"המשך צפייה"</string>
+    <string name="continue_menu_watched">צפיתי: סימון כנצפה והסרה מהשורה</string>
+    <string name="continue_menu_remove">רק הסרה מהשורה</string>
+    <string name="continue_menu_my_list">הרשימה שלי: הוספה או הסרה</string>
+    <string name="continue_menu_note_stremio">ב־Stremio עצמו שום דבר לא משתנה; אם תנגנו אותו שם שוב, הוא יחזור לכאן.</string>
+    <string name="continue_menu_note_file">המקום שבו עצרתם בקובץ יימחק; הקובץ עצמו נשאר בחשבון שלכם.</string>
+    <string name="continue_watched_removed">סומן כנצפה והוסר מהשורה</string>
     <string name="rd_history_cleared">היסטוריית הצפייה נמחקה</string>
     <string name="rd_clear_history">מחיקת היסטוריית הצפייה</string>
     <string name="player_marked">הקטע סומן ב־%1$s</string>

@@ -44,6 +44,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -145,6 +146,8 @@ class HomeActions(
     val onContinue: (WatchEntry) -> Unit = {},
     /** Holding OK on that card: it leaves the row. */
     val onForgetContinue: (WatchEntry) -> Unit = {},
+    /** The menu on a "Continue watching" card: take it out of its row, and (true) count its film as watched. */
+    val onFinishContinue: (ContinueItem, Boolean) -> Unit = { _, _ -> },
 )
 
 /** The margin on both sides of every screen: 48dp on a TV, less on tablets and phones (ScaryLayout). */
@@ -527,6 +530,21 @@ private fun HomeRowView(
     /** This row is about to go away by the viewer's own action (its last film removed, or dismissed). */
     onRowGone: () -> Unit,
 ) {
+    // The menu of a "Continue watching" card (its item, and whether it is the last of its row), while it is open.
+    var continueMenu by remember { mutableStateOf<Pair<ContinueItem, Boolean>?>(null) }
+    continueMenu?.let { (item, lastInRow) ->
+        ContinueMenu(
+            item = item,
+            language = language,
+            onFinish = { markWatched ->
+                continueMenu = null
+                if (lastInRow) onRowGone()
+                actions.onFinishContinue(item, markWatched)
+            },
+            onMyList = item.movie?.let { movie -> { continueMenu = null; actions.onToggleMyList(movie) } },
+            onDismiss = { continueMenu = null },
+        )
+    }
     // Holding OK on a My list card removes it: the card that takes its place gets the focus, so the next one can go too.
     val neighbourFocus = remember { FocusRequester() }
     var removedAt by remember { mutableIntStateOf(-1) }
@@ -608,10 +626,8 @@ private fun HomeRowView(
                         item = item,
                         language = language,
                         onClick = { actions.onContinue(item.entry) },
-                        onLongClick = {
-                            if (row.items.size == 1) onRowGone()
-                            actions.onForgetContinue(item.entry)
-                        },
+                        // Holding OK: "watched it" (marks the film and takes the card out), or only out of the row.
+                        onLongClick = { continueMenu = item to (row.items.size == 1) },
                         onFocused = { actions.onCardFocused(key, item.movie?.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
@@ -624,7 +640,7 @@ private fun HomeRowView(
                         language = language,
                         // The film's page: "Watch in Stremio" there picks up where the viewer stopped.
                         onClick = { movie?.let(actions.onOpenDetails) },
-                        onLongClick = { movie?.let(actions.onToggleMyList) },
+                        onLongClick = { continueMenu = item to (row.items.size == 1) },
                         onFocused = { actions.onCardFocused(key, movie?.id) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
@@ -1103,5 +1119,71 @@ internal fun MoodChip(
                 .align(Alignment.Center)
                 .padding(horizontal = 22.dp, vertical = 10.dp),
         )
+    }
+}
+
+/** Test tags of the "Continue watching" card's menu. */
+const val CONTINUE_MENU_TAG = "continueMenu"
+const val CONTINUE_MENU_WATCHED_TAG = "continueMenuWatched"
+const val CONTINUE_MENU_REMOVE_TAG = "continueMenuRemove"
+
+/**
+ * Holding OK on a "Continue watching" card: "Watched it" marks the film as watched and takes the card out of the row,
+ * "Only remove" takes it out, and My list is one press away. For a card from the Stremio account the menu says that
+ * nothing changes in Stremio itself; for one of the viewer's own files, that only the saved spot is forgotten.
+ */
+@Composable
+private fun ContinueMenu(
+    item: ContinueItem,
+    language: Language,
+    onFinish: (markWatched: Boolean) -> Unit,
+    onMyList: (() -> Unit)?,
+    onDismiss: () -> Unit,
+) {
+    val first = remember { FocusRequester() }
+    val fromStremio = item.entry.key.startsWith("s:")
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            runCatching { first.requestFocus() }
+        }
+        Column(
+            modifier = Modifier
+                .widthIn(max = 560.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .padding(22.dp)
+                .testTag(CONTINUE_MENU_TAG),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(
+                item.movie?.displayTitle(language) ?: item.entry.name,
+                style = ScaryType.Title.mixedLanguage(),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() },
+            )
+            // A file with no film SCARY knows has nothing to mark as watched.
+            if (item.movie != null) {
+                ScaryButton(
+                    stringResource(R.string.continue_menu_watched),
+                    onClick = { onFinish(true) },
+                    primary = true,
+                    focusRequester = first,
+                    modifier = Modifier.testTag(CONTINUE_MENU_WATCHED_TAG),
+                )
+            }
+            ScaryButton(
+                stringResource(R.string.continue_menu_remove),
+                onClick = { onFinish(false) },
+                focusRequester = first.takeIf { item.movie == null },
+                modifier = Modifier.testTag(CONTINUE_MENU_REMOVE_TAG),
+            )
+            if (onMyList != null) ScaryButton(stringResource(R.string.continue_menu_my_list), onClick = onMyList)
+            ScaryButton(stringResource(R.string.pin_cancel), onClick = onDismiss)
+            BasicText(
+                stringResource(if (fromStremio) R.string.continue_menu_note_stremio else R.string.continue_menu_note_file),
+                style = ScaryType.Caption.copy(color = ScaryColors.Ash),
+            )
+        }
     }
 }

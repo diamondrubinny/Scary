@@ -13,6 +13,7 @@ import io.github.diamondrubinny.scary.core.player.TrackMemory
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.player.WatchHistory
 import io.github.diamondrubinny.scary.core.realdebrid.RdMatches
+import io.github.diamondrubinny.scary.core.stremio.ContinueDismissals
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -102,6 +103,21 @@ class WatchStore(context: Context) {
         prefs.edit { putString(FILE_FILMS, RdMatches.encode(next)) }
     }
 
+    private val _stremioDismissed = MutableStateFlow<Map<String, Long>>(ContinueDismissals.decode(prefs.getString(STREMIO_DISMISSED, null)))
+
+    /**
+     * What the viewer took out of the "Continue in Stremio" row (core ContinueDismissals): IMDb id to when. On this TV
+     * only; nothing is changed in the Stremio account.
+     */
+    val stremioDismissed: StateFlow<Map<String, Long>> = _stremioDismissed.asStateFlow()
+
+    @Synchronized
+    fun dismissStremio(imdbId: String, nowMillis: Long) {
+        val next = ContinueDismissals.with(_stremioDismissed.value, imdbId, nowMillis)
+        _stremioDismissed.value = next
+        prefs.edit { putString(STREMIO_DISMISSED, ContinueDismissals.encode(next)) }
+    }
+
     private val memories: LinkedHashMap<String, TrackMemory> by lazy { TrackChoice.decodeAll(prefs.getString(TRACK_MEMORY, null)) }
 
     /** The tracks the viewer chose for one file, if they changed any. */
@@ -158,6 +174,7 @@ class WatchStore(context: Context) {
         const val TRACK_MEMORY = "track_memory"
         const val ONLINE_SUBTITLES = "online_subtitles"
         const val FILE_FILMS = "file_films"
+        const val STREMIO_DISMISSED = "stremio_dismissed"
         const val LEGACY_STAMP = "at:"
     }
 }

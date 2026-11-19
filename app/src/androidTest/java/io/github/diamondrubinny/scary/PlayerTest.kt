@@ -27,6 +27,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.data.RealDebridRepository
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.performTouchInput
+import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_TAG
+import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_REMOVE_TAG
+import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_WATCHED_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.home.HomeViewModel
 import io.github.diamondrubinny.scary.ui.home.OnlineSubtitleSource
@@ -163,6 +168,17 @@ class PlayerTest {
             waitFor(hasTestTag(HOME_ROWS_TAG))
             rule.waitUntil(TIMEOUT_MS) { runCatching { rule.onNodeWithTag(HOME_ROWS_TAG).performScrollToKey("continue") }.isSuccess }
             waitFor(hasTestTag(CONTINUE_CARD_TAG))
+            // Holding the card opens its menu. This file is no film SCARY knows, so there is nothing to mark as watched:
+            // "Only remove from this row" takes it out, and says so.
+            rule.onNode(hasTestTag(CONTINUE_CARD_TAG)).performTouchInput { longClick() }
+            waitFor(hasTestTag(CONTINUE_MENU_TAG))
+            assertTrue(rule.onAllNodes(hasTestTag(CONTINUE_MENU_WATCHED_TAG)).fetchSemanticsNodes().isEmpty())
+            rule.onNode(hasText(text(R.string.continue_menu_note_file))).assertExists()
+            rule.onNode(hasTestTag(CONTINUE_MENU_REMOVE_TAG)).performClick()
+            rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(CONTINUE_CARD_TAG)).fetchSemanticsNodes().isEmpty() }
+            waitFor(hasText(text(R.string.continue_removed)))
+            val store = (rule.activity.application as ScaryApplication).container.watchStore
+            assertTrue("The file's saved spot is forgotten", store.entry("d:TESTCLIP") == null)
         } finally {
             rule.runOnUiThread { vm.clearWatchHistory() }
         }

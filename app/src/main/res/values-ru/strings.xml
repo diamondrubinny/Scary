@@ -696,6 +696,12 @@
     <string name="rd_continue_signed_out">Чтобы продолжить просмотр, снова подключите Real-Debrid в настройках.</string>
     <string name="rd_file_gone">Этого файла больше нет в вашем аккаунте Real-Debrid, поэтому он убран из «Продолжить просмотр».</string>
     <string name="continue_removed">Убрано из «Продолжить просмотр»</string>
+    <string name="continue_menu_watched">Посмотрел: отметить просмотренным и убрать из ряда</string>
+    <string name="continue_menu_remove">Только убрать из ряда</string>
+    <string name="continue_menu_my_list">Мой список: добавить или убрать</string>
+    <string name="continue_menu_note_stremio">В самом Stremio ничего не меняется; если запустить там снова, он вернётся сюда.</string>
+    <string name="continue_menu_note_file">Место остановки в этом файле будет забыто; сам файл останется в вашем аккаунте.</string>
+    <string name="continue_watched_removed">Отмечено просмотренным и убрано из ряда</string>
     <string name="rd_history_cleared">История просмотра очищена</string>
     <string name="rd_clear_history">Очистить историю просмотра</string>
     <string name="player_marked">Отмечено на %1$s</string>
