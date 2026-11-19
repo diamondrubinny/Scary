@@ -311,7 +311,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     var fromRows by remember { mutableStateOf(false) }
     LaunchedEffect(screen) {
         if (screen != Screen.Settings && screen !is Screen.Document && screen != Screen.Stats && screen != Screen.PhoneRemote &&
-            screen != Screen.TastePicker
+            screen != Screen.TastePicker && screen != Screen.HomeRows
         ) {
             lastDocument = null
             fromStats = false

@@ -80,11 +80,14 @@ class BackupRepository(
      * (a new TV, a reinstall) are asked for from Cinemeta, one at a time, by IMDb id only.
      */
     private suspend fun fetchDetails(lists: Backup.Snapshot, series: Set<String>) {
-        if (!settings.prefs.first().onlineEnabled) return
+        val prefs = settings.prefs.first()
+        if (!prefs.onlineEnabled) return
         savedMovies.load()
         val kept = savedMovies.items.value.mapTo(HashSet()) { it.imdbId }
         val listed = (lists.myList + lists.bucket).distinct().filter { it.startsWith(Cinemeta.ID_PREFIX) }
-        val keep = listed.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
+        // Everything whose saved details must stay, as when a film is saved from its page: the restored lists, and
+        // what the TV already keeps for Recently opened.
+        val keep = (listed + prefs.recentIds).filter { it.startsWith(Cinemeta.ID_PREFIX) }.mapTo(HashSet()) { it.removePrefix(Cinemeta.ID_PREFIX) }
         val found = ArrayList<CinemetaMeta>()
         for (id in listed) {
             val imdb = id.removePrefix(Cinemeta.ID_PREFIX)
