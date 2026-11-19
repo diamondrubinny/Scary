@@ -270,6 +270,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
+            onFinishContinue = viewModel::finishContinue,
         )
     }
     val bucketActions = remember(viewModel) {

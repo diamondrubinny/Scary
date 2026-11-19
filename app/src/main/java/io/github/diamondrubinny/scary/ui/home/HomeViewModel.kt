@@ -65,6 +65,7 @@ import io.github.diamondrubinny.scary.data.RealDebridRepository
 import io.github.diamondrubinny.scary.data.StremioRepository
 import io.github.diamondrubinny.scary.data.SubtitleRepository
 import io.github.diamondrubinny.scary.core.stremio.StremioItem
+import io.github.diamondrubinny.scary.core.stremio.ContinueDismissals
 import io.github.diamondrubinny.scary.core.stremio.Stremio
 import io.github.diamondrubinny.scary.data.WatchStore
 import io.github.diamondrubinny.scary.core.player.WatchHistory
@@ -247,7 +248,10 @@ class HomeViewModel(
     /** Everything on the home screen except the hero; moving between cards does not rebuild it. */
     private val homeBase: Flow<HomeUiState> = combine(
         shownCatalog,
-        combine(installedApps, inputs, watchHistory, stremioLibrary) { a, i, w, st -> HomeSources(a, i, w, st) },
+        // The Stremio items shown on the home screen: without those the viewer took out of its continue row.
+        combine(installedApps, inputs, watchHistory, stremioLibrary, watchStore?.stremioDismissed ?: MutableStateFlow(emptyMap())) { a, i, w, st, gone ->
+            HomeSources(a, i, w, ContinueDismissals.visible(st, gone))
+        },
         combine(mood, decade, timeBudget, tab, picking) { m, d, t, k, p -> HomeChoices(m, d, t, k, p) },
         settings.prefs,
         sessionUnlocked,
@@ -589,7 +593,7 @@ class HomeViewModel(
                 val going = Stremio.continueWatching(stremioItems).mapNotNull { item ->
                     val movie = byImdb[item.imdbId]?.takeUnless(isLocked) ?: return@mapNotNull null
                     val at = maxOf(item.lastWatched, item.modified)
-                    ContinueItem(WatchEntry("s:${item.imdbId}", movie.title, movie.id, item.offsetMs, item.durationMs, at), movie)
+                    ContinueItem(WatchEntry(STREMIO_ENTRY_PREFIX + item.imdbId, movie.title, movie.id, item.offsetMs, item.durationMs, at), movie)
                 }
                 if (going.isNotEmpty()) add(HomeRow.StremioContinue(going))
             }
@@ -1361,6 +1365,31 @@ class HomeViewModel(
     fun forgetWatching(entry: WatchEntry) {
         watchStore?.update { WatchHistory.forget(it, entry.key) }
         show(R.string.continue_removed)
+    }
+
+    /**
+     * The menu on a "Continue watching" card (holding OK): the card leaves its row, and with [markWatched] its film
+     * also counts as watched. A file of the viewer's own is forgotten (its saved spot goes with it); an item from the
+     * Stremio account is only hidden here until it is played again, and stays as it is in Stremio.
+     */
+    fun finishContinue(item: ContinueItem, markWatched: Boolean) {
+        val entry = item.entry
+        if (entry.key.startsWith(STREMIO_ENTRY_PREFIX)) {
+            watchStore?.dismissStremio(entry.key.removePrefix(STREMIO_ENTRY_PREFIX), System.currentTimeMillis())
+        } else {
+            watchStore?.update { WatchHistory.forget(it, entry.key) }
+        }
+        val movie = item.movie
+        if (markWatched && movie != null) {
+            // As on the film's page: marked, and a film from the web keeps its details so it can be shown as watched.
+            viewModelScope.launch {
+                settings.setWatched(movie.id, watched = true)
+                savedMovies.save(movie, language.value, keptOnline())
+            }
+            show(R.string.continue_watched_removed)
+        } else {
+            show(R.string.continue_removed)
+        }
     }
 
     /** "Clear watch history" on the Real-Debrid screen. */
@@ -2340,6 +2369,9 @@ class HomeViewModel(
         private const val CATEGORY_PREFIX = "cat:"
         private const val TMDB_CATEGORY_PREFIX = "tcat:"
         private const val MAX_TASTE_CANDIDATES = 120
+
+        /** A "Continue in Stremio" card's key: this, then the IMDb id. */
+        private const val STREMIO_ENTRY_PREFIX = "s:"
         private const val CANDIDATES_SHOWN = 8
 
         /** How much the taste may move a film in "More like this": up to one shared genre's worth. */

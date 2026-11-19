@@ -113,4 +113,28 @@ class StremioTest {
         assertNull(Stremio.parseLibrary(library("movie", "tt5753856", "tt5753856:2:3"))!!.single().videoId)
         assertNull(Stremio.parseLibrary(library("series", "tt5753856", ""))!!.single().videoId)
     }
+
+    @Test
+    fun `a film taken out of the continue row stays out until it is played again`() {
+        fun lib(id: String, played: String) =
+            """{"_id":"$id","name":"Film","type":"movie","_mtime":"$played","state":{"timeOffset":600000,"duration":6000000,"lastWatched":"$played"}}"""
+        val items = Stremio.parseLibrary("""{"result":[${lib("tt0081505", "2026-11-18T20:00:00.000Z")},${lib("tt1457767", "2026-11-17T20:00:00.000Z")}]}""")!!
+        val shining = items.first { it.imdbId == "tt0081505" }
+        assertEquals(2, io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.visible(items, emptyMap()).size)
+        // Taken out an hour after it was last played: gone from the row, the other stays.
+        val out = io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.with(emptyMap(), "tt0081505", shining.lastWatched + 3_600_000)
+        assertEquals(listOf("tt1457767"), io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.visible(items, out).map { it.imdbId })
+        // Played again later in Stremio: back in the row.
+        val again = items.map { if (it.imdbId == "tt0081505") it.copy(lastWatched = it.lastWatched + 7_200_000) else it }
+        assertEquals(2, io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.visible(again, out).size)
+        // Kept, bounded and read back safely.
+        assertEquals(out, io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.decode(io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.encode(out)))
+        assertTrue(io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.decode("{broken").isEmpty())
+        assertEquals(setOf("tt0000002"), io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.decode("""{"../x":5,"tt0000001":"7","tt0000002":9,"tt0000003":-1}""").keys)
+        assertTrue(io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.with(emptyMap(), "not an id", 5).isEmpty())
+        var many = emptyMap<String, Long>()
+        repeat(250) { many = io.github.diamondrubinny.scary.core.stremio.ContinueDismissals.with(many, "tt%07d".format(it + 1), 1_000L + it) }
+        assertEquals(200, many.size)
+        assertFalse("tt0000001" in many)
+    }
 }

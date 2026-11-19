@@ -711,6 +711,12 @@
     <string name="rd_continue_signed_out">لمتابعة المشاهدة، اربط Real-Debrid مجددًا من الإعدادات.</string>
     <string name="rd_file_gone">لم يعد هذا الملف في حسابك على Real-Debrid، لذا أُزيل من متابعة المشاهدة.</string>
     <string name="continue_removed">أُزيل من متابعة المشاهدة</string>
+    <string name="continue_menu_watched">شاهدته: وضع علامة «شوهد» وإزالته من هذا الصف</string>
+    <string name="continue_menu_remove">إزالته من هذا الصف فقط</string>
+    <string name="continue_menu_my_list">قائمتي: إضافة أو إزالة</string>
+    <string name="continue_menu_note_stremio">لا يتغير شيء في Stremio نفسه؛ وإذا شغّلته هناك مجددًا فسيعود إلى هنا.</string>
+    <string name="continue_menu_note_file">يُنسى الموضع الذي توقفت عنده في هذا الملف؛ والملف يبقى في حسابك.</string>
+    <string name="continue_watched_removed">وُضعت علامة «شوهد» وأُزيل من الصف</string>
     <string name="rd_history_cleared">مُسح سجل المشاهدة</string>
     <string name="rd_clear_history">مسح سجل المشاهدة</string>
     <string name="player_marked">وُضعت علامة عند %1$s</string>

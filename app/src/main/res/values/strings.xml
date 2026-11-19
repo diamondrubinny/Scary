@@ -684,6 +684,12 @@
     <string name="rd_continue_signed_out">Connect Real-Debrid again in Settings to continue watching.</string>
     <string name="rd_file_gone">That file is no longer in your Real-Debrid account, so it was removed from Continue watching.</string>
     <string name="continue_removed">Removed from Continue watching</string>
+    <string name="continue_menu_watched">Watched it: mark as watched and remove from this row</string>
+    <string name="continue_menu_remove">Only remove from this row</string>
+    <string name="continue_menu_my_list">My list: add or remove</string>
+    <string name="continue_menu_note_stremio">In Stremio itself nothing changes; if you play it there again, it comes back here.</string>
+    <string name="continue_menu_note_file">The spot where you stopped in this file is forgotten; the file stays in your account.</string>
+    <string name="continue_watched_removed">Marked as watched and removed from the row</string>
     <string name="rd_history_cleared">Watch history cleared</string>
     <string name="rd_clear_history">Clear watch history</string>
     <string name="player_marked">Spot marked at %1$s</string>

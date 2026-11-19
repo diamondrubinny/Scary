@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.5.16: Settings are in sections with a jump bar at the top, so any setting is a few presses away; the TMDB key is back in its place; the round icon buttons say their names while focused.",
-  "he": "SCARY 0.5.16: ההגדרות מסודרות בקבוצות עם שורת קפיצה למעלה, כך שכל הגדרה נמצאת כמה לחיצות משם; מפתח ה־TMDB חזר למקומו; והכפתורים העגולים מציגים את שמם כשהפוקוס עליהם.",
-  "ar": "SCARY 0.5.16: الإعدادات مرتبة في أقسام مع شريط انتقال في الأعلى، فيصير أي إعداد على بُعد ضغطات قليلة؛ عاد مفتاح TMDB إلى مكانه؛ والأزرار الدائرية تعرض أسماءها عند التركيز عليها.",
-  "pt": "SCARY 0.5.16: as Configurações estão em seções, com uma barra de atalhos no topo, e qualquer ajuste fica a poucos toques; a chave do TMDB voltou ao seu lugar; os botões redondos mostram seus nomes quando em foco.",
-  "ru": "SCARY 0.5.16: настройки разбиты на разделы с панелью перехода наверху, так что любая настройка в нескольких нажатиях; ключ TMDB вернулся на своё место; круглые кнопки показывают свои названия в фокусе."
+  "en": "SCARY 0.5.17: hold OK on a Continue watching card (your files or Stremio) for a menu: mark the film as watched and take it out of the row, or only take it out.",
+  "he": "SCARY 0.5.17: החזיקו OK על כרטיס ב\"המשך צפייה\" (הקבצים שלכם או Stremio) ותקבלו תפריט: לסמן את הסרט כנצפה ולהסיר אותו מהשורה, או רק להסיר.",
+  "ar": "SCARY 0.5.17: اضغط مطولًا على OK فوق بطاقة في «متابعة المشاهدة» (ملفاتك أو Stremio) لتظهر قائمة: وضع علامة «شوهد» على الفيلم وإزالته من الصف، أو إزالته فقط.",
+  "pt": "SCARY 0.5.17: segure OK num cartão de Continuar assistindo (seus arquivos ou Stremio) para abrir um menu: marcar o filme como visto e tirá-lo da fileira, ou só tirá-lo.",
+  "ru": "SCARY 0.5.17: удерживайте OK на карточке в «Продолжить просмотр» (ваши файлы или Stremio), чтобы открыть меню: отметить фильм просмотренным и убрать из ряда или только убрать."
 }
