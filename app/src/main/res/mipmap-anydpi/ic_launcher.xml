@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary -->
+<!--
+  SCARY's icon in layers, so a home screen can cut it to its own shape (Google TV: a circle) and the background still
+  fills all of it. Made by tools/icon/make_icon.py. The monochrome layer is for themed icons (Android 13 and later).
+-->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@mipmap/ic_launcher_background" />
+    <foreground android:drawable="@mipmap/ic_launcher_foreground" />
+    <monochrome android:drawable="@mipmap/ic_launcher_monochrome" />
+</adaptive-icon>
