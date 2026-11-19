@@ -46,6 +46,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performScrollToKey
+import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -60,12 +61,17 @@ import io.github.diamondrubinny.scary.ui.components.ICON_LABEL_TAG
 import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
 import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
 import io.github.diamondrubinny.scary.ui.details.BY_DIRECTOR_ROW_TAG
+import io.github.diamondrubinny.scary.ui.details.REMIND_TAG
 import io.github.diamondrubinny.scary.ui.settings.ORIGINS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SCREEN_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SHOW_ALL_TAG
 import io.github.diamondrubinny.scary.ui.settings.homeRowChoiceTag
 import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
+import io.github.diamondrubinny.scary.core.catalog.SearchFilter
+import io.github.diamondrubinny.scary.ui.search.SEARCH_FILTER_CLEAR_TAG
+import io.github.diamondrubinny.scary.ui.search.SEARCH_FILTER_FEAR_TAG
+import io.github.diamondrubinny.scary.ui.search.SEARCH_FILTER_KIND_TAG
 import io.github.diamondrubinny.scary.core.backup.Backup
 import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
@@ -373,6 +379,66 @@ class ScaryUiTest {
         rule.onNode(hasTestTag(HOME_ROWS_SHOW_ALL_TAG)).performClick()
         waitForGone(hasTestTag(HOME_ROWS_SHOW_ALL_TAG))
         backToHome()
+    }
+
+    /** Search filters: a fear level the film does not have takes it out of the results, and "Clear filters" brings it back. */
+    @Test
+    fun searchFiltersNarrowTheResultsAndClear() {
+        waitForHome()
+        rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+        waitFor(hasSetTextAction())
+        rule.onNode(hasSetTextAction()).performTextInput("shining")
+        val shining = hasContentDescription("The Shining", substring = true)
+        waitFor(shining)
+        rule.onNode(hasTestTag(SEARCH_FILTER_CLEAR_TAG)).assertDoesNotExist()
+        // A band its scare rating is not in. Films from the web have no rating, so they fit no band either.
+        val fear = bundledMovies().first { it.title == "The Shining" }.fear ?: error("The Shining has no scare rating")
+        val other = SearchFilter.FearBand.entries.first { fear !in it.levels }
+        repeat(other.ordinal + 1) { rule.onNode(hasTestTag(SEARCH_FILTER_FEAR_TAG)).performClick() }
+        waitForGone(shining)
+        waitFor(hasText(text(R.string.search_no_filter_results)))
+        rule.onNode(hasTestTag(SEARCH_FILTER_CLEAR_TAG)).performClick()
+        waitFor(shining)
+        waitForGone(hasTestTag(SEARCH_FILTER_CLEAR_TAG))
+        // With no text, a filter alone picks films: the 1980s, only films.
+        rule.onNode(hasSetTextAction()).performTextClearance()
+        rule.onNode(hasTestTag(SEARCH_FILTER_KIND_TAG)).performClick()
+        waitFor(hasText(text(R.string.filter_kind_films)))
+        waitUntilOrDescribe("films picked by the filter alone") { rule.onAllNodes(hasText(text(R.string.search_no_filter_results))).fetchSemanticsNodes().isEmpty() && rule.onAllNodes(hasTestTag(SEARCH_FILTER_CLEAR_TAG)).fetchSemanticsNodes().isNotEmpty() }
+        rule.onNode(hasTestTag(SEARCH_FILTER_CLEAR_TAG)).performClick()
+        backToHome()
+    }
+
+    /** "Remind me": a film whose day has come shows in "Now out"; taking the reminder off on its page takes it out. */
+    @Test
+    fun aRemindedFilmShowsInNowOutAndLeavesWhenTheReminderIsRemoved() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
+        val settings = container.settingsRepository
+        val film = bundledMovies().first { it.title == "The Shining" }
+        val today = java.time.LocalDate.now().toEpochDay()
+        fun nowOut() = viewModel.uiState.value.rows.filterIsInstance<HomeRow.NowOut>().singleOrNull()?.movies.orEmpty().map { it.id }
+        withCleanup({
+            // Asked about before it came out; it came out yesterday.
+            assertTrue(runBlocking { settings.toggleReminder(film.id, today - 1, today) })
+            waitUntilOrDescribe("${film.title} in Now out") { film.id in nowOut() }
+            rule.onNodeWithContentDescription(text(R.string.search_title)).performClick()
+            waitFor(hasSetTextAction())
+            rule.onNode(hasSetTextAction()).performTextInput("shining")
+            val card = hasContentDescription("The Shining", substring = true)
+            waitFor(card)
+            rule.onAllNodes(card)[0].performClick()
+            waitFor(hasTestTag(REMIND_TAG))
+            waitFor(hasText(text(R.string.action_reminded)))
+            rule.onNode(hasTestTag(REMIND_TAG)).performClick()
+            // Out already and no reminder: the button has nothing left to offer.
+            waitForGone(hasTestTag(REMIND_TAG))
+            waitUntilOrDescribe("${film.title} out of Now out") { film.id !in nowOut() }
+            backToHome()
+        }) {
+            runBlocking { if (settings.prefs.first().reminders.any { it.id == film.id }) settings.toggleReminder(film.id, today - 1, today) }
+        }
     }
 
     /** The full index (index.json): search finds a well-known film outside the hand-picked library, and it opens. */
