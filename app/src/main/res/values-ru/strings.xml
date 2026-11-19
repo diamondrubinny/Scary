@@ -820,6 +820,7 @@
     <string name="diag_online">Фильмы из интернета: %1$s</string>
     <string name="diag_refresh">Последнее обновление (загружено страниц: ряды · категории): %1$s</string>
     <string name="diag_quality">Проверка происхождения (фильмов исключено из рядов по месту · ждут язык): %1$s</string>
+    <string name="diag_film_quality">Проверка фильмов (не попали в ряды: неполные · короче 45 мин · без оценки · оценка ниже 5 · без страха): %1$s</string>
     <string name="diag_startup">Запуск: %1$s (время до первых рядов, последний и среднее по последним запускам)</string>
     <string name="diag_none">Сбоев и зависаний не записано.</string>
     <string name="diag_clear">Очистить диагностику</string>

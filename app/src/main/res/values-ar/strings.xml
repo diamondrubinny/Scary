@@ -837,6 +837,7 @@
     <string name="diag_online">أفلام من الإنترنت: %1$s</string>
     <string name="diag_refresh">آخر تحديث (الصفحات المحمّلة: الصفوف · الفئات): %1$s</string>
     <string name="diag_quality">فحص الأصل (أفلام استُبعدت من صفوف المكان · بانتظار اللغة): %1$s</string>
+    <string name="diag_film_quality">فحص الأفلام (أُبعدت عن الصفوف: ناقصة · أقصر من 45 دقيقة · بلا تقييم · تقييم أقل من 5 · بلا رعب): %1$s</string>
     <string name="diag_startup">البدء: %1$s (الوقت حتى ظهور الصفوف الأولى، الأخير والمتوسط لآخر مرات التشغيل)</string>
     <string name="diag_none">لم تُسجَّل أعطال أو حالات تجمّد.</string>
     <string name="diag_clear">مسح التشخيص</string>

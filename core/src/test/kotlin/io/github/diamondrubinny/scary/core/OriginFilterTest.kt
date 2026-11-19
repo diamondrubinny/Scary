@@ -23,6 +23,9 @@ class OriginFilterTest {
     private fun film(n: Int, country: String = "", language: String = "", vararg genres: String = arrayOf("Horror")) = CinemetaMeta(
         imdbId = "tt%07d".format(n),
         name = "Film $n",
+        poster = "https://images.metahub.space/poster/small/tt0000001/img",
+        description = "A film.",
+        imdbRating = 6.5,
         genres = genres.toList(),
         country = country,
         originalLanguage = language,

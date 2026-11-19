@@ -8,6 +8,7 @@ import io.github.diamondrubinny.scary.stability.HealthLog
 import io.github.diamondrubinny.scary.core.catalog.Categories
 import io.github.diamondrubinny.scary.core.catalog.CategoryPaging
 import io.github.diamondrubinny.scary.core.catalog.Origin
+import io.github.diamondrubinny.scary.core.catalog.FilmQuality
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.catalog.RowAudit
 import android.content.Context
@@ -244,7 +245,8 @@ class CinemetaRepository(
         val metas = fetch(url)?.let(Cinemeta::parseCatalog) ?: return@withContext null
         val ofKind = OriginFilter.visible(metas).filter { it.kind == spec.kind }
         OnlinePage(
-            movies = if (spec.themedOnly) Cinemeta.themed(ofKind) else ofKind,
+            // The films' own quality (core FilmQuality), as in the row's first pages.
+            movies = FilmQuality.accepted(if (spec.themedOnly) Cinemeta.themed(ofKind) else ofKind, spec.id, LocalDate.now().year),
             next = EndlessCursor.after(cursor, metas.size, spec.yearChain),
         )
     }
@@ -292,6 +294,8 @@ class CinemetaRepository(
         // and the popular rows queue first so whole rows of posters appear early.
         val pool = Semaphore(PARALLEL_REQUESTS)
         val failedPages = AtomicInteger(0)
+        val leftOut = java.util.concurrent.ConcurrentHashMap<FilmQuality.Problem, Int>()
+        val thisYear = LocalDate.now().year
         val specs = rowSpecs
         val (metaList, results) = coroutineScope {
             val rows = specs.map { spec ->
@@ -306,6 +310,9 @@ class CinemetaRepository(
                     // Arab and Indian films stay off the shelves (core OriginFilter), as in every row below.
                     val metas = OriginFilter.visible(pages.filterNotNull().flatten().distinctBy { it.imdbId }).filter { it.kind == spec.kind }
                         .let { if (spec.themedOnly) Cinemeta.themed(it) else it }
+                        // The films themselves: no shorts, unrated films only in the rows of what is new, a floor under
+                        // the rating, and fear in every thriller (core FilmQuality). Each one taken out is counted.
+                        .let { themed -> FilmQuality.accepted(themed, spec.id, thisYear) { problem -> leftOut.merge(problem, 1, Int::plus) } }
                     val row = metas.takeIf { it.isNotEmpty() }?.let {
                         OnlineRow(spec.id, spec.titles.getValue("he"), spec.titles.getValue("en"), it, spec.titles - "he" - "en")
                     }
@@ -320,6 +327,8 @@ class CinemetaRepository(
         val totalPages = specs.sumOf { it.skips.size }
         // Nothing at all came back (offline): the cache stays as it was, and the next try waits a little longer.
         if (failedPages.get() == totalPages && metaList.all { it == null }) return@withContext null
+        // How many films each quality rule kept out of the rows this time: counts only, for Diagnostics.
+        HealthLog.recordFilmQuality(appContext, FilmQuality.Problem.entries.map { leftOut[it] ?: 0 })
         val metas = LinkedHashMap<String, CinemetaMeta>()
         // On a retry the films' details are yesterday's; otherwise a film whose details failed keeps its old ones.
         if (retry) metas.putAll(previous!!.metas)

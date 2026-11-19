@@ -28,7 +28,9 @@ class CategoriesTest {
         imdbId = "tt" + (1_000_000 + name.hashCode().mod(8_999_999)).toString(),
         name = name,
         year = year,
-        description = description,
+        poster = "https://images.metahub.space/poster/small/tt0000001/img",
+        // Never empty: a film with no synopsis is left out by the quality check before any category is asked.
+        description = description.ifEmpty { "." },
         genres = genres.toList(),
         imdbRating = rating,
         country = country,
@@ -106,7 +108,9 @@ class NewCategoriesTest {
         imdbId = "tt" + (1_000_000 + name.hashCode().mod(8_999_999)).toString(),
         name = name,
         year = year,
-        description = description,
+        poster = "https://images.metahub.space/poster/small/tt0000001/img",
+        // Never empty: a film with no synopsis is left out by the quality check before any category is asked.
+        description = description.ifEmpty { "." },
         genres = genres.toList(),
         imdbRating = rating,
         country = country,

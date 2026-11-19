@@ -29,6 +29,10 @@ class OriginQualityTest {
         imdbId = "tt%07d".format(++next),
         name = name,
         year = year,
+        // A whole film: the checks on the film itself (core FilmQuality) are not what these tests are about.
+        poster = "https://images.metahub.space/poster/small/tt0000001/img",
+        description = "A film.",
+        imdbRating = 6.5,
         genres = listOf("Horror"),
         country = country,
         originalLanguage = language,

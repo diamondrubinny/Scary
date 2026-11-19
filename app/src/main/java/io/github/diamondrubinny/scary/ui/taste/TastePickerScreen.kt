@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.taste
 
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -76,6 +77,20 @@ fun TastePickerScreen(
         runCatching { doneFocus.requestFocus() }
     }
     LaunchedEffect(kind) { gridState.scrollToItem(0) }
+    // The list changes under the viewer's eyes: ratings arrive from the web and reorder it. A grid follows the card it
+    // showed first, by its key, so a viewer still at the top would find themselves a row down, past the cards that
+    // are first now. At the top, the top is kept; a viewer who scrolled keeps their place as before.
+    val atTop = remember { booleanArrayOf(true) }
+    LaunchedEffect(gridState) {
+        // Followed outside composition, so scrolling never recomposes this screen.
+        snapshotFlow { gridState.firstVisibleItemIndex == 0 && gridState.firstVisibleItemScrollOffset == 0 }.collect { atTop[0] = it }
+    }
+    val lastShown = remember { arrayOfNulls<List<Movie>>(1) }
+    if (lastShown[0] !== movies) {
+        lastShown[0] = movies
+        // Asked for while composing, before the grid lays the new list out.
+        if (atTop[0]) gridState.requestScrollToItem(0)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
