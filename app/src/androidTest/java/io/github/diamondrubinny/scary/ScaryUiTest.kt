@@ -1179,7 +1179,9 @@ class ScaryUiTest {
             val series = firstTasteCardOnScreen(lovedBefore, viewModel)
             assertTrue(series.kind == MediaKind.SERIES)
             picked += series.id
-            rule.onNodeWithTag(tasteCardTag(series.id)).performClick()
+            // Brought into view first, as with the film: a card can be composed just outside the grid's edge (kept ready
+            // for scrolling), where a click at its centre lands on nothing.
+            rule.onNodeWithTag(tasteCardTag(series.id)).performScrollTo().performClick()
             waitUntilOrDescribe("${series.title} loved") { series.id in viewModel.uiState.value.lovedIds }
             // Done: back on settings, on the row that opened the picker.
             rule.onNode(hasText(text(R.string.taste_done))).performClick()
