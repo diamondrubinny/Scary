@@ -87,9 +87,9 @@ fun DonateMini(modifier: Modifier = Modifier) {
             size = MINI_QR_SIZE,
             description = stringResource(R.string.donate_qr_description),
         )
-        // Two lines at most, in a narrow column: a long sentence (Russian) must not widen the logo's side and push the
-        // top bar's words off the screen.
-        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption, maxLines = 2, modifier = Modifier.widthIn(max = 120.dp))
+        // In a narrow column, on as many lines as the code beside it is tall: a long sentence (Russian) must not widen
+        // the logo's side and push the top bar's words off the screen, nor be cut in the middle.
+        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption, maxLines = 3, modifier = Modifier.widthIn(max = 132.dp))
     }
 }
 
