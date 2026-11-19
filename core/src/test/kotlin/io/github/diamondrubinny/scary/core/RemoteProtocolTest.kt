@@ -94,4 +94,51 @@ class RemoteProtocolTest {
         assertTrue(encoded.none { it == '+' || it == '/' || it == '=' })
         assertEquals(32, Base64.getUrlDecoder().decode(encoded).size)
     }
+
+    private val backupText = """{"format":"scary-backup","version":1,"myList":["the-shining-1980","cm_tt0078748"]}"""
+    private val bigBackup = """{"format":"scary-backup","version":1,"watched":[""" + (0 until 600).joinToString(",") { "\"f$it\"" } + "]}"
+
+    @Test
+    fun `an answer with a backup is encrypted and signed, with values computed independently`() {
+        val session = RemoteProtocol.Session(secret)
+        val answer = session.sealAnswer(1700000000000456, backupText)
+        assertEquals("RS0zrphbi1qii+4tHJdYUD9cszb2vV1nwOIUU0HnlmkHVy33nwf/0gzoUbnaOPQlo69VfHvAmwBmQJrsfYxavU6AW6XThV0n4UH446k3SXMOTA==", answer.cipher)
+        assertEquals("1238871ebae82d0b7634d66339faef4ea69b506c0cdc1939f351e2a8d6f8ea9f", answer.tag)
+        assertEquals(backupText, RemoteProtocol.openAnswer(secret, 1700000000000456, answer))
+        // Another counter, another secret, or a changed text: not opened.
+        assertEquals(null, RemoteProtocol.openAnswer(secret, 1700000000000457, answer))
+        assertEquals(null, RemoteProtocol.openAnswer(ByteArray(32) { 9 }, 1700000000000456, answer))
+        val flipped = Base64.getDecoder().decode(answer.cipher).also { it[3] = (it[3].toInt() xor 1).toByte() }
+        assertEquals(null, RemoteProtocol.openAnswer(secret, 1700000000000456, answer.copy(cipher = Base64.getEncoder().encodeToString(flipped))))
+        // The answer's keystream is its own: the same counter's command text is encrypted differently.
+        assertTrue(!RemoteProtocol.crypt(secret, 5, ByteArray(32)).contentEquals(RemoteProtocol.cryptAnswer(secret, 5, ByteArray(32))))
+    }
+
+    @Test
+    fun `a backup file is taken only where a large body is expected`() {
+        val sealed = RemoteProtocol.seal(secret, 7, Command.RESTORE, bigBackup)
+        assertEquals(4139, bigBackup.length)
+        assertTrue(sealed.contains("\"t\":\"d12138415c10394ed2fef2d3c5bec647bb3107db36a5f5b0ab625df3b70c6c4d\""))
+        assertTrue(sealed.length > RemoteProtocol.MAX_BODY)
+        // At the usual address it is refused, and its counter is not spent.
+        val session = RemoteProtocol.Session(secret)
+        assertEquals(Verdict.Malformed, session.open(sealed))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 8, Command.RESTORE, "{}")))
+        assertEquals(Verdict.Accepted(RemoteProtocol.Request(7, Command.RESTORE, bigBackup)), session.open(sealed, large = true))
+        assertEquals(Verdict.Replayed, session.open(sealed, large = true))
+        // The large address takes nothing but a restore: no way around the small limits of the other commands.
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 9, Command.TMDB_KEY, "0123456789abcdef0123456789abcdef"), large = true))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 10, Command.UP), large = true))
+        // Too long even for a backup, a line break in it, or a forged one.
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 11, Command.RESTORE, "x".repeat(RemoteProtocol.MAX_LARGE_TEXT + 1)), large = true))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 12, Command.RESTORE, "{\n}"), large = true))
+        assertEquals(Verdict.BadSignature, session.open(RemoteProtocol.seal(ByteArray(32) { 1 }, 13, Command.RESTORE, bigBackup), large = true))
+        // The longest backup fits in the largest body.
+        val longest = RemoteProtocol.seal(secret, 14, Command.RESTORE, "x".repeat(RemoteProtocol.MAX_LARGE_TEXT))
+        assertTrue(longest.length <= RemoteProtocol.MAX_LARGE_BODY)
+        assertTrue(session.open(longest, large = true) is Verdict.Accepted)
+        // Asking for a backup is a small command with no text.
+        assertTrue(session.open(RemoteProtocol.seal(secret, 15, Command.BACKUP)) is Verdict.Accepted)
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 16, Command.BACKUP, "x")))
+    }
 }

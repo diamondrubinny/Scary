@@ -66,6 +66,7 @@ import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SCREEN_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SHOW_ALL_TAG
 import io.github.diamondrubinny.scary.ui.settings.homeRowChoiceTag
 import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
+import io.github.diamondrubinny.scary.core.backup.Backup
 import io.github.diamondrubinny.scary.ui.home.HERO_TITLE_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
 import io.github.diamondrubinny.scary.ui.settings.REFRESH_FILMS_ROW_TAG
@@ -79,6 +80,8 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onRoot
@@ -966,9 +969,65 @@ class ScaryUiTest {
             socket.getInputStream().readBytes().toString(Charsets.UTF_8)
         }
 
-    private fun remotePost(port: Int, json: String): String {
+    private fun remotePost(port: Int, json: String, path: String = "/api"): String {
         val body = json.toByteArray(Charsets.UTF_8)
-        return remoteHttp(port, "POST /api HTTP/1.1\r\nHost: tv\r\nContent-Type: application/json\r\nContent-Length: ${body.size}\r\n\r\n$json")
+        return remoteHttp(port, "POST $path HTTP/1.1\r\nHost: tv\r\nContent-Type: application/json\r\nContent-Length: ${body.size}\r\n\r\n$json")
+    }
+
+    /**
+     * The viewer's backup through the phone remote: it leaves the TV encrypted and signed for the paired phone, and a
+     * file sent back adds to My list without removing anything. A file is taken only at its own address.
+     */
+    @Test
+    fun theBackupGoesToThePairedPhoneAndAFileIsMergedBack() {
+        waitForHome()
+        val container = (rule.activity.application as ScaryApplication).container
+        val remote = container.phoneRemote
+        val settings = container.settingsRepository
+        val listBefore = runBlocking { settings.prefs.first().myListIds }
+        val (kept, added) = bundledMovies().filter { it.id !in listBefore }.let { it[0] to it[1] }
+        withCleanup({
+            runBlocking { settings.toggleMyList(kept.id) }
+            val url = remote.start(Language.EN) ?: error("no network for the phone remote")
+            val port = Uri.parse(url).port
+            val secret = Base64.decode(
+                Uri.parse(url).fragment.orEmpty().split('&').first { it.startsWith("s=") }.removePrefix("s="),
+                Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP,
+            )
+            var counter = System.currentTimeMillis() * 1000
+
+            val asked = ++counter
+            val answer = remotePost(port, RemoteProtocol.seal(secret, asked, Command.BACKUP))
+            assertTrue(answer, answer.startsWith("HTTP/1.1 200") && "\"backup\"" in answer)
+            // Nothing readable on the wire: not the format's name, not a film's id.
+            assertFalse(answer, "scary-backup" in answer || kept.id in answer)
+            val body = org.json.JSONObject(answer.substringAfter("\r\n\r\n"))
+            val sealed = RemoteProtocol.SealedAnswer(body.getString("b"), body.getString("t"))
+            val text = RemoteProtocol.openAnswer(secret, asked, sealed) ?: error("the backup's answer did not open")
+            // Signed for that command only: another counter does not open it.
+            assertNull(RemoteProtocol.openAnswer(secret, asked + 1, sealed))
+            val backup = Backup.decode(text) ?: error("not a backup: ${text.take(80)}")
+            assertTrue(text, kept.id in backup.myList)
+            for (word in listOf("pin", "token", "secret", "password")) assertFalse(word, word in text.lowercase())
+
+            // A file with one more film: only at the large address, and only when it is a backup.
+            val file = Backup.encode(backup.copy(myList = backup.myList + added.id), "test", 20_000)
+            val small = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.RESTORE, file))
+            assertTrue(small, small.startsWith("HTTP/1.1 400") || small.startsWith("HTTP/1.1 413"))
+            val other = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.RESTORE, """{"format":"other"}"""), path = "/api/big")
+            assertTrue(other, "\"restore_invalid\"" in other)
+            val restored = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.RESTORE, file), path = "/api/big")
+            assertTrue(restored, restored.startsWith("HTTP/1.1 200") && "\"restore_ok\"" in restored)
+            waitUntilOrDescribe("${added.title} in My list after the restore") {
+                runBlocking { settings.prefs.first().myListIds }.let { added.id in it && kept.id in it && it.containsAll(listBefore) }
+            }
+        }) {
+            remote.stop()
+            runBlocking {
+                val now = settings.prefs.first().myListIds
+                for (film in listOf(kept, added)) if (film.id in now) settings.toggleMyList(film.id)
+            }
+        }
     }
 
     @Test

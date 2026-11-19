@@ -78,6 +78,15 @@
         </div>
       </form>
     </section>
+    <section>
+      <h2 data-w="backupTitle">Backup</h2>
+      <p class="hint" data-w="backupHint"></p>
+      <button type="button" id="backup-save" data-w="backupSave">Save a backup on this phone</button>
+      <label for="backup-file" data-w="restoreLabel">Restore from a backup file</label>
+      <input id="backup-file" type="file" accept="application/json,.json">
+      <p id="backup-summary" class="hint" role="status" aria-live="polite"></p>
+      <button type="button" id="backup-restore" data-w="restoreButton" disabled>Restore to the TV</button>
+    </section>
   </main>
   <footer data-w="credit">Powered by SCARY · Open source</footer>
 </body>

@@ -56,6 +56,7 @@ import io.github.diamondrubinny.scary.core.security.PinLockout
 import io.github.diamondrubinny.scary.core.tmdb.RegionOffers
 import io.github.diamondrubinny.scary.core.tmdb.WatchProvider
 import io.github.diamondrubinny.scary.data.AiRepository
+import io.github.diamondrubinny.scary.data.BackupRepository
 import io.github.diamondrubinny.scary.data.CatalogRepository
 import io.github.diamondrubinny.scary.data.CinemetaRepository
 import io.github.diamondrubinny.scary.data.InstalledApp
@@ -139,6 +140,8 @@ class HomeViewModel(
     private val stremio: StremioRepository? = null,
     /** Subtitles found online by the film's name, for the internal player; null in tests that do not need it. */
     private val subtitleRepository: SubtitleRepository? = null,
+    /** The viewer's backup, made and restored from the phone remote; null in tests that do not need it. */
+    private val backups: BackupRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
 ) : ViewModel() {
 
@@ -1475,6 +1478,21 @@ class HomeViewModel(
         }
     }
 
+    /** What the phone remote did with the viewer's backup, said on the TV; a restore can change the hidden films. */
+    private fun onBackupEvent(event: BackupRepository.Event) {
+        when (event) {
+            BackupRepository.Event.Saved -> show(R.string.msg_backup_sent)
+            is BackupRepository.Event.Restored -> {
+                if (event.originsChanged) {
+                    if (OriginFilter.enabled) extraPages.update { pages -> pages.mapValues { (_, metas) -> OriginFilter.visible(metas) } }
+                    refreshRequests.tryEmit(Unit)
+                }
+                val added = event.added.myList + event.added.watched + event.added.rated + event.added.bucket
+                if (added > 0) show(R.string.msg_restore_done, added.toString()) else show(R.string.msg_restore_nothing)
+            }
+        }
+    }
+
     fun toggleHideWatched() {
         viewModelScope.launch { settings.setHideWatched(!settings.prefs.first().hideWatched) }
     }
@@ -2406,6 +2424,7 @@ class HomeViewModel(
         loadCatalog()
         refreshApps()
         viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
+        backups?.let { repository -> viewModelScope.launch { repository.events.collect(::onBackupEvent) } }
     }
 
     companion object {
@@ -2466,6 +2485,7 @@ class HomeViewModel(
                     container.watchStore,
                     container.stremio,
                     container.subtitleRepository,
+                    container.backups,
                 )
             }
         }

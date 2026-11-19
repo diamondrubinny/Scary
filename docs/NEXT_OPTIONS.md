@@ -68,3 +68,31 @@ Built in stages, the small ones first.
 - **Accessibility:** each row reads "<row name>: Shown" or "…: Hidden"; the state is words, never colour alone; arrows and OK only; RTL follows the app.
 - **Files:** core `catalog/HomeRowChoices.kt` (+ `RowsTest`); app `SettingsRepository` (`hiddenRows`), `HomeViewModel` (`buildState` gating, `rowChoices`, `toggleHomeRow`), `ui/settings/HomeRowsScreen.kt`, `SettingsScreen` (the row), `ScaryRoot` (the screen, focus back on the row), strings in 5 languages, `ScaryUiTest.aHomeRowIsTurnedOffAndBackOn`.
 - **Limit:** rows are turned off by their kind or their collection id. A collection whose id changes in a later catalog shows again (the old key is simply never matched).
+
+## Stage 3: backup and restore (19.11.2026), version 0.5.20
+
+### Plan
+- **What the viewer gets:** on the phone remote's page, "Save a backup on this phone" and "Restore from a backup file". After a reinstall, or on a second TV, the lists come back in two presses.
+- **What is in the file:** My list, watched (and the day each was marked), "Loved it", "Not for me", the bucket list, the home rows turned off, and six plain switches (seasonal rows, mark watched automatically, hide watched, hide Arab and Indian films, trailer autoplay, trailer sound). Film ids and yes/no values only.
+- **What is never in the file:** the TMDB key, AI keys, the TMDB, Stremio and Real-Debrid accounts, the parental PIN and everything of the lock (family night, the fear level), the language, pinned and hidden apps (they belong to one TV), the internal player's history (it holds the viewer's own file names), and whether online data and AI are on (turning those on is a choice made on the TV).
+- **Restoring merges.** Everything the TV holds stays, in its place; the file adds after it. Where the two disagree about a film (loved here, "not for me" in the file) the TV's answer stays. The home rows turned off and the six switches are settings, so they are taken from the file. The same file restored twice changes nothing.
+
+### Threat model
+| What | Risk | Control |
+|---|---|---|
+| The backup crossing the home network | Another device on the Wi-Fi reads what the viewer watched | The answer is encrypted and signed with the pairing's secret (its own keystream and signature, bound to the command's counter); the secret never crosses the network |
+| A forged or replayed "give me the backup" | A device without the QR code gets the lists | The command is signed and its counter must rise, as every command; 20 forged commands turn the remote off |
+| A crafted file sent to restore | Injection, a huge file, a setting that unlocks something | Signed by the paired phone only; one address reads a long body and takes nothing but a restore; 120,000 characters at most; a strict format and version; every id checked against a pattern; every list capped; only the six named switches; unknown fields ignored; nothing in the file is ever run or shown as markup |
+| The file on the phone | Someone else reads it | It holds lists of film ids and six switches, no key, account or PIN; the page says so and it is the viewer's to keep |
+| Restore as a way around the parental lock | A child restores a file to change the lock | The lock, the PIN, family night and the fear level are not in the format and are never written by a restore |
+
+### As built
+- **core:** `backup/Backup.kt` (the format: `encode`, `decode`, `sanitize`, `merge`, `added`), `remote/RemoteProtocol.kt` (commands `backup` and `restore`; `Session.sealAnswer`, `openAnswer`; a large body only for `restore`). Tests: `BackupTest`, `RemoteProtocolTest` (values computed apart, with Python's hmac).
+- **app:** `data/BackupRepository.kt`, `SettingsRepository.backupSnapshot` and `applyBackup` (one write), `remote/PhoneRemoteServer.kt` (`POST /api/big`, the sealed answer), `assets/remote` (the page's Backup section in five languages; `openAnswer` in `remote.js`, checked by `tools/remote/check-remote-js.cjs` against the same values), the TV's messages, `ScaryUiTest.theBackupGoesToThePairedPhoneAndAFileIsMergedBack`.
+- **After a restore:** films found online that this TV has not kept get their details from Cinemeta by IMDb id (one at a time, only with online data on), so they show in My list and the bucket list.
+- **Works whatever app is in front:** the backup needs no screen.
+
+### Limits, to verify on a real phone
+- **Saving the file uses the browser's download of a page-made file** (`a download` with a blob). It works in Chrome on Android and Safari on iOS 13 and later by their documentation; **requires a check on the owner's phone**, since the page is served over plain HTTP on the home network.
+- **The file is not encrypted on the phone.** It holds no secret, but it does show what was watched. A password on the file was left out: it would need a strong key-derivation function in the page's own JavaScript (no Web Crypto on plain HTTP).
+- **Privacy law:** the file is the viewer's own data moved by the viewer between their own devices; SCARY's maker never receives it. **Needs legal review** before it is described as a data-portability feature.

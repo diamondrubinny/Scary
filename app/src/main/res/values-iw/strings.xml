@@ -70,6 +70,9 @@
     <string name="value_origins_shown">מוצגים</string>
     <string name="settings_origins_note">מוסתרים: הסרטים האלה לא מופיעים באף שורה (החיפוש עדיין מוצא אותם). מוצגים: הם חוזרים אחרי שהסרטים נקראים מחדש.</string>
     <string name="msg_origins_hidden">סרטים ערביים והודיים מוסתרים.</string>
+    <string name="msg_backup_sent">הגיבוי נשלח לטלפון.</string>
+    <string name="msg_restore_done">שוחזר מהטלפון. נוספו לרשימות: %1$s.</string>
+    <string name="msg_restore_nothing">שוחזר מהטלפון. הכול כבר היה ברשימות שלכם.</string>
     <string name="msg_origins_shown">סרטים ערביים והודיים יוצגו אחרי שהסרטים ייקראו מחדש.</string>
     <string name="settings_refresh_films_last">נקראו לאחרונה: %1$s</string>
     <string name="settings_refresh_films_never">עדיין לא נקראו</string>
@@ -400,7 +403,7 @@
     <string name="remote_title">שלט בטלפון</string>
     <string name="remote_step_wifi">1. מחברים את הטלפון לאותה רשת Wi-Fi של הטלוויזיה.</string>
     <string name="remote_step_scan">2. סורקים את הקוד במצלמת הטלפון ופותחים את הדף.</string>
-    <string name="remote_step_use">3. משתמשים בחצים, מחפשים סרטים או מדביקים את מפתח ה־TMDB.</string>
+    <string name="remote_step_use">3. משתמשים בחצים, מחפשים סרטים, מדביקים את מפתח ה־TMDB או שומרים גיבוי של הרשימות.</string>
     <string name="remote_connected">טלפון מחובר.</string>
     <string name="remote_waiting">ממתינים שטלפון יסרוק את הקוד…</string>
     <string name="remote_no_network">הטלוויזיה לא מחוברת לרשת ביתית (Wi-Fi או כבל), ולכן הטלפון לא יכול להגיע אליה.</string>
@@ -410,7 +413,7 @@
     <string name="remote_disconnect">ניתוק</string>
     <string name="remote_new_code">קוד חדש</string>
     <string name="remote_turn_on">הפעלה</string>
-    <string name="remote_privacy">פועל רק ברשת הביתית. כל פקודה חתומה ומוצפנת במפתח חד־פעמי שבקוד ה־QR, והמפתח לא נשלח ברשת אף פעם. שום דבר לא נשמר ולא נשלח לאינטרנט. השלט כבה מעצמו אחרי 30 דקות בלי שימוש.</string>
+    <string name="remote_privacy">פועל רק ברשת הביתית. כל פקודה חתומה ומוצפנת במפתח חד־פעמי שבקוד ה־QR, והמפתח לא נשלח ברשת אף פעם. שום דבר לא נשמר ולא נשלח לאינטרנט. גיבוי שביקשתם עובר רק לטלפון שלכם, מוצפן, כקובץ שנשאר אצלכם. השלט כבה מעצמו אחרי 30 דקות בלי שימוש.</string>
     <string name="remote_qr_description">קוד QR שפותח בטלפון את השלט של SCARY</string>
     <string name="remote_other_apps_full">הטלפון שולט גם באפליקציות אחרות (Stremio, Netflix…): חצים, OK, חזרה ובית. חיפוש ומפתח TMDB מחזירים קודם ל־SCARY.</string>
     <string name="remote_other_apps_back_home">באפליקציות אחרות (Stremio, Netflix…) הטלפון לוחץ חזרה ובית, ומפעיל, משהה ומשנה עוצמת קול. החצים דורשים Android 13 ומעלה בטלוויזיה.</string>
