@@ -7,6 +7,7 @@
     <string name="row_recent">Abertos recentemente</string>
     <string name="row_apps">Meus apps</string>
     <string name="row_more_like">Mais como este</string>
+    <string name="row_more_from_director">Mais de %1$s</string>
     <string name="minutes">%1$d min</string>
     <string name="fear_short">Medo %1$d/5</string>
     <string name="fear_description">Nível de medo %1$d de 5</string>
@@ -56,6 +57,12 @@
     <string name="settings_effects">Névoa e granulação</string>
     <string name="value_effects_tv_off">Ligado, mas a TV remove as animações</string>
     <string name="settings_refresh_films">Atualizar os filmes agora</string>
+    <string name="settings_origins">Filmes árabes e indianos</string>
+    <string name="value_origins_hidden">Ocultos</string>
+    <string name="value_origins_shown">Visíveis</string>
+    <string name="settings_origins_note">Ocultos: esses filmes não aparecem em nenhuma fileira (a busca ainda os encontra). Visíveis: voltam depois que os filmes forem lidos de novo.</string>
+    <string name="msg_origins_hidden">Filmes árabes e indianos estão ocultos.</string>
+    <string name="msg_origins_shown">Filmes árabes e indianos aparecerão quando os filmes forem lidos de novo.</string>
     <string name="settings_refresh_films_last">Última leitura: %1$s</string>
     <string name="settings_refresh_films_never">Ainda não lidos</string>
     <string name="msg_refreshing">Lendo filmes novos…</string>
@@ -650,6 +657,15 @@
     <string name="tracks_audio">Áudio</string>
     <string name="tracks_subtitles">Legendas</string>
     <string name="tracks_every_film">Em todo filme</string>
+    <string name="tracks_look">Aparência das legendas</string>
+    <string name="tracks_look_color">Cor: %1$s</string>
+    <string name="tracks_look_white">branca</string>
+    <string name="tracks_look_yellow">amarela</string>
+    <string name="tracks_look_background_on">Fundo escuro: sim</string>
+    <string name="tracks_look_background_off">Fundo escuro: não</string>
+    <string name="tracks_look_position">Posição: %1$s</string>
+    <string name="tracks_look_bottom">embaixo</string>
+    <string name="tracks_look_higher">mais alta</string>
     <string name="tracks_pref_audio">Idioma do áudio: %1$s</string>
     <string name="tracks_pref_subtitles">Idioma das legendas: %1$s</string>
     <string name="tracks_as_in_file">como no arquivo</string>

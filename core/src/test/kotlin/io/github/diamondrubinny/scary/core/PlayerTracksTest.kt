@@ -229,4 +229,18 @@ class PlayerTracksTest {
         assertEquals(listOf("The.Thing.1982.heb.srt"), film.subtitles.map { it.name })
         assertEquals("https://real-debrid.com/d/L2", film.subtitles.single().link)
     }
+
+    @Test
+    fun `a file's subtitle delay is kept with its other choices`() {
+        val memory = TrackMemory(subtitle = "TEXT|he|||0", subtitleDelayMs = 1_500)
+        assertEquals(memory, TrackChoice.decode(TrackChoice.encode(memory)))
+        // The delay alone is worth keeping.
+        assertEquals(TrackMemory(subtitleDelayMs = 500), TrackChoice.decode(TrackChoice.encode(TrackMemory(subtitleDelayMs = 500))))
+        // Out of range, or not a number: no delay.
+        assertNull(TrackChoice.decode("""{"d":999999}"""))
+        assertNull(TrackChoice.decode("""{"d":"1500"}"""))
+        assertEquals(0L, TrackChoice.decode("""{"a":"x","d":-5}""")!!.subtitleDelayMs)
+        // What older versions wrote still reads.
+        assertEquals(TrackMemory(audio = "x"), TrackChoice.decode("""{"a":"x"}"""))
+    }
 }

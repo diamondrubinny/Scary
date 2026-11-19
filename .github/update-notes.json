@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.5.17: hold OK on a Continue watching card (your files or Stremio) for a menu: mark the film as watched and take it out of the row, or only take it out.",
-  "he": "SCARY 0.5.17: החזיקו OK על כרטיס ב\"המשך צפייה\" (הקבצים שלכם או Stremio) ותקבלו תפריט: לסמן את הסרט כנצפה ולהסיר אותו מהשורה, או רק להסיר.",
-  "ar": "SCARY 0.5.17: اضغط مطولًا على OK فوق بطاقة في «متابعة المشاهدة» (ملفاتك أو Stremio) لتظهر قائمة: وضع علامة «شوهد» على الفيلم وإزالته من الصف، أو إزالته فقط.",
-  "pt": "SCARY 0.5.17: segure OK num cartão de Continuar assistindo (seus arquivos ou Stremio) para abrir um menu: marcar o filme como visto e tirá-lo da fileira, ou só tirá-lo.",
-  "ru": "SCARY 0.5.17: удерживайте OK на карточке в «Продолжить просмотр» (ваши файлы или Stremio), чтобы открыть меню: отметить фильм просмотренным и убрать из ряда или только убрать."
+  "en": "SCARY 0.5.18: a film's page shows more from its director; subtitles can be yellow, without the dark box, or higher, and their delay is kept per file; Settings can show Arab and Indian films again. Also the menu on Continue watching cards (hold OK).",
+  "he": "SCARY 0.5.18: בעמוד סרט יש שורת \"עוד מהבמאי\"; אפשר לבחור כתוביות צהובות, בלי רקע כהה או גבוה יותר, וההשהיה נשמרת לכל קובץ; ובהגדרות אפשר להציג שוב סרטים ערביים והודיים. בנוסף, תפריט על כרטיסי \"המשך צפייה\" (החזקת OK).",
+  "ar": "SCARY 0.5.18: صفحة الفيلم تعرض المزيد من مخرجه؛ يمكن جعل الترجمة صفراء أو بلا خلفية داكنة أو أعلى، ويُحفظ تأخيرها لكل ملف؛ ويمكن من الإعدادات إظهار الأفلام العربية والهندية مجددًا. وكذلك قائمة على بطاقات «متابعة المشاهدة» (ضغط مطوّل على OK).",
+  "pt": "SCARY 0.5.18: a página do filme mostra mais do diretor; as legendas podem ser amarelas, sem o fundo escuro ou mais altas, e o atraso fica guardado por arquivo; nas Configurações dá para mostrar de novo filmes árabes e indianos. E o menu nos cartões de Continuar assistindo (segure OK).",
+  "ru": "SCARY 0.5.18: на странице фильма есть ряд «Ещё от режиссёра»; субтитры можно сделать жёлтыми, без тёмного фона или выше, а задержка запоминается для каждого файла; в настройках можно снова показать арабские и индийские фильмы. И меню на карточках «Продолжить просмотр» (удерживайте OK)."
 }

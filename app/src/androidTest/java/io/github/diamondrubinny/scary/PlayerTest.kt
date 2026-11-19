@@ -40,6 +40,9 @@ import io.github.diamondrubinny.scary.ui.player.ONLINE_SEARCH_TAG
 import io.github.diamondrubinny.scary.ui.player.ONLINE_TOGGLE_TAG
 import io.github.diamondrubinny.scary.ui.player.languageNameIn
 import io.github.diamondrubinny.scary.ui.player.onlineLanguageTag
+import io.github.diamondrubinny.scary.ui.player.LOOK_COLOR_TAG
+import io.github.diamondrubinny.scary.ui.player.LOOK_BACKGROUND_TAG
+import io.github.diamondrubinny.scary.ui.player.LOOK_POSITION_TAG
 import io.github.diamondrubinny.scary.ui.player.PLAYER_TAG
 import io.github.diamondrubinny.scary.ui.player.PLAYER_TOAST_TAG
 import io.github.diamondrubinny.scary.ui.player.PLAYER_SPEED_TAG
@@ -240,6 +243,12 @@ class PlayerTest {
             // Off.
             rule.onNode(hasTestTag(PLAYER_SUBTITLES_OFF_TAG)).performScrollTo().performClick()
             waitFor(hasTestTag(PLAYER_SUBTITLES_OFF_TAG) and isSelected())
+            // How subtitles look: a press changes the colour, and it is kept for every film.
+            rule.onNode(hasTestTag(LOOK_COLOR_TAG)).performScrollTo().performClick()
+            waitFor(hasText(rule.activity.getString(R.string.tracks_look_color, text(R.string.tracks_look_yellow))))
+            assertTrue("yellow subtitles are kept", container.watchStore.subtitleColor == 1)
+            rule.onNode(hasTestTag(LOOK_BACKGROUND_TAG)).performScrollTo().assertExists()
+            rule.onNode(hasTestTag(LOOK_POSITION_TAG)).performScrollTo().assertExists()
 
             // Back closes the window, not the film.
             rule.waitForIdle()
@@ -254,6 +263,7 @@ class PlayerTest {
         } finally {
             rule.runOnUiThread { vm.clearWatchHistory() }
             container.watchStore.setLanguages(LanguagePrefs())
+            container.watchStore.subtitleColor = 0
         }
     }
 

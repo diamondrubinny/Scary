@@ -8,6 +8,7 @@
     <string name="row_recent">Recently opened</string>
     <string name="row_apps">My apps</string>
     <string name="row_more_like">More like this</string>
+    <string name="row_more_from_director">More from %1$s</string>
     <string name="minutes">%1$d min</string>
     <string name="fear_short">Fear %1$d/5</string>
     <string name="fear_description">Fear level %1$d of 5</string>
@@ -57,6 +58,12 @@
     <string name="settings_effects">Fog and film grain</string>
     <string name="value_effects_tv_off">On, but the TV removes animations</string>
     <string name="settings_refresh_films">Refresh films now</string>
+    <string name="settings_origins">Arab and Indian films</string>
+    <string name="value_origins_hidden">Hidden</string>
+    <string name="value_origins_shown">Shown</string>
+    <string name="settings_origins_note">Hidden: these films are in no row (search still finds them). Shown: they come back after the films are read again.</string>
+    <string name="msg_origins_hidden">Arab and Indian films are hidden.</string>
+    <string name="msg_origins_shown">Arab and Indian films will show once the films are read again.</string>
     <string name="settings_refresh_films_last">Last read: %1$s</string>
     <string name="settings_refresh_films_never">Not read yet</string>
     <string name="msg_refreshing">Reading new films…</string>
@@ -645,6 +652,15 @@
     <string name="tracks_audio">Audio</string>
     <string name="tracks_subtitles">Subtitles</string>
     <string name="tracks_every_film">In every film</string>
+    <string name="tracks_look">How subtitles look</string>
+    <string name="tracks_look_color">Colour: %1$s</string>
+    <string name="tracks_look_white">white</string>
+    <string name="tracks_look_yellow">yellow</string>
+    <string name="tracks_look_background_on">Dark background: on</string>
+    <string name="tracks_look_background_off">Dark background: off</string>
+    <string name="tracks_look_position">Place: %1$s</string>
+    <string name="tracks_look_bottom">at the bottom</string>
+    <string name="tracks_look_higher">higher</string>
     <string name="tracks_pref_audio">Audio language: %1$s</string>
     <string name="tracks_pref_subtitles">Subtitle language: %1$s</string>
     <string name="tracks_as_in_file">as in the file</string>

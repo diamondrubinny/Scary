@@ -27,9 +27,16 @@ object OriginFilter {
     private val LANGUAGES = setOf("ar", "hi", "ta", "te", "ml", "kn", "bn", "mr", "pa", "gu", "or", "as")
 
     /** Whether the first country of [country] ("India, United States") is a hidden one. */
-    fun hidesCountry(country: String): Boolean = country.substringBefore(',').trim().lowercase() in COUNTRIES
+    /**
+     * Whether the rule applies. On unless the viewer turns it off in Settings ("Arab and Indian films: shown"); read by
+     * every check below, so one switch covers every row.
+     */
+    @Volatile
+    var enabled: Boolean = true
 
-    fun hidesLanguage(code: String): Boolean = code.trim().lowercase() in LANGUAGES
+    fun hidesCountry(country: String): Boolean = enabled && country.substringBefore(',').trim().lowercase() in COUNTRIES
+
+    fun hidesLanguage(code: String): Boolean = enabled && code.trim().lowercase() in LANGUAGES
 
     fun hides(meta: CinemetaMeta): Boolean = hidesCountry(meta.country) || hidesLanguage(meta.originalLanguage)
 

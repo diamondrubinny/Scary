@@ -61,6 +61,20 @@ fun onlineLanguageTag(code: String) = "onlineLanguage:$code"
 /** A track row's test tag: "track:<id>". */
 fun trackTag(id: String) = "track:$id"
 
+/** How subtitles look in every film: their colour, a dark box behind them, and how high they sit. */
+data class SubtitleLook(val color: Int = WHITE, val background: Boolean = true, val position: Int = BOTTOM) {
+    companion object {
+        const val WHITE = 0
+        const val YELLOW = 1
+        const val BOTTOM = 0
+        const val HIGHER = 1
+    }
+}
+
+const val LOOK_COLOR_TAG = "subtitleLookColor"
+const val LOOK_BACKGROUND_TAG = "subtitleLookBackground"
+const val LOOK_POSITION_TAG = "subtitleLookPosition"
+
 /** Where the search for subtitles online stands. */
 enum class OnlinePhase { IDLE, SEARCHING, READY, UNREACHABLE, NONE }
 
@@ -86,6 +100,7 @@ class TrackPickerState(
     /** A subtitle file being fetched. */
     val loadingText: String?,
     val prefs: LanguagePrefs,
+    val look: SubtitleLook = SubtitleLook(),
     /** Null when this file cannot be searched (no film, no service): the section is not shown. */
     val online: OnlinePickerState? = null,
 )
@@ -96,6 +111,7 @@ class TrackPickerActions(
     val onText: (TrackInfo?) -> Unit,
     val onPrefs: (LanguagePrefs) -> Unit,
     val onClose: () -> Unit,
+    val onLook: (SubtitleLook) -> Unit = {},
     val onOnlineEnabled: (Boolean) -> Unit = {},
     val onOnlineSearch: () -> Unit = {},
     /** The best subtitle in this language, fetched and played. */
@@ -155,6 +171,23 @@ fun TrackPicker(state: TrackPickerState, actions: TrackPickerActions, focusReque
             )
         }
         state.online?.let { OnlineSection(it, actions) }
+        // How the subtitles look: each press moves to the next choice, and it holds for every film.
+        Heading(stringResource(R.string.tracks_look))
+        ScaryButton(
+            stringResource(R.string.tracks_look_color, stringResource(if (state.look.color == SubtitleLook.YELLOW) R.string.tracks_look_yellow else R.string.tracks_look_white)),
+            onClick = { actions.onLook(state.look.copy(color = if (state.look.color == SubtitleLook.YELLOW) SubtitleLook.WHITE else SubtitleLook.YELLOW)) },
+            modifier = Modifier.testTag(LOOK_COLOR_TAG),
+        )
+        ScaryButton(
+            stringResource(if (state.look.background) R.string.tracks_look_background_on else R.string.tracks_look_background_off),
+            onClick = { actions.onLook(state.look.copy(background = !state.look.background)) },
+            modifier = Modifier.testTag(LOOK_BACKGROUND_TAG),
+        )
+        ScaryButton(
+            stringResource(R.string.tracks_look_position, stringResource(if (state.look.position == SubtitleLook.HIGHER) R.string.tracks_look_higher else R.string.tracks_look_bottom)),
+            onClick = { actions.onLook(state.look.copy(position = if (state.look.position == SubtitleLook.HIGHER) SubtitleLook.BOTTOM else SubtitleLook.HIGHER)) },
+            modifier = Modifier.testTag(LOOK_POSITION_TAG),
+        )
         Heading(stringResource(R.string.tracks_every_film))
         LanguagePrefButtons(state.prefs, actions.onPrefs)
         ScaryButton(stringResource(R.string.player_close), onClick = actions.onClose)

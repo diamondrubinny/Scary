@@ -8,6 +8,7 @@
     <string name="row_recent">فُتحت مؤخرًا</string>
     <string name="row_apps">تطبيقاتي</string>
     <string name="row_more_like">أفلام مشابهة</string>
+    <string name="row_more_from_director">المزيد من المخرج %1$s</string>
     <string name="minutes">%1$d دقيقة</string>
     <string name="fear_short">الرعب %1$d/5</string>
     <string name="fear_description">مستوى الرعب %1$d من 5</string>
@@ -57,6 +58,12 @@
     <string name="settings_effects">الضباب وحبيبات الفيلم</string>
     <string name="value_effects_tv_off">مفعّل، لكن التلفزيون يزيل الحركات</string>
     <string name="settings_refresh_films">تحديث الأفلام الآن</string>
+    <string name="settings_origins">الأفلام العربية والهندية</string>
+    <string name="value_origins_hidden">مخفية</string>
+    <string name="value_origins_shown">ظاهرة</string>
+    <string name="settings_origins_note">مخفية: لا تظهر هذه الأفلام في أي صف (البحث ما زال يجدها). ظاهرة: تعود بعد قراءة الأفلام من جديد.</string>
+    <string name="msg_origins_hidden">الأفلام العربية والهندية مخفية.</string>
+    <string name="msg_origins_shown">ستظهر الأفلام العربية والهندية بعد قراءة الأفلام من جديد.</string>
     <string name="settings_refresh_films_last">آخر قراءة: %1$s</string>
     <string name="settings_refresh_films_never">لم تُقرأ بعد</string>
     <string name="msg_refreshing">جارٍ قراءة أفلام جديدة…</string>
@@ -672,6 +679,15 @@
     <string name="tracks_audio">الصوت</string>
     <string name="tracks_subtitles">الترجمة</string>
     <string name="tracks_every_film">في كل فيلم</string>
+    <string name="tracks_look">شكل الترجمة</string>
+    <string name="tracks_look_color">اللون: %1$s</string>
+    <string name="tracks_look_white">أبيض</string>
+    <string name="tracks_look_yellow">أصفر</string>
+    <string name="tracks_look_background_on">خلفية داكنة: نعم</string>
+    <string name="tracks_look_background_off">خلفية داكنة: لا</string>
+    <string name="tracks_look_position">الموضع: %1$s</string>
+    <string name="tracks_look_bottom">في الأسفل</string>
+    <string name="tracks_look_higher">أعلى</string>
     <string name="tracks_pref_audio">لغة الصوت: %1$s</string>
     <string name="tracks_pref_subtitles">لغة الترجمة: %1$s</string>
     <string name="tracks_as_in_file">كما في الملف</string>

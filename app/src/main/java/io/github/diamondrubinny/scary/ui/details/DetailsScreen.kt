@@ -395,10 +395,39 @@ fun DetailsScreen(
                         }
                     }
                 }
+                // The director's other films, from the library and the offline index: nothing is asked online.
+                if (details.byDirector.isNotEmpty() && !isLocked(movie)) {
+                    BasicText(
+                        text = stringResource(R.string.row_more_from_director, movie.director.substringBefore(',').trim()),
+                        style = ScaryType.RowTitle.mixedLanguage(),
+                        modifier = Modifier
+                            .padding(start = SidePadding, end = SidePadding, top = 20.dp)
+                            .semantics { heading() },
+                    )
+                    LazyRow(
+                        modifier = Modifier.testTag(BY_DIRECTOR_ROW_TAG),
+                        contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    ) {
+                        items(details.byDirector, key = { it.id }) { other ->
+                            PosterCard(
+                                movie = other,
+                                onClick = { onOpenSimilar(other) },
+                                onFocused = {},
+                                width = 92.dp,
+                                locked = isLocked(other),
+                                watched = isWatched(other),
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
+
+/** The "More from this director" row on a film's page. */
+const val BY_DIRECTOR_ROW_TAG = "byDirectorRow"
 
 private val PageTopPadding = 36.dp
 
