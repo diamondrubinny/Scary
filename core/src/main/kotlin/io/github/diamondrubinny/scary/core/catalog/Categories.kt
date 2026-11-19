@@ -43,6 +43,8 @@ object Categories {
      */
     fun matches(collectionId: String, meta: CinemetaMeta, thisYear: Int = LocalDate.now().year): Boolean {
         if (!Cinemeta.onTheme(meta)) return false
+        // The film itself has to be worth offering (core FilmQuality): no shorts, no unrated or low-rated films.
+        if (FilmQuality.problem(meta, FilmQuality.isNewRow(collectionId), thisYear) != null) return false
         val series = collectionId.startsWith(SERIES_PREFIX)
         if ((meta.kind == MediaKind.SERIES) != series) return false
         val genres = meta.genres.mapTo(HashSet()) { it.lowercase() }

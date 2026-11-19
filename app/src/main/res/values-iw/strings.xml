@@ -812,6 +812,7 @@
     <string name="diag_online">סרטים מהרשת: %1$s</string>
     <string name="diag_refresh">רענון אחרון (עמודים שנטענו: שורות · קטגוריות): %1$s</string>
     <string name="diag_quality">בדיקת מוצא (סרטים שהוצאו משורות לפי מקום · ממתינים לשפה): %1$s</string>
+    <string name="diag_film_quality">בדיקת סרטים (נשארו מחוץ לשורות: חסרים פרטים · קצרים מ־45 דק׳ · בלי דירוג · דירוג מתחת ל־5 · בלי פחד): %1$s</string>
     <string name="diag_startup">התחלה: %1$s (הזמן עד השורות הראשונות, האחרון והממוצע של ההפעלות האחרונות)</string>
     <string name="diag_none">לא נרשמו קריסות או היתקעויות.</string>
     <string name="diag_clear">ניקוי האבחון</string>

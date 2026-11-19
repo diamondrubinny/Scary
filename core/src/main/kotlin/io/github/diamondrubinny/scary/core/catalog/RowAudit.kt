@@ -6,12 +6,13 @@ package io.github.diamondrubinny.scary.core.catalog
 
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
+import java.time.LocalDate
 
 /**
  * Quality control for the rows. Every film a row holds is checked against the rules the rows are built from, in one
  * place: whether it belongs to the row's place ([Origin]), whether it is one of the films kept off every shelf
  * ([OriginFilter]), whether it is on theme at all (no documentaries or children's films) and whether the row lists it
- * twice. [audit] reports what it finds; [clean] is the same check used to take the offenders out, so a cache written by
+ * twice, and whether the film itself is worth offering ([FilmQuality]). [audit] reports what it finds; [clean] is the same check used to take the offenders out, so a cache written by
  * an older version, or a row a bug let a wrong film into, never reaches the screen. Pure logic, tested on real films.
  */
 object RowAudit {
@@ -33,14 +34,29 @@ object RowAudit {
 
         /** The same film twice in one row. */
         DUPLICATE,
+
+        /** The film itself is not worth offering (core FilmQuality): a short, unrated, rated low, without fear, or incomplete. */
+        TOO_SHORT,
+        UNRATED,
+        LOW_RATED,
+        NO_FEAR,
+        INCOMPLETE,
     }
 
     data class Finding(val rowId: String, val imdbId: String, val name: String, val problem: Problem)
 
     /** What is wrong with [meta] in the row [rowId]; null when nothing is. */
-    fun check(rowId: String, meta: CinemetaMeta): Problem? {
+    fun check(rowId: String, meta: CinemetaMeta, thisYear: Int = LocalDate.now().year): Problem? {
         if (OriginFilter.hides(meta)) return Problem.HIDDEN_ORIGIN
         if (!Cinemeta.onTheme(meta)) return Problem.OFF_THEME
+        when (FilmQuality.problem(meta, FilmQuality.isNewRow(rowId), thisYear)) {
+            FilmQuality.Problem.INCOMPLETE -> return Problem.INCOMPLETE
+            FilmQuality.Problem.TOO_SHORT -> return Problem.TOO_SHORT
+            FilmQuality.Problem.UNRATED -> return Problem.UNRATED
+            FilmQuality.Problem.LOW_RATED -> return Problem.LOW_RATED
+            FilmQuality.Problem.NO_FEAR -> return Problem.NO_FEAR
+            null -> Unit
+        }
         val region = Categories.PLACE_ROWS[rowId] ?: return null
         return when (Origin.verdict(region, meta)) {
             Origin.Verdict.IN -> null
@@ -62,12 +78,16 @@ object RowAudit {
      * The categories' lists ([categories]: row id to IMDb ids, their films' details in [metas]) without the films that
      * do not belong; with how many were taken out. A film whose details are not in [metas] stays: nothing says it is wrong.
      */
-    fun clean(categories: Map<String, List<String>>, metas: Map<String, CinemetaMeta>): Pair<Map<String, List<String>>, Int> {
+    fun clean(
+        categories: Map<String, List<String>>,
+        metas: Map<String, CinemetaMeta>,
+        thisYear: Int = LocalDate.now().year,
+    ): Pair<Map<String, List<String>>, Int> {
         var removed = 0
         val cleaned = categories.mapValues { (rowId, ids) ->
             val seen = HashSet<String>()
             ids.filter { id ->
-                val keep = seen.add(id) && (metas[id]?.let { check(rowId, it) == null } ?: true)
+                val keep = seen.add(id) && (metas[id]?.let { check(rowId, it, thisYear) == null } ?: true)
                 if (!keep) removed++
                 keep
             }

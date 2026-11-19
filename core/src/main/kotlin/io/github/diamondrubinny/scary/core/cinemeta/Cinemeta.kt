@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.core.cinemeta
 
 import io.github.diamondrubinny.scary.core.catalog.Categories
+import io.github.diamondrubinny.scary.core.catalog.FilmQuality
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.catalog.RowAudit
 import io.github.diamondrubinny.scary.core.model.Catalog
@@ -495,11 +496,14 @@ data class CinemetaCache(
      * The cache without the films kept off the shelves (core OriginFilter): in the online rows, and in the categories'
      * lists (their films' details stay in [metas]). A cache written before the choice shows no hidden film either.
      */
-    fun withoutHidden(): CinemetaCache = copy(
-        rows = rows.mapNotNull(OriginFilter::visible),
+    fun withoutHidden(thisYear: Int = java.time.LocalDate.now().year): CinemetaCache = copy(
+        // The films' own quality too (core FilmQuality), so a cache written before those rules shows none of theirs.
+        rows = rows.mapNotNull { row ->
+            OriginFilter.visible(row)?.let { shown -> shown.copy(metas = FilmQuality.accepted(shown.metas, shown.id, thisYear)).takeIf { it.metas.isNotEmpty() } }
+        },
         // The same quality check as the rows are built with (core RowAudit): hidden origins, off-theme films, American
         // films in rows about a place (an older cache had them there), duplicates.
-        categories = RowAudit.clean(categories, metas).first,
+        categories = RowAudit.clean(categories, metas, thisYear).first,
     )
 
     /** Whether the rows should be fetched again: missing pages are, as well as old data. */

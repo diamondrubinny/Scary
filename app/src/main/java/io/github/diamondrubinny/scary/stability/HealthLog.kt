@@ -29,6 +29,7 @@ object HealthLog {
     private const val ONLINE = "online"
     private const val REFRESH = "refresh"
     private const val QUALITY = "quality"
+    private const val FILM_QUALITY = "film_quality"
     private const val STARTS = "starts"
     private const val MAX_STARTS = 5
     private const val OWN_PACKAGE = "io.github.diamondrubinny.scary"
@@ -43,6 +44,11 @@ object HealthLog {
         val refresh: String? = null,
         /** "16.11 21:10 · 41 · 3": American films kept out of the rows about a place, and those waiting for a language. */
         val quality: String? = null,
+        /**
+         * "19.11 21:10 · 0 · 9 · 20 · 7 · 12": films the last refresh kept out of the online rows for being incomplete,
+         * too short, unrated, rated low, or without fear (core FilmQuality.Problem, in that order).
+         */
+        val filmQuality: String? = null,
         /** "16.11 21:10 · 3.2 s · 3.0 s on average of 5": how long SCARY took, from opening, to show its first rows. */
         val startup: String? = null,
     )
@@ -56,6 +62,7 @@ object HealthLog {
             prefs.getString(ONLINE, null),
             prefs.getString(REFRESH, null),
             prefs.getString(QUALITY, null),
+            prefs.getString(FILM_QUALITY, null),
             startupLine(prefs.getString(STARTS, null)),
         )
     }
@@ -86,6 +93,12 @@ object HealthLog {
     fun recordQuality(context: Context, keptOut: Int, unclear: Int) {
         val line = "${stamp()} · $keptOut · $unclear"
         context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(QUALITY, line) }
+    }
+
+    /** The check on the films themselves (core FilmQuality): how many each rule left out, in the rules' order. Counts only. */
+    fun recordFilmQuality(context: Context, counts: List<Int>) {
+        val line = stamp() + counts.joinToString("") { " · $it" }
+        context.getSharedPreferences(FILE, Context.MODE_PRIVATE).edit { putString(FILM_QUALITY, line) }
     }
 
     private val firstRowsRecorded = java.util.concurrent.atomic.AtomicBoolean(false)

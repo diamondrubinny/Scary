@@ -766,6 +766,7 @@ private fun Diagnostics() {
     report.online?.let { BasicText(stringResource(R.string.diag_online, it), style = code) }
     report.refresh?.let { BasicText(stringResource(R.string.diag_refresh, it), style = code) }
     report.quality?.let { BasicText(stringResource(R.string.diag_quality, it), style = code) }
+    report.filmQuality?.let { BasicText(stringResource(R.string.diag_film_quality, it), style = code) }
     report.startup?.let { BasicText(stringResource(R.string.diag_startup, it), style = code) }
     // Why titles do or do not move: SCARY's own switch, and the TV's animation scale (0 removes every animation).
     val scale = remember { android.provider.Settings.Global.getFloat(context.contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f) }
