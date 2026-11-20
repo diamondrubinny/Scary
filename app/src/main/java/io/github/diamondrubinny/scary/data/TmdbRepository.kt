@@ -258,6 +258,45 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         result?.takeIf { it.films.size >= 2 }
     }
 
+    /** An actor's films by their name, lower case; a name TMDB does not know is kept as null. In memory only. */
+    private val people = object : LinkedHashMap<String, OnlinePerson?>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, OnlinePerson?>) = size > PEOPLE_KEPT
+    }
+
+    /** An actor's horror, thrillers and mysteries, each with its IMDb id, the newest first. */
+    data class OnlinePerson(val language: Language, val films: List<CinemetaMeta>)
+
+    /**
+     * The films [name] acted in that belong on SCARY's shelves, in [language] (docs/CAST_PLAN.md). Asked for with the
+     * viewer's own key: the name (it is printed on the film's page), then the person's id, and the IMDb id of each
+     * film this TV has not asked about before. Nothing about the viewer is sent. Null without a key, when TMDB knows
+     * nobody by exactly that name, or when it cannot be reached. Never throws.
+     */
+    suspend fun personFilms(name: String, language: Language): OnlinePerson? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val cacheKey = name.trim().lowercase()
+        synchronized(people) {
+            if (people.containsKey(cacheKey)) {
+                val kept = people[cacheKey]
+                if (kept == null || kept.language == language) return@withContext kept
+            }
+        }
+        val search = Tmdb.personSearchUrl(name, language) ?: return@withContext null
+        val found = body(search, key) ?: return@withContext null
+        val personId = Tmdb.parsePersonId(found, name)
+        if (personId == null) {
+            synchronized(people) { people[cacheKey] = null }
+            return@withContext null
+        }
+        val credits = body(Tmdb.personCreditsUrl(personId, language), key)?.let(Tmdb::parsePersonCredits) ?: return@withContext null
+        // The films kept off every shelf stay off this one too (core OriginFilter).
+        val shown = credits.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
+        val result = OnlinePerson(language, withImdbIds(shown, key, language))
+        // A film whose IMDb id did not arrive is missing: shown as it is, asked for again on the next visit.
+        if (result.films.size == shown.size) synchronized(people) { people[cacheKey] = result }
+        result
+    }
+
     private val languagesFile = File(context.filesDir, "origin_languages.json")
     private val languages = LinkedHashMap<Long, String>()
     private var languagesLoaded = false
@@ -458,6 +497,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val MAX_BODY_BYTES = 2 * 1024 * 1024
         const val PROVIDERS_KEPT = 40
         const val FRANCHISES_KEPT = 40
+        const val PEOPLE_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
         const val MAX_IDS = 20_000
         const val MAX_LANGUAGE_LOOKUPS = 300

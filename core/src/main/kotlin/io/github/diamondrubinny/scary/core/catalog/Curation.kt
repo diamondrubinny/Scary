@@ -67,6 +67,24 @@ object Similar {
             .toList()
     }
 
+    /**
+     * The films among [candidates] whose cast names [actor] (the same name, case and surrounding spaces aside): those
+     * not [watched] first, then the newest, then the best rated. Films and series alike. Empty for a blank name.
+     */
+    fun byActor(candidates: List<Movie>, actor: String, limit: Int = MAX_BY_ACTOR, watched: (Movie) -> Boolean = { false }): List<Movie> {
+        val name = actor.trim().lowercase()
+        if (name.isEmpty()) return emptyList()
+        return candidates.asSequence()
+            .filter { movie -> movie.cast.any { it.trim().lowercase() == name } }
+            .distinctBy { it.imdbId }
+            .sortedWith(compareBy<Movie>({ watched(it) }, { -it.year }, { -(it.imdbRating ?: 0.0) }, { it.title }))
+            .take(limit)
+            .toList()
+    }
+
+    /** As many films as an actor's screen shows. */
+    const val MAX_BY_ACTOR = 120
+
     fun find(
         movies: List<Movie>,
         movie: Movie,

@@ -132,7 +132,13 @@
     <string name="settings_online">الصور والمعلومات من الإنترنت</string>
     <string name="settings_online_note">تأتي الملصقات والخلفيات وتقييمات IMDb وطاقم التمثيل والصفوف الرائجة من Cinemeta، قاعدة بيانات الأفلام العامة الخاصة بـ Stremio. لا يُرسل سوى معرّفات الأفلام، ونص البحث عندما تبحث، ولا تُرسل أي بيانات شخصية. وكأي موقع ويب، يرى الخادم عنوان IP الخاص بالتلفزيون. أوقف هذا الخيار للبقاء دون اتصال تمامًا.</string>
     <string name="imdb_rating">IMDb %1$s</string>
-    <string name="cast_line">بطولة %1$s</string>
+    <string name="cast_label">بطولة:</string>
+    <string name="person_title">أفلام %1$s</string>
+    <string name="person_loading">نسأل TMDB عن أفلام أخرى…</string>
+    <string name="person_note_local">%1$s مما لدى SCARY. مع مفتاح TMDB تظهر القائمة الكاملة للرعب والإثارة.</string>
+    <string name="person_note_tmdb">%1$s: من SCARY ومن TMDB. رعب وإثارة وغموض فقط.</string>
+    <string name="person_empty_title">لا شيء على الرفوف</string>
+    <string name="person_empty_body">ليس لدى SCARY فيلم رعب أو إثارة آخر لهذا الممثل.</string>
     <string name="settings_home_section">الشاشة الرئيسية</string>
     <string name="settings_jump">الانتقال إلى</string>
     <string name="settings_section_films">الأفلام والحسابات</string>

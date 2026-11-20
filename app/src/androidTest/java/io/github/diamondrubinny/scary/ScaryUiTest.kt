@@ -62,6 +62,9 @@ import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
 import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
 import io.github.diamondrubinny.scary.ui.details.BY_DIRECTOR_ROW_TAG
 import io.github.diamondrubinny.scary.ui.details.REMIND_TAG
+import io.github.diamondrubinny.scary.ui.details.CAST_NAME_TAG
+import io.github.diamondrubinny.scary.ui.details.CAST_ROW_TAG
+import io.github.diamondrubinny.scary.ui.person.PERSON_SCREEN_TAG
 import io.github.diamondrubinny.scary.ui.settings.ORIGINS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_ROW_TAG
 import io.github.diamondrubinny.scary.ui.settings.HOME_ROWS_SCREEN_TAG
@@ -440,6 +443,25 @@ class ScaryUiTest {
         }) {
             runBlocking { if (settings.prefs.first().reminders.any { it.id == film.id }) settings.toggleReminder(film.id, today - 1, today) }
         }
+    }
+
+    /** A film's cast: an actor's name is a button, and OK opens the films SCARY holds with them. */
+    @Test
+    fun anActorsNameOnAFilmPageOpensTheirFilms() {
+        waitForHome()
+        openViaSearch(bundledMovies().first { it.title == "Hereditary" })
+        // The cast comes with the film's details from the web (the bundled library carries none): without it there is
+        // nothing to press, and the test has nothing to say.
+        val names = hasTestTag(CAST_NAME_TAG)
+        assumeTrue("the film's cast did not arrive from the web", runCatching { waitFor(names, ONLINE_TIMEOUT_MS) }.isSuccess)
+        rule.onAllNodes(names)[0].performClick()
+        waitFor(hasTestTag(PERSON_SCREEN_TAG))
+        // The film the viewer came from is one of the actor's films.
+        waitFor(hasContentDescription("Hereditary", substring = true) and hasAnyAncestor(hasTestTag(PERSON_SCREEN_TAG)))
+        // Back on the film's page, with its cast.
+        pressBack()
+        waitFor(hasTestTag(CAST_ROW_TAG))
+        backToHome()
     }
 
     /** The full index (index.json): search finds a well-known film outside the hand-picked library, and it opens. */

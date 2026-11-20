@@ -489,6 +489,52 @@ class HomeViewModel(
         .flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
+    private val _person = MutableStateFlow<PersonUi?>(null)
+    private var personJob: Job? = null
+
+    /** The films of the actor whose screen is open; null until worked out. */
+    val person: StateFlow<PersonUi?> = _person.asStateFlow()
+
+    /** OK on an actor's name on a film's page. */
+    fun openPerson(name: String) {
+        val clean = name.trim().take(MAX_PERSON_NAME)
+        if (clean.isNotEmpty()) push(Screen.Person(clean))
+    }
+
+    /**
+     * The actor's films, for their screen: at once, the films SCARY holds whose cast names them; then, with the
+     * viewer's TMDB key and online data on, their films from TMDB too. Not on family night, where only the library
+     * is shown. The screen asks again when it comes back to the front, so each actor's screen shows its own films.
+     */
+    fun loadPerson(name: String) {
+        if (_person.value?.name == name) return
+        personJob?.cancel()
+        _person.value = null
+        personJob = viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            val shown = visibleCatalog()?.movies.orEmpty()
+            val watched = prefs.watchedIds.toHashSet()
+            val disliked = prefs.dislikedIds.toHashSet()
+            val local = withContext(Dispatchers.Default) {
+                Similar.byActor(shown.filter { it.id !in disliked }, name) { it.id in watched }
+            }
+            val askTmdb = prefs.onlineEnabled && !prefs.familyNight && tmdb.keyMask.value != null
+            _person.value = PersonUi(name, local, loading = askTmdb, fromTmdb = false)
+            if (!askTmdb) return@launch
+            val found = tmdb.personFilms(name, language.value)
+            if (found == null) {
+                _person.value = PersonUi(name, local, loading = false, fromTmdb = false)
+                return@launch
+            }
+            val known = shown.associateBy { it.imdbId }
+            // A film SCARY holds is shown as it holds it; the others as TMDB describes them.
+            val more = found.films.mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }.filter { it.id !in disliked }
+            webMovies = webMovies + more.filter { it.imdbId !in known }.associateBy { it.id }
+            val all = (local + more).distinctBy { it.imdbId }.sortedWith(compareBy<Movie>({ it.id in watched }, { -it.year }, { it.title }))
+            _person.value = PersonUi(name, all, loading = false, fromTmdb = true)
+        }
+    }
+
     private val _franchise = MutableStateFlow<FranchiseUi?>(null)
     private var franchiseJob: Job? = null
 
@@ -2572,6 +2618,7 @@ class HomeViewModel(
         private const val LAUNCH_STILL_MS = 400L
         private const val LAUNCH_CLEAR_MS = 1_500L
         private const val MAX_QUERY_LENGTH = 80
+        private const val MAX_PERSON_NAME = 80
         private const val WEB_SEARCH_DELAY_MS = 700L
         /** Index films added to each library subgenre row. */
         private const val INDEX_PER_ROW = 40

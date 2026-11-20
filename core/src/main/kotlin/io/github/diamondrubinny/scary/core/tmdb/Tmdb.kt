@@ -208,6 +208,61 @@ object Tmdb {
         return TmdbFranchise(id, o.text("name"), parts)
     }
 
+    /**
+     * The search for a person by name. Null when [name] is not a name SCARY would send: too short, too long, or with
+     * control characters in it. The name is encoded into the address; nothing else of it is used.
+     */
+    fun personSearchUrl(name: String, language: Language): String? {
+        val clean = name.trim()
+        if (clean.length !in 2..MAX_PERSON_NAME || clean.any { it.isISOControl() }) return null
+        return "$API/search/person?query=${java.net.URLEncoder.encode(clean, "UTF-8")}&include_adult=false&language=${language.tmdbTag}"
+    }
+
+    /**
+     * The id of the person named [name] in a person search's answer: only a result whose name is the same (case,
+     * accents and spacing aside) is taken, never the nearest one; among several, an actor before other crafts, then
+     * the best known. Null when there is none: nothing is guessed.
+     */
+    fun parsePersonId(text: String, name: String): Long? {
+        val wanted = personKey(name)
+        if (wanted.isEmpty()) return null
+        return (root(text)?.get("results") as? JsonArray).orEmpty().asSequence().take(MAX_PERSON_RESULTS)
+            .mapNotNull { it as? JsonObject }
+            .filterNot { (it["adult"] as? JsonPrimitive)?.booleanOrNull == true }
+            .filter { personKey(it.text("name")) == wanted || personKey(it.text("original_name")) == wanted }
+            .mapNotNull { o -> (o["id"] as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 }?.let { id -> Triple(id, o.text("known_for_department") == "Acting", (o["popularity"] as? JsonPrimitive)?.doubleOrNull ?: 0.0) } }
+            .sortedWith(compareByDescending<Triple<Long, Boolean, Double>> { it.second }.thenByDescending { it.third })
+            .firstOrNull()?.first
+    }
+
+    private fun personKey(name: String): String = io.github.diamondrubinny.scary.core.catalog.Search.normalize(name)
+
+    /** A person's films, in [language]. */
+    fun personCreditsUrl(personId: Long, language: Language): String {
+        require(personId > 0) { "invalid person id" }
+        return "$API/person/$personId/movie_credits?language=${language.tmdbTag}"
+    }
+
+    /**
+     * The films a person acted in, from [personCreditsUrl]'s answer: only what SCARY's shelves hold (horror, thriller,
+     * mystery), never adult titles or films with no year, each once, the newest first, at most [MAX_PERSON_FILMS].
+     */
+    fun parsePersonCredits(text: String): List<TmdbResult> =
+        (root(text)?.get("cast") as? JsonArray).orEmpty().asSequence().take(MAX_PERSON_CREDITS)
+            .mapNotNull { it as? JsonObject }
+            .filterNot { (it["adult"] as? JsonPrimitive)?.booleanOrNull == true }
+            .mapNotNull(::toResult)
+            .filter { it.year != null && isThemed(it) }
+            .distinctBy { it.tmdbId }
+            .sortedWith(compareByDescending<TmdbResult> { it.releaseDate.orEmpty() }.thenBy { it.tmdbId })
+            .take(MAX_PERSON_FILMS)
+            .toList()
+
+    const val MAX_PERSON_FILMS = 60
+    private const val MAX_PERSON_NAME = 80
+    private const val MAX_PERSON_RESULTS = 40
+    private const val MAX_PERSON_CREDITS = 600
+
     /** The longest series shown: the longest horror series have about thirty films. */
     const val MAX_FRANCHISE = 40
 

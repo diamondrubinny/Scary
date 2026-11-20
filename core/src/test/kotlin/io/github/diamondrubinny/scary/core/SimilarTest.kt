@@ -113,4 +113,25 @@ class SimilarTest {
         // A film with two directors is among each one's.
         assertTrue(io.github.diamondrubinny.scary.core.catalog.Similar.byDirector(films, films.first { it.id == "hush" }).size == 3)
     }
+
+    @Test
+    fun `an actor's films are the ones whose cast names them`() {
+        fun film(id: String, year: Int, rating: Double?, vararg cast: String) = Movie(
+            id = id, imdbId = "tt" + id.hashCode().toString().takeLast(7).padStart(7, '0'), title = id, year = year,
+            genre = io.github.diamondrubinny.scary.core.model.Genre.HORROR, imdbRating = rating, cast = cast.toList(),
+        )
+        val films = listOf(
+            film("hereditary", 2018, 7.3, "Toni Collette", "Milly Shapiro"), film("sixth sense", 1999, 8.2, "Bruce Willis", " toni collette "),
+            film("krampus", 2015, 6.2, "Adam Scott", "TONI COLLETTE"), film("alien", 1979, 8.5, "Sigourney Weaver"),
+            film("no cast", 2001, 6.0), film("near name", 2010, 6.0, "Toni Collett"),
+        )
+        val similar = io.github.diamondrubinny.scary.core.catalog.Similar
+        // The same name, whatever its case or the spaces around it; the newest first. A near name is another person.
+        assertEquals(listOf("hereditary", "krampus", "sixth sense"), similar.byActor(films, "Toni Collette").map { it.id })
+        // Films already watched wait at the end.
+        assertEquals("hereditary", similar.byActor(films, "Toni Collette") { it.id == "hereditary" }.last().id)
+        assertEquals(listOf("hereditary"), similar.byActor(films, "Toni Collette", limit = 1).map { it.id })
+        assertTrue(similar.byActor(films, "Nobody").isEmpty())
+        assertTrue(similar.byActor(films, "  ").isEmpty())
+    }
 }

@@ -106,6 +106,7 @@ import io.github.diamondrubinny.scary.ui.settings.CountryPicker
 import io.github.diamondrubinny.scary.ui.settings.DocumentScreen
 import io.github.diamondrubinny.scary.ui.settings.LanguageDialog
 import io.github.diamondrubinny.scary.ui.settings.SettingsActions
+import io.github.diamondrubinny.scary.ui.person.PersonScreen
 import io.github.diamondrubinny.scary.ui.settings.HomeRowsScreen
 import io.github.diamondrubinny.scary.ui.settings.SettingsScreen
 import io.github.diamondrubinny.scary.ui.settings.TmdbAccountActions
@@ -180,6 +181,10 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     // Search keeps its scroll position and the movie it opened, so Back from that movie lands on it again.
     val searchGrid = rememberLazyGridState()
     var searchOpenedId by remember { mutableStateOf<String?>(null) }
+    // An actor's screen keeps its place across a visit to one of its films: a grid per actor, and the film opened.
+    val personGrids = remember { HashMap<String, androidx.compose.foundation.lazy.grid.LazyGridState>() }
+    var personOpenedId by remember { mutableStateOf<String?>(null) }
+    val person by viewModel.person.collectAsStateWithLifecycle()
     val rowStates = remember { mutableMapOf<String, LazyListState>() }
     LaunchedEffect(resets) {
         if (resets == 0) return@LaunchedEffect
@@ -594,6 +599,10 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     franchise = franchise?.takeIf { it.movieId == details.movie.id },
                     onLoadFranchise = { viewModel.loadFranchise(it, language) },
                     onFranchiseToBucket = { viewModel.addFranchiseToBucket(it, language) },
+                    onOpenPerson = {
+                        personOpenedId = null
+                        viewModel.openPerson(it)
+                    },
                     reminded = details.movie.id in state.remindedIds,
                     onToggleReminder = { viewModel.toggleReminder(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
@@ -693,6 +702,19 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onOpenSettings = viewModel::openSettings,
                         )
                     },
+                )
+                current is Screen.Person -> PersonScreen(
+                    name = current.name,
+                    person = person,
+                    onLoad = viewModel::loadPerson,
+                    onOpenMovie = {
+                        personOpenedId = it.id
+                        viewModel.openDetails(it.id)
+                    },
+                    isLocked = state::isLocked,
+                    isWatched = state::isWatched,
+                    gridState = personGrids.getOrPut(current.name) { androidx.compose.foundation.lazy.grid.LazyGridState() },
+                    returnTo = personOpenedId,
                 )
                 current == Screen.HomeRows -> HomeRowsScreen(
                     // Asked again whenever a row is turned, or the catalog's rows change.
