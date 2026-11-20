@@ -383,6 +383,10 @@
     <string name="stats_scariest">الأكثر رعبًا</string>
     <string name="stats_favorite_subgenre">النوع الفرعي المفضل</string>
     <string name="stats_favorite_decade">العقد المفضل</string>
+    <string name="stats_favorite_director">المخرج المفضّل</string>
+    <string name="stats_top_actor">أكثر ممثل شاهدته</string>
+    <string name="stats_series">منها مسلسلات</string>
+    <string name="stats_busiest_month">أكثر الشهور مشاهدة</string>
     <string name="stats_loved">أفلام محبوبة</string>
     <string name="tab_movies">أفلام</string>
     <string name="tab_series">مسلسلات</string>

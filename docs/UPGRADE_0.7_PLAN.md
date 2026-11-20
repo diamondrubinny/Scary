@@ -8,7 +8,7 @@ cast with faces, other titles for your own files, "My year in horror", viewer pr
 | Stage | Version | What |
 |---|---|---|
 | 1 | 0.7.0 | Cast with faces and roles; other titles of a film for recognising your own files (both: TMDB key) |
-| 2 | 0.7.1 | More in "Your year in fear" (the screen exists; see the correction in its section) |
+| 2 | 0.7.0, with stage 1 | More in "Your year in fear" (the screen exists; see the correction in its section) |
 | 3 | 0.8.0 | Viewer profiles (its own design section is written before it is built) |
 
 **Scope line (unchanged):** SCARY does not search for, fetch or list stream or torrent sources. "Your own files" are the files already in the viewer's Real-Debrid account.
@@ -70,13 +70,15 @@ cast with faces, other titles for your own files, "My year in horror", viewer pr
 - **Written from TMDB's API description,** not from a live answer (no key in the workspace): **to verify on a TV with a key.** The photo size `w185` is the profile size TMDB documents; if it is refused, initials show.
 - **Other titles arrive when a film's page is opened,** not for the whole library at once (that would be thousands of requests).
 
-## Stage 2 (version 0.7.1): more in "Your year in fear"
+## Stage 2 (in version 0.7.0, being small): more in "Your year in fear"
 **A correction:** when the options were listed, "My year in horror" was written as missing. It is not: **"Your year in fear" has been in Settings for a long time** (films watched, hours, average fear, the scariest film, favourite subgenre and decade, films loved; this year and all time; the day a film is marked as watched is kept). The option was offered without checking the code first.
 
 **What stage 2 adds to the screen that exists,** all worked out on the TV, nothing sent:
-- the favourite director and the actor seen most (from the films' own details);
-- how many of the watched films were series;
-- the month with the most films, this year.
+- **the favourite director and the actor seen most** (from the films' own details), named only from two watched films on: one film says nothing;
+- **how many of the watched are series;**
+- **the busiest month,** in this year's card only (across years a month's name says nothing).
+
+**Files:** `FearStats` (core) and its test in `HandyFeaturesTest`; `StatsScreen`; four strings in five languages.
 
 ## Stage 3 (version 0.8.0): viewer profiles
 "Who is watching?": each person their own list, watched, loved and bucket list, under the same PIN rules. Large: it touches every stored list and the backup file's format. **Its design (what is shared, what is per person, how the PIN and family night apply, how old data moves into the first profile) is written here and shown before the build starts.**

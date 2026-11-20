@@ -376,6 +376,10 @@
     <string name="stats_scariest">Самый страшный</string>
     <string name="stats_favorite_subgenre">Любимый поджанр</string>
     <string name="stats_favorite_decade">Любимое десятилетие</string>
+    <string name="stats_favorite_director">Любимый режиссёр</string>
+    <string name="stats_top_actor">Актёр, которого вы видели чаще всего</string>
+    <string name="stats_series">Из них сериалов</string>
+    <string name="stats_busiest_month">Самый насыщенный месяц</string>
     <string name="stats_loved">Понравилось фильмов</string>
     <string name="tab_movies">Фильмы</string>
     <string name="tab_series">Сериалы</string>

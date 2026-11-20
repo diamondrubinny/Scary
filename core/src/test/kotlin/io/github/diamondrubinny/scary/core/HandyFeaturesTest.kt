@@ -116,6 +116,36 @@ class HandyFeaturesTest {
     }
 
     @Test
+    fun `fear stats name the favourite director, the actor seen most, the series and the busiest month`() {
+        val day = { text: String -> java.time.LocalDate.parse(text).toEpochDay() }
+        // Newest first, as the watched list keeps them.
+        val a = movie("a", 100, 5, Subgenre.GHOST, year = 1987).copy(director = "John Carpenter", cast = listOf("Jamie Lee Curtis", "Donald Pleasence"))
+        val b = movie("b", 90, 3, Subgenre.GHOST, year = 1981).copy(director = "Wes Craven", cast = listOf("Neve Campbell", "jamie lee curtis"))
+        val c = movie("c", 110, 5, Subgenre.SLASHER, year = 2019).copy(director = "john carpenter, Debra Hill", cast = listOf("Donald Pleasence"))
+        val d = movie("d", 50, 2, Subgenre.GHOST, year = 2020).copy(director = "Wes Craven", kind = io.github.diamondrubinny.scary.core.model.MediaKind.SERIES)
+        val days = mapOf("a" to day("2026-10-31"), "b" to day("2026-10-01"), "c" to day("2026-03-05"), "d" to day("2026-03-06"))
+        val stats = FearStats.of(listOf(a, b, c, d), lovedCount = 0, watchedDays = days)
+        // Two films each: of equals, the one in the more recently watched film, written as it first appears.
+        assertEquals("John Carpenter", stats.favoriteDirector)
+        assertEquals("Jamie Lee Curtis", stats.topActor)
+        assertEquals(1, stats.seriesCount)
+        // March and October hold two each: the later month.
+        assertEquals(10, stats.busiestMonth)
+        // One film says nothing about a favourite; without days there is no month.
+        val one = FearStats.of(listOf(a), lovedCount = 0)
+        assertEquals(null, one.favoriteDirector)
+        assertEquals(null, one.topActor)
+        assertEquals(null, one.busiestMonth)
+        assertEquals(0, one.seriesCount)
+        // A film whose day is not known does not count for the month; blank names are nobody.
+        val blank = movie("e", 90, 1, Subgenre.GHOST, year = 2000).copy(director = " ", cast = listOf("", " "))
+        val partly = FearStats.of(listOf(blank, blank.copy(id = "f"), c), lovedCount = 0, watchedDays = mapOf("c" to day("2026-03-05")))
+        assertEquals(null, partly.favoriteDirector)
+        assertEquals(null, partly.topActor)
+        assertEquals(3, partly.busiestMonth)
+    }
+
+    @Test
     fun `coming soon asks TMDB for horror out in the next six months`() {
         val url = Tmdb.discoverUrl(TmdbRow.COMING_SOON, today, Language.EN)
         assertTrue("with_genres=27" in url)

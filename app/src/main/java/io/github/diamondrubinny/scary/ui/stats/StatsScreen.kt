@@ -128,9 +128,17 @@ private fun StatsCard(title: String, stats: FearStats, language: Language, modif
         stats.scariest?.let { Line(stringResource(R.string.stats_scariest), "${it.displayTitle(language)} (${it.year})") }
         stats.favoriteSubgenre?.let { Line(stringResource(R.string.stats_favorite_subgenre), stringResource(it.labelRes())) }
         stats.favoriteDecade?.let { Line(stringResource(R.string.stats_favorite_decade), stringResource(R.string.decade_label, it)) }
+        stats.favoriteDirector?.let { Line(stringResource(R.string.stats_favorite_director), it) }
+        stats.topActor?.let { Line(stringResource(R.string.stats_top_actor), it) }
+        if (stats.seriesCount > 0) Line(stringResource(R.string.stats_series), stats.seriesCount.toString())
+        stats.busiestMonth?.let { Line(stringResource(R.string.stats_busiest_month), monthName(it, language)) }
         Line(stringResource(R.string.stats_loved), stats.lovedCount.toString())
     }
 }
+
+/** "October", "אוקטובר": the month's name as it stands alone, in the app's language. */
+private fun monthName(month: Int, language: Language): String =
+    java.time.Month.of(month).getDisplayName(java.time.format.TextStyle.FULL_STANDALONE, java.util.Locale.forLanguageTag(language.code))
 
 @Composable
 private fun Line(label: String, value: String) {

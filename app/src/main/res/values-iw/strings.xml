@@ -373,6 +373,10 @@
     <string name="stats_scariest">המפחיד ביותר</string>
     <string name="stats_favorite_subgenre">תת־ז׳אנר אהוב</string>
     <string name="stats_favorite_decade">עשור אהוב</string>
+    <string name="stats_favorite_director">הבמאי המועדף</string>
+    <string name="stats_top_actor">השחקן שראיתם הכי הרבה</string>
+    <string name="stats_series">מתוכם סדרות</string>
+    <string name="stats_busiest_month">החודש העמוס ביותר</string>
     <string name="stats_loved">סרטים אהובים</string>
     <string name="tab_movies">סרטים</string>
     <string name="tab_series">סדרות</string>

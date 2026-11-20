@@ -372,6 +372,10 @@
     <string name="stats_scariest">Scariest</string>
     <string name="stats_favorite_subgenre">Favorite subgenre</string>
     <string name="stats_favorite_decade">Favorite decade</string>
+    <string name="stats_favorite_director">Favorite director</string>
+    <string name="stats_top_actor">Actor you saw most</string>
+    <string name="stats_series">Series among them</string>
+    <string name="stats_busiest_month">Busiest month</string>
     <string name="stats_loved">Films loved</string>
     <string name="tab_movies">Movies</string>
     <string name="tab_series">Series</string>

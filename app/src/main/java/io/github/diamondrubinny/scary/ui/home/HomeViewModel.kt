@@ -2585,7 +2585,8 @@ class HomeViewModel(
                 stats
             }
         }
-        val thisYear = FearStats.of(thisYearIds.mapNotNull(lookUp), prefs.lovedIds.count(inYear)).copy(watchedCount = thisYearIds.size)
+        // The busiest month is this year's only: across years, a month's name says nothing.
+        val thisYear = FearStats.of(thisYearIds.mapNotNull(lookUp), prefs.lovedIds.count(inYear), prefs.watchedDays).copy(watchedCount = thisYearIds.size)
         val allTime = FearStats.of(prefs.watchedIds.mapNotNull(lookUp), prefs.lovedIds.size).copy(watchedCount = prefs.watchedIds.size)
         return hideScariest(thisYear) to hideScariest(allTime)
     }
