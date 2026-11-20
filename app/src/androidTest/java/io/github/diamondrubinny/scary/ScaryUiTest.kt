@@ -264,7 +264,9 @@ class ScaryUiTest {
     fun settingsSayWhereMoviesComeFromAndOfferTheDonationCode() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
-        val notice = hasText(text(R.string.settings_content_notice))
+        // A build with the sources feature says what that build does.
+        val sources = rule.activity.resources.getBoolean(R.bool.rd_sources_enabled)
+        val notice = hasText(text(if (sources) R.string.settings_content_notice_sources else R.string.settings_content_notice))
         waitFor(notice)
         rule.onNode(notice).performScrollTo().assertExists()
         // The movie data credit (TMDB's terms) and the donation code are in the same About section.
