@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rd_torrent_puller_title">Поиск и загрузка торрентов Real-Debrid Pro</string>
+    <string name="rd_torrent_refresh">Обновить</string>
+    <string name="rd_torrent_back">Назад</string>
+    <string name="rd_auto_play_when_ready">Автоматически открывать внешний плеер, когда поток готов</string>
+    <string name="rd_scraper_title">Поиск торрентов по нескольким источникам</string>
+    <string name="rd_scraper_hint">Название фильма или сериала (например, Hereditary 2018)</string>
+    <string name="rd_scraper_action">Искать</string>
+    <string name="rd_scraper_auto_best">Загрузить лучший автоматически</string>
+    <string name="rd_scraper_force_refresh">Обновить источники</string>
+    <string name="rd_scraper_sort_label">Сортировка:</string>
+    <string name="rd_scraper_results_title">Найденные релизы</string>
+    <string name="rd_torrent_magnet_label">Вставьте magnet-ссылку для загрузки</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_pull_action">Загрузить торрент</string>
+    <string name="rd_torrent_active_slots">Активные слоты: %1$d / %2$d</string>
+    <string name="rd_torrent_working">Работаем с Real-Debrid и источниками…</string>
+    <string name="rd_torrent_ready_streams">Готовые ссылки для просмотра</string>
+    <string name="rd_torrent_play">Смотреть</string>
+    <string name="rd_torrent_recent_title">Недавние торренты аккаунта</string>
+    <string name="rd_torrent_delete">Удалить</string>
+    <string name="settings_rd_open_torrents">Искать и загружать торренты Real-Debrid</string>
+</resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rd_torrent_puller_title">Buscador e puxador de torrents do Real-Debrid Pro</string>
+    <string name="rd_torrent_refresh">Atualizar</string>
+    <string name="rd_torrent_back">Voltar</string>
+    <string name="rd_auto_play_when_ready">Abrir o player externo automaticamente quando o stream estiver pronto</string>
+    <string name="rd_scraper_title">Buscador de torrents em várias fontes</string>
+    <string name="rd_scraper_hint">Título do filme ou da série (ex.: Hereditary 2018)</string>
+    <string name="rd_scraper_action">Buscar</string>
+    <string name="rd_scraper_auto_best">Puxar o melhor automaticamente</string>
+    <string name="rd_scraper_force_refresh">Atualizar fontes</string>
+    <string name="rd_scraper_sort_label">Ordenar:</string>
+    <string name="rd_scraper_results_title">Lançamentos encontrados</string>
+    <string name="rd_torrent_magnet_label">Cole o link magnet para puxar</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_pull_action">Puxar torrent</string>
+    <string name="rd_torrent_active_slots">Slots ativos: %1$d / %2$d</string>
+    <string name="rd_torrent_working">Trabalhando com o Real-Debrid e as fontes…</string>
+    <string name="rd_torrent_ready_streams">Links de stream prontos</string>
+    <string name="rd_torrent_play">Reproduzir</string>
+    <string name="rd_torrent_recent_title">Torrents recentes da conta</string>
+    <string name="rd_torrent_delete">Excluir</string>
+    <string name="settings_rd_open_torrents">Buscar e puxar torrents do Real-Debrid</string>
+</resources>

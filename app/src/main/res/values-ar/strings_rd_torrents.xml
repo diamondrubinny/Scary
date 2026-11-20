@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rd_torrent_puller_title">أداة البحث عن التورنت وسحبه من Real-Debrid (برو)</string>
+    <string name="rd_torrent_refresh">تحديث</string>
+    <string name="rd_torrent_back">رجوع</string>
+    <string name="rd_auto_play_when_ready">تشغيل المشغّل الخارجي تلقائيًا عند جاهزية البث</string>
+    <string name="rd_scraper_title">باحث تورنت متعدد المصادر</string>
+    <string name="rd_scraper_hint">اسم فيلم أو مسلسل (مثل Hereditary 2018)</string>
+    <string name="rd_scraper_action">بحث</string>
+    <string name="rd_scraper_auto_best">سحب الأفضل تلقائيًا</string>
+    <string name="rd_scraper_force_refresh">تحديث المصادر</string>
+    <string name="rd_scraper_sort_label">الترتيب:</string>
+    <string name="rd_scraper_results_title">الإصدارات التي عُثر عليها</string>
+    <string name="rd_torrent_magnet_label">الصق رابط Magnet لسحبه</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_pull_action">سحب التورنت</string>
+    <string name="rd_torrent_active_slots">الخانات النشطة: %1$d / %2$d</string>
+    <string name="rd_torrent_working">جارٍ العمل مع Real-Debrid والمصادر…</string>
+    <string name="rd_torrent_ready_streams">روابط البث الجاهزة</string>
+    <string name="rd_torrent_play">تشغيل</string>
+    <string name="rd_torrent_recent_title">أحدث التورنتات في الحساب</string>
+    <string name="rd_torrent_delete">حذف</string>
+    <string name="settings_rd_open_torrents">البحث عن تورنتات Real-Debrid وسحبها</string>
+</resources>

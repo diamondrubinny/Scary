@@ -1,4 +1,8 @@
-package com.example.launcher.torrent
+// SPDX-License-Identifier: Apache-2.0
+// Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+// Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+
+package io.github.diamondrubinny.scary.core.realdebrid
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
