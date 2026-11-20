@@ -264,7 +264,9 @@ class ScaryUiTest {
     fun settingsSayWhereMoviesComeFromAndOfferTheDonationCode() {
         waitForHome()
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
-        val notice = hasText(text(R.string.settings_content_notice))
+        // A build with the sources feature says what that build does.
+        val sources = rule.activity.resources.getBoolean(R.bool.rd_sources_enabled)
+        val notice = hasText(text(if (sources) R.string.settings_content_notice_sources else R.string.settings_content_notice))
         waitFor(notice)
         rule.onNode(notice).performScrollTo().assertExists()
         // The movie data credit (TMDB's terms) and the donation code are in the same About section.
@@ -1020,11 +1022,20 @@ class ScaryUiTest {
             shell("settings put secure enabled_accessibility_services $service")
             shell("settings put secure accessibility_enabled 1")
             waitUntilOrDescribe("SCARY's accessibility service to start") { HomeButtonService.instance != null }
-            if (!scaryInFront()) {
-                val down = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.DOWN))
-                val expected = if (HomeButtonService.arrowsEverywhere) "\"ok\"" else "\"old_android\""
-                assertTrue(down, down.startsWith("HTTP/1.1 200") && expected in down)
+            // As with Back above: the emulator may bring SCARY to the front between the look and the question, and
+            // SCARY then answers the arrow itself ("ok"), which says nothing about other apps. So the settings are
+            // opened again and the question is asked again.
+            val expected = if (HomeButtonService.arrowsEverywhere) "\"ok\"" else "\"old_android\""
+            var down = ""
+            for (attempt in 1..3) {
+                if (scaryInFront()) {
+                    rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                    waitUntilOrDescribe("the TV's settings in front of SCARY") { !scaryInFront() }
+                }
+                down = remotePost(port, RemoteProtocol.seal(secret, ++counter, Command.DOWN))
+                if (expected in down) break
             }
+            assertTrue(down, down.startsWith("HTTP/1.1 200") && expected in down)
             // The service may open SCARY by itself shortly after the TV starts: then go back to the settings.
             if (scaryInFront()) {
                 rule.activity.startActivity(Intent(Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))

@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.6.2: upkeep. Newer build tools and libraries, and a slightly smaller download. Nothing changes on screen.",
-  "he": "SCARY 0.6.2: תחזוקה. כלי בנייה וספריות חדשים יותר, והורדה מעט קטנה יותר. שום דבר לא משתנה על המסך.",
-  "ar": "SCARY 0.6.2: صيانة. أدوات بناء ومكتبات أحدث، وتنزيل أصغر قليلًا. لا يتغيّر شيء على الشاشة.",
-  "pt": "SCARY 0.6.2: manutenção. Ferramentas de compilação e bibliotecas mais recentes, e um download um pouco menor. Nada muda na tela.",
-  "ru": "SCARY 0.6.2: обслуживание. Более новые инструменты сборки и библиотеки, загрузка чуть меньше. На экране ничего не меняется."
+  "en": "SCARY 0.6.3: upkeep (newer build tools and libraries, a slightly smaller download). From 0.6.2: add to Real-Debrid from the TV. On the Real-Debrid screen, \"Add a torrent\" takes a magnet link of your own and plays it in SCARY's player; \"Search your indexer\" searches a Torznab indexer you set up yourself (Prowlarr, Jackett, HTTPS). SCARY comes with no indexer, site or links.",
+  "he": "SCARY 0.6.3: תחזוקה (כלי בנייה וספריות חדשים יותר, הורדה מעט קטנה יותר). מ־0.6.2: הוספה ל־Real-Debrid מהטלוויזיה. במסך Real-Debrid, \"הוספת טורנט\" מקבלת קישור מגנט משלכם ומנגנת אותו בנגן של SCARY; \"חיפוש באינדקסר שלכם\" מחפש באינדקסר Torznab שהגדרתם בעצמכם (Prowlarr, ‏Jackett, ‏HTTPS). SCARY לא מגיעה עם אינדקסר, אתר או קישורים.",
+  "ar": "SCARY 0.6.3: صيانة (أدوات بناء ومكتبات أحدث، وتنزيل أصغر قليلًا). من 0.6.2: الإضافة إلى Real-Debrid من التلفاز. في شاشة Real-Debrid، «إضافة تورنت» يأخذ رابطًا مغناطيسيًا خاصًا بك ويشغّله في مشغّل SCARY؛ و«البحث في مفهرسك» يبحث في مفهرس Torznab أعددته بنفسك (Prowlarr أو Jackett عبر HTTPS). لا يأتي SCARY بأي مفهرس أو موقع أو روابط.",
+  "pt": "SCARY 0.6.3: manutenção (ferramentas de compilação e bibliotecas mais recentes, um download um pouco menor). Da 0.6.2: adicione ao Real-Debrid pela TV. Na tela do Real-Debrid, “Adicionar torrent” recebe um link magnet seu e o reproduz no player do SCARY; “Buscar no seu indexador” busca em um indexador Torznab que você mesmo configurou (Prowlarr, Jackett, HTTPS). O SCARY não vem com indexador, site nem links.",
+  "ru": "SCARY 0.6.3: обслуживание (более новые инструменты сборки и библиотеки, загрузка чуть меньше). Из 0.6.2: добавление в Real-Debrid с ТВ. На экране Real-Debrid «Добавить торрент» принимает вашу magnet-ссылку и воспроизводит её в плеере SCARY; «Поиск в вашем индексаторе» ищет в Torznab-индексаторе, который вы настроили сами (Prowlarr, Jackett, HTTPS). В SCARY нет ни индексатора, ни сайтов, ни ссылок."
 }

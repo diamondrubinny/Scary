@@ -1,12 +1,14 @@
-# Upgrade: 0.6.2 (tools and libraries), and what to build next (20.11.2026)
+# Upgrade: 0.6.3 (tools and libraries), and what to build next (20.11.2026)
+
+**The number:** this was built as 0.6.2. While it waited for the owner's word, another piece of work was released as 0.6.2 (PR #50), so it ships as 0.6.3. Nothing else about it changed.
 
 **The request:** "תשדרג את האפליקציה" ("upgrade the app"), with no detail.
 
 **How I read it (an assumption, written down):** two parts.
-1. **What needs no decision:** bring the build tools and libraries up to date. Two Dependabot pull requests (#33, #4) have been open since 16.11. This is version 0.6.2.
+1. **What needs no decision:** bring the build tools and libraries up to date. Two Dependabot pull requests (#33, #4) have been open since 16.11. This is version 0.6.3.
 2. **What does need the owner's choice:** the next visible upgrade (0.7.0). Options are listed below; nothing of part 2 is built.
 
-## Part 1: version 0.6.2 (built on `claude/upgrade-toolchain`)
+## Part 1: version 0.6.3 (built on `claude/upgrade-toolchain`)
 
 | What | From | To | Why |
 |---|---|---|---|
@@ -31,6 +33,7 @@
 - Here: `:core:test`, `:app:lintDebug` ("No issues found"), `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin`, the credit check, the phone remote's JS check.
 - In CI (the branch's push run): the TV emulator's UI tests and the screenshots, which is also the real test of the six newer Actions.
 - **Risk:** the Actions jump several major versions at once. If the CI run breaks on one of them, that one is fixed or kept at its old version, and this file says which.
+- **A UI test that failed once on timing** (`withItsAccessibilityServiceOnThePhoneRemoteReachesOtherApps`): the emulator now and then brings SCARY back to the front by itself, between the test's look and its question, and SCARY then answers the arrow itself. The test now opens the TV's settings again and asks again, as it already did for Back.
 - **First CI run (371):** build green on the new tools; all 62 UI tests passed, yet the job was red. The cause was in `screenshots.sh`, not in the upgrade: `echo "$result" | grep -q '^OK ('` fails now and then under `pipefail` (grep ends at the first match while echo is still writing). `screenshots-mobile.sh` already avoided it; the TV script now does too, in both places it had the pattern (the second one could have hidden a crash of the release build).
 
 ## Part 2: options for the next visible upgrade (not built; the owner chooses)
@@ -42,6 +45,6 @@
 | 3 | **More in "Your year in fear"** | The favourite director, the actor seen most, the busiest month; kept on the TV only | **Corrected 20.11:** the screen exists (films watched, hours, average fear, the scariest, favourite subgenre and decade). It was first listed here as missing, without checking the code | Small |
 | 4 | **Viewer profiles** | "Who is watching?": each person their own list, watched, loved and bucket list, under the same PIN rules | One viewer per TV | Large. Touches every stored list and the backup file |
 
-**Scope of these options:** none of them searches for, fetches or lists stream or torrent sources. (While this was being built, a separate piece of work was merged into main, PR #49, `docs/TORRENT_SCRAPER_PLAN.md`: a "sources" feature behind a build switch, off in the official APK. It is not part of this upgrade and is not changed by it.)
+**Scope of these options:** none of them searches for, fetches or lists stream or torrent sources. (While this was being built, a separate piece of work was merged into main, PR #49 and PR #50, `docs/TORRENT_SCRAPER_PLAN.md`: adding a magnet link of the viewer's own to Real-Debrid and searching a Torznab indexer the viewer sets up, on in the official APK since 0.6.2. It is not part of this upgrade and is not changed by it.)
 
 **Privacy, for whichever is chosen:** 1 and 2 send a film's id to TMDB with the viewer's own key (nothing about the viewer); 3 and 4 never leave the TV (4 adds profile names to the backup file the viewer makes).

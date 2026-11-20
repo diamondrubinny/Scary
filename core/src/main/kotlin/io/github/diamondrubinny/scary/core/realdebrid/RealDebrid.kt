@@ -18,10 +18,10 @@ import java.net.URLEncoder
 
 /**
  * Real-Debrid's REST API, as documented at api.real-debrid.com (read 9 Nov 2026), for playing files that are already in
- * the viewer's own account: their downloads, and the torrents they added themselves. SCARY never searches for sources
- * and never sends anything but the requests below. Only a build made with the sources feature
- * (docs/TORRENT_SCRAPER_PLAN.md) uses the torrent requests that change the account: adding a magnet link the viewer
- * gave, choosing its files, and deleting a torrent.
+ * the viewer's own account: their downloads, and the torrents they added themselves. SCARY never sends anything but
+ * the requests below. The sources feature (docs/TORRENT_SCRAPER_PLAN.md, on since 0.6.2 unless a build turns it off)
+ * uses the torrent requests that change the account: adding a magnet link the viewer gave, choosing its files, and
+ * deleting a torrent. Searching happens only at an indexer the viewer set up (core sources), never here.
  *
  * Every answer is read as untrusted: a field of the wrong type, an over-long string, or a link that is not HTTPS on a
  * Real-Debrid host makes that item (or the answer) be dropped, never half-used.
