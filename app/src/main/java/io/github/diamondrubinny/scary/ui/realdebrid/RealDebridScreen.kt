@@ -66,6 +66,7 @@ const val REAL_DEBRID_TAG = "realDebrid"
 const val REAL_DEBRID_CODE_TAG = "realDebridCode"
 const val REAL_DEBRID_FILES_TAG = "realDebridFiles"
 const val REAL_DEBRID_HISTORY_TAG = "realDebridHistory"
+const val REAL_DEBRID_TORRENTS_BUTTON_TAG = "realDebridTorrentsButton"
 
 /** Files listed under "Continue watching" here; the home row has them all. */
 private const val HISTORY_SHOWN = 5
@@ -86,6 +87,8 @@ class RealDebridActions(
     val onCandidates: suspend (RealDebrid.RdFile) -> List<Movie> = { emptyList() },
     /** The viewer's word on a file's film: a film id, "" for "not a film in the library", null to let SCARY guess. */
     val onSetFilm: (RealDebrid.RdFile, String?) -> Unit = { _, _ -> },
+    /** Opens "Add a torrent"; null in a build without the sources feature, which then shows no way in. */
+    val onTorrents: (() -> Unit)? = null,
 )
 
 /** Test tags of the file correction window. */
@@ -140,7 +143,7 @@ fun RealDebridScreen(
             style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f),
             modifier = Modifier.semantics { heading() },
         )
-        BasicText(stringResource(R.string.rd_what), style = ScaryType.Body)
+        BasicText(stringResource(if (actions.onTorrents == null) R.string.rd_what else R.string.rd_what_sources), style = ScaryType.Body)
         BasicText(
             text = statusText(state),
             style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
@@ -153,6 +156,7 @@ fun RealDebridScreen(
                 is State.Waiting -> ScaryButton(stringResource(R.string.rd_cancel), onClick = actions.onCancel, focusRequester = firstFocus)
                 is State.SignedIn -> {
                     ScaryButton(stringResource(R.string.rd_refresh), onClick = actions.onRefresh, focusRequester = firstFocus)
+                    actions.onTorrents?.let { ScaryButton(stringResource(R.string.rd_torrent_open), onClick = it, modifier = Modifier.testTag(REAL_DEBRID_TORRENTS_BUTTON_TAG)) }
                     ScaryButton(stringResource(R.string.rd_sign_out), onClick = actions.onSignOut)
                     if (history.isNotEmpty()) ScaryButton(stringResource(R.string.rd_clear_history), onClick = actions.onClearHistory)
                 }

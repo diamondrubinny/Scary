@@ -18,8 +18,10 @@ import java.net.URLEncoder
 
 /**
  * Real-Debrid's REST API, as documented at api.real-debrid.com (read 9 Nov 2026), for playing files that are already in
- * the viewer's own account: their downloads, and the torrents they added themselves. SCARY never searches for sources,
- * never adds a torrent or a magnet, and never sends anything but the requests below.
+ * the viewer's own account: their downloads, and the torrents they added themselves. SCARY never searches for sources
+ * and never sends anything but the requests below. Only a build made with the sources feature
+ * (docs/TORRENT_SCRAPER_PLAN.md) uses the torrent requests that change the account: adding a magnet link the viewer
+ * gave, choosing its files, and deleting a torrent.
  *
  * Every answer is read as untrusted: a field of the wrong type, an over-long string, or a link that is not HTTPS on a
  * Real-Debrid host makes that item (or the answer) be dropped, never half-used.
@@ -85,6 +87,31 @@ object RealDebrid {
     }
 
     fun transcodeUrl(id: String): String = "$API/streaming/transcode/${checkedId(id)}"
+
+    // Torrent requests of the sources feature (documentation read 20 Nov 2026) ------------------------------------------
+
+    /** Answers 201 with the new torrent's id. */
+    const val ADD_MAGNET_URL = "$API/torrents/addMagnet"
+
+    /** The form for adding [magnet]: the link SCARY rebuilt from the viewer's text, never the text itself. */
+    fun addMagnetForm(magnet: Magnets.Magnet): String = form("magnet" to magnet.uri)
+
+    /** Answers 204 (or 202 when the files were already chosen). */
+    fun selectFilesUrl(id: String): String = "$API/torrents/selectFiles/${checkedId(id)}"
+
+    /** The form for choosing a torrent's files by their ids (from its info). */
+    fun selectFilesForm(fileIds: List<Int>): String {
+        require(fileIds.isNotEmpty() && fileIds.size <= MAX_LINKS && fileIds.all { it >= 0 }) { "invalid file ids" }
+        return form("files" to fileIds.joinToString(","))
+    }
+
+    /** DELETE; answers 204. */
+    fun deleteTorrentUrl(id: String): String = "$API/torrents/delete/${checkedId(id)}"
+
+    const val ACTIVE_COUNT_URL = "$API/torrents/activeCount"
+
+    /** The viewer's newest torrents, finished or not. */
+    const val RECENT_TORRENTS_URL = "$API/torrents?page=1&limit=30"
 
     private fun checkedId(id: String): String {
         require(idPattern.matches(id)) { "invalid id" }
@@ -237,6 +264,84 @@ object RealDebrid {
         return byQuality.maxByOrNull { (quality, _) -> Regex("\\d+").find(quality)?.value?.toIntOrNull() ?: 0 }?.second
     }
 
+    // Torrent answers of the sources feature ----------------------------------------------------------------------------
+
+    /** Where a torrent stands, from the eleven statuses the documentation lists; an unknown status counts as failed. */
+    enum class TorrentState { CONVERTING, CHOOSE_FILES, QUEUED, DOWNLOADING, FINISHING, READY, FAILED }
+
+    data class TorrentFile(val id: Int, val name: String, val sizeBytes: Long, val selected: Boolean)
+
+    /** A torrent in the viewer's account: from the list (no [files]) or from its info. */
+    data class TorrentStatus(
+        val id: String,
+        val name: String,
+        val state: TorrentState,
+        /** 0 to 100. */
+        val progress: Int,
+        val sizeBytes: Long,
+        val files: List<TorrentFile> = emptyList(),
+        val links: List<String> = emptyList(),
+    ) {
+        /** The finished torrent as the rest of SCARY reads it, or null while it has nothing to play. */
+        fun finished(): RdTorrent? = if (state == TorrentState.READY && links.isNotEmpty()) RdTorrent(id, name, sizeBytes, links) else null
+    }
+
+    data class ActiveCount(val active: Int, val limit: Int)
+
+    /** The id of the torrent an added magnet became. */
+    fun parseAdded(text: String): String? = obj(text)?.str("id")?.takeIf(idPattern::matches)
+
+    /** The documentation names the count "nb". */
+    fun parseActiveCount(text: String): ActiveCount? {
+        val o = obj(text) ?: return null
+        val active = o.long("nb")?.takeIf { it in 0..MAX_COUNT } ?: return null
+        val limit = o.long("limit")?.takeIf { it in 0..MAX_COUNT } ?: return null
+        return ActiveCount(active.toInt(), limit.toInt())
+    }
+
+    fun parseTorrentStatus(text: String): TorrentStatus? = obj(text)?.let(::torrentStatus)
+
+    /** The viewer's torrents in any state, newest first as the API lists them. */
+    fun parseTorrentStatuses(text: String): List<TorrentStatus> =
+        array(text)?.mapNotNull { (it as? JsonObject)?.let(::torrentStatus) }.orEmpty()
+
+    private fun torrentStatus(o: JsonObject): TorrentStatus? {
+        val id = o.str("id")?.takeIf(idPattern::matches) ?: return null
+        val name = o.str("filename") ?: return null
+        val state = when (o.str("status")) {
+            "magnet_conversion" -> TorrentState.CONVERTING
+            "waiting_files_selection" -> TorrentState.CHOOSE_FILES
+            "queued" -> TorrentState.QUEUED
+            "downloading" -> TorrentState.DOWNLOADING
+            "compressing", "uploading" -> TorrentState.FINISHING
+            "downloaded" -> TorrentState.READY
+            else -> TorrentState.FAILED
+        }
+        val files = (o["files"] as? JsonArray)?.take(MAX_FILES)?.mapNotNull { f ->
+            val file = f as? JsonObject ?: return@mapNotNull null
+            val fileId = file.long("id")?.takeIf { it in 0..Int.MAX_VALUE } ?: return@mapNotNull null
+            val path = file.str("path") ?: return@mapNotNull null
+            TorrentFile(fileId.toInt(), path.substringAfterLast('/').take(MAX_NAME), file.long("bytes")?.coerceAtLeast(0) ?: 0, file.long("selected") == 1L)
+        }.orEmpty()
+        val links = (o["links"] as? JsonArray)?.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.takeIf(::isHttps) }.orEmpty()
+        return TorrentStatus(id, name, state, (o.long("progress") ?: 0).coerceIn(0, 100).toInt(), o.long("bytes")?.coerceAtLeast(0) ?: 0, files, links.take(MAX_LINKS))
+    }
+
+    /**
+     * The files to ask Real-Debrid for: the videos, without the small ones beside a big one (samples, trailers), and the
+     * subtitle files small enough to be subtitles. Empty when the torrent holds no video: nothing is fetched then.
+     */
+    fun filesToSelect(files: List<TorrentFile>): List<Int> {
+        val videos = files.filter { isVideo(it.name, null) }
+        val biggest = videos.maxOfOrNull { it.sizeBytes } ?: return emptyList()
+        val kept = videos.filter { it.sizeBytes >= biggest / SAMPLE_FRACTION }
+        val subtitles = files.filter { SubtitleFiles.mimeType(it.name) != null && it.sizeBytes in 1..SubtitleFiles.MAX_BYTES.toLong() }
+        return (kept + subtitles).map { it.id }.distinct().take(MAX_LINKS)
+    }
+
+    /** The video to play first among a pulled torrent's files: the biggest one. */
+    fun mainFile(files: List<RdFile>): RdFile? = files.maxByOrNull { it.sizeBytes }
+
     /** The API's own error code, when an answer is one ({"error": "...", "error_code": 8}). */
     fun errorCode(text: String): Int? = obj(text)?.long("error_code")?.toInt()
 
@@ -245,6 +350,11 @@ object RealDebrid {
     private val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "mov", "webm", "ts", "m2ts", "wmv", "mpg", "mpeg")
     private const val MAX_LINKS = 500
     private const val MAX_NAME = 255
+    private const val MAX_FILES = 2000
+    private const val MAX_COUNT = 10_000L
+
+    /** A video under a twentieth of the torrent's biggest one is a sample or a trailer, not the film. */
+    private const val SAMPLE_FRACTION = 20
 
     fun isVideo(name: String, mimeType: String?): Boolean =
         mimeType?.startsWith("video/") == true || name.substringAfterLast('.', "").lowercase() in VIDEO_EXTENSIONS
