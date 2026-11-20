@@ -82,6 +82,12 @@ data class HomeUiState(
     fun isWatched(movie: Movie): Boolean = movie.id in watchedIds
 }
 
+/**
+ * An actor's films: those SCARY holds whose cast names them and, once TMDB answered ([fromTmdb]), their horror,
+ * thrillers and mysteries from there. [loading] while TMDB is being asked.
+ */
+data class PersonUi(val name: String, val movies: List<Movie>, val loading: Boolean, val fromTmdb: Boolean)
+
 /** The whole series a film belongs to, its films in the order they came out (TMDB, with the viewer's key). */
 data class FranchiseUi(val movieId: String, val name: String, val movies: List<Movie>, val language: Language? = null)
 
@@ -275,6 +281,9 @@ sealed interface Screen {
     data object TastePicker : Screen
     /** Settings → Home screen rows: each row on or off. */
     data object HomeRows : Screen
+
+    /** "Films with <actor>", opened from the cast row of a film's page. */
+    data class Person(val name: String) : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */

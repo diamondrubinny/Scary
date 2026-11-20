@@ -134,6 +134,8 @@ fun DetailsScreen(
     franchise: FranchiseUi? = null,
     onLoadFranchise: (Movie) -> Unit = {},
     onFranchiseToBucket: ((List<Movie>) -> Unit)? = null,
+    /** OK on an actor's name: their films. Null where there is nowhere to open them. */
+    onOpenPerson: ((String) -> Unit)? = null,
     /** "Remind me" is set for this film; its button shows on a film not out yet, or one with a reminder. */
     reminded: Boolean = false,
     onToggleReminder: ((Movie) -> Unit)? = null,
@@ -217,9 +219,11 @@ fun DetailsScreen(
                             style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
                         )
                     }
-                    if (movie.cast.isNotEmpty()) {
+                    // The cast is under the buttons, where each name can be pressed; without a way to open an actor's
+                    // films (a preview, a test) the names are a line of text here as before.
+                    if (movie.cast.isNotEmpty() && onOpenPerson == null) {
                         BasicText(
-                            stringResource(R.string.cast_line, movie.cast.take(4).joinToString(", ")),
+                            stringResource(R.string.cast_label) + " " + movie.cast.take(4).joinToString(", "),
                             style = ScaryType.Body.copy(color = ScaryColors.Ash).mixedLanguage(),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -313,6 +317,19 @@ fun DetailsScreen(
                                 onClick = { onToggleBucket(movie) },
                                 quiet = true,
                             )
+                        }
+                    }
+                    // The cast: each name is a word that takes the focus, and OK opens that actor's films.
+                    if (movie.cast.isNotEmpty() && onOpenPerson != null) {
+                        LazyRow(
+                            modifier = Modifier.testTag(CAST_ROW_TAG),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            item(key = "label") { BasicText(stringResource(R.string.cast_label), style = ScaryType.Caption) }
+                            items(movie.cast.take(MAX_CAST_SHOWN).distinct(), key = { "actor:$it" }) { actor ->
+                                ScaryButton(text = actor, onClick = { onOpenPerson(actor) }, quiet = true, modifier = Modifier.testTag(CAST_NAME_TAG))
+                            }
                         }
                     }
                     if (stremioNote != null) {
@@ -491,6 +508,11 @@ fun DetailsScreen(
         }
     }
 }
+
+/** The cast row on a film's page, and each actor's name in it. */
+const val CAST_ROW_TAG = "castRow"
+const val CAST_NAME_TAG = "castName"
+private const val MAX_CAST_SHOWN = 6
 
 /** The film's whole series on its page, and the button that puts it in the bucket list. */
 const val FRANCHISE_ROW_TAG = "franchiseRow"

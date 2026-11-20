@@ -131,7 +131,13 @@
     <string name="settings_online">Imagens e informações da internet</string>
     <string name="settings_online_note">Pôsteres, fundos, notas do IMDb, elenco e as listas populares vêm do Cinemeta, a base pública de filmes do Stremio. Só os IDs dos filmes e, na busca, o texto pesquisado são enviados, nunca dados pessoais. Como qualquer site, o servidor vê o endereço IP da TV. Desligue para ficar totalmente offline.</string>
     <string name="imdb_rating">IMDb %1$s</string>
-    <string name="cast_line">Com %1$s</string>
+    <string name="cast_label">Elenco:</string>
+    <string name="person_title">Filmes com %1$s</string>
+    <string name="person_loading">Perguntando ao TMDB por mais filmes…</string>
+    <string name="person_note_local">%1$s do que o SCARY tem. Com uma chave do TMDB, a lista completa de terror e suspense.</string>
+    <string name="person_note_tmdb">%1$s: do SCARY e do TMDB. Só terror, suspense e mistério.</string>
+    <string name="person_empty_title">Nada nas prateleiras</string>
+    <string name="person_empty_body">O SCARY não tem outro terror ou suspense com este ator.</string>
     <string name="settings_home_section">Tela inicial</string>
     <string name="settings_jump">Ir para</string>
     <string name="settings_section_films">Filmes e contas</string>

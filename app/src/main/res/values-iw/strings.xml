@@ -131,7 +131,13 @@
     <string name="settings_online">תמונות ומידע מהאינטרנט</string>
     <string name="settings_online_note">פוסטרים, רקעים, דירוג IMDb, שחקנים והשורות הפופולריות מגיעים מ־Cinemeta, מאגר הסרטים הציבורי של Stremio. נשלחים רק מזהי סרטים, ובחיפוש גם טקסט החיפוש, אף פעם לא פרטים אישיים. כמו בכל אתר, השרת רואה את כתובת ה־IP של הטלוויזיה. כיבוי משאיר את SCARY בלי אינטרנט בכלל.</string>
     <string name="imdb_rating">IMDb %1$s</string>
-    <string name="cast_line">בכיכובם: %1$s</string>
+    <string name="cast_label">בכיכובם:</string>
+    <string name="person_title">סרטים עם %1$s</string>
+    <string name="person_loading">שואלים את TMDB על עוד סרטים…</string>
+    <string name="person_note_local">%1$s מתוך מה ש־SCARY מחזיקה. עם מפתח TMDB תופיע הרשימה המלאה של האימה והמתח.</string>
+    <string name="person_note_tmdb">%1$s: מ־SCARY ומ־TMDB. רק אימה, מתח ומסתורין.</string>
+    <string name="person_empty_title">אין כלום על המדפים</string>
+    <string name="person_empty_body">ל־SCARY אין עוד סרט אימה או מתח עם השחקן הזה.</string>
     <string name="settings_home_section">מסך הבית</string>
     <string name="settings_jump">קפיצה אל</string>
     <string name="settings_section_films">סרטים וחשבונות</string>

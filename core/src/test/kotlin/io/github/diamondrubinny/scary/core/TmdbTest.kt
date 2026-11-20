@@ -276,4 +276,49 @@ class TmdbTest {
         val long = (1..100).joinToString(",") { """{"id":$it,"title":"Part $it","release_date":"19${(it % 90 + 10)}-01-01"}""" }
         assertEquals(Tmdb.MAX_FRANCHISE, Tmdb.parseCollection("""{"id":7,"name":"Long","parts":[$long]}""")!!.parts.size)
     }
+
+    @Test
+    fun `an actor is found by their exact name, and their films are the ones on SCARY's shelves`() {
+        assertEquals("https://api.themoviedb.org/3/search/person?query=Toni+Collette&include_adult=false&language=he-IL", Tmdb.personSearchUrl(" Toni Collette ", Language.HE))
+        // What is not a name is not sent: too short, too long, or with a control character.
+        assertEquals(null, Tmdb.personSearchUrl("A", Language.EN))
+        assertEquals(null, Tmdb.personSearchUrl("x".repeat(81), Language.EN))
+        assertEquals(null, Tmdb.personSearchUrl("Toni\nCollette", Language.EN))
+        // A name is encoded, so it cannot add to the address.
+        assertTrue(Tmdb.personSearchUrl("A&api_key=x/../y", Language.EN)!!.contains("query=A%26api_key%3Dx%2F..%2Fy&"))
+
+        val found = """{"page":1,"results":[
+            {"adult":false,"id":101,"name":"Toni Collett","known_for_department":"Acting","popularity":99.0},
+            {"adult":false,"id":102,"name":"Toni Collette","known_for_department":"Directing","popularity":50.0},
+            {"adult":false,"id":103,"name":"toni  COLLETTE","known_for_department":"Acting","popularity":3.0},
+            {"adult":false,"id":104,"name":"Toni Collette","known_for_department":"Acting","popularity":20.5},
+            {"adult":true,"id":105,"name":"Toni Collette","known_for_department":"Acting","popularity":900.0},
+            {"id":"x","name":"Toni Collette"}, "junk"
+        ]}"""
+        // The same name only; an actor before a director; the best known among the actors; never the adult entry.
+        assertEquals(104L, Tmdb.parsePersonId(found, "Toni Collette"))
+        assertEquals(null, Tmdb.parsePersonId(found, "Toni"))
+        assertEquals(null, Tmdb.parsePersonId("""{"results":[]}""", "Toni Collette"))
+        assertEquals(null, Tmdb.parsePersonId("not json", "Toni Collette"))
+        // Accents and case do not part a name from itself.
+        assertEquals(7L, Tmdb.parsePersonId("""{"results":[{"id":7,"name":"Penélope Cruz","known_for_department":"Acting"}]}""", "penelope cruz"))
+
+        assertEquals("https://api.themoviedb.org/3/person/104/movie_credits?language=en-US", Tmdb.personCreditsUrl(104, Language.EN))
+        val credits = """{"id":104,"cast":[
+            {"adult":false,"id":1,"title":"Hereditary","original_title":"Hereditary","release_date":"2018-06-07","genre_ids":[27,9648,53],"character":"Annie"},
+            {"adult":false,"id":2,"title":"Muriel's Wedding","release_date":"1994-09-29","genre_ids":[35,18]},
+            {"adult":false,"id":3,"title":"The Sixth Sense","release_date":"1999-08-06","genre_ids":[9648,53,18]},
+            {"adult":false,"id":4,"title":"Not announced yet","release_date":"","genre_ids":[27]},
+            {"adult":true,"id":5,"title":"Not this","release_date":"2001-01-01","genre_ids":[27]},
+            {"adult":false,"id":1,"title":"Hereditary","release_date":"2018-06-07","genre_ids":[27],"character":"Annie (voice)"},
+            {"adult":false,"id":6,"title":"Krampus","release_date":"2015-11-26","genre_ids":[27,35,14]},
+            "junk"
+        ],"crew":[{"id":9,"title":"Directed this","release_date":"2020-01-01","genre_ids":[27]}]}"""
+        val films = Tmdb.parsePersonCredits(credits)
+        // Newest first; the comedy, the undated, the adult title, the repeat and what they only directed are not there.
+        assertEquals(listOf(1L, 6L, 3L), films.map { it.tmdbId })
+        assertEquals(emptyList<Long>(), Tmdb.parsePersonCredits("""{"success":false}""").map { it.tmdbId })
+        val many = (1..200).joinToString(",") { """{"id":$it,"title":"F$it","release_date":"20${10 + it % 15}-01-01","genre_ids":[27]}""" }
+        assertEquals(Tmdb.MAX_PERSON_FILMS, Tmdb.parsePersonCredits("""{"cast":[$many]}""").size)
+    }
 }

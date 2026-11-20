@@ -131,7 +131,13 @@
     <string name="settings_online">Изображения и данные из интернета</string>
     <string name="settings_online_note">Постеры, фоны, рейтинги IMDb, актёры и популярные подборки берутся из Cinemeta, открытой базы фильмов Stremio. Отправляются только идентификаторы фильмов, а при поиске — текст запроса, никаких личных данных. Как и любой сайт, сервер видит IP-адрес ТВ. Выключите, чтобы работать полностью офлайн.</string>
     <string name="imdb_rating">IMDb %1$s</string>
-    <string name="cast_line">В ролях: %1$s</string>
+    <string name="cast_label">В ролях:</string>
+    <string name="person_title">Фильмы с участием: %1$s</string>
+    <string name="person_loading">Спрашиваем у TMDB другие фильмы…</string>
+    <string name="person_note_local">%1$s из того, что есть в SCARY. С ключом TMDB появится полный список ужасов и триллеров.</string>
+    <string name="person_note_tmdb">%1$s: из SCARY и из TMDB. Только ужасы, триллеры и детективы.</string>
+    <string name="person_empty_title">На полках пусто</string>
+    <string name="person_empty_body">В SCARY нет других ужасов или триллеров с этим актёром.</string>
     <string name="settings_home_section">Главный экран</string>
     <string name="settings_jump">Перейти к</string>
     <string name="settings_section_films">Фильмы и аккаунты</string>

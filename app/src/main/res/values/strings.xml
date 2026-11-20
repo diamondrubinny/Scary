@@ -132,7 +132,13 @@
     <string name="settings_online">Artwork and info from the internet</string>
     <string name="settings_online_note">Posters, backgrounds, IMDb ratings, cast and the popular rows come from Cinemeta, Stremio’s public movie database. Only movie IDs and, when you search, the search text are sent, never personal details. Like any website, the server sees the TV’s IP address. Turn this off to stay fully offline.</string>
     <string name="imdb_rating">IMDb %1$s</string>
-    <string name="cast_line">Starring %1$s</string>
+    <string name="cast_label">Cast:</string>
+    <string name="person_title">Films with %1$s</string>
+    <string name="person_loading">Asking TMDB for more films…</string>
+    <string name="person_note_local">%1$s from what SCARY holds. With a TMDB key, their whole list of horror and thrillers.</string>
+    <string name="person_note_tmdb">%1$s: from SCARY and from TMDB. Horror, thrillers and mysteries only.</string>
+    <string name="person_empty_title">Nothing on the shelves</string>
+    <string name="person_empty_body">SCARY holds no other horror or thriller with this actor.</string>
     <string name="settings_home_section">Home screen</string>
     <string name="settings_jump">Jump to</string>
     <string name="settings_section_films">Films and accounts</string>
