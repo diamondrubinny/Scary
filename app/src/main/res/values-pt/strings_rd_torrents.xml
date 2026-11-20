@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rd_torrent_puller_title">Buscador e puxador de torrents do Real-Debrid Pro</string>
     <string name="rd_torrent_refresh">Atualizar</string>
     <string name="rd_torrent_back">Voltar</string>
-    <string name="rd_auto_play_when_ready">Abrir o player externo automaticamente quando o stream estiver pronto</string>
-    <string name="rd_scraper_title">Buscador de torrents em várias fontes</string>
-    <string name="rd_scraper_hint">Título do filme ou da série (ex.: Hereditary 2018)</string>
-    <string name="rd_scraper_action">Buscar</string>
-    <string name="rd_scraper_auto_best">Puxar o melhor automaticamente</string>
-    <string name="rd_scraper_force_refresh">Atualizar fontes</string>
-    <string name="rd_scraper_sort_label">Ordenar:</string>
-    <string name="rd_scraper_results_title">Lançamentos encontrados</string>
+    <string name="rd_auto_play_when_ready">Quando o arquivo estiver pronto, ele toca no player do SCARY.</string>
     <string name="rd_torrent_magnet_label">Cole o link magnet para puxar</string>
-    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:…</string>
     <string name="rd_torrent_pull_action">Puxar torrent</string>
     <string name="rd_torrent_active_slots">Slots ativos: %1$d / %2$d</string>
-    <string name="rd_torrent_working">Trabalhando com o Real-Debrid e as fontes…</string>
-    <string name="rd_torrent_ready_streams">Links de stream prontos</string>
+    <string name="rd_torrent_working">Falando com o Real-Debrid…</string>
     <string name="rd_torrent_play">Reproduzir</string>
     <string name="rd_torrent_recent_title">Torrents recentes da conta</string>
     <string name="rd_torrent_delete">Excluir</string>
-    <string name="settings_rd_open_torrents">Buscar e puxar torrents do Real-Debrid</string>
+    <string name="rd_torrent_title">Adicionar torrent</string>
+    <string name="rd_torrent_open">Adicionar torrent</string>
+    <string name="rd_what_sources">Reproduz, no player do SCARY, os vídeos da sua própria conta Real-Debrid. Nesta versão você também pode adicionar à conta um link magnet seu. O SCARY não procura fontes.</string>
+    <string name="rd_torrent_what">Cole um link magnet seu. O SCARY envia o hash, o nome e os trackers dele para a sua conta Real-Debrid, pede os arquivos de vídeo e reproduz o filme no player do SCARY. Nada mais sai da TV. O que você adiciona é responsabilidade sua.</string>
+    <string name="rd_torrent_invalid">Isto não é um link magnet.</string>
+    <string name="rd_torrent_downloading">O Real-Debrid está baixando: %1$d%%. Ele aparece abaixo como pronto quando terminar.</string>
+    <string name="rd_torrent_error_slots">Sua conta Real-Debrid não tem vaga para mais um torrent. Exclua um ou espere um terminar.</string>
+    <string name="rd_torrent_error_refused">O Real-Debrid recusou este torrent.</string>
+    <string name="rd_torrent_error_too_big">Este torrent é grande demais para o Real-Debrid.</string>
+    <string name="rd_torrent_error_no_video">Este torrent não tem arquivo de vídeo, por isso não foi mantido.</string>
+    <string name="rd_torrent_error_dead">O Real-Debrid não conseguiu baixar este torrent, por isso ele foi removido da sua conta.</string>
+    <string name="rd_torrent_error_not_allowed">Sua conta Real-Debrid não pode adicionar torrents (é preciso uma conta premium).</string>
+    <string name="rd_torrent_recent_empty">Ainda não há torrents na sua conta.</string>
+    <string name="rd_torrent_state_ready">Pronto</string>
+    <string name="rd_torrent_state_waiting">Aguardando</string>
+    <string name="rd_torrent_state_downloading">Baixando, %1$d%%</string>
+    <string name="rd_torrent_state_failed">Falhou</string>
+    <string name="rd_torrent_delete_confirm">Excluir este torrent da sua conta Real-Debrid? Não dá para desfazer.</string>
+    <string name="rd_torrent_delete_yes">Excluir</string>
+    <string name="rd_torrent_delete_no">Manter</string>
+    <string name="rd_torrent_deleted">Torrent excluído da sua conta.</string>
+    <string name="rd_torrent_delete_failed">Não foi possível excluir o torrent. Tente de novo daqui a pouco.</string>
 </resources>

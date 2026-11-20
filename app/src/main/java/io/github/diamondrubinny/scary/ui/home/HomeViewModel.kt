@@ -51,6 +51,7 @@ import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
+import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.security.PinHasher
@@ -1376,6 +1377,73 @@ class HomeViewModel(
         }
     }
 
+    // The sources feature (docs/TORRENT_SCRAPER_PLAN.md): only a build made with it shows the way in ---------------------
+
+    private val _rdTorrents = MutableStateFlow(RdTorrentsState())
+    val rdTorrents: StateFlow<RdTorrentsState> = _rdTorrents.asStateFlow()
+
+    /** Real-Debrid → "Add a torrent". Personal files, so family night leaves it out and the parental lock asks. */
+    fun openRdTorrents() {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        if (realDebrid?.signedIn != true) return
+        guard(null, GatedAction.RdTorrents)
+    }
+
+    fun refreshRdTorrents() {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val torrents = repository.recentTorrents()
+            val active = repository.activeCount()
+            _rdTorrents.update { it.copy(torrents = torrents ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
+        }
+    }
+
+    /** The viewer's magnet link: added to their account, and played in SCARY's player as soon as it is ready. */
+    fun pullMagnet(text: String) {
+        val repository = realDebrid ?: return
+        if (_rdTorrents.value.pull == RdPullState.Working) return
+        val magnet = Magnets.parse(text)
+        if (magnet == null) {
+            _rdTorrents.update { it.copy(pull = RdPullState.Invalid) }
+            return
+        }
+        _rdTorrents.update { it.copy(pull = RdPullState.Working) }
+        viewModelScope.launch {
+            val result = repository.pull(magnet)
+            _rdTorrents.update {
+                it.copy(
+                    pull = when (result) {
+                        is RealDebridRepository.Pull.Ready -> RdPullState.Idle
+                        is RealDebridRepository.Pull.Downloading -> RdPullState.Downloading(result.progress)
+                        is RealDebridRepository.Pull.Failed -> RdPullState.Failed(result.reason)
+                    },
+                )
+            }
+            refreshRdTorrents()
+            // Still on the screen the viewer asked from: a film must not start over something they moved on to.
+            if (result is RealDebridRepository.Pull.Ready && backStack.value.last() == Screen.RdTorrents) {
+                RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = null) }
+            }
+        }
+    }
+
+    /** A finished torrent from the list, in the internal player. */
+    fun playRdTorrent(id: String) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val file = repository.torrentVideos(id)?.let(RealDebrid::mainFile)
+            if (file == null) show(R.string.rd_play_failed) else playRealDebrid(file, movieId = null)
+        }
+    }
+
+    fun deleteRdTorrent(id: String) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            show(if (repository.deleteTorrent(id)) R.string.rd_torrent_deleted else R.string.rd_torrent_delete_failed)
+            refreshRdTorrents()
+        }
+    }
+
     /** Looks through the viewer's own files for the film being opened; nothing is searched for anywhere else. */
     private fun findRealDebridFiles(movieId: String) {
         _rdMatches.value = null
@@ -1715,6 +1783,11 @@ class HomeViewModel(
                 push(Screen.RealDebrid)
                 realDebrid?.refreshAccount()
                 loadRealDebridFiles()
+            }
+            GatedAction.RdTorrents -> {
+                _rdTorrents.value = RdTorrentsState()
+                push(Screen.RdTorrents)
+                refreshRdTorrents()
             }
             is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId, action.startAtMs)
         }

@@ -10,6 +10,7 @@ import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.player.Languages
 import io.github.diamondrubinny.scary.core.player.SubtitleFiles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
+import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -72,6 +73,19 @@ class RealDebridRepository(
         data object SignedOut : Files
         data object Unreachable : Files
     }
+
+    /** What became of a magnet link the viewer gave (the sources feature, docs/TORRENT_SCRAPER_PLAN.md). */
+    sealed interface Pull {
+        /** In the account and finished: its videos, ready to play. */
+        data class Ready(val files: List<RealDebrid.RdFile>) : Pull
+
+        /** In the account, and Real-Debrid is still fetching it. */
+        data class Downloading(val progress: Int) : Pull
+
+        data class Failed(val reason: PullError) : Pull
+    }
+
+    enum class PullError { UNREACHABLE, SLOTS_FULL, REFUSED, TOO_BIG, NO_VIDEO, DEAD, NOT_ALLOWED }
 
     /** What the player opens: a direct link, and how to get the converted stream if the TV cannot play it. */
     class Playable(val url: String, val title: String, private val transcode: suspend () -> String?) {
@@ -232,6 +246,90 @@ class RealDebridRepository(
     /** The viewer's files that are [movie] (FileMatch), or empty when not signed in or not reachable. */
     suspend fun filesFor(movie: Movie): List<RealDebrid.RdFile> =
         (files() as? Files.Ready)?.files?.let { FileMatch.forMovie(movie, it) }.orEmpty()
+
+    // The sources feature: only a build made with it reaches these (docs/TORRENT_SCRAPER_PLAN.md) ------------------------
+
+    /**
+     * Adds [magnet] to the viewer's account, asks for its videos (and their subtitle files), and waits a short while:
+     * a torrent Real-Debrid already holds is ready within seconds. One that fails, or holds no video, is deleted again
+     * so it does not keep one of the account's active places.
+     */
+    suspend fun pull(magnet: Magnets.Magnet): Pull = withContext(Dispatchers.IO) {
+        val added = call("POST", RealDebrid.ADD_MAGNET_URL, RealDebrid.addMagnetForm(magnet)) ?: return@withContext Pull.Failed(PullError.UNREACHABLE)
+        val id = added.body?.takeIf { added.ok }?.let(RealDebrid::parseAdded)
+            ?: return@withContext Pull.Failed(pullError(added))
+        val started = SystemClock.elapsedRealtime()
+        var chosenAt = 0L
+        var progress = 0
+        while (SystemClock.elapsedRealtime() - started < PULL_WAIT_MS) {
+            val answer = call("GET", RealDebrid.torrentInfoUrl(id))
+            val status = answer?.body?.takeIf { answer.ok }?.let(RealDebrid::parseTorrentStatus)
+            when (status?.state) {
+                null, RealDebrid.TorrentState.CONVERTING -> Unit
+                RealDebrid.TorrentState.CHOOSE_FILES -> if (chosenAt == 0L) {
+                    val ids = RealDebrid.filesToSelect(status.files)
+                    if (ids.isEmpty()) {
+                        deleteTorrent(id)
+                        return@withContext Pull.Failed(PullError.NO_VIDEO)
+                    }
+                    val chosen = call("POST", RealDebrid.selectFilesUrl(id), RealDebrid.selectFilesForm(ids))
+                    if (chosen?.ok == true) chosenAt = SystemClock.elapsedRealtime()
+                }
+                RealDebrid.TorrentState.QUEUED, RealDebrid.TorrentState.DOWNLOADING, RealDebrid.TorrentState.FINISHING -> {
+                    progress = status.progress
+                    // Not one Real-Debrid already holds: it stays in the account and shows in the list when done.
+                    if (chosenAt != 0L && SystemClock.elapsedRealtime() - chosenAt > CACHED_WAIT_MS) return@withContext Pull.Downloading(progress)
+                }
+                RealDebrid.TorrentState.READY -> {
+                    cachedFiles = null
+                    val files = status.finished()?.let { RealDebrid.torrentFiles(it, answer.body) }.orEmpty()
+                    return@withContext if (files.isEmpty()) Pull.Failed(PullError.NO_VIDEO) else Pull.Ready(files)
+                }
+                RealDebrid.TorrentState.FAILED -> {
+                    deleteTorrent(id)
+                    return@withContext Pull.Failed(PullError.DEAD)
+                }
+            }
+            delay(PULL_POLL_MS)
+        }
+        Pull.Downloading(progress)
+    }
+
+    private fun pullError(answer: Answer): PullError = when (answer.body?.let(RealDebrid::errorCode)) {
+        ERROR_TOO_MANY_ACTIVE -> PullError.SLOTS_FULL
+        ERROR_INFRINGING -> PullError.REFUSED
+        ERROR_TOO_BIG -> PullError.TOO_BIG
+        ERROR_INVALID_TORRENT -> PullError.DEAD
+        else -> if (answer.code == HttpURLConnection.HTTP_FORBIDDEN) PullError.NOT_ALLOWED else PullError.UNREACHABLE
+    }
+
+    /** The account's newest torrents in any state, or null when they could not be listed. */
+    suspend fun recentTorrents(): List<RealDebrid.TorrentStatus>? = withContext(Dispatchers.IO) {
+        val answer = call("GET", RealDebrid.RECENT_TORRENTS_URL) ?: return@withContext null
+        when {
+            answer.code == HttpURLConnection.HTTP_NO_CONTENT -> emptyList()
+            answer.ok -> RealDebrid.parseTorrentStatuses(answer.body.orEmpty())
+            else -> null
+        }
+    }
+
+    /** The videos of one finished torrent of the account; empty when it has none, null when it could not be asked. */
+    suspend fun torrentVideos(id: String): List<RealDebrid.RdFile>? = withContext(Dispatchers.IO) {
+        val answer = call("GET", RealDebrid.torrentInfoUrl(id))?.takeIf { it.ok } ?: return@withContext null
+        val torrent = answer.body?.let(RealDebrid::parseTorrentStatus)?.finished() ?: return@withContext emptyList()
+        RealDebrid.torrentFiles(torrent, answer.body)
+    }
+
+    /** Deletes a torrent from the account. True when Real-Debrid says it is gone. */
+    suspend fun deleteTorrent(id: String): Boolean = withContext(Dispatchers.IO) {
+        val answer = call("DELETE", RealDebrid.deleteTorrentUrl(id)) ?: return@withContext false
+        if (answer.ok) cachedFiles = null
+        answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND
+    }
+
+    suspend fun activeCount(): RealDebrid.ActiveCount? = withContext(Dispatchers.IO) {
+        call("GET", RealDebrid.ACTIVE_COUNT_URL)?.takeIf { it.ok }?.body?.let(RealDebrid::parseActiveCount)
+    }
 
     /** A link to play [file]: the one Real-Debrid already generated, or a fresh one from its own link. */
     suspend fun playable(file: RealDebrid.RdFile): Playable? = withContext(Dispatchers.IO) {
@@ -397,5 +495,18 @@ class RealDebridRepository(
         const val CACHE_MS = 5 * 60_000L
         const val BACKOFF_MS = 2 * 60_000L
         const val HTTP_TOO_MANY_REQUESTS = 429
+
+        /** How long a pull is watched before it is left to finish in the account. */
+        const val PULL_WAIT_MS = 60_000L
+        const val PULL_POLL_MS = 2_000L
+
+        /** A torrent Real-Debrid already holds is ready well within this, once its files are chosen. */
+        const val CACHED_WAIT_MS = 12_000L
+
+        // Real-Debrid's error codes, as its documentation lists them (read 20 Nov 2026).
+        const val ERROR_TOO_MANY_ACTIVE = 21
+        const val ERROR_TOO_BIG = 29
+        const val ERROR_INVALID_TORRENT = 30
+        const val ERROR_INFRINGING = 35
     }
 }

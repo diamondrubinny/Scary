@@ -119,6 +119,8 @@ sealed interface GatedAction {
     data object Settings : GatedAction
     /** The viewer's Real-Debrid files: personal files have no fear level, so the parental lock asks for the PIN. */
     data object RealDebrid : GatedAction
+    /** Adding torrents to the viewer's Real-Debrid account (the sources feature): personal files again. */
+    data object RdTorrents : GatedAction
     /** [startAtMs] null: from the saved spot or the start, as the viewer chooses when there is a spot to go back to. */
     data class PlayRealDebrid(
         val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile,
@@ -288,6 +290,8 @@ sealed interface Screen {
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */
     data object RealDebrid : Screen
+    /** Adding a magnet link to the viewer's Real-Debrid account, and its newest torrents (the sources feature). */
+    data object RdTorrents : Screen
     /** The internal player, playing the session in HomeViewModel.player. */
     data object Player : Screen
 }
@@ -299,6 +303,23 @@ sealed interface RdFilesState {
     data class Ready(val files: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile>) : RdFilesState
     data object Unreachable : RdFilesState
 }
+
+/** What became of the magnet link the viewer last gave. */
+sealed interface RdPullState {
+    data object Idle : RdPullState
+    data object Working : RdPullState
+    data object Invalid : RdPullState
+    data class Downloading(val progress: Int) : RdPullState
+    data class Failed(val reason: io.github.diamondrubinny.scary.data.RealDebridRepository.PullError) : RdPullState
+}
+
+/** The torrents screen: the last pull, the account's newest torrents (null while loading) and its active places. */
+data class RdTorrentsState(
+    val pull: RdPullState = RdPullState.Idle,
+    val torrents: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.TorrentStatus>? = null,
+    val unreachable: Boolean = false,
+    val active: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.ActiveCount? = null,
+)
 
 /** What the internal player is playing: the file's key (for resuming), a link, and the film it is, if known. */
 class PlayerSession(

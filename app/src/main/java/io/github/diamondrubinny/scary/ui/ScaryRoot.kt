@@ -97,7 +97,10 @@ import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.player.PlayerScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
+import androidx.compose.ui.res.booleanResource
 import io.github.diamondrubinny.scary.ui.remote.OtherApps
 import io.github.diamondrubinny.scary.ui.remote.PhoneRemoteScreen
 import io.github.diamondrubinny.scary.ui.search.SearchScreen
@@ -207,6 +210,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val aiState by aiStateFlow.collectAsStateWithLifecycle()
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
+    val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
+    val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
     val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
     val playerSession by viewModel.player.collectAsStateWithLifecycle()
     val watchHistory by viewModel.watchHistory.collectAsStateWithLifecycle()
@@ -643,6 +648,18 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onOnlineSubtitles = viewModel::setPlayerOnlineSubtitles,
                             onCandidates = viewModel::rdFileCandidates,
                             onSetFilm = viewModel::setRdFileFilm,
+                            onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
+                        )
+                    },
+                )
+                current == Screen.RdTorrents -> RdTorrentsScreen(
+                    state = rdTorrents,
+                    actions = remember(viewModel) {
+                        RdTorrentsActions(
+                            onPull = viewModel::pullMagnet,
+                            onRefresh = viewModel::refreshRdTorrents,
+                            onPlay = viewModel::playRdTorrent,
+                            onDelete = viewModel::deleteRdTorrent,
                         )
                     },
                 )

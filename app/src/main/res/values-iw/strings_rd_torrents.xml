@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="rd_torrent_puller_title">סקרפר ומשיכת טורנטים מ-Real-Debrid (משודרג)</string>
     <string name="rd_torrent_refresh">רענן</string>
     <string name="rd_torrent_back">חזרה</string>
-    <string name="rd_auto_play_when_ready">הפעל נגן חיצוני אוטומטית כשהסטרימינג מוכן</string>
-    <string name="rd_scraper_title">סקרפר טורנטים מרובה מקורות</string>
-    <string name="rd_scraper_hint">שם סרט או סדרה (למשל Hereditary 2018)</string>
-    <string name="rd_scraper_action">חפש וסקור</string>
-    <string name="rd_scraper_auto_best">משיכה אוטומטית של הטוב ביותר</string>
-    <string name="rd_scraper_force_refresh">רענן מקורות</string>
-    <string name="rd_scraper_sort_label">מיון:</string>
-    <string name="rd_scraper_results_title">תוצאות סקרפר</string>
+    <string name="rd_auto_play_when_ready">כשהקובץ מוכן, הוא מתנגן בנגן של SCARY.</string>
     <string name="rd_torrent_magnet_label">הדבק קישור Magnet למשיכה</string>
-    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:…</string>
     <string name="rd_torrent_pull_action">משוך טורנט</string>
     <string name="rd_torrent_active_slots">משיכות פעילות: %1$d / %2$d</string>
-    <string name="rd_torrent_working">מבצע סריקה / משיכה מול Real-Debrid...</string>
-    <string name="rd_torrent_ready_streams">קישורי הזרמה מוכנים</string>
+    <string name="rd_torrent_working">פונים ל-Real-Debrid…</string>
     <string name="rd_torrent_play">הפעל</string>
     <string name="rd_torrent_recent_title">טורנטים אחרונים בחשבון</string>
     <string name="rd_torrent_delete">מחק</string>
-    <string name="settings_rd_open_torrents">סקרפר ומשיכת טורנטים מ-Real-Debrid</string>
+    <string name="rd_torrent_title">הוספת טורנט</string>
+    <string name="rd_torrent_open">הוספת טורנט</string>
+    <string name="rd_what_sources">מנגן, בנגן של SCARY, את הסרטונים שבחשבון ה-Real-Debrid שלכם. בגרסה הזו אפשר גם להוסיף לחשבון קישור מגנט משלכם. SCARY לא מחפש מקורות.</string>
+    <string name="rd_torrent_what">הדביקו קישור מגנט משלכם. SCARY שולח את ה-hash, השם וה-trackers שלו לחשבון ה-Real-Debrid שלכם, מבקש את קובצי הווידאו ומנגן את הסרט בנגן של SCARY. שום דבר אחר לא יוצא מהטלוויזיה. האחריות על מה שאתם מוסיפים היא שלכם.</string>
+    <string name="rd_torrent_invalid">זה לא קישור מגנט.</string>
+    <string name="rd_torrent_downloading">Real-Debrid מוריד אותו: %1$d%%. הוא יופיע למטה כמוכן כשיסתיים.</string>
+    <string name="rd_torrent_error_slots">אין בחשבון ה-Real-Debrid שלכם מקום פנוי לטורנט נוסף. מחקו אחד, או חכו שאחד יסתיים.</string>
+    <string name="rd_torrent_error_refused">Real-Debrid סירב לטורנט הזה.</string>
+    <string name="rd_torrent_error_too_big">הטורנט הזה גדול מדי ל-Real-Debrid.</string>
+    <string name="rd_torrent_error_no_video">אין בטורנט הזה קובץ וידאו, ולכן הוא לא נשמר.</string>
+    <string name="rd_torrent_error_dead">Real-Debrid לא הצליח להוריד את הטורנט הזה, ולכן הוא הוסר מהחשבון.</string>
+    <string name="rd_torrent_error_not_allowed">חשבון ה-Real-Debrid שלכם לא יכול להוסיף טורנטים (נדרש חשבון פרימיום).</string>
+    <string name="rd_torrent_recent_empty">עדיין אין טורנטים בחשבון.</string>
+    <string name="rd_torrent_state_ready">מוכן</string>
+    <string name="rd_torrent_state_waiting">ממתין</string>
+    <string name="rd_torrent_state_downloading">יורד, %1$d%%</string>
+    <string name="rd_torrent_state_failed">נכשל</string>
+    <string name="rd_torrent_delete_confirm">למחוק את הטורנט הזה מחשבון ה-Real-Debrid שלכם? אי אפשר לבטל את זה.</string>
+    <string name="rd_torrent_delete_yes">מחיקה</string>
+    <string name="rd_torrent_delete_no">להשאיר</string>
+    <string name="rd_torrent_deleted">הטורנט נמחק מהחשבון.</string>
+    <string name="rd_torrent_delete_failed">לא הצלחנו למחוק את הטורנט. נסו שוב בעוד רגע.</string>
 </resources>

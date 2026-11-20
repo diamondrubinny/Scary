@@ -22,6 +22,8 @@ android {
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
         versionName = "0.6.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // The sources feature (docs/TORRENT_SCRAPER_PLAN.md) is off unless the build asks for it: -Pscary.sources=true.
+        resValue("bool", "rd_sources_enabled", (providers.gradleProperty("scary.sources").orNull == "true").toString())
     }
 
     // A dedicated release key, when one is provided (CI secret or local environment). Without it the release build
@@ -59,6 +61,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = false
+        resValues = true
     }
 
     // SCARY switches its language inside the app (LocaleOverride), so an app bundle must ship every language:
