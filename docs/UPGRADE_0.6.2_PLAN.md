@@ -31,6 +31,7 @@
 - Here: `:core:test`, `:app:lintDebug` ("No issues found"), `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin`, the credit check, the phone remote's JS check.
 - In CI (the branch's push run): the TV emulator's UI tests and the screenshots, which is also the real test of the six newer Actions.
 - **Risk:** the Actions jump several major versions at once. If the CI run breaks on one of them, that one is fixed or kept at its old version, and this file says which.
+- **First CI run (371):** build green on the new tools; all 62 UI tests passed, yet the job was red. The cause was in `screenshots.sh`, not in the upgrade: `echo "$result" | grep -q '^OK ('` fails now and then under `pipefail` (grep ends at the first match while echo is still writing). `screenshots-mobile.sh` already avoided it; the TV script now does too, in both places it had the pattern (the second one could have hidden a crash of the release build).
 
 ## Part 2: options for the next visible upgrade (not built; the owner chooses)
 
@@ -38,7 +39,7 @@
 |---|---|---|---|---|
 | 1 | **Cast with faces and roles** | With a TMDB key: each actor's photo and the role they play, and the actor's page opens by TMDB's own id (no guessing by name) | Names only, from Cinemeta; the actor's films are found by an exact name match | Small to medium. `/3/movie/{id}/credits` is in TMDB's official spec (`profile_path`, `character`, `id`); what it returns was not seen (no key here) |
 | 2 | **Other titles of a film, for your own files** | With a TMDB key: a file named by another title of the film (a foreign or re-release title) is recognised as that film | Spelling variants only (0.5.12); the correction window otherwise | Small. `/3/movie/{id}/alternative_titles` is in the spec; left open in `docs/NEXT_UPGRADE_PLAN.md` |
-| 3 | **"My year in horror"** | A screen of the viewer's own numbers: films watched, hours, favourite decade, director and actor, the scariest watched; kept on the TV only | None | Medium. Needs a check of what dates the watched list keeps |
+| 3 | **More in "Your year in fear"** | The favourite director, the actor seen most, the busiest month; kept on the TV only | **Corrected 20.11:** the screen exists (films watched, hours, average fear, the scariest, favourite subgenre and decade). It was first listed here as missing, without checking the code | Small |
 | 4 | **Viewer profiles** | "Who is watching?": each person their own list, watched, loved and bucket list, under the same PIN rules | One viewer per TV | Large. Touches every stored list and the backup file |
 
 **Scope line (unchanged):** SCARY does not search for, fetch or list stream or torrent sources. A change of that kind requires a legal review (דורש בדיקה משפטית) and is not among the options.

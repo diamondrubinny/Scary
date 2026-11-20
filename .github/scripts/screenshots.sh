@@ -39,7 +39,9 @@ if [ -f dist/scary-tests.apk ]; then
   cat "$OUT/ui-tests.txt"
   echo "OK key events the app handled during the tests (last 200):"
   adb logcat -d -s ScaryKeys:D | tail -200 || true
-  if ! echo "$result" | grep -q '^OK ('; then
+  # Searched as a whole, not through a pipe: "grep -q" ends at the first match, and the "echo" still writing into
+  # the pipe then fails it under pipefail, so a run whose tests all passed was reported as failed (20.11.2026).
+  if ! grep -q '^OK (' <<< "$result"; then
     echo "UI tests failed."
     exit 1
   fi
@@ -319,9 +321,12 @@ if [ -f dist/scary-release.apk ]; then
   shot 28-release-details 6
   key KEYCODE_BACK
   sleep 2
-  if adb logcat -d -b crash | grep -q "$PKG"; then
+  # Read in full first, then searched (see the UI tests above): through a pipe, a crash found early could end the
+  # pipe, fail it under pipefail and so be taken for "no crash".
+  crashes=$(adb logcat -d -b crash || true)
+  if grep -q "$PKG" <<< "$crashes"; then
     echo "The release build crashed:"
-    adb logcat -d -b crash
+    echo "$crashes"
     exit 1
   fi
   adb shell pidof "$PKG" > /dev/null || { echo "The release build is not running."; exit 1; }
