@@ -142,6 +142,9 @@ class AppContainer(context: Context) {
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
     val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore, java.io.File(appContext.cacheDir, "subtitles"))
 
+    /** The viewer's own Torznab indexer, only in a build with the sources feature and once they set it. */
+    val sources = io.github.diamondrubinny.scary.data.SourcesRepository(secretStore)
+
     /** Subtitles found online by the film's name, for the internal player; kept in the same cache as the torrent's. */
     val subtitleRepository = io.github.diamondrubinny.scary.data.SubtitleRepository(
         io.github.diamondrubinny.scary.data.SubtitleCache(java.io.File(appContext.cacheDir, "subtitles")),

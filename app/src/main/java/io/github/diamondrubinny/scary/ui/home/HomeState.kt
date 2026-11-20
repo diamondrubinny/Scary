@@ -292,6 +292,8 @@ sealed interface Screen {
     data object RealDebrid : Screen
     /** Adding a magnet link to the viewer's Real-Debrid account, and its newest torrents (the sources feature). */
     data object RdTorrents : Screen
+    /** Searching the viewer's own indexer for a release to add (the sources feature). */
+    data object RdSources : Screen
     /** The internal player, playing the session in HomeViewModel.player. */
     data object Player : Screen
 }
@@ -311,6 +313,16 @@ sealed interface RdPullState {
     data object Invalid : RdPullState
     data class Downloading(val progress: Int) : RdPullState
     data class Failed(val reason: io.github.diamondrubinny.scary.data.RealDebridRepository.PullError) : RdPullState
+}
+
+/** What the viewer's indexer answered for the last search. */
+sealed interface RdSearchState {
+    data object Idle : RdSearchState
+    data object Loading : RdSearchState
+    data class Ready(val candidates: List<io.github.diamondrubinny.scary.core.sources.Releases.Candidate>) : RdSearchState
+    data object Unreachable : RdSearchState
+    data object Refused : RdSearchState
+    data object Unreadable : RdSearchState
 }
 
 /** The torrents screen: the last pull, the account's newest torrents (null while loading) and its active places. */

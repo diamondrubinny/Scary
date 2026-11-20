@@ -71,6 +71,7 @@ const val RD_TORRENTS_LIST_TAG = "rdTorrentsList"
 const val RD_TORRENTS_DIALOG_TAG = "rdTorrentsDialog"
 const val RD_TORRENTS_DELETE_TAG = "rdTorrentsDelete"
 const val RD_TORRENTS_CONFIRM_TAG = "rdTorrentsConfirm"
+const val RD_TORRENTS_SEARCH_TAG = "rdTorrentsSearch"
 
 /** A torrent's row in the list: its id for the test tag. */
 fun torrentTag(id: String) = "torrent:$id"
@@ -80,6 +81,8 @@ class RdTorrentsActions(
     val onRefresh: () -> Unit,
     val onPlay: (String) -> Unit,
     val onDelete: (String) -> Unit,
+    /** Opens "Search your indexer". */
+    val onSearch: () -> Unit = {},
 )
 
 /**
@@ -148,6 +151,7 @@ fun RdTorrentsScreen(state: RdTorrentsState, actions: RdTorrentsActions) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
             ScaryButton(stringResource(R.string.rd_torrent_pull_action), onClick = ::pull, primary = true, modifier = Modifier.testTag(RD_TORRENTS_PULL_TAG))
+            ScaryButton(stringResource(R.string.rd_sources_open), onClick = actions.onSearch, modifier = Modifier.testTag(RD_TORRENTS_SEARCH_TAG))
             ScaryButton(stringResource(R.string.rd_torrent_refresh), onClick = actions.onRefresh)
             state.active?.let { BasicText(stringResource(R.string.rd_torrent_active_slots, it.active, it.limit), style = ScaryType.Caption.copy(color = ScaryColors.Ash)) }
         }
@@ -174,7 +178,7 @@ fun RdTorrentsScreen(state: RdTorrentsState, actions: RdTorrentsActions) {
 }
 
 @Composable
-private fun pullText(pull: RdPullState): String = when (pull) {
+internal fun pullText(pull: RdPullState): String = when (pull) {
     RdPullState.Idle -> stringResource(R.string.rd_auto_play_when_ready)
     RdPullState.Working -> stringResource(R.string.rd_torrent_working)
     RdPullState.Invalid -> stringResource(R.string.rd_torrent_invalid)

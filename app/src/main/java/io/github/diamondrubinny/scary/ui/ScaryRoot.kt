@@ -97,6 +97,8 @@ import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.player.PlayerScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
@@ -211,6 +213,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
+    val rdSearch by viewModel.rdSearch.collectAsStateWithLifecycle()
+    val indexerHost by viewModel.indexerHost.collectAsStateWithLifecycle()
     val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
     val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
     val playerSession by viewModel.player.collectAsStateWithLifecycle()
@@ -660,6 +664,20 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onRefresh = viewModel::refreshRdTorrents,
                             onPlay = viewModel::playRdTorrent,
                             onDelete = viewModel::deleteRdTorrent,
+                            onSearch = viewModel::openRdSources,
+                        )
+                    },
+                )
+                current == Screen.RdSources -> RdSourcesScreen(
+                    search = rdSearch,
+                    pull = rdTorrents.pull,
+                    indexerHost = indexerHost,
+                    actions = remember(viewModel) {
+                        RdSourcesActions(
+                            onSearch = viewModel::searchSources,
+                            onPull = { viewModel.pullMagnet(it.magnet.uri) },
+                            onSaveIndexer = viewModel::saveIndexer,
+                            onRemoveIndexer = viewModel::removeIndexer,
                         )
                     },
                 )

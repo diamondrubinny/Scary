@@ -146,6 +146,8 @@ class HomeViewModel(
     /** The viewer's backup, made and restored from the phone remote; null in tests that do not need it. */
     private val backups: BackupRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
+    /** The viewer's own indexer (the sources feature); null in tests that do not need it. */
+    private val sources: io.github.diamondrubinny.scary.data.SourcesRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -353,6 +355,7 @@ class HomeViewModel(
                 watchTmdbAccount()
             }
             launch { realDebrid?.load() }
+            launch { sources?.load() }
             launch {
                 stremio?.load()
                 watchStremio()
@@ -1421,9 +1424,49 @@ class HomeViewModel(
             }
             refreshRdTorrents()
             // Still on the screen the viewer asked from: a film must not start over something they moved on to.
-            if (result is RealDebridRepository.Pull.Ready && backStack.value.last() == Screen.RdTorrents) {
+            if (result is RealDebridRepository.Pull.Ready && backStack.value.last().let { it == Screen.RdTorrents || it == Screen.RdSources }) {
                 RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = null) }
             }
+        }
+    }
+
+    /** The host of the viewer's indexer, or null when none is set. */
+    val indexerHost: StateFlow<String?> = sources?.host ?: MutableStateFlow(null)
+
+    private val _rdSearch = MutableStateFlow<RdSearchState>(RdSearchState.Idle)
+    val rdSearch: StateFlow<RdSearchState> = _rdSearch.asStateFlow()
+
+    /** "Search your indexer", from the torrents screen (already behind the parental lock). */
+    fun openRdSources() {
+        if (backStack.value.last() != Screen.RdTorrents) return
+        _rdSearch.value = RdSearchState.Idle
+        _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+        push(Screen.RdSources)
+    }
+
+    fun searchSources(query: String) {
+        val repository = sources ?: return
+        if (_rdSearch.value == RdSearchState.Loading) return
+        _rdSearch.value = RdSearchState.Loading
+        viewModelScope.launch {
+            _rdSearch.value = when (val result = repository.search(query)) {
+                is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreachable -> RdSearchState.Unreachable
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Refused -> RdSearchState.Refused
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreadable -> RdSearchState.Unreadable
+            }
+        }
+    }
+
+    /** Saves the indexer's address and key; the answer says what was wrong with them, if anything. */
+    suspend fun saveIndexer(address: String, key: String): io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult =
+        sources?.save(address, key) ?: io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE
+
+    fun removeIndexer() {
+        viewModelScope.launch {
+            sources?.remove()
+            _rdSearch.value = RdSearchState.Idle
         }
     }
 
@@ -2716,6 +2759,7 @@ class HomeViewModel(
                     container.stremio,
                     container.subtitleRepository,
                     container.backups,
+                    sources = container.sources,
                 )
             }
         }
