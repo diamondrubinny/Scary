@@ -68,6 +68,9 @@ import kotlinx.coroutines.delay
 /** Test tag of the top bar's "Ask SCARY ✦" button. */
 const val ASK_BUTTON_TAG = "askButton"
 
+/** Test tag of the top bar's "Real-Debrid" word. */
+const val REAL_DEBRID_NAV_TAG = "realDebridNav"
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TopBar(
@@ -87,11 +90,13 @@ fun TopBar(
     bucketCount: Int = 0,
     /** "Ask SCARY ✦"; none when AI is off. */
     onAsk: (() -> Unit)? = null,
+    /** The viewer's Real-Debrid account and its videos, one press from the home screen; none when null. */
+    onOpenRealDebrid: (() -> Unit)? = null,
 ) {
     if (scaryLayout.narrow) {
         NarrowTopBar(
             onOpenSettings, onOpenSearch, onSurprise, modifier, familyNight, sleepAtMillis,
-            tab, onSelectTab, onOpenBucket, bucketCount, onAsk,
+            tab, onSelectTab, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid,
         )
         return
     }
@@ -128,7 +133,7 @@ fun TopBar(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid)
             Row(Modifier.padding(start = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
                 Clock()
@@ -155,6 +160,7 @@ private fun NarrowTopBar(
     onOpenBucket: (() -> Unit)?,
     bucketCount: Int,
     onAsk: (() -> Unit)?,
+    onOpenRealDebrid: (() -> Unit)?,
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -182,7 +188,7 @@ private fun NarrowTopBar(
                 )
             }
             if (tab != null) HomeTabs(tab, onSelectTab)
-            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid)
         }
     }
 }
@@ -195,6 +201,7 @@ private fun TopBarButtons(
     onOpenBucket: (() -> Unit)?,
     bucketCount: Int,
     onAsk: (() -> Unit)?,
+    onOpenRealDebrid: (() -> Unit)?,
 ) {
     // Noir: the top bar is words. Each says where it goes; nothing has to be remembered by its picture. The longer
     // names stay as what a screen reader says (and what the tests look for).
@@ -211,6 +218,10 @@ private fun TopBarButtons(
     }
     NavWord(stringResource(R.string.nav_search), stringResource(R.string.search_title), onOpenSearch)
     NavWord(stringResource(R.string.nav_surprise), stringResource(R.string.surprise_me), onSurprise)
+    // The viewer's own files, one press away instead of a row far down Settings (asked for by the owner, 0.6.2).
+    if (onOpenRealDebrid != null) {
+        NavWord(stringResource(R.string.rd_title), stringResource(R.string.rd_title), onOpenRealDebrid, Modifier.testTag(REAL_DEBRID_NAV_TAG))
+    }
     // The effects switch is in Settings: one word fewer here, and the bar fits in every language.
     NavWord(stringResource(R.string.nav_settings), stringResource(R.string.settings_title), onOpenSettings)
 }

@@ -143,6 +143,8 @@ class HomeActions(
     val onDismissTasteInvite: () -> Unit = {},
     /** A one-press AI request on the "Ask SCARY" row (asked at once), or null for "Ask in your own words". */
     val onAsk: (AiChip?, String?) -> Unit = { _, _ -> },
+    /** The top bar's "Real-Debrid" word. */
+    val onOpenRealDebrid: () -> Unit = {},
     /** A "Continue watching" card: plays the file from where the viewer stopped (or the spot last marked). */
     val onContinue: (WatchEntry) -> Unit = {},
     /** Holding OK on that card: it leaves the row. */
@@ -247,6 +249,8 @@ fun HomeScreen(
             onOpenBucket = actions.onOpenBucket,
             bucketCount = state.bucketIds.size,
             onAsk = if (state.aiEnabled) ({ actions.onAsk(null, null) }) else null,
+            // Family night leaves personal files out, so their word is not offered either.
+            onOpenRealDebrid = if (state.familyNight) null else actions.onOpenRealDebrid,
         )
         // On a tablet or phone the hero scrolls away with the rows (first item below), so the rows get the room.
         val heroInRows = scaryLayout.narrow
