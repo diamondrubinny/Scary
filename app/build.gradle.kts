@@ -22,8 +22,8 @@ android {
         versionCode = providers.environmentVariable("GITHUB_RUN_NUMBER").orNull?.toIntOrNull() ?: 1
         versionName = "0.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // The sources feature (docs/TORRENT_SCRAPER_PLAN.md) is off unless the build asks for it: -Pscary.sources=true.
-        resValue("bool", "rd_sources_enabled", (providers.gradleProperty("scary.sources").orNull == "true").toString())
+        // The sources feature (docs/TORRENT_SCRAPER_PLAN.md) is on since 0.6.2; -Pscary.sources=false builds without it.
+        resValue("bool", "rd_sources_enabled", (providers.gradleProperty("scary.sources").orNull != "false").toString())
     }
 
     // A dedicated release key, when one is provided (CI secret or local environment). Without it the release build

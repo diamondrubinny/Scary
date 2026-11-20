@@ -40,9 +40,9 @@ import java.net.URL
 
 /**
  * The viewer's own Real-Debrid account, only if they connect it (docs/INTERNAL_PLAYER_PLAN.md): SCARY lists the videos
- * already in it (their downloads, and torrents they added themselves) and plays them. It never searches for sources and,
- * in the official build, never adds anything to the account. Only a build made with the sources feature
- * (docs/TORRENT_SCRAPER_PLAN.md) reaches the calls that add a magnet link the viewer gave, or delete a torrent.
+ * already in it (their downloads, and torrents they added themselves) and plays them. It never searches for sources.
+ * With the sources feature (docs/TORRENT_SCRAPER_PLAN.md, on since 0.6.2 unless a build turns it off) it also adds a
+ * magnet link the viewer gave and deletes a torrent they chose, each after their confirmation.
  *
  * Signing in is Real-Debrid's device flow: the TV shows real-debrid.com/device and a code, the viewer approves on their
  * phone, and the TV receives credentials bound to that account. Those and the refresh token are passwords: stored
