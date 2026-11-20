@@ -30,6 +30,8 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 W, H, FPS = 1920, 1080, 30
 ROOT = Path(__file__).resolve().parents[2]
 FONTS = ROOT / "app/src/main/res/font"
+# Faces only the promo films use (the app itself no longer ships them).
+PROMO_FONTS = ROOT / "tools/promo/fonts"
 
 # ScaryColors (app/src/main/java/.../ui/theme/Theme.kt).
 VOID = (10, 11, 11)
@@ -89,7 +91,8 @@ LANGUAGE_CUTS = [("40-en-home", "English", "latin"), ("01-home", "עברית", "
 
 
 def font(name: str, size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(str(FONTS / name), size, layout_engine=ImageFont.Layout.RAQM)
+    path = PROMO_FONTS / name if (PROMO_FONTS / name).exists() else FONTS / name
+    return ImageFont.truetype(str(path), size, layout_engine=ImageFont.Layout.RAQM)
 
 
 class Shots:

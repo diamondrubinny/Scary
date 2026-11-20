@@ -23,13 +23,13 @@ jobs:
     env:
       HAS_KEY: ${{ secrets.SCARY_KEYSTORE_BASE64 != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: .github
 
       - name: Read the signing key from the cache (before it is moved to secrets)
         if: env.HAS_KEY != 'true'
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: ~/.android/debug.keystore
           key: android-debug-keystore-v1

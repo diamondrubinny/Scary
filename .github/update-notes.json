@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.6.1: a film's cast. Each actor on a film's page is a button: OK opens \"Films with…\", from what SCARY holds and, with your TMDB key, their whole list of horror and thrillers. Also the new Noir look from 0.6.0.",
-  "he": "SCARY 0.6.1: השחקנים של הסרט. כל שחקן בעמוד סרט הוא כפתור: OK פותח את \"סרטים עם…\", מתוך מה ש־SCARY מחזיקה, ועם מפתח TMDB שלכם גם הרשימה המלאה של האימה והמתח שלו. בנוסף המראה החדש (Noir) מ־0.6.0.",
-  "ar": "SCARY 0.6.1: طاقم الفيلم. كل ممثل في صفحة الفيلم زر: OK يفتح «أفلام…» مما لدى SCARY، ومع مفتاح TMDB الخاص بك قائمته الكاملة من الرعب والإثارة. وأيضًا المظهر الجديد (Noir) من 0.6.0.",
-  "pt": "SCARY 0.6.1: o elenco do filme. Cada ator na página do filme é um botão: OK abre “Filmes com…”, do que o SCARY tem e, com a sua chave do TMDB, a lista completa de terror e suspense dele. Também o novo visual Noir da 0.6.0.",
-  "ru": "SCARY 0.6.1: актёры фильма. Каждый актёр на странице фильма теперь кнопка: OK открывает «Фильмы с участием…» из того, что есть в SCARY, а с вашим ключом TMDB и полный список его ужасов и триллеров. Также новый вид Noir из 0.6.0."
+  "en": "SCARY 0.6.2: upkeep. Newer build tools and libraries, and a slightly smaller download. Nothing changes on screen.",
+  "he": "SCARY 0.6.2: תחזוקה. כלי בנייה וספריות חדשים יותר, והורדה מעט קטנה יותר. שום דבר לא משתנה על המסך.",
+  "ar": "SCARY 0.6.2: صيانة. أدوات بناء ومكتبات أحدث، وتنزيل أصغر قليلًا. لا يتغيّر شيء على الشاشة.",
+  "pt": "SCARY 0.6.2: manutenção. Ferramentas de compilação e bibliotecas mais recentes, e um download um pouco menor. Nada muda no ecrã.",
+  "ru": "SCARY 0.6.2: обслуживание. Более новые инструменты сборки и библиотеки, загрузка чуть меньше. На экране ничего не меняется."
 }

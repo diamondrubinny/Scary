@@ -101,7 +101,7 @@ for lang in en pt ru; do
   open --es scary.debug.open settings
   shot "$n-settings-$lang" 4; n=$((n+1))
 done
-# Arabic, the fifth language: right to left with its own fonts (Rakkas and Cairo).
+# Arabic, the fifth language: right to left with its own font (Cairo).
 open --es scary.debug.open language:ar
 sleep 6
 open
