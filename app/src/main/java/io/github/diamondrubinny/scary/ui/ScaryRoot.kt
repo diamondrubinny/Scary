@@ -164,6 +164,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val similarFor by viewModel.similar.collectAsStateWithLifecycle()
     val rentOrBuy by viewModel.rentOrBuy.collectAsStateWithLifecycle()
     val franchise by viewModel.franchise.collectAsStateWithLifecycle()
+    val cast by viewModel.cast.collectAsStateWithLifecycle()
     val rentCountry by viewModel.rentCountry.collectAsStateWithLifecycle()
     val trailerIntro by viewModel.trailerIntro.collectAsStateWithLifecycle()
     val bucketPrompt by viewModel.bucketPrompt.collectAsStateWithLifecycle()
@@ -597,11 +598,15 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     inBucket = details.movie.id in state.bucketIds,
                     onToggleBucket = { viewModel.toggleBucket(it, language) },
                     franchise = franchise?.takeIf { it.movieId == details.movie.id },
-                    onLoadFranchise = { viewModel.loadFranchise(it, language) },
+                    onLoadFranchise = {
+                        viewModel.loadFranchise(it, language)
+                        viewModel.loadCast(it, language)
+                    },
+                    cast = cast?.takeIf { it.movieId == details.movie.id && it.language == language }?.members.orEmpty(),
                     onFranchiseToBucket = { viewModel.addFranchiseToBucket(it, language) },
-                    onOpenPerson = {
+                    onOpenPerson = { name, personId, photo ->
                         personOpenedId = null
-                        viewModel.openPerson(it)
+                        viewModel.openPerson(name, personId, photo)
                     },
                     reminded = details.movie.id in state.remindedIds,
                     onToggleReminder = { viewModel.toggleReminder(it, language) },
@@ -706,14 +711,15 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 current is Screen.Person -> PersonScreen(
                     name = current.name,
                     person = person,
-                    onLoad = viewModel::loadPerson,
+                    onLoad = { viewModel.loadPerson(it, current.personId) },
+                    photo = current.photo,
                     onOpenMovie = {
                         personOpenedId = it.id
                         viewModel.openDetails(it.id)
                     },
                     isLocked = state::isLocked,
                     isWatched = state::isWatched,
-                    gridState = personGrids.getOrPut(current.name) { androidx.compose.foundation.lazy.grid.LazyGridState() },
+                    gridState = personGrids.getOrPut(current.name + "#" + (current.personId ?: "")) { androidx.compose.foundation.lazy.grid.LazyGridState() },
                     returnTo = personOpenedId,
                 )
                 current == Screen.HomeRows -> HomeRowsScreen(

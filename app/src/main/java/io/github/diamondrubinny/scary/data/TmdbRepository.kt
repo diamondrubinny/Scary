@@ -9,9 +9,11 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.realdebrid.AltTitles
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
 import io.github.diamondrubinny.scary.core.tmdb.TmdbAuth
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCache
+import io.github.diamondrubinny.scary.core.tmdb.TmdbCastMember
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCategory
 import io.github.diamondrubinny.scary.core.tmdb.TmdbResult
 import io.github.diamondrubinny.scary.core.tmdb.TmdbRow
@@ -62,6 +64,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
     suspend fun load() = withContext(Dispatchers.IO) {
         auth = secrets.read(SECRET_NAME)?.let(Tmdb::parseAuth)
         _keyMask.value = auth?.let { Tmdb.mask(it.value()) }
+        if (auth != null) loadAltTitles()
     }
 
     suspend fun setKey(input: String): TmdbKeyResult = withContext(Dispatchers.IO) {
@@ -86,6 +89,13 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         cacheFile.delete()
         auth = null
         _keyMask.value = null
+        // The films' other titles came with the key and leave with it.
+        synchronized(altLock) {
+            altLoaded = true
+            altFile.delete()
+            _altTitles.value = AltTitles.NONE
+        }
+        synchronized(casts) { casts.clear() }
     }
 
     /** The cache only counts when it was fetched in the current UI language. */
@@ -288,13 +298,90 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
             synchronized(people) { people[cacheKey] = null }
             return@withContext null
         }
-        val credits = body(Tmdb.personCreditsUrl(personId, language), key)?.let(Tmdb::parsePersonCredits) ?: return@withContext null
+        filmsOf(personId, cacheKey, language, key)
+    }
+
+    /**
+     * As [personFilms], for a person TMDB named itself (an actor of a film's cast, [cast]): asked for by TMDB's id of
+     * them, so nobody of the same name is taken for them. Null without a key or when TMDB cannot be reached.
+     */
+    suspend fun personFilmsById(personId: Long, language: Language): OnlinePerson? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        if (personId <= 0) return@withContext null
+        val cacheKey = "#$personId"
+        synchronized(people) { people[cacheKey]?.takeIf { it.language == language } }?.let { return@withContext it }
+        filmsOf(personId, cacheKey, language, key)
+    }
+
+    private suspend fun filmsOf(personId: Long, cacheKey: String, language: Language, key: TmdbAuth): OnlinePerson? {
+        val credits = body(Tmdb.personCreditsUrl(personId, language), key)?.let(Tmdb::parsePersonCredits) ?: return null
         // The films kept off every shelf stay off this one too (core OriginFilter).
         val shown = credits.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
         val result = OnlinePerson(language, withImdbIds(shown, key, language))
         // A film whose IMDb id did not arrive is missing: shown as it is, asked for again on the next visit.
         if (result.films.size == shown.size) synchronized(people) { people[cacheKey] = result }
-        result
+        return result
+    }
+
+    /** A film's cast by its TMDB id and the language of the roles' names. In memory only. */
+    private val casts = object : LinkedHashMap<Pair<Long, Language>, List<TmdbCastMember>>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<Long, Language>, List<TmdbCastMember>>) = size > CASTS_KEPT
+    }
+
+    /**
+     * A film's actors with their photos and roles, in [language] (docs/UPGRADE_0.7_PLAN.md). Asked for with the
+     * viewer's own key: the film's id only. Null without a key, when TMDB does not know the film, or when it cannot
+     * be reached; an empty list when TMDB lists nobody. Never throws.
+     */
+    suspend fun cast(imdbId: String, language: Language): List<TmdbCastMember>? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val tmdbId = tmdbIdOf(imdbId) ?: return@withContext null
+        synchronized(casts) { casts[tmdbId to language] }?.let { return@withContext it }
+        val found = body(Tmdb.creditsUrl(tmdbId, language), key)?.let(Tmdb::parseCast) ?: return@withContext null
+        synchronized(casts) { casts[tmdbId to language] = found }
+        found
+    }
+
+    private val altFile = File(context.filesDir, "alt_titles.json")
+    private val altLock = Any()
+    private var altLoaded = false
+    private val _altTitles = MutableStateFlow(AltTitles.NONE)
+
+    /**
+     * Other titles of the films whose pages were opened, kept on the TV (up to [AltTitles.MAX_FILMS] films), for
+     * recognising the viewer's own files. Empty without a key.
+     */
+    val altTitles: StateFlow<AltTitles> = _altTitles.asStateFlow()
+
+    private fun loadAltTitles() {
+        synchronized(altLock) {
+            if (altLoaded) return
+            altLoaded = true
+            _altTitles.value = runCatching { if (altFile.exists()) AltTitles.decode(altFile.readText()) else AltTitles.NONE }
+                .getOrDefault(AltTitles.NONE)
+        }
+    }
+
+    /**
+     * Asks TMDB once for a film's other titles and keeps them. True when titles were added now, so the viewer's files
+     * are worth looking through again; false when they were known already, there are none, there is no key, or TMDB
+     * cannot be reached (then it is asked again next time). The request carries the film's id only. Never throws.
+     */
+    suspend fun loadAlternativeTitles(imdbId: String): Boolean = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext false
+        loadAltTitles()
+        if (_altTitles.value.knows(imdbId)) return@withContext false
+        val tmdbId = tmdbIdOf(imdbId) ?: return@withContext false
+        val titles = body(Tmdb.alternativeTitlesUrl(tmdbId), key)?.let(Tmdb::parseAlternativeTitles) ?: return@withContext false
+        synchronized(altLock) {
+            // The key may have been removed while TMDB answered: nothing is kept then.
+            if (auth == null) return@withContext false
+            val next = _altTitles.value.with(imdbId, titles)
+            _altTitles.value = next
+            runCatching { altFile.writeText(next.encode()) }
+                .onFailure { Log.w(TAG, "Could not save other titles: ${it.javaClass.simpleName}") }
+        }
+        titles.isNotEmpty()
     }
 
     private val languagesFile = File(context.filesDir, "origin_languages.json")
@@ -498,6 +585,7 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val PROVIDERS_KEPT = 40
         const val FRANCHISES_KEPT = 40
         const val PEOPLE_KEPT = 40
+        const val CASTS_KEPT = 40
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
         const val MAX_IDS = 20_000
         const val MAX_LANGUAGE_LOOKUPS = 300

@@ -9,6 +9,7 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.player.Languages
 import io.github.diamondrubinny.scary.core.player.SubtitleFiles
+import io.github.diamondrubinny.scary.core.realdebrid.AltTitles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import kotlinx.coroutines.CoroutineScope
@@ -230,8 +231,8 @@ class RealDebridRepository(
     }
 
     /** The viewer's files that are [movie] (FileMatch), or empty when not signed in or not reachable. */
-    suspend fun filesFor(movie: Movie): List<RealDebrid.RdFile> =
-        (files() as? Files.Ready)?.files?.let { FileMatch.forMovie(movie, it) }.orEmpty()
+    suspend fun filesFor(movie: Movie, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> =
+        (files() as? Files.Ready)?.files?.let { FileMatch.forMovie(movie, it, alt) }.orEmpty()
 
     /** A link to play [file]: the one Real-Debrid already generated, or a fresh one from its own link. */
     suspend fun playable(file: RealDebrid.RdFile): Playable? = withContext(Dispatchers.IO) {

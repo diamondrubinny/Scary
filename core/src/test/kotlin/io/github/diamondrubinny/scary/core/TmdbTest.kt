@@ -321,4 +321,60 @@ class TmdbTest {
         val many = (1..200).joinToString(",") { """{"id":$it,"title":"F$it","release_date":"20${10 + it % 15}-01-01","genre_ids":[27]}""" }
         assertEquals(Tmdb.MAX_PERSON_FILMS, Tmdb.parsePersonCredits("""{"cast":[$many]}""").size)
     }
+
+    @Test
+    fun `a film's cast is read in billing order with photos from TMDB's image host only`() {
+        assertEquals("https://api.themoviedb.org/3/movie/948/credits?language=he-IL", Tmdb.creditsUrl(948, Language.HE))
+        val answer = """{"id":948,"cast":[
+            {"adult":false,"id":8944,"name":"Jamie Lee Curtis","character":"Laurie Strode","order":1,"profile_path":"/9KWvPPRRNXBKmqM0aQGeZDHqSeb.jpg"},
+            {"adult":false,"id":9221,"name":"Donald Pleasence","character":"Dr. Sam Loomis","order":0,"profile_path":"/aBcDe12345.jpg"},
+            {"adult":false,"id":8944,"name":"Jamie Lee Curtis","character":"Twice","order":7},
+            {"adult":true,"id":5,"name":"Left Out","order":2},
+            {"id":"x","name":"No Id","order":3},
+            {"id":6,"name":" ","order":4},
+            {"id":7,"name":"No Photo","character":"Bob\u0007 \n the  ghost","order":5,"profile_path":null},
+            {"id":8,"name":"Bad Photo","order":6,"profile_path":"https://evil.example/x.jpg"},
+            "junk"],"crew":[{"id":1,"name":"John Carpenter","job":"Director"}]}"""
+        val cast = Tmdb.parseCast(answer)
+        assertEquals(listOf("Donald Pleasence", "Jamie Lee Curtis", "No Photo", "Bad Photo"), cast.map { it.name })
+        assertEquals(listOf(9221L, 8944L, 7L, 8L), cast.map { it.personId })
+        assertEquals("Laurie Strode", cast[1].character)
+        assertEquals("https://image.tmdb.org/t/p/w185/9KWvPPRRNXBKmqM0aQGeZDHqSeb.jpg", cast[1].photo)
+        // Control characters are dropped and spaces made single; an address that is not a TMDB file name is not used.
+        assertEquals("Bob the ghost", cast[2].character)
+        assertNull(cast[2].photo)
+        assertNull(cast[3].photo)
+        assertTrue(Tmdb.parseCast("not json").isEmpty())
+        assertTrue(Tmdb.parseCast("""{"cast":"x"}""").isEmpty())
+        val many = (1..300).joinToString(",") { """{"id":$it,"name":"Actor $it","order":$it}""" }
+        assertEquals(Tmdb.MAX_CAST, Tmdb.parseCast("""{"cast":[$many]}""").size)
+        assertEquals("Actor 1", Tmdb.parseCast("""{"cast":[$many]}""").first().name)
+        try {
+            Tmdb.creditsUrl(0, Language.EN)
+        } catch (e: IllegalArgumentException) {
+            return
+        }
+        throw AssertionError("expected IllegalArgumentException")
+    }
+
+    @Test
+    fun `a film's other titles are read, each once, within limits`() {
+        assertEquals("https://api.themoviedb.org/3/movie/550/alternative_titles", Tmdb.alternativeTitlesUrl(550))
+        val answer = """{"id":550,"titles":[
+            {"iso_3166_1":"RS","title":"Borilački klub","type":""},
+            {"iso_3166_1":"DE","title":"  Fight  Club ","type":""},
+            {"iso_3166_1":"US","title":"fight club","type":"working title"},
+            {"iso_3166_1":"XX","title":"x"},
+            {"iso_3166_1":"XX","title":7},
+            {"iso_3166_1":"XX"},
+            "junk"]}"""
+        assertEquals(listOf("Borilački klub", "Fight Club"), Tmdb.parseAlternativeTitles(answer))
+        assertTrue(Tmdb.parseAlternativeTitles("not json").isEmpty())
+        // A series' answer holds "results", not "titles": not a film's titles.
+        assertTrue(Tmdb.parseAlternativeTitles("""{"id":1399,"results":[{"title":"Froni i shpatave"}]}""").isEmpty())
+        val many = (1..500).joinToString(",") { """{"title":"Title number $it"}""" }
+        assertEquals(Tmdb.MAX_ALT_TITLES, Tmdb.parseAlternativeTitles("""{"titles":[$many]}""").size)
+        val long = "A".repeat(Tmdb.MAX_ALT_TITLE + 1)
+        assertTrue(Tmdb.parseAlternativeTitles("""{"titles":[{"title":"$long"}]}""").isEmpty())
+    }
 }

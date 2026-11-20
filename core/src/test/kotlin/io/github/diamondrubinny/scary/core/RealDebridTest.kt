@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.realdebrid.AltTitles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import org.junit.Assert.assertEquals
@@ -224,5 +225,77 @@ class RealDebridTest {
             return
         }
         throw AssertionError("expected IllegalArgumentException")
+    }
+
+    @Test
+    fun `a file named by another title of a film is that film, and a film's own title wins`() {
+        val eyes = movie("Eyes Without a Face", 1960).copy(imdbId = "tt0053459")
+        val alt = AltTitles.NONE.with("tt0053459", listOf("Les yeux sans visage", "The Horror Chamber of Dr. Faustus", "It"))
+        val french = FileMatch.parse("Les.Yeux.Sans.Visage.1960.1080p.BluRay.mkv")
+        assertFalse("not without the other titles", FileMatch.matches(eyes, french))
+        assertTrue(FileMatch.matches(eyes, french, alt))
+        assertTrue(FileMatch.matches(eyes, FileMatch.parse("The Horror Chamber of Dr Faustus (1960).mp4"), alt))
+        // The same rules as for a film's own titles: the year, and no short title without a year.
+        assertFalse("wrong year", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.1988.mkv"), alt))
+        assertFalse("an episode", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.S01E02.mkv"), alt))
+        // Another title of two letters tells nothing apart: left out even with the right year.
+        assertFalse(FileMatch.matches(eyes, FileMatch.parse("It.1960.mkv"), alt))
+        val files = listOf(
+            RealDebrid.RdFile("d:1", "Les.Yeux.Sans.Visage.1960.mkv", 2_000, "https://real-debrid.com/d/1"),
+            RealDebrid.RdFile("d:2", "Eyes.Without.a.Face.1960.2160p.mkv", 9_000, "https://real-debrid.com/d/2"),
+            RealDebrid.RdFile("d:3", "Halloween.1978.mkv", 5_000, "https://real-debrid.com/d/3"),
+        )
+        assertEquals(listOf("d:2"), FileMatch.forMovie(eyes, files).map { it.key })
+        assertEquals(listOf("d:2", "d:1"), FileMatch.forMovie(eyes, files, alt).map { it.key })
+
+        // In the index: found by another title; a film whose own title the file carries comes first and wins.
+        val night = movie("Night of the Demon", 1957).copy(imdbId = "tt0050766")
+        val curse = movie("Curse of the Demon", 1957).copy(imdbId = "tt9999991")
+        val both = AltTitles.NONE.with("tt0050766", listOf("Curse of the Demon")).with("tt0053459", listOf("Les yeux sans visage"))
+        val index = FileMatch.Index(listOf(eyes, night, curse, movie("Dark", 2017).copy(imdbId = "tt5753856")), both)
+        assertEquals(listOf(eyes.id), index.find("Les.Yeux.Sans.Visage.1960.mkv").map { it.id })
+        assertEquals(eyes.id, index.one("Les.Yeux.Sans.Visage.1960.mkv")?.id)
+        assertEquals(listOf(curse.id, night.id), index.find("Curse.of.the.Demon.1957.mkv").map { it.id })
+        assertEquals("its own title wins", curse.id, index.one("Curse.of.the.Demon.1957.mkv")?.id)
+        assertEquals(listOf(curse.id), index.ownTitle("Curse.of.the.Demon.1957.mkv").map { it.id })
+        assertNull(index.one("Unknown.Film.2001.mkv"))
+        // Without the other titles nothing changes.
+        assertNull(FileMatch.Index(listOf(eyes, night)).one("Les.Yeux.Sans.Visage.1960.mkv"))
+        // Two films that fit only by other titles are none: the viewer decides.
+        val twice = both.with("tt9999991", listOf("Les yeux sans visage"))
+        assertNull(FileMatch.Index(listOf(eyes, night, curse), twice).one("Les.Yeux.Sans.Visage.mkv"))
+    }
+
+    @Test
+    fun `other titles are kept within limits and read back as they were written`() {
+        var kept = AltTitles.NONE.with("tt0053459", listOf(" Les yeux sans visage ", "les YEUX sans visage", "x", "Ok\u0007ay", "B".repeat(AltTitles.MAX_TITLE + 1)))
+        assertEquals(listOf("Les yeux sans visage", "Okay"), kept.of("tt0053459"))
+        // A film asked about that has none is remembered as such.
+        kept = kept.with("tt0050766", emptyList())
+        assertTrue(kept.knows("tt0050766"))
+        assertTrue(kept.of("tt0050766").isEmpty())
+        assertFalse(kept.knows("tt0000009"))
+        assertEquals("an invalid id changes nothing", kept, kept.with("../x", listOf("Title")))
+        assertEquals(kept, AltTitles.decode(kept.encode()))
+        assertEquals(2, AltTitles.decode(kept.encode()).size)
+        // Damaged, hostile or foreign files give nothing.
+        assertEquals(AltTitles.NONE, AltTitles.decode("not json"))
+        assertEquals(AltTitles.NONE, AltTitles.decode("""{"version":"1","films":{"tt0053459":["A title"]}}"""))
+        assertEquals(AltTitles.NONE, AltTitles.decode("""{"version":2,"films":{"tt0053459":["A title"]}}"""))
+        assertEquals(AltTitles.NONE, AltTitles.decode("""{"version":1,"films":[]}"""))
+        val hostile = AltTitles.decode("""{"version":1,"films":{"../../etc":["A title"],"tt0053459":["Good title",7,null,{"a":1}],"tt0050766":"x"}}""")
+        assertEquals(1, hostile.size)
+        assertEquals(listOf("Good title"), hostile.of("tt0053459"))
+        // The oldest films leave first.
+        var many = AltTitles.NONE
+        for (i in 1..AltTitles.MAX_FILMS + 5) many = many.with("tt%07d".format(i), listOf("Title $i"))
+        assertEquals(AltTitles.MAX_FILMS, many.size)
+        assertFalse(many.knows("tt0000005"))
+        assertTrue(many.knows("tt0000006"))
+        // A film asked about again moves to the newest end.
+        many = many.with("tt0000006", listOf("Again"))
+        many = many.with("tt9000000", listOf("New"))
+        assertTrue(many.knows("tt0000006"))
+        assertFalse(many.knows("tt0000007"))
     }
 }

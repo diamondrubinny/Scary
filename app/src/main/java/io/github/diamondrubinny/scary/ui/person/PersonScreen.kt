@@ -32,15 +32,23 @@ import androidx.compose.ui.unit.dp
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.ui.components.EmptyState
+import io.github.diamondrubinny.scary.ui.details.PersonPhoto
 import io.github.diamondrubinny.scary.ui.components.PosterCard
 import io.github.diamondrubinny.scary.ui.home.PersonUi
 import io.github.diamondrubinny.scary.ui.home.SidePadding
 import io.github.diamondrubinny.scary.ui.theme.ScaryType
 import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
+import androidx.compose.foundation.layout.Row
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.aspectRatio
 
 /** Test tags of an actor's screen. */
 const val PERSON_SCREEN_TAG = "personScreen"
 const val PERSON_STATUS_TAG = "personStatus"
+const val PERSON_PHOTO_TAG = "personPhoto"
 
 /**
  * "Films with <actor>": the films SCARY holds whose cast names the actor and, with the viewer's TMDB key, the
@@ -53,6 +61,8 @@ fun PersonScreen(
     person: PersonUi?,
     onLoad: (String) -> Unit,
     onOpenMovie: (Movie) -> Unit,
+    /** The actor's photo from TMDB, when they were chosen from a cast TMDB listed; null otherwise. */
+    photo: String? = null,
     isLocked: (Movie) -> Boolean = { false },
     isWatched: (Movie) -> Boolean = { false },
     gridState: LazyGridState = rememberLazyGridState(),
@@ -71,12 +81,21 @@ fun PersonScreen(
         if (!runCatching { returnFocus.requestFocus() }.getOrDefault(false)) runCatching { firstFocus.requestFocus() }
     }
     Column(Modifier.fillMaxSize().padding(top = 28.dp).testTag(PERSON_SCREEN_TAG)) {
-        BasicText(
-            stringResource(R.string.person_title, name),
-            style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f).mixedLanguage(),
-            maxLines = 2,
-            modifier = Modifier.padding(horizontal = SidePadding).semantics { heading() },
-        )
+        Row(Modifier.padding(horizontal = SidePadding), verticalAlignment = Alignment.CenterVertically) {
+            if (photo != null) {
+                PersonPhoto(
+                    name,
+                    photo,
+                    Modifier.padding(end = 16.dp).width(52.dp).aspectRatio(2f / 3f).clip(RoundedCornerShape(4.dp)).testTag(PERSON_PHOTO_TAG),
+                )
+            }
+            BasicText(
+                stringResource(R.string.person_title, name),
+                style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f).mixedLanguage(),
+                maxLines = 2,
+                modifier = Modifier.weight(1f).semantics { heading() },
+            )
+        }
         BasicText(
             text = when {
                 shown == null -> ""

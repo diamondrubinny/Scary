@@ -52,7 +52,11 @@ object FileMatch {
         )
     }
 
-    fun matches(movie: Movie, parsed: Parsed): Boolean {
+    /**
+     * Whether a file named as [parsed] is [movie]. [alt] adds the film's other titles from TMDB (films only): a file
+     * named by one of them fits too, under the same rules for the year and for short titles.
+     */
+    fun matches(movie: Movie, parsed: Parsed, alt: AltTitles = AltTitles.NONE): Boolean {
         if (movie.isSeries) return matchesSeries(movie, parsed)
         if (parsed.episode) return false
         if (parsed.title.length < 2) return false
@@ -60,7 +64,7 @@ object FileMatch {
         val title = key(parsed.title)
         // A file with no year must match a longer title exactly, so "It" or "Us" alone never claims a random file.
         if (parsed.year == null && title.length < 6) return false
-        return title in titleKeys(movie)
+        return title in titleKeys(movie) || title in altKeys(movie, alt)
     }
 
     private fun matchesSeries(movie: Movie, parsed: Parsed): Boolean {
@@ -77,6 +81,12 @@ object FileMatch {
 
     internal fun titleKeys(movie: Movie): Set<String> =
         (listOf(movie.title, movie.titleHe) + movie.titles.values).filter(String::isNotBlank).mapTo(HashSet()) { key(Search.normalize(it)) }
+
+    /** The keys of a film's other titles; one too short to tell films apart is left out. */
+    internal fun altKeys(movie: Movie, alt: AltTitles): Set<String> =
+        alt.of(movie.imdbId).mapNotNullTo(HashSet()) { title -> key(Search.normalize(title)).takeIf { it.length >= MIN_ALT_KEY } }
+
+    private const val MIN_ALT_KEY = 3
 
     private val ROMAN = mapOf("ii" to "2", "iii" to "3", "iv" to "4", "v" to "5", "vi" to "6", "vii" to "7", "viii" to "8", "ix" to "9", "x" to "10")
     private val ARTICLES = setOf("the", "a", "an")
@@ -97,8 +107,8 @@ object FileMatch {
     }
 
     /** The viewer's files that are [movie], biggest first (usually the best quality). For a series, see [forSeries]. */
-    fun forMovie(movie: Movie, files: List<RealDebrid.RdFile>): List<RealDebrid.RdFile> =
-        files.filter { matches(movie, parse(it.name)) }.sortedByDescending { it.sizeBytes }
+    fun forMovie(movie: Movie, files: List<RealDebrid.RdFile>, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> =
+        files.filter { matches(movie, parse(it.name), alt) }.sortedByDescending { it.sizeBytes }
 
     /** One of the viewer's files for an episode of a series. */
     data class Episode(val season: Int, val episode: Int, val file: RealDebrid.RdFile)
@@ -117,17 +127,52 @@ object FileMatch {
      * The films and series of a catalog by their title keys, to tell which one a file is without comparing the file with
      * every film each time. Built once per catalog.
      */
-    class Index(movies: Collection<Movie>) {
+    class Index(movies: Collection<Movie>, private val alt: AltTitles = AltTitles.NONE) {
         private val byKey: Map<String, List<Movie>> = HashMap<String, MutableList<Movie>>().also { map ->
             for (movie in movies) for (key in titleKeys(movie)) map.getOrPut(key) { ArrayList(1) }.add(movie)
         }
 
-        /** The films that [fileName] is by the rules of [matches], the likeliest first (nearest year, best rated). */
-        fun find(fileName: String): List<Movie> {
+        /** Films by the keys of their other titles from TMDB ([alt]); a film's own titles are in [byKey]. */
+        private val byAltKey: Map<String, List<Movie>> = HashMap<String, MutableList<Movie>>().also { map ->
+            if (alt.size > 0) for (movie in movies) if (!movie.isSeries) for (key in altKeys(movie, alt)) map.getOrPut(key) { ArrayList(1) }.add(movie)
+        }
+
+        private fun likeliestFirst(parsed: Parsed) =
+            compareBy<Movie>({ parsed.year?.let { y -> kotlin.math.abs(y - it.year) } ?: 0 }, { -(it.imdbRating ?: 0.0) })
+
+        /** The films whose own title [fileName] carries, by the rules of [matches], the likeliest first. */
+        fun ownTitle(fileName: String): List<Movie> {
             val parsed = parse(fileName)
             val key = key(if (parsed.episode) parsed.showTitle else parsed.title)
-            return byKey[key].orEmpty().distinctBy { it.id }.filter { matches(it, parsed) }
-                .sortedWith(compareBy<Movie>({ parsed.year?.let { y -> kotlin.math.abs(y - it.year) } ?: 0 }, { -(it.imdbRating ?: 0.0) }))
+            return byKey[key].orEmpty().distinctBy { it.id }.filter { matches(it, parsed) }.sortedWith(likeliestFirst(parsed))
+        }
+
+        /** The films one of whose other titles [fileName] carries, and whose own title it does not. */
+        private fun otherTitle(fileName: String, own: List<Movie>): List<Movie> {
+            if (byAltKey.isEmpty()) return emptyList()
+            val parsed = parse(fileName)
+            if (parsed.episode) return emptyList()
+            val ownIds = own.mapTo(HashSet()) { it.id }
+            return byAltKey[key(parsed.title)].orEmpty().distinctBy { it.id }
+                .filter { it.id !in ownIds && matches(it, parsed, alt) }.sortedWith(likeliestFirst(parsed))
+        }
+
+        /**
+         * The films that [fileName] is by the rules of [matches]: those whose own title it carries first (nearest
+         * year, best rated), then those it fits by one of their other titles.
+         */
+        fun find(fileName: String): List<Movie> {
+            val own = ownTitle(fileName)
+            return own + otherTitle(fileName, own)
+        }
+
+        /**
+         * The one film [fileName] is, or null when none or several fit: the viewer decides then. A film's own title
+         * wins: other titles are looked at only when no film's own title fits.
+         */
+        fun one(fileName: String): Movie? {
+            val own = ownTitle(fileName)
+            return if (own.isNotEmpty()) own.singleOrNull() else otherTitle(fileName, own).singleOrNull()
         }
 
         /**

@@ -86,7 +86,10 @@ data class HomeUiState(
  * An actor's films: those SCARY holds whose cast names them and, once TMDB answered ([fromTmdb]), their horror,
  * thrillers and mysteries from there. [loading] while TMDB is being asked.
  */
-data class PersonUi(val name: String, val movies: List<Movie>, val loading: Boolean, val fromTmdb: Boolean)
+data class PersonUi(val name: String, val movies: List<Movie>, val loading: Boolean, val fromTmdb: Boolean, val personId: Long? = null)
+
+/** The cast of the film whose page is open, as TMDB lists it (photos and roles), in [language]. */
+data class CastUi(val movieId: String, val language: Language, val members: List<io.github.diamondrubinny.scary.core.tmdb.TmdbCastMember>)
 
 /** The whole series a film belongs to, its films in the order they came out (TMDB, with the viewer's key). */
 data class FranchiseUi(val movieId: String, val name: String, val movies: List<Movie>, val language: Language? = null)
@@ -283,7 +286,8 @@ sealed interface Screen {
     data object HomeRows : Screen
 
     /** "Films with <actor>", opened from the cast row of a film's page. */
-    data class Person(val name: String) : Screen
+    /** [personId] and [photo] are TMDB's, when the actor was chosen from a cast TMDB listed; null from a plain name. */
+    data class Person(val name: String, val personId: Long? = null, val photo: String? = null) : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */

@@ -92,6 +92,7 @@ import io.github.diamondrubinny.scary.ui.trailer.canAutoTrailer
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import androidx.compose.ui.focus.onFocusChanged
 
 /** Test tags of "About this film ✦" and its text. */
 const val AI_ABOUT_TAG = "aiAbout"
@@ -134,8 +135,13 @@ fun DetailsScreen(
     franchise: FranchiseUi? = null,
     onLoadFranchise: (Movie) -> Unit = {},
     onFranchiseToBucket: ((List<Movie>) -> Unit)? = null,
-    /** OK on an actor's name: their films. Null where there is nowhere to open them. */
-    onOpenPerson: ((String) -> Unit)? = null,
+    /**
+     * OK on an actor: their films. The id and the photo are TMDB's when the actor is one of [cast]; null from a
+     * plain name. Null where there is nowhere to open them.
+     */
+    onOpenPerson: ((name: String, personId: Long?, photo: String?) -> Unit)? = null,
+    /** The cast as TMDB lists it (photos, roles), with the viewer's key; empty until it arrives, and without a key. */
+    cast: List<io.github.diamondrubinny.scary.core.tmdb.TmdbCastMember> = emptyList(),
     /** "Remind me" is set for this film; its button shows on a film not out yet, or one with a reminder. */
     reminded: Boolean = false,
     onToggleReminder: ((Movie) -> Unit)? = null,
@@ -183,6 +189,9 @@ fun DetailsScreen(
     }
     LaunchedEffect(movie.id, offersKey) { onLoadOffers(movie) }
     LaunchedEffect(movie.id, offersKey) { onLoadFranchise(movie) }
+    // TMDB's cast (faces and roles) takes the place of the plain names; not for a film the lock covers.
+    val castCards = cast.isNotEmpty() && onOpenPerson != null && !isLocked(movie)
+    var namesFocused by remember(movie.id) { mutableStateOf(false) }
 
     // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
     // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
@@ -319,16 +328,18 @@ fun DetailsScreen(
                             )
                         }
                     }
-                    // The cast: each name is a word that takes the focus, and OK opens that actor's films.
-                    if (movie.cast.isNotEmpty() && onOpenPerson != null) {
+                    // The cast: each name is a word that takes the focus, and OK opens that actor's films. Once TMDB's
+                    // cast is there (cards with faces, below the header) the names leave, but never from under the
+                    // focus: a name the viewer stands on stays until they move off the row.
+                    if (movie.cast.isNotEmpty() && onOpenPerson != null && (!castCards || namesFocused)) {
                         LazyRow(
-                            modifier = Modifier.testTag(CAST_ROW_TAG),
+                            modifier = Modifier.testTag(CAST_ROW_TAG).onFocusChanged { namesFocused = it.hasFocus },
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             item(key = "label") { BasicText(stringResource(R.string.cast_label), style = ScaryType.Caption) }
                             items(movie.cast.take(MAX_CAST_SHOWN).distinct(), key = { "actor:$it" }) { actor ->
-                                ScaryButton(text = actor, onClick = { onOpenPerson(actor) }, quiet = true, modifier = Modifier.testTag(CAST_NAME_TAG))
+                                ScaryButton(text = actor, onClick = { onOpenPerson(actor, null, null) }, quiet = true, modifier = Modifier.testTag(CAST_NAME_TAG))
                             }
                         }
                     }
@@ -419,6 +430,9 @@ fun DetailsScreen(
                             if (!locked && scaryLayout.tv) ShareCode(movie, language)
                         }
                     }
+                }
+                if (castCards && onOpenPerson != null) {
+                    CastCards(cast, onOpen = { onOpenPerson(it.name, it.personId, it.photo) })
                 }
                 if (details.similar.isNotEmpty()) {
                     BasicText(

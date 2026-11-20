@@ -54,6 +54,12 @@ data class TmdbResult(
 /** A series of films as TMDB holds it ("Halloween Collection"), its films in the order they came out. */
 data class TmdbFranchise(val id: Long, val name: String, val parts: List<TmdbResult>)
 
+/**
+ * One actor of a film as TMDB lists them: TMDB's id for the person, the role they play (may be empty) and the
+ * address of their photo (null when TMDB has none).
+ */
+data class TmdbCastMember(val personId: Long, val name: String, val character: String, val photo: String?)
+
 /** How a key is sent: a v4 read-access token goes in a header, a v3 key in the query string. */
 sealed interface TmdbAuth {
     data class Bearer(val token: String) : TmdbAuth
@@ -257,6 +263,66 @@ object Tmdb {
             .sortedWith(compareByDescending<TmdbResult> { it.releaseDate.orEmpty() }.thenBy { it.tmdbId })
             .take(MAX_PERSON_FILMS)
             .toList()
+
+    /** A film's cast and crew, in [language] (the roles' names). */
+    fun creditsUrl(tmdbId: Long, language: Language): String {
+        require(tmdbId > 0) { "invalid TMDB id" }
+        return "$API/movie/$tmdbId/credits?language=${language.tmdbTag}"
+    }
+
+    /**
+     * A film's actors from [creditsUrl]'s answer, in TMDB's billing order, each person once, at most [MAX_CAST]. Adult
+     * entries and entries without an id or a usable name are left out. The photo is a TMDB file name joined to
+     * TMDB's image host, or null.
+     */
+    fun parseCast(text: String): List<TmdbCastMember> =
+        (root(text)?.get("cast") as? JsonArray).orEmpty().asSequence().take(MAX_CAST_READ)
+            .mapNotNull { it as? JsonObject }
+            .filterNot { (it["adult"] as? JsonPrimitive)?.booleanOrNull == true }
+            .mapNotNull { o ->
+                val id = (o["id"] as? JsonPrimitive)?.longOrNull?.takeIf { it > 0 } ?: return@mapNotNull null
+                val name = shownText(o.text("name")).takeIf { it.length in 2..MAX_PERSON_NAME } ?: return@mapNotNull null
+                val order = (o["order"] as? JsonPrimitive)?.longOrNull?.takeIf { it >= 0 } ?: Long.MAX_VALUE
+                order to TmdbCastMember(id, name, shownText(o.text("character")).take(MAX_PERSON_NAME), imageUrl(o.text("profile_path"), PROFILE_SIZE))
+            }
+            .sortedBy { it.first }
+            .map { it.second }
+            .distinctBy { it.personId }
+            .take(MAX_CAST)
+            .toList()
+
+    /** A film's other titles (other countries' titles, re-release and working titles). */
+    fun alternativeTitlesUrl(tmdbId: Long): String {
+        require(tmdbId > 0) { "invalid TMDB id" }
+        return "$API/movie/$tmdbId/alternative_titles"
+    }
+
+    /**
+     * The titles of [alternativeTitlesUrl]'s answer: each once (case aside), 2 to [MAX_ALT_TITLE] characters, at most
+     * [MAX_ALT_TITLES]. An answer that is not a film's titles gives none.
+     */
+    fun parseAlternativeTitles(text: String): List<String> =
+        (root(text)?.get("titles") as? JsonArray).orEmpty().asSequence().take(MAX_ALT_TITLES * 4)
+            .mapNotNull { (it as? JsonObject)?.text("title")?.let(::shownText) }
+            .filter { it.length in 2..MAX_ALT_TITLE }
+            .distinctBy { it.lowercase() }
+            .take(MAX_ALT_TITLES)
+            .toList()
+
+    /** Text from TMDB that will be drawn or kept: no control characters, spaces made single. */
+    private fun shownText(text: String): String =
+        text.filterNot { it.isISOControl() }.replace(Regex("\\s+"), " ").trim()
+
+    /** The most actors shown on a film's page. */
+    const val MAX_CAST = 12
+    private const val MAX_CAST_READ = 200
+
+    /** The photo size asked for: the middle one of TMDB's documented profile sizes (w45, w185, h632). */
+    private const val PROFILE_SIZE = "w185"
+
+    /** The most other titles kept for one film, and the longest one kept. */
+    const val MAX_ALT_TITLES = 40
+    const val MAX_ALT_TITLE = 120
 
     const val MAX_PERSON_FILMS = 60
     private const val MAX_PERSON_NAME = 80

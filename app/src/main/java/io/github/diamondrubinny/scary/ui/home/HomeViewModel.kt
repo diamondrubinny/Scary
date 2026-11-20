@@ -50,6 +50,7 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.realdebrid.AltTitles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.core.security.ParentalGate
@@ -495,10 +496,13 @@ class HomeViewModel(
     /** The films of the actor whose screen is open; null until worked out. */
     val person: StateFlow<PersonUi?> = _person.asStateFlow()
 
-    /** OK on an actor's name on a film's page. */
-    fun openPerson(name: String) {
+    /**
+     * OK on an actor on a film's page. [personId] and [photo] are TMDB's when the actor was chosen from the cast
+     * TMDB listed; from a plain name (Cinemeta's cast) both are null and TMDB is asked by the name.
+     */
+    fun openPerson(name: String, personId: Long? = null, photo: String? = null) {
         val clean = name.trim().take(MAX_PERSON_NAME)
-        if (clean.isNotEmpty()) push(Screen.Person(clean))
+        if (clean.isNotEmpty()) push(Screen.Person(clean, personId?.takeIf { it > 0 }, photo))
     }
 
     /**
@@ -506,8 +510,8 @@ class HomeViewModel(
      * viewer's TMDB key and online data on, their films from TMDB too. Not on family night, where only the library
      * is shown. The screen asks again when it comes back to the front, so each actor's screen shows its own films.
      */
-    fun loadPerson(name: String) {
-        if (_person.value?.name == name) return
+    fun loadPerson(name: String, personId: Long? = null) {
+        if (_person.value?.let { it.name == name && it.personId == personId } == true) return
         personJob?.cancel()
         _person.value = null
         personJob = viewModelScope.launch {
@@ -519,11 +523,12 @@ class HomeViewModel(
                 Similar.byActor(shown.filter { it.id !in disliked }, name) { it.id in watched }
             }
             val askTmdb = prefs.onlineEnabled && !prefs.familyNight && tmdb.keyMask.value != null
-            _person.value = PersonUi(name, local, loading = askTmdb, fromTmdb = false)
+            _person.value = PersonUi(name, local, loading = askTmdb, fromTmdb = false, personId = personId)
             if (!askTmdb) return@launch
-            val found = tmdb.personFilms(name, language.value)
+            // By TMDB's own id of the person when the cast came from TMDB; by the exact name otherwise.
+            val found = if (personId != null) tmdb.personFilmsById(personId, language.value) else tmdb.personFilms(name, language.value)
             if (found == null) {
-                _person.value = PersonUi(name, local, loading = false, fromTmdb = false)
+                _person.value = PersonUi(name, local, loading = false, fromTmdb = false, personId = personId)
                 return@launch
             }
             val known = shown.associateBy { it.imdbId }
@@ -531,7 +536,34 @@ class HomeViewModel(
             val more = found.films.mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }.filter { it.id !in disliked }
             webMovies = webMovies + more.filter { it.imdbId !in known }.associateBy { it.id }
             val all = (local + more).distinctBy { it.imdbId }.sortedWith(compareBy<Movie>({ it.id in watched }, { -it.year }, { it.title }))
-            _person.value = PersonUi(name, all, loading = false, fromTmdb = true)
+            _person.value = PersonUi(name, all, loading = false, fromTmdb = true, personId = personId)
+        }
+    }
+
+    private val _cast = MutableStateFlow<CastUi?>(null)
+    private var castJob: Job? = null
+
+    /** The cast of the film whose page is open as TMDB lists it (photos, roles); null while unknown or without a key. */
+    val cast: StateFlow<CastUi?> = _cast.asStateFlow()
+
+    /**
+     * Asks TMDB for the film's cast (films only, with the viewer's key and online data on; not on family night).
+     * Until it answers, and whenever it cannot, the page shows the names it has from Cinemeta. The page calls it
+     * again when the key or online data change.
+     */
+    fun loadCast(movie: Movie, language: Language) {
+        val prefs = latestPrefs
+        if (movie.isSeries || prefs == null || !prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) {
+            castJob?.cancel()
+            _cast.value = null
+            return
+        }
+        if (_cast.value?.let { it.movieId == movie.id && it.language == language } == true) return
+        castJob?.cancel()
+        _cast.value = null
+        castJob = viewModelScope.launch {
+            val found = tmdb.cast(movie.imdbId, language)?.takeIf { it.isNotEmpty() } ?: return@launch
+            _cast.value = CastUi(movie.id, language, found)
         }
     }
 
@@ -1281,10 +1313,12 @@ class HomeViewModel(
     val rdFiles: StateFlow<RdFilesState> = _rdFiles.asStateFlow()
 
     /** The catalog's title index for recognising files, built once per catalog (off the main thread). */
-    private var fileIndex: Pair<Catalog, FileMatch.Index>? = null
+    private var fileIndex: Triple<Catalog, AltTitles, FileMatch.Index>? = null
 
-    private fun indexOf(catalog: Catalog): FileMatch.Index =
-        fileIndex?.takeIf { it.first === catalog }?.second ?: FileMatch.Index(catalog.movies).also { fileIndex = catalog to it }
+    /** With the films' other titles from TMDB ([alt]) as they are now; built again when either changes. */
+    private fun indexOf(catalog: Catalog, alt: AltTitles = tmdb.altTitles.value): FileMatch.Index =
+        fileIndex?.takeIf { it.first === catalog && it.second === alt }?.third
+            ?: FileMatch.Index(catalog.movies, alt).also { fileIndex = Triple(catalog, alt, it) }
 
     /**
      * The film or series each of the viewer's files is, by file key: what the viewer said ([WatchStore.fileFilms]),
@@ -1294,19 +1328,20 @@ class HomeViewModel(
         _rdFiles,
         shownCatalog,
         watchStore?.fileFilms ?: MutableStateFlow(emptyMap()),
-    ) { files, state, corrections ->
+        tmdb.altTitles,
+    ) { files, state, corrections, alt ->
         val catalog = (state as? CatalogState.Ready)?.catalog
         if (files !is RdFilesState.Ready || catalog == null) {
             emptyMap()
         } else {
-            val index = indexOf(catalog)
+            val index = indexOf(catalog, alt)
             buildMap {
                 for (file in files.files) {
                     val said = corrections[file.key]
                     val movie = when {
                         said == "" -> null
                         said != null -> catalog.movie(said)
-                        else -> index.find(file.name).singleOrNull()
+                        else -> index.one(file.name)
                     }
                     if (movie != null) put(file.key, movie)
                 }
@@ -1383,9 +1418,35 @@ class HomeViewModel(
         val prefs = latestPrefs ?: return
         if (!repository.signedIn || !prefs.onlineEnabled || prefs.familyNight) return
         val movie = movieById(movieId) ?: return
-        viewModelScope.launch {
-            val matches = repository.filesFor(movie)
-            if (matches.isNotEmpty()) _rdMatches.value = movieId to matches
+        rdMatchJob?.cancel()
+        rdMatchJob = viewModelScope.launch {
+            val first = ownFilesOf(movie, repository)
+            if (first.isNotEmpty()) _rdMatches.value = movieId to first
+            // The film's other titles (TMDB, with the viewer's key): asked for once per film and kept on the TV. When
+            // new ones arrive, the files are looked through again: one of them may be named by another title.
+            if (!movie.isSeries && tmdb.keyMask.value != null && tmdb.loadAlternativeTitles(movie.imdbId)) {
+                val again = ownFilesOf(movie, repository)
+                if (again.isNotEmpty()) _rdMatches.value = movieId to again
+            }
+        }
+    }
+
+    private var rdMatchJob: Job? = null
+
+    /**
+     * The viewer's files that are [movie]. A file that fits only by one of the film's other titles is left out when
+     * it carries another film's own title: that film's page shows it.
+     */
+    private suspend fun ownFilesOf(movie: Movie, repository: RealDebridRepository): List<RealDebrid.RdFile> {
+        val alt = tmdb.altTitles.value
+        val found = repository.filesFor(movie, alt)
+        if (movie.isSeries || found.isEmpty() || alt.of(movie.imdbId).isEmpty()) return found
+        val catalog = visibleCatalog() ?: return found
+        return withContext(Dispatchers.Default) {
+            val index = indexOf(catalog, alt)
+            found.filter { file ->
+                FileMatch.matches(movie, FileMatch.parse(file.name)) || index.ownTitle(file.name).none { it.id != movie.id }
+            }
         }
     }
 

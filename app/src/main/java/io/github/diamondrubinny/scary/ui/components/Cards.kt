@@ -440,4 +440,4 @@ fun BoxScope.CardExtras(extras: CardExtrasState) {
 }
 
 /** How much of a poster out of focus is taken by black: the films stay recognisable, the focused one stands out. */
-private const val POSTER_DIM = 0.38f
+internal const val POSTER_DIM = 0.38f
