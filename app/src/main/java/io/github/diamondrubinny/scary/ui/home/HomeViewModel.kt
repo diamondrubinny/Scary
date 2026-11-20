@@ -52,6 +52,7 @@ import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.realdebrid.AltTitles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
+import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.core.security.ParentalGate
 import io.github.diamondrubinny.scary.core.security.PinHasher
@@ -146,6 +147,8 @@ class HomeViewModel(
     /** The viewer's backup, made and restored from the phone remote; null in tests that do not need it. */
     private val backups: BackupRepository? = null,
     private val today: () -> LocalDate = LocalDate::now,
+    /** The viewer's own indexer (the sources feature); null in tests that do not need it. */
+    private val sources: io.github.diamondrubinny.scary.data.SourcesRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -353,6 +356,7 @@ class HomeViewModel(
                 watchTmdbAccount()
             }
             launch { realDebrid?.load() }
+            launch { sources?.load() }
             launch {
                 stremio?.load()
                 watchStremio()
@@ -1417,6 +1421,129 @@ class HomeViewModel(
         }
     }
 
+    // The sources feature (docs/TORRENT_SCRAPER_PLAN.md): only a build made with it shows the way in ---------------------
+
+    private val _rdTorrents = MutableStateFlow(RdTorrentsState())
+    val rdTorrents: StateFlow<RdTorrentsState> = _rdTorrents.asStateFlow()
+
+    /** Real-Debrid → "Add a torrent". Personal files, so family night leaves it out and the parental lock asks. */
+    fun openRdTorrents() {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        if (realDebrid?.signedIn != true) return
+        guard(null, GatedAction.RdTorrents)
+    }
+
+    fun refreshRdTorrents() {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val torrents = repository.recentTorrents()
+            val active = repository.activeCount()
+            _rdTorrents.update { it.copy(torrents = torrents ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
+        }
+    }
+
+    /** The viewer's magnet link: added to their account, and played in SCARY's player as soon as it is ready. */
+    fun pullMagnet(text: String) {
+        val repository = realDebrid ?: return
+        if (_rdTorrents.value.pull == RdPullState.Working) return
+        val magnet = Magnets.parse(text)
+        if (magnet == null) {
+            _rdTorrents.update { it.copy(pull = RdPullState.Invalid) }
+            return
+        }
+        _rdTorrents.update { it.copy(pull = RdPullState.Working) }
+        viewModelScope.launch {
+            val result = repository.pull(magnet)
+            _rdTorrents.update {
+                it.copy(
+                    pull = when (result) {
+                        is RealDebridRepository.Pull.Ready -> RdPullState.Idle
+                        is RealDebridRepository.Pull.Downloading -> RdPullState.Downloading(result.progress)
+                        is RealDebridRepository.Pull.Failed -> RdPullState.Failed(result.reason)
+                    },
+                )
+            }
+            refreshRdTorrents()
+            // Still on the screen the viewer asked from: a film must not start over something they moved on to.
+            val screen = backStack.value.last()
+            if (result is RealDebridRepository.Pull.Ready && (screen == Screen.RdTorrents || screen is Screen.RdSources)) {
+                // Asked from a film's page: the file is that film, for its subtitles and "Continue watching".
+                RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = (screen as? Screen.RdSources)?.movieId) }
+            }
+        }
+    }
+
+    /** The host of the viewer's indexer, or null when none is set. */
+    val indexerHost: StateFlow<String?> = sources?.host ?: MutableStateFlow(null)
+
+    private val _rdSearch = MutableStateFlow<RdSearchState>(RdSearchState.Idle)
+    val rdSearch: StateFlow<RdSearchState> = _rdSearch.asStateFlow()
+
+    /** "Search your indexer", from the torrents screen (already behind the parental lock). */
+    fun openRdSources() {
+        if (backStack.value.last() != Screen.RdTorrents) return
+        _rdSearch.value = RdSearchState.Idle
+        _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+        push(Screen.RdSources())
+    }
+
+    /** "Find sources" on a film's page. The film's fear level decides whether the parental lock asks. */
+    fun openSourcesFor(movie: Movie) {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        if (realDebrid?.signedIn != true) return
+        guard(movie, GatedAction.RdSourcesFor(movie))
+    }
+
+    /** The words a film is searched by when its number finds nothing: its original title and, for a film, its year. */
+    fun sourceQuery(movieId: String): String =
+        movieById(movieId)?.let { if (it.isSeries) it.title else "${it.title} ${it.year}" }.orEmpty()
+
+    fun searchSources(query: String) {
+        val repository = sources ?: return
+        if (_rdSearch.value == RdSearchState.Loading) return
+        // On a film's own search, with the words untouched, the film's IMDb number is asked for first.
+        val film = (backStack.value.last() as? Screen.RdSources)?.movieId?.let(::movieById)
+        val imdbId = film?.takeIf { !it.isSeries && query.trim() == sourceQuery(it.id) }?.imdbId?.takeIf { it.isNotBlank() }
+        _rdSearch.value = RdSearchState.Loading
+        viewModelScope.launch {
+            _rdSearch.value = when (val result = repository.search(query, imdbId)) {
+                is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreachable -> RdSearchState.Unreachable
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Refused -> RdSearchState.Refused
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreadable -> RdSearchState.Unreadable
+            }
+        }
+    }
+
+    /** Saves the indexer's address and key; the answer says what was wrong with them, if anything. */
+    suspend fun saveIndexer(address: String, key: String): io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult =
+        sources?.save(address, key) ?: io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE
+
+    fun removeIndexer() {
+        viewModelScope.launch {
+            sources?.remove()
+            _rdSearch.value = RdSearchState.Idle
+        }
+    }
+
+    /** A finished torrent from the list, in the internal player. */
+    fun playRdTorrent(id: String) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val file = repository.torrentVideos(id)?.let(RealDebrid::mainFile)
+            if (file == null) show(R.string.rd_play_failed) else playRealDebrid(file, movieId = null)
+        }
+    }
+
+    fun deleteRdTorrent(id: String) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            show(if (repository.deleteTorrent(id)) R.string.rd_torrent_deleted else R.string.rd_torrent_delete_failed)
+            refreshRdTorrents()
+        }
+    }
+
     /** Looks through the viewer's own files for the film being opened; nothing is searched for anywhere else. */
     private fun findRealDebridFiles(movieId: String) {
         rdMatchFor = movieId
@@ -1789,6 +1916,17 @@ class HomeViewModel(
                 push(Screen.RealDebrid)
                 realDebrid?.refreshAccount()
                 loadRealDebridFiles()
+            }
+            is GatedAction.RdSourcesFor -> {
+                _rdSearch.value = RdSearchState.Idle
+                _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+                push(Screen.RdSources(action.movie.id))
+                if (indexerHost.value != null) searchSources(sourceQuery(action.movie.id))
+            }
+            GatedAction.RdTorrents -> {
+                _rdTorrents.value = RdTorrentsState()
+                push(Screen.RdTorrents)
+                refreshRdTorrents()
             }
             is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId, action.startAtMs)
         }
@@ -2718,6 +2856,7 @@ class HomeViewModel(
                     container.stremio,
                     container.subtitleRepository,
                     container.backups,
+                    sources = container.sources,
                 )
             }
         }

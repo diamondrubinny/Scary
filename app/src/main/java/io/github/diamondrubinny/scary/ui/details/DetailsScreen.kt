@@ -99,6 +99,7 @@ import androidx.compose.ui.focus.onFocusChanged
 /** Test tags of "About this film ✦" and its text. */
 const val AI_ABOUT_TAG = "aiAbout"
 const val PLAY_RD_TAG = "playRealDebrid"
+const val FIND_SOURCES_TAG = "findSources"
 const val CONTINUE_RD_TAG = "continueRealDebrid"
 const val STREMIO_NOTE_TAG = "stremioNote"
 const val AI_ABOUT_TEXT_TAG = "aiAboutText"
@@ -163,6 +164,8 @@ fun DetailsScreen(
     /** The viewer's own Real-Debrid files that are this film (found in their account only); empty hides the button. */
     realDebridFiles: List<io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile> = emptyList(),
     onPlayRealDebrid: (io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile) -> Unit = {},
+    /** "Find sources" in the viewer's own indexer (a build with the sources feature, signed in); null hides it. */
+    onFindSources: (() -> Unit)? = null,
     /** Where the viewer stopped in a file of this film (or marked a spot), to continue from; null when nowhere. */
     continueEntry: io.github.diamondrubinny.scary.core.player.WatchEntry? = null,
     onContinue: (io.github.diamondrubinny.scary.core.player.WatchEntry) -> Unit = {},
@@ -300,6 +303,9 @@ fun DetailsScreen(
                                 onClick = { if (realDebridFiles.size == 1 && episodes.isEmpty()) onPlayRealDebrid(realDebridFiles[0]) else chooseFile = true },
                                 modifier = Modifier.testTag(PLAY_RD_TAG),
                             )
+                        }
+                        if (onFindSources != null) {
+                            ScaryButton(stringResource(R.string.rd_sources_find), onClick = onFindSources, modifier = Modifier.testTag(FIND_SOURCES_TAG))
                         }
                         // Noir: three weights. "Watch" is the filled one, the ways to play are framed, and what the viewer
                         // marks about the film (list, watched, loved…) is words, in the same order as before.

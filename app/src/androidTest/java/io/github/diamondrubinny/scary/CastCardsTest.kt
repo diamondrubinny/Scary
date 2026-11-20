@@ -72,6 +72,7 @@ class CastCardsTest {
         val film = Movie(id = "halloween", imdbId = "tt0077651", title = "Halloween", year = 1978, genre = Genre.HORROR)
         val asked = mutableListOf<String>()
         var photo: String? = "https://image.tmdb.org/t/p/w185/aBcDe12345.jpg"
+        var personId: Long? = 9221
         fun show() = rule.runOnUiThread { rule.activity.setContent {
             ScaryTheme {
                 PersonScreen(
@@ -80,19 +81,24 @@ class CastCardsTest {
                     onLoad = { asked += it },
                     onOpenMovie = {},
                     photo = photo,
+                    personId = personId,
                 )
             }
         } }
         show()
         rule.waitUntil(WAIT_MS) { rule.onAllNodes(hasTestTag(PERSON_SCREEN_TAG)).fetchSemanticsNodes().isNotEmpty() }
         rule.onNode(hasTestTag(PERSON_PHOTO_TAG)).assertExists()
-        rule.onNode(hasContentDescription("Halloween", substring = true)).assertExists()
+        val filmCard = hasContentDescription("Halloween", substring = true)
+        rule.waitUntil(WAIT_MS) { rule.onAllNodes(filmCard).fetchSemanticsNodes().isNotEmpty() }
         rule.runOnIdle { assertEquals(listOf("Donald Pleasence"), asked) }
-        // Opened from a plain name (no TMDB cast): no photo, and nothing stands in its place.
+        // Opened from a plain name (no TMDB cast): no photo, and nothing stands in its place. The films worked out
+        // for TMDB's person are not shown for the plain name: they may be a namesake's.
         photo = null
+        personId = null
         show()
         rule.waitUntil(WAIT_MS) { rule.onAllNodes(hasTestTag(PERSON_PHOTO_TAG)).fetchSemanticsNodes().isEmpty() }
         rule.onNode(hasTestTag(PERSON_SCREEN_TAG)).assertExists()
+        rule.waitUntil(WAIT_MS) { rule.onAllNodes(filmCard).fetchSemanticsNodes().isEmpty() }
     }
 
     private companion object {
