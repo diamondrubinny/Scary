@@ -140,8 +140,11 @@ jobs:
 
   publish:
     # Only for pushes to this repository, never for pull requests, and only after the release APK passed the
-    # emulator smoke test in the screenshots job.
-    if: github.event_name == 'push'
+    # emulator smoke test in the screenshots job. Also when the workflow is started by hand on main: GitHub starts no
+    # run for a push whose commit message holds "[skip ci]", and a squash merge copies every commit's title into its
+    # message, so one docs-only commit in a pull request once left a merged version unpublished (0.5.22). Starting
+    # the workflow by hand on main publishes what main holds, with no empty commit needed.
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: [build, screenshots, screenshots-mobile]
     runs-on: ubuntu-latest
     permissions:
