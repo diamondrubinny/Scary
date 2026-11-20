@@ -42,6 +42,6 @@
 | 3 | **More in "Your year in fear"** | The favourite director, the actor seen most, the busiest month; kept on the TV only | **Corrected 20.11:** the screen exists (films watched, hours, average fear, the scariest, favourite subgenre and decade). It was first listed here as missing, without checking the code | Small |
 | 4 | **Viewer profiles** | "Who is watching?": each person their own list, watched, loved and bucket list, under the same PIN rules | One viewer per TV | Large. Touches every stored list and the backup file |
 
-**Scope line (unchanged):** SCARY does not search for, fetch or list stream or torrent sources. A change of that kind requires a legal review (דורש בדיקה משפטית) and is not among the options.
+**Scope of these options:** none of them searches for, fetches or lists stream or torrent sources. (While this was being built, a separate piece of work was merged into main, PR #49, `docs/TORRENT_SCRAPER_PLAN.md`: a "sources" feature behind a build switch, off in the official APK. It is not part of this upgrade and is not changed by it.)
 
 **Privacy, for whichever is chosen:** 1 and 2 send a film's id to TMDB with the viewer's own key (nothing about the viewer); 3 and 4 never leave the TV (4 adds profile names to the backup file the viewer makes).
