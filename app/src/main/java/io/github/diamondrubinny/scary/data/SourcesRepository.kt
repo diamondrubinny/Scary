@@ -92,14 +92,33 @@ class SourcesRepository(private val secrets: SecretStore) {
         _host.value = next?.let { runCatching { URI(it.endpoint).host }.getOrNull() }
     }
 
-    /** Asks the indexer for [query]. The last answer is kept for [CACHE_MS], so filtering and sorting ask nothing. */
-    suspend fun search(query: String): Search = withContext(Dispatchers.IO) {
+    /**
+     * Asks the indexer for [query]; with a film's [imdbId], for that film first, and for the words only when that
+     * found nothing (not every indexer searches by number). The last answer is kept for [CACHE_MS], so filtering and
+     * sorting ask nothing.
+     */
+    suspend fun search(query: String, imdbId: String? = null): Search = withContext(Dispatchers.IO) {
         val current = config ?: return@withContext Search.NotConfigured
-        val words = Torznab.cleanQuery(query) ?: return@withContext Search.Ready(emptyList())
-        cached?.takeIf { cachedQuery == words && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return@withContext Search.Ready(it) }
-        val url = Torznab.searchUrl(current.endpoint, current.apiKey, words) ?: return@withContext Search.Ready(emptyList())
+        val words = Torznab.cleanQuery(query)
+        val byNumber = imdbId?.let { Torznab.movieUrl(current.endpoint, current.apiKey, it) }
+        if (words == null && byNumber == null) return@withContext Search.Ready(emptyList())
+        val cacheKey = "${if (byNumber != null) imdbId else ""}|${words.orEmpty()}"
+        cached?.takeIf { cachedQuery == cacheKey && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return@withContext Search.Ready(it) }
+        var result: Search = byNumber?.let(::ask) ?: Search.Ready(emptyList())
+        if ((result as? Search.Ready)?.candidates?.isEmpty() != false && words != null) {
+            Torznab.searchUrl(current.endpoint, current.apiKey, words)?.let { result = ask(it) }
+        }
+        (result as? Search.Ready)?.let {
+            cachedQuery = cacheKey
+            cached = it.candidates
+            cachedAt = SystemClock.elapsedRealtime()
+        }
+        result
+    }
+
+    private fun ask(url: String): Search {
         var connection: HttpURLConnection? = null
-        try {
+        return try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 connectTimeout = TIMEOUT_MS
@@ -110,18 +129,14 @@ class SourcesRepository(private val secrets: SecretStore) {
                 setRequestProperty("User-Agent", "SCARY-launcher")
             }
             val code = connection.responseCode
-            if (code == HttpURLConnection.HTTP_UNAUTHORIZED || code == HttpURLConnection.HTTP_FORBIDDEN || code == HTTP_TOO_MANY_REQUESTS) return@withContext Search.Refused
-            if (code != HttpURLConnection.HTTP_OK) return@withContext Search.Unreachable
-            val body = readLimited(connection) ?: return@withContext Search.Unreadable
-            when (val answer = Torznab.parse(body)) {
-                is Torznab.Answer.Results -> {
-                    cachedQuery = words
-                    cached = answer.candidates
-                    cachedAt = SystemClock.elapsedRealtime()
-                    Search.Ready(answer.candidates)
+            when {
+                code == HttpURLConnection.HTTP_UNAUTHORIZED || code == HttpURLConnection.HTTP_FORBIDDEN || code == HTTP_TOO_MANY_REQUESTS -> Search.Refused
+                code != HttpURLConnection.HTTP_OK -> Search.Unreachable
+                else -> when (val answer = readLimited(connection)?.let(Torznab::parse)) {
+                    is Torznab.Answer.Results -> Search.Ready(answer.candidates)
+                    is Torznab.Answer.Refused -> Search.Refused
+                    Torznab.Answer.Unreadable, null -> Search.Unreadable
                 }
-                is Torznab.Answer.Refused -> Search.Refused
-                Torznab.Answer.Unreadable -> Search.Unreadable
             }
         } catch (e: IOException) {
             // Only the kind of failure: the address holds the key.

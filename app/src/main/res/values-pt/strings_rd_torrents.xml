@@ -66,4 +66,5 @@
     <string name="rd_sources_bad_key">Isto não parece uma chave de API.</string>
     <string name="rd_sources_pull_confirm">Adicionar este lançamento à sua conta Real-Debrid e reproduzir no player do SCARY?</string>
     <string name="rd_sources_pull_yes">Adicionar e reproduzir</string>
+    <string name="rd_sources_find">Buscar fontes</string>
 </resources>

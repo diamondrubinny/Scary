@@ -121,6 +121,8 @@ sealed interface GatedAction {
     data object RealDebrid : GatedAction
     /** Adding torrents to the viewer's Real-Debrid account (the sources feature): personal files again. */
     data object RdTorrents : GatedAction
+    /** "Find sources" on a film's page: the viewer's indexer, asked for that film. */
+    data class RdSourcesFor(val movie: Movie) : GatedAction
     /** [startAtMs] null: from the saved spot or the start, as the viewer chooses when there is a spot to go back to. */
     data class PlayRealDebrid(
         val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile,
@@ -292,8 +294,8 @@ sealed interface Screen {
     data object RealDebrid : Screen
     /** Adding a magnet link to the viewer's Real-Debrid account, and its newest torrents (the sources feature). */
     data object RdTorrents : Screen
-    /** Searching the viewer's own indexer for a release to add (the sources feature). */
-    data object RdSources : Screen
+    /** Searching the viewer's own indexer for a release to add (the sources feature); with [movieId], for that film. */
+    data class RdSources(val movieId: String? = null) : Screen
     /** The internal player, playing the session in HomeViewModel.player. */
     data object Player : Screen
 }

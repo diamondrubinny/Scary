@@ -47,6 +47,12 @@ class TorznabTest {
         )
         assertEquals("a%26t%3Dcaps", Torznab.searchUrl("https://i.example/api", "0123456789abcdef", "a&t=caps")!!.substringAfter("q=").substringBefore("&"))
         assertNull(Torznab.searchUrl("https://i.example/api", "0123456789abcdef", " "))
+        assertEquals(
+            "https://indexer.example/api?t=movie&cat=2000&extended=1&limit=100&imdbid=tt0063350&apikey=0123456789abcdef",
+            Torznab.movieUrl("https://indexer.example/api", "0123456789abcdef", "tt0063350"),
+        )
+        assertNull(Torznab.movieUrl("https://indexer.example/api", "0123456789abcdef", "tt1&t=caps"))
+        assertNull(Torznab.movieUrl("https://indexer.example/api", "0123456789abcdef", ""))
     }
 
     @Test

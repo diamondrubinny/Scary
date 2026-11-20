@@ -66,4 +66,5 @@
     <string name="rd_sources_bad_key">هذا لا يبدو مفتاح API.</string>
     <string name="rd_sources_pull_confirm">هل تريد إضافة هذه النتيجة إلى حسابك على Real-Debrid وتشغيلها في مشغّل SCARY؟</string>
     <string name="rd_sources_pull_yes">إضافة وتشغيل</string>
+    <string name="rd_sources_find">البحث عن مصادر</string>
 </resources>

@@ -37,6 +37,8 @@ object Torznab {
 
     /** Movies and TV, as the specification numbers them. */
     private const val CATEGORIES = "2000,5000"
+    private const val MOVIES = "2000"
+    private val imdbPattern = Regex("^tt\\d{6,8}$")
     private val keyPattern = Regex("^[A-Za-z0-9_\\-]{8,$MAX_KEY}$")
 
     /** The indexer's address as the viewer gave it, checked: HTTPS, a host, no user name, no query of its own. */
@@ -54,6 +56,15 @@ object Torznab {
     fun searchUrl(endpoint: String, apiKey: String, query: String): String? {
         val words = cleanQuery(query) ?: return null
         return "$endpoint?t=search&cat=$CATEGORIES&extended=1&limit=100&q=${encode(words)}&apikey=${encode(apiKey)}"
+    }
+
+    /**
+     * The search for one film by its IMDb number ("tt0063350"), or null when [imdbId] is not one. Prowlarr reads the
+     * number with or without "tt", and Jackett passes it on as it came (their source, read 20 Nov 2026).
+     */
+    fun movieUrl(endpoint: String, apiKey: String, imdbId: String): String? {
+        if (!imdbPattern.matches(imdbId)) return null
+        return "$endpoint?t=movie&cat=$MOVIES&extended=1&limit=100&imdbid=$imdbId&apikey=${encode(apiKey)}"
     }
 
     /** The search text as it is sent: one line, single spaces, of sane length. */

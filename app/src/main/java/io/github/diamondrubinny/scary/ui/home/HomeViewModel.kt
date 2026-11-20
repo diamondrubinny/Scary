@@ -1424,8 +1424,10 @@ class HomeViewModel(
             }
             refreshRdTorrents()
             // Still on the screen the viewer asked from: a film must not start over something they moved on to.
-            if (result is RealDebridRepository.Pull.Ready && backStack.value.last().let { it == Screen.RdTorrents || it == Screen.RdSources }) {
-                RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = null) }
+            val screen = backStack.value.last()
+            if (result is RealDebridRepository.Pull.Ready && (screen == Screen.RdTorrents || screen is Screen.RdSources)) {
+                // Asked from a film's page: the file is that film, for its subtitles and "Continue watching".
+                RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = (screen as? Screen.RdSources)?.movieId) }
             }
         }
     }
@@ -1441,15 +1443,29 @@ class HomeViewModel(
         if (backStack.value.last() != Screen.RdTorrents) return
         _rdSearch.value = RdSearchState.Idle
         _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
-        push(Screen.RdSources)
+        push(Screen.RdSources())
     }
+
+    /** "Find sources" on a film's page. The film's fear level decides whether the parental lock asks. */
+    fun openSourcesFor(movie: Movie) {
+        if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
+        if (realDebrid?.signedIn != true) return
+        guard(movie, GatedAction.RdSourcesFor(movie))
+    }
+
+    /** The words a film is searched by when its number finds nothing: its original title and, for a film, its year. */
+    fun sourceQuery(movieId: String): String =
+        movieById(movieId)?.let { if (it.isSeries) it.title else "${it.title} ${it.year}" }.orEmpty()
 
     fun searchSources(query: String) {
         val repository = sources ?: return
         if (_rdSearch.value == RdSearchState.Loading) return
+        // On a film's own search, with the words untouched, the film's IMDb number is asked for first.
+        val film = (backStack.value.last() as? Screen.RdSources)?.movieId?.let(::movieById)
+        val imdbId = film?.takeIf { !it.isSeries && query.trim() == sourceQuery(it.id) }?.imdbId?.takeIf { it.isNotBlank() }
         _rdSearch.value = RdSearchState.Loading
         viewModelScope.launch {
-            _rdSearch.value = when (val result = repository.search(query)) {
+            _rdSearch.value = when (val result = repository.search(query, imdbId)) {
                 is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreachable -> RdSearchState.Unreachable
@@ -1826,6 +1842,12 @@ class HomeViewModel(
                 push(Screen.RealDebrid)
                 realDebrid?.refreshAccount()
                 loadRealDebridFiles()
+            }
+            is GatedAction.RdSourcesFor -> {
+                _rdSearch.value = RdSearchState.Idle
+                _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+                push(Screen.RdSources(action.movie.id))
+                if (indexerHost.value != null) searchSources(sourceQuery(action.movie.id))
             }
             GatedAction.RdTorrents -> {
                 _rdTorrents.value = RdTorrentsState()

@@ -101,8 +101,15 @@ class RdSourcesActions(
  * viewer says yes to one release, "Suggest the best" included; then it plays in SCARY's player.
  */
 @Composable
-fun RdSourcesScreen(search: RdSearchState, pull: RdPullState, indexerHost: String?, actions: RdSourcesActions) {
-    var query by rememberSaveable { mutableStateOf("") }
+fun RdSourcesScreen(
+    search: RdSearchState,
+    pull: RdPullState,
+    indexerHost: String?,
+    actions: RdSourcesActions,
+    /** The film this search was opened for, already in the line (and already asked for). */
+    initialQuery: String = "",
+) {
+    var query by rememberSaveable(initialQuery) { mutableStateOf(initialQuery) }
     var filter by rememberSaveable { mutableStateOf(Releases.Filter.ALL) }
     var sort by rememberSaveable { mutableStateOf(Releases.Sort.SMART) }
     var settingUp by remember { mutableStateOf(false) }

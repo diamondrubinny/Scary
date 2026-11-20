@@ -66,4 +66,5 @@
     <string name="rd_sources_bad_key">זה לא נראה כמו מפתח API.</string>
     <string name="rd_sources_pull_confirm">להוסיף את התוצאה הזו לחשבון ה-Real-Debrid שלכם ולנגן אותה בנגן של SCARY?</string>
     <string name="rd_sources_pull_yes">הוספה וניגון</string>
+    <string name="rd_sources_find">חיפוש מקורות</string>
 </resources>

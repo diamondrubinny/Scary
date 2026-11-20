@@ -620,6 +620,11 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onAiSettings = viewModel::openSettings,
                     realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
                     onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
+                    onFindSources = if (sourcesEnabled && realDebridState is RealDebridRepository.State.SignedIn && !state.familyNight) {
+                        { viewModel.openSourcesFor(details.movie) }
+                    } else {
+                        null
+                    },
                     continueEntry = if (state.familyNight) null else WatchHistory.forMovie(watchHistory, details.movie.id),
                     stremioNote = stremioLibrary.firstOrNull { it.imdbId == details.movie.imdbId }?.let { item ->
                         when {
@@ -668,7 +673,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                         )
                     },
                 )
-                current == Screen.RdSources -> RdSourcesScreen(
+                current is Screen.RdSources -> RdSourcesScreen(
+                    initialQuery = remember(current.movieId) { current.movieId?.let(viewModel::sourceQuery).orEmpty() },
                     search = rdSearch,
                     pull = rdTorrents.pull,
                     indexerHost = indexerHost,
