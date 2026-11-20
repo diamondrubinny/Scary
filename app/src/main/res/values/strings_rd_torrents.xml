@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rd_torrent_puller_title">Real-Debrid Torrent Scraper &amp; Puller Pro</string>
+    <string name="rd_torrent_refresh">Refresh</string>
+    <string name="rd_torrent_back">Back</string>
+    <string name="rd_auto_play_when_ready">Auto-launch external player when stream is ready</string>
+    <string name="rd_scraper_title">Multi-Source Torrent Scraper</string>
+    <string name="rd_scraper_hint">Movie or show title (e.g. Hereditary 2018)</string>
+    <string name="rd_scraper_action">Scrape</string>
+    <string name="rd_scraper_auto_best">Auto-Pull Best</string>
+    <string name="rd_scraper_force_refresh">Force Refresh</string>
+    <string name="rd_scraper_sort_label">Sort:</string>
+    <string name="rd_scraper_results_title">Scraped Releases</string>
+    <string name="rd_torrent_magnet_label">Paste Magnet link to pull</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_pull_action">Pull Torrent</string>
+    <string name="rd_torrent_active_slots">Active slots: %1$d / %2$d</string>
+    <string name="rd_torrent_working">Working with Real-Debrid &amp; scrapers...</string>
+    <string name="rd_torrent_ready_streams">Ready Stream Links</string>
+    <string name="rd_torrent_play">Play</string>
+    <string name="rd_torrent_recent_title">Recent Account Torrents</string>
+    <string name="rd_torrent_delete">Delete</string>
+    <string name="settings_rd_open_torrents">Scrape &amp; pull Real-Debrid torrents</string>
+</resources>

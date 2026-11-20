@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rd_torrent_puller_title">סקרפר ומשיכת טורנטים מ-Real-Debrid (משודרג)</string>
+    <string name="rd_torrent_refresh">רענן</string>
+    <string name="rd_torrent_back">חזרה</string>
+    <string name="rd_auto_play_when_ready">הפעל נגן חיצוני אוטומטית כשהסטרימינג מוכן</string>
+    <string name="rd_scraper_title">סקרפר טורנטים מרובה מקורות</string>
+    <string name="rd_scraper_hint">שם סרט או סדרה (למשל Hereditary 2018)</string>
+    <string name="rd_scraper_action">חפש וסקור</string>
+    <string name="rd_scraper_auto_best">משיכה אוטומטית של הטוב ביותר</string>
+    <string name="rd_scraper_force_refresh">רענן מקורות</string>
+    <string name="rd_scraper_sort_label">מיון:</string>
+    <string name="rd_scraper_results_title">תוצאות סקרפר</string>
+    <string name="rd_torrent_magnet_label">הדבק קישור Magnet למשיכה</string>
+    <string name="rd_torrent_magnet_hint">magnet:?xt=urn:btih:...</string>
+    <string name="rd_torrent_pull_action">משוך טורנט</string>
+    <string name="rd_torrent_active_slots">משיכות פעילות: %1$d / %2$d</string>
+    <string name="rd_torrent_working">מבצע סריקה / משיכה מול Real-Debrid...</string>
+    <string name="rd_torrent_ready_streams">קישורי הזרמה מוכנים</string>
+    <string name="rd_torrent_play">הפעל</string>
+    <string name="rd_torrent_recent_title">טורנטים אחרונים בחשבון</string>
+    <string name="rd_torrent_delete">מחק</string>
+    <string name="settings_rd_open_torrents">סקרפר ומשיכת טורנטים מ-Real-Debrid</string>
+</resources>
