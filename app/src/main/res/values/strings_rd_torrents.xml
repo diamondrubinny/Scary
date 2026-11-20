@@ -67,4 +67,5 @@
     <string name="rd_sources_pull_confirm">Add this release to your Real-Debrid account and play it in SCARY\'s player?</string>
     <string name="rd_sources_pull_yes">Add and play</string>
     <string name="rd_sources_find">Find sources</string>
+    <string name="settings_content_notice_sources">SCARY hosts no movies and stores no video files. It shows public movie information and opens the movie in a streaming app already installed on this device, such as Stremio, Netflix or YouTube. What those apps play is up to them and to you. This build was made with the sources feature, which the official SCARY does not have: if you connect your own Real-Debrid account, SCARY plays the files in it, can add a magnet link you give to that account, and can search a Torznab indexer that you set up yourself. SCARY comes with no indexer, no site and no links. What you search for, add and keep is your responsibility, under the law where you live.</string>
 </resources>

@@ -67,4 +67,5 @@
     <string name="rd_sources_pull_confirm">هل تريد إضافة هذه النتيجة إلى حسابك على Real-Debrid وتشغيلها في مشغّل SCARY؟</string>
     <string name="rd_sources_pull_yes">إضافة وتشغيل</string>
     <string name="rd_sources_find">البحث عن مصادر</string>
+    <string name="settings_content_notice_sources">لا يستضيف SCARY أي أفلام ولا يحفظ ملفات فيديو. يعرض معلومات عامة عن الأفلام ويفتح الفيلم في تطبيق مشاهدة مثبّت بالفعل على هذا الجهاز، مثل Stremio أو Netflix أو YouTube. ما تعرضه هذه التطبيقات مسؤوليتها ومسؤوليتك. بُنيت هذه النسخة مع ميزة المصادر غير الموجودة في SCARY الرسمي: إذا ربطت حسابك على Real-Debrid، يشغّل SCARY الملفات الموجودة فيه، ويمكنه إضافة رابط مغناطيسي تقدّمه أنت إلى الحساب، والبحث في مفهرس Torznab أعددته بنفسك. لا يأتي SCARY بأي مفهرس أو موقع أو روابط. ما تبحث عنه وتضيفه وتحتفظ به مسؤوليتك، وفق القانون في بلدك.</string>
 </resources>

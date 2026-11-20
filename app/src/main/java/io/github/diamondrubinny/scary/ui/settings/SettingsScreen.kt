@@ -518,7 +518,9 @@ fun SettingsScreen(
         }
         Diagnostics()
         // Where the movies come from, said plainly: SCARY holds no video and only hands movies to installed apps.
-        BasicText(stringResource(R.string.settings_content_notice), style = ScaryType.Body)
+        // A build made with the sources feature says what that build does, not what the official one does.
+        val sources = androidx.compose.ui.res.booleanResource(R.bool.rd_sources_enabled)
+        BasicText(stringResource(if (sources) R.string.settings_content_notice_sources else R.string.settings_content_notice), style = ScaryType.Body)
         CreditLine()
         DataCredit()
         SupportScary(Modifier.padding(vertical = 8.dp))
