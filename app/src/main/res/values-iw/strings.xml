@@ -29,8 +29,6 @@
     <string name="subgenre_survival">הישרדות</string>
     <string name="subgenre_mystery">תעלומה</string>
     <string name="subgenre_crime">פשע</string>
-    <string name="effects_on_description">אפקטי אווירה: פועלים</string>
-    <string name="effects_off_description">אפקטי אווירה: כבויים</string>
     <string name="msg_effects_on">ערפל וגרעיניות פועלים</string>
     <string name="msg_effects_off">ערפל וגרעיניות כבויים</string>
     <string name="msg_safe_mode">SCARY הופעלה מחדש אחרי שגיאות חוזרות. האפקטים והצלילים כבויים לעת עתה, ויחזרו בהפעלה הרגילה הבאה.</string>
@@ -370,6 +368,11 @@
     <string name="stats_loved">סרטים אהובים</string>
     <string name="tab_movies">סרטים</string>
     <string name="tab_series">סדרות</string>
+    <string name="nav_search">חיפוש</string>
+    <string name="nav_surprise">הפתעה</string>
+    <string name="nav_ask">שאלו ✦</string>
+    <string name="nav_settings">הגדרות</string>
+    <string name="nav_bucket_count">Bucket list (%1$d)</string>
     <string name="series_tag">סדרה</string>
     <string name="minutes_episode">%1$d דק׳ לפרק</string>
     <string name="bucket_title">Bucket list</string>

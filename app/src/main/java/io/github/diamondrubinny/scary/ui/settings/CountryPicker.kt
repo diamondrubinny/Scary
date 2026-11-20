@@ -66,8 +66,8 @@ fun CountryPicker(
         Column(
             modifier = Modifier
                 .dialogWidth(520.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -105,7 +105,7 @@ private fun Choice(label: String, chosen: Boolean, onClick: () -> Unit, modifier
     FocusSurface(
         onClick = onClick,
         modifier = modifier.fillMaxWidth().semantics { selected = chosen },
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(4.dp),
         focusedScale = 1.02f,
         containerColor = if (chosen) ScaryColors.Blood.copy(alpha = 0.35f) else ScaryColors.Void.copy(alpha = 0.5f),
         focusedContainerColor = ScaryColors.Bone,

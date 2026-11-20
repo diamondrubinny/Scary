@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
@@ -234,8 +235,6 @@ fun HomeScreen(
 
     Column(Modifier.fillMaxSize()) {
         TopBar(
-            effectsEnabled = state.effectsEnabled,
-            onToggleEffects = actions.onToggleEffects,
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
@@ -603,8 +602,21 @@ private fun HomeRowView(
         is HomeRow.AskAi -> stringResource(R.string.ai_title)
     }
     Column {
+        // Noir: while the focus is in a row of films, its far end says where in the row it is ("03 / 150").
+        var focusedAt by remember(row.key) { mutableIntStateOf(-1) }
+        var rowFocused by remember(row.key) { mutableStateOf(false) }
+        val counted = when (row) {
+            is HomeRow.NowOut -> row.movies.size
+            is HomeRow.Collection -> row.movies.size
+            is HomeRow.BecauseYouLoved -> row.movies.size
+            is HomeRow.BecauseYouWatched -> row.movies.size
+            is HomeRow.Watched -> row.movies.size
+            is HomeRow.Seasonal -> row.movies.size
+            else -> 0
+        }
         Row(
-            modifier = Modifier.padding(horizontal = SidePadding),
+            // A little air above: the focus outline of the buttons over the first row is drawn outside them.
+            modifier = Modifier.fillMaxWidth().padding(horizontal = SidePadding).padding(top = 6.dp),
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
@@ -612,10 +624,15 @@ private fun HomeRowView(
             // The only row a movie leaves by holding OK: say so where it matters.
             if (row is HomeRow.MyList) BasicText(stringResource(R.string.my_list_hint), style = ScaryType.Caption)
             if (row is HomeRow.ContinueWatching) BasicText(stringResource(R.string.continue_hint), style = ScaryType.Caption)
+            if (counted > 0) {
+                Spacer(Modifier.weight(1f))
+                // Read inside the counter only: moving along a row redraws these few digits, not the row.
+                RowCounter(at = { focusedAt }, shown = { rowFocused }, total = counted)
+            }
         }
         LazyRow(
             state = rowState,
-            modifier = Modifier.testTag(rowTag(row.key)),
+            modifier = Modifier.testTag(rowTag(row.key)).onFocusChanged { rowFocused = it.hasFocus },
             // Vertical padding leaves room for the focused card to grow without clipping.
             contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -691,7 +708,7 @@ private fun HomeRowView(
                 }
                 is HomeRow.Moods, is HomeRow.TimePlan, is HomeRow.TasteInvite, is HomeRow.AskAi -> Unit
                 is HomeRow.Collection, is HomeRow.Seasonal, is HomeRow.BecauseYouLoved, is HomeRow.BecauseYouWatched,
-                is HomeRow.Watched, is HomeRow.NowOut -> items(
+                is HomeRow.Watched, is HomeRow.NowOut -> itemsIndexed(
                     when (row) {
                         is HomeRow.NowOut -> row.movies
                         is HomeRow.Collection -> row.movies
@@ -700,8 +717,8 @@ private fun HomeRowView(
                         is HomeRow.Watched -> row.movies
                         else -> (row as HomeRow.Seasonal).movies
                     },
-                    key = { it.id },
-                ) { movie ->
+                    key = { _, movie -> movie.id },
+                ) { index, movie ->
                     val key = "${row.key}:${movie.id}"
                     PosterCard(
                         movie = movie,
@@ -709,13 +726,32 @@ private fun HomeRowView(
                         watched = isWatched(movie),
                         onClick = { actions.onOpenDetails(movie) },
                         onLongClick = { actions.onToggleMyList(movie) },
-                        onFocused = { actions.onCardFocused(key, movie.id) },
+                        onFocused = {
+                            focusedAt = index
+                            actions.onCardFocused(key, movie.id)
+                        },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )
                 }
             }
         }
     }
+}
+
+/** The "03 / 150" at the far end of a row of films while the focus is in it. */
+const val ROW_COUNTER_TAG = "rowCounter"
+
+@Composable
+private fun RowCounter(at: () -> Int, shown: () -> Boolean, total: Int) {
+    val index = at()
+    if (!shown() || index !in 0 until total) return
+    BasicText(
+        // Left to right in every language; a screen reader hears each card's own name, not this.
+        text = "\u2066%02d / %d\u2069".format(java.util.Locale.ROOT, index + 1, total),
+        style = ScaryType.Caption,
+        maxLines = 1,
+        modifier = Modifier.testTag(ROW_COUNTER_TAG).clearAndSetSemantics { },
+    )
 }
 
 /** Rows scrolled past the top melt into the dark instead of showing as a cut strip under the hero. */
@@ -801,7 +837,7 @@ fun LoadingView(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SkeletonBlock(modifier: Modifier) {
-    Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(6.dp)))
+    Box(modifier.background(ScaryColors.Crypt, RoundedCornerShape(4.dp)))
 }
 
 /** Cards from the end of a row at which its next page starts loading. */
@@ -1106,16 +1142,16 @@ internal fun MoodChip(
         onFocusChanged = { if (it) onFocused() },
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             .semantics { this.selected = selected },
-        shape = RoundedCornerShape(50),
-        focusedScale = 1.06f,
-        containerColor = if (selected) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.6f),
-        focusedContainerColor = ScaryColors.Bone,
-        borderColor = if (selected) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
-        focusedBorderColor = ScaryColors.Candle,
+        // Noir: a chip is a word in a hairline frame. The chosen one has a bone frame and bone words (and says so to
+        // TalkBack); the focus is the outline, as everywhere.
+        shape = RoundedCornerShape(4.dp),
+        focusedScale = 1.04f,
+        containerColor = Color.Transparent,
+        borderColor = if (selected) ScaryColors.Bone else ScaryColors.Line,
     ) { focused ->
         BasicText(
             text = label,
-            style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+            style = ScaryType.Label.copy(color = if (focused || selected) ScaryColors.Bone else ScaryColors.Ash),
             maxLines = 1,
             modifier = Modifier
                 .align(Alignment.Center)
@@ -1152,7 +1188,7 @@ private fun ContinueMenu(
         Column(
             modifier = Modifier
                 .widthIn(max = 560.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
                 .padding(22.dp)
                 .testTag(CONTINUE_MENU_TAG),
             verticalArrangement = Arrangement.spacedBy(10.dp),

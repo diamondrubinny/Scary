@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -53,8 +56,9 @@ import io.github.diamondrubinny.scary.ui.theme.LocalReduceMotion
 import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 
 /**
- * Base for everything the remote can land on: springs forward, gets a candlelight border and a warm glow when
- * focused, and dips slightly while OK is held. D-pad center and Enter trigger [onClick]; holding them triggers
+ * Base for everything the remote can land on. In focus it grows a little and gains a hard bone outline, drawn a few
+ * pixels outside its own edge so the gap keeps it apart from whatever it sits on (a poster, a filled button): 16:1 on
+ * black, with no soft glow to guess the edge of. It dips slightly while OK is held. D-pad center and Enter trigger [onClick]; holding them triggers
  * [onLongClick] when given.
  *
  * OK is handled here rather than by combinedClickable: a TV remote sends a held key as a stream of repeated key-downs,
@@ -68,8 +72,8 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 fun FocusSurface(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(6.dp),
-    focusedScale: Float = 1.08f,
+    shape: Shape = RoundedCornerShape(3.dp),
+    focusedScale: Float = 1.05f,
     containerColor: Color = ScaryColors.Crypt,
     focusedContainerColor: Color = containerColor,
     borderColor: Color = Color.Transparent,
@@ -124,22 +128,23 @@ fun FocusSurface(
             }
             .drawBehind {
                 if (glow > 0f) {
-                    val spread = 16.dp.toPx()
-                    drawRoundRect(
-                        brush = Brush.radialGradient(
-                            colors = listOf(ScaryColors.Candle.copy(alpha = 0.32f * glow), Color.Transparent),
-                            center = center,
-                            radius = maxOf(size.width, size.height) * 0.8f,
-                        ),
-                        topLeft = Offset(-spread, -spread),
-                        size = Size(size.width + spread * 2, size.height + spread * 2),
-                        cornerRadius = CornerRadius(spread),
-                    )
+                    // The focus outline: outside the element by a gap, in the element's own shape.
+                    val gap = FOCUS_GAP.toPx()
+                    val stroke = FOCUS_STROKE.toPx()
+                    val outer = Size(size.width + gap * 2, size.height + gap * 2)
+                    translate(-gap, -gap) {
+                        drawOutline(
+                            outline = shape.createOutline(outer, layoutDirection, this),
+                            color = focusedBorderColor,
+                            alpha = glow,
+                            style = Stroke(stroke),
+                        )
+                    }
                 }
             }
             .clip(shape)
             .background(container)
-            .border(2.dp, if (focused) focusedBorderColor else borderColor, shape)
+            .border(1.dp, borderColor, shape)
             .onPreviewKeyEvent { event ->
                 keyHold.handle(event, interactionSource, contentDescription, onClick = { latestOnClick() }, onLongClick = latestOnLongClick)
             }
@@ -231,6 +236,10 @@ private val SELECT_KEYS = setOf(Key.DirectionCenter, Key.Enter, Key.NumPadEnter)
 private const val KEY_LOG_TAG = "ScaryKeys"
 
 private const val DURATION_MS = 160
+
+/** The focus outline: this thick, this far outside the element. */
+private val FOCUS_STROKE = 2.dp
+private val FOCUS_GAP = 3.dp
 private const val SPRING_DAMPING = 0.62f
 /** While pressed, the card keeps this share of its focus growth. */
 private const val PRESSED_FRACTION = 0.35f

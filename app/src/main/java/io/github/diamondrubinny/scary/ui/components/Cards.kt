@@ -4,6 +4,8 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.input.InputMode
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.foundation.layout.BoxScope
@@ -122,9 +124,13 @@ fun PosterCard(
             .aspectRatio(2f / 3f),
         contentDescription = (listOfNotNull("${movie.title}, ${movie.yearsLabel}", comingLabel, watchedLabel.takeIf { watched }, lockedLabel.takeIf { locked }) + extras.labels)
             .joinToString(", "),
-        borderColor = ScaryColors.Bone.copy(alpha = 0.08f),
+        borderColor = Color.Transparent,
+        focusedScale = 1.08f,
         onFocusChanged = { if (it) onFocused() },
-    ) {
+    ) { focused ->
+        // Noir: the poster in focus is lit, the others are dimmed. With a finger there is no focus to follow, so
+        // every poster is lit. Paint only (an alpha over the art), so it costs nothing.
+        val lit = focused || LocalInputModeManager.current.inputMode != InputMode.Keyboard
         // The generated art stays underneath: it shows while the poster loads, offline, or if it fails. A locked movie
         // shows only that art: its real poster could be exactly what the lock is meant to keep off the screen.
         var posterShown by remember(movie.posterUrl, locked) { mutableStateOf(false) }
@@ -138,6 +144,7 @@ fun PosterCard(
                 modifier = Modifier.fillMaxSize(),
             )
         }
+        if (!lit) Box(Modifier.fillMaxSize().background(ScaryColors.Void.copy(alpha = POSTER_DIM)))
         if (!posterShown) {
             BasicText(
                 text = movie.yearsLabel,
@@ -307,7 +314,7 @@ fun AppTileCard(
                     else -> Box(
                         Modifier
                             .size(26.dp)
-                            .background(ScaryColors.Blood, RoundedCornerShape(7.dp)),
+                            .background(ScaryColors.Blood, RoundedCornerShape(4.dp)),
                     )
                 }
                 BasicText(
@@ -333,7 +340,7 @@ fun AppTileCard(
                     Box(
                         Modifier
                             .size(30.dp)
-                            .background(ScaryColors.Blood, RoundedCornerShape(8.dp)),
+                            .background(ScaryColors.Blood, RoundedCornerShape(4.dp)),
                     )
                 }
                 BasicText(
@@ -431,3 +438,6 @@ fun BoxScope.CardExtras(extras: CardExtrasState) {
         )
     }
 }
+
+/** How much of a poster out of focus is taken by black: the films stay recognisable, the focused one stands out. */
+private const val POSTER_DIM = 0.38f

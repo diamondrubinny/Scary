@@ -29,8 +29,6 @@
     <string name="subgenre_survival">Выживание</string>
     <string name="subgenre_mystery">Детектив-загадка</string>
     <string name="subgenre_crime">Криминал</string>
-    <string name="effects_on_description">Эффекты атмосферы: включены</string>
-    <string name="effects_off_description">Эффекты атмосферы: выключены</string>
     <string name="msg_effects_on">Туман и зернистость включены</string>
     <string name="msg_effects_off">Туман и зернистость выключены</string>
     <string name="msg_safe_mode">SCARY перезапущен после повторяющихся ошибок. Эффекты и звуки пока выключены и вернутся при следующем обычном запуске.</string>
@@ -373,6 +371,11 @@
     <string name="stats_loved">Понравилось фильмов</string>
     <string name="tab_movies">Фильмы</string>
     <string name="tab_series">Сериалы</string>
+    <string name="nav_search">Поиск</string>
+    <string name="nav_surprise">Сюрприз</string>
+    <string name="nav_ask">Спросить ✦</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="nav_bucket_count">Bucket list (%1$d)</string>
     <string name="series_tag">Сериал</string>
     <string name="minutes_episode">%1$d мин на серию</string>
     <string name="bucket_title">Bucket list</string>

@@ -57,7 +57,7 @@ import io.github.diamondrubinny.scary.core.links.KnownPackages
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.brand.Credit
 import io.github.diamondrubinny.scary.ui.home.CREDIT_KEY
-import io.github.diamondrubinny.scary.ui.components.ICON_LABEL_TAG
+import io.github.diamondrubinny.scary.ui.components.NAV_WORD_TAG
 import io.github.diamondrubinny.scary.ui.settings.SETTINGS_JUMP_TAG
 import io.github.diamondrubinny.scary.ui.settings.settingsJumpTag
 import io.github.diamondrubinny.scary.ui.details.BY_DIRECTOR_ROW_TAG
@@ -293,8 +293,8 @@ class ScaryUiTest {
     }
 
     /**
-     * Ease of use: an icon button says its name while the remote's focus is on it, and the settings' jump bar takes the
-     * focus straight to a section far down the list.
+     * Ease of use: the top bar's items are named in words, and the settings' jump bar takes the focus straight to a
+     * section far down the list.
      */
     @Test
     fun iconsSayTheirNamesAndSettingsJumpToASection() {
@@ -302,8 +302,9 @@ class ScaryUiTest {
         // A key press, so SCARY knows a remote is in use (a touch hides the focus marks, and the names with them).
         InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_DPAD_DOWN)
         rule.waitForIdle()
-        rule.onNodeWithContentDescription(text(R.string.search_title)).performSemanticsAction(SemanticsActions.RequestFocus)
-        rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(ICON_LABEL_TAG), useUnmergedTree = true).fetchSemanticsNodes().isNotEmpty() }
+        // The top bar is words: each item's name is on screen all the time, with or without the focus.
+        rule.onNodeWithContentDescription(text(R.string.search_title)).assertExists()
+        assertTrue(rule.onAllNodes(hasTestTag(NAV_WORD_TAG), useUnmergedTree = true).fetchSemanticsNodes().size >= 4)
 
         rule.onNodeWithContentDescription(text(R.string.settings_title)).performClick()
         waitFor(hasTestTag(SETTINGS_JUMP_TAG))

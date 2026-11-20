@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.graphics.Color
 import android.text.format.DateFormat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -65,10 +68,9 @@ import kotlinx.coroutines.delay
 /** Test tag of the top bar's "Ask SCARY ✦" button. */
 const val ASK_BUTTON_TAG = "askButton"
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TopBar(
-    effectsEnabled: Boolean,
-    onToggleEffects: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
     onSurprise: () -> Unit,
@@ -88,7 +90,7 @@ fun TopBar(
 ) {
     if (scaryLayout.narrow) {
         NarrowTopBar(
-            effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, modifier, familyNight, sleepAtMillis,
+            onOpenSettings, onOpenSearch, onSurprise, modifier, familyNight, sleepAtMillis,
             tab, onSelectTab, onOpenBucket, bucketCount, onAsk,
         )
         return
@@ -116,13 +118,21 @@ fun TopBar(
                     .padding(horizontal = 14.dp, vertical = 5.dp),
             )
         }
-        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 28.dp))
-        Spacer(Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
-            Clock()
-            Spacer(Modifier.width(4.dp))
-            TopBarButtons(effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+        if (tab != null) HomeTabs(tab, onSelectTab, Modifier.padding(start = 20.dp))
+        // The words take the room that is left and wrap to a second line when a language's words are long (Russian,
+        // Portuguese) or the text is enlarged: none is ever pushed off the bar, and the clock is never squeezed. The
+        // logo's side is three lines tall anyway, so a second line costs no height.
+        FlowRow(
+            modifier = Modifier.weight(1f).padding(start = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.End),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+            Row(Modifier.padding(start = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
+                Clock()
+            }
         }
     }
 }
@@ -134,8 +144,6 @@ fun TopBar(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun NarrowTopBar(
-    effectsEnabled: Boolean,
-    onToggleEffects: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
     onSurprise: () -> Unit,
@@ -174,15 +182,13 @@ private fun NarrowTopBar(
                 )
             }
             if (tab != null) HomeTabs(tab, onSelectTab)
-            TopBarButtons(effectsEnabled, onToggleEffects, onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk)
         }
     }
 }
 
 @Composable
 private fun TopBarButtons(
-    effectsEnabled: Boolean,
-    onToggleEffects: () -> Unit,
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
     onSurprise: () -> Unit,
@@ -190,44 +196,63 @@ private fun TopBarButtons(
     bucketCount: Int,
     onAsk: (() -> Unit)?,
 ) {
+    // Noir: the top bar is words. Each says where it goes; nothing has to be remembered by its picture. The longer
+    // names stay as what a screen reader says (and what the tests look for).
     if (onOpenBucket != null) {
-        IconCircleButton(
-            contentDescription = if (bucketCount > 0) {
-                stringResource(R.string.bucket_button_count, bucketCount)
-            } else {
-                stringResource(R.string.bucket_title)
-            },
+        NavWord(
+            text = if (bucketCount > 0) stringResource(R.string.nav_bucket_count, bucketCount) else stringResource(R.string.bucket_title),
+            description = if (bucketCount > 0) stringResource(R.string.bucket_button_count, bucketCount) else stringResource(R.string.bucket_title),
             onClick = onOpenBucket,
             modifier = Modifier.testTag(BUCKET_BUTTON_TAG),
-        ) { BucketIcon(it) }
+        )
     }
     if (onAsk != null) {
-        IconCircleButton(
-            contentDescription = stringResource(R.string.ai_title),
-            onClick = onAsk,
-            modifier = Modifier.testTag(ASK_BUTTON_TAG),
-        ) { BasicText("✦", style = ScaryType.Title.copy(color = it, fontSize = ScaryType.Title.fontSize * 0.9f)) }
+        NavWord(stringResource(R.string.nav_ask), stringResource(R.string.ai_title), onAsk, Modifier.testTag(ASK_BUTTON_TAG))
     }
-    IconCircleButton(
-        contentDescription = stringResource(R.string.search_title),
-        onClick = onOpenSearch,
-    ) { SearchIcon(it) }
-    IconCircleButton(
-        contentDescription = stringResource(R.string.surprise_me),
-        onClick = onSurprise,
-    ) { DiceIcon(it) }
-    IconCircleButton(
-        contentDescription = stringResource(
-            if (effectsEnabled) R.string.effects_on_description else R.string.effects_off_description,
-        ),
-        onClick = onToggleEffects,
-        dimmed = !effectsEnabled,
-    ) { FogIcon(it) }
-    IconCircleButton(
-        contentDescription = stringResource(R.string.settings_title),
-        onClick = onOpenSettings,
-    ) { GearIcon(it) }
+    NavWord(stringResource(R.string.nav_search), stringResource(R.string.search_title), onOpenSearch)
+    NavWord(stringResource(R.string.nav_surprise), stringResource(R.string.surprise_me), onSurprise)
+    // The effects switch is in Settings: one word fewer here, and the bar fits in every language.
+    NavWord(stringResource(R.string.nav_settings), stringResource(R.string.settings_title), onOpenSettings)
 }
+
+/**
+ * One word of the top bar: ash, bone when it is the current place or has the focus, with a short red line under the
+ * current one. [description] is what a screen reader says (the full name).
+ */
+@Composable
+internal fun NavWord(
+    text: String,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    current: Boolean = false,
+) {
+    FocusSurface(
+        onClick = onClick,
+        modifier = modifier.heightIn(min = if (scaryLayout.tv) 0.dp else TOUCH_TARGET),
+        shape = RoundedCornerShape(3.dp),
+        focusedScale = 1.04f,
+        containerColor = Color.Transparent,
+        contentDescription = description,
+    ) { focused ->
+        Column(
+            modifier = Modifier.align(Alignment.Center).padding(horizontal = 8.dp, vertical = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            BasicText(
+                text = text,
+                style = ScaryType.Nav.copy(color = if (focused || current) ScaryColors.Bone else ScaryColors.Ash),
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier.testTag(NAV_WORD_TAG).clearAndSetSemantics { },
+            )
+            Box(Modifier.padding(top = 3.dp).size(width = 16.dp, height = 2.dp).background(if (current) ScaryColors.Accent else Color.Transparent))
+        }
+    }
+}
+
+/** The visible word of a top bar item (its node says nothing to a screen reader: the item itself carries the name). */
+const val NAV_WORD_TAG = "navWord"
 
 @Composable
 fun Clock(modifier: Modifier = Modifier) {
@@ -243,7 +268,8 @@ fun Clock(modifier: Modifier = Modifier) {
             delay(MILLIS_PER_MINUTE - System.currentTimeMillis() % MILLIS_PER_MINUTE)
         }
     }
-    BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier)
+    // One line always: a clock squeezed for room must not fall apart into a column of digits.
+    BasicText(now.format(formatter), style = ScaryType.Clock, modifier = modifier, maxLines = 1, softWrap = false)
 }
 
 /** The sleep timer at a glance: a moon and the minutes left. Not focusable; its words are read with the top bar. */
@@ -288,8 +314,8 @@ fun MessageBanner(message: UserMessage?, onDismiss: (Long) -> Unit, modifier: Mo
     Box(
         modifier
             .padding(bottom = 28.dp)
-            .background(ScaryColors.Void.copy(alpha = 0.94f), RoundedCornerShape(8.dp))
-            .border(1.dp, ScaryColors.Candle, RoundedCornerShape(8.dp))
+            .background(ScaryColors.Void.copy(alpha = 0.94f), RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle, RoundedCornerShape(4.dp))
             .padding(horizontal = 22.dp, vertical = 12.dp)
             .semantics { liveRegion = LiveRegionMode.Polite },
     ) {
@@ -319,13 +345,16 @@ fun CreditLine(modifier: Modifier = Modifier, short: Boolean = false) {
 const val BUCKET_BUTTON_TAG = "bucketButton"
 fun tabTag(kind: MediaKind): String = "tab:${kind.name.lowercase()}"
 
-/** Films or series: two tabs beside the logo. The chosen one is filled, and says so to TalkBack. */
+/** Films or series: two words beside the logo. The chosen one is bone with a red line under it, and says so to TalkBack. */
 @Composable
 private fun HomeTabs(selected: MediaKind, onSelect: (MediaKind) -> Unit, modifier: Modifier = Modifier) {
-    Row(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
         for (kind in MediaKind.entries) {
             val chosen = kind == selected
-            FocusSurface(
+            val name = stringResource(if (kind == MediaKind.SERIES) R.string.tab_series else R.string.tab_movies)
+            NavWord(
+                text = name,
+                description = name,
                 onClick = { onSelect(kind) },
                 modifier = Modifier
                     .testTag(tabTag(kind))
@@ -333,19 +362,8 @@ private fun HomeTabs(selected: MediaKind, onSelect: (MediaKind) -> Unit, modifie
                         role = Role.Tab
                         this.selected = chosen
                     },
-                shape = RoundedCornerShape(50),
-                focusedScale = 1.06f,
-                containerColor = if (chosen) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.5f),
-                focusedContainerColor = ScaryColors.Bone,
-                borderColor = if (chosen) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.25f),
-            ) { focused ->
-                BasicText(
-                    text = stringResource(if (kind == MediaKind.SERIES) R.string.tab_series else R.string.tab_movies),
-                    style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
-                    maxLines = 1,
-                    modifier = Modifier.align(Alignment.Center).padding(horizontal = 20.dp, vertical = 9.dp),
-                )
-            }
+                current = chosen,
+            )
         }
     }
 }

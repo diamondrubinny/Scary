@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.components
 
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -86,7 +87,9 @@ fun DonateMini(modifier: Modifier = Modifier) {
             size = MINI_QR_SIZE,
             description = stringResource(R.string.donate_qr_description),
         )
-        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption)
+        // In a narrow column, on as many lines as the code beside it is tall: a long sentence (Russian) must not widen
+        // the logo's side and push the top bar's words off the screen, nor be cut in the middle.
+        BasicText(stringResource(R.string.donate_mini), style = ScaryType.Caption, maxLines = 3, modifier = Modifier.widthIn(max = 132.dp))
     }
 }
 
@@ -101,7 +104,7 @@ fun QrImage(code: QrCode, size: Dp, description: String, modifier: Modifier = Mo
     Canvas(
         modifier
             .size(size)
-            .background(Color.White, RoundedCornerShape(6.dp))
+            .background(Color.White, RoundedCornerShape(4.dp))
             .semantics { contentDescription = description },
     ) {
         val modules = code.size + 2 * QrCode.QUIET_ZONE

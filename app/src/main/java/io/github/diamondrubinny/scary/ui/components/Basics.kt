@@ -68,26 +68,38 @@ fun ScaryButton(
     modifier: Modifier = Modifier,
     primary: Boolean = false,
     focusRequester: FocusRequester? = null,
+    /**
+     * A third weight, under the framed button: words only. For a screen with many actions (a film's page), so the
+     * eye finds the filled one, then the framed ones, and reads the rest as a list.
+     */
+    quiet: Boolean = false,
 ) {
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier)
             // A finger needs 48 dp (WCAG 2.5.5 and Android's guidance); a TV keeps its own size.
             .heightIn(min = if (scaryLayout.tv) 0.dp else TOUCH_TARGET),
-        shape = RoundedCornerShape(6.dp),
-        focusedScale = 1.06f,
-        containerColor = if (primary) ScaryColors.Blood else ScaryColors.Void.copy(alpha = 0.6f),
-        focusedContainerColor = if (primary) ScaryColors.Candle else ScaryColors.Bone,
-        borderColor = if (primary) ScaryColors.Blood else ScaryColors.Bone.copy(alpha = 0.25f),
-        focusedBorderColor = if (primary) ScaryColors.Candle else ScaryColors.Bone,
+        // Noir: one filled button per screen, the primary one, bone with black words. Every other button is words on
+        // black with a hairline, ash until the focus lights it. The focus itself is always the outline (FocusSurface).
+        shape = RoundedCornerShape(4.dp),
+        focusedScale = 1.04f,
+        containerColor = if (primary) ScaryColors.Bone else Color.Transparent,
+        borderColor = if (primary || quiet) Color.Transparent else ScaryColors.Line,
     ) { focused ->
         BasicText(
             text = text,
-            style = ScaryType.Label.copy(color = if (focused) ScaryColors.Void else ScaryColors.Bone),
+            style = ScaryType.Label.copy(
+                color = when {
+                    primary -> ScaryColors.Void
+                    focused -> ScaryColors.Bone
+                    quiet -> ScaryColors.Ash
+                    else -> ScaryColors.BoneDim
+                },
+            ),
             maxLines = 1,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 20.dp, vertical = 9.dp),
+                .padding(horizontal = if (quiet) 12.dp else 20.dp, vertical = 9.dp),
         )
     }
 }
@@ -175,10 +187,10 @@ fun IconCircleButton(
             onClick = onClick,
             modifier = modifier.size(if (scaryLayout.tv) 40.dp else TOUCH_TARGET),
             shape = CircleShape,
-            focusedScale = 1.12f,
-            containerColor = ScaryColors.Bone.copy(alpha = if (dimmed) 0.04f else 0.1f),
+            focusedScale = 1.08f,
+            containerColor = Color.Transparent,
             focusedContainerColor = ScaryColors.Bone,
-            borderColor = ScaryColors.Bone.copy(alpha = 0.15f),
+            borderColor = ScaryColors.Line.copy(alpha = if (dimmed) 0.08f else 0.2f),
             contentDescription = contentDescription,
             onFocusChanged = { hasFocus = it },
         ) { focused ->
@@ -430,8 +442,8 @@ fun EmptyState(
 ) {
     Column(
         modifier = modifier
-            .border(1.dp, ScaryColors.Bone.copy(alpha = 0.18f), RoundedCornerShape(10.dp))
-            .background(ScaryColors.Void.copy(alpha = 0.7f), RoundedCornerShape(10.dp))
+            .border(1.dp, ScaryColors.Bone.copy(alpha = 0.18f), RoundedCornerShape(4.dp))
+            .background(ScaryColors.Void.copy(alpha = 0.7f), RoundedCornerShape(4.dp))
             .padding(horizontal = 24.dp, vertical = 18.dp)
             .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
         verticalArrangement = Arrangement.spacedBy(8.dp),

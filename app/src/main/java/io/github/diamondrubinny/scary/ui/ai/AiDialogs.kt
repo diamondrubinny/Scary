@@ -89,8 +89,8 @@ private fun DialogBox(tag: String, width: Int = 600, content: @Composable () -> 
     Column(
         modifier = Modifier
             .dialogWidth(width.dp)
-            .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+            .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+            .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
             .verticalScroll(rememberScrollState())
             .padding(24.dp)
             .testTag(tag),
@@ -201,8 +201,8 @@ fun AiKeyDialog(
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .background(ScaryColors.Void, RoundedCornerShape(8.dp))
-                    .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                    .background(ScaryColors.Void, RoundedCornerShape(4.dp))
+                    .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 if (input.isEmpty()) BasicText(keyMask ?: stringResource(R.string.ai_key_hint), style = ScaryType.Body.copy(color = ScaryColors.Ash))
@@ -259,7 +259,7 @@ fun AiUrlDialog(current: String, onSave: (String) -> Boolean, onDismiss: () -> U
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .background(ScaryColors.Void, RoundedCornerShape(8.dp))
+                    .background(ScaryColors.Void, RoundedCornerShape(4.dp))
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 if (input.isEmpty()) BasicText("https://…/v1", style = ScaryType.Body.copy(color = ScaryColors.Ash))
@@ -322,7 +322,7 @@ private fun ChoiceRow(
     FocusSurface(
         onClick = onClick,
         modifier = (if (focusRequester != null) modifier.focusRequester(focusRequester) else modifier).fillMaxWidth(),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(4.dp),
         focusedScale = 1.02f,
         containerColor = if (selected) ScaryColors.Blood.copy(alpha = 0.5f) else ScaryColors.Void,
         focusedContainerColor = ScaryColors.Void,

@@ -97,3 +97,23 @@ About one film in ten was one a viewer would call "why is this here?".
 - **One large version** is harder to test than stages: every screen is compared in CI screenshots before it ships.
 - **Light type** on a TV: sizes and weights are checked on the screenshots at 130% font size and from the emulator's 1080p frame.
 - **The owner sees it first on their own TV:** a mock-up is not the product; adjustments after the first build are expected.
+
+## Part 2 as built, first pass (version 0.6.0)
+Everything below is in one version; what CI's screenshots show is compared screen by screen before it ships.
+- **Tokens (`Theme.kt`):** pure black; no gold (what was "candle" is the bone itself); one red accent (`Accent`) for eyebrows and the line under the current tab; a hairline colour (`Line`). Titles in Rubik (Cairo in Arabic), a film's title large and in a regular weight; row names small, spaced and ash. Wide letter-spacing is off in Arabic, whose letters join.
+- **Focus (`FocusSurface`):** a hard bone outline drawn 3 dp outside the element, in its own shape; no glow; a smaller zoom.
+- **Buttons:** the primary one is bone with black words; the others are words in a hairline frame, ash until the focus lights them.
+- **Posters:** the ones out of focus are dimmed (38% black over the art), the focused one is lit and a little larger. With a finger (a phone) every poster is lit.
+- **The top bar is words:** Films, Series, then Bucket list, Ask, Search, Surprise, Settings, and the clock. The full names stay as what a screen reader says. The effects switch left the bar (it is in Settings), so the bar fits in every language.
+- **Chips** (moods, time, filters): a word in a hairline frame; the chosen one has a bone frame.
+- **Settings:** each row is a line of words with a hairline under it; no boxes.
+- **Corners** are nearly square everywhere (4 dp).
+- **The screensaver** uses the same title faces.
+- **Kept on purpose:** the donation code in the home screen's header (it is the owner's, and has its own test); it still steps aside when the rows have the focus. Whether it stays there is the owner's call.
+- **Found in CI's screenshots and fixed:** in Russian, and with text at 130%, the top bar ran out of room (Settings was pushed off it, the clock fell into a column of digits): its words now wrap to a second line. Section headings on a film's page were red and are now ash. The donation sentence was cut in the middle in Russian.
+
+## Part 2, second pass (20.11.2026)
+The owner left the three open choices to the builder ("sort it out as you think"). Decided, with the reasons:
+- **A film's page has three weights of button.** "Watch" is the filled one; the other ways to play (trailer, Real-Debrid, continue) are framed; what the viewer marks about the film (My list, watched, loved, not for me, the bucket list, remind me, "About this film") is words only. The order and the focus path are unchanged, so nothing about the remote's movement was put at risk.
+- **The donation code stays in the home screen's header.** It is the owner's, placed there on purpose and covered by its own test, and it already steps aside when the rows have the focus. Looks alone are not a reason to take it down.
+- **A row of films says where the focus is in it:** "03 / 150" at the row's far end, only while the focus is in that row. Left to right in every language; not read by a screen reader (each card says its own name). Only those few digits redraw as the focus moves.

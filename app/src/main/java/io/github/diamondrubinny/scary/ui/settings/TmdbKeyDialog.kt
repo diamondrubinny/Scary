@@ -77,8 +77,8 @@ fun TmdbKeyDialog(
         Column(
             modifier = Modifier
                 .dialogWidth(520.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                 // The TV keyboard can cover the lower half of the screen: keep everything reachable.
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
@@ -89,8 +89,8 @@ fun TmdbKeyDialog(
             Box(
                 Modifier
                     .fillMaxWidth()
-                    .background(ScaryColors.Void, RoundedCornerShape(8.dp))
-                    .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+                    .background(ScaryColors.Void, RoundedCornerShape(4.dp))
+                    .border(2.dp, if (focused) ScaryColors.Candle else ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                     .padding(horizontal = 14.dp, vertical = 12.dp),
             ) {
                 if (input.isEmpty()) {

@@ -52,8 +52,8 @@ fun TrailerIntroDialog(onPlay: () -> Unit, onTurnOff: () -> Unit, onDismiss: () 
         Column(
             modifier = Modifier
                 .dialogWidth(560.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.2f), RoundedCornerShape(4.dp))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .testTag(TRAILER_INTRO_TAG),

@@ -59,8 +59,8 @@ fun LanguageDialog(current: Language, onPick: (Language) -> Unit, onDismiss: () 
             modifier = Modifier
                 .widthIn(max = 460.dp)
                 .fillMaxWidth()
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .testTag(LANGUAGE_DIALOG_TAG),
@@ -75,7 +75,7 @@ fun LanguageDialog(current: Language, onPick: (Language) -> Unit, onDismiss: () 
                         .fillMaxWidth()
                         .semantics { selected = chosen }
                         .testTag(languageTag(language)),
-                    shape = RoundedCornerShape(8.dp),
+                    shape = RoundedCornerShape(4.dp),
                     focusedScale = 1.02f,
                     containerColor = if (chosen) ScaryColors.Blood.copy(alpha = 0.5f) else ScaryColors.Void,
                     focusedContainerColor = ScaryColors.Void,

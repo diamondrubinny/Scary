@@ -84,8 +84,8 @@ fun UpdateDialog(state: UpdateState, language: Language, actions: UpdateActions)
         Column(
             modifier = Modifier
                 .dialogWidth(620.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Candle.copy(alpha = 0.4f), RoundedCornerShape(4.dp))
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp)
                 .testTag(UPDATE_DIALOG_TAG),

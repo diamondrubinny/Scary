@@ -94,8 +94,8 @@ fun PinDialog(state: PinDialogState, onSubmit: (String) -> Unit, onDismiss: () -
         Column(
             modifier = Modifier
                 .dialogWidth(340.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(12.dp))
-                .border(1.dp, ScaryColors.Blood, RoundedCornerShape(12.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Blood, RoundedCornerShape(4.dp))
                 .padding(22.dp)
                 .onPreviewKeyEvent { event ->
                     if (event.type != KeyEventType.KeyUp) return@onPreviewKeyEvent false

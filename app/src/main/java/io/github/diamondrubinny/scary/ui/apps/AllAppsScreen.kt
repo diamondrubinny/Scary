@@ -153,8 +153,8 @@ private fun AppOptionsDialog(
         Column(
             modifier = Modifier
                 .dialogWidth(360.dp)
-                .background(ScaryColors.Crypt, RoundedCornerShape(10.dp))
-                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.15f), RoundedCornerShape(10.dp))
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .border(1.dp, ScaryColors.Bone.copy(alpha = 0.15f), RoundedCornerShape(4.dp))
                 .padding(22.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
