@@ -13,7 +13,7 @@
     <string name="rd_torrent_delete">מחק</string>
     <string name="rd_torrent_title">הוספת טורנט</string>
     <string name="rd_torrent_open">הוספת טורנט</string>
-    <string name="rd_what_sources">מנגן, בנגן של SCARY, את הסרטונים שבחשבון ה-Real-Debrid שלכם. בגרסה הזו אפשר גם להוסיף לחשבון קישור מגנט משלכם. SCARY לא מחפש מקורות.</string>
+    <string name="rd_what_sources">מנגן, בנגן של SCARY, את הסרטונים שבחשבון ה-Real-Debrid שלכם. אפשר גם להוסיף לחשבון קישור מגנט משלכם, או לחפש באינדקסר שהגדרתם בעצמכם. SCARY לא מגיע עם אינדקסר, אתר או קישורים.</string>
     <string name="rd_torrent_what">הדביקו קישור מגנט משלכם. SCARY שולח את ה-hash, השם וה-trackers שלו לחשבון ה-Real-Debrid שלכם, מבקש את קובצי הווידאו ומנגן את הסרט בנגן של SCARY. שום דבר אחר לא יוצא מהטלוויזיה. האחריות על מה שאתם מוסיפים היא שלכם.</string>
     <string name="rd_torrent_invalid">זה לא קישור מגנט.</string>
     <string name="rd_torrent_downloading">Real-Debrid מוריד אותו: %1$d%%. הוא יופיע למטה כמוכן כשיסתיים.</string>
@@ -67,5 +67,5 @@
     <string name="rd_sources_pull_confirm">להוסיף את התוצאה הזו לחשבון ה-Real-Debrid שלכם ולנגן אותה בנגן של SCARY?</string>
     <string name="rd_sources_pull_yes">הוספה וניגון</string>
     <string name="rd_sources_find">חיפוש מקורות</string>
-    <string name="settings_content_notice_sources">SCARY לא מארח סרטים ולא שומר קובצי וידאו. הוא מציג מידע ציבורי על סרטים ופותח את הסרט באפליקציית צפייה שכבר מותקנת במכשיר, כמו Stremio, Netflix או YouTube. מה שהאפליקציות האלה מנגנות הוא באחריותן ובאחריותכם. הגרסה הזו נבנתה עם פיצ\'ר המקורות, שלא קיים ב-SCARY הרשמי: אם תחברו את חשבון ה-Real-Debrid שלכם, SCARY מנגן את הקבצים שבו, יכול להוסיף לחשבון קישור מגנט שאתם נותנים, ויכול לחפש באינדקסר Torznab שהגדרתם בעצמכם. SCARY לא מגיע עם אינדקסר, אתר או קישורים. האחריות על מה שאתם מחפשים, מוסיפים ושומרים היא שלכם, לפי הדין במדינתכם.</string>
+    <string name="settings_content_notice_sources">SCARY לא מארח סרטים ולא שומר קובצי וידאו. הוא מציג מידע ציבורי על סרטים ופותח את הסרט באפליקציית צפייה שכבר מותקנת במכשיר, כמו Stremio, Netflix או YouTube. מה שהאפליקציות האלה מנגנות הוא באחריותן ובאחריותכם. אם תחברו את חשבון ה-Real-Debrid שלכם, SCARY מנגן את הקבצים שבו, יכול להוסיף לחשבון קישור מגנט שאתם נותנים, ויכול לחפש באינדקסר Torznab שהגדרתם בעצמכם. SCARY לא מגיע עם אינדקסר, אתר או קישורים, ולא מחפש בשום מקום עד שתגדירו אינדקסר. האחריות על מה שאתם מחפשים, מוסיפים ושומרים היא שלכם, לפי הדין במדינתכם.</string>
 </resources>

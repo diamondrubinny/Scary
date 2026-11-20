@@ -454,7 +454,9 @@ class PlayerTest {
         waitFor(hasTestTag(REAL_DEBRID_ROW_TAG))
         rule.onNode(hasTestTag(REAL_DEBRID_ROW_TAG)).performScrollTo().performClick()
         waitFor(hasTestTag(REAL_DEBRID_TAG))
-        rule.onNode(hasText(text(R.string.rd_what))).assertExists()
+        // A build with the sources feature says what that build does.
+        val sources = rule.activity.resources.getBoolean(R.bool.rd_sources_enabled)
+        rule.onNode(hasText(text(if (sources) R.string.rd_what_sources else R.string.rd_what))).assertExists()
         rule.onNode(hasText(text(R.string.rd_sign_in))).assertExists()
         rule.onNode(hasText(text(R.string.rd_privacy))).assertExists()
         pressBack()

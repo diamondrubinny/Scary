@@ -1,6 +1,6 @@
 # The next visible upgrade: four chosen options (20.11.2026)
 
-**The request:** "תשדרג את האפליקציה". Asked what to build, the owner chose all four options of `docs/UPGRADE_0.6.2_PLAN.md`:
+**The request:** "תשדרג את האפליקציה". Asked what to build, the owner chose all four options of `docs/UPGRADE_0.6.3_PLAN.md`:
 cast with faces, other titles for your own files, "My year in horror", viewer profiles.
 
 **Order (small first, as with the eight options of 0.5.18 to 0.5.21):**
@@ -11,7 +11,7 @@ cast with faces, other titles for your own files, "My year in horror", viewer pr
 | 2 | 0.7.0, with stage 1 | More in "Your year in fear" (the screen exists; see the correction in its section) |
 | 3 | 0.8.0 | Viewer profiles (its own design section is written before it is built) |
 
-**Scope of this upgrade:** nothing here searches for, fetches or lists stream or torrent sources. "Your own files" are the files already in the viewer's Real-Debrid account. (The "sources" feature merged into main meanwhile, PR #49, is a separate piece of work behind a build switch, off in the official APK; this upgrade does not change it.)
+**Scope of this upgrade:** nothing here searches for, fetches or lists stream or torrent sources. "Your own files" are the files already in the viewer's Real-Debrid account. (Adding a magnet link to Real-Debrid and searching the viewer's own Torznab indexer, merged into main meanwhile as PR #49 and PR #50 and on since 0.6.2, is a separate piece of work; this upgrade does not change it. The files it brings into the viewer's account are recognised like any other file of theirs.)
 
 ## Stage 1 (version 0.7.0)
 
