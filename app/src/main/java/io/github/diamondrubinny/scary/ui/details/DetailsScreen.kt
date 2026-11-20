@@ -260,30 +260,37 @@ fun DetailsScreen(
                                 modifier = Modifier.testTag(PLAY_RD_TAG),
                             )
                         }
+                        // Noir: three weights. "Watch" is the filled one, the ways to play are framed, and what the viewer
+                        // marks about the film (list, watched, loved…) is words, in the same order as before.
                         ScaryButton(stringResource(R.string.action_trailer), onClick = { onTrailer(movie) })
                         if (about != null) {
                             ScaryButton(
                                 text = stringResource(R.string.ai_about),
                                 onClick = { onAbout(movie) },
+                                quiet = true,
                                 modifier = Modifier.testTag(AI_ABOUT_TAG),
                             )
                         }
                         ScaryButton(
                             text = stringResource(if (inMyList) R.string.action_in_my_list else R.string.action_add_my_list),
                             onClick = { onToggleMyList(movie) },
+                            quiet = true,
                         )
                         ScaryButton(
                             text = stringResource(if (watched) R.string.action_watched else R.string.action_mark_watched),
                             onClick = { onToggleWatched(movie) },
+                            quiet = true,
                         )
                         // "Loved it" feeds "Because you loved"; "Not for me" keeps the film out of every suggestion.
                         ScaryButton(
                             text = stringResource(if (loved) R.string.action_loved else R.string.action_love),
                             onClick = { onToggleLoved(movie) },
+                            quiet = true,
                         )
                         ScaryButton(
                             text = stringResource(if (notForMe) R.string.action_not_for_me_on else R.string.action_not_for_me),
                             onClick = { onToggleNotForMe(movie) },
+                            quiet = true,
                         )
                         // Not out yet: "Remind me" brings it to the home screen's "Now out" row on its day.
                         if (onToggleReminder != null && (reminded || movie.comingOn(LocalDate.now()) != null)) {
@@ -296,6 +303,7 @@ fun DetailsScreen(
                                     onToggleReminder(movie)
                                 },
                                 modifier = Modifier.testTag(REMIND_TAG),
+                                quiet = true,
                             )
                         }
                         // Films only: a series has no end for the next one to follow.
@@ -303,6 +311,7 @@ fun DetailsScreen(
                             ScaryButton(
                                 text = stringResource(if (inBucket) R.string.action_in_bucket else R.string.action_add_bucket),
                                 onClick = { onToggleBucket(movie) },
+                                quiet = true,
                             )
                         }
                     }

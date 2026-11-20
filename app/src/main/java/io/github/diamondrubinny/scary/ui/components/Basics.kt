@@ -68,6 +68,11 @@ fun ScaryButton(
     modifier: Modifier = Modifier,
     primary: Boolean = false,
     focusRequester: FocusRequester? = null,
+    /**
+     * A third weight, under the framed button: words only. For a screen with many actions (a film's page), so the
+     * eye finds the filled one, then the framed ones, and reads the rest as a list.
+     */
+    quiet: Boolean = false,
 ) {
     FocusSurface(
         onClick = onClick,
@@ -79,7 +84,7 @@ fun ScaryButton(
         shape = RoundedCornerShape(4.dp),
         focusedScale = 1.04f,
         containerColor = if (primary) ScaryColors.Bone else Color.Transparent,
-        borderColor = if (primary) Color.Transparent else ScaryColors.Line,
+        borderColor = if (primary || quiet) Color.Transparent else ScaryColors.Line,
     ) { focused ->
         BasicText(
             text = text,
@@ -87,13 +92,14 @@ fun ScaryButton(
                 color = when {
                     primary -> ScaryColors.Void
                     focused -> ScaryColors.Bone
+                    quiet -> ScaryColors.Ash
                     else -> ScaryColors.BoneDim
                 },
             ),
             maxLines = 1,
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 20.dp, vertical = 9.dp),
+                .padding(horizontal = if (quiet) 12.dp else 20.dp, vertical = 9.dp),
         )
     }
 }
