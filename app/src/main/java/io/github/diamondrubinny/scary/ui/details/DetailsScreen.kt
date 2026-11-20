@@ -44,6 +44,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -142,6 +144,10 @@ fun DetailsScreen(
     onOpenPerson: ((name: String, personId: Long?, photo: String?) -> Unit)? = null,
     /** The cast as TMDB lists it (photos, roles), with the viewer's key; empty until it arrives, and without a key. */
     cast: List<io.github.diamondrubinny.scary.core.tmdb.TmdbCastMember> = emptyList(),
+    /** The actor whose screen the viewer is coming back from (Back), if any: the focus lands on them again. */
+    returnToPerson: String? = null,
+    /** Called once the page has put the focus back (on the actor, or on "Watch"): the return is used up. */
+    onReturnedToPerson: () -> Unit = {},
     /** "Remind me" is set for this film; its button shows on a film not out yet, or one with a reminder. */
     reminded: Boolean = false,
     onToggleReminder: ((Movie) -> Unit)? = null,
@@ -183,15 +189,37 @@ fun DetailsScreen(
             RealDebridChooser(realDebridFiles, onChoose = { chooseFile = false; onPlayRealDebrid(it) }, onDismiss = { chooseFile = false })
         }
     }
-    LaunchedEffect(movie.id) {
-        withFrameNanos { }
-        runCatching { watchFocus.requestFocus() }
-    }
     LaunchedEffect(movie.id, offersKey) { onLoadOffers(movie) }
     LaunchedEffect(movie.id, offersKey) { onLoadFranchise(movie) }
-    // TMDB's cast (faces and roles) takes the place of the plain names; not for a film the lock covers.
-    val castCards = cast.isNotEmpty() && onOpenPerson != null && !isLocked(movie)
+    // TMDB's cast (faces and roles) takes the place of the plain names; not for a film the lock covers. The page
+    // must not move under the viewer: the cards come in (a row under the header) only while the focus is in the
+    // header or nowhere on the page, never while it stands on a row further down, which would be pushed away.
+    // When the cast is known as the page opens (coming back to it), the cards are there from the start.
+    val castKnown = cast.isNotEmpty() && onOpenPerson != null && !isLocked(movie)
+    var castCards by remember(movie.id) { mutableStateOf(castKnown) }
     var namesFocused by remember(movie.id) { mutableStateOf(false) }
+    var headerFocused by remember(movie.id) { mutableStateOf(false) }
+    var pageFocused by remember(movie.id) { mutableStateOf(false) }
+    LaunchedEffect(castKnown, headerFocused, pageFocused) {
+        if (!castKnown) castCards = false else if (headerFocused || !pageFocused) castCards = true
+    }
+    val castRow = rememberLazyListState()
+    val personFocus = remember { FocusRequester() }
+    LaunchedEffect(movie.id) {
+        withFrameNanos { }
+        // Back from an actor's screen: on that actor again (their card, or their name), not at the top of the page.
+        if (returnToPerson != null) {
+            val index = if (castCards) cast.indexOfFirst { it.name == returnToPerson } else -1
+            if (index >= 0) {
+                runCatching { castRow.scrollToItem(index) }
+                withFrameNanos { }
+            }
+            val landed = runCatching { personFocus.requestFocus() }.getOrDefault(false)
+            onReturnedToPerson()
+            if (landed) return@LaunchedEffect
+        }
+        runCatching { watchFocus.requestFocus() }
+    }
 
     // Scrolls when "Rent or buy" and "More like this" need more than one screen; the remote's focus moves it. On a TV,
     // Compose's default would move every focused button up to a third of the screen and cut the title off, so the
@@ -211,7 +239,7 @@ fun DetailsScreen(
         // A phone upright plays no trailer by itself, to spare mobile data; the Trailer button still plays it.
         val autoTrailer = if (scaryLayout.compact) TrailerSettings.Off else trailer
         val trailerSlot = canAutoTrailer(movie, isLocked(movie), autoTrailer, DetailsTrailerSize)
-        Column(Modifier.fillMaxSize().verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
+        Column(Modifier.fillMaxSize().onFocusChanged { pageFocused = it.hasFocus }.verticalScroll(pageScroll).riseIn(movie.id).padding(top = PageTopPadding, bottom = 24.dp)) {
             CompositionLocalProvider(LocalBringIntoViewSpec provides rowsScroll) {
                 val locked = isLocked(movie)
                 val info: @Composable ColumnScope.() -> Unit = {
@@ -339,7 +367,12 @@ fun DetailsScreen(
                         ) {
                             item(key = "label") { BasicText(stringResource(R.string.cast_label), style = ScaryType.Caption) }
                             items(movie.cast.take(MAX_CAST_SHOWN).distinct(), key = { "actor:$it" }) { actor ->
-                                ScaryButton(text = actor, onClick = { onOpenPerson(actor, null, null) }, quiet = true, modifier = Modifier.testTag(CAST_NAME_TAG))
+                                ScaryButton(
+                                    text = actor,
+                                    onClick = { onOpenPerson(actor, null, null) },
+                                    quiet = true,
+                                    modifier = Modifier.testTag(CAST_NAME_TAG).then(if (actor == returnToPerson) Modifier.focusRequester(personFocus) else Modifier),
+                                )
                             }
                         }
                     }
@@ -413,7 +446,7 @@ fun DetailsScreen(
                 // to share is for scanning a TV with a phone, so only a TV shows it.
                 if (scaryLayout.narrow) {
                     Column(
-                        modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
+                        modifier = Modifier.onFocusChanged { headerFocused = it.hasFocus }.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         poster()
@@ -421,7 +454,7 @@ fun DetailsScreen(
                     }
                 } else {
                     Row(
-                        modifier = Modifier.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
+                        modifier = Modifier.onFocusChanged { headerFocused = it.hasFocus }.bringIntoViewResponder(fromPageTop).padding(horizontal = SidePadding),
                         horizontalArrangement = Arrangement.spacedBy(36.dp),
                     ) {
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp), content = info)
@@ -432,7 +465,13 @@ fun DetailsScreen(
                     }
                 }
                 if (castCards && onOpenPerson != null) {
-                    CastCards(cast, onOpen = { onOpenPerson(it.name, it.personId, it.photo) })
+                    CastCards(
+                        cast,
+                        onOpen = { onOpenPerson(it.name, it.personId, it.photo) },
+                        state = castRow,
+                        returnTo = returnToPerson,
+                        returnFocus = personFocus,
+                    )
                 }
                 if (details.similar.isNotEmpty()) {
                     BasicText(

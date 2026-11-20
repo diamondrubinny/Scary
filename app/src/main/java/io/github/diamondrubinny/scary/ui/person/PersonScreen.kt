@@ -63,6 +63,8 @@ fun PersonScreen(
     onOpenMovie: (Movie) -> Unit,
     /** The actor's photo from TMDB, when they were chosen from a cast TMDB listed; null otherwise. */
     photo: String? = null,
+    /** TMDB's id of the actor, when they were chosen from a cast TMDB listed: [person] must be theirs, not a namesake's. */
+    personId: Long? = null,
     isLocked: (Movie) -> Boolean = { false },
     isWatched: (Movie) -> Boolean = { false },
     gridState: LazyGridState = rememberLazyGridState(),
@@ -70,7 +72,7 @@ fun PersonScreen(
     returnTo: String? = null,
 ) {
     LaunchedEffect(name) { onLoad(name) }
-    val shown = person?.takeIf { it.name == name }
+    val shown = person?.takeIf { it.name == name && it.personId == personId }
     val movies = shown?.movies.orEmpty()
     val firstFocus = remember { FocusRequester() }
     val returnFocus = remember { FocusRequester() }

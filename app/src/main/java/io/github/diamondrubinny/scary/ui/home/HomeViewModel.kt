@@ -1313,12 +1313,17 @@ class HomeViewModel(
     val rdFiles: StateFlow<RdFilesState> = _rdFiles.asStateFlow()
 
     /** The catalog's title index for recognising files, built once per catalog (off the main thread). */
-    private var fileIndex: Triple<Catalog, AltTitles, FileMatch.Index>? = null
+    private var fileIndex: Triple<Catalog, Any, FileMatch.Index>? = null
 
-    /** With the films' other titles from TMDB ([alt]) as they are now; built again when either changes. */
+    /**
+     * With the films' other titles from TMDB ([alt]) as they are now; built again when the catalog or the titles
+     * themselves change (a film remembered as having no other titles changes nothing). Asked for from several
+     * threads, so one at a time: the index is never built twice for the same thing.
+     */
+    @Synchronized
     private fun indexOf(catalog: Catalog, alt: AltTitles = tmdb.altTitles.value): FileMatch.Index =
-        fileIndex?.takeIf { it.first === catalog && it.second === alt }?.third
-            ?: FileMatch.Index(catalog.movies, alt).also { fileIndex = Triple(catalog, alt, it) }
+        fileIndex?.takeIf { it.first === catalog && it.second === alt.stamp }?.third
+            ?: FileMatch.Index(catalog.movies, alt).also { fileIndex = Triple(catalog, alt.stamp, it) }
 
     /**
      * The film or series each of the viewer's files is, by file key: what the viewer said ([WatchStore.fileFilms]),
@@ -1328,7 +1333,8 @@ class HomeViewModel(
         _rdFiles,
         shownCatalog,
         watchStore?.fileFilms ?: MutableStateFlow(emptyMap()),
-        tmdb.altTitles,
+        // Only when the titles themselves change: a film found to have none is no reason to match every file again.
+        tmdb.altTitles.distinctUntilChanged { old, new -> old.stamp === new.stamp },
     ) { files, state, corrections, alt ->
         val catalog = (state as? CatalogState.Ready)?.catalog
         if (files !is RdFilesState.Ready || catalog == null) {
@@ -1413,12 +1419,13 @@ class HomeViewModel(
 
     /** Looks through the viewer's own files for the film being opened; nothing is searched for anywhere else. */
     private fun findRealDebridFiles(movieId: String) {
+        rdMatchFor = movieId
+        rdMatchJob?.cancel()
         _rdMatches.value = null
         val repository = realDebrid ?: return
         val prefs = latestPrefs ?: return
         if (!repository.signedIn || !prefs.onlineEnabled || prefs.familyNight) return
         val movie = movieById(movieId) ?: return
-        rdMatchJob?.cancel()
         rdMatchJob = viewModelScope.launch {
             val first = ownFilesOf(movie, repository)
             if (first.isNotEmpty()) _rdMatches.value = movieId to first
@@ -1433,6 +1440,17 @@ class HomeViewModel(
 
     private var rdMatchJob: Job? = null
 
+    /** The film whose files were looked for last (found or not). */
+    private var rdMatchFor: String? = null
+
+    /**
+     * A film's page that comes back to the front (Back from another film's page, or from an actor's screen) looks for
+     * the viewer's files of its own film again: the matches kept are those of the page opened last.
+     */
+    fun ensureRealDebridFiles(movieId: String) {
+        if (rdMatchFor != movieId) findRealDebridFiles(movieId)
+    }
+
     /**
      * The viewer's files that are [movie]. A file that fits only by one of the film's other titles is left out when
      * it carries another film's own title: that film's page shows it.
@@ -1442,12 +1460,7 @@ class HomeViewModel(
         val found = repository.filesFor(movie, alt)
         if (movie.isSeries || found.isEmpty() || alt.of(movie.imdbId).isEmpty()) return found
         val catalog = visibleCatalog() ?: return found
-        return withContext(Dispatchers.Default) {
-            val index = indexOf(catalog, alt)
-            found.filter { file ->
-                FileMatch.matches(movie, FileMatch.parse(file.name)) || index.ownTitle(file.name).none { it.id != movie.id }
-            }
-        }
+        return withContext(Dispatchers.Default) { indexOf(catalog, alt).ownFiles(movie, found) }
     }
 
     fun playRealDebrid(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long? = null) {

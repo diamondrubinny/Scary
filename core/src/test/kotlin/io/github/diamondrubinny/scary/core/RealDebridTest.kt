@@ -235,8 +235,12 @@ class RealDebridTest {
         assertFalse("not without the other titles", FileMatch.matches(eyes, french))
         assertTrue(FileMatch.matches(eyes, french, alt))
         assertTrue(FileMatch.matches(eyes, FileMatch.parse("The Horror Chamber of Dr Faustus (1960).mp4"), alt))
-        // The same rules as for a film's own titles: the year, and no short title without a year.
+        // Stricter than for a film's own titles: the file must carry the film's own year, exactly. A year next to
+        // it, or none, is not enough (another film may share the title, and SCARY may not know that film's titles).
         assertFalse("wrong year", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.1988.mkv"), alt))
+        assertFalse("the year next to it", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.1961.mkv"), alt))
+        assertFalse("no year", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.1080p.mkv"), alt))
+        assertTrue("its own title keeps the year either way", FileMatch.matches(eyes, FileMatch.parse("Eyes.Without.a.Face.1961.mkv"), alt))
         assertFalse("an episode", FileMatch.matches(eyes, FileMatch.parse("Les.Yeux.Sans.Visage.S01E02.mkv"), alt))
         // Another title of two letters tells nothing apart: left out even with the right year.
         assertFalse(FileMatch.matches(eyes, FileMatch.parse("It.1960.mkv"), alt))
@@ -262,8 +266,24 @@ class RealDebridTest {
         // Without the other titles nothing changes.
         assertNull(FileMatch.Index(listOf(eyes, night)).one("Les.Yeux.Sans.Visage.1960.mkv"))
         // Two films that fit only by other titles are none: the viewer decides.
-        val twice = both.with("tt9999991", listOf("Les yeux sans visage"))
-        assertNull(FileMatch.Index(listOf(eyes, night, curse), twice).one("Les.Yeux.Sans.Visage.mkv"))
+        val remake = movie("The Faceless", 1960).copy(imdbId = "tt9999992")
+        val twice = both.with("tt9999992", listOf("Les yeux sans visage"))
+        val shared = FileMatch.Index(listOf(eyes, night, curse, remake), twice)
+        assertNull(shared.one("Les.Yeux.Sans.Visage.1960.mkv"))
+        assertEquals(setOf(eyes.id, remake.id), shared.find("Les.Yeux.Sans.Visage.1960.mkv").map { it.id }.toSet())
+
+        // On a film's own page: a file that fits it only by another title is not shown when it carries another
+        // film's own title; a file that fits by its own title always is.
+        val demonFiles = listOf(
+            RealDebrid.RdFile("d:4", "Curse.of.the.Demon.1957.mkv", 3_000, "https://real-debrid.com/d/4"),
+            RealDebrid.RdFile("d:5", "Night.of.the.Demon.1957.mkv", 4_000, "https://real-debrid.com/d/5"),
+        )
+        assertEquals(listOf("d:5", "d:4"), FileMatch.forMovie(night, demonFiles, both).map { it.key })
+        assertEquals(listOf("d:5"), index.ownFiles(night, FileMatch.forMovie(night, demonFiles, both)).map { it.key })
+        assertEquals(listOf("d:4"), index.ownFiles(curse, FileMatch.forMovie(curse, demonFiles, both)).map { it.key })
+        // With no other film owning the title, the file found by another title stays.
+        val alone = FileMatch.Index(listOf(eyes, night), both)
+        assertEquals(listOf("d:5", "d:4"), alone.ownFiles(night, FileMatch.forMovie(night, demonFiles, both)).map { it.key })
     }
 
     @Test
@@ -297,5 +317,14 @@ class RealDebridTest {
         many = many.with("tt9000000", listOf("New"))
         assertTrue(many.knows("tt0000006"))
         assertFalse(many.knows("tt0000007"))
+
+        // The stamp says whether the titles themselves changed: a film with none, or the same titles again, does not.
+        val base = AltTitles.NONE.with("tt0053459", listOf("Les yeux sans visage"))
+        assertTrue(base.stamp !== AltTitles.NONE.stamp)
+        assertTrue(base.with("tt0050766", emptyList()).stamp === base.stamp)
+        assertTrue(base.with("tt0053459", listOf("Les yeux sans visage")).stamp === base.stamp)
+        assertTrue(base.with("tt0053459", listOf("Another")).stamp !== base.stamp)
+        assertTrue(base.with("tt0050766", listOf("Curse of the Demon")).stamp !== base.stamp)
+        assertTrue(base.with("bad id", listOf("Title")).stamp === base.stamp)
     }
 }

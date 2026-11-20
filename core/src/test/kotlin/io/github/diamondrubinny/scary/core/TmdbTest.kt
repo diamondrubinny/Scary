@@ -340,8 +340,12 @@ class TmdbTest {
         assertEquals(listOf(9221L, 8944L, 7L, 8L), cast.map { it.personId })
         assertEquals("Laurie Strode", cast[1].character)
         assertEquals("https://image.tmdb.org/t/p/w185/9KWvPPRRNXBKmqM0aQGeZDHqSeb.jpg", cast[1].photo)
-        // Control characters are dropped and spaces made single; an address that is not a TMDB file name is not used.
+        // Control characters become spaces and spaces are made single; an address that is not a TMDB file name is not used.
         assertEquals("Bob the ghost", cast[2].character)
+        // A line break keeps the words apart, and the marks that turn the text's direction around are dropped.
+        val tricky = Tmdb.parseCast("""{"cast":[{"id":9,"name":"Ann\u202E Lee\u2066","character":"Laurie\nStrode\u200B"}]}""").single()
+        assertEquals("Ann Lee", tricky.name)
+        assertEquals("Laurie Strode", tricky.character)
         assertNull(cast[2].photo)
         assertNull(cast[3].photo)
         assertTrue(Tmdb.parseCast("not json").isEmpty())

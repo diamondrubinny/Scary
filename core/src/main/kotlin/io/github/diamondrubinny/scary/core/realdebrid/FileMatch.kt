@@ -56,15 +56,21 @@ object FileMatch {
      * Whether a file named as [parsed] is [movie]. [alt] adds the film's other titles from TMDB (films only): a file
      * named by one of them fits too, under the same rules for the year and for short titles.
      */
-    fun matches(movie: Movie, parsed: Parsed, alt: AltTitles = AltTitles.NONE): Boolean {
-        if (movie.isSeries) return matchesSeries(movie, parsed)
+    fun matches(movie: Movie, parsed: Parsed, alt: AltTitles = AltTitles.NONE): Boolean =
+        if (movie.isSeries) matchesSeries(movie, parsed) else matchesFilm(movie, parsed, titleKeys(movie), altKeys(movie, alt))
+
+    /** [own] and [other] are the film's [titleKeys] and [altKeys], worked out once for many files. */
+    private fun matchesFilm(movie: Movie, parsed: Parsed, own: Set<String>, other: Set<String>): Boolean {
         if (parsed.episode) return false
         if (parsed.title.length < 2) return false
         if (parsed.year != null && kotlin.math.abs(parsed.year - movie.year) > 1) return false
         val title = key(parsed.title)
         // A file with no year must match a longer title exactly, so "It" or "Us" alone never claims a random file.
         if (parsed.year == null && title.length < 6) return false
-        return title in titleKeys(movie) || title in altKeys(movie, alt)
+        if (title in own) return true
+        // Other titles are looser ground (another film may share one, and SCARY knows them only for the films whose
+        // pages were opened), so the file must carry the film's own year, exactly.
+        return parsed.year == movie.year && title in other
     }
 
     private fun matchesSeries(movie: Movie, parsed: Parsed): Boolean {
@@ -107,8 +113,12 @@ object FileMatch {
     }
 
     /** The viewer's files that are [movie], biggest first (usually the best quality). For a series, see [forSeries]. */
-    fun forMovie(movie: Movie, files: List<RealDebrid.RdFile>, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> =
-        files.filter { matches(movie, parse(it.name), alt) }.sortedByDescending { it.sizeBytes }
+    fun forMovie(movie: Movie, files: List<RealDebrid.RdFile>, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> {
+        if (movie.isSeries) return files.filter { matchesSeries(movie, parse(it.name)) }.sortedByDescending { it.sizeBytes }
+        val own = titleKeys(movie)
+        val other = altKeys(movie, alt)
+        return files.filter { matchesFilm(movie, parse(it.name), own, other) }.sortedByDescending { it.sizeBytes }
+    }
 
     /** One of the viewer's files for an episode of a series. */
     data class Episode(val season: Int, val episode: Int, val file: RealDebrid.RdFile)
@@ -165,6 +175,14 @@ object FileMatch {
             val own = ownTitle(fileName)
             return own + otherTitle(fileName, own)
         }
+
+        /**
+         * Of [files] that fit [movie] ([FileMatch.forMovie] with the same other titles), those that are its own: a
+         * file that fits only by one of the film's other titles is left out when it carries another film's own title
+         * (that film's page shows it).
+         */
+        fun ownFiles(movie: Movie, files: List<RealDebrid.RdFile>): List<RealDebrid.RdFile> =
+            files.filter { file -> matches(movie, parse(file.name)) || ownTitle(file.name).none { it.id != movie.id } }
 
         /**
          * The one film [fileName] is, or null when none or several fit: the viewer decides then. A film's own title

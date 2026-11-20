@@ -309,9 +309,17 @@ object Tmdb {
             .take(MAX_ALT_TITLES)
             .toList()
 
-    /** Text from TMDB that will be drawn or kept: no control characters, spaces made single. */
+    /**
+     * Text from TMDB that will be drawn or kept: control characters (a line break among them) become spaces, the
+     * characters that turn the direction of the text around or hide in it are dropped, and spaces are made single.
+     */
     private fun shownText(text: String): String =
-        text.filterNot { it.isISOControl() }.replace(Regex("\\s+"), " ").trim()
+        text.map { if (it.isISOControl()) ' ' else it }.filterNot { it in DIRECTION_MARKS }.joinToString("")
+            .replace(Regex("\\s+"), " ").trim()
+
+    /** Embeddings, overrides and isolates, the direction marks, the zero-width space and the byte order mark. */
+    private val DIRECTION_MARKS: Set<Char> =
+        (('\u202A'..'\u202E') + ('\u2066'..'\u2069') + listOf('\u200E', '\u200F', '\u061C', '\u200B', '\uFEFF')).toSet()
 
     /** The most actors shown on a film's page. */
     const val MAX_CAST = 12

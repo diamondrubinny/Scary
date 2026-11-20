@@ -15,6 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,10 +57,18 @@ const val CAST_CARD_TAG = "castCard"
 
 /**
  * The film's cast with faces and roles, as TMDB lists it (docs/UPGRADE_0.7_PLAN.md): a heading and a row of cards.
- * OK on a card opens that actor's films. Each card is one button, read as "<actor>, as <role>".
+ * OK on a card opens that actor's films. Each card is one button, read as "<actor>, as <role>". [returnTo] is the
+ * actor the viewer is coming back from, if any: their card carries [returnFocus].
  */
 @Composable
-fun CastCards(cast: List<TmdbCastMember>, onOpen: (TmdbCastMember) -> Unit, modifier: Modifier = Modifier) {
+fun CastCards(
+    cast: List<TmdbCastMember>,
+    onOpen: (TmdbCastMember) -> Unit,
+    modifier: Modifier = Modifier,
+    state: LazyListState = rememberLazyListState(),
+    returnTo: String? = null,
+    returnFocus: FocusRequester? = null,
+) {
     Column(modifier) {
         BasicText(
             text = stringResource(R.string.row_cast),
@@ -63,46 +77,58 @@ fun CastCards(cast: List<TmdbCastMember>, onOpen: (TmdbCastMember) -> Unit, modi
         )
         LazyRow(
             modifier = Modifier.testTag(CAST_CARDS_TAG),
+            state = state,
             contentPadding = PaddingValues(horizontal = SidePadding, vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             items(cast, key = { "cast:" + it.personId }) { member ->
-                CastCard(member, onClick = { onOpen(member) })
+                CastCard(
+                    member,
+                    onClick = { onOpen(member) },
+                    modifier = if (returnFocus != null && member.name == returnTo) Modifier.focusRequester(returnFocus) else Modifier,
+                )
             }
         }
     }
 }
 
+/**
+ * The whole card takes the focus (the photo, the name and the role), so the page scrolls far enough to show all of
+ * it, and every card is as tall as the next: the name always has room for two lines and the role for one.
+ */
 @Composable
-private fun CastCard(member: TmdbCastMember, onClick: () -> Unit, width: Dp = 84.dp) {
+private fun CastCard(member: TmdbCastMember, onClick: () -> Unit, modifier: Modifier = Modifier, width: Dp = 84.dp) {
     val label = if (member.character.isBlank()) member.name else stringResource(R.string.cast_card_label, member.name, member.character)
-    Column(Modifier.width(width)) {
-        FocusSurface(
-            onClick = onClick,
-            modifier = Modifier.width(width).aspectRatio(2f / 3f).testTag(CAST_CARD_TAG),
-            contentDescription = label,
-            focusedScale = 1.06f,
-        ) { focused ->
-            PersonPhoto(member.name, member.photo, Modifier.fillMaxSize())
-            // Noir: like the posters, the card in focus is lit and the others are dimmed (not with a finger).
-            val lit = focused || LocalInputModeManager.current.inputMode != InputMode.Keyboard
-            if (!lit) Box(Modifier.fillMaxSize().background(ScaryColors.Void.copy(alpha = POSTER_DIM)))
-        }
-        // The button above already says both; a screen reader does not read them twice.
-        BasicText(
-            text = member.name,
-            style = ScaryType.Caption.copy(color = ScaryColors.Bone).mixedLanguage(),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 8.dp).clearAndSetSemantics { },
-        )
-        if (member.character.isNotBlank()) {
+    FocusSurface(
+        onClick = onClick,
+        modifier = modifier.width(width).testTag(CAST_CARD_TAG),
+        contentDescription = label,
+        containerColor = Color.Transparent,
+        focusedScale = 1.06f,
+    ) { focused ->
+        Column {
+            Box(Modifier.fillMaxWidth().aspectRatio(2f / 3f)) {
+                PersonPhoto(member.name, member.photo, Modifier.fillMaxSize())
+                // Noir: like the posters, the card in focus is lit and the others are dimmed (not with a finger).
+                val lit = focused || LocalInputModeManager.current.inputMode != InputMode.Keyboard
+                if (!lit) Box(Modifier.fillMaxSize().background(ScaryColors.Void.copy(alpha = POSTER_DIM)))
+            }
+            // The button already says both; a screen reader does not read them twice.
+            BasicText(
+                text = member.name,
+                style = ScaryType.Caption.copy(color = ScaryColors.Bone).mixedLanguage(),
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(start = 2.dp, end = 2.dp, top = 6.dp).clearAndSetSemantics { },
+            )
             BasicText(
                 text = member.character,
                 style = ScaryType.Caption.mixedLanguage(),
+                minLines = 1,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.clearAndSetSemantics { },
+                modifier = Modifier.padding(start = 2.dp, end = 2.dp, bottom = 4.dp).clearAndSetSemantics { },
             )
         }
     }

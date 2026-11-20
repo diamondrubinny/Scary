@@ -185,6 +185,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     // An actor's screen keeps its place across a visit to one of its films: a grid per actor, and the film opened.
     val personGrids = remember { HashMap<String, androidx.compose.foundation.lazy.grid.LazyGridState>() }
     var personOpenedId by remember { mutableStateOf<String?>(null) }
+    // The film's page an actor's screen was opened from, and the actor: Back lands on that actor again.
+    var personReturn by remember { mutableStateOf<Pair<String, String>?>(null) }
     val person by viewModel.person.collectAsStateWithLifecycle()
     val rowStates = remember { mutableMapOf<String, LazyListState>() }
     LaunchedEffect(resets) {
@@ -458,6 +460,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     ScaryTheme(reduceMotion = !state.effectsEnabled || !systemAnimations) {
         Box(Modifier.fillMaxSize().background(ScaryColors.Void).remoteKeysPastHiddenKeyboard()) {
             val current = screen
+            // Back at the home screen, no film's page is waiting for the viewer to come back from an actor.
+            LaunchedEffect(current == Screen.Home) { if (current == Screen.Home) personReturn = null }
             val details = (current as? Screen.Details)?.let { viewModel.details(it.movieId, similarFor) }
             val backdropMovie = if (current == Screen.Home || details != null) details?.movie ?: state.hero else null
             // The background (art, tinted light, fog, grain): not under the player, which covers everything, so a film
@@ -601,13 +605,18 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onLoadFranchise = {
                         viewModel.loadFranchise(it, language)
                         viewModel.loadCast(it, language)
+                        // A page that comes back to the front shows its own film's files again.
+                        viewModel.ensureRealDebridFiles(it.id)
                     },
+                    onReturnedToPerson = { personReturn = null },
                     cast = cast?.takeIf { it.movieId == details.movie.id && it.language == language }?.members.orEmpty(),
                     onFranchiseToBucket = { viewModel.addFranchiseToBucket(it, language) },
                     onOpenPerson = { name, personId, photo ->
                         personOpenedId = null
+                        personReturn = details.movie.id to name
                         viewModel.openPerson(name, personId, photo)
                     },
+                    returnToPerson = personReturn?.takeIf { it.first == details.movie.id }?.second,
                     reminded = details.movie.id in state.remindedIds,
                     onToggleReminder = { viewModel.toggleReminder(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
@@ -713,6 +722,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     person = person,
                     onLoad = { viewModel.loadPerson(it, current.personId) },
                     photo = current.photo,
+                    personId = current.personId,
                     onOpenMovie = {
                         personOpenedId = it.id
                         viewModel.openDetails(it.id)

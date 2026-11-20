@@ -231,8 +231,11 @@ class RealDebridRepository(
     }
 
     /** The viewer's files that are [movie] (FileMatch), or empty when not signed in or not reachable. */
-    suspend fun filesFor(movie: Movie, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> =
-        (files() as? Files.Ready)?.files?.let { FileMatch.forMovie(movie, it, alt) }.orEmpty()
+    suspend fun filesFor(movie: Movie, alt: AltTitles = AltTitles.NONE): List<RealDebrid.RdFile> {
+        val all = (files() as? Files.Ready)?.files ?: return emptyList()
+        // Hundreds of names are parsed: not on the main thread.
+        return withContext(Dispatchers.Default) { FileMatch.forMovie(movie, all, alt) }
+    }
 
     /** A link to play [file]: the one Real-Debrid already generated, or a fresh one from its own link. */
     suspend fun playable(file: RealDebrid.RdFile): Playable? = withContext(Dispatchers.IO) {

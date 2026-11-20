@@ -36,7 +36,7 @@ cast with faces, other titles for your own files, "My year in horror", viewer pr
 - **When a film's page opens** (TMDB key, Real-Debrid signed in, online data on, not family night), SCARY asks TMDB once for the film's other titles and keeps them on the TV. The page then looks through the viewer's files again with them.
 - **On the Real-Debrid screen** the same kept titles tell which film a file is.
 - **A film's own title wins:** a file that carries film B's own title is never given to film A because of one of A's other titles. Two films that fit equally stay unmatched, and the viewer decides (the correction window of 0.5.12).
-- **The year rule stays:** a year in the file's name must be within one of the film's; a short title with no year matches nothing.
+- **Stricter than for a film's own title:** by another title, the file's name must carry the film's own year, exactly (by its own title a year within one is enough, as before). Another film may share the title, and SCARY knows other titles only for the films whose pages were opened.
 
 **Asked of TMDB:** `/3/movie/{id}/alternative_titles` (`titles[].title`).
 
@@ -65,10 +65,23 @@ cast with faces, other titles for your own files, "My year in horror", viewer pr
 - **core:** `Tmdb.creditsUrl`, `parseCast`, `alternativeTitlesUrl`, `parseAlternativeTitles`; `realdebrid/AltTitles.kt`; `FileMatch` (other titles, "own title wins"). Tests: `TmdbTest`, `FileMatchTest`, `AltTitlesTest`.
 - **app:** `TmdbRepository.cast`, `personFilmsById`, `altTitles`, `loadAlternativeTitles`; `HomeViewModel` (`cast`, `loadCast`, `openPerson` with an id; files matched with other titles); `DetailsScreen` (cast cards); `PersonScreen` (photo); strings in five languages; UI tests.
 
+### Review notes (an independent review of the first build, 20.11.2026)
+Found and fixed before the first push:
+- **A focused cast card could leave its name below the screen's edge** (only the photo took the focus). The whole card takes it now, and every card is the same height.
+- **The page moved under the viewer when TMDB answered late** (a new row pushed the focused poster down). The cards now come in only while the focus is in the header, or nowhere on the page; a viewer already further down gets them when they come back up.
+- **Back from an actor's screen landed on "Watch".** It lands on that actor again (their card, or their name).
+- **Another title could claim a neighbour's file** ("Zombie.1979" for a 1978 film that has "Zombie" among its titles). By another title the year must now be the film's own.
+- **A line break in a TMDB name joined two words; direction marks could turn the text around.** Breaks become spaces; the marks are dropped.
+- **Matching ran on the main thread, and every film found to have no other titles rebuilt the whole index.** Off the main thread now; the index is rebuilt only when titles themselves change.
+- **An actor opened by name, then by their card, showed the name's films for a moment.** The screen now checks TMDB's id too.
+- **Older than this version:** a film's page that came back to the front (Back from another film) had lost its "Play from Real-Debrid" button. It looks for its own files again.
+
 ### Limits
 - **Films only.** A series' page keeps the names from Cinemeta, and series files are matched by the titles SCARY holds (TMDB's "find" is read for films only today).
 - **Written from TMDB's API description,** not from a live answer (no key in the workspace): **to verify on a TV with a key.** The photo size `w185` is the profile size TMDB documents; if it is refused, initials show.
 - **Other titles arrive when a film's page is opened,** not for the whole library at once (that would be thousands of requests).
+- **Two films of the same year that share another title,** only one of whose pages was opened: the file goes to that one until the other's page is opened; then neither, and the viewer decides. The correction window (hold OK on the file) settles it either way.
+- **Not tested by a UI test:** the swap from names to cards on a film's page (it needs TMDB's answer; the cards and the actor's screen are tested by themselves with made-up data).
 
 ## Stage 2 (in version 0.7.0, being small): more in "Your year in fear"
 **A correction:** when the options were listed, "My year in horror" was written as missing. It is not: **"Your year in fear" has been in Settings for a long time** (films watched, hours, average fear, the scariest film, favourite subgenre and decade, films loved; this year and all time; the day a film is marked as watched is kept). The option was offered without checking the code first.

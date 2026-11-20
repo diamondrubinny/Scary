@@ -19,7 +19,14 @@ import kotlinx.serialization.json.jsonObject
  * named by another title of a film is still recognised as that film (docs/UPGRADE_0.7_PLAN.md). A film asked about
  * that has no other titles is kept with none, so it is not asked about again. Never changes: [with] gives a new one.
  */
-class AltTitles private constructor(private val byImdb: Map<String, List<String>>) {
+class AltTitles private constructor(
+    private val byImdb: Map<String, List<String>>,
+    /**
+     * The same object for as long as the titles themselves are the same: a film remembered as having none changes
+     * nothing a file could be matched by, so what was built from the titles (an index) is still good.
+     */
+    val stamp: Any = Any(),
+) {
     val size: Int get() = byImdb.size
 
     /** Whether the film was asked about already (it may have no other titles). */
@@ -31,10 +38,11 @@ class AltTitles private constructor(private val byImdb: Map<String, List<String>
     fun with(imdbId: String, titles: List<String>): AltTitles {
         if (!imdbPattern.matches(imdbId)) return this
         val next = LinkedHashMap(byImdb)
-        next.remove(imdbId)
-        next[imdbId] = clean(titles)
-        while (next.size > MAX_FILMS) next.remove(next.keys.first())
-        return AltTitles(next)
+        val cleaned = clean(titles)
+        var titlesChanged = next.remove(imdbId).orEmpty() != cleaned
+        next[imdbId] = cleaned
+        while (next.size > MAX_FILMS) titlesChanged = next.remove(next.keys.first()).orEmpty().isNotEmpty() || titlesChanged
+        return AltTitles(next, if (titlesChanged) Any() else stamp)
     }
 
     fun encode(): String = buildJsonObject {
