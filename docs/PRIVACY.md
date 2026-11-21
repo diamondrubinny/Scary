@@ -12,7 +12,7 @@
   - לכן אין באנר עוגיות. **דורש בדיקה משפטית:** האם השאלה הזו מספיקה כהסכמה לפי ePrivacy (סעיף 5(3)).
   - אם תתווסף בעתיד אנליטיקה, היא תיטען רק אחרי הסכמה מפורשת, עם אפשרות משיכה (ראו `PLAN.md` סעיף 13).
 - המידע נשמר מקומית בלבד. `android:allowBackup="false"`, כך שהוא לא עובר לגיבוי של Google.
-- הרשת: HTTPS בלבד (`network_security_config`, ללא cleartext). בקשות API נשלחות ל־Cinemeta ול־TMDB, ובנוסף ל־Real-Debrid ול־Stremio רק אם המשתמש מחבר אותם, ולשירות הכתוביות כשחיפוש הכתוביות פעיל (ברירת מחדל). תמונות נטענות מכתובות HTTPS שהשירותים מחזירים (בעיקר `images.metahub.space` ו־`image.tmdb.org`).
+- הרשת: HTTPS בלבד (`network_security_config`, ללא cleartext). **חריג אחד:** אינדקסר שהמשתמש הגדיר בכתובת `http://` של הרשת הביתית (סעיף 6). בקשות API נשלחות ל־Cinemeta ול־TMDB, ובנוסף ל־Real-Debrid ול־Stremio רק אם המשתמש מחבר אותם, ולשירות הכתוביות כשחיפוש הכתוביות פעיל (ברירת מחדל). תמונות נטענות מכתובות HTTPS שהשירותים מחזירים (בעיקר `images.metahub.space` ו־`image.tmdb.org`).
 
 ## 2. Data Map
 
@@ -183,20 +183,21 @@
 
 | ספק | מתי | מה נשלח | מטרה | שליטת המשתמש | לבדיקה |
 |---|---|---|---|---|---|
-| האינדקסר של המשתמש (Torznab: ‏Prowlarr, ‏Jackett; כתובת HTTPS שהמשתמש הזין) | רק אחרי שהמשתמש הגדיר אינדקסר, ורק כשהוא לוחץ "חיפוש" או "חיפוש מקורות" | מילות החיפוש או מספר ה־IMDb, מפתח ה־API (בכתובת הבקשה, כפי ש־Torznab דורש), IP ו־User-Agent "SCARY-launcher". **לא** נשלחים פרטי Real-Debrid, היסטוריה או רשימות | חיפוש תוצאות | הגדרה יזומה, הסרה בכל עת; בלי אינדקסר לא נשלח דבר | האינדקסר הוא שרת של המשתמש או של צד שלישי שהמשתמש בחר; מה שהוא שולח הלאה לאתרים אינו בשליטת SCARY. **דורש בדיקה משפטית** |
+| האינדקסר של המשתמש (Torznab: ‏Prowlarr, ‏Jackett; כתובת HTTPS שהמשתמש הזין) | רק אחרי שהמשתמש הגדיר אינדקסר, ורק כשהוא לוחץ "חיפוש" או "חיפוש מקורות" | מילות החיפוש או מספר ה־IMDb, מפתח ה־API (בכתובת הבקשה, כפי ש־Torznab דורש), IP ו־User-Agent "SCARY-launcher". ב־HTTPS; או ב־HTTP לא מוצפן, רק כשהמשתמש הזין כתובת פרטית של הרשת הביתית במספרים (‎10.x‎, ‎172.16–172.31‎, ‎192.168.x‎), ואז המפתח והחיפוש עוברים גלויים בתוך אותה רשת. **לא** נשלחים פרטי Real-Debrid, היסטוריה או רשימות | חיפוש תוצאות | הגדרה יזומה, הסרה בכל עת; בלי אינדקסר לא נשלח דבר | האינדקסר הוא שרת של המשתמש או של צד שלישי שהמשתמש בחר; מה שהוא שולח הלאה לאתרים אינו בשליטת SCARY. **דורש בדיקה משפטית** |
 | Real-Debrid (`api.real-debrid.com`) | כשהמשתמש מאשר הוספה של קישור מגנט, פותח את מסך "הוספת טורנט" או מוחק טורנט | קישור המגנט כפי ש־SCARY בנתה אותו מחדש (info-hash, שם, trackers), בחירת קובצי הווידאו והכתוביות, בקשת מחיקה, token ו־IP | משיכה לחשבון המשתמש וניגון בנגן הפנימי | כל הוספה דורשת אישור; מחיקה דורשת אישור שני | תנאי Real-Debrid ל־client_id של קוד פתוח לגבי הוספת טורנטים. **דורש אימות ובדיקה משפטית** |
 
 אין עוגיות ואין trackers בפיצ'ר הזה. תשובת האינדקסר נקראת כטקסט לא מהימן: מסמך עם DOCTYPE נדחה, קישורים לקובצי `.torrent` לא נפתחים, ושום קובץ מהטורנט לא מורד לטלוויזיה או מורץ.
 
 ### 6.3 טיוטת נוסח למשתמש
 
-**עברית.** **חיפוש והוספת מקורות (רק אם אתם משתמשים בהם).** אם הגדרתם אינדקסר Torznab משלכם, מילות החיפוש שלכם (או מספר ה־IMDb של הסרט), מפתח האינדקסר וכתובת ה־IP של הטלוויזיה נשלחים לאינדקסר שלכם, ורק אליו. כשאתם מאשרים הוספה, ה־hash, השם וה־trackers של הקישור נשלחים לחשבון ה־Real-Debrid שלכם. כתובת האינדקסר והמפתח נשמרים מוצפנים בטלוויזיה בלבד. SCARY לא מגיעה עם אינדקסר, אתר או קישורים, ולא שומרת את החיפושים שלכם.
+**עברית.** **חיפוש והוספת מקורות (רק אם אתם משתמשים בהם).** אם הגדרתם אינדקסר Torznab משלכם, מילות החיפוש שלכם (או מספר ה־IMDb של הסרט), מפתח האינדקסר וכתובת ה־IP של הטלוויזיה נשלחים לאינדקסר שלכם, ורק אליו. אם כתובת האינדקסר היא `http://` ברשת הביתית, הם עוברים בה בלי הצפנה. כשאתם מאשרים הוספה, ה־hash, השם וה־trackers של הקישור נשלחים לחשבון ה־Real-Debrid שלכם. כתובת האינדקסר והמפתח נשמרים מוצפנים בטלוויזיה בלבד. SCARY לא מגיעה עם אינדקסר, אתר או קישורים, ולא שומרת את החיפושים שלכם.
 
-**English.** **Searching for and adding sources (only if you use them).** If you set up a Torznab indexer of your own, your search words (or the film's IMDb number), the indexer's key and your TV's IP address go to your indexer, and only there. When you confirm adding a release, the link's hash, name and trackers go to your own Real-Debrid account. The indexer's address and key are kept encrypted on the TV only. SCARY comes with no indexer, site or links, and does not keep your searches.
+**English.** **Searching for and adding sources (only if you use them).** If you set up a Torznab indexer of your own, your search words (or the film's IMDb number), the indexer's key and your TV's IP address go to your indexer, and only there. If the indexer's address is `http://` on your home network, they travel there unencrypted. When you confirm adding a release, the link's hash, name and trackers go to your own Real-Debrid account. The indexer's address and key are kept encrypted on the TV only. SCARY comes with no indexer, site or links, and does not keep your searches.
 
 ### 6.4 נושאים לבדיקה משפטית
 
 - אחריות המפיץ של אפליקציה שמחפשת באינדקסר ומוסיפה מגנטים לחשבון debrid, גם כשהאינדקסר והקישורים הם של המשתמש. **הופץ ב־0.6.2 בלי בדיקה משפטית; היא עדיין נדרשת.**
 - האם חיפוש לפי שם או מספר IMDb, בצירוף IP, הוא מידע אישי שמחייב גילוי או בסיס חוקי נוסף לפי GDPR ולפי חוק הגנת הפרטיות. **דורש בדיקה משפטית.**
 - מפתח ה־API נשלח בכתובת הבקשה (דרישת הפרוטוקול), ולכן עלול להירשם בלוגים של שרת האינדקסר או של proxy בדרך. SCARY עצמה לא רושמת אותו.
+- **HTTP ברשת הביתית:** הבקשה לאינדקסר בכתובת פרטית יוצאת ב־socket משל SCARY, בלי לפתוח cleartext לשאר האפליקציה. כל מי שמחובר לאותה רשת ביתית יכול לראות את המפתח ואת החיפוש. מוצג למשתמש בחלון "הגדרות אינדקסר".
 - האפליקציה אינה מתאימה לחנויות אפליקציות בלי בדיקה של מדיניות החנות. **דורש אימות.**

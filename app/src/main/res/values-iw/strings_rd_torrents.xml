@@ -56,13 +56,13 @@
     <string name="rd_sources_seeders">משתפים: %1$d</string>
     <string name="rd_sources_not_configured">עדיין לא הוגדר אינדקסר.</string>
     <string name="rd_sources_indexer">הגדרות אינדקסר</string>
-    <string name="rd_sources_indexer_what">הזינו את כתובת ה-Torznab של האינדקסר שלכם (חייבת להתחיל ב-https://) ואת מפתח ה-API שלו. שניהם נשמרים מוצפנים בטלוויזיה הזו בלבד, ונשלחים רק לכתובת הזו.</string>
+    <string name="rd_sources_indexer_what">הזינו את כתובת ה-Torznab של האינדקסר שלכם ואת מפתח ה-API שלו. הכתובת מתחילה ב-https://, או ב-http:// כשזו כתובת ברשת הביתית במספרים (‎192.168…‎, ‎10…‎, ‎172.16 עד 172.31…‎): ב-http:// המפתח עובר לא מוצפן בתוך הרשת הביתית. שניהם נשמרים מוצפנים בטלוויזיה הזו בלבד, ונשלחים רק לכתובת הזו.</string>
     <string name="rd_sources_connected">מחובר: %1$s</string>
     <string name="rd_sources_address_label">כתובת Torznab</string>
     <string name="rd_sources_key_label">מפתח API</string>
     <string name="rd_sources_save">שמירה</string>
     <string name="rd_sources_remove">הסרת האינדקסר</string>
-    <string name="rd_sources_bad_address">זו לא כתובת https.</string>
+    <string name="rd_sources_bad_address">זו לא כתובת ש-SCARY יכול להשתמש בה: https://, או http:// עם כתובת ברשת הביתית במספרים (‎192.168…‎, ‎10…‎).</string>
     <string name="rd_sources_bad_key">זה לא נראה כמו מפתח API.</string>
     <string name="rd_sources_pull_confirm">להוסיף את התוצאה הזו לחשבון ה-Real-Debrid שלכם ולנגן אותה בנגן של SCARY?</string>
     <string name="rd_sources_pull_yes">הוספה וניגון</string>

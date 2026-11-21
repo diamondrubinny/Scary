@@ -56,13 +56,13 @@
     <string name="rd_sources_seeders">Сиды: %1$d</string>
     <string name="rd_sources_not_configured">Индексатор ещё не настроен.</string>
     <string name="rd_sources_indexer">Настройки индексатора</string>
-    <string name="rd_sources_indexer_what">Введите Torznab-адрес вашего индексатора (должен начинаться с https://) и его API-ключ. Оба хранятся в зашифрованном виде только на этом ТВ и отправляются только на этот адрес.</string>
+    <string name="rd_sources_indexer_what">Введите Torznab-адрес вашего индексатора и его API-ключ. Адрес начинается с https:// или с http://, если это адрес домашней сети цифрами (192.168…, 10…, от 172.16 до 172.31…): по http:// ключ передаётся внутри домашней сети без шифрования. Оба хранятся в зашифрованном виде только на этом ТВ и отправляются только на этот адрес.</string>
     <string name="rd_sources_connected">Подключено: %1$s</string>
     <string name="rd_sources_address_label">Адрес Torznab</string>
     <string name="rd_sources_key_label">API-ключ</string>
     <string name="rd_sources_save">Сохранить</string>
     <string name="rd_sources_remove">Удалить индексатор</string>
-    <string name="rd_sources_bad_address">Это не https-адрес.</string>
+    <string name="rd_sources_bad_address">SCARY не может использовать этот адрес: нужен https:// или http:// с адресом домашней сети цифрами (192.168…, 10…).</string>
     <string name="rd_sources_bad_key">Это не похоже на API-ключ.</string>
     <string name="rd_sources_pull_confirm">Добавить этот релиз в ваш аккаунт Real-Debrid и воспроизвести в плеере SCARY?</string>
     <string name="rd_sources_pull_yes">Добавить и смотреть</string>

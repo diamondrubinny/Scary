@@ -27,9 +27,19 @@ class TorznabTest {
            <rss version="2.0" xmlns:torznab="http://torznab.com/schemas/2015/feed"><channel><title>Indexer</title>$items</channel></rss>"""
 
     @Test
-    fun `the address must be https and plain`() {
+    fun `the address must be https, or plain http at a home address`() {
         assertEquals("https://indexer.example/1/api", Torznab.endpoint(" https://indexer.example/1/api/ "))
-        assertNull(Torznab.endpoint("http://192.168.1.5:9696/1/api"))
+        assertEquals("http://192.168.1.5:9696/1/api", Torznab.endpoint("http://192.168.1.5:9696/1/api"))
+        assertEquals("http://10.0.0.7/api", Torznab.endpoint("http://10.0.0.7/api/"))
+        assertEquals("http://172.20.3.4:9117/api/v2.0/indexers/all/results/torznab/api", Torznab.endpoint("http://172.20.3.4:9117/api/v2.0/indexers/all/results/torznab/api"))
+        // Plain HTTP anywhere else is refused: a public address, a name, or numbers that only look private.
+        assertNull(Torznab.endpoint("http://indexer.example/1/api"))
+        assertNull(Torznab.endpoint("http://8.8.8.8:9696/1/api"))
+        assertNull(Torznab.endpoint("http://172.32.0.1/api"))
+        assertNull(Torznab.endpoint("http://192.168.1.5.evil.example/api"))
+        assertNull(Torznab.endpoint("http://nas.local:9696/1/api"))
+        assertNull(Torznab.endpoint("http://user:pass@192.168.1.5/api"))
+        assertNull(Torznab.endpoint("http://192.168.1.999/api"))
         assertNull(Torznab.endpoint("https://user:pass@indexer.example/api"))
         assertNull(Torznab.endpoint("https://indexer.example/api?apikey=x"))
         assertNull(Torznab.endpoint("https://"))

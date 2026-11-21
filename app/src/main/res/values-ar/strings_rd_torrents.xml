@@ -56,13 +56,13 @@
     <string name="rd_sources_seeders">المشاركون: %1$d</string>
     <string name="rd_sources_not_configured">لم يُعدّ أي مفهرس بعد.</string>
     <string name="rd_sources_indexer">إعدادات المفهرس</string>
-    <string name="rd_sources_indexer_what">أدخل عنوان Torznab لمفهرسك (يجب أن يبدأ بـ https://) ومفتاح API الخاص به. يُحفظان مشفّرين على هذا التلفاز فقط ويُرسلان إلى ذلك العنوان فقط.</string>
+    <string name="rd_sources_indexer_what">أدخل عنوان Torznab لمفهرسك ومفتاح API الخاص به. يبدأ العنوان بـ https://، أو بـ http:// إذا كان عنوانًا في الشبكة المنزلية بالأرقام (192.168… أو 10… أو من 172.16 إلى 172.31…): مع http:// ينتقل المفتاح دون تشفير داخل شبكتك المنزلية. يُحفظان مشفّرين على هذا التلفاز فقط ويُرسلان إلى ذلك العنوان فقط.</string>
     <string name="rd_sources_connected">متصل: %1$s</string>
     <string name="rd_sources_address_label">عنوان Torznab</string>
     <string name="rd_sources_key_label">مفتاح API</string>
     <string name="rd_sources_save">حفظ</string>
     <string name="rd_sources_remove">إزالة المفهرس</string>
-    <string name="rd_sources_bad_address">هذا ليس عنوان https.</string>
+    <string name="rd_sources_bad_address">هذا ليس عنوانًا يستطيع SCARY استخدامه: https://، أو http:// مع عنوان في الشبكة المنزلية بالأرقام (192.168… أو 10…).</string>
     <string name="rd_sources_bad_key">هذا لا يبدو مفتاح API.</string>
     <string name="rd_sources_pull_confirm">هل تريد إضافة هذه النتيجة إلى حسابك على Real-Debrid وتشغيلها في مشغّل SCARY؟</string>
     <string name="rd_sources_pull_yes">إضافة وتشغيل</string>

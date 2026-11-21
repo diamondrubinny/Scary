@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.data
 
 import android.os.SystemClock
 import android.util.Log
+import io.github.diamondrubinny.scary.core.sources.LanHttp
 import io.github.diamondrubinny.scary.core.sources.Releases
 import io.github.diamondrubinny.scary.core.sources.Torznab
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,9 @@ import kotlinx.serialization.json.put
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.net.URI
 import java.net.URL
 
@@ -29,8 +33,9 @@ import java.net.URL
  * The viewer's own Torznab indexer (Prowlarr, Jackett), only in a build made with the sources feature and only once
  * they give its address and key (docs/TORRENT_SCRAPER_PLAN.md). SCARY ships no address of any indexer or site.
  *
- * The address and the key are stored encrypted (SecretStore), are not backed up, and are sent to that address only,
- * over HTTPS. The key travels in the request's address, as Torznab asks, so that address is never logged. A search
+ * The address and the key are stored encrypted (SecretStore), are not backed up, and are sent to that address only:
+ * over HTTPS, or over plain HTTP when the address is a private home-network one (core LanHttp), where the key then
+ * travels unencrypted inside that network. The key travels in the request's address, as Torznab asks, so that address is never logged. A search
  * sends the viewer's words, the key and the TV's IP address to the indexer; nothing about the viewer's account.
  */
 class SourcesRepository(private val secrets: SecretStore) {
@@ -116,7 +121,41 @@ class SourcesRepository(private val secrets: SecretStore) {
         result
     }
 
-    private fun ask(url: String): Search {
+    private fun ask(url: String): Search = LanHttp.target(url)?.let(::askAtHome) ?: askSecurely(url)
+
+    /**
+     * The viewer's indexer at a private home address, over plain HTTP (core LanHttp): a socket of SCARY's own, since
+     * the app's cleartext rule stays closed for everything else. The address was checked when it was saved, and the
+     * socket is checked again once connected: it must have reached a private address.
+     */
+    private fun askAtHome(target: LanHttp.Target): Search = try {
+        Socket().use { socket ->
+            socket.soTimeout = TIMEOUT_MS
+            socket.connect(InetSocketAddress(InetAddress.getByName(target.host), target.port), LAN_CONNECT_MS)
+            if (!socket.inetAddress.isSiteLocalAddress) return Search.Unreachable
+            socket.getOutputStream().apply {
+                write(LanHttp.request(target))
+                flush()
+            }
+            val response = LanHttp.read(socket.getInputStream().buffered(), Torznab.MAX_ANSWER_BYTES)
+            when {
+                response.code == HttpURLConnection.HTTP_UNAUTHORIZED || response.code == HttpURLConnection.HTTP_FORBIDDEN || response.code == HTTP_TOO_MANY_REQUESTS -> Search.Refused
+                // A redirect is not followed: the key must not go to another address.
+                response.code != HttpURLConnection.HTTP_OK -> Search.Unreachable
+                else -> when (val answer = response.body?.let(Torznab::parse)) {
+                    is Torznab.Answer.Results -> Search.Ready(answer.candidates)
+                    is Torznab.Answer.Refused -> Search.Refused
+                    Torznab.Answer.Unreadable, null -> Search.Unreadable
+                }
+            }
+        }
+    } catch (e: IOException) {
+        // Only the kind of failure: the address holds the key.
+        Log.w(TAG, "Home indexer request failed: ${e.javaClass.simpleName}")
+        Search.Unreachable
+    }
+
+    private fun askSecurely(url: String): Search {
         var connection: HttpURLConnection? = null
         return try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
@@ -163,6 +202,7 @@ class SourcesRepository(private val secrets: SecretStore) {
         const val TAG = "ScarySources"
         const val SECRET_NAME = "torznab_indexer"
         const val TIMEOUT_MS = 20_000
+        const val LAN_CONNECT_MS = 8_000
         const val CACHE_MS = 10 * 60_000L
         const val HTTP_TOO_MANY_REQUESTS = 429
     }
