@@ -1,0 +1,210 @@
+--------- beginning of system
+--------- beginning of main
+11-21 14:14:06.696 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:08.761 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:08.761 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:09.070 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:09.165 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:09.439 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:09.439 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:09.439 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:09.439 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:12.829 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 MJNR58zaStE nocookie: YouTube player ready
+11-21 14:14:15.099 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 MJNR58zaStE nocookie: YouTube error 150
+11-21 14:14:15.130 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:17.166 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:17.166 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:17.456 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:17.464 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:17.465 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:17.465 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:17.465 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:19.393 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 V6wWKNij_1M nocookie: YouTube player ready
+11-21 14:14:21.253 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 V6wWKNij_1M nocookie: YouTube error 150
+11-21 14:14:21.426 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:23.648 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:23.648 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:23.871 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:23.871 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:23.871 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:23.871 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:27.225 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 MJNR58zaStE youtube: YouTube player ready
+11-21 14:14:29.737 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:30.826 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:30.826 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:31.095 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:31.109 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:31.109 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:31.109 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:31.109 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:31.985 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/5 jAE7dNurHR4 nocookie: YouTube player ready
+11-21 14:14:33.317 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/5 jAE7dNurHR4 nocookie: YouTube error 150
+11-21 14:14:33.330 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:35.533 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:35.533 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:35.722 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:35.726 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:35.726 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:35.726 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:37.403 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/5 FZQvIJxG9Xs nocookie: YouTube player ready
+11-21 14:14:38.291 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/5 FZQvIJxG9Xs nocookie: YouTube error 150
+11-21 14:14:38.317 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:39.798 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:39.798 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:39.998 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:40.016 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:40.016 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:40.016 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:40.016 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:40.689 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/5 ANKdpe4J2h0 nocookie: YouTube player ready
+11-21 14:14:42.010 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/5 ANKdpe4J2h0 nocookie: YouTube error 150
+11-21 14:14:42.036 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:43.431 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:43.431 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:43.634 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:43.634 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:43.635 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:43.635 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:45.663 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:46.113 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:46.113 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:46.451 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:46.451 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:46.451 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:46.451 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:46.993 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 NT0loXUv-ks nocookie: YouTube player ready
+11-21 14:14:47.876 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 NT0loXUv-ks nocookie: YouTube error 150
+11-21 14:14:47.908 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:49.342 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:49.342 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:49.567 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:49.567 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:49.567 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:49.567 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:50.538 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 3JsrH8eUVOo nocookie: YouTube player ready
+11-21 14:14:51.969 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 3JsrH8eUVOo nocookie: YouTube error 150
+11-21 14:14:52.045 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:53.701 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:53.701 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:53.987 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:53.987 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:53.987 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:53.987 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:54.619 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 2Orp73nufs0 nocookie: YouTube player ready
+11-21 14:14:56.182 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 2Orp73nufs0 nocookie: YouTube error 150
+11-21 14:14:56.193 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:14:58.398 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:14:58.398 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:14:58.478 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:14:58.539 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:14:58.540 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:14:58.540 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:14:58.540 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:14:59.609 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 NT0loXUv-ks youtube: YouTube player ready
+11-21 14:15:02.502 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:03.903 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:03.903 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:04.309 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:04.387 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:04.387 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:04.387 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:04.387 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:05.450 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 gsB70ZRY-hI nocookie: YouTube player ready
+11-21 14:15:05.450 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 gsB70ZRY-hI nocookie: YouTube error 150
+11-21 14:15:05.457 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:06.440 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:06.440 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:06.636 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:06.657 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:06.715 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:06.715 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:06.715 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:07.454 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 Lc9pZmkNf34 nocookie: YouTube player ready
+11-21 14:15:08.672 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 Lc9pZmkNf34 nocookie: YouTube error 150
+11-21 14:15:08.693 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:10.522 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:10.523 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:10.784 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:10.823 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:10.823 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:10.823 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:10.823 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:11.884 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 sRfnevzM9kQ nocookie: YouTube player ready
+11-21 14:15:13.283 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 sRfnevzM9kQ nocookie: YouTube error 150
+11-21 14:15:13.297 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:15.807 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:15.807 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:16.061 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:16.338 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:16.339 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:16.339 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:16.339 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:18.951 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:19.936 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:19.936 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:20.151 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:20.151 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:20.151 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:20.151 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:20.754 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 zoNa1WH3GR8 nocookie: YouTube player ready
+11-21 14:15:21.636 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/3 zoNa1WH3GR8 nocookie: YouTube error 150
+11-21 14:15:21.644 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:23.303 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:23.303 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:23.537 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:23.583 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:23.584 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:23.584 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:23.584 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:24.866 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 9tyMi1Hn32I nocookie: YouTube player ready
+11-21 14:15:26.101 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/3 9tyMi1Hn32I nocookie: YouTube error 150
+11-21 14:15:26.181 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:27.861 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:27.861 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:28.091 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:28.140 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:28.140 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:28.140 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:28.140 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:29.548 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 zoNa1WH3GR8 youtube: YouTube player ready
+11-21 14:15:31.629 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/3 zoNa1WH3GR8 youtube: YouTube error 150
+11-21 14:15:34.746 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:35.923 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:35.923 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:36.114 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:36.320 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:36.374 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:36.374 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:36.375 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:36.564 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:37.208 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 U0LETmDvuXc nocookie: YouTube player ready
+11-21 14:15:38.145 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 1/4 U0LETmDvuXc nocookie: YouTube error 150
+11-21 14:15:38.250 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:39.498 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:39.499 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:39.802 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:39.837 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:39.837 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:39.837 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:39.837 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:40.794 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 i3J6ACKQ7K0 nocookie: YouTube player ready
+11-21 14:15:42.466 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 2/4 i3J6ACKQ7K0 nocookie: YouTube error 150
+11-21 14:15:42.468 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:44.188 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:44.189 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:44.364 10233 10233 D ScaryTrailer: console: Failed to execute 'postMessage' on 'DOMWindow': The target origin provided ('https://www.youtube-nocookie.com') does not match the recipient window's origin ('https://io.github.diamondrubinny.scary').
+11-21 14:15:44.448 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:44.448 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:44.448 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:44.448 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:44.973 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 YjGSwuaf20g nocookie: YouTube player ready
+11-21 14:15:46.489 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 3/4 YjGSwuaf20g nocookie: YouTube error 150
+11-21 14:15:46.493 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: loading
+11-21 14:15:48.038 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'picture-in-picture'.
+11-21 14:15:48.038 10233 10233 D ScaryTrailer: console: Unrecognized feature: 'web-share'.
+11-21 14:15:48.255 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-bitness'.
+11-21 14:15:48.255 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-full-version-list'.
+11-21 14:15:48.255 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-wow64'.
+11-21 14:15:48.255 10233 10233 D ScaryTrailer: console: Error with Permissions-Policy header: Unrecognized feature: 'ch-ua-form-factors'.
+11-21 14:15:49.656 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 U0LETmDvuXc youtube: YouTube player ready
+11-21 14:15:51.134 10233 10233 I ScaryTrailer: WebView 90.0.4430.91: trailer 4/4 U0LETmDvuXc youtube: YouTube error 150

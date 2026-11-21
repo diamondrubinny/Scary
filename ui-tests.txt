@@ -1,0 +1,2 @@
+OK (77 tests)
+Skipped by an assumption: aMoviePageFitsWithItsButtonsBelowThePoster scrollingHomeOpensNothing settingsFitAndOfferNoTvOnlyOptions theAppHasAnIconInTheAppDrawer theHomeScreenFitsAndItsButtonsTakeAFinger 
