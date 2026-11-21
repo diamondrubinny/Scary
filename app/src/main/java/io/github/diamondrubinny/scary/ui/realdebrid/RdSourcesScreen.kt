@@ -56,6 +56,7 @@ import androidx.compose.ui.window.Dialog
 import io.github.diamondrubinny.scary.R
 import io.github.diamondrubinny.scary.core.sources.Releases
 import io.github.diamondrubinny.scary.core.sources.Torznab
+import io.github.diamondrubinny.scary.data.SourcesRepository
 import io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
 import io.github.diamondrubinny.scary.ui.components.ScaryButton
@@ -79,6 +80,8 @@ const val RD_SOURCES_INDEXER_TAG = "rdSourcesIndexer"
 const val RD_SOURCES_ADDRESS_TAG = "rdSourcesAddress"
 const val RD_SOURCES_KEY_TAG = "rdSourcesKey"
 const val RD_SOURCES_SAVE_TAG = "rdSourcesSave"
+const val RD_SOURCES_CHECK_TAG = "rdSourcesCheck"
+const val RD_SOURCES_CHECK_RESULT_TAG = "rdSourcesCheckResult"
 const val RD_SOURCES_CONFIRM_TAG = "rdSourcesConfirm"
 const val RD_SOURCES_PULL_TAG = "rdSourcesPull"
 
@@ -93,6 +96,8 @@ class RdSourcesActions(
     val onPull: (Releases.Candidate) -> Unit,
     val onSaveIndexer: suspend (address: String, key: String) -> SaveResult,
     val onRemoveIndexer: () -> Unit,
+    /** Asks the source whether it answers, and how fast; only at the viewer's press. */
+    val onCheckSource: suspend () -> SourcesRepository.Check = { SourcesRepository.Check(SourcesRepository.Health.NOT_CONFIGURED, 0) },
 )
 
 /**
@@ -352,7 +357,42 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
         ) {
             BasicText(stringResource(R.string.rd_sources_indexer), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
             BasicText(stringResource(R.string.rd_sources_indexer_what), style = ScaryType.Body)
-            if (host != null) BasicText(stringResource(R.string.rd_sources_connected, host), style = ScaryType.Caption.copy(color = ScaryColors.Candle))
+            if (host != null) {
+                BasicText(stringResource(R.string.rd_sources_connected, host), style = ScaryType.Caption.copy(color = ScaryColors.Candle))
+                // Does the saved source answer, and how fast: asked only at this press.
+                var check by remember { mutableStateOf<SourcesRepository.Check?>(null) }
+                var checking by remember { mutableStateOf(false) }
+                ScaryButton(
+                    stringResource(R.string.rd_sources_check),
+                    onClick = {
+                        if (!checking) {
+                            checking = true
+                            scope.launch {
+                                check = actions.onCheckSource()
+                                checking = false
+                            }
+                        }
+                    },
+                    modifier = Modifier.testTag(RD_SOURCES_CHECK_TAG),
+                )
+                val words = when {
+                    checking -> stringResource(R.string.rd_sources_checking)
+                    else -> when (check?.health) {
+                        SourcesRepository.Health.OK -> stringResource(R.string.rd_sources_check_ok, check?.millis.toString())
+                        SourcesRepository.Health.REFUSED -> stringResource(R.string.rd_sources_check_refused)
+                        SourcesRepository.Health.UNREADABLE -> stringResource(R.string.rd_sources_check_unreadable)
+                        SourcesRepository.Health.UNREACHABLE, SourcesRepository.Health.NOT_CONFIGURED -> stringResource(R.string.rd_sources_check_unreachable)
+                        null -> null
+                    }
+                }
+                if (words != null) {
+                    BasicText(
+                        words,
+                        style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
+                        modifier = Modifier.testTag(RD_SOURCES_CHECK_RESULT_TAG).semantics { liveRegion = LiveRegionMode.Polite },
+                    )
+                }
+            }
             DialogField(
                 label = stringResource(R.string.rd_sources_address_label),
                 hint = "https://",

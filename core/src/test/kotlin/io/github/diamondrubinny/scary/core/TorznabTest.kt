@@ -145,4 +145,14 @@ class TorznabTest {
         val two = candidate("Film.1080p.BluRay", a, 90)
         assertEquals(listOf(two), Releases.arrange(listOf(one, two), Filter.ALL, Sort.SMART))
     }
+
+    @Test
+    fun `the check asks the indexer what it can do, and reads only that`() {
+        assertEquals("https://indexer.example/api?t=caps&apikey=k%2B1", Torznab.capsUrl("https://indexer.example/api", "k+1"))
+        assertEquals(Torznab.Answer.Results(emptyList()), Torznab.capsAnswer("""<?xml version="1.0"?><caps><server title="x"/><searching><search available="yes"/></searching></caps>"""))
+        assertEquals(Torznab.Answer.Refused(100), Torznab.capsAnswer("""<error code="100" description="Invalid API Key"/>"""))
+        assertEquals(Torznab.Answer.Unreadable, Torznab.capsAnswer("<html><body>Login</body></html>"))
+        assertEquals(Torznab.Answer.Unreadable, Torznab.capsAnswer("not xml"))
+        assertEquals(Torznab.Answer.Unreadable, Torznab.capsAnswer("""<!DOCTYPE caps [<!ENTITY x "y">]><caps/>"""))
+    }
 }

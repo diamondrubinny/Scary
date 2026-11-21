@@ -74,4 +74,19 @@
     <string name="rd_file_deleted">حُذف من حسابك.</string>
     <string name="rd_file_delete_failed">تعذّر الحذف. حاول مجددًا بعد قليل.</string>
     <string name="rd_film_hint_delete">اضغط مطولًا على OK فوق ملف لاختيار الفيلم الذي يمثّله، أو لحذفه من حسابك.</string>
+    <string name="rd_delete_all">حذف كل الملفات</string>
+    <string name="rd_delete_all_count">الملفات في هذه القائمة: %1$s</string>
+    <string name="rd_delete_all_confirm">هل تريد حذف كل الملفات في هذه القائمة من حسابك في Real-Debrid؟ تُحذف معها ملفات التورنت التي جاءت منها. لا يمكن التراجع عن ذلك.</string>
+    <string name="rd_delete_all_no">الاحتفاظ بها</string>
+    <string name="rd_delete_all_yes">حذف الكل</string>
+    <string name="rd_delete_all_again">اضغط مرة أخرى لحذف كل شيء</string>
+    <string name="rd_delete_all_working">جارٍ الحذف من حسابك…</string>
+    <string name="rd_delete_all_done">حُذفت كل الملفات من حسابك.</string>
+    <string name="rd_delete_all_partial">تعذّر حذف بعض الملفات. حاول مرة أخرى بعد قليل.</string>
+    <string name="rd_sources_check">فحص المصدر</string>
+    <string name="rd_sources_checking">جارٍ سؤال المصدر…</string>
+    <string name="rd_sources_check_ok">المصدر يجيب. استغرق ذلك %1$s مللي ثانية.</string>
+    <string name="rd_sources_check_refused">رفض المصدر: تحقق من المفتاح، أو أنك بلغت حدّه.</string>
+    <string name="rd_sources_check_unreadable">أجاب شيء في هذا العنوان، لكنه ليس مصدرًا يستطيع SCARY قراءته. تحقق من العنوان.</string>
+    <string name="rd_sources_check_unreachable">لم يُجب المصدر. تحقق من العنوان ومن أنه يعمل.</string>
 </resources>

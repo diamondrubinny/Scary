@@ -73,6 +73,10 @@ data class HomeUiState(
     val aiCustomUrl: String = "",
     val aiShareTaste: Boolean = false,
     val aiHomeRow: Boolean = true,
+    /** "Who is watching?": the TV's profiles (always at least the first), and the one on screen. */
+    val profiles: List<io.github.diamondrubinny.scary.core.profiles.Profiles.Profile> =
+        listOf(io.github.diamondrubinny.scary.core.profiles.Profiles.Profile(io.github.diamondrubinny.scary.core.profiles.Profiles.FIRST)),
+    val activeProfileId: String = io.github.diamondrubinny.scary.core.profiles.Profiles.FIRST,
 ) {
     /** A film's place in the bucket list, from 1; null when it is not in it. */
     fun bucketNumber(movie: Movie): Int? = bucketIds.indexOf(movie.id).takeIf { it >= 0 }?.plus(1)
@@ -123,12 +127,23 @@ sealed interface GatedAction {
     data object RdTorrents : GatedAction
     /** "Find sources" on a film's page: the viewer's indexer, asked for that film. */
     data class RdSourcesFor(val movie: Movie) : GatedAction
+    /** Leaving a gentle profile for [profileId]: always asks for the PIN when one is set. */
+    data class SwitchProfile(val profileId: String) : GatedAction
+    /** Adding, changing or removing a profile: asks for the PIN when one is set. */
+    data class EditProfile(val change: ProfileChange) : GatedAction
     /** [startAtMs] null: from the saved spot or the start, as the viewer chooses when there is a spot to go back to. */
     data class PlayRealDebrid(
         val file: io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.RdFile,
         val movieId: String?,
         val startAtMs: Long? = null,
     ) : GatedAction
+}
+
+/** A change to the TV's profiles, as the profiles screen asks for it. */
+sealed interface ProfileChange {
+    data class Add(val name: String, val colour: Int, val gentle: Boolean) : ProfileChange
+    data class Update(val id: String, val name: String, val colour: Int, val gentle: Boolean) : ProfileChange
+    data class Remove(val id: String) : ProfileChange
 }
 
 sealed interface PinStep {
@@ -296,6 +311,8 @@ sealed interface Screen {
     data object RdTorrents : Screen
     /** Searching the viewer's own indexer for a release to add (the sources feature); with [movieId], for that film. */
     data class RdSources(val movieId: String? = null) : Screen
+    /** "Who is watching?": choosing, adding and changing profiles. */
+    data object Profiles : Screen
     /** The internal player, playing the session in HomeViewModel.player. */
     data object Player : Screen
 }

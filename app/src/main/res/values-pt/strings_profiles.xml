@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="profiles_title">Quem está assistindo?</string>
+    <string name="profiles_note">Cada pessoa tem a sua própria Minha lista, filmes assistidos, avaliações, bucket list e Continuar assistindo. Perfis são uma conveniência, não uma trava: qualquer pessoa diante da TV pode abrir qualquer um, exceto que sair de um perfil Suave pede o PIN. As contas TMDB e Stremio sincronizam só com o primeiro perfil. Os nomes ficam nesta TV.</string>
+    <string name="profiles_add">Adicionar perfil</string>
+    <string name="profiles_hint">Segure OK em um perfil para renomear, alterar ou remover.</string>
+    <string name="profiles_switch">Perfil: %1$s. Trocar de perfil</string>
+    <string name="profile_default_name">Primeira pessoa</string>
+    <string name="profile_gentle_badge">Suave</string>
+    <string name="profile_current">assistindo agora</string>
+    <string name="profile_new_title">Novo perfil</string>
+    <string name="profile_edit_title">Editar perfil</string>
+    <string name="profile_name_label">Nome</string>
+    <string name="profile_colour">Cor %1$d de %2$d: trocar</string>
+    <string name="profile_gentle_on">Perfil Suave: ligado</string>
+    <string name="profile_gentle_off">Perfil Suave: desligado</string>
+    <string name="profile_gentle_what">Um perfil Suave mostra sempre só os filmes mais leves, como a noite em família, e nenhum dos seus arquivos.</string>
+    <string name="profile_gentle_no_pin">Não há PIN definido, então qualquer pessoa pode sair deste perfil. Defina um PIN nas Configurações para segurá-lo.</string>
+    <string name="profile_save">Salvar</string>
+    <string name="profile_remove">Remover este perfil</string>
+    <string name="profile_remove_confirm">Remover %1$s? As listas, os filmes assistidos e o Continuar assistindo dessa pessoa são apagados desta TV. Não dá para desfazer.</string>
+    <string name="profile_remove_yes">Remover</string>
+    <string name="profile_keep">Manter</string>
+    <string name="profile_bad_name">Digite um nome.</string>
+    <string name="profile_removed">Perfil removido.</string>
+    <string name="settings_profiles">Perfis</string>
+</resources>

@@ -50,6 +50,16 @@ object StreamAddon {
         return trimmed.dropLast(MANIFEST.length).trimEnd('/')
     }
 
+    /** The add-on's own manifest, for checking that it answers. Never log it: it can hold the viewer's settings. */
+    fun manifestUrl(base: String): String = base + MANIFEST
+
+    /** Whether [text] is an add-on's manifest: an object with its id and what it serves, as the protocol asks. */
+    fun isManifestAnswer(text: String): Boolean {
+        if (text.length > MAX_ANSWER_BYTES) return false
+        val root = runCatching { Json.parseToJsonElement(text) }.getOrNull() as? JsonObject ?: return false
+        return root.text("id") != null && root["resources"] is kotlinx.serialization.json.JsonArray
+    }
+
     /** The request for one film's streams; null when [imdbId] is not an IMDb number. Never log it: see above. */
     fun movieUrl(base: String, imdbId: String): String? =
         if (imdbPattern.matches(imdbId)) "$base/stream/movie/$imdbId.json" else null

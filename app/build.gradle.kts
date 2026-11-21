@@ -72,6 +72,19 @@ android {
         }
     }
 
+    packaging {
+        jniLibs {
+            // The tunnel library also carries WireGuard's command-line tools, for rooted devices with the kernel
+            // module. SCARY uses only the userspace tunnel (libwg-go), so the tools are left out of the APK.
+            excludes += listOf("**/libwg.so", "**/libwg-quick.so")
+            // The tunnel is 3 MB for each kind of processor. TVs and phones are ARM, so the x86 copies are left out:
+            // on an x86 device the VPN says it could not start, and the rest of SCARY works as before.
+            excludes += listOf("lib/x86/libwg-go.so", "lib/x86_64/libwg-go.so")
+            // Compressed in the APK (about half the download), and unpacked by Android when the app is installed.
+            useLegacyPackaging = true
+        }
+    }
+
     lint {
         abortOnError = true
         warningsAsErrors = false
@@ -112,6 +125,8 @@ dependencies {
     // WebMessageListener: the trailer page reports playing, ended and error from one fixed origin only.
     implementation(libs.androidx.webkit)
     // The internal player for the viewer's own Real-Debrid files (docs/INTERNAL_PLAYER_PLAN.md). Apache 2.0.
+    // The VPN in Settings: WireGuard's own tunnel library (Apache 2.0), see docs/VPN_PLAN.md.
+    implementation(libs.wireguard.tunnel)
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.ui.compose)

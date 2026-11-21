@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.ui.settings
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -99,6 +100,11 @@ class SettingsActions(
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRealDebrid: () -> Unit = {},
+    val onOpenProfiles: () -> Unit = {},
+    /** The TV's VPN apps, asked when the row is pressed. */
+    val vpnApps: () -> List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp> = { emptyList() },
+    /** SCARY's own tunnel and the TV's VPN apps, for the VPN window. */
+    val vpn: VpnActions = VpnActions(),
     val onOpenStremioAccount: () -> Unit = {},
     val onOpenHomeRows: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
@@ -143,6 +149,13 @@ fun SettingsScreen(
     tmdbAccountName: String? = null,
     /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
     realDebridName: String? = null,
+    /** The viewer on screen, for the Profiles row. */
+    profileName: String = "",
+    /** Whether a VPN is on, for the VPN row. */
+    vpnActive: Boolean = false,
+    /** SCARY's own tunnel, and its kill switch, for the VPN window. */
+    tunnelState: io.github.diamondrubinny.scary.data.VpnRepository.State = io.github.diamondrubinny.scary.data.VpnRepository.State.None,
+    vpnKillSwitch: Boolean = false,
     stremioConnected: Boolean = false,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
@@ -286,6 +299,25 @@ fun SettingsScreen(
             modifier = Modifier.testTag(ORIGINS_ROW_TAG),
         )
         BasicText(stringResource(R.string.settings_origins_note), style = ScaryType.Caption)
+        // SCARY's own tunnel with the viewer's settings file, and the way to the TV's VPN apps (VpnDialog).
+        var vpnOpen by remember { mutableStateOf<List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp>?>(null) }
+        vpnOpen?.let { apps ->
+            VpnDialog(state = tunnelState, killSwitch = vpnKillSwitch, apps = apps, actions = actions.vpn, onDismiss = { vpnOpen = null })
+        }
+        SettingRow(
+            label = stringResource(R.string.settings_vpn),
+            value = vpnStateWords(tunnelState)?.takeIf { tunnelState is io.github.diamondrubinny.scary.data.VpnRepository.State.Up || !vpnActive }
+                ?: stringResource(if (vpnActive) R.string.vpn_on else R.string.vpn_off),
+            onClick = { vpnOpen = actions.vpnApps() },
+            modifier = Modifier.testTag(VPN_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_vpn_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.settings_profiles),
+            value = profileName,
+            onClick = actions.onOpenProfiles,
+            modifier = Modifier.testTag(PROFILES_ROW_TAG),
+        )
         SettingRow(
             label = stringResource(R.string.settings_realdebrid),
             value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
@@ -547,6 +579,8 @@ const val ORIGINS_ROW_TAG = "originsRow"
 const val HOME_ROWS_ROW_TAG = "homeRowsRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
+const val PROFILES_ROW_TAG = "profilesRow"
+const val VPN_ROW_TAG = "vpnRow"
 const val STREMIO_ROW_TAG = "stremioRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"

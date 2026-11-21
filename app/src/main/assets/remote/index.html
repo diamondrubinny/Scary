@@ -87,6 +87,14 @@
       <p id="backup-summary" class="hint" role="status" aria-live="polite"></p>
       <button type="button" id="backup-restore" data-w="restoreButton" disabled>Restore to the TV</button>
     </section>
+    <section>
+      <h2 data-w="vpnTitle">VPN</h2>
+      <p class="hint" data-w="vpnHint"></p>
+      <label for="vpn-file" data-w="vpnLabel">WireGuard settings file (.conf)</label>
+      <input id="vpn-file" type="file" accept=".conf,text/plain">
+      <p id="vpn-summary" class="hint" role="status" aria-live="polite"></p>
+      <button type="button" id="vpn-send" data-w="vpnButton" disabled>Send to the TV</button>
+    </section>
   </main>
   <footer data-w="credit">Powered by SCARY · Open source</footer>
 </body>

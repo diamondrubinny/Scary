@@ -51,6 +51,7 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.profiles.Profiles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
@@ -149,6 +150,10 @@ class HomeViewModel(
     private val today: () -> LocalDate = LocalDate::now,
     /** The viewer's own indexer (the sources feature); null in tests that do not need it. */
     private val sources: io.github.diamondrubinny.scary.data.SourcesRepository? = null,
+    /** Whether a VPN is on, and the TV's VPN apps; null in tests that do not need it. */
+    private val vpn: io.github.diamondrubinny.scary.data.VpnWatcher? = null,
+    /** SCARY's own WireGuard tunnel; null in tests that do not need it. */
+    private val tunnel: io.github.diamondrubinny.scary.data.VpnRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -300,6 +305,8 @@ class HomeViewModel(
             trailerIntroSeen = prefs.trailerIntroSeen,
             lovedIds = prefs.lovedIds.toSet(),
             dislikedIds = prefs.dislikedIds.toSet(),
+            profiles = prefs.profiles,
+            activeProfileId = prefs.activeProfileId,
             // On until SleepTimerReceiver has paused playback and cleared it (or a restart of the TV dropped the alarm).
             sleepAtMillis = prefs.sleepAtMillis,
             tab = choices.tab,
@@ -357,6 +364,7 @@ class HomeViewModel(
             }
             launch { realDebrid?.load() }
             launch { sources?.load() }
+            launch { tunnel?.load() }
             launch {
                 stremio?.load()
                 watchStremio()
@@ -1214,6 +1222,8 @@ class HomeViewModel(
     }
 
     private suspend fun syncTmdbAccount(minGapMs: Long) {
+        // The account syncs with the first profile only: another viewer's lists are theirs and stay on the TV.
+        if (!settings.prefs.first().isFirstProfile) return
         val account = tmdbAccount ?: return
         if (account.state.value !is TmdbAccountRepository.State.SignedIn) return
         val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
@@ -1250,6 +1260,8 @@ class HomeViewModel(
     }
 
     private suspend fun syncStremio(minGapMs: Long) {
+        // As with TMDB: the first profile only.
+        if (!settings.prefs.first().isFirstProfile) return
         val account = stremio ?: return
         if (!account.signedIn) return
         val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
@@ -1486,6 +1498,27 @@ class HomeViewModel(
         }
     }
 
+    private var deletingAllRdFiles = false
+
+    /** Every file in the viewer's list, deleted from their Real-Debrid account at their word (after two more "yes"). */
+    fun deleteAllRdFiles() {
+        val repository = realDebrid ?: return
+        val files = (_rdFiles.value as? RdFilesState.Ready)?.files.orEmpty()
+        if (files.isEmpty() || deletingAllRdFiles) return
+        deletingAllRdFiles = true
+        show(R.string.rd_delete_all_working)
+        viewModelScope.launch {
+            try {
+                val failed = repository.deleteFiles(files)
+                show(if (failed == 0) R.string.rd_delete_all_done else R.string.rd_delete_all_partial)
+                _rdMatches.value = null
+                loadRealDebridFiles(force = true)
+            } finally {
+                deletingAllRdFiles = false
+            }
+        }
+    }
+
     /** The host of the viewer's indexer, or null when none is set. */
     val indexerHost: StateFlow<String?> = sources?.host ?: MutableStateFlow(null)
 
@@ -1535,6 +1568,10 @@ class HomeViewModel(
     /** Saves the indexer's address and key; the answer says what was wrong with them, if anything. */
     suspend fun saveIndexer(address: String, key: String): io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult =
         sources?.save(address, key) ?: io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE
+
+    /** Whether the viewer's source answers, and how fast: asked only when they press "Check the source". */
+    suspend fun checkSource(): io.github.diamondrubinny.scary.data.SourcesRepository.Check =
+        sources?.check() ?: io.github.diamondrubinny.scary.data.SourcesRepository.Check(io.github.diamondrubinny.scary.data.SourcesRepository.Health.NOT_CONFIGURED, 0)
 
     fun removeIndexer() {
         viewModelScope.launch {
@@ -1933,6 +1970,96 @@ class HomeViewModel(
                 refreshRdTorrents()
             }
             is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId, action.startAtMs)
+            is GatedAction.SwitchProfile -> switchProfile(action.profileId)
+            is GatedAction.EditProfile -> changeProfiles(action.change)
+        }
+    }
+
+    // VPN: SCARY is none, it only says whether one is on and opens the viewer's own VPN app ----------------------------
+
+    /** True while the TV has a VPN network on. */
+    val vpnActive: StateFlow<Boolean> = vpn?.active ?: MutableStateFlow(false)
+
+    /** The VPN apps to offer; asked when the row is pressed, since apps come and go. */
+    fun vpnApps(): List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp> = vpn?.apps().orEmpty()
+
+    /** Settings → VPN, with one app: it opens. With none, the viewer is told; with several, the screen asks which. */
+    fun openVpnApp(app: io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp? = null) {
+        val chosen = app ?: vpnApps().singleOrNull()
+        if (chosen == null) show(R.string.vpn_none_installed) else report(launcher.launchApp(chosen.packageName, chosen.label))
+    }
+
+    /** SCARY's own tunnel (docs/VPN_PLAN.md): its settings, and whether it is up. */
+    val tunnelState: StateFlow<io.github.diamondrubinny.scary.data.VpnRepository.State> =
+        tunnel?.state ?: MutableStateFlow(io.github.diamondrubinny.scary.data.VpnRepository.State.None)
+
+    val vpnKillSwitch: StateFlow<Boolean> = tunnel?.killSwitch ?: MutableStateFlow(false)
+
+    /** What Android wants shown before SCARY may open a VPN, the first time; null when the viewer already agreed. */
+    fun vpnConsent(): android.content.Intent? = tunnel?.consentIntent()
+
+    fun connectVpn() {
+        viewModelScope.launch { tunnel?.connect() }
+    }
+
+    fun disconnectVpn() {
+        viewModelScope.launch { tunnel?.disconnect() }
+    }
+
+    fun removeVpnSettings() {
+        viewModelScope.launch { tunnel?.remove() }
+    }
+
+    fun setVpnKillSwitch(on: Boolean) {
+        tunnel?.setKillSwitch(on)
+    }
+
+    // Profiles (docs/PROFILES_PLAN.md) --------------------------------------------------------------------------------
+
+    /** "Who is watching?", from the top bar, the settings, or by itself at start when the TV has several viewers. */
+    fun openProfiles() = push(Screen.Profiles)
+
+    /**
+     * The viewer chose a profile. Leaving a gentle one asks for the PIN every time, when one is set: the unlock a
+     * parent gave a while ago must not let a child walk out of it.
+     */
+    fun chooseProfile(id: String) {
+        val prefs = latestPrefs ?: return
+        when {
+            id == prefs.activeProfileId -> backStack.value = listOf(Screen.Home)
+            prefs.activeProfile.gentle && prefs.parentalEnabled -> _pinDialog.value = PinDialogState(PinStep.Verify(GatedAction.SwitchProfile(id)))
+            else -> switchProfile(id)
+        }
+    }
+
+    private fun switchProfile(id: String) {
+        viewModelScope.launch {
+            settings.setActiveProfile(id)
+            // Another person is at the TV: what the PIN opened for the last one closes.
+            unlockExpiry?.cancel()
+            unlockExpiry = null
+            sessionUnlocked.value = false
+            _rdMatches.value = null
+            backStack.value = listOf(Screen.Home)
+        }
+    }
+
+    /** Adding, changing or removing a profile: with a PIN set, it is asked first (a child must not un-gentle theirs). */
+    fun editProfiles(change: ProfileChange) {
+        val action = GatedAction.EditProfile(change)
+        if (latestPrefs?.parentalEnabled == true) _pinDialog.value = PinDialogState(PinStep.Verify(action)) else perform(action)
+    }
+
+    private fun changeProfiles(change: ProfileChange) {
+        viewModelScope.launch {
+            when (change) {
+                is ProfileChange.Add -> if (settings.addProfile(change.name, change.colour, change.gentle) == null) show(R.string.profile_bad_name)
+                is ProfileChange.Update -> if (!settings.updateProfile(change.id, change.name, change.colour, change.gentle)) show(R.string.profile_bad_name)
+                is ProfileChange.Remove -> if (settings.removeProfile(change.id)) {
+                    watchStore?.removeProfile(Profiles.suffix(change.id))
+                    show(R.string.profile_removed)
+                }
+            }
         }
     }
 
@@ -2796,6 +2923,12 @@ class HomeViewModel(
         loadCatalog()
         refreshApps()
         viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
+        // "Continue watching" follows the viewer on screen.
+        viewModelScope.launch {
+            settings.prefs.map { it.activeProfileId }.distinctUntilChanged().collect { watchStore?.useProfile(Profiles.suffix(it)) }
+        }
+        // A TV with several viewers asks who is watching when SCARY starts; with one, nothing is asked.
+        viewModelScope.launch { if (settings.prefs.first().profiles.size >= 2) push(Screen.Profiles) }
         backups?.let { repository -> viewModelScope.launch { repository.events.collect(::onBackupEvent) } }
     }
 
@@ -2864,6 +2997,8 @@ class HomeViewModel(
                     container.subtitleRepository,
                     container.backups,
                     sources = container.sources,
+                    vpn = container.vpnWatcher,
+                    tunnel = container.vpn,
                 )
             }
         }

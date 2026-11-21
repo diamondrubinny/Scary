@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="settings_vpn">VPN</string>
+    <string name="vpn_on">Включён</string>
+    <string name="vpn_off">Выключен</string>
+    <string name="settings_vpn_note">SCARY может подключаться через VPN с файлом настроек WireGuard от вашего VPN-провайдера. В SCARY нет ни провайдера, ни сервера, ни аккаунта. Строка также показывает, включён ли VPN на этом телевизоре.</string>
+    <string name="vpn_none_installed">На этом ТВ не установлено VPN-приложение.</string>
+    <string name="rd_vpn_note">VPN включён. Real-Debrid отклоняет некоторые VPN-адреса: если ваши файлы не загружаются или не воспроизводятся, попробуйте другой VPN-сервер или выключите VPN.</string>
+    <string name="vpn_connected">Подключено</string>
+    <string name="vpn_connecting">Подключение…</string>
+    <string name="vpn_disconnected">Не подключено</string>
+    <string name="vpn_failed_not_allowed">Android не разрешил SCARY открыть VPN.</string>
+    <string name="vpn_failed_dns">Адрес VPN-сервера не найден. Проверьте подключение к интернету.</string>
+    <string name="vpn_failed_start">VPN не запустился. Проверьте файл настроек у вашего провайдера.</string>
+    <string name="vpn_no_consent_screen">На этом телевизоре нет экрана разрешения VPN, поэтому SCARY не может подключить его здесь.</string>
+    <string name="vpn_connects_to">Подключается к: %1$s</string>
+    <string name="vpn_how_to">Чтобы добавить VPN: получите файл настроек WireGuard (.conf) у вашего VPN-провайдера, откройте пульт на телефоне из настроек и отправьте файл с телефона. В SCARY нет VPN-провайдера.</string>
+    <string name="vpn_scope_note">Через этот VPN идёт только SCARY; другие приложения телевизора не идут. VPN-провайдер видит то, что раньше видел интернет-провайдер. Real-Debrid отклоняет некоторые адреса VPN.</string>
+    <string name="vpn_connect">Подключить</string>
+    <string name="vpn_disconnect">Отключить</string>
+    <string name="vpn_kill_switch">Блокировать без VPN</string>
+    <string name="vpn_kill_switch_note">Когда включено, SCARY ничего не отправляет в Real-Debrid и в ваш источник, пока этот VPN не подключён. Фильм, который уже идёт, не останавливается.</string>
+    <string name="vpn_remove">Удалить настройки VPN</string>
+    <string name="vpn_remove_confirm">Нажмите ещё раз, чтобы удалить ключ с телевизора</string>
+    <string name="vpn_open_app">Открыть %1$s</string>
+    <string name="vpn_blocked_note">Заблокировано: ваш VPN не подключён. Подключите его в настройках, VPN, или выключите «Блокировать без VPN».</string>
+</resources>

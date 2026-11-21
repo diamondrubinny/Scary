@@ -97,6 +97,7 @@ import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.player.PlayerScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.profiles.ProfilesScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
@@ -213,6 +214,9 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
+    val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
+    val tunnelState by viewModel.tunnelState.collectAsStateWithLifecycle()
+    val vpnKillSwitch by viewModel.vpnKillSwitch.collectAsStateWithLifecycle()
     val rdSearch by viewModel.rdSearch.collectAsStateWithLifecycle()
     val indexerHost by viewModel.indexerHost.collectAsStateWithLifecycle()
     val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
@@ -286,6 +290,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onDismissTasteInvite = viewModel::dismissTasteInvite,
             onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
             onOpenRealDebrid = viewModel::openRealDebrid,
+            onOpenProfiles = viewModel::openProfiles,
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
             onFinishContinue = viewModel::finishContinue,
@@ -413,6 +418,16 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenTmdbAccount = viewModel::openTmdbAccount,
         onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
+        onOpenProfiles = viewModel::openProfiles,
+        vpnApps = viewModel::vpnApps,
+        vpn = io.github.diamondrubinny.scary.ui.settings.VpnActions(
+            consent = viewModel::vpnConsent,
+            onConnect = viewModel::connectVpn,
+            onDisconnect = viewModel::disconnectVpn,
+            onRemove = viewModel::removeVpnSettings,
+            onSetKillSwitch = viewModel::setVpnKillSwitch,
+            onOpenApp = viewModel::openVpnApp,
+        ),
         onToggleOnline = viewModel::toggleOnline,
         onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
@@ -548,6 +563,11 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     hideOrigins = state.hideOrigins,
                     tmdbAccountName = (tmdbAccount as? TmdbAccountRepository.State.SignedIn)?.username,
                     realDebridName = (realDebridState as? RealDebridRepository.State.SignedIn)?.username,
+                    profileName = io.github.diamondrubinny.scary.core.profiles.Profiles.active(state.profiles, state.activeProfileId).name
+                        .ifEmpty { stringResource(R.string.profile_default_name) },
+                    vpnActive = vpnActive,
+                    tunnelState = tunnelState,
+                    vpnKillSwitch = vpnKillSwitch,
                     stremioConnected = stremioState is StremioRepository.State.SignedIn,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
@@ -646,6 +666,9 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     languages = playerLanguages,
                     onlineSubtitles = playerOnlineSubtitles,
                     fileFilms = rdFileFilms,
+                    vpnActive = vpnActive,
+                    vpnBlocked = vpnKillSwitch && tunnelState !is io.github.diamondrubinny.scary.data.VpnRepository.State.None &&
+                        tunnelState !is io.github.diamondrubinny.scary.data.VpnRepository.State.Up,
                     actions = remember(viewModel) {
                         RealDebridActions(
                             onSignIn = viewModel::realDebridSignIn,
@@ -660,9 +683,17 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onCandidates = viewModel::rdFileCandidates,
                             onSetFilm = viewModel::setRdFileFilm,
                             onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
+                            onDeleteAll = if (sourcesEnabled) viewModel::deleteAllRdFiles else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
                         )
                     },
+                )
+                current == Screen.Profiles -> ProfilesScreen(
+                    profiles = state.profiles,
+                    activeId = state.activeProfileId,
+                    pinSet = state.parentalEnabled,
+                    onChoose = viewModel::chooseProfile,
+                    onChange = viewModel::editProfiles,
                 )
                 current == Screen.RdTorrents -> RdTorrentsScreen(
                     state = rdTorrents,
@@ -687,6 +718,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onPull = { viewModel.pullMagnet(it.magnet.uri) },
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
+                            onCheckSource = viewModel::checkSource,
                         )
                     },
                 )

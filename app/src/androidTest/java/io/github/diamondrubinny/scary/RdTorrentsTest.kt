@@ -21,9 +21,12 @@ import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_CONFIRM_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_DELETE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_FIELD_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_PULL_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_ALL_CONFIRM_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_ALL_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_FILE_CONFIRM_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_FILE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_TORRENTS_BUTTON_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_VPN_NOTE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
@@ -93,6 +96,49 @@ class RdTorrentsTest {
         assertTrue(deleted.isEmpty())
         rule.onNode(hasTestTag(REAL_DEBRID_DELETE_FILE_CONFIRM_TAG)).performClick()
         assertEquals(listOf("t:A1:0"), deleted)
+    }
+
+    @Test
+    fun deletingAllFilesTakesTwoMorePresses() {
+        var deletedAll = 0
+        val files = listOf(
+            RealDebrid.RdFile("t:A1:0", "Night.of.the.Living.Dead.1968.mkv", 1_000_000_000, "https://real-debrid.com/d/A"),
+            RealDebrid.RdFile("d:B2", "Carnival.of.Souls.1962.mkv", 900_000_000, "https://real-debrid.com/d/B"),
+        )
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RealDebridScreen(
+                    state = RealDebridRepository.State.SignedIn("viewer", true, "2027-01-01"),
+                    files = RdFilesState.Ready(files),
+                    actions = RealDebridActions(onSignIn = {}, onCancel = {}, onSignOut = {}, onRefresh = {}, onPlay = {}, onDeleteAll = { deletedAll++ }),
+                )
+            }
+        } }
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_ALL_TAG)).performClick()
+        rule.onNode(hasText(rule.activity.getString(R.string.rd_delete_all_count, "2"))).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_ALL_CONFIRM_TAG)).performClick()
+        assertEquals(0, deletedAll)
+        rule.onNode(hasText(rule.activity.getString(R.string.rd_delete_all_again))).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_ALL_CONFIRM_TAG)).performClick()
+        assertEquals(1, deletedAll)
+    }
+
+    @Test
+    fun withAVpnOnTheScreenSaysWhereToLookIfNothingPlays() {
+        fun show(vpn: Boolean) = rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RealDebridScreen(
+                    state = RealDebridRepository.State.SignedIn("viewer", true, "2027-01-01"),
+                    files = RdFilesState.Ready(emptyList()),
+                    actions = RealDebridActions(onSignIn = {}, onCancel = {}, onSignOut = {}, onRefresh = {}, onPlay = {}),
+                    vpnActive = vpn,
+                )
+            }
+        } }
+        show(vpn = true)
+        rule.onNode(hasTestTag(REAL_DEBRID_VPN_NOTE_TAG)).assertExists()
+        show(vpn = false)
+        rule.onNode(hasTestTag(REAL_DEBRID_VPN_NOTE_TAG)).assertDoesNotExist()
     }
 
     @Test

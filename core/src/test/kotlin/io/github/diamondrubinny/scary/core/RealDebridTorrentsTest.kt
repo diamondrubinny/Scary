@@ -71,6 +71,15 @@ class RealDebridTorrentsTest {
     }
 
     @Test
+    fun `deleting every file removes each download and each torrent once`() {
+        assertEquals(
+            listOf(RealDebrid.Deletion.Torrent("XYZ9"), RealDebrid.Deletion.Download("ABC123"), RealDebrid.Deletion.Torrent("Q7")),
+            RealDebrid.deletions(listOf("t:XYZ9:0", "d:ABC123", "t:XYZ9:1", "t:Q7:0", "d:../user", "d:ABC123", "")),
+        )
+        assertTrue(RealDebrid.deletions(emptyList()).isEmpty())
+    }
+
+    @Test
     fun `answers are read strictly`() {
         assertEquals("ABC123", RealDebrid.parseAdded("""{"id":"ABC123","uri":"https://api.real-debrid.com/rest/1.0/torrents/info/ABC123"}"""))
         assertNull(RealDebrid.parseAdded("""{"id":"../x"}"""))

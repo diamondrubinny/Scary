@@ -73,6 +73,46 @@ object Torznab {
         return "$endpoint?t=movie&cat=$MOVIES&extended=1&limit=100&imdbid=$imdbId&apikey=${encode(apiKey)}"
     }
 
+    /**
+     * The indexer's own "what can you do" request (t=caps in the Torznab and Newznab specifications): the smallest
+     * question that shows the address and the key are right, without searching for anything.
+     */
+    fun capsUrl(endpoint: String, apiKey: String): String = "$endpoint?t=caps&apikey=${encode(apiKey)}"
+
+    /**
+     * Whether [text] is an indexer's answer to [capsUrl]: [Answer.Results] (with no releases) for its capabilities,
+     * [Answer.Refused] for its error, [Answer.Unreadable] for anything else.
+     */
+    fun capsAnswer(text: String): Answer {
+        if (text.length > MAX_ANSWER_BYTES || text.contains("<!DOCTYPE", ignoreCase = true) || text.contains("<!ENTITY", ignoreCase = true)) return Answer.Unreadable
+        var root: String? = null
+        var code = 0
+        val handler = object : DefaultHandler() {
+            override fun startElement(uri: String?, localName: String?, qName: String?, attributes: Attributes) {
+                if (root != null) return
+                root = (localName?.takeIf { it.isNotEmpty() } ?: qName.orEmpty()).lowercase()
+                code = attributes.getValue("code")?.toIntOrNull() ?: 0
+            }
+        }
+        try {
+            val factory = SAXParserFactory.newInstance().apply { isNamespaceAware = true }
+            runCatching { factory.setFeature("http://xml.org/sax/features/external-general-entities", false) }
+            runCatching { factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false) }
+            factory.newSAXParser().parse(InputSource(StringReader(text)), handler)
+        } catch (e: SAXException) {
+            return Answer.Unreadable
+        } catch (e: IOException) {
+            return Answer.Unreadable
+        } catch (e: ParserConfigurationException) {
+            return Answer.Unreadable
+        }
+        return when (root) {
+            "caps" -> Answer.Results(emptyList())
+            "error" -> Answer.Refused(code)
+            else -> Answer.Unreadable
+        }
+    }
+
     /** The search text as it is sent: one line, single spaces, of sane length. */
     fun cleanQuery(query: String): String? =
         query.filterNot(Char::isISOControl).trim().replace(Regex("\\s+"), " ").take(MAX_QUERY).takeIf { it.length >= 2 }

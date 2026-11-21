@@ -44,6 +44,10 @@
         <intent>
             <action android:name="android.search.action.GLOBAL_SEARCH" />
         </intent>
+        <!-- Settings can open the viewer's own VPN app; SCARY is no VPN and has no VPN service of its own. -->
+        <intent>
+            <action android:name="android.net.VpnService" />
+        </intent>
     </queries>
 
     <application

@@ -13,6 +13,9 @@ Third-party material:
 - Fonts Karantina, Assistant, Oswald, Rubik, Rubik Wet Paint, Rakkas and Cairo:
   SIL Open Font License 1.1.
 - AndroidX, Jetpack Compose, Kotlin, kotlinx, Coil, OkHttp and ZXing: Apache License 2.0.
+- The WireGuard tunnel library for Android (com.wireguard.android:tunnel), Copyright WireGuard LLC:
+  Apache License 2.0. It includes wireguard-go (MIT License). "WireGuard" is a registered trademark of
+  Jason A. Donenfeld; SCARY is not affiliated with or endorsed by the WireGuard project.
 - This product uses the TMDB API but is not endorsed or certified by TMDB.
 - Rent, buy and subscription availability on movie pages is data by JustWatch, provided through TMDB.
 - The TMDB logo (app/src/main/res/drawable/tmdb_logo.xml, docs/tmdb-logo.svg) is a trademark of TMDB, used

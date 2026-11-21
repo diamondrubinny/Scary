@@ -28,6 +28,11 @@ class WatchStore(context: Context) {
     private val prefs = context.getSharedPreferences("player_history", Context.MODE_PRIVATE)
     private val legacy = context.getSharedPreferences("player_positions", Context.MODE_PRIVATE)
 
+    /** What goes after the keys that belong to the viewer on screen (core Profiles): nothing for the first profile. */
+    private var suffix = ""
+    private val historyKey get() = HISTORY + suffix
+    private val dismissedKey get() = STREMIO_DISMISSED + suffix
+
     private val _entries = MutableStateFlow(load())
     val entries: StateFlow<List<WatchEntry>> = _entries.asStateFlow()
 
@@ -39,7 +44,29 @@ class WatchStore(context: Context) {
         val after = change(before)
         if (after == before) return
         _entries.value = after
-        prefs.edit { putString(HISTORY, WatchHistory.encode(after)) }
+        prefs.edit { putString(historyKey, WatchHistory.encode(after)) }
+    }
+
+    /**
+     * Another viewer is on screen: "Continue watching" and what they took out of the Stremio row are theirs. The
+     * player's settings, the tracks chosen per file and which film a file is belong to the TV and stay.
+     */
+    @Synchronized
+    fun useProfile(profileSuffix: String) {
+        if (profileSuffix == suffix) return
+        suffix = profileSuffix
+        _entries.value = load()
+        _stremioDismissed.value = ContinueDismissals.decode(prefs.getString(dismissedKey, null))
+    }
+
+    /** A removed profile's history goes with it; never the first profile's. */
+    @Synchronized
+    fun removeProfile(profileSuffix: String) {
+        if (profileSuffix.isEmpty()) return
+        prefs.edit {
+            remove(HISTORY + profileSuffix)
+            remove(STREMIO_DISMISSED + profileSuffix)
+        }
     }
 
     /** "Clear watch history", and signing out of Real-Debrid: the tracks chosen per file go with it. */
@@ -49,7 +76,7 @@ class WatchStore(context: Context) {
         memories.clear()
         _fileFilms.value = emptyMap()
         prefs.edit {
-            remove(HISTORY)
+            remove(historyKey)
             remove(TRACK_MEMORY)
             remove(FILE_FILMS)
         }
@@ -115,7 +142,7 @@ class WatchStore(context: Context) {
     fun dismissStremio(imdbId: String, nowMillis: Long) {
         val next = ContinueDismissals.with(_stremioDismissed.value, imdbId, nowMillis)
         _stremioDismissed.value = next
-        prefs.edit { putString(STREMIO_DISMISSED, ContinueDismissals.encode(next)) }
+        prefs.edit { putString(dismissedKey, ContinueDismissals.encode(next)) }
     }
 
     private val memories: LinkedHashMap<String, TrackMemory> by lazy { TrackChoice.decodeAll(prefs.getString(TRACK_MEMORY, null)) }
@@ -165,7 +192,9 @@ class WatchStore(context: Context) {
      * "at:" + key → when), carried over without names: they show under "Continue watching" once played again.
      */
     private fun load(): List<WatchEntry> {
-        val stored = WatchHistory.decode(prefs.getString(HISTORY, null))
+        val stored = WatchHistory.decode(prefs.getString(historyKey, null))
+        // What SCARY 0.5 kept was the TV's own, so it is carried into the first profile only.
+        if (suffix.isNotEmpty()) return stored
         val old = legacy.all
         if (old.isEmpty()) return stored
         val carried = old.entries.mapNotNull { (key, value) ->

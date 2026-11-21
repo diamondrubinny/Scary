@@ -64,6 +64,10 @@ class SourcesRepository(private val secrets: SecretStore) {
     }
 
     private var config: Config? = null
+
+    /** The VPN's kill switch (VpnRepository): while it says so, no search leaves, as if the source were unreachable. */
+    @Volatile
+    var blocked: () -> Boolean = { false }
     private var cachedQuery: String? = null
     private var cached: List<Releases.Candidate>? = null
     private var cachedAt = 0L
@@ -136,6 +140,7 @@ class SourcesRepository(private val secrets: SecretStore) {
      * [CACHE_MS], so filtering and sorting ask nothing.
      */
     suspend fun search(query: String, imdbId: String? = null, filmImdbId: String? = imdbId): Search = withContext(Dispatchers.IO) {
+        if (config != null && blocked()) return@withContext Search.Unreachable
         when (val current = config) {
             null -> Search.NotConfigured
             is Config.Addon -> {
@@ -173,14 +178,58 @@ class SourcesRepository(private val secrets: SecretStore) {
         StreamAddon.parse(body)?.let { Search.Ready(it) } ?: Search.Unreadable
     }
 
-    private fun ask(url: String): Search = LanHttp.target(url)?.let(::askAtHome) ?: askSecurely(url)
+    private fun ask(url: String): Search = LanHttp.target(url)?.let { askAtHome(it, ::readFeed) } ?: askSecurely(url)
+
+    private fun readFeed(body: String): Search = when (val answer = Torznab.parse(body)) {
+        is Torznab.Answer.Results -> Search.Ready(answer.candidates)
+        is Torznab.Answer.Refused -> Search.Refused
+        Torznab.Answer.Unreadable -> Search.Unreadable
+    }
+
+    enum class Health { OK, NOT_CONFIGURED, UNREACHABLE, REFUSED, UNREADABLE }
+
+    /** Whether the viewer's source answers, and how long it took. */
+    data class Check(val health: Health, val millis: Long)
+
+    /**
+     * Asks the viewer's source the smallest question it has (an indexer: what it can do; an add-on: its manifest), at
+     * their word, to show whether the address and the key work. Nothing is searched for.
+     */
+    suspend fun check(): Check = withContext(Dispatchers.IO) {
+        val current = config ?: return@withContext Check(Health.NOT_CONFIGURED, 0)
+        if (blocked()) return@withContext Check(Health.UNREACHABLE, 0)
+        val started = SystemClock.elapsedRealtime()
+        val answer = when (current) {
+            is Config.Addon -> get(StreamAddon.manifestUrl(current.address), "application/json") { body ->
+                if (StreamAddon.isManifestAnswer(body)) Search.Ready(emptyList()) else Search.Unreadable
+            }
+            is Config.Indexer -> {
+                val read = { body: String ->
+                    when (Torznab.capsAnswer(body)) {
+                        is Torznab.Answer.Results -> Search.Ready(emptyList())
+                        is Torznab.Answer.Refused -> Search.Refused
+                        Torznab.Answer.Unreadable -> Search.Unreadable
+                    }
+                }
+                val url = Torznab.capsUrl(current.address, current.apiKey)
+                LanHttp.target(url)?.let { askAtHome(it, read) } ?: get(url, "application/xml", read)
+            }
+        }
+        val health = when (answer) {
+            is Search.Ready -> Health.OK
+            Search.Refused -> Health.REFUSED
+            Search.Unreadable -> Health.UNREADABLE
+            else -> Health.UNREACHABLE
+        }
+        Check(health, SystemClock.elapsedRealtime() - started)
+    }
 
     /**
      * The viewer's indexer at a private home address, over plain HTTP (core LanHttp): a socket of SCARY's own, since
      * the app's cleartext rule stays closed for everything else. The address was checked when it was saved, and the
      * socket is checked again once connected: it must have reached a private address.
      */
-    private fun askAtHome(target: LanHttp.Target): Search = try {
+    private fun askAtHome(target: LanHttp.Target, read: (String) -> Search): Search = try {
         Socket().use { socket ->
             socket.soTimeout = TIMEOUT_MS
             socket.connect(InetSocketAddress(InetAddress.getByName(target.host), target.port), LAN_CONNECT_MS)
@@ -194,11 +243,7 @@ class SourcesRepository(private val secrets: SecretStore) {
                 response.code == HttpURLConnection.HTTP_UNAUTHORIZED || response.code == HttpURLConnection.HTTP_FORBIDDEN || response.code == HTTP_TOO_MANY_REQUESTS -> Search.Refused
                 // A redirect is not followed: the key must not go to another address.
                 response.code != HttpURLConnection.HTTP_OK -> Search.Unreachable
-                else -> when (val answer = response.body?.let(Torznab::parse)) {
-                    is Torznab.Answer.Results -> Search.Ready(answer.candidates)
-                    is Torznab.Answer.Refused -> Search.Refused
-                    Torznab.Answer.Unreadable, null -> Search.Unreadable
-                }
+                else -> response.body?.let(read) ?: Search.Unreadable
             }
         }
     } catch (e: IOException) {
@@ -207,13 +252,7 @@ class SourcesRepository(private val secrets: SecretStore) {
         Search.Unreachable
     }
 
-    private fun askSecurely(url: String): Search = get(url, "application/rss+xml, application/xml") { body ->
-        when (val answer = Torznab.parse(body)) {
-            is Torznab.Answer.Results -> Search.Ready(answer.candidates)
-            is Torznab.Answer.Refused -> Search.Refused
-            Torznab.Answer.Unreadable -> Search.Unreadable
-        }
-    }
+    private fun askSecurely(url: String): Search = get(url, "application/rss+xml, application/xml", ::readFeed)
 
     /** One HTTPS GET, read up to the size limit and handed to [read]; redirects are not followed. */
     private fun get(url: String, accept: String, read: (String) -> Search): Search {

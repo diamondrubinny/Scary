@@ -137,6 +137,12 @@ object RealDebrid {
         }
     }
 
+    /**
+     * What deleting all of [fileKeys] removes: each download once, and each torrent once however many of its files are
+     * in the list. Keys that are not files are left out.
+     */
+    fun deletions(fileKeys: List<String>): List<Deletion> = fileKeys.mapNotNull(::deletion).distinct()
+
     /** The viewer's newest torrents, finished or not. */
     const val RECENT_TORRENTS_URL = "$API/torrents?page=1&limit=30"
 

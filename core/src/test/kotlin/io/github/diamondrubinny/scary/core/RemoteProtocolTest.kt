@@ -126,7 +126,7 @@ class RemoteProtocolTest {
         assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 8, Command.RESTORE, "{}")))
         assertEquals(Verdict.Accepted(RemoteProtocol.Request(7, Command.RESTORE, bigBackup)), session.open(sealed, large = true))
         assertEquals(Verdict.Replayed, session.open(sealed, large = true))
-        // The large address takes nothing but a restore: no way around the small limits of the other commands.
+        // The large address takes no small command: no way around the small limits of the other commands.
         assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 9, Command.TMDB_KEY, "0123456789abcdef0123456789abcdef"), large = true))
         assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 10, Command.UP), large = true))
         // Too long even for a backup, a line break in it, or a forged one.
@@ -140,5 +140,18 @@ class RemoteProtocolTest {
         // Asking for a backup is a small command with no text.
         assertTrue(session.open(RemoteProtocol.seal(secret, 15, Command.BACKUP)) is Verdict.Accepted)
         assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 16, Command.BACKUP, "x")))
+    }
+
+    @Test
+    fun `a VPN settings file travels in base64, only where a large body is expected`() {
+        val file = "[Interface]\nPrivateKey = " + "A".repeat(43) + "=\nAddress = 10.2.0.2/32\n\n[Peer]\nPublicKey = " + "B".repeat(43) + "=\nEndpoint = vpn.example.org:51820\n"
+        val base64 = java.util.Base64.getEncoder().encodeToString(file.toByteArray())
+        val session = RemoteProtocol.Session(secret)
+        // As it is, with its line breaks, it is refused; in base64 it is one line of plain letters.
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 1, Command.VPN_CONFIG, file), large = true))
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 2, Command.VPN_CONFIG, base64)))
+        assertEquals(Verdict.Accepted(RemoteProtocol.Request(3, Command.VPN_CONFIG, base64)), session.open(RemoteProtocol.seal(secret, 3, Command.VPN_CONFIG, base64), large = true))
+        // The largest file SCARY reads fits, in base64, in the largest command.
+        assertTrue(io.github.diamondrubinny.scary.core.vpn.WireGuardConfig.MAX_CHARS * 4 / 3 + 4 <= RemoteProtocol.MAX_LARGE_TEXT)
     }
 }

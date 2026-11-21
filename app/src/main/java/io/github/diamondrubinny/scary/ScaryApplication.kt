@@ -116,6 +116,9 @@ class AppContainer(context: Context) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val networkWatcher = NetworkWatcher(appContext)
 
+    /** Whether a VPN is on, and the TV's VPN apps, for the row in Settings. */
+    val vpnWatcher = io.github.diamondrubinny.scary.data.VpnWatcher(appContext)
+
     private val secretStore = SecretStore(appContext)
     val tmdbRepository = TmdbRepository(appContext, secretStore)
 
@@ -144,6 +147,21 @@ class AppContainer(context: Context) {
 
     /** The viewer's own Torznab indexer, only in a build with the sources feature and once they set it. */
     val sources = io.github.diamondrubinny.scary.data.SourcesRepository(secretStore)
+
+    /** SCARY's own WireGuard tunnel, only once the viewer gives a settings file from their VPN provider. */
+    val vpn = io.github.diamondrubinny.scary.data.VpnRepository(appContext, secretStore).also { repository ->
+        // With the kill switch on, nothing goes to Real-Debrid or the viewer's source while the tunnel is not up.
+        realDebrid.blocked = { repository.blocked }
+        sources.blocked = { repository.blocked }
+        phoneRemote.vpnConfigs = io.github.diamondrubinny.scary.remote.PhoneRemoteServer.VpnConfigs { base64 ->
+            val text = runCatching { String(android.util.Base64.decode(base64, android.util.Base64.DEFAULT), Charsets.UTF_8) }.getOrNull()
+            when (text?.let { repository.install(it) }) {
+                io.github.diamondrubinny.scary.data.VpnRepository.Install.OK -> "vpn_ok"
+                io.github.diamondrubinny.scary.data.VpnRepository.Install.STORAGE -> "vpn_failed"
+                io.github.diamondrubinny.scary.data.VpnRepository.Install.INVALID, null -> "vpn_invalid"
+            }
+        }
+    }
 
     /** Subtitles found online by the film's name, for the internal player; kept in the same cache as the torrent's. */
     val subtitleRepository = io.github.diamondrubinny.scary.data.SubtitleRepository(

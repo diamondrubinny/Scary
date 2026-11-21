@@ -71,6 +71,15 @@ class StreamAddonTest {
     }
 
     @Test
+    fun `the check reads the add-on's manifest`() {
+        assertEquals("https://addon.example/abc/manifest.json", StreamAddon.manifestUrl("https://addon.example/abc"))
+        assertTrue(StreamAddon.isManifestAnswer("""{"id":"org.example.addon","name":"X","version":"1.0.0","resources":["stream"],"types":["movie"]}"""))
+        assertFalse(StreamAddon.isManifestAnswer("""{"streams":[]}"""))
+        assertFalse(StreamAddon.isManifestAnswer("""{"id":"x","resources":"stream"}"""))
+        assertFalse(StreamAddon.isManifestAnswer("<html>"))
+    }
+
+    @Test
     fun `what is not the protocol's answer is refused`() {
         assertNull(StreamAddon.parse(""))
         assertNull(StreamAddon.parse("<html>Sign in</html>"))
