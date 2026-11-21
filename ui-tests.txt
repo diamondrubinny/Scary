@@ -1,0 +1,5 @@
+In the app drawer: yes
+Phone upright:
+OK (5 tests)
+Tablet upright:
+OK (5 tests)
