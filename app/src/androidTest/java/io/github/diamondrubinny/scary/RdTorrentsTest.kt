@@ -6,6 +6,9 @@ package io.github.diamondrubinny.scary
 
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -18,6 +21,8 @@ import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_CONFIRM_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_DELETE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_FIELD_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_PULL_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_FILE_CONFIRM_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_DELETE_FILE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_TORRENTS_BUTTON_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsScreen
@@ -70,6 +75,27 @@ class RdTorrentsTest {
     }
 
     @Test
+    fun deletingAFileFromTheAccountAsksTwice() {
+        val file = RealDebrid.RdFile("t:A1:0", "Night.of.the.Living.Dead.1968.mkv", 4_000_000_000, "https://real-debrid.com/d/1")
+        val deleted = mutableListOf<String>()
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RealDebridScreen(
+                    state = RealDebridRepository.State.SignedIn("viewer", true, "2027-01-01"),
+                    files = RdFilesState.Ready(listOf(file)),
+                    actions = RealDebridActions(onSignIn = {}, onCancel = {}, onSignOut = {}, onRefresh = {}, onPlay = {}, onDeleteFile = { deleted += it.key }),
+                )
+            }
+        } }
+        // Holding OK on the file opens its window; "Delete" there only asks, and the second "Delete" deletes.
+        rule.onNode(hasText(file.name)).performTouchInput { longClick() }
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_FILE_TAG)).performClick()
+        assertTrue(deleted.isEmpty())
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_FILE_CONFIRM_TAG)).performClick()
+        assertEquals(listOf("t:A1:0"), deleted)
+    }
+
+    @Test
     fun aBuildWithoutTheFeatureShowsNoWayIn() {
         rule.runOnUiThread { rule.activity.setContent {
             ScaryTheme {
@@ -81,5 +107,6 @@ class RdTorrentsTest {
             }
         } }
         rule.onNode(hasTestTag(REAL_DEBRID_TORRENTS_BUTTON_TAG)).assertDoesNotExist()
+        rule.onNode(hasTestTag(REAL_DEBRID_DELETE_FILE_TAG)).assertDoesNotExist()
     }
 }

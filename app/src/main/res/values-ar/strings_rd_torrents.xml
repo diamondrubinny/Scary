@@ -16,7 +16,7 @@
     <string name="rd_what_sources">يشغّل، في مشغّل SCARY، الفيديوهات الموجودة في حسابك على Real-Debrid. يمكنك أيضًا إضافة رابط مغناطيسي خاص بك إلى الحساب، أو البحث في مفهرس أعددته بنفسك. لا يأتي SCARY بأي مفهرس أو موقع أو روابط.</string>
     <string name="rd_torrent_what">الصق رابطًا مغناطيسيًا خاصًا بك. يرسل SCARY الهاش والاسم والمتتبّعات إلى حسابك على Real-Debrid، ويطلب ملفات الفيديو، ويشغّل الفيلم في مشغّل SCARY. لا شيء آخر يغادر التلفاز. ما تضيفه مسؤوليتك.</string>
     <string name="rd_torrent_invalid">هذا ليس رابطًا مغناطيسيًا.</string>
-    <string name="rd_torrent_downloading">Real-Debrid يجلبه الآن: %1$d%%. سيظهر في الأسفل جاهزًا عند الانتهاء.</string>
+    <string name="rd_torrent_downloading">Real-Debrid يجلبه الآن: %1$d%%. ابقَ في هذه الشاشة وسيُشغَّل في مشغّل SCARY عند جاهزيته؛ ويظهر أيضًا في الأسفل.</string>
     <string name="rd_torrent_error_slots">لا يوجد في حسابك على Real-Debrid مكان شاغر لتورنت آخر. احذف واحدًا أو انتظر حتى ينتهي أحدها.</string>
     <string name="rd_torrent_error_refused">رفض Real-Debrid هذا التورنت.</string>
     <string name="rd_torrent_error_too_big">هذا التورنت أكبر مما يقبله Real-Debrid.</string>
@@ -69,4 +69,9 @@
     <string name="rd_sources_find">البحث عن مصادر</string>
     <string name="settings_content_notice_sources">لا يستضيف SCARY أي أفلام ولا يحفظ ملفات فيديو. يعرض معلومات عامة عن الأفلام ويفتح الفيلم في تطبيق مشاهدة مثبّت بالفعل على هذا الجهاز، مثل Stremio أو Netflix أو YouTube. ما تعرضه هذه التطبيقات مسؤوليتها ومسؤوليتك. إذا ربطت حسابك على Real-Debrid، يشغّل SCARY الملفات الموجودة فيه، ويمكنه إضافة رابط مغناطيسي تقدّمه أنت إلى الحساب، والبحث في مصدر أعددته بنفسك: مفهرس Torznab، أو إضافة مصادر على عنوان تقدّمه أنت. لا يأتي SCARY بأي مفهرس أو إضافة أو موقع أو روابط، ولا يوصي بأيٍّ منها، ولا يبحث في أي مكان حتى تُعدّ مصدرًا. ما تبحث عنه وتضيفه وتحتفظ به مسؤوليتك، وفق القانون في بلدك.</string>
     <string name="rd_sources_needs_film">هذا المصدر يجد الأفلام من صفحتها: افتح فيلمًا واضغط على البحث عن مصادر. لا يبحث بالكلمات، والمسلسلات غير مدعومة بعد.</string>
+    <string name="rd_file_delete">حذف من Real-Debrid</string>
+    <string name="rd_file_delete_confirm">هل تريد حذف هذا من حسابك على Real-Debrid؟ الملف القادم من تورنت يحذف التورنت كله بكل ملفاته. لا يمكن التراجع عن ذلك.</string>
+    <string name="rd_file_deleted">حُذف من حسابك.</string>
+    <string name="rd_file_delete_failed">تعذّر الحذف. حاول مجددًا بعد قليل.</string>
+    <string name="rd_film_hint_delete">اضغط مطولًا على OK فوق ملف لاختيار الفيلم الذي يمثّله، أو لحذفه من حسابك.</string>
 </resources>

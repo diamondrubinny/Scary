@@ -16,7 +16,7 @@
     <string name="rd_what_sources">Plays, in SCARY\'s player, the videos in your own Real-Debrid account. You can also add a magnet link of your own to the account, or search an indexer you set up yourself. SCARY comes with no indexer, site or links.</string>
     <string name="rd_torrent_what">Paste a magnet link of your own. SCARY sends its hash, name and trackers to your Real-Debrid account, asks for the video files, and plays the film in SCARY\'s player. Nothing else leaves the TV. What you add is your responsibility.</string>
     <string name="rd_torrent_invalid">This is not a magnet link.</string>
-    <string name="rd_torrent_downloading">Real-Debrid is fetching it: %1$d%%. It will show below as ready when it is done.</string>
+    <string name="rd_torrent_downloading">Real-Debrid is fetching it: %1$d%%. Stay on this screen and it plays in SCARY\'s player when it is ready; it also shows below.</string>
     <string name="rd_torrent_error_slots">Your Real-Debrid account has no free place for another torrent. Delete one, or wait for one to finish.</string>
     <string name="rd_torrent_error_refused">Real-Debrid refused this torrent.</string>
     <string name="rd_torrent_error_too_big">This torrent is too big for Real-Debrid.</string>
@@ -69,4 +69,9 @@
     <string name="rd_sources_find">Find sources</string>
     <string name="settings_content_notice_sources">SCARY hosts no movies and stores no video files. It shows public movie information and opens the movie in a streaming app already installed on this device, such as Stremio, Netflix or YouTube. What those apps play is up to them and to you. If you connect your own Real-Debrid account, SCARY plays the files in it, can add a magnet link you give to that account, and can search a source that you set up yourself: a Torznab indexer, or a stream add-on at an address you give. SCARY comes with no indexer, add-on, site or links, recommends none, and searches nowhere until you set one up. What you search for, add and keep is your responsibility, under the law where you live.</string>
     <string name="rd_sources_needs_film">This source finds films from their page: open a film and press Find sources. It does not search by words, and series are not supported yet.</string>
+    <string name="rd_file_delete">Delete from Real-Debrid</string>
+    <string name="rd_file_delete_confirm">Delete this from your Real-Debrid account? A file that came from a torrent takes the whole torrent with it, every file in it. This cannot be undone.</string>
+    <string name="rd_file_deleted">Deleted from your account.</string>
+    <string name="rd_file_delete_failed">It could not be deleted. Try again in a moment.</string>
+    <string name="rd_film_hint_delete">Hold OK on a file to choose which film it is, or to delete it from your account.</string>
 </resources>

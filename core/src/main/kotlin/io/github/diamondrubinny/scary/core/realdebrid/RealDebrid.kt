@@ -110,6 +110,33 @@ object RealDebrid {
 
     const val ACTIVE_COUNT_URL = "$API/torrents/activeCount"
 
+    /** DELETE; answers 204. Removes one link from the viewer's downloads list. */
+    fun deleteDownloadUrl(id: String): String = "$API/downloads/delete/${checkedId(id)}"
+
+    /** What deleting one of the viewer's files removes from the account: a download, or the whole torrent it is in. */
+    sealed interface Deletion {
+        val url: String
+
+        data class Download(val id: String) : Deletion {
+            override val url get() = deleteDownloadUrl(id)
+        }
+
+        data class Torrent(val id: String) : Deletion {
+            override val url get() = deleteTorrentUrl(id)
+        }
+    }
+
+    /** From a file's key ("d:<download id>" or "t:<torrent id>:<link index>"); null for anything else. */
+    fun deletion(fileKey: String): Deletion? {
+        val parts = fileKey.split(':')
+        val id = parts.getOrNull(1)?.takeIf(idPattern::matches) ?: return null
+        return when {
+            parts.size == 2 && parts[0] == "d" -> Deletion.Download(id)
+            parts.size == 3 && parts[0] == "t" && parts[2].toIntOrNull() != null -> Deletion.Torrent(id)
+            else -> null
+        }
+    }
+
     /** The viewer's newest torrents, finished or not. */
     const val RECENT_TORRENTS_URL = "$API/torrents?page=1&limit=30"
 

@@ -16,7 +16,7 @@
     <string name="rd_what_sources">מנגן, בנגן של SCARY, את הסרטונים שבחשבון ה-Real-Debrid שלכם. אפשר גם להוסיף לחשבון קישור מגנט משלכם, או לחפש באינדקסר שהגדרתם בעצמכם. SCARY לא מגיע עם אינדקסר, אתר או קישורים.</string>
     <string name="rd_torrent_what">הדביקו קישור מגנט משלכם. SCARY שולח את ה-hash, השם וה-trackers שלו לחשבון ה-Real-Debrid שלכם, מבקש את קובצי הווידאו ומנגן את הסרט בנגן של SCARY. שום דבר אחר לא יוצא מהטלוויזיה. האחריות על מה שאתם מוסיפים היא שלכם.</string>
     <string name="rd_torrent_invalid">זה לא קישור מגנט.</string>
-    <string name="rd_torrent_downloading">Real-Debrid מוריד אותו: %1$d%%. הוא יופיע למטה כמוכן כשיסתיים.</string>
+    <string name="rd_torrent_downloading">Real-Debrid מוריד אותו: %1$d%%. הישארו במסך הזה והוא יתנגן בנגן של SCARY כשיהיה מוכן; הוא מופיע גם למטה.</string>
     <string name="rd_torrent_error_slots">אין בחשבון ה-Real-Debrid שלכם מקום פנוי לטורנט נוסף. מחקו אחד, או חכו שאחד יסתיים.</string>
     <string name="rd_torrent_error_refused">Real-Debrid סירב לטורנט הזה.</string>
     <string name="rd_torrent_error_too_big">הטורנט הזה גדול מדי ל-Real-Debrid.</string>
@@ -69,4 +69,9 @@
     <string name="rd_sources_find">חיפוש מקורות</string>
     <string name="settings_content_notice_sources">SCARY לא מארח סרטים ולא שומר קובצי וידאו. הוא מציג מידע ציבורי על סרטים ופותח את הסרט באפליקציית צפייה שכבר מותקנת במכשיר, כמו Stremio, Netflix או YouTube. מה שהאפליקציות האלה מנגנות הוא באחריותן ובאחריותכם. אם תחברו את חשבון ה-Real-Debrid שלכם, SCARY מנגן את הקבצים שבו, יכול להוסיף לחשבון קישור מגנט שאתם נותנים, ויכול לחפש במקור שהגדרתם בעצמכם: אינדקסר Torznab, או תוסף מקורות בכתובת שאתם מזינים. SCARY לא מגיע עם אינדקסר, תוסף, אתר או קישורים, לא ממליץ על אף אחד, ולא מחפש בשום מקום עד שתגדירו מקור. האחריות על מה שאתם מחפשים, מוסיפים ושומרים היא שלכם, לפי הדין במדינתכם.</string>
     <string name="rd_sources_needs_film">המקור הזה מוצא סרטים מהעמוד שלהם: פתחו סרט ולחצו על חיפוש מקורות. הוא לא מחפש לפי מילים, וסדרות עדיין לא נתמכות.</string>
+    <string name="rd_file_delete">מחיקה מ-Real-Debrid</string>
+    <string name="rd_file_delete_confirm">למחוק את זה מחשבון ה-Real-Debrid שלכם? קובץ שהגיע מטורנט מוחק את כל הטורנט, עם כל הקבצים שבו. אי אפשר לבטל את זה.</string>
+    <string name="rd_file_deleted">נמחק מהחשבון.</string>
+    <string name="rd_file_delete_failed">לא הצלחנו למחוק. נסו שוב בעוד רגע.</string>
+    <string name="rd_film_hint_delete">החזיקו OK על קובץ כדי לבחור איזה סרט זה, או כדי למחוק אותו מהחשבון.</string>
 </resources>

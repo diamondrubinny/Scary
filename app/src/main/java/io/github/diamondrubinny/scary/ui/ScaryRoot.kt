@@ -658,6 +658,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onOnlineSubtitles = viewModel::setPlayerOnlineSubtitles,
                             onCandidates = viewModel::rdFileCandidates,
                             onSetFilm = viewModel::setRdFileFilm,
+                            onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
                         )
                     },

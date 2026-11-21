@@ -63,6 +63,14 @@ class RealDebridTorrentsTest {
     }
 
     @Test
+    fun `deleting a file removes its download, or the torrent it is in`() {
+        assertEquals("https://api.real-debrid.com/rest/1.0/downloads/delete/ABC123", RealDebrid.deletion("d:ABC123")!!.url)
+        assertEquals(RealDebrid.Deletion.Torrent("XYZ9"), RealDebrid.deletion("t:XYZ9:2"))
+        assertEquals("https://api.real-debrid.com/rest/1.0/torrents/delete/XYZ9", RealDebrid.deletion("t:XYZ9:0")!!.url)
+        for (key in listOf("", "d:", "d:../user", "t:XYZ9", "t:XYZ9:x", "x:ABC", "d:ABC:1", "t:a/b:0")) assertNull(key, RealDebrid.deletion(key))
+    }
+
+    @Test
     fun `answers are read strictly`() {
         assertEquals("ABC123", RealDebrid.parseAdded("""{"id":"ABC123","uri":"https://api.real-debrid.com/rest/1.0/torrents/info/ABC123"}"""))
         assertNull(RealDebrid.parseAdded("""{"id":"../x"}"""))

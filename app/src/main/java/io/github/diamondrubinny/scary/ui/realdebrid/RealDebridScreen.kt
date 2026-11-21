@@ -87,6 +87,8 @@ class RealDebridActions(
     val onCandidates: suspend (RealDebrid.RdFile) -> List<Movie> = { emptyList() },
     /** The viewer's word on a file's film: a film id, "" for "not a film in the library", null to let SCARY guess. */
     val onSetFilm: (RealDebrid.RdFile, String?) -> Unit = { _, _ -> },
+    /** Deletes a file from the account; null in a build without the sources feature, which then offers no deleting. */
+    val onDeleteFile: ((RealDebrid.RdFile) -> Unit)? = null,
     /** Opens "Add a torrent"; null in a build without the sources feature, which then shows no way in. */
     val onTorrents: (() -> Unit)? = null,
 )
@@ -95,6 +97,8 @@ class RealDebridActions(
 const val REAL_DEBRID_FILM_TAG = "realDebridFilm"
 const val REAL_DEBRID_NOT_A_FILM_TAG = "realDebridNotAFilm"
 const val REAL_DEBRID_GUESS_AGAIN_TAG = "realDebridGuessAgain"
+const val REAL_DEBRID_DELETE_FILE_TAG = "realDebridDeleteFile"
+const val REAL_DEBRID_DELETE_FILE_CONFIRM_TAG = "realDebridDeleteFileConfirm"
 
 /** A file's film row on the Real-Debrid screen: the film's id for the test tag. */
 fun filmTag(movieId: String) = "film:$movieId"
@@ -186,7 +190,10 @@ fun RealDebridScreen(
             BasicText(stringResource(R.string.rd_files_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
             // How to correct a guess, in plain words (holding OK is the remote's long press).
             if (fileFilms.isNotEmpty() || (files as? RdFilesState.Ready)?.files?.isNotEmpty() == true) {
-                BasicText(stringResource(R.string.rd_film_hint), style = ScaryType.Caption.copy(color = ScaryColors.Ash))
+                BasicText(
+                    stringResource(if (actions.onDeleteFile == null) R.string.rd_film_hint else R.string.rd_film_hint_delete),
+                    style = ScaryType.Caption.copy(color = ScaryColors.Ash),
+                )
             }
             when (files) {
                 RdFilesState.Idle, RdFilesState.Loading -> BasicText(stringResource(R.string.rd_files_loading), style = ScaryType.Caption)
@@ -283,6 +290,37 @@ private fun FilmChooser(file: RealDebrid.RdFile, current: Movie?, actions: RealD
     var candidates by remember(file.key) { mutableStateOf<List<Movie>?>(null) }
     LaunchedEffect(file.key) { candidates = actions.onCandidates(file) }
     val first = remember { FocusRequester() }
+    // Deleting asks once more, in the same window, before anything leaves the account.
+    var deleting by remember(file.key) { mutableStateOf(false) }
+    val onDelete = actions.onDeleteFile
+    if (deleting && onDelete != null) {
+        val keep = remember { FocusRequester() }
+        LaunchedEffect(Unit) {
+            withFrameNanos { }
+            runCatching { keep.requestFocus() }
+        }
+        androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
+            Column(
+                modifier = Modifier
+                    .widthIn(max = 640.dp)
+                    .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                    .padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                BasicText(stringResource(R.string.rd_file_delete), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+                BasicText(file.name, style = ScaryType.Caption.copy(color = ScaryColors.Ash, textDirection = TextDirection.Content), maxLines = 2, overflow = TextOverflow.Ellipsis)
+                BasicText(stringResource(R.string.rd_file_delete_confirm), style = ScaryType.Body, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                // "Keep it" first: a second OK by habit must not delete.
+                ScaryButton(stringResource(R.string.rd_torrent_delete_no), onClick = onDone, focusRequester = keep)
+                ScaryButton(
+                    stringResource(R.string.rd_torrent_delete_yes),
+                    onClick = { onDelete(file); onDone() },
+                    modifier = Modifier.testTag(REAL_DEBRID_DELETE_FILE_CONFIRM_TAG),
+                )
+            }
+        }
+        return
+    }
     LaunchedEffect(candidates == null) {
         withFrameNanos { }
         runCatching { first.requestFocus() }
@@ -321,6 +359,14 @@ private fun FilmChooser(file: RealDebrid.RdFile, current: Movie?, actions: RealD
                 onClick = { actions.onSetFilm(file, null); onDone() },
                 modifier = Modifier.testTag(REAL_DEBRID_GUESS_AGAIN_TAG),
             )
+            if (onDelete != null) {
+                ScaryButton(
+                    stringResource(R.string.rd_file_delete),
+                    onClick = { deleting = true },
+                    quiet = true,
+                    modifier = Modifier.testTag(REAL_DEBRID_DELETE_FILE_TAG),
+                )
+            }
         }
     }
 }
