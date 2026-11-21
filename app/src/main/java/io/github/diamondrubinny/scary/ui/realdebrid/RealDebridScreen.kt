@@ -91,6 +91,8 @@ class RealDebridActions(
     val onSetFilm: (RealDebrid.RdFile, String?) -> Unit = { _, _ -> },
     /** Deletes a file from the account; null in a build without the sources feature, which then offers no deleting. */
     val onDeleteFile: ((RealDebrid.RdFile) -> Unit)? = null,
+    /** Deletes every file in the list from the account; null in a build without the sources feature. */
+    val onDeleteAll: (() -> Unit)? = null,
     /** Opens "Add a torrent"; null in a build without the sources feature, which then shows no way in. */
     val onTorrents: (() -> Unit)? = null,
 )
@@ -101,6 +103,8 @@ const val REAL_DEBRID_NOT_A_FILM_TAG = "realDebridNotAFilm"
 const val REAL_DEBRID_GUESS_AGAIN_TAG = "realDebridGuessAgain"
 const val REAL_DEBRID_DELETE_FILE_TAG = "realDebridDeleteFile"
 const val REAL_DEBRID_DELETE_FILE_CONFIRM_TAG = "realDebridDeleteFileConfirm"
+const val REAL_DEBRID_DELETE_ALL_TAG = "realDebridDeleteAll"
+const val REAL_DEBRID_DELETE_ALL_CONFIRM_TAG = "realDebridDeleteAllConfirm"
 
 /** A file's film row on the Real-Debrid screen: the film's id for the test tag. */
 fun filmTag(movieId: String) = "film:$movieId"
@@ -207,6 +211,13 @@ fun RealDebridScreen(
                     style = ScaryType.Caption.copy(color = ScaryColors.Ash),
                 )
             }
+            val listed = (files as? RdFilesState.Ready)?.files.orEmpty()
+            val onDeleteAll = actions.onDeleteAll
+            if (onDeleteAll != null && listed.isNotEmpty()) {
+                var deletingAll by remember { mutableStateOf(false) }
+                ScaryButton(stringResource(R.string.rd_delete_all), onClick = { deletingAll = true }, quiet = true, modifier = Modifier.testTag(REAL_DEBRID_DELETE_ALL_TAG))
+                if (deletingAll) DeleteAllDialog(count = listed.size, onDelete = onDeleteAll, onDone = { deletingAll = false })
+            }
             when (files) {
                 RdFilesState.Idle, RdFilesState.Loading -> BasicText(stringResource(R.string.rd_files_loading), style = ScaryType.Caption)
                 RdFilesState.Unreachable -> BasicText(stringResource(R.string.rd_unreachable), style = ScaryType.Caption)
@@ -296,6 +307,39 @@ private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Un
  * SCARY guess again". The viewer's word is kept on this TV, and decides which film the file's subtitles and "Continue
  * watching" belong to.
  */
+/**
+ * "Delete all files": it empties the list for good, so it takes two more presses, and "Keep them" is where the focus
+ * starts. Nothing leaves the account before the second press.
+ */
+@Composable
+private fun DeleteAllDialog(count: Int, onDelete: () -> Unit, onDone: () -> Unit) {
+    var sure by remember { mutableStateOf(false) }
+    val keep = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        runCatching { keep.requestFocus() }
+    }
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDone) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = 640.dp)
+                .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            BasicText(stringResource(R.string.rd_delete_all), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+            BasicText(stringResource(R.string.rd_delete_all_count, count.toString()), style = ScaryType.BodyStrong)
+            BasicText(stringResource(R.string.rd_delete_all_confirm), style = ScaryType.Body, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+            ScaryButton(stringResource(R.string.rd_delete_all_no), onClick = onDone, focusRequester = keep)
+            ScaryButton(
+                stringResource(if (sure) R.string.rd_delete_all_again else R.string.rd_delete_all_yes),
+                onClick = { if (sure) { onDelete(); onDone() } else sure = true },
+                modifier = Modifier.testTag(REAL_DEBRID_DELETE_ALL_CONFIRM_TAG),
+            )
+        }
+    }
+}
+
 @Composable
 private fun FilmChooser(file: RealDebrid.RdFile, current: Movie?, actions: RealDebridActions, onDone: () -> Unit) {
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)

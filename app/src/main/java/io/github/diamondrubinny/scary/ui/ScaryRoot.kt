@@ -683,6 +683,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onCandidates = viewModel::rdFileCandidates,
                             onSetFilm = viewModel::setRdFileFilm,
                             onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
+                            onDeleteAll = if (sourcesEnabled) viewModel::deleteAllRdFiles else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
                         )
                     },

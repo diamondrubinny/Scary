@@ -341,6 +341,21 @@ class RealDebridRepository(
         answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND
     }
 
+    /**
+     * Deletes all of [files] from the account, at the viewer's word: every download, and every torrent a file came
+     * from. One request at a time, well under Real-Debrid's limit of requests a minute. How many could not be deleted.
+     */
+    suspend fun deleteFiles(files: List<RealDebrid.RdFile>): Int = withContext(Dispatchers.IO) {
+        var failed = 0
+        for (deletion in RealDebrid.deletions(files.map { it.key })) {
+            val answer = call("DELETE", deletion.url)
+            if (answer == null || !(answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND)) failed++
+            delay(DELETE_PAUSE_MS)
+        }
+        cachedFiles = null
+        failed
+    }
+
     /** Deletes a torrent from the account. True when Real-Debrid says it is gone. */
     suspend fun deleteTorrent(id: String): Boolean = withContext(Dispatchers.IO) {
         val answer = call("DELETE", RealDebrid.deleteTorrentUrl(id)) ?: return@withContext false
@@ -521,6 +536,9 @@ class RealDebridRepository(
         /** How long a pull is watched before it is left to finish in the account. */
         const val PULL_WAIT_MS = 60_000L
         const val PULL_POLL_MS = 2_000L
+
+        /** Between two deletes of "Delete all files": at most four a second, far under 250 requests a minute. */
+        const val DELETE_PAUSE_MS = 300L
 
         /** A torrent Real-Debrid already holds is ready well within this, once its files are chosen. */
         const val CACHED_WAIT_MS = 12_000L

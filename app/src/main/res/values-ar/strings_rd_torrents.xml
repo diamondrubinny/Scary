@@ -74,4 +74,13 @@
     <string name="rd_file_deleted">حُذف من حسابك.</string>
     <string name="rd_file_delete_failed">تعذّر الحذف. حاول مجددًا بعد قليل.</string>
     <string name="rd_film_hint_delete">اضغط مطولًا على OK فوق ملف لاختيار الفيلم الذي يمثّله، أو لحذفه من حسابك.</string>
+    <string name="rd_delete_all">حذف كل الملفات</string>
+    <string name="rd_delete_all_count">الملفات في هذه القائمة: %1$s</string>
+    <string name="rd_delete_all_confirm">هل تريد حذف كل الملفات في هذه القائمة من حسابك في Real-Debrid؟ تُحذف معها ملفات التورنت التي جاءت منها. لا يمكن التراجع عن ذلك.</string>
+    <string name="rd_delete_all_no">الاحتفاظ بها</string>
+    <string name="rd_delete_all_yes">حذف الكل</string>
+    <string name="rd_delete_all_again">اضغط مرة أخرى لحذف كل شيء</string>
+    <string name="rd_delete_all_working">جارٍ الحذف من حسابك…</string>
+    <string name="rd_delete_all_done">حُذفت كل الملفات من حسابك.</string>
+    <string name="rd_delete_all_partial">تعذّر حذف بعض الملفات. حاول مرة أخرى بعد قليل.</string>
 </resources>

@@ -1498,6 +1498,27 @@ class HomeViewModel(
         }
     }
 
+    private var deletingAllRdFiles = false
+
+    /** Every file in the viewer's list, deleted from their Real-Debrid account at their word (after two more "yes"). */
+    fun deleteAllRdFiles() {
+        val repository = realDebrid ?: return
+        val files = (_rdFiles.value as? RdFilesState.Ready)?.files.orEmpty()
+        if (files.isEmpty() || deletingAllRdFiles) return
+        deletingAllRdFiles = true
+        show(R.string.rd_delete_all_working)
+        viewModelScope.launch {
+            try {
+                val failed = repository.deleteFiles(files)
+                show(if (failed == 0) R.string.rd_delete_all_done else R.string.rd_delete_all_partial)
+                _rdMatches.value = null
+                loadRealDebridFiles(force = true)
+            } finally {
+                deletingAllRdFiles = false
+            }
+        }
+    }
+
     /** The host of the viewer's indexer, or null when none is set. */
     val indexerHost: StateFlow<String?> = sources?.host ?: MutableStateFlow(null)
 

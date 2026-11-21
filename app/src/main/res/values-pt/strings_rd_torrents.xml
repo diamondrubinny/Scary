@@ -74,4 +74,13 @@
     <string name="rd_file_deleted">Excluído da sua conta.</string>
     <string name="rd_file_delete_failed">Não foi possível excluir. Tente de novo daqui a pouco.</string>
     <string name="rd_film_hint_delete">Segure OK em um arquivo para escolher qual filme ele é, ou para excluí-lo da sua conta.</string>
+    <string name="rd_delete_all">Apagar todos os arquivos</string>
+    <string name="rd_delete_all_count">Arquivos nesta lista: %1$s</string>
+    <string name="rd_delete_all_confirm">Apagar todos os arquivos desta lista da sua conta Real-Debrid? Os torrents de onde vieram são apagados junto. Isso não pode ser desfeito.</string>
+    <string name="rd_delete_all_no">Manter</string>
+    <string name="rd_delete_all_yes">Apagar tudo</string>
+    <string name="rd_delete_all_again">Pressione de novo para apagar tudo</string>
+    <string name="rd_delete_all_working">Apagando da sua conta…</string>
+    <string name="rd_delete_all_done">Todos os arquivos foram apagados da sua conta.</string>
+    <string name="rd_delete_all_partial">Alguns arquivos não puderam ser apagados. Tente de novo em instantes.</string>
 </resources>

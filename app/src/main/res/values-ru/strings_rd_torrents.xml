@@ -74,4 +74,13 @@
     <string name="rd_file_deleted">Удалено из аккаунта.</string>
     <string name="rd_file_delete_failed">Не удалось удалить. Попробуйте чуть позже.</string>
     <string name="rd_film_hint_delete">Удерживайте OK на файле, чтобы выбрать, какой это фильм, или удалить его из аккаунта.</string>
+    <string name="rd_delete_all">Удалить все файлы</string>
+    <string name="rd_delete_all_count">Файлов в этом списке: %1$s</string>
+    <string name="rd_delete_all_confirm">Удалить все файлы этого списка из вашего аккаунта Real-Debrid? Торренты, из которых они получены, удаляются вместе с ними. Это нельзя отменить.</string>
+    <string name="rd_delete_all_no">Оставить</string>
+    <string name="rd_delete_all_yes">Удалить всё</string>
+    <string name="rd_delete_all_again">Нажмите ещё раз, чтобы удалить всё</string>
+    <string name="rd_delete_all_working">Удаление из аккаунта…</string>
+    <string name="rd_delete_all_done">Все файлы удалены из аккаунта.</string>
+    <string name="rd_delete_all_partial">Некоторые файлы не удалось удалить. Попробуйте чуть позже.</string>
 </resources>

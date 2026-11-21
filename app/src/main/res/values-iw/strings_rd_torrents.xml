@@ -74,4 +74,13 @@
     <string name="rd_file_deleted">נמחק מהחשבון.</string>
     <string name="rd_file_delete_failed">לא הצלחנו למחוק. נסו שוב בעוד רגע.</string>
     <string name="rd_film_hint_delete">החזיקו OK על קובץ כדי לבחור איזה סרט זה, או כדי למחוק אותו מהחשבון.</string>
+    <string name="rd_delete_all">מחיקת כל הקבצים</string>
+    <string name="rd_delete_all_count">קבצים ברשימה: %1$s</string>
+    <string name="rd_delete_all_confirm">למחוק את כל הקבצים שברשימה מחשבון ה-Real-Debrid שלכם? הטורנטים שמהם הגיעו נמחקים איתם. אי אפשר לבטל את זה.</string>
+    <string name="rd_delete_all_no">להשאיר</string>
+    <string name="rd_delete_all_yes">מחיקת הכול</string>
+    <string name="rd_delete_all_again">לחצו שוב כדי למחוק הכול</string>
+    <string name="rd_delete_all_working">מוחק מהחשבון…</string>
+    <string name="rd_delete_all_done">כל הקבצים נמחקו מהחשבון.</string>
+    <string name="rd_delete_all_partial">חלק מהקבצים לא נמחקו. נסו שוב בעוד רגע.</string>
 </resources>

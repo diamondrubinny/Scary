@@ -74,4 +74,13 @@
     <string name="rd_file_deleted">Deleted from your account.</string>
     <string name="rd_file_delete_failed">It could not be deleted. Try again in a moment.</string>
     <string name="rd_film_hint_delete">Hold OK on a file to choose which film it is, or to delete it from your account.</string>
+    <string name="rd_delete_all">Delete all files</string>
+    <string name="rd_delete_all_count">Files in this list: %1$s</string>
+    <string name="rd_delete_all_confirm">Delete every file in this list from your Real-Debrid account? The torrents they came from are deleted with them. This cannot be undone.</string>
+    <string name="rd_delete_all_no">Keep them</string>
+    <string name="rd_delete_all_yes">Delete all</string>
+    <string name="rd_delete_all_again">Press again to delete everything</string>
+    <string name="rd_delete_all_working">Deleting from your account…</string>
+    <string name="rd_delete_all_done">All the files were deleted from your account.</string>
+    <string name="rd_delete_all_partial">Some files could not be deleted. Try again in a moment.</string>
 </resources>
