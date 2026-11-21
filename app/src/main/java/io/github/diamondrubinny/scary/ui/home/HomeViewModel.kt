@@ -1462,10 +1462,13 @@ class HomeViewModel(
         if (_rdSearch.value == RdSearchState.Loading) return
         // On a film's own search, with the words untouched, the film's IMDb number is asked for first.
         val film = (backStack.value.last() as? Screen.RdSources)?.movieId?.let(::movieById)
-        val imdbId = film?.takeIf { !it.isSeries && query.trim() == sourceQuery(it.id) }?.imdbId?.takeIf { it.isNotBlank() }
+        val filmImdbId = film?.takeIf { !it.isSeries }?.imdbId?.takeIf { it.isNotBlank() }
+        val imdbId = filmImdbId?.takeIf { query.trim() == sourceQuery(film.id) }
         _rdSearch.value = RdSearchState.Loading
         viewModelScope.launch {
-            _rdSearch.value = when (val result = repository.search(query, imdbId)) {
+            // A stream add-on answers by film only, whatever the words say: it is asked for the page's film.
+            _rdSearch.value = when (val result = repository.search(query, imdbId, filmImdbId)) {
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.NeedsFilm -> RdSearchState.NeedsFilm
                 is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreachable -> RdSearchState.Unreachable
