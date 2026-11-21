@@ -6,7 +6,9 @@ package io.github.diamondrubinny.scary.data
 
 import android.os.SystemClock
 import android.util.Log
+import io.github.diamondrubinny.scary.core.sources.LanHttp
 import io.github.diamondrubinny.scary.core.sources.Releases
+import io.github.diamondrubinny.scary.core.sources.StreamAddon
 import io.github.diamondrubinny.scary.core.sources.Torznab
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,15 +24,19 @@ import kotlinx.serialization.json.put
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.HttpURLConnection
-import java.net.URI
+import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 import java.net.URL
 
 /**
- * The viewer's own Torznab indexer (Prowlarr, Jackett), only in a build made with the sources feature and only once
- * they give its address and key (docs/TORRENT_SCRAPER_PLAN.md). SCARY ships no address of any indexer or site.
+ * The viewer's own source of releases, only once they give its address (docs/TORRENT_SCRAPER_PLAN.md): a Torznab
+ * indexer (Prowlarr, Jackett) with its key, or a stream add-on that speaks Stremio's add-on protocol (StreamAddon in
+ * core). SCARY ships no address of any indexer, add-on or site, and recommends none.
  *
- * The address and the key are stored encrypted (SecretStore), are not backed up, and are sent to that address only,
- * over HTTPS. The key travels in the request's address, as Torznab asks, so that address is never logged. A search
+ * The address and the key are stored encrypted (SecretStore), are not backed up, and are sent to that address only:
+ * over HTTPS, or over plain HTTP when the address is a private home-network one (core LanHttp), where the key then
+ * travels unencrypted inside that network. The key travels in the request's address, as Torznab asks, so that address is never logged. A search
  * sends the viewer's words, the key and the TV's IP address to the indexer; nothing about the viewer's account.
  */
 class SourcesRepository(private val secrets: SecretStore) {
@@ -44,16 +50,25 @@ class SourcesRepository(private val secrets: SecretStore) {
         /** The indexer said no: a wrong key, or its limit reached. */
         data object Refused : Search
         data object Unreadable : Search
+
+        /** The source is a stream add-on, which answers by film only: there is no film to ask it for. */
+        data object NeedsFilm : Search
     }
 
-    private data class Config(val endpoint: String, val apiKey: String)
+    /** Where the viewer's sources come from: a Torznab indexer (address and key), or a stream add-on (address only). */
+    private sealed interface Config {
+        val address: String
+
+        data class Indexer(override val address: String, val apiKey: String) : Config
+        data class Addon(override val address: String) : Config
+    }
 
     private var config: Config? = null
     private var cachedQuery: String? = null
     private var cached: List<Releases.Candidate>? = null
     private var cachedAt = 0L
 
-    /** The indexer's host, to show which one is set; null when none is. Never the key. */
+    /** The source's host, to show which one is set; null when none is. Never the key or the rest of the address. */
     private val _host = MutableStateFlow<String?>(null)
     val host: StateFlow<String?> = _host.asStateFlow()
 
@@ -61,23 +76,45 @@ class SourcesRepository(private val secrets: SecretStore) {
         val stored = secrets.read(SECRET_NAME)?.let { text ->
             runCatching {
                 val o = Json.parseToJsonElement(text).jsonObject
-                val endpoint = (o["url"] as? JsonPrimitive)?.contentOrNull?.let(Torznab::endpoint)
-                val key = (o["key"] as? JsonPrimitive)?.contentOrNull?.let(Torznab::apiKey)
-                if (endpoint != null && key != null) Config(endpoint, key) else null
+                val url = (o["url"] as? JsonPrimitive)?.contentOrNull ?: return@runCatching null
+                if ((o["kind"] as? JsonPrimitive)?.contentOrNull == KIND_ADDON) {
+                    // Kept as the base address; checked again as the manifest's address it came from.
+                    StreamAddon.base("$url/manifest.json")?.let { Config.Addon(it) }
+                } else {
+                    val endpoint = Torznab.endpoint(url)
+                    val key = (o["key"] as? JsonPrimitive)?.contentOrNull?.let(Torznab::apiKey)
+                    if (endpoint != null && key != null) Config.Indexer(endpoint, key) else null
+                }
             }.getOrNull()
         }
         use(stored)
     }
 
+    /**
+     * Saves the viewer's source. An address that ends with /manifest.json is a stream add-on's and takes no key;
+     * any other is a Torznab indexer's and needs one.
+     */
     suspend fun save(address: String, key: String): SaveResult = withContext(Dispatchers.IO) {
-        val endpoint = Torznab.endpoint(address) ?: return@withContext SaveResult.BAD_ADDRESS
-        val apiKey = Torznab.apiKey(key) ?: return@withContext SaveResult.BAD_KEY
-        val text = buildJsonObject {
-            put("url", endpoint)
-            put("key", apiKey)
-        }.toString()
+        val next: Config
+        val text: String
+        if (StreamAddon.isManifest(address)) {
+            val base = StreamAddon.base(address) ?: return@withContext SaveResult.BAD_ADDRESS
+            next = Config.Addon(base)
+            text = buildJsonObject {
+                put("kind", KIND_ADDON)
+                put("url", base)
+            }.toString()
+        } else {
+            val endpoint = Torznab.endpoint(address) ?: return@withContext SaveResult.BAD_ADDRESS
+            val apiKey = Torznab.apiKey(key) ?: return@withContext SaveResult.BAD_KEY
+            next = Config.Indexer(endpoint, apiKey)
+            text = buildJsonObject {
+                put("url", endpoint)
+                put("key", apiKey)
+            }.toString()
+        }
         if (!secrets.write(SECRET_NAME, text)) return@withContext SaveResult.STORAGE
-        use(Config(endpoint, apiKey))
+        use(next)
         SaveResult.SAVED
     }
 
@@ -89,58 +126,117 @@ class SourcesRepository(private val secrets: SecretStore) {
     private fun use(next: Config?) {
         config = next
         cached = null
-        _host.value = next?.let { runCatching { URI(it.endpoint).host }.getOrNull() }
+        _host.value = next?.let { Regex("^https?://([^/:]+)").find(it.address)?.groupValues?.get(1) }
     }
 
     /**
-     * Asks the indexer for [query]; with a film's [imdbId], for that film first, and for the words only when that
-     * found nothing (not every indexer searches by number). The last answer is kept for [CACHE_MS], so filtering and
-     * sorting ask nothing.
+     * Asks the viewer's source. An indexer is asked for [query]; with a film's [imdbId], for that film first, and for
+     * the words only when that found nothing (not every indexer searches by number). A stream add-on answers by film
+     * only: it is asked for [filmImdbId], and without one says [Search.NeedsFilm]. The last answer is kept for
+     * [CACHE_MS], so filtering and sorting ask nothing.
      */
-    suspend fun search(query: String, imdbId: String? = null): Search = withContext(Dispatchers.IO) {
-        val current = config ?: return@withContext Search.NotConfigured
-        val words = Torznab.cleanQuery(query)
-        val byNumber = imdbId?.let { Torznab.movieUrl(current.endpoint, current.apiKey, it) }
-        if (words == null && byNumber == null) return@withContext Search.Ready(emptyList())
-        val cacheKey = "${if (byNumber != null) imdbId else ""}|${words.orEmpty()}"
-        cached?.takeIf { cachedQuery == cacheKey && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return@withContext Search.Ready(it) }
-        var result: Search = byNumber?.let(::ask) ?: Search.Ready(emptyList())
-        if ((result as? Search.Ready)?.candidates?.isEmpty() != false && words != null) {
-            Torznab.searchUrl(current.endpoint, current.apiKey, words)?.let { result = ask(it) }
+    suspend fun search(query: String, imdbId: String? = null, filmImdbId: String? = imdbId): Search = withContext(Dispatchers.IO) {
+        when (val current = config) {
+            null -> Search.NotConfigured
+            is Config.Addon -> {
+                val url = filmImdbId?.let { StreamAddon.movieUrl(current.address, it) } ?: return@withContext Search.NeedsFilm
+                remembered("addon|$filmImdbId") { askAddon(url) }
+            }
+            is Config.Indexer -> {
+                val words = Torznab.cleanQuery(query)
+                val byNumber = imdbId?.let { Torznab.movieUrl(current.address, current.apiKey, it) }
+                if (words == null && byNumber == null) return@withContext Search.Ready(emptyList())
+                remembered("${if (byNumber != null) imdbId else ""}|${words.orEmpty()}") {
+                    var result: Search = byNumber?.let(::ask) ?: Search.Ready(emptyList())
+                    if ((result as? Search.Ready)?.candidates?.isEmpty() != false && words != null) {
+                        Torznab.searchUrl(current.address, current.apiKey, words)?.let { result = ask(it) }
+                    }
+                    result
+                }
+            }
         }
+    }
+
+    private inline fun remembered(key: String, ask: () -> Search): Search {
+        cached?.takeIf { cachedQuery == key && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return Search.Ready(it) }
+        val result = ask()
         (result as? Search.Ready)?.let {
-            cachedQuery = cacheKey
+            cachedQuery = key
             cached = it.candidates
             cachedAt = SystemClock.elapsedRealtime()
         }
-        result
+        return result
     }
 
-    private fun ask(url: String): Search {
+    /** A stream add-on's answer for one film, over HTTPS; the address is never logged (it can hold the viewer's settings). */
+    private fun askAddon(url: String): Search = get(url, "application/json") { body ->
+        StreamAddon.parse(body)?.let { Search.Ready(it) } ?: Search.Unreadable
+    }
+
+    private fun ask(url: String): Search = LanHttp.target(url)?.let(::askAtHome) ?: askSecurely(url)
+
+    /**
+     * The viewer's indexer at a private home address, over plain HTTP (core LanHttp): a socket of SCARY's own, since
+     * the app's cleartext rule stays closed for everything else. The address was checked when it was saved, and the
+     * socket is checked again once connected: it must have reached a private address.
+     */
+    private fun askAtHome(target: LanHttp.Target): Search = try {
+        Socket().use { socket ->
+            socket.soTimeout = TIMEOUT_MS
+            socket.connect(InetSocketAddress(InetAddress.getByName(target.host), target.port), LAN_CONNECT_MS)
+            if (!socket.inetAddress.isSiteLocalAddress) return Search.Unreachable
+            socket.getOutputStream().apply {
+                write(LanHttp.request(target))
+                flush()
+            }
+            val response = LanHttp.read(socket.getInputStream().buffered(), Torznab.MAX_ANSWER_BYTES)
+            when {
+                response.code == HttpURLConnection.HTTP_UNAUTHORIZED || response.code == HttpURLConnection.HTTP_FORBIDDEN || response.code == HTTP_TOO_MANY_REQUESTS -> Search.Refused
+                // A redirect is not followed: the key must not go to another address.
+                response.code != HttpURLConnection.HTTP_OK -> Search.Unreachable
+                else -> when (val answer = response.body?.let(Torznab::parse)) {
+                    is Torznab.Answer.Results -> Search.Ready(answer.candidates)
+                    is Torznab.Answer.Refused -> Search.Refused
+                    Torznab.Answer.Unreadable, null -> Search.Unreadable
+                }
+            }
+        }
+    } catch (e: IOException) {
+        // Only the kind of failure: the address holds the key.
+        Log.w(TAG, "Home indexer request failed: ${e.javaClass.simpleName}")
+        Search.Unreachable
+    }
+
+    private fun askSecurely(url: String): Search = get(url, "application/rss+xml, application/xml") { body ->
+        when (val answer = Torznab.parse(body)) {
+            is Torznab.Answer.Results -> Search.Ready(answer.candidates)
+            is Torznab.Answer.Refused -> Search.Refused
+            Torznab.Answer.Unreadable -> Search.Unreadable
+        }
+    }
+
+    /** One HTTPS GET, read up to the size limit and handed to [read]; redirects are not followed. */
+    private fun get(url: String, accept: String, read: (String) -> Search): Search {
         var connection: HttpURLConnection? = null
         return try {
             connection = (URL(url).openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"
                 connectTimeout = TIMEOUT_MS
                 readTimeout = TIMEOUT_MS
-                // The key must not follow a redirect to another host.
+                // The key, or the settings in the address, must not follow a redirect to another host.
                 instanceFollowRedirects = false
-                setRequestProperty("Accept", "application/rss+xml, application/xml")
+                setRequestProperty("Accept", accept)
                 setRequestProperty("User-Agent", "SCARY-launcher")
             }
             val code = connection.responseCode
             when {
                 code == HttpURLConnection.HTTP_UNAUTHORIZED || code == HttpURLConnection.HTTP_FORBIDDEN || code == HTTP_TOO_MANY_REQUESTS -> Search.Refused
                 code != HttpURLConnection.HTTP_OK -> Search.Unreachable
-                else -> when (val answer = readLimited(connection)?.let(Torznab::parse)) {
-                    is Torznab.Answer.Results -> Search.Ready(answer.candidates)
-                    is Torznab.Answer.Refused -> Search.Refused
-                    Torznab.Answer.Unreadable, null -> Search.Unreadable
-                }
+                else -> readLimited(connection)?.let(read) ?: Search.Unreadable
             }
         } catch (e: IOException) {
-            // Only the kind of failure: the address holds the key.
-            Log.w(TAG, "Indexer request failed: ${e.javaClass.simpleName}")
+            // Only the kind of failure: the address holds the key or the viewer's settings.
+            Log.w(TAG, "Source request failed: ${e.javaClass.simpleName}")
             Search.Unreachable
         } finally {
             connection?.disconnect()
@@ -162,7 +258,9 @@ class SourcesRepository(private val secrets: SecretStore) {
     private companion object {
         const val TAG = "ScarySources"
         const val SECRET_NAME = "torznab_indexer"
+        const val KIND_ADDON = "addon"
         const val TIMEOUT_MS = 20_000
+        const val LAN_CONNECT_MS = 8_000
         const val CACHE_MS = 10 * 60_000L
         const val HTTP_TOO_MANY_REQUESTS = 429
     }

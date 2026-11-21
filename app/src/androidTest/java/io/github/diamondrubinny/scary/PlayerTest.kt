@@ -53,6 +53,7 @@ import io.github.diamondrubinny.scary.ui.player.PLAYER_BOOKMARKS_TAG
 import io.github.diamondrubinny.scary.ui.player.CONTINUE_CARD_TAG
 import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.onNodeWithTag
+import io.github.diamondrubinny.scary.ui.components.REAL_DEBRID_NAV_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_TAG
 import io.github.diamondrubinny.scary.ui.settings.REAL_DEBRID_ROW_TAG
 import io.github.diamondrubinny.scary.ui.stremio.STREMIO_TAG
@@ -445,6 +446,15 @@ class PlayerTest {
         waitFor(hasText(text(R.string.player_error)))
         rule.onNode(hasText(text(R.string.player_close))).performClick()
         rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(PLAYER_TAG)).fetchSemanticsNodes().isEmpty() }
+    }
+
+    @Test
+    fun theTopBarOpensRealDebridInOnePress() {
+        waitFor(hasTestTag(HOME_ROWS_TAG))
+        rule.onNode(hasTestTag(REAL_DEBRID_NAV_TAG)).performClick()
+        waitFor(hasTestTag(REAL_DEBRID_TAG))
+        pressBack()
+        waitFor(hasTestTag(HOME_ROWS_TAG))
     }
 
     @Test

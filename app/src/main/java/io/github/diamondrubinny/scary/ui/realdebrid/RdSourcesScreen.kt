@@ -236,6 +236,7 @@ private fun statusText(search: RdSearchState, pull: RdPullState, found: Int, sho
     search == RdSearchState.Unreachable -> stringResource(R.string.rd_sources_unreachable)
     search == RdSearchState.Refused -> stringResource(R.string.rd_sources_refused)
     search == RdSearchState.Unreadable -> stringResource(R.string.rd_sources_unreadable)
+    search == RdSearchState.NeedsFilm -> stringResource(R.string.rd_sources_needs_film)
     found == 0 -> stringResource(R.string.rd_sources_none)
     shown == 0 -> stringResource(R.string.rd_sources_none_filtered)
     else -> stringResource(R.string.rd_sources_found, shown)
@@ -356,7 +357,7 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
                 label = stringResource(R.string.rd_sources_address_label),
                 hint = "https://",
                 value = address,
-                onValueChange = { address = it.trim().take(512) },
+                onValueChange = { address = it.trim().take(1500) },
                 keyboardType = KeyboardType.Uri,
                 imeAction = ImeAction.Next,
                 onDone = {},

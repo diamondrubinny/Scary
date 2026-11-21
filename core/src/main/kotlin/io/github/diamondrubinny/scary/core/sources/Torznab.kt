@@ -41,12 +41,18 @@ object Torznab {
     private val imdbPattern = Regex("^tt\\d{6,8}$")
     private val keyPattern = Regex("^[A-Za-z0-9_\\-]{8,$MAX_KEY}$")
 
-    /** The indexer's address as the viewer gave it, checked: HTTPS, a host, no user name, no query of its own. */
+    /**
+     * The indexer's address as the viewer gave it, checked: a host, no user name, no query of its own, and HTTPS, or
+     * plain HTTP only at a private home-network address written as numbers (LanHttp), where a home indexer lives.
+     */
     fun endpoint(text: String): String? {
         val trimmed = text.trim().trimEnd('/')
-        if (trimmed.length !in 12..MAX_URL || !trimmed.startsWith("https://") || trimmed.any { it.isWhitespace() || it.isISOControl() }) return null
+        if (trimmed.length !in 12..MAX_URL || trimmed.any { it.isWhitespace() || it.isISOControl() }) return null
+        val secure = trimmed.startsWith("https://")
+        if (!secure && !trimmed.startsWith("http://")) return null
         val uri = runCatching { URI(trimmed) }.getOrNull() ?: return null
         if (uri.host.isNullOrBlank() || uri.rawUserInfo != null || uri.rawQuery != null || uri.rawFragment != null) return null
+        if (!secure && LanHttp.target(trimmed) == null) return null
         return trimmed
     }
 

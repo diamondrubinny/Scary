@@ -285,6 +285,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onOpenTastePicker = viewModel::openTastePicker,
             onDismissTasteInvite = viewModel::dismissTasteInvite,
             onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
+            onOpenRealDebrid = viewModel::openRealDebrid,
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
             onFinishContinue = viewModel::finishContinue,

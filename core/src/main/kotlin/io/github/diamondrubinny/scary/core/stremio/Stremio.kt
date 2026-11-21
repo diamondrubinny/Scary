@@ -58,7 +58,9 @@ data class StremioItem(
  * the TV, approved on a phone; no password is typed on the TV), and the library (films and series, where the viewer
  * stopped, what was watched). Not a published API: every answer is read as untrusted, and anything off is dropped.
  *
- * SCARY never reads the account's add-ons and never asks them for streams: watching stays in Stremio.
+ * SCARY never reads the account's add-ons and never asks them for streams: watching stays in Stremio. (The sources
+ * feature can ask a stream add-on whose address the viewer typed in themselves, core sources/StreamAddon; that has
+ * nothing to do with this account.)
  */
 object Stremio {
     const val MOVIE = "movie"

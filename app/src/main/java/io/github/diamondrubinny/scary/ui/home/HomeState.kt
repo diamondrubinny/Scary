@@ -325,6 +325,9 @@ sealed interface RdSearchState {
     data object Unreachable : RdSearchState
     data object Refused : RdSearchState
     data object Unreadable : RdSearchState
+
+    /** The source answers by film only, and this search is not a film's (the free search, or a series). */
+    data object NeedsFilm : RdSearchState
 }
 
 /** The torrents screen: the last pull, the account's newest torrents (null while loading) and its active places. */
