@@ -116,6 +116,9 @@ class AppContainer(context: Context) {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val networkWatcher = NetworkWatcher(appContext)
 
+    /** Whether a VPN is on, and the TV's VPN apps, for the row in Settings. */
+    val vpnWatcher = io.github.diamondrubinny.scary.data.VpnWatcher(appContext)
+
     private val secretStore = SecretStore(appContext)
     val tmdbRepository = TmdbRepository(appContext, secretStore)
 

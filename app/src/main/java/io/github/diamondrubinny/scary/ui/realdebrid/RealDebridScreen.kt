@@ -67,6 +67,7 @@ const val REAL_DEBRID_CODE_TAG = "realDebridCode"
 const val REAL_DEBRID_FILES_TAG = "realDebridFiles"
 const val REAL_DEBRID_HISTORY_TAG = "realDebridHistory"
 const val REAL_DEBRID_TORRENTS_BUTTON_TAG = "realDebridTorrentsButton"
+const val REAL_DEBRID_VPN_NOTE_TAG = "realDebridVpnNote"
 
 /** Files listed under "Continue watching" here; the home row has them all. */
 private const val HISTORY_SHOWN = 5
@@ -118,6 +119,8 @@ fun RealDebridScreen(
     onlineSubtitles: Boolean = true,
     /** The film or series each file is (by file key), by SCARY's guess or the viewer's word; files that are none are absent. */
     fileFilms: Map<String, Movie> = emptyMap(),
+    /** A VPN is on: Real-Debrid refuses some VPN addresses, so the screen says where to look if nothing plays. */
+    vpnActive: Boolean = false,
 ) {
     var correcting by remember { mutableStateOf<RealDebrid.RdFile?>(null) }
     correcting?.let { file ->
@@ -165,6 +168,9 @@ fun RealDebridScreen(
                     if (history.isNotEmpty()) ScaryButton(stringResource(R.string.rd_clear_history), onClick = actions.onClearHistory)
                 }
             }
+        }
+        if (vpnActive) {
+            BasicText(stringResource(R.string.rd_vpn_note), style = ScaryType.Caption.copy(color = ScaryColors.Candle), modifier = Modifier.testTag(REAL_DEBRID_VPN_NOTE_TAG))
         }
         if (state is State.Waiting) {
             WaitingForCode(state, narrow)

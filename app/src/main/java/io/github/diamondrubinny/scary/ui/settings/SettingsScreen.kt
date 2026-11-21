@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.ui.settings
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -100,6 +101,9 @@ class SettingsActions(
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRealDebrid: () -> Unit = {},
     val onOpenProfiles: () -> Unit = {},
+    /** The TV's VPN apps, asked when the row is pressed, and opening one (null: the only one there is). */
+    val vpnApps: () -> List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp> = { emptyList() },
+    val onOpenVpn: (io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp?) -> Unit = {},
     val onOpenStremioAccount: () -> Unit = {},
     val onOpenHomeRows: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
@@ -146,6 +150,8 @@ fun SettingsScreen(
     realDebridName: String? = null,
     /** The viewer on screen, for the Profiles row. */
     profileName: String = "",
+    /** Whether a VPN is on, for the VPN row. */
+    vpnActive: Boolean = false,
     stremioConnected: Boolean = false,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
@@ -289,6 +295,33 @@ fun SettingsScreen(
             modifier = Modifier.testTag(ORIGINS_ROW_TAG),
         )
         BasicText(stringResource(R.string.settings_origins_note), style = ScaryType.Caption)
+        // SCARY is no VPN: the row says whether the TV has one on, and opens the viewer's own VPN app.
+        var choosingVpn by remember { mutableStateOf<List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp>?>(null) }
+        choosingVpn?.let { apps ->
+            androidx.compose.ui.window.Dialog(onDismissRequest = { choosingVpn = null }) {
+                Column(
+                    modifier = Modifier
+                        .background(ScaryColors.Crypt, androidx.compose.foundation.shape.RoundedCornerShape(4.dp))
+                        .padding(22.dp)
+                        .testTag(VPN_CHOOSER_TAG),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    BasicText(stringResource(R.string.settings_vpn), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
+                    apps.forEach { app -> ScaryButton(app.label, onClick = { choosingVpn = null; actions.onOpenVpn(app) }) }
+                    ScaryButton(stringResource(R.string.pin_cancel), onClick = { choosingVpn = null })
+                }
+            }
+        }
+        SettingRow(
+            label = stringResource(R.string.settings_vpn),
+            value = stringResource(if (vpnActive) R.string.vpn_on else R.string.vpn_off),
+            onClick = {
+                val apps = actions.vpnApps()
+                if (apps.size > 1) choosingVpn = apps else actions.onOpenVpn(null)
+            },
+            modifier = Modifier.testTag(VPN_ROW_TAG),
+        )
+        BasicText(stringResource(R.string.settings_vpn_note), style = ScaryType.Caption)
         SettingRow(
             label = stringResource(R.string.settings_profiles),
             value = profileName,
@@ -557,6 +590,8 @@ const val HOME_ROWS_ROW_TAG = "homeRowsRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
 const val PROFILES_ROW_TAG = "profilesRow"
+const val VPN_ROW_TAG = "vpnRow"
+const val VPN_CHOOSER_TAG = "vpnChooser"
 const val STREMIO_ROW_TAG = "stremioRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"

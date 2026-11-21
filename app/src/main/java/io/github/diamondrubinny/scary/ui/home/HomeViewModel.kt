@@ -150,6 +150,8 @@ class HomeViewModel(
     private val today: () -> LocalDate = LocalDate::now,
     /** The viewer's own indexer (the sources feature); null in tests that do not need it. */
     private val sources: io.github.diamondrubinny.scary.data.SourcesRepository? = null,
+    /** Whether a VPN is on, and the TV's VPN apps; null in tests that do not need it. */
+    private val vpn: io.github.diamondrubinny.scary.data.VpnWatcher? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -1945,6 +1947,20 @@ class HomeViewModel(
         }
     }
 
+    // VPN: SCARY is none, it only says whether one is on and opens the viewer's own VPN app ----------------------------
+
+    /** True while the TV has a VPN network on. */
+    val vpnActive: StateFlow<Boolean> = vpn?.active ?: MutableStateFlow(false)
+
+    /** The VPN apps to offer; asked when the row is pressed, since apps come and go. */
+    fun vpnApps(): List<io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp> = vpn?.apps().orEmpty()
+
+    /** Settings → VPN, with one app: it opens. With none, the viewer is told; with several, the screen asks which. */
+    fun openVpnApp(app: io.github.diamondrubinny.scary.data.VpnWatcher.VpnApp? = null) {
+        val chosen = app ?: vpnApps().singleOrNull()
+        if (chosen == null) show(R.string.vpn_none_installed) else report(launcher.launchApp(chosen.packageName, chosen.label))
+    }
+
     // Profiles (docs/PROFILES_PLAN.md) --------------------------------------------------------------------------------
 
     /** "Who is watching?", from the top bar, the settings, or by itself at start when the TV has several viewers. */
@@ -2928,6 +2944,7 @@ class HomeViewModel(
                     container.subtitleRepository,
                     container.backups,
                     sources = container.sources,
+                    vpn = container.vpnWatcher,
                 )
             }
         }

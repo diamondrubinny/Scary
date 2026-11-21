@@ -214,6 +214,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
+    val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
     val rdSearch by viewModel.rdSearch.collectAsStateWithLifecycle()
     val indexerHost by viewModel.indexerHost.collectAsStateWithLifecycle()
     val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
@@ -416,6 +417,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
         onOpenProfiles = viewModel::openProfiles,
+        vpnApps = viewModel::vpnApps,
+        onOpenVpn = viewModel::openVpnApp,
         onToggleOnline = viewModel::toggleOnline,
         onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
@@ -553,6 +556,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     realDebridName = (realDebridState as? RealDebridRepository.State.SignedIn)?.username,
                     profileName = io.github.diamondrubinny.scary.core.profiles.Profiles.active(state.profiles, state.activeProfileId).name
                         .ifEmpty { stringResource(R.string.profile_default_name) },
+                    vpnActive = vpnActive,
                     stremioConnected = stremioState is StremioRepository.State.SignedIn,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
@@ -651,6 +655,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     languages = playerLanguages,
                     onlineSubtitles = playerOnlineSubtitles,
                     fileFilms = rdFileFilms,
+                    vpnActive = vpnActive,
                     actions = remember(viewModel) {
                         RealDebridActions(
                             onSignIn = viewModel::realDebridSignIn,

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="settings_vpn">VPN</string>
+    <string name="vpn_on">Включён</string>
+    <string name="vpn_off">Выключен</string>
+    <string name="settings_vpn_note">SCARY не является VPN и не содержит его. Эта строка показывает, включён ли VPN на этом ТВ, и открывает установленное вами VPN-приложение. VPN-приложение охватывает весь ТВ, включая SCARY.</string>
+    <string name="vpn_none_installed">На этом ТВ не установлено VPN-приложение.</string>
+    <string name="rd_vpn_note">VPN включён. Real-Debrid отклоняет некоторые VPN-адреса: если ваши файлы не загружаются или не воспроизводятся, попробуйте другой VPN-сервер или выключите VPN.</string>
+</resources>
