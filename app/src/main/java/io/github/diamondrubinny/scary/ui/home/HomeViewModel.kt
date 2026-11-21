@@ -695,8 +695,12 @@ class HomeViewModel(
         // the end, or out with "hide watched"; the rows of the kind they watch most come first. Their own lists
         // (recently opened, My list) stay as they made them.
         val hideWatched = prefs.hideWatched
-        fun unseenFirst(movies: List<Movie>): List<Movie> =
-            if (hideWatched) movies.filter { it.id !in watched } else Personalize.watchedLast(movies) { it.id in watched }
+        // A film marked "Not for me" is not shown in these rows again. It can still be found by searching for it, and
+        // un-marked on its page; the viewer's own lists (recently opened, My list, watched) keep it.
+        fun unseenFirst(movies: List<Movie>): List<Movie> {
+            val wanted = movies.filter { it.id !in disliked }
+            return if (hideWatched) wanted.filter { it.id !in watched } else Personalize.watchedLast(wanted) { it.id in watched }
+        }
         val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
         val seenOrLoved = watched + prefs.lovedIds
         // Rows the viewer turned off in Settings are not built at all.
@@ -1716,6 +1720,27 @@ class HomeViewModel(
         } else {
             show(R.string.continue_removed)
         }
+    }
+
+    /**
+     * "Not for me" in the menu of a "Continue watching" card: for a film started and not worth finishing. The card
+     * leaves its row as with "Only remove", and its film is marked "Not for me", so it is not suggested or shown in
+     * the rows again. A file of the viewer's own stays in their account.
+     */
+    fun notForMeContinue(item: ContinueItem) {
+        val movie = item.movie ?: return finishContinue(item, markWatched = false)
+        val entry = item.entry
+        if (entry.key.startsWith(STREMIO_ENTRY_PREFIX)) {
+            watchStore?.dismissStremio(entry.key.removePrefix(STREMIO_ENTRY_PREFIX), System.currentTimeMillis())
+        } else {
+            watchStore?.update { WatchHistory.forget(it, entry.key) }
+        }
+        viewModelScope.launch {
+            // Set, never toggled: a film already marked stays marked.
+            settings.setRating(movie.id, Rating.NOT_FOR_ME)
+            savedMovies.save(movie, language.value, keptOnline())
+        }
+        show(R.string.continue_not_for_me_removed)
     }
 
     /** "Clear watch history" on the Real-Debrid screen. */

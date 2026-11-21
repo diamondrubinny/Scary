@@ -289,6 +289,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
             onFinishContinue = viewModel::finishContinue,
+            onNotForMeContinue = viewModel::notForMeContinue,
         )
     }
     val bucketActions = remember(viewModel) {
