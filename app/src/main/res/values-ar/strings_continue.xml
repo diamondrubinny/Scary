@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="continue_menu_not_for_me">ليس لي: أزِله ولا تعرضه مجددًا</string>
+    <string name="continue_not_for_me_removed">وُضعت عليه علامة «ليس لي» وأُزيل. لن يُعرض مجددًا.</string>
+</resources>

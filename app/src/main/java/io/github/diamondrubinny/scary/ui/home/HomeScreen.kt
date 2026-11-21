@@ -151,6 +151,8 @@ class HomeActions(
     val onForgetContinue: (WatchEntry) -> Unit = {},
     /** The menu on a "Continue watching" card: take it out of its row, and (true) count its film as watched. */
     val onFinishContinue: (ContinueItem, Boolean) -> Unit = { _, _ -> },
+    /** "Not for me" in a "Continue watching" card's menu: out of the row, and not shown again. */
+    val onNotForMeContinue: (ContinueItem) -> Unit = {},
 )
 
 /** The margin on both sides of every screen: 48dp on a TV, less on tablets and phones (ScaryLayout). */
@@ -543,6 +545,11 @@ private fun HomeRowView(
                 continueMenu = null
                 if (lastInRow) onRowGone()
                 actions.onFinishContinue(item, markWatched)
+            },
+            onNotForMe = {
+                continueMenu = null
+                if (lastInRow) onRowGone()
+                actions.onNotForMeContinue(item)
             },
             onMyList = item.movie?.let { movie -> { continueMenu = null; actions.onToggleMyList(movie) } },
             onDismiss = { continueMenu = null },
@@ -1168,10 +1175,12 @@ internal fun MoodChip(
 const val CONTINUE_MENU_TAG = "continueMenu"
 const val CONTINUE_MENU_WATCHED_TAG = "continueMenuWatched"
 const val CONTINUE_MENU_REMOVE_TAG = "continueMenuRemove"
+const val CONTINUE_MENU_NOT_FOR_ME_TAG = "continueMenuNotForMe"
 
 /**
  * Holding OK on a "Continue watching" card: "Watched it" marks the film as watched and takes the card out of the row,
- * "Only remove" takes it out, and My list is one press away. For a card from the Stremio account the menu says that
+ * "Not for me" takes it out and marks the film so it is not shown again, "Only remove" takes it out, and My list is one
+ * press away. For a card from the Stremio account the menu says that
  * nothing changes in Stremio itself; for one of the viewer's own files, that only the saved spot is forgotten.
  */
 @Composable
@@ -1179,6 +1188,7 @@ private fun ContinueMenu(
     item: ContinueItem,
     language: Language,
     onFinish: (markWatched: Boolean) -> Unit,
+    onNotForMe: () -> Unit,
     onMyList: (() -> Unit)?,
     onDismiss: () -> Unit,
 ) {
@@ -1212,6 +1222,14 @@ private fun ContinueMenu(
                     primary = true,
                     focusRequester = first,
                     modifier = Modifier.testTag(CONTINUE_MENU_WATCHED_TAG),
+                )
+            }
+            // Started and not worth finishing: only a film SCARY knows can be marked.
+            if (item.movie != null) {
+                ScaryButton(
+                    stringResource(R.string.continue_menu_not_for_me),
+                    onClick = onNotForMe,
+                    modifier = Modifier.testTag(CONTINUE_MENU_NOT_FOR_ME_TAG),
                 )
             }
             ScaryButton(

@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
@@ -694,8 +695,12 @@ class HomeViewModel(
         // the end, or out with "hide watched"; the rows of the kind they watch most come first. Their own lists
         // (recently opened, My list) stay as they made them.
         val hideWatched = prefs.hideWatched
-        fun unseenFirst(movies: List<Movie>): List<Movie> =
-            if (hideWatched) movies.filter { it.id !in watched } else Personalize.watchedLast(movies) { it.id in watched }
+        // A film marked "Not for me" is not shown in these rows again. It can still be found by searching for it, and
+        // un-marked on its page; the viewer's own lists (recently opened, My list, watched) keep it.
+        fun unseenFirst(movies: List<Movie>): List<Movie> {
+            val wanted = movies.filter { it.id !in disliked }
+            return if (hideWatched) wanted.filter { it.id !in watched } else Personalize.watchedLast(wanted) { it.id in watched }
+        }
         val taste = Personalize.taste(all::movie, prefs.watchedIds, prefs.lovedIds, prefs.dislikedIds)
         val seenOrLoved = watched + prefs.lovedIds
         // Rows the viewer turned off in Settings are not built at all.
@@ -1411,7 +1416,8 @@ class HomeViewModel(
             return
         }
         _rdTorrents.update { it.copy(pull = RdPullState.Working) }
-        viewModelScope.launch {
+        pullWatch?.cancel()
+        pullWatch = viewModelScope.launch {
             val result = repository.pull(magnet)
             _rdTorrents.update {
                 it.copy(
@@ -1428,6 +1434,54 @@ class HomeViewModel(
             if (result is RealDebridRepository.Pull.Ready && (screen == Screen.RdTorrents || screen is Screen.RdSources)) {
                 // Asked from a film's page: the file is that film, for its subtitles and "Continue watching".
                 RealDebrid.mainFile(result.files)?.let { playRealDebrid(it, movieId = (screen as? Screen.RdSources)?.movieId) }
+            }
+            if (result is RealDebridRepository.Pull.Downloading) playWhenFetched(repository, result.torrentId)
+        }
+    }
+
+    /** The pull being waited for, so a new one (or leaving the screens) ends the wait. */
+    private var pullWatch: Job? = null
+
+    /**
+     * A torrent Real-Debrid did not hold already: its progress is shown while the viewer stays on the screens they
+     * asked from, and the film starts in SCARY's player by itself when Real-Debrid has it. Leaving the screens ends the
+     * wait (the torrent stays in the account and plays from the list); so does [PULL_WATCH_MS].
+     */
+    private suspend fun playWhenFetched(repository: RealDebridRepository, torrentId: String) {
+        val started = SystemClock.elapsedRealtime()
+        while (SystemClock.elapsedRealtime() - started < PULL_WATCH_MS) {
+            delay(PULL_WATCH_POLL_MS)
+            val screen = backStack.value.last()
+            if (screen != Screen.RdTorrents && screen !is Screen.RdSources) return
+            val status = repository.torrentStatus(torrentId) ?: continue
+            when (status.state) {
+                RealDebrid.TorrentState.READY -> {
+                    _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+                    refreshRdTorrents()
+                    val file = repository.torrentVideos(torrentId)?.let(RealDebrid::mainFile)
+                    if (file == null) show(R.string.rd_play_failed) else playRealDebrid(file, movieId = (screen as? Screen.RdSources)?.movieId)
+                    return
+                }
+                RealDebrid.TorrentState.FAILED -> {
+                    repository.deleteTorrent(torrentId)
+                    _rdTorrents.update { it.copy(pull = RdPullState.Failed(RealDebridRepository.PullError.DEAD)) }
+                    refreshRdTorrents()
+                    return
+                }
+                else -> _rdTorrents.update { it.copy(pull = RdPullState.Downloading(status.progress)) }
+            }
+        }
+    }
+
+    /** One of the viewer's files, deleted from their Real-Debrid account at their word (after a second "yes"). */
+    fun deleteRdFile(file: RealDebrid.RdFile) {
+        val repository = realDebrid ?: return
+        viewModelScope.launch {
+            val deleted = repository.deleteFile(file)
+            show(if (deleted) R.string.rd_file_deleted else R.string.rd_file_delete_failed)
+            if (deleted) {
+                _rdMatches.value = null
+                loadRealDebridFiles(force = true)
             }
         }
     }
@@ -1666,6 +1720,27 @@ class HomeViewModel(
         } else {
             show(R.string.continue_removed)
         }
+    }
+
+    /**
+     * "Not for me" in the menu of a "Continue watching" card: for a film started and not worth finishing. The card
+     * leaves its row as with "Only remove", and its film is marked "Not for me", so it is not suggested or shown in
+     * the rows again. A file of the viewer's own stays in their account.
+     */
+    fun notForMeContinue(item: ContinueItem) {
+        val movie = item.movie ?: return finishContinue(item, markWatched = false)
+        val entry = item.entry
+        if (entry.key.startsWith(STREMIO_ENTRY_PREFIX)) {
+            watchStore?.dismissStremio(entry.key.removePrefix(STREMIO_ENTRY_PREFIX), System.currentTimeMillis())
+        } else {
+            watchStore?.update { WatchHistory.forget(it, entry.key) }
+        }
+        viewModelScope.launch {
+            // Set, never toggled: a film already marked stays marked.
+            settings.setRating(movie.id, Rating.NOT_FOR_ME)
+            savedMovies.save(movie, language.value, keptOnline())
+        }
+        show(R.string.continue_not_for_me_removed)
     }
 
     /** "Clear watch history" on the Real-Debrid screen. */
@@ -2729,6 +2804,10 @@ class HomeViewModel(
         /** Off unless "setprop log.tag.ScaryKeys DEBUG", as in FocusSurface: lets a failed UI test show what happened. */
         private const val KEY_LOG_TAG = "ScaryKeys"
         private const val STOP_TIMEOUT_MS = 5_000L
+
+        /** How long a torrent Real-Debrid is fetching is waited for, to play it when it is ready, and how often it is asked. */
+        private const val PULL_WATCH_MS = 30 * 60_000L
+        private const val PULL_WATCH_POLL_MS = 5_000L
         /** How often to look whether online data is old while SCARY stays on screen; a look fetches only what is due. */
         private const val REFRESH_CHECK_MS = 30 * 60_000L
         private const val REFRESH_NOW_EVERY_MS = 2 * 60_000L

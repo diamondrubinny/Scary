@@ -30,6 +30,7 @@ import io.github.diamondrubinny.scary.data.RealDebridRepository
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.performTouchInput
 import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_TAG
+import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_NOT_FOR_ME_TAG
 import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_REMOVE_TAG
 import io.github.diamondrubinny.scary.ui.home.CONTINUE_MENU_WATCHED_TAG
 import io.github.diamondrubinny.scary.ui.home.HOME_ROWS_TAG
@@ -177,6 +178,8 @@ class PlayerTest {
             rule.onNode(hasTestTag(CONTINUE_CARD_TAG)).performTouchInput { longClick() }
             waitFor(hasTestTag(CONTINUE_MENU_TAG))
             assertTrue(rule.onAllNodes(hasTestTag(CONTINUE_MENU_WATCHED_TAG)).fetchSemanticsNodes().isEmpty())
+            // Nor is there a film to mark "Not for me".
+            assertTrue(rule.onAllNodes(hasTestTag(CONTINUE_MENU_NOT_FOR_ME_TAG)).fetchSemanticsNodes().isEmpty())
             rule.onNode(hasText(text(R.string.continue_menu_note_file))).assertExists()
             rule.onNode(hasTestTag(CONTINUE_MENU_REMOVE_TAG)).performClick()
             rule.waitUntil(TIMEOUT_MS) { rule.onAllNodes(hasTestTag(CONTINUE_CARD_TAG)).fetchSemanticsNodes().isEmpty() }

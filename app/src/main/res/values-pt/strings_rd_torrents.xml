@@ -16,7 +16,7 @@
     <string name="rd_what_sources">Reproduz, no player do SCARY, os vídeos da sua própria conta Real-Debrid. Você também pode adicionar à conta um link magnet seu, ou buscar em um indexador que você mesmo configurou. O SCARY não vem com indexador, site nem links.</string>
     <string name="rd_torrent_what">Cole um link magnet seu. O SCARY envia o hash, o nome e os trackers dele para a sua conta Real-Debrid, pede os arquivos de vídeo e reproduz o filme no player do SCARY. Nada mais sai da TV. O que você adiciona é responsabilidade sua.</string>
     <string name="rd_torrent_invalid">Isto não é um link magnet.</string>
-    <string name="rd_torrent_downloading">O Real-Debrid está baixando: %1$d%%. Ele aparece abaixo como pronto quando terminar.</string>
+    <string name="rd_torrent_downloading">O Real-Debrid está baixando: %1$d%%. Fique nesta tela e ele toca no player do SCARY quando estiver pronto; ele também aparece abaixo.</string>
     <string name="rd_torrent_error_slots">Sua conta Real-Debrid não tem vaga para mais um torrent. Exclua um ou espere um terminar.</string>
     <string name="rd_torrent_error_refused">O Real-Debrid recusou este torrent.</string>
     <string name="rd_torrent_error_too_big">Este torrent é grande demais para o Real-Debrid.</string>
@@ -69,4 +69,9 @@
     <string name="rd_sources_find">Buscar fontes</string>
     <string name="settings_content_notice_sources">O SCARY não hospeda filmes e não guarda arquivos de vídeo. Ele mostra informações públicas sobre filmes e abre o filme em um app de streaming já instalado neste aparelho, como Stremio, Netflix ou YouTube. O que esses apps reproduzem é responsabilidade deles e sua. Se você conectar sua própria conta Real-Debrid, o SCARY reproduz os arquivos que estão nela, pode adicionar à conta um link magnet que você fornecer e pode buscar em uma fonte que você mesmo configurou: um indexador Torznab ou um add-on de fontes em um endereço que você informa. O SCARY não vem com indexador, add-on, site nem links, não recomenda nenhum e não busca em lugar nenhum até você configurar uma fonte. O que você busca, adiciona e guarda é responsabilidade sua, conforme a lei do seu país.</string>
     <string name="rd_sources_needs_film">Esta fonte encontra filmes pela página deles: abra um filme e pressione Buscar fontes. Ela não busca por palavras, e séries ainda não são suportadas.</string>
+    <string name="rd_file_delete">Excluir do Real-Debrid</string>
+    <string name="rd_file_delete_confirm">Excluir isto da sua conta Real-Debrid? Um arquivo que veio de um torrent leva o torrent inteiro, com todos os arquivos dele. Não dá para desfazer.</string>
+    <string name="rd_file_deleted">Excluído da sua conta.</string>
+    <string name="rd_file_delete_failed">Não foi possível excluir. Tente de novo daqui a pouco.</string>
+    <string name="rd_film_hint_delete">Segure OK em um arquivo para escolher qual filme ele é, ou para excluí-lo da sua conta.</string>
 </resources>

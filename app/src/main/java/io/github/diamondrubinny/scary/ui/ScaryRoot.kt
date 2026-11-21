@@ -289,6 +289,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
             onFinishContinue = viewModel::finishContinue,
+            onNotForMeContinue = viewModel::notForMeContinue,
         )
     }
     val bucketActions = remember(viewModel) {
@@ -658,6 +659,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onOnlineSubtitles = viewModel::setPlayerOnlineSubtitles,
                             onCandidates = viewModel::rdFileCandidates,
                             onSetFilm = viewModel::setRdFileFilm,
+                            onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
                         )
                     },

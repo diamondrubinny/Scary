@@ -81,7 +81,7 @@ class RealDebridRepository(
         data class Ready(val files: List<RealDebrid.RdFile>) : Pull
 
         /** In the account, and Real-Debrid is still fetching it. */
-        data class Downloading(val progress: Int) : Pull
+        data class Downloading(val progress: Int, val torrentId: String) : Pull
 
         data class Failed(val reason: PullError) : Pull
     }
@@ -279,7 +279,7 @@ class RealDebridRepository(
                 RealDebrid.TorrentState.QUEUED, RealDebrid.TorrentState.DOWNLOADING, RealDebrid.TorrentState.FINISHING -> {
                     progress = status.progress
                     // Not one Real-Debrid already holds: it stays in the account and shows in the list when done.
-                    if (chosenAt != 0L && SystemClock.elapsedRealtime() - chosenAt > CACHED_WAIT_MS) return@withContext Pull.Downloading(progress)
+                    if (chosenAt != 0L && SystemClock.elapsedRealtime() - chosenAt > CACHED_WAIT_MS) return@withContext Pull.Downloading(progress, id)
                 }
                 RealDebrid.TorrentState.READY -> {
                     cachedFiles = null
@@ -293,7 +293,7 @@ class RealDebridRepository(
             }
             delay(PULL_POLL_MS)
         }
-        Pull.Downloading(progress)
+        Pull.Downloading(progress, id)
     }
 
     private fun pullError(answer: Answer): PullError = when (answer.body?.let(RealDebrid::errorCode)) {
@@ -319,6 +319,22 @@ class RealDebridRepository(
         val answer = call("GET", RealDebrid.torrentInfoUrl(id))?.takeIf { it.ok } ?: return@withContext null
         val torrent = answer.body?.let(RealDebrid::parseTorrentStatus)?.finished() ?: return@withContext emptyList()
         RealDebrid.torrentFiles(torrent, answer.body)
+    }
+
+    /** Where one torrent of the account stands now; null when it could not be asked. */
+    suspend fun torrentStatus(id: String): RealDebrid.TorrentStatus? = withContext(Dispatchers.IO) {
+        call("GET", RealDebrid.torrentInfoUrl(id))?.takeIf { it.ok }?.body?.let(RealDebrid::parseTorrentStatus)
+    }
+
+    /**
+     * Deletes one of the viewer's files from the account, at their word: a download's link, or the whole torrent a
+     * torrent's file is in (Real-Debrid has no way to remove one file of a torrent). True when it is gone.
+     */
+    suspend fun deleteFile(file: RealDebrid.RdFile): Boolean = withContext(Dispatchers.IO) {
+        val deletion = RealDebrid.deletion(file.key) ?: return@withContext false
+        val answer = call("DELETE", deletion.url) ?: return@withContext false
+        if (answer.ok) cachedFiles = null
+        answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND
     }
 
     /** Deletes a torrent from the account. True when Real-Debrid says it is gone. */
