@@ -55,6 +55,10 @@ class RealDebridRepository(
 ) {
     private val subtitleCache = subtitlesDir?.let(::SubtitleCache)
 
+    /** The VPN's kill switch (VpnRepository): while it says so, no request leaves, as if Real-Debrid were unreachable. */
+    @Volatile
+    var blocked: () -> Boolean = { false }
+
     sealed interface State {
         data object SignedOut : State
 
@@ -456,6 +460,7 @@ class RealDebridRepository(
 
     private suspend fun send(method: String, url: String, form: String?, bearer: String?): Answer? = requestLock.withLock {
         // Spaced out under Real-Debrid's limit; after a 429, quiet for a while instead of trying again at once.
+        if (blocked()) return null
         val now = SystemClock.elapsedRealtime()
         if (now < blockedUntil) return null
         val gap = 60_000L / RealDebrid.MAX_REQUESTS_PER_MINUTE - (now - lastRequestAt)

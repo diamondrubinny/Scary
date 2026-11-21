@@ -152,6 +152,8 @@ class HomeViewModel(
     private val sources: io.github.diamondrubinny.scary.data.SourcesRepository? = null,
     /** Whether a VPN is on, and the TV's VPN apps; null in tests that do not need it. */
     private val vpn: io.github.diamondrubinny.scary.data.VpnWatcher? = null,
+    /** SCARY's own WireGuard tunnel; null in tests that do not need it. */
+    private val tunnel: io.github.diamondrubinny.scary.data.VpnRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -362,6 +364,7 @@ class HomeViewModel(
             }
             launch { realDebrid?.load() }
             launch { sources?.load() }
+            launch { tunnel?.load() }
             launch {
                 stremio?.load()
                 watchStremio()
@@ -1961,6 +1964,31 @@ class HomeViewModel(
         if (chosen == null) show(R.string.vpn_none_installed) else report(launcher.launchApp(chosen.packageName, chosen.label))
     }
 
+    /** SCARY's own tunnel (docs/VPN_PLAN.md): its settings, and whether it is up. */
+    val tunnelState: StateFlow<io.github.diamondrubinny.scary.data.VpnRepository.State> =
+        tunnel?.state ?: MutableStateFlow(io.github.diamondrubinny.scary.data.VpnRepository.State.None)
+
+    val vpnKillSwitch: StateFlow<Boolean> = tunnel?.killSwitch ?: MutableStateFlow(false)
+
+    /** What Android wants shown before SCARY may open a VPN, the first time; null when the viewer already agreed. */
+    fun vpnConsent(): android.content.Intent? = tunnel?.consentIntent()
+
+    fun connectVpn() {
+        viewModelScope.launch { tunnel?.connect() }
+    }
+
+    fun disconnectVpn() {
+        viewModelScope.launch { tunnel?.disconnect() }
+    }
+
+    fun removeVpnSettings() {
+        viewModelScope.launch { tunnel?.remove() }
+    }
+
+    fun setVpnKillSwitch(on: Boolean) {
+        tunnel?.setKillSwitch(on)
+    }
+
     // Profiles (docs/PROFILES_PLAN.md) --------------------------------------------------------------------------------
 
     /** "Who is watching?", from the top bar, the settings, or by itself at start when the TV has several viewers. */
@@ -2945,6 +2973,7 @@ class HomeViewModel(
                     container.backups,
                     sources = container.sources,
                     vpn = container.vpnWatcher,
+                    tunnel = container.vpn,
                 )
             }
         }

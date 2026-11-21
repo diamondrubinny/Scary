@@ -4,7 +4,25 @@
     <string name="settings_vpn">VPN</string>
     <string name="vpn_on">פועל</string>
     <string name="vpn_off">כבוי</string>
-    <string name="settings_vpn_note">SCARY אינו VPN ואין בו VPN. השורה הזו מראה אם בטלוויזיה פועל VPN, ופותחת את אפליקציית ה-VPN שהתקנתם. אפליקציית VPN מכסה את כל הטלוויזיה, כולל SCARY.</string>
+    <string name="settings_vpn_note">SCARY יכולה לחבר את עצמה דרך VPN, עם קובץ הגדרות WireGuard מספק ה־VPN שלכם. SCARY מגיעה בלי ספק, שרת או חשבון. השורה מראה גם אם פועל VPN בטלוויזיה.</string>
     <string name="vpn_none_installed">לא מותקנת אפליקציית VPN בטלוויזיה הזו.</string>
     <string name="rd_vpn_note">VPN פועל. Real-Debrid חוסם חלק מכתובות ה-VPN: אם הקבצים לא נטענים או לא מתנגנים, נסו שרת VPN אחר או כבו את ה-VPN.</string>
+    <string name="vpn_connected">מחובר</string>
+    <string name="vpn_connecting">מתחבר…</string>
+    <string name="vpn_disconnected">לא מחובר</string>
+    <string name="vpn_failed_not_allowed">Android לא אישר ל־SCARY לפתוח VPN.</string>
+    <string name="vpn_failed_dns">כתובת שרת ה־VPN לא נמצאה. בדקו את החיבור לאינטרנט.</string>
+    <string name="vpn_failed_start">ה־VPN לא התחיל. בדקו את קובץ ההגדרות מול הספק שלכם.</string>
+    <string name="vpn_no_consent_screen">בטלוויזיה הזאת אין מסך לאישור VPN, ולכן SCARY לא יכולה לחבר כאן VPN.</string>
+    <string name="vpn_connects_to">מתחבר אל: %1$s</string>
+    <string name="vpn_how_to">כדי להוסיף VPN: הורידו קובץ הגדרות WireGuard (‎.conf) מספק ה־VPN שלכם, פתחו את השלט בטלפון מההגדרות, ושלחו את הקובץ מהטלפון. SCARY מגיעה בלי ספק VPN.</string>
+    <string name="vpn_scope_note">רק SCARY עוברת דרך ה־VPN הזה; שאר האפליקציות בטלוויזיה לא. ספק ה־VPN רואה את מה שספק האינטרנט ראה קודם. Real-Debrid חוסם חלק מכתובות ה־VPN.</string>
+    <string name="vpn_connect">התחברות</string>
+    <string name="vpn_disconnect">ניתוק</string>
+    <string name="vpn_kill_switch">חסימה בלי VPN</string>
+    <string name="vpn_kill_switch_note">כשהמתג פועל, SCARY לא שולחת דבר אל Real-Debrid או אל המקור שלכם כל עוד ה־VPN הזה לא מחובר. סרט שכבר מתנגן לא נעצר.</string>
+    <string name="vpn_remove">הסרת הגדרות ה־VPN</string>
+    <string name="vpn_remove_confirm">לחצו שוב כדי למחוק את המפתח מהטלוויזיה</string>
+    <string name="vpn_open_app">פתיחת %1$s</string>
+    <string name="vpn_blocked_note">נחסם: ה־VPN שלכם לא מחובר. חברו אותו בהגדרות ← VPN, או כבו את \"חסימה בלי VPN\".</string>
 </resources>

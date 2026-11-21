@@ -86,6 +86,15 @@ class PhoneRemoteServer(private val context: Context) {
     @Volatile
     var backups: Backups? = null
 
+    /** The VPN's settings file from the phone (VpnRepository); set once by the app's container. */
+    fun interface VpnConfigs {
+        /** Keeps the file (given in base64); the status word for the phone. */
+        suspend fun install(base64: String): String
+    }
+
+    @Volatile
+    var vpnConfigs: VpnConfigs? = null
+
     /** What SCARY's screen does with a command; set by MainActivity while it exists. */
     fun interface Handler {
         suspend fun handle(request: RemoteProtocol.Request): Reply
@@ -273,6 +282,7 @@ class PhoneRemoteServer(private val context: Context) {
             // The backup needs no screen: it works whatever app is in front.
             Command.BACKUP -> return backups?.backup()?.let { Reply("backup", answer = it) } ?: Reply("backup_failed")
             Command.RESTORE -> return Reply(backups?.restore(request.text) ?: "restore_failed")
+            Command.VPN_CONFIG -> return Reply(vpnConfigs?.install(request.text) ?: "vpn_failed")
             else -> return handler?.handle(request)?.takeUnless { it.status == NOT_FRONT } ?: elsewhere(request)
         }
         return Reply("ok")

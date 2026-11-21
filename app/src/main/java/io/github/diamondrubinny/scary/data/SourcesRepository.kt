@@ -64,6 +64,10 @@ class SourcesRepository(private val secrets: SecretStore) {
     }
 
     private var config: Config? = null
+
+    /** The VPN's kill switch (VpnRepository): while it says so, no search leaves, as if the source were unreachable. */
+    @Volatile
+    var blocked: () -> Boolean = { false }
     private var cachedQuery: String? = null
     private var cached: List<Releases.Candidate>? = null
     private var cachedAt = 0L
@@ -136,6 +140,7 @@ class SourcesRepository(private val secrets: SecretStore) {
      * [CACHE_MS], so filtering and sorting ask nothing.
      */
     suspend fun search(query: String, imdbId: String? = null, filmImdbId: String? = imdbId): Search = withContext(Dispatchers.IO) {
+        if (config != null && blocked()) return@withContext Search.Unreachable
         when (val current = config) {
             null -> Search.NotConfigured
             is Config.Addon -> {

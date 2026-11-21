@@ -215,6 +215,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
     val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
+    val tunnelState by viewModel.tunnelState.collectAsStateWithLifecycle()
+    val vpnKillSwitch by viewModel.vpnKillSwitch.collectAsStateWithLifecycle()
     val rdSearch by viewModel.rdSearch.collectAsStateWithLifecycle()
     val indexerHost by viewModel.indexerHost.collectAsStateWithLifecycle()
     val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
@@ -418,7 +420,14 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenRealDebrid = viewModel::openRealDebrid,
         onOpenProfiles = viewModel::openProfiles,
         vpnApps = viewModel::vpnApps,
-        onOpenVpn = viewModel::openVpnApp,
+        vpn = io.github.diamondrubinny.scary.ui.settings.VpnActions(
+            consent = viewModel::vpnConsent,
+            onConnect = viewModel::connectVpn,
+            onDisconnect = viewModel::disconnectVpn,
+            onRemove = viewModel::removeVpnSettings,
+            onSetKillSwitch = viewModel::setVpnKillSwitch,
+            onOpenApp = viewModel::openVpnApp,
+        ),
         onToggleOnline = viewModel::toggleOnline,
         onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
@@ -557,6 +566,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     profileName = io.github.diamondrubinny.scary.core.profiles.Profiles.active(state.profiles, state.activeProfileId).name
                         .ifEmpty { stringResource(R.string.profile_default_name) },
                     vpnActive = vpnActive,
+                    tunnelState = tunnelState,
+                    vpnKillSwitch = vpnKillSwitch,
                     stremioConnected = stremioState is StremioRepository.State.SignedIn,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
@@ -656,6 +667,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onlineSubtitles = playerOnlineSubtitles,
                     fileFilms = rdFileFilms,
                     vpnActive = vpnActive,
+                    vpnBlocked = vpnKillSwitch && tunnelState !is io.github.diamondrubinny.scary.data.VpnRepository.State.None &&
+                        tunnelState !is io.github.diamondrubinny.scary.data.VpnRepository.State.Up,
                     actions = remember(viewModel) {
                         RealDebridActions(
                             onSignIn = viewModel::realDebridSignIn,

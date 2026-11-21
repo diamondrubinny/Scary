@@ -4,7 +4,25 @@
     <string name="settings_vpn">VPN</string>
     <string name="vpn_on">On</string>
     <string name="vpn_off">Off</string>
-    <string name="settings_vpn_note">SCARY is not a VPN and contains none. This row shows whether this TV has a VPN on, and opens the VPN app you installed. A VPN app covers the whole TV, SCARY included.</string>
+    <string name="settings_vpn_note">SCARY can connect itself through a VPN, with a WireGuard settings file from your own VPN provider. SCARY comes with no provider, server or account. The row also shows whether this TV has a VPN on.</string>
     <string name="vpn_none_installed">No VPN app is installed on this TV.</string>
     <string name="rd_vpn_note">A VPN is on. Real-Debrid refuses some VPN addresses: if your files do not load or play, try another VPN server or turn the VPN off.</string>
+    <string name="vpn_connected">Connected</string>
+    <string name="vpn_connecting">Connecting…</string>
+    <string name="vpn_disconnected">Not connected</string>
+    <string name="vpn_failed_not_allowed">Android did not allow SCARY to open a VPN.</string>
+    <string name="vpn_failed_dns">The VPN server\'s address was not found. Check the internet connection.</string>
+    <string name="vpn_failed_start">The VPN did not start. Check the settings file with your provider.</string>
+    <string name="vpn_no_consent_screen">This TV has no screen for allowing a VPN, so SCARY cannot connect one here.</string>
+    <string name="vpn_connects_to">Connects to: %1$s</string>
+    <string name="vpn_how_to">To add a VPN: get a WireGuard settings file (.conf) from your VPN provider, open the phone remote from Settings, and send the file from your phone. SCARY comes with no VPN provider.</string>
+    <string name="vpn_scope_note">Only SCARY goes through this VPN; other apps on the TV do not. Your VPN provider sees what your internet provider saw before. Real-Debrid refuses some VPN addresses.</string>
+    <string name="vpn_connect">Connect</string>
+    <string name="vpn_disconnect">Disconnect</string>
+    <string name="vpn_kill_switch">Block without VPN</string>
+    <string name="vpn_kill_switch_note">When on, SCARY sends nothing to Real-Debrid or to your source while this VPN is not connected. A film that is already playing is not stopped.</string>
+    <string name="vpn_remove">Remove the VPN settings</string>
+    <string name="vpn_remove_confirm">Press again to delete the key from this TV</string>
+    <string name="vpn_open_app">Open %1$s</string>
+    <string name="vpn_blocked_note">Held back: your VPN is not connected. Connect it in Settings, VPN, or turn off “Block without VPN”.</string>
 </resources>

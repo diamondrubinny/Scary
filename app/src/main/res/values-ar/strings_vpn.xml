@@ -4,7 +4,25 @@
     <string name="settings_vpn">VPN</string>
     <string name="vpn_on">يعمل</string>
     <string name="vpn_off">متوقف</string>
-    <string name="settings_vpn_note">SCARY ليس VPN ولا يحتوي على واحد. يوضح هذا السطر هل يعمل VPN على هذا التلفاز، ويفتح تطبيق VPN الذي ثبّتّه. تطبيق VPN يغطي التلفاز كله، ومنه SCARY.</string>
+    <string name="settings_vpn_note">يستطيع SCARY أن يتصل عبر VPN بملف إعدادات WireGuard من مزوّد الـVPN الخاص بك. لا يأتي SCARY بمزوّد أو خادم أو حساب. يعرض هذا السطر أيضًا هل يعمل VPN على هذا التلفاز.</string>
     <string name="vpn_none_installed">لا يوجد تطبيق VPN مثبّت على هذا التلفاز.</string>
     <string name="rd_vpn_note">هناك VPN يعمل. يرفض Real-Debrid بعض عناوين VPN: إذا لم تُحمَّل ملفاتك أو لم تُشغَّل، جرّب خادم VPN آخر أو أوقف الـ VPN.</string>
+    <string name="vpn_connected">متصل</string>
+    <string name="vpn_connecting">جارٍ الاتصال…</string>
+    <string name="vpn_disconnected">غير متصل</string>
+    <string name="vpn_failed_not_allowed">لم يسمح Android لـSCARY بفتح VPN.</string>
+    <string name="vpn_failed_dns">تعذّر العثور على عنوان خادم الـVPN. تحقق من اتصال الإنترنت.</string>
+    <string name="vpn_failed_start">لم يبدأ الـVPN. راجع ملف الإعدادات مع مزوّدك.</string>
+    <string name="vpn_no_consent_screen">لا توجد في هذا التلفاز شاشة للسماح بـVPN، لذلك لا يستطيع SCARY الاتصال هنا.</string>
+    <string name="vpn_connects_to">يتصل بـ: %1$s</string>
+    <string name="vpn_how_to">لإضافة VPN: احصل على ملف إعدادات WireGuard (‎.conf) من مزوّد الـVPN، افتح جهاز التحكم بالهاتف من الإعدادات، وأرسل الملف من هاتفك. لا يأتي SCARY بمزوّد VPN.</string>
+    <string name="vpn_scope_note">يمر SCARY وحده عبر هذا الـVPN؛ التطبيقات الأخرى على التلفاز لا تمر. يرى مزوّد الـVPN ما كان يراه مزوّد الإنترنت. يرفض Real-Debrid بعض عناوين الـVPN.</string>
+    <string name="vpn_connect">اتصال</string>
+    <string name="vpn_disconnect">قطع الاتصال</string>
+    <string name="vpn_kill_switch">الحظر بدون VPN</string>
+    <string name="vpn_kill_switch_note">عند التشغيل، لا يرسل SCARY شيئًا إلى Real-Debrid أو إلى مصدرك ما دام هذا الـVPN غير متصل. الفيلم الذي يُعرض الآن لا يتوقف.</string>
+    <string name="vpn_remove">إزالة إعدادات الـVPN</string>
+    <string name="vpn_remove_confirm">اضغط مرة أخرى لحذف المفتاح من هذا التلفاز</string>
+    <string name="vpn_open_app">فتح %1$s</string>
+    <string name="vpn_blocked_note">محظور: الـVPN غير متصل. صِله من الإعدادات ثم VPN، أو أوقف «الحظر بدون VPN».</string>
 </resources>

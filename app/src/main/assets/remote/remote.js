@@ -161,6 +161,7 @@ const WORDS = {
     tmdbLabel: "Paste the key here", tmdbButton: "Send to the TV", tmdbSaved: "Saved. TMDB rows and titles in your language are on their way.",
     tmdbInvalid: "That does not look like a TMDB key.", tmdbRejected: "TMDB did not accept this key.",
     tmdbUnreachable: "TMDB could not be reached from the TV. Try again.", tmdbStorage: "The TV could not store the key safely.", aiTitle: "AI key", aiHint: "For Ask SCARY with your own AI service. The key travels encrypted, is checked with the service, and stays on the TV.", aiService: "Service", aiLabel: "Paste the key here", aiButton: "Send to the TV", aiSaved: "Saved. Ask SCARY now uses this service.", aiInvalid: "That does not look like a key.", aiRejected: "The service did not accept this key.", aiUnreachable: "The TV could not reach the service. Try again.", aiStorage: "The TV could not store the key safely.",
+    vpnTitle: "VPN", vpnHint: "A WireGuard settings file (.conf) from your own VPN provider. It holds a private key: it goes only to your TV, over this encrypted page, and is kept encrypted there. You connect at the TV, in Settings, VPN. SCARY comes with no VPN provider.", vpnLabel: "WireGuard settings file (.conf)", vpnButton: "Send to the TV", vpnReady: "The file is ready to send.", vpnInvalid: "This is not a WireGuard settings file SCARY can use.", vpnFailed: "The TV could not keep the file. Try again.", vpnDone: "Saved on the TV. Connect in Settings, VPN.",
     backupTitle: "Backup", backupHint: "Your lists (My list, watched, loved, the bucket list) and a few settings, as a file on this phone. No keys, accounts or PIN are in it. Restoring adds to the TV's lists and removes nothing.", backupSave: "Save a backup on this phone", backupSaved: "The backup file was saved on this phone.", backupFailed: "The TV could not make the backup. Try again.", restoreLabel: "Restore from a backup file", restoreButton: "Restore to the TV", restoreInvalid: "This is not a SCARY backup file.", restoreFailed: "The TV could not restore the file. Try again.", restoreDone: "Restored on the TV.", sumPrefix: "In this file", sumMyList: "My list", sumWatched: "Watched", sumLoved: "Loved it", sumBucket: "Bucket list",
     credit: "Powered by SCARY · Open source",
   },
@@ -178,6 +179,7 @@ const WORDS = {
     tmdbLabel: "מדביקים כאן את המפתח", tmdbButton: "שליחה לטלוויזיה", tmdbSaved: "נשמר. השורות של TMDB והשמות בעברית בדרך.",
     tmdbInvalid: "זה לא נראה כמו מפתח של TMDB.", tmdbRejected: "TMDB לא קיבלה את המפתח.",
     tmdbUnreachable: "הטלוויזיה לא הצליחה להגיע ל־TMDB. נסו שוב.", tmdbStorage: "הטלוויזיה לא הצליחה לשמור את המפתח בבטחה.", aiTitle: "מפתח AI", aiHint: "ל\"שאלו את SCARY\" עם שירות AI משלכם. המפתח עובר מוצפן, נבדק מול השירות ונשמר רק בטלוויזיה.", aiService: "שירות", aiLabel: "מדביקים כאן את המפתח", aiButton: "שליחה לטלוויזיה", aiSaved: "נשמר. \"שאלו את SCARY\" עובד עכשיו עם השירות הזה.", aiInvalid: "זה לא נראה כמו מפתח.", aiRejected: "השירות לא קיבל את המפתח.", aiUnreachable: "הטלוויזיה לא הצליחה להגיע לשירות. נסו שוב.", aiStorage: "הטלוויזיה לא הצליחה לשמור את המפתח בבטחה.",
+    vpnTitle: "VPN", vpnHint: "קובץ הגדרות WireGuard (‎.conf) מספק ה־VPN שלכם. יש בו מפתח פרטי: הוא עובר רק לטלוויזיה שלכם, דרך הדף המוצפן הזה, ונשמר בה מוצפן. מתחברים בטלוויזיה, בהגדרות ← VPN. SCARY מגיעה בלי ספק VPN.", vpnLabel: "קובץ הגדרות WireGuard (‎.conf)", vpnButton: "שליחה לטלוויזיה", vpnReady: "הקובץ מוכן לשליחה.", vpnInvalid: "זה לא קובץ הגדרות WireGuard ש־SCARY יכולה להשתמש בו.", vpnFailed: "הטלוויזיה לא הצליחה לשמור את הקובץ. נסו שוב.", vpnDone: "נשמר בטלוויזיה. מתחברים בהגדרות ← VPN.",
     backupTitle: "גיבוי", backupHint: "הרשימות שלכם (הרשימה שלי, נצפו, אהבתי, רשימת המשאלות) וכמה הגדרות, כקובץ בטלפון הזה. אין בו מפתחות, חשבונות או קוד PIN. שחזור מוסיף לרשימות שבטלוויזיה ולא מוחק דבר.", backupSave: "שמירת גיבוי בטלפון הזה", backupSaved: "קובץ הגיבוי נשמר בטלפון הזה.", backupFailed: "הטלוויזיה לא הצליחה ליצור את הגיבוי. נסו שוב.", restoreLabel: "שחזור מקובץ גיבוי", restoreButton: "שחזור לטלוויזיה", restoreInvalid: "זה לא קובץ גיבוי של SCARY.", restoreFailed: "הטלוויזיה לא הצליחה לשחזר את הקובץ. נסו שוב.", restoreDone: "שוחזר בטלוויזיה.", sumPrefix: "בקובץ הזה", sumMyList: "הרשימה שלי", sumWatched: "נצפו", sumLoved: "אהבתי", sumBucket: "רשימת המשאלות",
     credit: "Powered by SCARY · Open source",
   },
@@ -195,6 +197,7 @@ const WORDS = {
     tmdbLabel: "الصق المفتاح هنا", tmdbButton: "أرسل إلى التلفاز", tmdbSaved: "حُفظ. صفوف TMDB والعناوين المترجمة في الطريق.",
     tmdbInvalid: "هذا لا يبدو مفتاح TMDB.", tmdbRejected: "لم يقبل TMDB هذا المفتاح.",
     tmdbUnreachable: "تعذّر على التلفاز الوصول إلى TMDB. حاول مرة أخرى.", tmdbStorage: "تعذّر على التلفاز حفظ المفتاح بأمان.", aiTitle: "مفتاح الذكاء الاصطناعي", aiHint: "لـ\"اسأل SCARY\" مع خدمة ذكاء اصطناعي خاصة بك. ينتقل المفتاح مشفّرًا ويُتحقق منه لدى الخدمة ويبقى على التلفاز.", aiService: "الخدمة", aiLabel: "الصق المفتاح هنا", aiButton: "أرسل إلى التلفاز", aiSaved: "حُفظ. يستخدم \"اسأل SCARY\" هذه الخدمة الآن.", aiInvalid: "هذا لا يبدو مفتاحًا.", aiRejected: "لم تقبل الخدمة هذا المفتاح.", aiUnreachable: "تعذّر على التلفاز الوصول إلى الخدمة. حاول مرة أخرى.", aiStorage: "تعذّر على التلفاز حفظ المفتاح بأمان.",
+    vpnTitle: "VPN", vpnHint: "ملف إعدادات WireGuard (‎.conf) من مزوّد الـVPN الخاص بك. فيه مفتاح خاص: يذهب إلى تلفازك فقط، عبر هذه الصفحة المشفّرة، ويُحفظ هناك مشفّرًا. يتم الاتصال من التلفاز، في الإعدادات ثم VPN. لا يأتي SCARY بمزوّد VPN.", vpnLabel: "ملف إعدادات WireGuard (‎.conf)", vpnButton: "إرسال إلى التلفاز", vpnReady: "الملف جاهز للإرسال.", vpnInvalid: "هذا ليس ملف إعدادات WireGuard يستطيع SCARY استخدامه.", vpnFailed: "تعذّر على التلفاز حفظ الملف. حاول مرة أخرى.", vpnDone: "حُفظ على التلفاز. اتصل من الإعدادات ثم VPN.",
     backupTitle: "نسخة احتياطية", backupHint: "قوائمك (قائمتي، ما شاهدته، ما أحببته، قائمة الأمنيات) وبعض الإعدادات، كملف على هذا الهاتف. لا يحتوي على مفاتيح أو حسابات أو رمز PIN. الاستعادة تضيف إلى قوائم التلفاز ولا تحذف شيئًا.", backupSave: "احفظ نسخة احتياطية على هذا الهاتف", backupSaved: "حُفظ ملف النسخة الاحتياطية على هذا الهاتف.", backupFailed: "تعذّر على التلفاز إنشاء النسخة الاحتياطية. حاول مرة أخرى.", restoreLabel: "الاستعادة من ملف نسخة احتياطية", restoreButton: "استعادة إلى التلفاز", restoreInvalid: "هذا ليس ملف نسخة احتياطية من SCARY.", restoreFailed: "تعذّر على التلفاز استعادة الملف. حاول مرة أخرى.", restoreDone: "تمت الاستعادة على التلفاز.", sumPrefix: "في هذا الملف", sumMyList: "قائمتي", sumWatched: "شوهد", sumLoved: "أحببته", sumBucket: "قائمة الأمنيات",
     credit: "Powered by SCARY · Open source",
   },
@@ -212,6 +215,7 @@ const WORDS = {
     tmdbLabel: "Cole a chave aqui", tmdbButton: "Enviar para a TV", tmdbSaved: "Salva. As fileiras do TMDB e os títulos traduzidos estão a caminho.",
     tmdbInvalid: "Isso não parece uma chave do TMDB.", tmdbRejected: "O TMDB não aceitou esta chave.",
     tmdbUnreachable: "A TV não conseguiu falar com o TMDB. Tente de novo.", tmdbStorage: "A TV não conseguiu guardar a chave com segurança.", aiTitle: "Chave de IA", aiHint: "Para o Pergunte ao SCARY com seu próprio serviço de IA. A chave viaja criptografada, é verificada com o serviço e fica na TV.", aiService: "Serviço", aiLabel: "Cole a chave aqui", aiButton: "Enviar para a TV", aiSaved: "Salva. O Pergunte ao SCARY agora usa este serviço.", aiInvalid: "Isso não parece uma chave.", aiRejected: "O serviço não aceitou esta chave.", aiUnreachable: "A TV não conseguiu falar com o serviço. Tente de novo.", aiStorage: "A TV não conseguiu guardar a chave com segurança.",
+    vpnTitle: "VPN", vpnHint: "Um arquivo de configuração WireGuard (.conf) do seu provedor de VPN. Ele contém uma chave privada: vai só para a sua TV, por esta página criptografada, e fica guardado lá criptografado. A conexão é feita na TV, em Configurações, VPN. O SCARY não traz provedor de VPN.", vpnLabel: "Arquivo de configuração WireGuard (.conf)", vpnButton: "Enviar para a TV", vpnReady: "O arquivo está pronto para enviar.", vpnInvalid: "Este não é um arquivo de configuração WireGuard que o SCARY possa usar.", vpnFailed: "A TV não conseguiu guardar o arquivo. Tente de novo.", vpnDone: "Salvo na TV. Conecte em Configurações, VPN.",
     backupTitle: "Backup", backupHint: "Suas listas (Minha lista, assistidos, adorei, a lista de desejos) e algumas configurações, como um arquivo neste celular. Não há chaves, contas nem PIN nele. Restaurar acrescenta às listas da TV e não remove nada.", backupSave: "Salvar um backup neste celular", backupSaved: "O arquivo de backup foi salvo neste celular.", backupFailed: "A TV não conseguiu criar o backup. Tente de novo.", restoreLabel: "Restaurar de um arquivo de backup", restoreButton: "Restaurar na TV", restoreInvalid: "Este não é um arquivo de backup do SCARY.", restoreFailed: "A TV não conseguiu restaurar o arquivo. Tente de novo.", restoreDone: "Restaurado na TV.", sumPrefix: "Neste arquivo", sumMyList: "Minha lista", sumWatched: "Assistidos", sumLoved: "Adorei", sumBucket: "Lista de desejos",
     credit: "Powered by SCARY · Open source",
   },
@@ -229,6 +233,7 @@ const WORDS = {
     tmdbLabel: "Вставьте ключ сюда", tmdbButton: "Отправить на телевизор", tmdbSaved: "Сохранено. Ряды TMDB и переведённые названия уже в пути.",
     tmdbInvalid: "Это не похоже на ключ TMDB.", tmdbRejected: "TMDB не принял этот ключ.",
     tmdbUnreachable: "Телевизор не смог связаться с TMDB. Попробуйте ещё раз.", tmdbStorage: "Телевизор не смог надёжно сохранить ключ.", aiTitle: "Ключ ИИ", aiHint: "Для «Спросите SCARY» с вашим собственным сервисом ИИ. Ключ передаётся зашифрованным, проверяется сервисом и хранится только на телевизоре.", aiService: "Сервис", aiLabel: "Вставьте ключ сюда", aiButton: "Отправить на телевизор", aiSaved: "Сохранено. «Спросите SCARY» теперь использует этот сервис.", aiInvalid: "Это не похоже на ключ.", aiRejected: "Сервис не принял этот ключ.", aiUnreachable: "Телевизор не смог связаться с сервисом. Попробуйте ещё раз.", aiStorage: "Телевизор не смог надёжно сохранить ключ.",
+    vpnTitle: "VPN", vpnHint: "Файл настроек WireGuard (.conf) от вашего VPN-провайдера. В нём закрытый ключ: он уходит только на ваш телевизор через эту зашифрованную страницу и хранится там в зашифрованном виде. Подключение выполняется на телевизоре: настройки, VPN. В SCARY нет VPN-провайдера.", vpnLabel: "Файл настроек WireGuard (.conf)", vpnButton: "Отправить на телевизор", vpnReady: "Файл готов к отправке.", vpnInvalid: "Это не файл настроек WireGuard, который может использовать SCARY.", vpnFailed: "Телевизор не смог сохранить файл. Попробуйте ещё раз.", vpnDone: "Сохранено на телевизоре. Подключите в настройках, VPN.",
     backupTitle: "Резервная копия", backupHint: "Ваши списки (Мой список, просмотренное, понравившееся, список желаний) и несколько настроек в виде файла на этом телефоне. В нём нет ключей, аккаунтов и PIN-кода. Восстановление добавляет к спискам телевизора и ничего не удаляет.", backupSave: "Сохранить копию на этом телефоне", backupSaved: "Файл резервной копии сохранён на этом телефоне.", backupFailed: "Телевизор не смог создать копию. Попробуйте ещё раз.", restoreLabel: "Восстановить из файла копии", restoreButton: "Восстановить на телевизоре", restoreInvalid: "Это не файл резервной копии SCARY.", restoreFailed: "Телевизор не смог восстановить файл. Попробуйте ещё раз.", restoreDone: "Восстановлено на телевизоре.", sumPrefix: "В этом файле", sumMyList: "Мой список", sumWatched: "Просмотрено", sumLoved: "Понравилось", sumBucket: "Список желаний",
     credit: "Powered by SCARY · Open source",
   },
@@ -239,6 +244,7 @@ const STATUS_WORDS = {
   tmdb_saved: "tmdbSaved", tmdb_invalid: "tmdbInvalid", tmdb_rejected: "tmdbRejected",
   tmdb_unreachable: "tmdbUnreachable", tmdb_storage: "tmdbStorage",
   backup_failed: "backupFailed", restore_ok: "restoreDone", restore_invalid: "restoreInvalid", restore_failed: "restoreFailed",
+  vpn_ok: "vpnDone", vpn_invalid: "vpnInvalid", vpn_failed: "vpnFailed",
   ai_saved: "aiSaved", ai_invalid: "aiInvalid", ai_rejected: "aiRejected", ai_unreachable: "aiUnreachable", ai_storage: "aiStorage",
 };
 
@@ -427,6 +433,54 @@ function start() {
       summary.textContent = words.restoreDone;
     } else {
       restoreButton.disabled = false;
+    }
+  });
+
+  // A WireGuard settings file for the VPN in the TV's Settings. It holds a private key, so nothing from it is shown
+  // here, and it leaves this page only sealed, to the TV. The TV reads it strictly: this page is only the messenger.
+  const MAX_VPN = 8192;
+  const vpnField = document.getElementById("vpn-file");
+  const vpnButton = document.getElementById("vpn-send");
+  const vpnSummary = document.getElementById("vpn-summary");
+  let chosenVpn = null;
+  vpnField.addEventListener("change", async () => {
+    chosenVpn = null;
+    vpnButton.disabled = true;
+    vpnSummary.textContent = "";
+    const file = vpnField.files && vpnField.files[0];
+    if (!file) return;
+    try {
+      if (file.size > MAX_VPN) throw new Error("too large");
+      const raw = file.text ? await file.text() : await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(file);
+      });
+      if (!/\[Interface\]/i.test(raw) || !/\[Peer\]/i.test(raw)) throw new Error("not a settings file");
+      // In base64: a command's text may hold no line break, and the file is made of lines.
+      const bytes = new TextEncoder().encode(raw);
+      if (bytes.length > MAX_VPN) throw new Error("too large");
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      chosenVpn = btoa(binary);
+      vpnSummary.textContent = words.vpnReady;
+      vpnButton.disabled = false;
+    } catch (e) {
+      vpnSummary.textContent = words.vpnInvalid;
+    }
+  });
+  vpnButton.addEventListener("click", async () => {
+    if (!chosenVpn) return;
+    vpnButton.disabled = true;
+    const reply = await send("vpn", chosenVpn, true);
+    if (reply && reply.s === "vpn_ok") {
+      chosenVpn = null;
+      vpnField.value = "";
+      vpnSummary.textContent = words.vpnDone;
+    } else {
+      vpnSummary.textContent = reply ? words[STATUS_WORDS[reply.s]] || words.vpnFailed : "";
+      vpnButton.disabled = false;
     }
   });
 

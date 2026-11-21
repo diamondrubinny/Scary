@@ -15,8 +15,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Whether a VPN is on, and which VPN apps this TV has. SCARY is no VPN and carries no VPN code: a VPN app covers the
- * whole TV, SCARY included, so all SCARY does is say whether one is on and open the app the viewer installed.
+ * Whether a VPN is on, and which VPN apps this TV has. This is about the TV's own VPN apps (SCARY's own tunnel is
+ * VpnRepository): a VPN app covers the whole TV, SCARY included, and here SCARY only says whether one is on and opens
+ * the app the viewer installed.
  *
  * Only what Android tells every app is read: that some network of the device is a VPN (not which, not where), and the
  * apps that declare a VPN service. Nothing is sent anywhere.

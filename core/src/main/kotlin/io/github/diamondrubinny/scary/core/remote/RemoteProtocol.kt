@@ -54,6 +54,11 @@ object RemoteProtocol {
         /** A backup file's text, to merge into the TV's lists. Large: taken only where a large body is expected. */
         RESTORE("restore", takesText = true, large = true),
 
+        /**
+         * A WireGuard settings file for the VPN in Settings, in base64 (a file has line breaks, and a command's text
+         * may not). Large, like a backup. It is only kept on the TV: connecting is done at the TV, never from a phone.
+         */
+        VPN_CONFIG("vpn", takesText = true, large = true),
         /** The page asks whether it is paired; it changes nothing. */
         PING("ping");
 
