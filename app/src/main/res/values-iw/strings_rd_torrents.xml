@@ -83,4 +83,10 @@
     <string name="rd_delete_all_working">מוחק מהחשבון…</string>
     <string name="rd_delete_all_done">כל הקבצים נמחקו מהחשבון.</string>
     <string name="rd_delete_all_partial">חלק מהקבצים לא נמחקו. נסו שוב בעוד רגע.</string>
+    <string name="rd_sources_check">בדיקת המקור</string>
+    <string name="rd_sources_checking">שואל את המקור…</string>
+    <string name="rd_sources_check_ok">המקור עונה. זה לקח %1$s אלפיות שנייה.</string>
+    <string name="rd_sources_check_refused">המקור סירב: בדקו את המפתח, או שהגעתם למגבלה שלו.</string>
+    <string name="rd_sources_check_unreadable">משהו ענה בכתובת הזאת, אבל לא מקור ש-SCARY יודע לקרוא. בדקו את הכתובת.</string>
+    <string name="rd_sources_check_unreachable">המקור לא ענה. בדקו את הכתובת ושהוא פועל.</string>
 </resources>

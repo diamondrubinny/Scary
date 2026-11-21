@@ -1569,6 +1569,10 @@ class HomeViewModel(
     suspend fun saveIndexer(address: String, key: String): io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult =
         sources?.save(address, key) ?: io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE
 
+    /** Whether the viewer's source answers, and how fast: asked only when they press "Check the source". */
+    suspend fun checkSource(): io.github.diamondrubinny.scary.data.SourcesRepository.Check =
+        sources?.check() ?: io.github.diamondrubinny.scary.data.SourcesRepository.Check(io.github.diamondrubinny.scary.data.SourcesRepository.Health.NOT_CONFIGURED, 0)
+
     fun removeIndexer() {
         viewModelScope.launch {
             sources?.remove()

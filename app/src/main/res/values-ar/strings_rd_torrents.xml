@@ -83,4 +83,10 @@
     <string name="rd_delete_all_working">جارٍ الحذف من حسابك…</string>
     <string name="rd_delete_all_done">حُذفت كل الملفات من حسابك.</string>
     <string name="rd_delete_all_partial">تعذّر حذف بعض الملفات. حاول مرة أخرى بعد قليل.</string>
+    <string name="rd_sources_check">فحص المصدر</string>
+    <string name="rd_sources_checking">جارٍ سؤال المصدر…</string>
+    <string name="rd_sources_check_ok">المصدر يجيب. استغرق ذلك %1$s مللي ثانية.</string>
+    <string name="rd_sources_check_refused">رفض المصدر: تحقق من المفتاح، أو أنك بلغت حدّه.</string>
+    <string name="rd_sources_check_unreadable">أجاب شيء في هذا العنوان، لكنه ليس مصدرًا يستطيع SCARY قراءته. تحقق من العنوان.</string>
+    <string name="rd_sources_check_unreachable">لم يُجب المصدر. تحقق من العنوان ومن أنه يعمل.</string>
 </resources>

@@ -718,6 +718,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onPull = { viewModel.pullMagnet(it.magnet.uri) },
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
+                            onCheckSource = viewModel::checkSource,
                         )
                     },
                 )

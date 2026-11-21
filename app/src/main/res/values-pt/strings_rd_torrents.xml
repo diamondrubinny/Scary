@@ -83,4 +83,10 @@
     <string name="rd_delete_all_working">Apagando da sua conta…</string>
     <string name="rd_delete_all_done">Todos os arquivos foram apagados da sua conta.</string>
     <string name="rd_delete_all_partial">Alguns arquivos não puderam ser apagados. Tente de novo em instantes.</string>
+    <string name="rd_sources_check">Verificar a fonte</string>
+    <string name="rd_sources_checking">Perguntando à fonte…</string>
+    <string name="rd_sources_check_ok">A fonte responde. Levou %1$s ms.</string>
+    <string name="rd_sources_check_refused">A fonte recusou: confira a chave, ou o limite dela foi atingido.</string>
+    <string name="rd_sources_check_unreadable">Algo respondeu neste endereço, mas não é uma fonte que o SCARY consiga ler. Confira o endereço.</string>
+    <string name="rd_sources_check_unreachable">A fonte não respondeu. Confira o endereço e se ela está em execução.</string>
 </resources>

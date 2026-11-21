@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,6 +16,9 @@ import io.github.diamondrubinny.scary.core.sources.Releases
 import io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult
 import io.github.diamondrubinny.scary.ui.home.RdPullState
 import io.github.diamondrubinny.scary.ui.home.RdSearchState
+import io.github.diamondrubinny.scary.data.SourcesRepository
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_CHECK_RESULT_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_CHECK_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_BEST_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_CONFIRM_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_FIELD_TAG
@@ -59,6 +63,32 @@ class RdSourcesTest {
                 )
             }
         } }
+    }
+
+    @Test
+    fun checkingTheSourceSaysWhetherItAnswersAndHowFast() {
+        var asked = 0
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RdSourcesScreen(
+                    search = RdSearchState.Idle,
+                    pull = RdPullState.Idle,
+                    indexerHost = "indexer.example",
+                    actions = RdSourcesActions(
+                        onSearch = {}, onPull = {}, onSaveIndexer = { _, _ -> SaveResult.SAVED }, onRemoveIndexer = {},
+                        onCheckSource = { asked++; SourcesRepository.Check(SourcesRepository.Health.OK, 240) },
+                    ),
+                )
+            }
+        } }
+        rule.onNode(hasTestTag(RD_SOURCES_INDEXER_TAG)).performClick()
+        // Nothing is asked until the viewer presses.
+        assertEquals(0, asked)
+        rule.onNode(hasTestTag(RD_SOURCES_CHECK_RESULT_TAG)).assertDoesNotExist()
+        rule.onNode(hasTestTag(RD_SOURCES_CHECK_TAG)).performClick()
+        rule.waitForIdle()
+        assertEquals(1, asked)
+        rule.onNode(hasText(rule.activity.getString(R.string.rd_sources_check_ok, "240"))).assertExists()
     }
 
     @Test
