@@ -99,6 +99,7 @@ class SettingsActions(
     val onOpenPhoneRemote: () -> Unit = {},
     val onOpenTmdbAccount: () -> Unit = {},
     val onOpenRealDebrid: () -> Unit = {},
+    val onOpenProfiles: () -> Unit = {},
     val onOpenStremioAccount: () -> Unit = {},
     val onOpenHomeRows: () -> Unit = {},
     val onOpenTastePicker: () -> Unit = {},
@@ -143,6 +144,8 @@ fun SettingsScreen(
     tmdbAccountName: String? = null,
     /** The connected Real-Debrid account's name; empty when connected without one; null when not connected. */
     realDebridName: String? = null,
+    /** The viewer on screen, for the Profiles row. */
+    profileName: String = "",
     stremioConnected: Boolean = false,
     onlineEnabled: Boolean,
     isDefaultHome: Boolean,
@@ -286,6 +289,12 @@ fun SettingsScreen(
             modifier = Modifier.testTag(ORIGINS_ROW_TAG),
         )
         BasicText(stringResource(R.string.settings_origins_note), style = ScaryType.Caption)
+        SettingRow(
+            label = stringResource(R.string.settings_profiles),
+            value = profileName,
+            onClick = actions.onOpenProfiles,
+            modifier = Modifier.testTag(PROFILES_ROW_TAG),
+        )
         SettingRow(
             label = stringResource(R.string.settings_realdebrid),
             value = realDebridName?.ifBlank { stringResource(R.string.rd_connected) } ?: stringResource(R.string.value_rd_none),
@@ -547,6 +556,7 @@ const val ORIGINS_ROW_TAG = "originsRow"
 const val HOME_ROWS_ROW_TAG = "homeRowsRow"
 const val TMDB_ACCOUNT_ROW_TAG = "tmdbAccountRow"
 const val REAL_DEBRID_ROW_TAG = "realDebridRow"
+const val PROFILES_ROW_TAG = "profilesRow"
 const val STREMIO_ROW_TAG = "stremioRow"
 const val TASTE_ROW_TAG = "tasteRow"
 const val CLEAR_RECENT_ROW_TAG = "clearRecentRow"

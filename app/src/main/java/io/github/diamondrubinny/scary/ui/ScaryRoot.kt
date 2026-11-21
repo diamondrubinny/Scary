@@ -97,6 +97,7 @@ import io.github.diamondrubinny.scary.ui.home.Screen
 import io.github.diamondrubinny.scary.ui.pin.PinDialog
 import io.github.diamondrubinny.scary.ui.player.PlayerScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.profiles.ProfilesScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
@@ -286,6 +287,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onDismissTasteInvite = viewModel::dismissTasteInvite,
             onAsk = { chip, prompt -> viewModel.openAsk(chip, prompt) },
             onOpenRealDebrid = viewModel::openRealDebrid,
+            onOpenProfiles = viewModel::openProfiles,
             onContinue = viewModel::continueWatching,
             onForgetContinue = viewModel::forgetWatching,
             onFinishContinue = viewModel::finishContinue,
@@ -413,6 +415,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
         onOpenTmdbAccount = viewModel::openTmdbAccount,
         onOpenStremioAccount = viewModel::openStremioAccount,
         onOpenRealDebrid = viewModel::openRealDebrid,
+        onOpenProfiles = viewModel::openProfiles,
         onToggleOnline = viewModel::toggleOnline,
         onRefreshFilms = viewModel::refreshFilmsNow,
         onRequestDefaultHome = ::requestDefaultHome,
@@ -548,6 +551,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     hideOrigins = state.hideOrigins,
                     tmdbAccountName = (tmdbAccount as? TmdbAccountRepository.State.SignedIn)?.username,
                     realDebridName = (realDebridState as? RealDebridRepository.State.SignedIn)?.username,
+                    profileName = io.github.diamondrubinny.scary.core.profiles.Profiles.active(state.profiles, state.activeProfileId).name
+                        .ifEmpty { stringResource(R.string.profile_default_name) },
                     stremioConnected = stremioState is StremioRepository.State.SignedIn,
                     onlineEnabled = state.onlineEnabled,
                     isDefaultHome = launcherStatus.isDefaultHome,
@@ -663,6 +668,13 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
                         )
                     },
+                )
+                current == Screen.Profiles -> ProfilesScreen(
+                    profiles = state.profiles,
+                    activeId = state.activeProfileId,
+                    pinSet = state.parentalEnabled,
+                    onChoose = viewModel::chooseProfile,
+                    onChange = viewModel::editProfiles,
                 )
                 current == Screen.RdTorrents -> RdTorrentsScreen(
                     state = rdTorrents,

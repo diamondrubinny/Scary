@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="profiles_title">Who is watching?</string>
+    <string name="profiles_note">Each viewer has their own My list, watched films, ratings, bucket list and Continue watching. Profiles are a convenience, not a lock: anyone at the TV can open any of them, except that leaving a Gentle profile asks for the PIN. The TMDB and Stremio accounts sync with the first profile only. Names stay on this TV.</string>
+    <string name="profiles_add">Add a profile</string>
+    <string name="profiles_hint">Hold OK on a profile to rename it, change it or remove it.</string>
+    <string name="profiles_switch">Profile: %1$s. Switch profile</string>
+    <string name="profile_default_name">First viewer</string>
+    <string name="profile_gentle_badge">Gentle</string>
+    <string name="profile_current">watching now</string>
+    <string name="profile_new_title">New profile</string>
+    <string name="profile_edit_title">Edit profile</string>
+    <string name="profile_name_label">Name</string>
+    <string name="profile_colour">Colour %1$d of %2$d: change</string>
+    <string name="profile_gentle_on">Gentle profile: on</string>
+    <string name="profile_gentle_off">Gentle profile: off</string>
+    <string name="profile_gentle_what">A Gentle profile always shows only the gentlest films, as family night does, and none of your own files.</string>
+    <string name="profile_gentle_no_pin">No PIN is set, so anyone can leave this profile. Set a PIN in Settings to hold it.</string>
+    <string name="profile_save">Save</string>
+    <string name="profile_remove">Remove this profile</string>
+    <string name="profile_remove_confirm">Remove %1$s? Their lists, watched films and Continue watching are deleted from this TV. This cannot be undone.</string>
+    <string name="profile_remove_yes">Remove</string>
+    <string name="profile_keep">Keep it</string>
+    <string name="profile_bad_name">Type a name.</string>
+    <string name="profile_removed">Profile removed.</string>
+    <string name="settings_profiles">Profiles</string>
+</resources>

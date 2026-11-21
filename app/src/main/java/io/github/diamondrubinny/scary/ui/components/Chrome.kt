@@ -68,6 +68,9 @@ import kotlinx.coroutines.delay
 /** Test tag of the top bar's "Ask SCARY ✦" button. */
 const val ASK_BUTTON_TAG = "askButton"
 
+/** Test tag of the top bar's profile name. */
+const val PROFILE_NAV_TAG = "profileNav"
+
 /** Test tag of the top bar's "Real-Debrid" word. */
 const val REAL_DEBRID_NAV_TAG = "realDebridNav"
 
@@ -92,11 +95,14 @@ fun TopBar(
     onAsk: (() -> Unit)? = null,
     /** The viewer's Real-Debrid account and its videos, one press from the home screen; none when null. */
     onOpenRealDebrid: (() -> Unit)? = null,
+    /** "Who is watching?", shown as the name of the viewer on screen; none on a TV with one viewer. */
+    profileName: String? = null,
+    onOpenProfiles: () -> Unit = {},
 ) {
     if (scaryLayout.narrow) {
         NarrowTopBar(
             onOpenSettings, onOpenSearch, onSurprise, modifier, familyNight, sleepAtMillis,
-            tab, onSelectTab, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid,
+            tab, onSelectTab, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid, profileName, onOpenProfiles,
         )
         return
     }
@@ -133,7 +139,7 @@ fun TopBar(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid)
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid, profileName, onOpenProfiles)
             Row(Modifier.padding(start = 10.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (sleepAtMillis != null) SleepCountdown(sleepAtMillis)
                 Clock()
@@ -161,6 +167,8 @@ private fun NarrowTopBar(
     bucketCount: Int,
     onAsk: (() -> Unit)?,
     onOpenRealDebrid: (() -> Unit)?,
+    profileName: String?,
+    onOpenProfiles: () -> Unit,
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -188,7 +196,7 @@ private fun NarrowTopBar(
                 )
             }
             if (tab != null) HomeTabs(tab, onSelectTab)
-            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid)
+            TopBarButtons(onOpenSettings, onOpenSearch, onSurprise, onOpenBucket, bucketCount, onAsk, onOpenRealDebrid, profileName, onOpenProfiles)
         }
     }
 }
@@ -202,7 +210,13 @@ private fun TopBarButtons(
     bucketCount: Int,
     onAsk: (() -> Unit)?,
     onOpenRealDebrid: (() -> Unit)?,
+    profileName: String?,
+    onOpenProfiles: () -> Unit,
 ) {
+    // Whose lists these are, and the way to someone else's: first, where the eye starts.
+    if (profileName != null) {
+        NavWord(profileName, stringResource(R.string.profiles_switch, profileName), onOpenProfiles, Modifier.testTag(PROFILE_NAV_TAG))
+    }
     // Noir: the top bar is words. Each says where it goes; nothing has to be remembered by its picture. The longer
     // names stay as what a screen reader says (and what the tests look for).
     if (onOpenBucket != null) {

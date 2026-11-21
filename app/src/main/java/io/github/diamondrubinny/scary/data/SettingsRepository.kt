@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.data
 import io.github.diamondrubinny.scary.core.backup.Backup
 import io.github.diamondrubinny.scary.core.catalog.HomeRowChoices
 import io.github.diamondrubinny.scary.core.links.Region
+import io.github.diamondrubinny.scary.core.profiles.Profiles
 import io.github.diamondrubinny.scary.core.ai.AiProvider
 import android.content.Context
 import android.provider.Settings
@@ -114,8 +115,16 @@ data class LauncherPrefs(
     val bucketIds: List<String> = emptyList(),
     /** The bucket-list film handed to Stremio, until SCARY is back on screen; null otherwise. */
     val bucketPlaying: String? = null,
+    /** "Who is watching?": the TV's profiles (always the first one), and the one on screen (core Profiles). */
+    val profiles: List<Profiles.Profile> = listOf(Profiles.Profile(Profiles.FIRST)),
+    val activeProfileId: String = Profiles.FIRST,
 ) {
     val parentalEnabled: Boolean get() = pinHash != null
+
+    val activeProfile: Profiles.Profile get() = Profiles.active(profiles, activeProfileId)
+
+    /** The first profile is the one the TMDB and Stremio accounts sync with; the others' lists stay on the TV. */
+    val isFirstProfile: Boolean get() = activeProfileId == Profiles.FIRST
 }
 
 /** How the viewer rated a film: one or the other, never both. */
@@ -129,7 +138,7 @@ class SettingsRepository(private val context: Context) {
         .map { p ->
             LauncherPrefs(
                 effectsEnabled = p[EFFECTS] ?: systemAnimationsEnabled(),
-                recentIds = RecentList.decode(p[RECENT]),
+                recentIds = RecentList.decode(p[RECENT.key(p)]),
                 pinned = p[PINNED]?.let(RecentList::decode) ?: KnownPackages.PINNED,
                 hidden = p[HIDDEN] ?: emptySet(),
                 nightMaxFear = (p[NIGHT_MAX_FEAR] ?: MAX_FEAR).coerceIn(1, MAX_FEAR),
@@ -138,16 +147,17 @@ class SettingsRepository(private val context: Context) {
                 lockout = LockoutState(p[PIN_FAILED] ?: 0, p[PIN_LOCKED_UNTIL] ?: 0L),
                 soundsEnabled = p[SOUNDS] ?: false,
                 onlineEnabled = p[ONLINE] ?: true,
-                myListIds = RecentList.decode(p[MY_LIST]),
-                familyNight = p[FAMILY_NIGHT] ?: false,
+                myListIds = RecentList.decode(p[MY_LIST.key(p)]),
+                // A gentle profile is family night for whoever is in it, whatever the TV's own switch says.
+                familyNight = (p[FAMILY_NIGHT] ?: false) || Profiles.active(Profiles.decode(p[PROFILES]), activeId(p)).gentle,
                 seasonalRows = p[SEASONAL_ROWS] ?: true,
-                watchedIds = RecentList.decode(p[WATCHED]),
+                watchedIds = RecentList.decode(p[WATCHED.key(p)]),
                 autoWatched = p[AUTO_WATCHED] ?: true,
                 hideWatched = p[HIDE_WATCHED] ?: false,
                 hideOrigins = p[HIDE_ORIGINS] ?: true,
                 hiddenRows = HomeRowChoices.sanitize(p[HIDDEN_ROWS].orEmpty()),
-                reminders = Reminders.decode(p[REMINDERS]),
-                tasteInviteDismissed = p[TASTE_INVITE_DISMISSED] ?: false,
+                reminders = Reminders.decode(p[REMINDERS.key(p)]),
+                tasteInviteDismissed = p[TASTE_INVITE_DISMISSED.key(p)] ?: false,
                 autoUpdateCheck = p[AUTO_UPDATE_CHECK] ?: true,
                 updateSkippedVersion = p[UPDATE_SKIPPED],
                 updateLaterUntil = p[UPDATE_LATER_UNTIL],
@@ -163,12 +173,14 @@ class SettingsRepository(private val context: Context) {
                 trailerAutoplay = p[TRAILER_AUTOPLAY] ?: true,
                 trailerSound = p[TRAILER_SOUND] ?: false,
                 trailerIntroSeen = p[TRAILER_INTRO_SEEN] ?: false,
-                lovedIds = RecentList.decode(p[LOVED]),
-                dislikedIds = RecentList.decode(p[DISLIKED]),
-                watchedDays = decodeDays(p[WATCHED_DAYS]),
+                lovedIds = RecentList.decode(p[LOVED.key(p)]),
+                dislikedIds = RecentList.decode(p[DISLIKED.key(p)]),
+                watchedDays = decodeDays(p[WATCHED_DAYS.key(p)]),
                 sleepAtMillis = p[SLEEP_AT],
-                bucketIds = RecentList.decode(p[BUCKET]),
-                bucketPlaying = p[BUCKET_PLAYING]?.takeIf(String::isNotBlank),
+                bucketIds = RecentList.decode(p[BUCKET.key(p)]),
+                bucketPlaying = p[BUCKET_PLAYING.key(p)]?.takeIf(String::isNotBlank),
+                profiles = Profiles.decode(p[PROFILES]),
+                activeProfileId = activeId(p),
             )
         }
         .distinctUntilChanged()
@@ -176,16 +188,16 @@ class SettingsRepository(private val context: Context) {
     suspend fun setEffectsEnabled(enabled: Boolean) = edit { it[EFFECTS] = enabled }
 
     suspend fun pushRecent(movieId: String) = edit {
-        it[RECENT] = RecentList.encode(RecentList.push(RecentList.decode(it[RECENT]), movieId))
+        it[RECENT.key(it)] = RecentList.encode(RecentList.push(RecentList.decode(it[RECENT.key(it)]), movieId))
     }
 
     /** Adds the movie to "My list", or removes it if it is already there. Returns true when it was added. */
     suspend fun toggleMyList(movieId: String): Boolean {
         var added = false
         edit {
-            val current = RecentList.decode(it[MY_LIST])
+            val current = RecentList.decode(it[MY_LIST.key(it)])
             added = movieId !in current
-            it[MY_LIST] = RecentList.encode(MyList.toggle(current, movieId))
+            it[MY_LIST.key(it)] = RecentList.encode(MyList.toggle(current, movieId))
         }
         return added
     }
@@ -194,13 +206,13 @@ class SettingsRepository(private val context: Context) {
     suspend fun setWatched(movieId: String, watched: Boolean): Boolean {
         var changed = false
         edit {
-            val current = RecentList.decode(it[WATCHED])
+            val current = RecentList.decode(it[WATCHED.key(it)])
             changed = (movieId in current) != watched
             if (changed) {
-                it[WATCHED] = RecentList.encode(if (watched) WatchedList.add(current, movieId) else WatchedList.remove(current, movieId))
-                val days = decodeDays(it[WATCHED_DAYS]) - movieId
+                it[WATCHED.key(it)] = RecentList.encode(if (watched) WatchedList.add(current, movieId) else WatchedList.remove(current, movieId))
+                val days = decodeDays(it[WATCHED_DAYS.key(it)]) - movieId
                 val updated = if (watched) mapOf(movieId to LocalDate.now().toEpochDay()) + days else days
-                it[WATCHED_DAYS] = encodeDays(updated.entries.take(WatchedList.MAX_SIZE).associate { e -> e.key to e.value })
+                it[WATCHED_DAYS.key(it)] = encodeDays(updated.entries.take(WatchedList.MAX_SIZE).associate { e -> e.key to e.value })
             }
         }
         return changed
@@ -220,17 +232,17 @@ class SettingsRepository(private val context: Context) {
         var set = false
         edit {
             // Whether one is set is read from everything stored (what the film's page shows), before old ones are dropped.
-            val stored = Reminders.decode(it[REMINDERS])
+            val stored = Reminders.decode(it[REMINDERS.key(it)])
             set = stored.none { reminder -> reminder.id == movieId }
             val current = Reminders.pruned(stored, today).filter { reminder -> reminder.id != movieId }
-            it[REMINDERS] = Reminders.encode(if (set) Reminders.toggle(current, movieId, day) else current)
+            it[REMINDERS.key(it)] = Reminders.encode(if (set) Reminders.toggle(current, movieId, day) else current)
         }
         return set
     }
 
     suspend fun setHiddenRows(keys: Set<String>) = edit { it[HIDDEN_ROWS] = HomeRowChoices.sanitize(keys) }
 
-    suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED] = dismissed }
+    suspend fun setTasteInviteDismissed(dismissed: Boolean) = edit { it[TASTE_INVITE_DISMISSED.key(it)] = dismissed }
 
     suspend fun setAutoUpdateCheck(enabled: Boolean) = edit { it[AUTO_UPDATE_CHECK] = enabled }
 
@@ -266,14 +278,14 @@ class SettingsRepository(private val context: Context) {
     suspend fun updateLater(untilMillis: Long) = edit { it[UPDATE_LATER_UNTIL] = untilMillis }
 
     /** Empties "Recently opened". Watched, My list and the ratings stay. */
-    suspend fun clearRecent() = edit { it.remove(RECENT) }
+    suspend fun clearRecent() = edit { it.remove(RECENT.key(it)) }
 
     /** "Loved it" or "not for me" (one excludes the other), or neither with null. */
     suspend fun setRating(movieId: String, rating: Rating?) = edit {
-        val loved = RecentList.decode(it[LOVED]).filter { id -> id != movieId }
-        val disliked = RecentList.decode(it[DISLIKED]).filter { id -> id != movieId }
-        it[LOVED] = RecentList.encode((if (rating == Rating.LOVED) listOf(movieId) + loved else loved).take(MAX_RATED))
-        it[DISLIKED] = RecentList.encode((if (rating == Rating.NOT_FOR_ME) listOf(movieId) + disliked else disliked).take(MAX_RATED))
+        val loved = RecentList.decode(it[LOVED.key(it)]).filter { id -> id != movieId }
+        val disliked = RecentList.decode(it[DISLIKED.key(it)]).filter { id -> id != movieId }
+        it[LOVED.key(it)] = RecentList.encode((if (rating == Rating.LOVED) listOf(movieId) + loved else loved).take(MAX_RATED))
+        it[DISLIKED.key(it)] = RecentList.encode((if (rating == Rating.NOT_FOR_ME) listOf(movieId) + disliked else disliked).take(MAX_RATED))
     }
 
     /** The lists as they are stored after [applySync]: the lists have caps, so not everything given may fit. */
@@ -288,16 +300,16 @@ class SettingsRepository(private val context: Context) {
     suspend fun applySync(myList: List<String>?, loved: List<String>?, watchedAdded: List<String>): StoredLists {
         var stored = StoredLists(emptyList(), emptyList(), emptyList())
         edit { p ->
-            myList?.let { p[MY_LIST] = RecentList.encode(it.distinct().take(MyList.MAX_SIZE)) }
+            myList?.let { p[MY_LIST.key(p)] = RecentList.encode(it.distinct().take(MyList.MAX_SIZE)) }
             loved?.let { list ->
                 val kept = list.distinct().take(MAX_RATED)
-                p[LOVED] = RecentList.encode(kept)
-                p[DISLIKED] = RecentList.encode(RecentList.decode(p[DISLIKED]).filterNot(kept::contains))
+                p[LOVED.key(p)] = RecentList.encode(kept)
+                p[DISLIKED.key(p)] = RecentList.encode(RecentList.decode(p[DISLIKED.key(p)]).filterNot(kept::contains))
             }
-            val watched = RecentList.decode(p[WATCHED])
+            val watched = RecentList.decode(p[WATCHED.key(p)])
             val added = watchedAdded.distinct().filterNot(watched::contains)
-            if (added.isNotEmpty()) p[WATCHED] = RecentList.encode((added + watched).take(WatchedList.MAX_SIZE))
-            stored = StoredLists(RecentList.decode(p[MY_LIST]), RecentList.decode(p[LOVED]), RecentList.decode(p[WATCHED]))
+            if (added.isNotEmpty()) p[WATCHED.key(p)] = RecentList.encode((added + watched).take(WatchedList.MAX_SIZE))
+            stored = StoredLists(RecentList.decode(p[MY_LIST.key(p)]), RecentList.decode(p[LOVED.key(p)]), RecentList.decode(p[WATCHED.key(p)]))
         }
         return stored
     }
@@ -329,17 +341,17 @@ class SettingsRepository(private val context: Context) {
         var result = Restored(Backup.Snapshot(), Backup.Snapshot(), false)
         edit { p ->
             val here = Backup.Snapshot(
-                myList = RecentList.decode(p[MY_LIST]), watched = RecentList.decode(p[WATCHED]), watchedDays = decodeDays(p[WATCHED_DAYS]),
-                loved = RecentList.decode(p[LOVED]), disliked = RecentList.decode(p[DISLIKED]), bucket = RecentList.decode(p[BUCKET]),
+                myList = RecentList.decode(p[MY_LIST.key(p)]), watched = RecentList.decode(p[WATCHED.key(p)]), watchedDays = decodeDays(p[WATCHED_DAYS.key(p)]),
+                loved = RecentList.decode(p[LOVED.key(p)]), disliked = RecentList.decode(p[DISLIKED.key(p)]), bucket = RecentList.decode(p[BUCKET.key(p)]),
                 hiddenRows = p[HIDDEN_ROWS].orEmpty(),
             )
             val merged = Backup.merge(here, file)
-            p[MY_LIST] = RecentList.encode(merged.myList.take(MyList.MAX_SIZE))
-            p[WATCHED] = RecentList.encode(merged.watched.take(WatchedList.MAX_SIZE))
-            p[WATCHED_DAYS] = encodeDays(merged.watchedDays)
-            p[LOVED] = RecentList.encode(merged.loved.take(MAX_RATED))
-            p[DISLIKED] = RecentList.encode(merged.disliked.take(MAX_RATED))
-            p[BUCKET] = RecentList.encode(merged.bucket.take(BucketList.MAX_SIZE))
+            p[MY_LIST.key(p)] = RecentList.encode(merged.myList.take(MyList.MAX_SIZE))
+            p[WATCHED.key(p)] = RecentList.encode(merged.watched.take(WatchedList.MAX_SIZE))
+            p[WATCHED_DAYS.key(p)] = encodeDays(merged.watchedDays)
+            p[LOVED.key(p)] = RecentList.encode(merged.loved.take(MAX_RATED))
+            p[DISLIKED.key(p)] = RecentList.encode(merged.disliked.take(MAX_RATED))
+            p[BUCKET.key(p)] = RecentList.encode(merged.bucket.take(BucketList.MAX_SIZE))
             p[HIDDEN_ROWS] = HomeRowChoices.sanitize(merged.hiddenRows)
             val hidOrigins = p[HIDE_ORIGINS] ?: true
             for ((name, value) in file.switches) {
@@ -357,19 +369,68 @@ class SettingsRepository(private val context: Context) {
         return result
     }
 
+    // Profiles (docs/PROFILES_PLAN.md) --------------------------------------------------------------------------------
+
+    /** Adds a viewer; null when the name is empty or the TV already has the most it can. The new one is not chosen yet. */
+    suspend fun addProfile(name: String, colour: Int, gentle: Boolean): Profiles.Profile? {
+        var added: Profiles.Profile? = null
+        edit { p ->
+            val (list, profile) = Profiles.add(Profiles.decode(p[PROFILES]), name, colour, gentle) ?: return@edit
+            // A freed id may be used again: whatever an earlier profile left under it must not become the new one's.
+            clearProfile(p, Profiles.suffix(profile.id))
+            p[PROFILES] = Profiles.encode(list)
+            added = profile
+        }
+        return added
+    }
+
+    suspend fun updateProfile(id: String, name: String, colour: Int, gentle: Boolean): Boolean {
+        var changed = false
+        edit { p ->
+            val list = Profiles.update(Profiles.decode(p[PROFILES]), id, name, colour, gentle) ?: return@edit
+            p[PROFILES] = Profiles.encode(list)
+            changed = true
+        }
+        return changed
+    }
+
+    /** Removes a viewer and their lists, in one write; the first profile (the TV's own lists) cannot be removed. */
+    suspend fun removeProfile(id: String): Boolean {
+        var removed = false
+        edit { p ->
+            val list = Profiles.remove(Profiles.decode(p[PROFILES]), id) ?: return@edit
+            clearProfile(p, Profiles.suffix(id))
+            p[PROFILES] = Profiles.encode(list)
+            if (p[ACTIVE_PROFILE] == id) p.remove(ACTIVE_PROFILE)
+            removed = true
+        }
+        return removed
+    }
+
+    /** The viewer on screen from now on; an id that is no profile's leaves the first one on. */
+    suspend fun setActiveProfile(id: String) = edit { p ->
+        if (id == Profiles.FIRST || Profiles.decode(p[PROFILES]).none { it.id == id }) p.remove(ACTIVE_PROFILE) else p[ACTIVE_PROFILE] = id
+    }
+
+    /** Every list kept under [suffix]; never called with the first profile's (empty) suffix. */
+    private fun clearProfile(p: MutablePreferences, suffix: String) {
+        if (suffix.isEmpty()) return
+        PROFILE_KEYS.forEach { p.remove(it.of(suffix)) }
+    }
+
     suspend fun setSleepAt(millis: Long?) = edit { if (millis == null) it.remove(SLEEP_AT) else it[SLEEP_AT] = millis }
 
     /** Changes the bucket list with [change] (BucketList's functions), atomically; returns the new list. */
     suspend fun updateBucket(change: (List<String>) -> List<String>): List<String> {
         var updated = emptyList<String>()
         edit {
-            updated = change(RecentList.decode(it[BUCKET])).take(BucketList.MAX_SIZE)
-            it[BUCKET] = RecentList.encode(updated)
+            updated = change(RecentList.decode(it[BUCKET.key(it)])).take(BucketList.MAX_SIZE)
+            it[BUCKET.key(it)] = RecentList.encode(updated)
         }
         return updated
     }
 
-    suspend fun setBucketPlaying(movieId: String?) = edit { if (movieId == null) it.remove(BUCKET_PLAYING) else it[BUCKET_PLAYING] = movieId }
+    suspend fun setBucketPlaying(movieId: String?) = edit { if (movieId == null) it.remove(BUCKET_PLAYING.key(it)) else it[BUCKET_PLAYING.key(it)] = movieId }
 
     /** Null goes back to the device's own country. */
     suspend fun setRentBuyCountry(code: String?) = edit {
@@ -496,9 +557,27 @@ class SettingsRepository(private val context: Context) {
             Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) != 0f
 
         const val MAX_FEAR = 5
+
+        /**
+         * A key that belongs to the viewer on screen: the first profile's is the key the TV always used, and every
+         * other profile's is the same name with its suffix (core Profiles), read from the same write that uses it.
+         */
+        private class Scoped<T>(private val make: (String) -> Preferences.Key<T>, private val base: String) {
+            fun key(p: Preferences): Preferences.Key<T> = of(Profiles.suffix(activeId(p)))
+            fun of(suffix: String): Preferences.Key<T> = make(base + suffix)
+        }
+
+        private val PROFILES = stringPreferencesKey("profiles")
+        private val ACTIVE_PROFILE = stringPreferencesKey("active_profile")
+
+        /** The profile on screen: the stored id while that profile exists, else the first. */
+        private fun activeId(p: Preferences): String {
+            val id = p[ACTIVE_PROFILE] ?: return Profiles.FIRST
+            return if (Profiles.decode(p[PROFILES]).any { it.id == id }) id else Profiles.FIRST
+        }
         private val EFFECTS = booleanPreferencesKey("effects_enabled")
-        private val RECENT = stringPreferencesKey("recent_movie_ids")
-        private val MY_LIST = stringPreferencesKey("my_list_movie_ids")
+        private val RECENT = Scoped(::stringPreferencesKey, "recent_movie_ids")
+        private val MY_LIST = Scoped(::stringPreferencesKey, "my_list_movie_ids")
         private val PINNED = stringPreferencesKey("pinned_apps")
         private val HIDDEN = stringSetPreferencesKey("hidden_apps")
         private val NIGHT_MAX_FEAR = intPreferencesKey("night_max_fear")
@@ -512,13 +591,13 @@ class SettingsRepository(private val context: Context) {
         private val ONLINE = booleanPreferencesKey("online_artwork")
         private val FAMILY_NIGHT = booleanPreferencesKey("family_night")
         private val SEASONAL_ROWS = booleanPreferencesKey("seasonal_rows")
-        private val WATCHED = stringPreferencesKey("watched_movie_ids")
+        private val WATCHED = Scoped(::stringPreferencesKey, "watched_movie_ids")
         private val AUTO_WATCHED = booleanPreferencesKey("auto_watched")
         private val HIDE_WATCHED = booleanPreferencesKey("hide_watched")
         private val HIDE_ORIGINS = booleanPreferencesKey("hide_arab_indian")
         private val HIDDEN_ROWS = stringSetPreferencesKey("hidden_home_rows")
-        private val REMINDERS = stringPreferencesKey("release_reminders")
-        private val TASTE_INVITE_DISMISSED = booleanPreferencesKey("taste_invite_dismissed")
+        private val REMINDERS = Scoped(::stringPreferencesKey, "release_reminders")
+        private val TASTE_INVITE_DISMISSED = Scoped(::booleanPreferencesKey, "taste_invite_dismissed")
         private val AUTO_UPDATE_CHECK = booleanPreferencesKey("auto_update_check")
         private val UPDATE_SKIPPED = intPreferencesKey("update_skipped_version")
         private val UPDATE_LATER_UNTIL = longPreferencesKey("update_later_until")
@@ -540,13 +619,18 @@ class SettingsRepository(private val context: Context) {
         private val TRAILER_AUTOPLAY = booleanPreferencesKey("trailer_autoplay")
         private val TRAILER_SOUND = booleanPreferencesKey("trailer_sound")
         private val TRAILER_INTRO_SEEN = booleanPreferencesKey("trailer_intro_seen")
-        private val LOVED = stringPreferencesKey("loved_movie_ids")
-        private val DISLIKED = stringPreferencesKey("disliked_movie_ids")
-        private val WATCHED_DAYS = stringPreferencesKey("watched_movie_days")
+        private val LOVED = Scoped(::stringPreferencesKey, "loved_movie_ids")
+        private val DISLIKED = Scoped(::stringPreferencesKey, "disliked_movie_ids")
+        private val WATCHED_DAYS = Scoped(::stringPreferencesKey, "watched_movie_days")
         private val SLEEP_AT = longPreferencesKey("sleep_at_millis")
-        private val BUCKET = stringPreferencesKey("bucket_movie_ids")
-        private val BUCKET_PLAYING = stringPreferencesKey("bucket_playing")
+        private val BUCKET = Scoped(::stringPreferencesKey, "bucket_movie_ids")
+        private val BUCKET_PLAYING = Scoped(::stringPreferencesKey, "bucket_playing")
         private const val MAX_RATED = 500
+
+        /** Everything a profile owns here, for removing a profile in one write. */
+        private val PROFILE_KEYS: List<Scoped<*>> by lazy {
+            listOf(RECENT, MY_LIST, WATCHED, WATCHED_DAYS, LOVED, DISLIKED, BUCKET, BUCKET_PLAYING, REMINDERS, TASTE_INVITE_DISMISSED)
+        }
 
         /** "id@epochDay,id@epochDay", newest first; anything malformed is skipped. */
         private fun decodeDays(raw: String?): Map<String, Long> =

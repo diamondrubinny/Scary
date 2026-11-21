@@ -51,6 +51,7 @@ import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.profiles.Profiles
 import io.github.diamondrubinny.scary.core.realdebrid.FileMatch
 import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
@@ -300,6 +301,8 @@ class HomeViewModel(
             trailerIntroSeen = prefs.trailerIntroSeen,
             lovedIds = prefs.lovedIds.toSet(),
             dislikedIds = prefs.dislikedIds.toSet(),
+            profiles = prefs.profiles,
+            activeProfileId = prefs.activeProfileId,
             // On until SleepTimerReceiver has paused playback and cleared it (or a restart of the TV dropped the alarm).
             sleepAtMillis = prefs.sleepAtMillis,
             tab = choices.tab,
@@ -1214,6 +1217,8 @@ class HomeViewModel(
     }
 
     private suspend fun syncTmdbAccount(minGapMs: Long) {
+        // The account syncs with the first profile only: another viewer's lists are theirs and stay on the TV.
+        if (!settings.prefs.first().isFirstProfile) return
         val account = tmdbAccount ?: return
         if (account.state.value !is TmdbAccountRepository.State.SignedIn) return
         val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
@@ -1250,6 +1255,8 @@ class HomeViewModel(
     }
 
     private suspend fun syncStremio(minGapMs: Long) {
+        // As with TMDB: the first profile only.
+        if (!settings.prefs.first().isFirstProfile) return
         val account = stremio ?: return
         if (!account.signedIn) return
         val full = (catalog.value as? CatalogState.Ready)?.catalog ?: return
@@ -1933,6 +1940,57 @@ class HomeViewModel(
                 refreshRdTorrents()
             }
             is GatedAction.PlayRealDebrid -> startPlaying(action.file, action.movieId, action.startAtMs)
+            is GatedAction.SwitchProfile -> switchProfile(action.profileId)
+            is GatedAction.EditProfile -> changeProfiles(action.change)
+        }
+    }
+
+    // Profiles (docs/PROFILES_PLAN.md) --------------------------------------------------------------------------------
+
+    /** "Who is watching?", from the top bar, the settings, or by itself at start when the TV has several viewers. */
+    fun openProfiles() = push(Screen.Profiles)
+
+    /**
+     * The viewer chose a profile. Leaving a gentle one asks for the PIN every time, when one is set: the unlock a
+     * parent gave a while ago must not let a child walk out of it.
+     */
+    fun chooseProfile(id: String) {
+        val prefs = latestPrefs ?: return
+        when {
+            id == prefs.activeProfileId -> backStack.value = listOf(Screen.Home)
+            prefs.activeProfile.gentle && prefs.parentalEnabled -> _pinDialog.value = PinDialogState(PinStep.Verify(GatedAction.SwitchProfile(id)))
+            else -> switchProfile(id)
+        }
+    }
+
+    private fun switchProfile(id: String) {
+        viewModelScope.launch {
+            settings.setActiveProfile(id)
+            // Another person is at the TV: what the PIN opened for the last one closes.
+            unlockExpiry?.cancel()
+            unlockExpiry = null
+            sessionUnlocked.value = false
+            _rdMatches.value = null
+            backStack.value = listOf(Screen.Home)
+        }
+    }
+
+    /** Adding, changing or removing a profile: with a PIN set, it is asked first (a child must not un-gentle theirs). */
+    fun editProfiles(change: ProfileChange) {
+        val action = GatedAction.EditProfile(change)
+        if (latestPrefs?.parentalEnabled == true) _pinDialog.value = PinDialogState(PinStep.Verify(action)) else perform(action)
+    }
+
+    private fun changeProfiles(change: ProfileChange) {
+        viewModelScope.launch {
+            when (change) {
+                is ProfileChange.Add -> if (settings.addProfile(change.name, change.colour, change.gentle) == null) show(R.string.profile_bad_name)
+                is ProfileChange.Update -> if (!settings.updateProfile(change.id, change.name, change.colour, change.gentle)) show(R.string.profile_bad_name)
+                is ProfileChange.Remove -> if (settings.removeProfile(change.id)) {
+                    watchStore?.removeProfile(Profiles.suffix(change.id))
+                    show(R.string.profile_removed)
+                }
+            }
         }
     }
 
@@ -2796,6 +2854,12 @@ class HomeViewModel(
         loadCatalog()
         refreshApps()
         viewModelScope.launch { settings.prefs.collect { latestPrefs = it } }
+        // "Continue watching" follows the viewer on screen.
+        viewModelScope.launch {
+            settings.prefs.map { it.activeProfileId }.distinctUntilChanged().collect { watchStore?.useProfile(Profiles.suffix(it)) }
+        }
+        // A TV with several viewers asks who is watching when SCARY starts; with one, nothing is asked.
+        viewModelScope.launch { if (settings.prefs.first().profiles.size >= 2) push(Screen.Profiles) }
         backups?.let { repository -> viewModelScope.launch { repository.events.collect(::onBackupEvent) } }
     }
 

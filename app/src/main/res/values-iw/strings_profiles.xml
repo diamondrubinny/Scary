@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="profiles_title">מי צופה?</string>
+    <string name="profiles_note">לכל צופה יש רשימה משלו, סרטים שנצפו, דירוגים, Bucket list והמשך צפייה. פרופילים הם נוחות ולא נעילה: כל מי שליד הטלוויזיה יכול לפתוח כל פרופיל, חוץ מיציאה מפרופיל עדין, שדורשת PIN. חשבונות TMDB ו-Stremio מסתנכרנים רק עם הפרופיל הראשון. השמות נשארים בטלוויזיה הזו.</string>
+    <string name="profiles_add">הוספת פרופיל</string>
+    <string name="profiles_hint">החזיקו OK על פרופיל כדי לשנות את שמו, לערוך אותו או להסיר אותו.</string>
+    <string name="profiles_switch">פרופיל: %1$s. החלפת פרופיל</string>
+    <string name="profile_default_name">הצופה הראשון</string>
+    <string name="profile_gentle_badge">עדין</string>
+    <string name="profile_current">צופה עכשיו</string>
+    <string name="profile_new_title">פרופיל חדש</string>
+    <string name="profile_edit_title">עריכת פרופיל</string>
+    <string name="profile_name_label">שם</string>
+    <string name="profile_colour">צבע %1$d מתוך %2$d: החלפה</string>
+    <string name="profile_gentle_on">פרופיל עדין: פועל</string>
+    <string name="profile_gentle_off">פרופיל עדין: כבוי</string>
+    <string name="profile_gentle_what">פרופיל עדין מציג תמיד רק את הסרטים העדינים ביותר, כמו ערב משפחתי, ולא מציג קבצים אישיים.</string>
+    <string name="profile_gentle_no_pin">לא הוגדר PIN, ולכן כל אחד יכול לצאת מהפרופיל הזה. הגדירו PIN בהגדרות כדי לנעול אותו.</string>
+    <string name="profile_save">שמירה</string>
+    <string name="profile_remove">הסרת הפרופיל</string>
+    <string name="profile_remove_confirm">להסיר את %1$s? הרשימות, הסרטים שנצפו והמשך הצפייה שלו יימחקו מהטלוויזיה הזו. אי אפשר לבטל את זה.</string>
+    <string name="profile_remove_yes">הסרה</string>
+    <string name="profile_keep">להשאיר</string>
+    <string name="profile_bad_name">הקלידו שם.</string>
+    <string name="profile_removed">הפרופיל הוסר.</string>
+    <string name="settings_profiles">פרופילים</string>
+</resources>

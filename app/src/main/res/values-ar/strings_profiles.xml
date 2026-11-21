@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="profiles_title">من يشاهد؟</string>
+    <string name="profiles_note">لكل مشاهد قائمته الخاصة وأفلامه التي شاهدها وتقييماته وقائمة الأمنيات ومتابعة المشاهدة. الملفات الشخصية للراحة وليست قفلًا: يستطيع أي شخص أمام التلفاز فتح أيٍّ منها، إلا أن الخروج من ملف لطيف يطلب رمز PIN. حسابا TMDB و Stremio يتزامنان مع الملف الأول فقط. الأسماء تبقى على هذا التلفاز.</string>
+    <string name="profiles_add">إضافة ملف شخصي</string>
+    <string name="profiles_hint">اضغط مطولًا على OK فوق ملف لتغيير اسمه أو تعديله أو إزالته.</string>
+    <string name="profiles_switch">الملف: %1$s. تبديل الملف</string>
+    <string name="profile_default_name">المشاهد الأول</string>
+    <string name="profile_gentle_badge">لطيف</string>
+    <string name="profile_current">يشاهد الآن</string>
+    <string name="profile_new_title">ملف شخصي جديد</string>
+    <string name="profile_edit_title">تعديل الملف الشخصي</string>
+    <string name="profile_name_label">الاسم</string>
+    <string name="profile_colour">اللون %1$d من %2$d: تغيير</string>
+    <string name="profile_gentle_on">ملف لطيف: مفعّل</string>
+    <string name="profile_gentle_off">ملف لطيف: متوقف</string>
+    <string name="profile_gentle_what">الملف اللطيف يعرض دائمًا ألطف الأفلام فقط، كما في أمسية العائلة، ولا يعرض ملفاتك الشخصية.</string>
+    <string name="profile_gentle_no_pin">لم يُضبط رمز PIN، لذا يستطيع أي شخص الخروج من هذا الملف. اضبط رمز PIN في الإعدادات لتثبيته.</string>
+    <string name="profile_save">حفظ</string>
+    <string name="profile_remove">إزالة هذا الملف</string>
+    <string name="profile_remove_confirm">هل تريد إزالة %1$s؟ ستُحذف قوائمه وأفلامه التي شاهدها ومتابعة المشاهدة من هذا التلفاز. لا يمكن التراجع عن ذلك.</string>
+    <string name="profile_remove_yes">إزالة</string>
+    <string name="profile_keep">إبقاء</string>
+    <string name="profile_bad_name">اكتب اسمًا.</string>
+    <string name="profile_removed">أُزيل الملف الشخصي.</string>
+    <string name="settings_profiles">الملفات الشخصية</string>
+</resources>

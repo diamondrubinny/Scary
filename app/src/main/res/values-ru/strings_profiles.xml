@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="profiles_title">Кто смотрит?</string>
+    <string name="profiles_note">У каждого зрителя свой список, просмотренные фильмы, оценки, bucket list и «Продолжить просмотр». Профили сделаны для удобства, а не как замок: любой у телевизора может открыть любой из них, но выход из мягкого профиля требует PIN-код. Аккаунты TMDB и Stremio синхронизируются только с первым профилем. Имена остаются на этом ТВ.</string>
+    <string name="profiles_add">Добавить профиль</string>
+    <string name="profiles_hint">Удерживайте OK на профиле, чтобы переименовать, изменить или удалить его.</string>
+    <string name="profiles_switch">Профиль: %1$s. Сменить профиль</string>
+    <string name="profile_default_name">Первый зритель</string>
+    <string name="profile_gentle_badge">Мягкий</string>
+    <string name="profile_current">сейчас смотрит</string>
+    <string name="profile_new_title">Новый профиль</string>
+    <string name="profile_edit_title">Изменить профиль</string>
+    <string name="profile_name_label">Имя</string>
+    <string name="profile_colour">Цвет %1$d из %2$d: сменить</string>
+    <string name="profile_gentle_on">Мягкий профиль: вкл.</string>
+    <string name="profile_gentle_off">Мягкий профиль: выкл.</string>
+    <string name="profile_gentle_what">Мягкий профиль всегда показывает только самые лёгкие фильмы, как семейный вечер, и не показывает ваши файлы.</string>
+    <string name="profile_gentle_no_pin">PIN-код не задан, поэтому выйти из этого профиля может кто угодно. Задайте PIN-код в настройках, чтобы закрепить его.</string>
+    <string name="profile_save">Сохранить</string>
+    <string name="profile_remove">Удалить этот профиль</string>
+    <string name="profile_remove_confirm">Удалить %1$s? Списки, просмотренные фильмы и «Продолжить просмотр» этого зрителя будут удалены с этого ТВ. Это нельзя отменить.</string>
+    <string name="profile_remove_yes">Удалить</string>
+    <string name="profile_keep">Оставить</string>
+    <string name="profile_bad_name">Введите имя.</string>
+    <string name="profile_removed">Профиль удалён.</string>
+    <string name="settings_profiles">Профили</string>
+</resources>
