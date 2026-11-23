@@ -119,6 +119,9 @@ class RdSourcesTest {
         rule.onNode(hasTestTag(RD_SOURCES_INDEXER_TAG)).assertExists()
         rule.onNode(hasTestTag(RD_SOURCES_FIELD_TAG)).assertDoesNotExist()
         rule.onNode(hasTestTag(RD_SOURCES_SEARCH_TAG)).assertDoesNotExist()
+        // The Tor switch is there before any source is added.
+        rule.onNode(hasTestTag(RD_SOURCES_INDEXER_TAG)).performClick()
+        rule.onNode(hasTestTag(RD_SOURCES_TOR_TAG)).assertExists()
     }
 
     @Test
