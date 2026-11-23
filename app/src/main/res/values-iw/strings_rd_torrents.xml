@@ -61,7 +61,6 @@
     <string name="rd_sources_address_label">כתובת</string>
     <string name="rd_sources_key_label">מפתח API (לאינדקסר Torznab בלבד)</string>
     <string name="rd_sources_save">שמירה</string>
-    <string name="rd_sources_remove">הסרת המקור</string>
     <string name="rd_sources_bad_address">זו לא כתובת ש-SCARY יכול להשתמש בה: https://, או http:// עם כתובת ברשת הביתית במספרים (‎192.168…‎, ‎10…‎). כתובת של תוסף היא https:// ומסתיימת ב-‎/manifest.json.</string>
     <string name="rd_sources_bad_key">זה לא נראה כמו מפתח API.</string>
     <string name="rd_sources_pull_confirm">להוסיף את התוצאה הזו לחשבון ה-Real-Debrid שלכם ולנגן אותה בנגן של SCARY?</string>
@@ -89,4 +88,11 @@
     <string name="rd_sources_check_refused">המקור סירב: בדקו את המפתח, או שהגעתם למגבלה שלו.</string>
     <string name="rd_sources_check_unreadable">משהו ענה בכתובת הזאת, אבל לא מקור ש-SCARY יודע לקרוא. בדקו את הכתובת.</string>
     <string name="rd_sources_check_unreachable">המקור לא ענה. בדקו את הכתובת ושהוא פועל.</string>
+    <string name="rd_sources_remove_one">הסרת %1$s</string>
+    <string name="rd_sources_full">לא יותר מ-%1$s מקורות. הסירו אחד קודם.</string>
+    <string name="rd_sources_saved">נשמר. כל חיפוש שואל את כל המקורות שלכם יחד.</string>
+    <string name="rd_tor_toggle">חיפוש דרך Tor: %1$s</string>
+    <string name="rd_tor_note">כשהמתג פועל, החיפושים במקורות שלכם יוצאים דרך רשת Tor, באמצעות אפליקציית Tor שאתם מפעילים בטלוויזיה (למשל Orbot), כך שהמקור רואה כתובת של Tor ולא את שלכם. Real-Debrid לא עובר דרך Tor ועדיין רואה את הכתובת שלכם. מקור ברשת הביתית נשאל ישירות. החיפושים איטיים יותר, ויש מקורות שמסרבים ל-Tor. אם Tor לא פועל, החיפוש נכשל; הוא אף פעם לא יוצא ישירות. ב-SCARY אין תוכנת Tor, והיא אינה מאושרת או ממומנת על ידי פרויקט Tor ואינה קשורה אליו.</string>
+    <string name="rd_tor_off">Tor לא פועל בטלוויזיה הזאת. פתחו את אפליקציית ה-Tor שלכם, חכו שתתחבר, ונסו שוב. שום דבר לא נשלח.</string>
+    <string name="rd_tor_open_app">פתיחת Orbot</string>
 </resources>

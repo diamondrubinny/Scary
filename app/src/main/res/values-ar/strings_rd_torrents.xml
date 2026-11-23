@@ -61,7 +61,6 @@
     <string name="rd_sources_address_label">العنوان</string>
     <string name="rd_sources_key_label">مفتاح API (لمفهرس Torznab فقط)</string>
     <string name="rd_sources_save">حفظ</string>
-    <string name="rd_sources_remove">إزالة المصدر</string>
     <string name="rd_sources_bad_address">هذا ليس عنوانًا يستطيع SCARY استخدامه: https://، أو http:// مع عنوان في الشبكة المنزلية بالأرقام (192.168… أو 10…). عنوان الإضافة يبدأ بـ https:// وينتهي بـ ‎/manifest.json.</string>
     <string name="rd_sources_bad_key">هذا لا يبدو مفتاح API.</string>
     <string name="rd_sources_pull_confirm">هل تريد إضافة هذه النتيجة إلى حسابك على Real-Debrid وتشغيلها في مشغّل SCARY؟</string>
@@ -89,4 +88,11 @@
     <string name="rd_sources_check_refused">رفض المصدر: تحقق من المفتاح، أو أنك بلغت حدّه.</string>
     <string name="rd_sources_check_unreadable">أجاب شيء في هذا العنوان، لكنه ليس مصدرًا يستطيع SCARY قراءته. تحقق من العنوان.</string>
     <string name="rd_sources_check_unreachable">لم يُجب المصدر. تحقق من العنوان ومن أنه يعمل.</string>
+    <string name="rd_sources_remove_one">إزالة %1$s</string>
+    <string name="rd_sources_full">لا أكثر من %1$s مصادر. أزل واحدًا أولًا.</string>
+    <string name="rd_sources_saved">تم الحفظ. كل بحث يسأل كل مصادرك معًا.</string>
+    <string name="rd_tor_toggle">البحث عبر Tor: %1$s</string>
+    <string name="rd_tor_note">عند التشغيل، تخرج عمليات البحث في مصادرك عبر شبكة Tor، بواسطة تطبيق Tor تشغّله على هذا التلفاز (مثل Orbot)، فيرى المصدر عنوان Tor لا عنوانك. Real-Debrid لا يمر عبر Tor ويبقى يرى عنوانك. المصدر الموجود على شبكتك المنزلية يُسأل مباشرة. البحث أبطأ، وبعض المصادر ترفض Tor. إذا لم يكن Tor يعمل يفشل البحث؛ ولا يخرج مباشرة أبدًا. لا يحتوي SCARY على برنامج Tor، وهو غير معتمد أو مموَّل من مشروع Tor وغير تابع له.</string>
+    <string name="rd_tor_off">Tor لا يعمل على هذا التلفاز. افتح تطبيق Tor وانتظر حتى يتصل ثم حاول مرة أخرى. لم يُرسَل شيء.</string>
+    <string name="rd_tor_open_app">فتح Orbot</string>
 </resources>

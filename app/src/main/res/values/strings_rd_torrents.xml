@@ -61,7 +61,6 @@
     <string name="rd_sources_address_label">Address</string>
     <string name="rd_sources_key_label">API key (Torznab indexer only)</string>
     <string name="rd_sources_save">Save</string>
-    <string name="rd_sources_remove">Remove the source</string>
     <string name="rd_sources_bad_address">Not an address SCARY can use: https://, or http:// with a home-network address in numbers (192.168…, 10…). An add-on\'s address is https:// and ends in /manifest.json.</string>
     <string name="rd_sources_bad_key">This does not look like an API key.</string>
     <string name="rd_sources_pull_confirm">Add this release to your Real-Debrid account and play it in SCARY\'s player?</string>
@@ -89,4 +88,11 @@
     <string name="rd_sources_check_refused">The source refused: check the key, or its limit was reached.</string>
     <string name="rd_sources_check_unreadable">Something answered at this address, but not a source SCARY can read. Check the address.</string>
     <string name="rd_sources_check_unreachable">The source did not answer. Check the address and that it is running.</string>
+    <string name="rd_sources_remove_one">Remove %1$s</string>
+    <string name="rd_sources_full">No more than %1$s sources. Remove one first.</string>
+    <string name="rd_sources_saved">Saved. Every search asks all your sources together.</string>
+    <string name="rd_tor_toggle">Search through Tor: %1$s</string>
+    <string name="rd_tor_note">When on, searches of your sources go out through the Tor network, by a Tor app you run on this TV (such as Orbot), so a source sees a Tor address and not yours. Real-Debrid does not go through Tor and still sees your address. A source on your home network is asked directly. Searches are slower, and some sources refuse Tor. If Tor is not running, the search fails; it never goes out directly. SCARY contains no Tor software, and is not endorsed or sponsored by, or affiliated with, the Tor Project.</string>
+    <string name="rd_tor_off">Tor is not running on this TV. Open your Tor app, wait until it is connected, and try again. Nothing was sent.</string>
+    <string name="rd_tor_open_app">Open Orbot</string>
 </resources>

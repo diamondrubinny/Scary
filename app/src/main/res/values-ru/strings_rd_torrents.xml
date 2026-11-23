@@ -61,7 +61,6 @@
     <string name="rd_sources_address_label">Адрес</string>
     <string name="rd_sources_key_label">API-ключ (только для Torznab-индексатора)</string>
     <string name="rd_sources_save">Сохранить</string>
-    <string name="rd_sources_remove">Удалить источник</string>
     <string name="rd_sources_bad_address">SCARY не может использовать этот адрес: нужен https:// или http:// с адресом домашней сети цифрами (192.168…, 10…). Адрес дополнения начинается с https:// и заканчивается на /manifest.json.</string>
     <string name="rd_sources_bad_key">Это не похоже на API-ключ.</string>
     <string name="rd_sources_pull_confirm">Добавить этот релиз в ваш аккаунт Real-Debrid и воспроизвести в плеере SCARY?</string>
@@ -89,4 +88,11 @@
     <string name="rd_sources_check_refused">Источник отказал: проверьте ключ, или достигнут его лимит.</string>
     <string name="rd_sources_check_unreadable">По этому адресу что-то ответило, но это не источник, который SCARY может прочитать. Проверьте адрес.</string>
     <string name="rd_sources_check_unreachable">Источник не ответил. Проверьте адрес и что он запущен.</string>
+    <string name="rd_sources_remove_one">Удалить %1$s</string>
+    <string name="rd_sources_full">Не больше %1$s источников. Сначала удалите один.</string>
+    <string name="rd_sources_saved">Сохранено. Каждый поиск спрашивает все ваши источники сразу.</string>
+    <string name="rd_tor_toggle">Поиск через Tor: %1$s</string>
+    <string name="rd_tor_note">Когда включено, поиск по вашим источникам идёт через сеть Tor с помощью приложения Tor, которое вы запускаете на этом телевизоре (например, Orbot), и источник видит адрес Tor, а не ваш. Real-Debrid не идёт через Tor и по-прежнему видит ваш адрес. Источник в домашней сети запрашивается напрямую. Поиск медленнее, и некоторые источники отклоняют Tor. Если Tor не запущен, поиск не выполняется; напрямую он не уходит никогда. В SCARY нет программ Tor; SCARY не одобрен и не спонсируется проектом Tor и не связан с ним.</string>
+    <string name="rd_tor_off">Tor не запущен на этом телевизоре. Откройте приложение Tor, дождитесь подключения и попробуйте снова. Ничего не было отправлено.</string>
+    <string name="rd_tor_open_app">Открыть Orbot</string>
 </resources>

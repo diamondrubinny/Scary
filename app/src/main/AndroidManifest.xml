@@ -20,6 +20,8 @@
         android:required="false" />
 
     <queries>
+        <!-- "Search through Tor": lets SCARY offer to open the Tor app (Orbot) when the viewer installed it. -->
+        <package android:name="org.torproject.android" />
         <!-- Lets the launcher list TV apps (Android 11+ package visibility). -->
         <intent>
             <action android:name="android.intent.action.MAIN" />

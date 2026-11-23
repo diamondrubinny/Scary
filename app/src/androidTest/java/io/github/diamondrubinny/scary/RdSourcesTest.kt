@@ -8,6 +8,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.hasText
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_TOR_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.sourceRemoveTag
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -66,8 +69,10 @@ class RdSourcesTest {
     }
 
     @Test
-    fun checkingTheSourceSaysWhetherItAnswersAndHowFast() {
+    fun severalSourcesAreCheckedAndRemovedOneByOneAndTorIsASwitch() {
         var asked = 0
+        val removed = mutableListOf<Int>()
+        val tor = mutableListOf<Boolean>()
         rule.runOnUiThread { rule.activity.setContent {
             ScaryTheme {
                 RdSourcesScreen(
@@ -76,8 +81,17 @@ class RdSourcesTest {
                     indexerHost = "indexer.example",
                     actions = RdSourcesActions(
                         onSearch = {}, onPull = {}, onSaveIndexer = { _, _ -> SaveResult.SAVED }, onRemoveIndexer = {},
-                        onCheckSource = { asked++; SourcesRepository.Check(SourcesRepository.Health.OK, 240) },
+                        onCheckSource = {
+                            asked++
+                            listOf(
+                                SourcesRepository.Check(SourcesRepository.Health.OK, 240, "indexer.example/1/api"),
+                                SourcesRepository.Check(SourcesRepository.Health.TOR_OFF, 3, "addon.example"),
+                            )
+                        },
+                        onRemoveSource = { removed += it },
+                        onSetTor = { tor += it },
                     ),
+                    sources = listOf("indexer.example/1/api", "addon.example"),
                 )
             }
         } }
@@ -88,7 +102,15 @@ class RdSourcesTest {
         rule.onNode(hasTestTag(RD_SOURCES_CHECK_TAG)).performClick()
         rule.waitForIdle()
         assertEquals(1, asked)
-        rule.onNode(hasText(rule.activity.getString(R.string.rd_sources_check_ok, "240"))).assertExists()
+        // One line for each source, by its name.
+        val ok = rule.activity.getString(R.string.rd_sources_check_ok, "240")
+        rule.onNode(hasText("indexer.example/1/api: $ok")).assertExists()
+        rule.onNode(hasText("addon.example: " + rule.activity.getString(R.string.rd_tor_off))).assertExists()
+        // Each source has its own "Remove", and the Tor switch asks for the other state.
+        rule.onNode(hasTestTag(sourceRemoveTag(1))).performScrollTo().performClick()
+        assertEquals(listOf(1), removed)
+        rule.onNode(hasTestTag(RD_SOURCES_TOR_TAG)).performScrollTo().performClick()
+        assertEquals(listOf(true), tor)
     }
 
     @Test
