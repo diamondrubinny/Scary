@@ -143,6 +143,18 @@ class RemoteProtocolTest {
     }
 
     @Test
+    fun `a source's address and key travel as one line, where a large body is expected`() {
+        val session = RemoteProtocol.Session(secret)
+        val text = "https://indexer.example/api/v2.0/indexers/all/results/torznab/api abcdef0123456789"
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 1, Command.SOURCE, text)))
+        assertEquals(Verdict.Accepted(RemoteProtocol.Request(2, Command.SOURCE, text)), session.open(RemoteProtocol.seal(secret, 2, Command.SOURCE, text), large = true))
+        // A long add-on address fits; a line break in it does not.
+        val addon = "https://addon.example/" + "a".repeat(1400) + "/manifest.json"
+        assertTrue(session.open(RemoteProtocol.seal(secret, 3, Command.SOURCE, addon), large = true) is Verdict.Accepted)
+        assertEquals(Verdict.Malformed, session.open(RemoteProtocol.seal(secret, 4, Command.SOURCE, "https://a.example/api\nkey"), large = true))
+    }
+
+    @Test
     fun `a VPN settings file travels in base64, only where a large body is expected`() {
         val file = "[Interface]\nPrivateKey = " + "A".repeat(43) + "=\nAddress = 10.2.0.2/32\n\n[Peer]\nPublicKey = " + "B".repeat(43) + "=\nEndpoint = vpn.example.org:51820\n"
         val base64 = java.util.Base64.getEncoder().encodeToString(file.toByteArray())

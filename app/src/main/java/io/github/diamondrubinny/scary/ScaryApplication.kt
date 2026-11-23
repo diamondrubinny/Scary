@@ -153,6 +153,18 @@ class AppContainer(context: Context) {
         // With the kill switch on, nothing goes to Real-Debrid or the viewer's source while the tunnel is not up.
         realDebrid.blocked = { repository.blocked }
         sources.blocked = { repository.blocked }
+        // In a build without the sources feature the phone cannot add one either.
+        if (appContext.resources.getBoolean(R.bool.rd_sources_enabled)) {
+            phoneRemote.sources = io.github.diamondrubinny.scary.remote.PhoneRemoteServer.Sources { address, key ->
+                when (sources.save(address, key)) {
+                    io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.SAVED -> "source_saved"
+                    io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.BAD_ADDRESS -> "source_bad_address"
+                    io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.BAD_KEY -> "source_bad_key"
+                    io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.FULL -> "source_full"
+                    io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE -> "source_failed"
+                }
+            }
+        }
         phoneRemote.vpnConfigs = io.github.diamondrubinny.scary.remote.PhoneRemoteServer.VpnConfigs { base64 ->
             val text = runCatching { String(android.util.Base64.decode(base64, android.util.Base64.DEFAULT), Charsets.UTF_8) }.getOrNull()
             when (text?.let { repository.install(it) }) {

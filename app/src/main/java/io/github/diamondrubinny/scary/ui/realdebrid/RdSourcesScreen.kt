@@ -432,18 +432,6 @@ private fun IndexerDialog(sources: List<String>, throughTor: Boolean, actions: R
                         lines.forEach { BasicText(it, style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle, textDirection = TextDirection.Content)) }
                     }
                 }
-                // Search through the Tor app the viewer runs on this TV (docs/TOR_PLAN.md). SCARY carries no Tor.
-                ScaryButton(
-                    stringResource(R.string.rd_tor_toggle, stringResource(if (throughTor) R.string.vpn_on else R.string.vpn_off)),
-                    onClick = { actions.onSetTor(!throughTor) },
-                    modifier = Modifier.testTag(RD_SOURCES_TOR_TAG),
-                )
-                BasicText(stringResource(R.string.rd_tor_note), style = ScaryType.Caption)
-                val context = LocalContext.current
-                val torApp = remember { runCatching { context.packageManager.getLaunchIntentForPackage(ORBOT_PACKAGE) }.getOrNull() }
-                if (torApp != null) {
-                    ScaryButton(stringResource(R.string.rd_tor_open_app), onClick = { runCatching { context.startActivity(torApp) } }, quiet = true)
-                }
             }
             DialogField(
                 label = stringResource(R.string.rd_sources_address_label),
@@ -478,6 +466,19 @@ private fun IndexerDialog(sources: List<String>, throughTor: Boolean, actions: R
                 BasicText(message, style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             }
             ScaryButton(stringResource(R.string.rd_sources_save), onClick = ::save, primary = true, modifier = Modifier.testTag(RD_SOURCES_SAVE_TAG))
+            // Search through the Tor app the viewer runs on this TV (docs/TOR_PLAN.md). SCARY carries no Tor. Shown with
+            // or without a source, so the switch is found before one is added.
+            ScaryButton(
+                stringResource(R.string.rd_tor_toggle, stringResource(if (throughTor) R.string.vpn_on else R.string.vpn_off)),
+                onClick = { actions.onSetTor(!throughTor) },
+                modifier = Modifier.testTag(RD_SOURCES_TOR_TAG),
+            )
+            BasicText(stringResource(R.string.rd_tor_note), style = ScaryType.Caption)
+            val context = LocalContext.current
+            val torApp = remember { runCatching { context.packageManager.getLaunchIntentForPackage(ORBOT_PACKAGE) }.getOrNull() }
+            if (torApp != null) {
+                ScaryButton(stringResource(R.string.rd_tor_open_app), onClick = { runCatching { context.startActivity(torApp) } }, quiet = true)
+            }
             ScaryButton(stringResource(R.string.rd_torrent_back), onClick = onDone)
         }
     }
