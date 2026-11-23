@@ -61,7 +61,6 @@
     <string name="rd_sources_address_label">Endereço</string>
     <string name="rd_sources_key_label">Chave de API (só para indexador Torznab)</string>
     <string name="rd_sources_save">Salvar</string>
-    <string name="rd_sources_remove">Remover a fonte</string>
     <string name="rd_sources_bad_address">Não é um endereço que o SCARY possa usar: https://, ou http:// com um endereço da rede de casa em números (192.168…, 10…). O endereço de um add-on é https:// e termina em /manifest.json.</string>
     <string name="rd_sources_bad_key">Isto não parece uma chave de API.</string>
     <string name="rd_sources_pull_confirm">Adicionar este lançamento à sua conta Real-Debrid e reproduzir no player do SCARY?</string>
@@ -89,4 +88,11 @@
     <string name="rd_sources_check_refused">A fonte recusou: confira a chave, ou o limite dela foi atingido.</string>
     <string name="rd_sources_check_unreadable">Algo respondeu neste endereço, mas não é uma fonte que o SCARY consiga ler. Confira o endereço.</string>
     <string name="rd_sources_check_unreachable">A fonte não respondeu. Confira o endereço e se ela está em execução.</string>
+    <string name="rd_sources_remove_one">Remover %1$s</string>
+    <string name="rd_sources_full">No máximo %1$s fontes. Remova uma primeiro.</string>
+    <string name="rd_sources_saved">Salvo. Cada busca pergunta a todas as suas fontes juntas.</string>
+    <string name="rd_tor_toggle">Buscar pelo Tor: %1$s</string>
+    <string name="rd_tor_note">Quando ligado, as buscas nas suas fontes saem pela rede Tor, por um app Tor que você executa nesta TV (como o Orbot), e a fonte vê um endereço do Tor em vez do seu. O Real-Debrid não passa pelo Tor e continua vendo o seu endereço. Uma fonte na sua rede doméstica é consultada diretamente. As buscas ficam mais lentas, e algumas fontes recusam o Tor. Se o Tor não estiver em execução, a busca falha; ela nunca sai diretamente. O SCARY não contém software do Tor e não é endossado nem patrocinado pelo Projeto Tor, nem afiliado a ele.</string>
+    <string name="rd_tor_off">O Tor não está em execução nesta TV. Abra o seu app Tor, espere conectar e tente de novo. Nada foi enviado.</string>
+    <string name="rd_tor_open_app">Abrir o Orbot</string>
 </resources>

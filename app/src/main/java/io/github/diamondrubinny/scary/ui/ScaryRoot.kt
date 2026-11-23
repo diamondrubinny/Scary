@@ -219,6 +219,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val vpnKillSwitch by viewModel.vpnKillSwitch.collectAsStateWithLifecycle()
     val rdSearch by viewModel.rdSearch.collectAsStateWithLifecycle()
     val indexerHost by viewModel.indexerHost.collectAsStateWithLifecycle()
+    val sourceLabels by viewModel.sourceLabels.collectAsStateWithLifecycle()
+    val sourcesThroughTor by viewModel.sourcesThroughTor.collectAsStateWithLifecycle()
     val sourcesEnabled = booleanResource(R.bool.rd_sources_enabled)
     val rdMatches by viewModel.rdMatches.collectAsStateWithLifecycle()
     val playerSession by viewModel.player.collectAsStateWithLifecycle()
@@ -712,6 +714,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     search = rdSearch,
                     pull = rdTorrents.pull,
                     indexerHost = indexerHost,
+                    sources = sourceLabels,
+                    throughTor = sourcesThroughTor,
                     actions = remember(viewModel) {
                         RdSourcesActions(
                             onSearch = viewModel::searchSources,
@@ -719,6 +723,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
                             onCheckSource = viewModel::checkSource,
+                            onRemoveSource = viewModel::removeSource,
+                            onSetTor = viewModel::setSourcesThroughTor,
                         )
                     },
                 )

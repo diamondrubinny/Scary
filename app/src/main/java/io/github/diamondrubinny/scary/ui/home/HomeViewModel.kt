@@ -1561,6 +1561,7 @@ class HomeViewModel(
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreachable -> RdSearchState.Unreachable
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.Refused -> RdSearchState.Refused
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.Unreadable -> RdSearchState.Unreadable
+                io.github.diamondrubinny.scary.data.SourcesRepository.Search.TorOff -> RdSearchState.TorOff
             }
         }
     }
@@ -1569,16 +1570,31 @@ class HomeViewModel(
     suspend fun saveIndexer(address: String, key: String): io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult =
         sources?.save(address, key) ?: io.github.diamondrubinny.scary.data.SourcesRepository.SaveResult.STORAGE
 
-    /** Whether the viewer's source answers, and how fast: asked only when they press "Check the source". */
-    suspend fun checkSource(): io.github.diamondrubinny.scary.data.SourcesRepository.Check =
-        sources?.check() ?: io.github.diamondrubinny.scary.data.SourcesRepository.Check(io.github.diamondrubinny.scary.data.SourcesRepository.Health.NOT_CONFIGURED, 0)
+    /** Whether each of the viewer's sources answers, and how fast: asked only when they press "Check the sources". */
+    suspend fun checkSource(): List<io.github.diamondrubinny.scary.data.SourcesRepository.Check> = sources?.check().orEmpty()
 
-    fun removeIndexer() {
+    /** The viewer's sources, as they are shown: never a key. */
+    val sourceLabels: StateFlow<List<String>> = sources?.labels ?: MutableStateFlow(emptyList())
+
+    /** Whether searches go through the Tor app on this TV (docs/TOR_PLAN.md). */
+    val sourcesThroughTor: StateFlow<Boolean> = sources?.tor ?: MutableStateFlow(false)
+
+    fun setSourcesThroughTor(on: Boolean) {
         viewModelScope.launch {
-            sources?.remove()
+            sources?.setTor(on)
             _rdSearch.value = RdSearchState.Idle
         }
     }
+
+    /** Removes one source (its place in [sourceLabels]), or all of them with null. */
+    fun removeSource(index: Int?) {
+        viewModelScope.launch {
+            sources?.remove(index)
+            _rdSearch.value = RdSearchState.Idle
+        }
+    }
+
+    fun removeIndexer() = removeSource(null)
 
     /** A finished torrent from the list, in the internal player. */
     fun playRdTorrent(id: String) {

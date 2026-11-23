@@ -48,12 +48,16 @@ object LanHttp {
     }
 
     /** The request's bytes: the answer is asked for whole and unpacked, and the connection ends with it. */
-    fun request(target: Target): ByteArray = buildString {
-        append("GET ").append(target.pathAndQuery).append(" HTTP/1.1\r\n")
-        append("Host: ").append(target.host)
-        if (target.port != 80) append(':').append(target.port)
+    fun request(target: Target): ByteArray = request(target.host, target.port, target.pathAndQuery, defaultPort = 80, accept = "application/rss+xml, application/xml")
+
+    /** The same request for any host: [defaultPort] is the one the "Host" line leaves out (443 inside TLS). */
+    fun request(host: String, port: Int, pathAndQuery: String, defaultPort: Int, accept: String): ByteArray = buildString {
+        require((host + pathAndQuery + accept).none { it == '\r' || it == '\n' }) { "a line break in the request" }
+        append("GET ").append(pathAndQuery).append(" HTTP/1.1\r\n")
+        append("Host: ").append(host)
+        if (port != defaultPort) append(':').append(port)
         append("\r\n")
-        append("Accept: application/rss+xml, application/xml\r\n")
+        append("Accept: ").append(accept).append("\r\n")
         append("Accept-Encoding: identity\r\n")
         append("User-Agent: SCARY-launcher\r\n")
         append("Connection: close\r\n\r\n")

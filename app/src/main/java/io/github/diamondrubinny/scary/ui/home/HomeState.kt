@@ -345,6 +345,9 @@ sealed interface RdSearchState {
 
     /** The source answers by film only, and this search is not a film's (the free search, or a series). */
     data object NeedsFilm : RdSearchState
+
+    /** "Search through Tor" is on, and no Tor app answers on this TV: nothing was sent. */
+    data object TorOff : RdSearchState
 }
 
 /** The torrents screen: the last pull, the account's newest torrents (null while loading) and its active places. */

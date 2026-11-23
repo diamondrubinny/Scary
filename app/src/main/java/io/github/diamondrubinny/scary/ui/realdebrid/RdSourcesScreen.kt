@@ -4,6 +4,8 @@
 
 package io.github.diamondrubinny.scary.ui.realdebrid
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
@@ -82,6 +84,14 @@ const val RD_SOURCES_KEY_TAG = "rdSourcesKey"
 const val RD_SOURCES_SAVE_TAG = "rdSourcesSave"
 const val RD_SOURCES_CHECK_TAG = "rdSourcesCheck"
 const val RD_SOURCES_CHECK_RESULT_TAG = "rdSourcesCheckResult"
+const val RD_SOURCES_SAVED_TAG = "rdSourcesSaved"
+const val RD_SOURCES_TOR_TAG = "rdSourcesTor"
+
+/** The Tor app whose SOCKS port a search through Tor uses, when the viewer installed it; SCARY only opens it. */
+private const val ORBOT_PACKAGE = "org.torproject.android"
+
+/** The "Remove" button of the source at this place in the list. */
+fun sourceRemoveTag(index: Int) = "rdSourcesRemove:$index"
 const val RD_SOURCES_CONFIRM_TAG = "rdSourcesConfirm"
 const val RD_SOURCES_PULL_TAG = "rdSourcesPull"
 
@@ -96,8 +106,12 @@ class RdSourcesActions(
     val onPull: (Releases.Candidate) -> Unit,
     val onSaveIndexer: suspend (address: String, key: String) -> SaveResult,
     val onRemoveIndexer: () -> Unit,
-    /** Asks the source whether it answers, and how fast; only at the viewer's press. */
-    val onCheckSource: suspend () -> SourcesRepository.Check = { SourcesRepository.Check(SourcesRepository.Health.NOT_CONFIGURED, 0) },
+    /** Asks each source whether it answers, and how fast; only at the viewer's press. */
+    val onCheckSource: suspend () -> List<SourcesRepository.Check> = { emptyList() },
+    /** Removes the source at this place in the list. */
+    val onRemoveSource: (Int) -> Unit = {},
+    /** Turns "search through Tor" on or off. */
+    val onSetTor: (Boolean) -> Unit = {},
 )
 
 /**
@@ -111,6 +125,10 @@ fun RdSourcesScreen(
     pull: RdPullState,
     indexerHost: String?,
     actions: RdSourcesActions,
+    /** All of the viewer's sources, as they are shown; the first is [indexerHost]. */
+    sources: List<String> = listOfNotNull(indexerHost),
+    /** Whether searches go through the Tor app on this TV. */
+    throughTor: Boolean = false,
     /** The film this search was opened for, already in the line (and already asked for). */
     initialQuery: String = "",
 ) {
@@ -119,7 +137,7 @@ fun RdSourcesScreen(
     var sort by rememberSaveable { mutableStateOf(Releases.Sort.SMART) }
     var settingUp by remember { mutableStateOf(false) }
     var chosen by remember { mutableStateOf<Releases.Candidate?>(null) }
-    if (settingUp) IndexerDialog(indexerHost, actions, onDone = { settingUp = false })
+    if (settingUp) IndexerDialog(sources, throughTor, actions, onDone = { settingUp = false })
     chosen?.let { release -> ReleaseDialog(release, onPull = { actions.onPull(release) }, onDone = { chosen = null }) }
 
     val firstFocus = remember { FocusRequester() }
@@ -242,6 +260,7 @@ private fun statusText(search: RdSearchState, pull: RdPullState, found: Int, sho
     search == RdSearchState.Refused -> stringResource(R.string.rd_sources_refused)
     search == RdSearchState.Unreadable -> stringResource(R.string.rd_sources_unreadable)
     search == RdSearchState.NeedsFilm -> stringResource(R.string.rd_sources_needs_film)
+    search == RdSearchState.TorOff -> stringResource(R.string.rd_tor_off)
     found == 0 -> stringResource(R.string.rd_sources_none)
     shown == 0 -> stringResource(R.string.rd_sources_none_filtered)
     else -> stringResource(R.string.rd_sources_found, shown)
@@ -325,9 +344,9 @@ private fun ReleaseDialog(release: Releases.Candidate, onPull: () -> Unit, onDon
     }
 }
 
-/** The viewer's indexer: its address and key, saved encrypted on this TV, or removed. */
+/** The viewer's sources: their addresses and keys, saved encrypted on this TV, checked or removed; and the Tor switch. */
 @Composable
-private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -> Unit) {
+private fun IndexerDialog(sources: List<String>, throughTor: Boolean, actions: RdSourcesActions, onDone: () -> Unit) {
     var address by remember { mutableStateOf("") }
     var key by remember { mutableStateOf("") }
     var result by remember { mutableStateOf<SaveResult?>(null) }
@@ -344,7 +363,12 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
         scope.launch {
             val saved = actions.onSaveIndexer(address, key)
             busy = false
-            if (saved == SaveResult.SAVED) onDone() else result = saved
+            result = saved
+            // Saved: the new source is in the list above, and the fields are ready for another.
+            if (saved == SaveResult.SAVED) {
+                address = ""
+                key = ""
+            }
         }
     }
     Dialog(onDismissRequest = onDone) {
@@ -352,15 +376,30 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
             modifier = Modifier
                 .widthIn(max = 680.dp)
                 .background(ScaryColors.Crypt, RoundedCornerShape(4.dp))
-                .padding(22.dp),
+                .padding(22.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             BasicText(stringResource(R.string.rd_sources_indexer), style = ScaryType.Title, modifier = Modifier.semantics { heading() })
             BasicText(stringResource(R.string.rd_sources_indexer_what), style = ScaryType.Body)
-            if (host != null) {
-                BasicText(stringResource(R.string.rd_sources_connected, host), style = ScaryType.Caption.copy(color = ScaryColors.Candle))
-                // Does the saved source answer, and how fast: asked only at this press.
-                var check by remember { mutableStateOf<SourcesRepository.Check?>(null) }
+            if (sources.isNotEmpty()) {
+                // Each source, with its own way out; "Remove" names it for a screen reader.
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.testTag(RD_SOURCES_SAVED_TAG)) {
+                    sources.forEachIndexed { index, label ->
+                        BasicText(
+                            stringResource(R.string.rd_sources_connected, label),
+                            style = ScaryType.Caption.copy(color = ScaryColors.Candle, textDirection = TextDirection.Content),
+                        )
+                        ScaryButton(
+                            stringResource(R.string.rd_sources_remove_one, label),
+                            onClick = { actions.onRemoveSource(index) },
+                            quiet = true,
+                            modifier = Modifier.testTag(sourceRemoveTag(index)),
+                        )
+                    }
+                }
+                // Do the saved sources answer, and how fast: asked only at this press.
+                var checks by remember { mutableStateOf<List<SourcesRepository.Check>?>(null) }
                 var checking by remember { mutableStateOf(false) }
                 ScaryButton(
                     stringResource(R.string.rd_sources_check),
@@ -368,29 +407,42 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
                         if (!checking) {
                             checking = true
                             scope.launch {
-                                check = actions.onCheckSource()
+                                checks = actions.onCheckSource()
                                 checking = false
                             }
                         }
                     },
                     modifier = Modifier.testTag(RD_SOURCES_CHECK_TAG),
                 )
-                val words = when {
-                    checking -> stringResource(R.string.rd_sources_checking)
-                    else -> when (check?.health) {
-                        SourcesRepository.Health.OK -> stringResource(R.string.rd_sources_check_ok, check?.millis.toString())
-                        SourcesRepository.Health.REFUSED -> stringResource(R.string.rd_sources_check_refused)
-                        SourcesRepository.Health.UNREADABLE -> stringResource(R.string.rd_sources_check_unreadable)
-                        SourcesRepository.Health.UNREACHABLE, SourcesRepository.Health.NOT_CONFIGURED -> stringResource(R.string.rd_sources_check_unreachable)
-                        null -> null
+                val lines = when {
+                    checking -> listOf(stringResource(R.string.rd_sources_checking))
+                    else -> checks.orEmpty().map { check ->
+                        val words = when (check.health) {
+                            SourcesRepository.Health.OK -> stringResource(R.string.rd_sources_check_ok, check.millis.toString())
+                            SourcesRepository.Health.REFUSED -> stringResource(R.string.rd_sources_check_refused)
+                            SourcesRepository.Health.UNREADABLE -> stringResource(R.string.rd_sources_check_unreadable)
+                            SourcesRepository.Health.TOR_OFF -> stringResource(R.string.rd_tor_off)
+                            SourcesRepository.Health.UNREACHABLE, SourcesRepository.Health.NOT_CONFIGURED -> stringResource(R.string.rd_sources_check_unreachable)
+                        }
+                        if (check.label.isEmpty()) words else "${check.label}: $words"
                     }
                 }
-                if (words != null) {
-                    BasicText(
-                        words,
-                        style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle),
-                        modifier = Modifier.testTag(RD_SOURCES_CHECK_RESULT_TAG).semantics { liveRegion = LiveRegionMode.Polite },
-                    )
+                if (lines.isNotEmpty()) {
+                    Column(modifier = Modifier.testTag(RD_SOURCES_CHECK_RESULT_TAG).semantics { liveRegion = LiveRegionMode.Polite }) {
+                        lines.forEach { BasicText(it, style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle, textDirection = TextDirection.Content)) }
+                    }
+                }
+                // Search through the Tor app the viewer runs on this TV (docs/TOR_PLAN.md). SCARY carries no Tor.
+                ScaryButton(
+                    stringResource(R.string.rd_tor_toggle, stringResource(if (throughTor) R.string.vpn_on else R.string.vpn_off)),
+                    onClick = { actions.onSetTor(!throughTor) },
+                    modifier = Modifier.testTag(RD_SOURCES_TOR_TAG),
+                )
+                BasicText(stringResource(R.string.rd_tor_note), style = ScaryType.Caption)
+                val context = LocalContext.current
+                val torApp = remember { runCatching { context.packageManager.getLaunchIntentForPackage(ORBOT_PACKAGE) }.getOrNull() }
+                if (torApp != null) {
+                    ScaryButton(stringResource(R.string.rd_tor_open_app), onClick = { runCatching { context.startActivity(torApp) } }, quiet = true)
                 }
             }
             DialogField(
@@ -418,13 +470,14 @@ private fun IndexerDialog(host: String?, actions: RdSourcesActions, onDone: () -
                 SaveResult.BAD_ADDRESS -> stringResource(R.string.rd_sources_bad_address)
                 SaveResult.BAD_KEY -> stringResource(R.string.rd_sources_bad_key)
                 SaveResult.STORAGE -> stringResource(R.string.rd_storage)
-                SaveResult.SAVED, null -> null
+                SaveResult.FULL -> stringResource(R.string.rd_sources_full, SourcesRepository.MAX_SOURCES.toString())
+                SaveResult.SAVED -> stringResource(R.string.rd_sources_saved)
+                null -> null
             }
             if (message != null) {
                 BasicText(message, style = ScaryType.BodyStrong.copy(color = ScaryColors.Candle), modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
             }
             ScaryButton(stringResource(R.string.rd_sources_save), onClick = ::save, primary = true, modifier = Modifier.testTag(RD_SOURCES_SAVE_TAG))
-            if (host != null) ScaryButton(stringResource(R.string.rd_sources_remove), onClick = { actions.onRemoveIndexer(); onDone() })
             ScaryButton(stringResource(R.string.rd_torrent_back), onClick = onDone)
         }
     }
