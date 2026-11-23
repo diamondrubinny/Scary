@@ -112,12 +112,24 @@ class SourcesRepository(private val secrets: SecretStore) {
     /** Whether searches go through Tor. Off unless the viewer turns it on. */
     val tor: StateFlow<Boolean> = _tor.asStateFlow()
 
-    suspend fun load() = withContext(Dispatchers.IO) {
+    suspend fun load() = withContext(Dispatchers.IO) { loadNow() }
+
+    @Volatile
+    private var loaded = false
+
+    /** What is stored, read once: a change made before that (from the phone remote) must not write over it. */
+    private fun ensureLoaded() {
+        if (!loaded) loadNow()
+    }
+
+    @Synchronized
+    private fun loadNow() {
         val root = secrets.read(SECRET_NAME)?.let { runCatching { Json.parseToJsonElement(it).jsonObject }.getOrNull() }
         // Before several sources: the one source was the object itself.
         val stored = (root?.get("sources") as? JsonArray)?.mapNotNull { (it as? JsonObject)?.let(::read) }
             ?: listOfNotNull(root?.let(::read))
         use(stored.take(MAX_SOURCES), (root?.get("tor") as? JsonPrimitive)?.booleanOrNull == true)
+        loaded = true
     }
 
     private fun read(o: JsonObject): Config? = runCatching {
@@ -175,6 +187,7 @@ class SourcesRepository(private val secrets: SecretStore) {
             val endpoint = Torznab.endpoint(address) ?: return@withContext SaveResult.BAD_ADDRESS
             Config.Indexer(endpoint, Torznab.apiKey(key) ?: return@withContext SaveResult.BAD_KEY)
         }
+        ensureLoaded()
         val current = configs
         val at = current.indexOfFirst { it.address == added.address }
         val next = when {
@@ -189,12 +202,14 @@ class SourcesRepository(private val secrets: SecretStore) {
 
     /** Removes the source at [index] of [labels]; with null, all of them. */
     suspend fun remove(index: Int? = null) = withContext(Dispatchers.IO) {
+        ensureLoaded()
         val next = if (index == null) emptyList() else configs.filterIndexed { i, _ -> i != index }
         store(next, throughTor)
         use(next, throughTor)
     }
 
     suspend fun setTor(on: Boolean) = withContext(Dispatchers.IO) {
+        ensureLoaded()
         if (store(configs, on)) use(configs, on)
     }
 

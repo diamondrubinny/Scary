@@ -59,6 +59,13 @@ object RemoteProtocol {
          * may not). Large, like a backup. It is only kept on the TV: connecting is done at the TV, never from a phone.
          */
         VPN_CONFIG("vpn", takesText = true, large = true),
+
+        /**
+         * A source of the viewer's own, to add on the TV: "address", or "address key" for a Torznab indexer (neither
+         * holds a space). Large, since a stream add-on's address can be long. The TV checks both as if typed there.
+         */
+        SOURCE("source", takesText = true, large = true),
+
         /** The page asks whether it is paired; it changes nothing. */
         PING("ping");
 

@@ -95,6 +95,15 @@ class PhoneRemoteServer(private val context: Context) {
     @Volatile
     var vpnConfigs: VpnConfigs? = null
 
+    /** A source of the viewer's own, sent from the phone (SourcesRepository); set once by the app's container. */
+    fun interface Sources {
+        /** Adds the source as if it were typed on the TV; the status word for the phone. */
+        suspend fun add(address: String, key: String): String
+    }
+
+    @Volatile
+    var sources: Sources? = null
+
     /** What SCARY's screen does with a command; set by MainActivity while it exists. */
     fun interface Handler {
         suspend fun handle(request: RemoteProtocol.Request): Reply
@@ -283,6 +292,9 @@ class PhoneRemoteServer(private val context: Context) {
             Command.BACKUP -> return backups?.backup()?.let { Reply("backup", answer = it) } ?: Reply("backup_failed")
             Command.RESTORE -> return Reply(backups?.restore(request.text) ?: "restore_failed")
             Command.VPN_CONFIG -> return Reply(vpnConfigs?.install(request.text) ?: "vpn_failed")
+            Command.SOURCE -> return Reply(
+                sources?.add(request.text.substringBefore(' ').trim(), request.text.substringAfter(' ', "").trim()) ?: "source_failed",
+            )
             else -> return handler?.handle(request)?.takeUnless { it.status == NOT_FRONT } ?: elsewhere(request)
         }
         return Reply("ok")

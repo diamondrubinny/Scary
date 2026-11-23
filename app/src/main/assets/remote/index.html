@@ -79,6 +79,19 @@
       </form>
     </section>
     <section>
+      <h2 data-w="sourceTitle">Source</h2>
+      <p class="hint" data-w="sourceHint"></p>
+      <form id="source-form">
+        <label for="source-address" data-w="sourceAddress">Address</label>
+        <input id="source-address" type="url" maxlength="1500" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr" placeholder="https://">
+        <label for="source-key" data-w="sourceKey">API key (a Torznab indexer only)</label>
+        <div class="field">
+          <input id="source-key" type="password" maxlength="128" autocomplete="off" autocapitalize="off" spellcheck="false" dir="ltr">
+          <button type="submit" data-w="sourceButton">Send to the TV</button>
+        </div>
+      </form>
+    </section>
+    <section>
       <h2 data-w="backupTitle">Backup</h2>
       <p class="hint" data-w="backupHint"></p>
       <button type="button" id="backup-save" data-w="backupSave">Save a backup on this phone</button>
