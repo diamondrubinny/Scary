@@ -225,7 +225,8 @@ def gather(base, today):
         if known_film.get("rel"):
             film["rel"] = known_film["rel"]
         out.append(film)
-    return out, [i for i in fresh if i in films], [i for i in popular if i in films]
+    about = {imdb: (info.get(imdb) or {}).get("o", "") for imdb in films}
+    return out, [i for i in fresh if i in films], [i for i in popular if i in films], about
 
 
 def overrides():
@@ -238,12 +239,8 @@ def overrides():
     return everywhere, per_row
 
 
-def has(*subgenres):
-    return lambda film: bool(set(film.get("s", [])) & set(subgenres))
-
-
-def known_enough(film, rating=5.5, wikipedias=8):
-    """Not the first film of a row unless people know it and did not hate it."""
+def known_enough(film, rating=5.5, wikipedias=5):
+    """Not in a row unless people know the film and did not hate it."""
     return film.get("p", 0) >= wikipedias and film.get("r", 0) >= rating
 
 
@@ -251,25 +248,90 @@ def by_fame(film):
     return (-film.get("p", 0), -film.get("r", 0), film["imdb"])
 
 
-# The home rows, in the order the home screen shows them. Each: its id (the app holds its name in five languages), who
-# is in it, and the order. A subgenre comes from Wikidata's own labels; where IMDb has a genre for the same thing
-# (comedy), both must say so.
-ROWS = [
-    ("top_rated", lambda f: f.get("r", 0) >= 7.3 and f.get("p", 0) >= 15, lambda f: (-f.get("r", 0), -f.get("p", 0), f["imdb"])),
-    ("slashers", lambda f: has("slasher")(f) and known_enough(f), by_fame),
-    ("ghosts", lambda f: has("ghost", "supernatural", "possession")(f) and known_enough(f), by_fame),
-    ("haunted_houses", lambda f: has("haunted_house")(f) and known_enough(f, wikipedias=5), by_fame),
-    ("zombies", lambda f: has("zombie")(f) and known_enough(f), by_fame),
-    ("vampires", lambda f: has("vampire")(f) and known_enough(f), by_fame),
-    ("creatures", lambda f: has("creature", "animal")(f) and known_enough(f), by_fame),
-    ("psychological", lambda f: has("psychological")(f) and known_enough(f, rating=6.0), by_fame),
-    ("found_footage", lambda f: has("found_footage")(f) and known_enough(f, wikipedias=5), by_fame),
-    ("horror_comedy", lambda f: has("comedy")(f) and "Comedy" in f.get("g", []) and known_enough(f, rating=6.0), by_fame),
-    ("classics", lambda f: f["y"] <= 1980 and f.get("r", 0) >= 6.8 and f.get("p", 0) >= 15, by_fame),
+def words(*parts):
+    return re.compile(r"\b(?:" + "|".join(parts) + ")", re.IGNORECASE)
+
+
+# The word rules, on a film's title and description: the same ones the app applies to its online rows (core
+# Categories.kt, tuned there on Cinemeta's real catalogs). Keep the two in step.
+SUPERNATURAL = [
+    "ghosts?\\b", "ghostly", "demon", "possess", "exorcis", "poltergeist", "evil spirit", "supernatural", "satan", "the devil",
+    "curse[ds]?", "occult", "malevolent (?:spirit|entity|force)", "evil entity",
+]
+HAUNTED = [
+    "haunted (?:house|home|mansion|manor|hotel|estate)",
+    "(?:house|home|mansion|manor|estate)\\b.{0,60}\\b(?:ghost|haunt|presence|spirit|paranormal|poltergeist)",
+    "(?:ghost|haunt|presence|spirit|paranormal|poltergeist)\\w*\\b.{0,60}\\b(?:house|home|mansion|manor)",
+]
+# "Infected" and its kin are the feed's own: 28 Weeks Later never says "zombie".
+ZOMBIES = ["zombie", "undead", "walking dead", "flesh-eating", "the dead (?:rise|return|walk|come back)", "infected", "rage virus", "outbreak"]
+VAMPIRES = ["vampir", "dracula", "nosferatu", "bloodsuck", "blood-suck", "blood sucking"]
+CREATURES = [
+    "creature", "monster", "alien", "shark", "beast", "werewol", "kaiju", "crocodile", "alligator",
+    "giant (?:spider|snake|insect|ant|worm)", "mutant", "sea creature", "predator\\b",
+]
+MONSTERS = words("werewol", "vampir", "zombie", "ghosts?\\b", "demon", "alien", "creature", "monster", "possess")
+
+
+class Rule:
+    """
+    Who is in a subgenre row. Two sources are asked: Wikidata's subgenre labels ([labels]) and the words of the film's
+    description ([says], unless [not_says]). A film both name comes first. A film only one names is in the row when
+    that source has proved right for this row ([trust_labels], [trust_words]): checked row by row on the films
+    themselves, 24 Nov 2026 (Wikidata files Rosemary's Baby and Carrie under monster films, but its vampire and
+    found-footage labels are right; descriptions rarely say "found footage", but they do say "shark").
+    """
+
+    def __init__(self, labels, says, not_says=None, trust_labels=False, trust_words=False, rating=5.5, never_labels=(), never_genres=()):
+        self.labels, self.says, self.not_says = set(labels), says, not_says
+        self.trust_labels, self.trust_words, self.rating = trust_labels, trust_words, rating
+        self.never_labels, self.never_genres = set(never_labels), set(never_genres)
+
+    def films(self, films, about):
+        both, one = [], []
+        for film in films:
+            if not known_enough(film, self.rating):
+                continue
+            labels = set(film.get("s", []))
+            if labels & self.never_labels or set(film.get("g", [])) & self.never_genres:
+                continue
+            text = film["t"]["en"] + ". " + about.get(film["imdb"], "")
+            labelled = bool(labels & self.labels)
+            said = bool(self.says.search(text)) and not (self.not_says and self.not_says.search(text))
+            if labelled and said:
+                both.append(film)
+            elif (labelled and self.trust_labels) or (said and self.trust_words):
+                one.append(film)
+        return [f["imdb"] for f in sorted(both, key=by_fame) + sorted(one, key=by_fame)]
+
+
+# The home rows after "new" and "popular", in the order the home screen shows them. The app holds each row's name, in
+# five languages, by its id.
+SUBGENRE_ROWS = [
+    ("slashers", Rule(
+        ["slasher"],
+        words("masked", "slasher", "machete", "summer camp", "serial killer", "killer (?:stalks|picks off|targets|terrori)",
+              "picks? (?:them|off)", "stalked by", "knife-wielding", "murderous (?:psycho|maniac)", "maniac"),
+        words(*SUPERNATURAL, "werewol", "vampir", "zombie", "alien", "creature", "monster"),
+        trust_labels=True, never_genres=["Fantasy", "Musical", "Sci-Fi"])),
+    ("ghosts", Rule(["ghost", "supernatural", "possession"], words(*SUPERNATURAL))),
+    ("haunted_houses", Rule(["haunted_house"], words(*HAUNTED), words(*VAMPIRES), trust_labels=True, trust_words=True, never_labels=["vampire", "comedy"])),
+    ("zombies", Rule(["zombie"], words(*ZOMBIES), words(*VAMPIRES))),
+    ("vampires", Rule(["vampire"], words(*VAMPIRES), trust_labels=True)),
+    ("creatures", Rule(["creature", "animal"], words(*CREATURES), words("vampir", "zombie"), trust_words=True, never_labels=["vampire", "zombie"])),
+    ("psychological", Rule(
+        ["psychological"],
+        words("psycholog", "grief", "griev", "madness", "sanity", "insanity", "paranoi", "delusion", "hallucinat", "trauma",
+              "unravel", "her mind", "his mind", "losing (?:her|his) mind"),
+        MONSTERS, rating=6.0)),
+    ("found_footage", Rule(
+        ["found_footage"],
+        words("found footage", "footage", "camcorder", "video camera", "livestream", "live-stream", "webcam", "vlog", "documentary crew"),
+        trust_labels=True)),
 ]
 
 
-def build_rows(films, fresh, popular, today):
+def build_rows(films, fresh, popular, about, today):
     everywhere, per_row = overrides()
     by_id = {f["imdb"]: f for f in films if f["imdb"] not in everywhere}
     year_ago = (today - datetime.timedelta(days=365)).isoformat()
@@ -282,14 +344,21 @@ def build_rows(films, fresh, popular, today):
         else:
             print(f"Row {row_id} has only {len(ids)} films and is left out", file=sys.stderr)
 
+    everyone = list(by_id.values())
     # New: out in the last twelve months (never one that is not out yet), in Cinemeta's order of popularity.
-    new = [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()]
-    add("new", new)
+    add("new", [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()])
     # Popular now: Cinemeta's order; without it, the best known films of the last five years.
-    recent = sorted((f for f in by_id.values() if f["y"] >= today.year - 5 and f.get("r", 0) >= 5.5), key=by_fame)
+    recent = sorted((f for f in everyone if f["y"] >= today.year - 5 and f.get("r", 0) >= 5.5), key=by_fame)
     add("popular", popular or [f["imdb"] for f in recent])
-    for row_id, belongs, order in ROWS:
-        add(row_id, [f["imdb"] for f in sorted((f for f in by_id.values() if belongs(f)), key=order)])
+    best = [f for f in everyone if f.get("r", 0) >= 7.3 and f.get("p", 0) >= 15]
+    add("top_rated", [f["imdb"] for f in sorted(best, key=lambda f: (-f.get("r", 0), -f.get("p", 0), f["imdb"]))])
+    for row_id, rule in SUBGENRE_ROWS:
+        add(row_id, rule.films(everyone, about))
+    # Comedy: Wikidata's label and IMDb's own genre must both say so.
+    funny = [f for f in everyone if "comedy" in f.get("s", []) and "Comedy" in f.get("g", []) and known_enough(f, 6.0)]
+    add("horror_comedy", [f["imdb"] for f in sorted(funny, key=by_fame)])
+    classics = [f for f in everyone if f["y"] <= 1980 and f.get("r", 0) >= 6.8 and f.get("p", 0) >= 15]
+    add("classics", [f["imdb"] for f in sorted(classics, key=by_fame)])
     return rows, everywhere
 
 
@@ -373,9 +442,9 @@ def main():
         with open(previous_path, encoding="utf-8") as handle:
             previous = json.load(handle)
     today = datetime.date.today()
-    films, fresh, popular = gather(base, today)
+    films, fresh, popular, about = gather(base, today)
     films = keep_known(films, previous, {f["imdb"] for f in base["films"]})
-    rows, excluded = build_rows(films, fresh, popular, today)
+    rows, excluded = build_rows(films, fresh, popular, about, today)
     films = sorted((f for f in films if f["imdb"] not in excluded), key=by_fame)
     feed = {
         "version": VERSION,
