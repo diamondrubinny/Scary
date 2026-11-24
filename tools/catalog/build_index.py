@@ -10,6 +10,7 @@ Builds app/src/main/assets/index.json: every well-known horror film on Wikidata 
     python3 -I tools/catalog/build_index.py --check    # only check the file already there
     python3 -I tools/catalog/build_index.py --prune    # drop the hidden Arab and Indian films from the file there
     python3 -I tools/catalog/build_index.py --keep-from OLD.json   # put back films an older copy held (see keep_known)
+    python3 -I tools/catalog/build_index.py --with-curated --out BASE.json   # every film, for build_feed.py
 
 "Well-known" means at least MIN_SITELINKS Wikipedias have an article on it; IMDb (through Cinemeta) must call it
 horror too, which drops the films Wikidata mislabels.
@@ -255,7 +256,8 @@ def curated_ids():
 
 
 def build(films):
-    skip = curated_ids() | EXCLUDED
+    # For the feed (build_feed.py) the hand-picked films are wanted too: nothing is left out for being curated.
+    skip = EXCLUDED if "--with-curated" in sys.argv else curated_ids() | EXCLUDED
     this_year = datetime.date.today().year
     by_imdb = {}
     for film in films.values():
@@ -304,7 +306,7 @@ def check(index):
     films = index["films"]
     assert index["version"] == 1 and len(films) >= 1000, "too few films"
     seen = set()
-    skip = curated_ids()
+    skip = set() if "--with-curated" in sys.argv else curated_ids()
     for film in films:
         imdb = film["imdb"]
         assert IMDB.match(imdb), imdb
@@ -391,16 +393,17 @@ def main():
         with open(OUT, encoding="utf-8") as handle:
             check(json.load(handle))
         return
+    out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else OUT
     previous = {}
-    if os.path.exists(OUT):
-        with open(OUT, encoding="utf-8") as handle:
+    if os.path.exists(out):
+        with open(out, encoding="utf-8") as handle:
             previous = json.load(handle)
     index = keep_known(previous, build(fetch()))
     check(index)
-    with open(OUT, "w", encoding="utf-8") as handle:
+    with open(out, "w", encoding="utf-8") as handle:
         json.dump(index, handle, ensure_ascii=False, separators=(",", ":"))
         handle.write("\n")
-    print(f"Wrote {OUT} ({os.path.getsize(OUT) // 1024} KB)", file=sys.stderr)
+    print(f"Wrote {out} ({os.path.getsize(out) // 1024} KB)", file=sys.stderr)
 
 
 if __name__ == "__main__":

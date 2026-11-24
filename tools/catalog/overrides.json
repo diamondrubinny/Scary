@@ -1,0 +1,5 @@
+{
+  "about": "Corrections to the film feed (tools/catalog/build_feed.py). 'exclude': IMDb ids kept out of the feed altogether. 'notInRow': for a row's id, IMDb ids kept out of that row only. Add a line when a rule puts a film where it does not belong; the next weekly build applies it.",
+  "exclude": [],
+  "notInRow": {}
+}
