@@ -46,7 +46,10 @@ TOP = "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror{}.json"
 YEAR = "https://cinemeta-catalogs.strem.io/year/catalog/movie/year/genre={}{}.json"
 PAGE = 50
 YEAR_PAGES = 40  # A year's mixed catalog: 2,000 films, of which a few dozen are horror.
-TOP_PAGES = 3
+# Cinemeta's own horror catalog, most popular first: all of it (it ends near 1,750 films) joins the feed, since
+# Wikidata's horror list alone misses famous films; its first pages are the "popular now" row.
+TOP_PAGES = 45
+POPULAR_ROW = 150
 VERSION = 1
 LANGS = ["en", "he", "ru", "pt", "ar"]
 IMDB = re.compile(r"^tt\d{7,8}$")
@@ -193,28 +196,44 @@ def gather(base, today):
             known.setdefault(imdb, details(meta))
             popular.append(imdb)
     films = {film["imdb"]: dict(film) for film in base["films"]}
-    info = cinemeta_details(sorted(set(films) | set(popular)), known)
-    added = 0
-    for imdb in dict.fromkeys(fresh + popular):
+    # Films no rule finds and SCARY wants (overrides.json): Cinemeta lists three genres at most, and for Alien none of
+    # them is horror.
+    always = included()
+    info = cinemeta_details(sorted(set(films) | set(popular) | always), known)
+    wanted = []
+    for imdb in dict.fromkeys(popular + fresh + sorted(always)):
         known_film = info.get(imdb)
-        if imdb in films or not known_film or not on_shelf(known_film):
+        if imdb in films or not known_film or not (on_shelf(known_film) or imdb in always):
             continue
         name = known_film.get("n")
         if not name or ADULT.search(name) or not known_film.get("y") or not 1895 <= known_film["y"] <= today.year:
             continue
-        film = {"imdb": imdb, "t": {"en": name}, "y": known_film["y"], "p": 0}
-        if known_film.get("d"):
-            film["d"] = known_film["d"]
+        wanted.append(imdb)
+    # What Wikidata knows of them: titles in the other languages, how many Wikipedias, the director, the subgenres.
+    described = {film["imdb"]: film for film in INDEX.by_imdb(wanted).values()}
+    added = 0
+    for imdb in wanted:
+        known_film = info[imdb]
+        wikidata = described.get(imdb, {})
+        titles = {lang: title for lang, title in wikidata.get("t", {}).items() if lang in LANGS}
+        # IMDb's own title, as Cinemeta has it, is the English one.
+        titles["en"] = known_film["n"]
+        film = {"imdb": imdb, "t": titles, "y": known_film["y"], "p": min(wikidata.get("p", 0), 500)}
+        director = wikidata.get("d") or known_film.get("d")
+        if director:
+            film["d"] = director
+        if wikidata.get("s"):
+            film["s"] = sorted(wikidata["s"])
         films[imdb] = film
         added += 1
-    print(f"{len(base['films'])} films from the base, {added} more from Cinemeta's new and popular catalogs", file=sys.stderr)
+    print(f"{len(base['films'])} films from the base, {added} more from Cinemeta's horror and new-film catalogs", file=sys.stderr)
     out = []
     for imdb, film in films.items():
         known_film = info.get(imdb)
         if known_film is None:
             # Not reachable now: the film stays as the base has it, without a rating.
             known_film = {}
-        elif not on_shelf(known_film):
+        elif not on_shelf(known_film) and imdb not in always:
             continue
         other = [g for g in (known_film.get("g") or film.get("g") or []) if g != "Horror" and GENRE.match(g)][:6]
         film.pop("g", None)
@@ -227,6 +246,14 @@ def gather(base, today):
         out.append(film)
     about = {imdb: (info.get(imdb) or {}).get("o", "") for imdb in films}
     return out, [i for i in fresh if i in films], [i for i in popular if i in films], about
+
+
+def included():
+    """IMDb ids overrides.json puts in the feed whatever the sources say of their genre."""
+    if not os.path.exists(OVERRIDES):
+        return set()
+    with open(OVERRIDES, encoding="utf-8") as handle:
+        return {i for i in json.load(handle).get("include", []) if IMDB.match(i)}
 
 
 def overrides():
@@ -349,7 +376,7 @@ def build_rows(films, fresh, popular, about, today):
     add("new", [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()])
     # Popular now: Cinemeta's order; without it, the best known films of the last five years.
     recent = sorted((f for f in everyone if f["y"] >= today.year - 5 and f.get("r", 0) >= 5.5), key=by_fame)
-    add("popular", popular or [f["imdb"] for f in recent])
+    add("popular", popular[:POPULAR_ROW] or [f["imdb"] for f in recent])
     best = [f for f in everyone if f.get("r", 0) >= 7.3 and f.get("p", 0) >= 15]
     add("top_rated", [f["imdb"] for f in sorted(best, key=lambda f: (-f.get("r", 0), -f.get("p", 0), f["imdb"]))])
     for row_id, rule in SUBGENRE_ROWS:

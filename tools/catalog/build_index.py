@@ -169,6 +169,32 @@ def fetch():
         # A film with two IMDb ids (a re-release) keeps the first; the most-linked one wins duplicates below.
         films.setdefault(key, {"imdb": imdb, "p": int(row["s"]["value"]), "y": year, "t": {}, "d": None, "s": set()})
     print(f"{len(films)} films with at least {MIN_SITELINKS} Wikipedias", file=sys.stderr)
+    return describe(films)
+
+
+def by_imdb(imdb_ids):
+    """
+    The same films record for given IMDb ids, whatever genre Wikidata files them under and however many Wikipedias
+    have them: for films another source (Cinemeta's horror catalog) already vouches for. Wikidata's own horror list
+    misses famous ones (Alien, Hellraiser, Poltergeist and The Evil Dead were not in it on 24 Nov 2026).
+    """
+    films = {}
+    for batch in chunks([i for i in imdb_ids if IMDB.match(i)], 150):
+        values = " ".join(f'"{i}"' for i in batch)
+        for row in sparql(f"""
+            SELECT ?f ?imdb ?s (MIN(YEAR(?date)) AS ?year) WHERE {{
+              VALUES ?imdb {{ {values} }}
+              ?f wdt:P345 ?imdb; wikibase:sitelinks ?s.
+              OPTIONAL {{ ?f wdt:P577 ?date. }}
+            }} GROUP BY ?f ?imdb ?s"""):
+            year = int(row["year"]["value"]) if "year" in row else None
+            films.setdefault(qid(row["f"]["value"]), {"imdb": row["imdb"]["value"], "p": int(row["s"]["value"]), "y": year, "t": {}, "d": None, "s": set()})
+        time.sleep(1)
+    return describe(films)
+
+
+def describe(films):
+    """Titles in SCARY's languages, the director and the subgenres of each film, in place."""
     keys = list(films)
     lang_filter = ", ".join(f'"{lang}"' for lang in LANGS + ["pt-br"])
     for batch in chunks(keys, 250):

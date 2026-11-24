@@ -1,5 +1,35 @@
 {
-  "about": "Corrections to the film feed (tools/catalog/build_feed.py). 'exclude': IMDb ids kept out of the feed altogether. 'notInRow': for a row's id, IMDb ids kept out of that row only. Add a line when a rule puts a film where it does not belong; the next weekly build applies it.",
+  "about": "Corrections to the film feed (tools/catalog/build_feed.py), applied by the next weekly build. 'include': IMDb ids always in the feed, for films the sources miss (Cinemeta lists three genres at most, and for Alien none of them is horror). 'exclude': IMDb ids kept out of the feed altogether. 'notInRow': for a row's id, IMDb ids kept out of that row only. The names beside the ids are for people; only the ids are read.",
+  "include": [
+    "tt0078748",
+    "tt0090605",
+    "tt17526714",
+    "tt5814060",
+    "tt0397065",
+    "tt27489557",
+    "tt4547056",
+    "tt1740707",
+    "tt2716382",
+    "tt6304046",
+    "tt0116365",
+    "tt1714915",
+    "tt0074811",
+    "tt0094721",
+    "tt0066735",
+    "tt0067361",
+    "tt2526898",
+    "tt4177080",
+    "tt1855153"
+  ],
+  "includeNames": "Alien; Aliens; The Substance; The Nun (2018); House of Wax (2005); Abigail (2024); The Girl with All the Gifts; Troll Hunter; Sea Fever; Thelma; The Frighteners; Only Lovers Left Alive; The Tenant; Beetlejuice; Four Flies on Grey Velvet; A Lizard in a Woman's Skin; Cannon Fodder; Children of the Fall; Cats on a Pedal Boat",
   "exclude": [],
-  "notInRow": {}
+  "notInRow": {
+    "slashers": [
+      "tt0297284"
+    ],
+    "zombies": [
+      "tt1259521"
+    ]
+  },
+  "notInRowNames": "slashers: Mindhunters; zombies: The Cabin in the Woods"
 }
