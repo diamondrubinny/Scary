@@ -1522,7 +1522,9 @@ class ScaryUiTest {
         val movie = bundledMovies().first { it.title == "The Shining" }
         rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "details:${movie.id}"))
         val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
-        val title = isHeading() and hasContentDescription(movie.title)
+        // The page's heading is the film's name in the viewer's language (the feed has it in Hebrew: "הניצוץ").
+        val language = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+        val title = isHeading() and hasContentDescription(movie.displayTitle(language))
         waitFor(watch)
         waitFor(title)
         fun titleTop() = rule.onNode(title).fetchSemanticsNode().boundsInRoot.top

@@ -75,7 +75,7 @@ HORROR_GENRES = {
     "Q12049743": "romantic horror film", "Q108280930": "horror western",
 }
 
-# Wikidata genre or main-subject labels (English, lower case, matched as substrings) -> SCARY subgenre.
+# Wikidata genre or main-subject labels (English, lower case, matched from the start of a word) -> SCARY subgenre.
 SUBGENRES = [
     ("slasher", "slasher"),
     ("giallo", "giallo"),
@@ -224,7 +224,9 @@ def describe(films):
             }}"""):
             label = row["gl"]["value"].lower()
             for needle, subgenre in SUBGENRES:
-                if needle in label:
+                # At the start of a word: "natural horror" is not in "supernatural horror" (which had put The Shining
+                # and Poltergeist among the animal attacks).
+                if re.search(r"(?<![a-z])" + re.escape(needle), label):
                     films[qid(row["f"]["value"])]["s"].add(subgenre)
         time.sleep(1)
     return films
