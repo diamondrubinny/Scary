@@ -53,6 +53,7 @@ IMDB = re.compile(r"^tt\d{7,8}$")
 GENRE = re.compile(r"^[A-Za-z][A-Za-z -]{1,23}$")
 MAX_TITLE = 120
 MAX_NAME = 80
+MAX_ABOUT = 900
 MAX_ROW = 80
 MIN_ROW = 12
 MAX_FILMS = 12_000
@@ -114,7 +115,10 @@ def details(meta):
     directors = text_list(meta.get("director"))
     country = meta.get("country") if isinstance(meta.get("country"), str) else ""
     name = INDEX.title_of(meta.get("name")) if isinstance(meta.get("name"), str) else None
+    description = meta.get("description") if isinstance(meta.get("description"), str) else ""
     return {
+        # What the film is about, for the rows' word rules only: it is never written to the feed.
+        "o": " ".join(description.split())[:MAX_ABOUT],
         "g": genres, "r": rating, "rel": released, "y": year, "c": country[:120], "n": name,
         "d": INDEX.clean(directors[0], MAX_NAME) if directors else None,
     }
@@ -132,7 +136,7 @@ def cinemeta_details(imdb_ids, known):
         answer = get_json(META.format(imdb))
         return imdb, None if answer is None else details(answer.get("meta") or {})
 
-    missing = [i for i in imdb_ids if i not in cache]
+    missing = [i for i in imdb_ids if "o" not in cache.get(i, {})]
     print(f"Cinemeta details: {len(imdb_ids) - len(missing)} known, {len(missing)} to ask", file=sys.stderr)
     with ThreadPoolExecutor(max_workers=6) as pool:
         for done, (imdb, info) in enumerate(pool.map(one, missing), 1):
