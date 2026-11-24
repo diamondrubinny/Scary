@@ -18,7 +18,7 @@
     <string name="rd_torrent_invalid">Это не magnet-ссылка.</string>
     <string name="rd_torrent_downloading">Real-Debrid загружает его: %1$d%%. Оставайтесь на этом экране, и он запустится в плеере SCARY, когда будет готов; он также появится ниже.</string>
     <string name="rd_torrent_error_slots">В вашем аккаунте Real-Debrid нет свободного места для ещё одного торрента. Удалите один или дождитесь окончания загрузки.</string>
-    <string name="rd_torrent_error_refused">Real-Debrid отклонил этот торрент.</string>
+    <string name="rd_torrent_error_refused">Real-Debrid блокирует этот файл, поэтому добавить его нельзя. Попробуйте другой релиз или другой фильм.</string>
     <string name="rd_torrent_error_too_big">Этот торрент слишком большой для Real-Debrid.</string>
     <string name="rd_torrent_error_no_video">В этом торренте нет видеофайла, поэтому он не сохранён.</string>
     <string name="rd_torrent_error_dead">Real-Debrid не смог загрузить этот торрент, поэтому он удалён из аккаунта.</string>

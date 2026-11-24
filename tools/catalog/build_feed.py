@@ -44,6 +44,11 @@ USER_AGENT = "SCARY-catalog-builder/1.0 (https://github.com/diamondrubinny/Scary
 META = "https://v3-cinemeta.strem.io/meta/movie/{}.json"
 TOP = "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Horror{}.json"
 YEAR = "https://cinemeta-catalogs.strem.io/year/catalog/movie/year/genre={}{}.json"
+# Beside horror films: the most popular thrillers, and horror series, each in a row of its own.
+THRILLERS = "https://v3-cinemeta.strem.io/catalog/movie/top/genre=Thriller{}.json"
+SERIES = "https://v3-cinemeta.strem.io/catalog/series/top/genre=Horror{}.json"
+THRILLER_PAGES = 30
+SERIES_PAGES = 8
 PAGE = 50
 YEAR_PAGES = 40  # A year's mixed catalog: 2,000 films, of which a few dozen are horror.
 # Cinemeta's own horror catalog, most popular first: all of it (it ends near 1,750 films) joins the feed, since
@@ -248,6 +253,75 @@ def gather(base, today):
     return out, [i for i in fresh if i in films], [i for i in popular if i in films], about
 
 
+# A thriller for SCARY is a dark one: crime, mystery or drama, not a spy film or a caper (Casino Royale and Tenet led the
+# first trial's row).
+NOT_A_DARK_THRILLER = {"Action", "Adventure", "Comedy", "Sci-Fi", "Fantasy", "Romance", "Musical", "War", "Western", "Sport"}
+
+
+def thriller_ok(info, today):
+    genres = set(info.get("g") or [])
+    return (
+        "Thriller" in genres and "Horror" not in genres and genres & {"Crime", "Mystery", "Drama"}
+        and not genres & NOT_A_DARK_THRILLER and not genres & INDEX.OFF_THEME and not INDEX.hidden(info.get("c"))
+        and (info.get("r") or 0) >= 6.5
+    )
+
+
+def series_ok(info, today):
+    # A series so new that nobody rated it yet is let in; an older one needs a fair rating.
+    return on_shelf(info) and ((info.get("r") or 0) >= 6.5 or (not info.get("r") and (info.get("y") or 0) >= today.year - 1))
+
+
+def extras(today, taken):
+    """
+    Thrillers and horror series: Cinemeta's most popular of each, in its order, with what Wikidata knows of them.
+    Each film says what it is ("k"), so nothing mistakes a thriller or a series for a horror film. Returns the films
+    and, for each kind, its row.
+    """
+    picked, rows = [], {}
+    for kind, url, pages, fits in (("thriller", THRILLERS, THRILLER_PAGES, thriller_ok), ("series", SERIES, SERIES_PAGES, series_ok)):
+        metas = catalog(lambda extra, u=url: u.format(extra), pages)
+        if metas is None:
+            print(f"Cinemeta's {kind} catalog did not answer: none this time", file=sys.stderr)
+            continue
+        rows[kind] = []
+        for meta in metas:
+            imdb = meta.get("imdb_id") or meta.get("id")
+            if not isinstance(imdb, str) or not IMDB.match(imdb) or imdb in taken:
+                continue
+            info = details(meta)
+            if not fits(info, today) or not info.get("n") or ADULT.search(info["n"]) or not info.get("y") or not 1895 <= info["y"] <= today.year:
+                continue
+            span = re.match(r"^\d{4}\s*[–-]\s*(\d{4})?", str(meta.get("releaseInfo") or "")) if kind == "series" else None
+            taken.add(imdb)
+            picked.append((kind, imdb, info, span))
+            rows[kind].append(imdb)
+    described = {film["imdb"]: film for film in INDEX.by_imdb([imdb for _, imdb, _, _ in picked]).values()}
+    films = []
+    for kind, imdb, info, span in picked:
+        wikidata = described.get(imdb, {})
+        titles = {lang: title for lang, title in wikidata.get("t", {}).items() if lang in LANGS}
+        titles["en"] = info["n"]
+        film = {"imdb": imdb, "t": titles, "y": info["y"], "p": min(wikidata.get("p", 0), 500), "k": kind}
+        other = [g for g in info.get("g") or [] if g not in ("Horror", "Thriller") and GENRE.match(g)][:6]
+        if other:
+            film["g"] = other
+        director = wikidata.get("d") or info.get("d")
+        if director:
+            film["d"] = director
+        if info.get("r"):
+            film["r"] = info["r"]
+        if span is not None:
+            end = int(span.group(1)) if span.group(1) else None
+            if end and info["y"] <= end <= 2100:
+                film["e"] = end
+            elif not end:
+                film["on"] = True
+        films.append(film)
+    print(f"{len(rows.get('thriller', []))} thrillers and {len(rows.get('series', []))} series from Cinemeta", file=sys.stderr)
+    return films, rows
+
+
 def included():
     """IMDb ids overrides.json puts in the feed whatever the sources say of their genre."""
     if not os.path.exists(OVERRIDES):
@@ -358,7 +432,7 @@ SUBGENRE_ROWS = [
 ]
 
 
-def build_rows(films, fresh, popular, about, today):
+def build_rows(films, fresh, popular, about, today, more=None):
     everywhere, per_row = overrides()
     by_id = {f["imdb"]: f for f in films if f["imdb"] not in everywhere}
     year_ago = (today - datetime.timedelta(days=365)).isoformat()
@@ -371,7 +445,8 @@ def build_rows(films, fresh, popular, about, today):
         else:
             print(f"Row {row_id} has only {len(ids)} films and is left out", file=sys.stderr)
 
-    everyone = list(by_id.values())
+    # The horror films: a thriller or a series is in its own row only.
+    everyone = [f for f in by_id.values() if "k" not in f]
     # New: out in the last twelve months (never one that is not out yet), in Cinemeta's order of popularity.
     add("new", [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()])
     # Popular now: Cinemeta's order; without it, the best known films of the last five years.
@@ -386,6 +461,8 @@ def build_rows(films, fresh, popular, about, today):
     add("horror_comedy", [f["imdb"] for f in sorted(funny, key=by_fame)])
     classics = [f for f in everyone if f["y"] <= 1980 and f.get("r", 0) >= 6.8 and f.get("p", 0) >= 15]
     add("classics", [f["imdb"] for f in sorted(classics, key=by_fame)])
+    add("thrillers", (more or {}).get("thriller", []))
+    add("series", (more or {}).get("series", []))
     return rows, everywhere
 
 
@@ -421,7 +498,10 @@ def check(feed):
         assert "d" not in film or INDEX.clean(film["d"], MAX_NAME) == film["d"], imdb
         assert all(GENRE.match(g) and g != "Horror" for g in film.get("g", [])), imdb
         assert set(film.get("s", [])) <= {s for _, s in INDEX.SUBGENRES}, imdb
-        assert set(film) <= {"imdb", "t", "y", "p", "g", "d", "s", "r", "rel"}, imdb
+        assert film.get("k") in (None, "thriller", "series"), imdb
+        assert "e" not in film or (film.get("k") == "series" and film["y"] <= film["e"] <= 2100), imdb
+        assert film.get("on") in (None, True), imdb
+        assert set(film) <= {"imdb", "t", "y", "p", "g", "d", "s", "r", "rel", "k", "e", "on"}, imdb
     assert 3 <= len(rows) <= 40, f"{len(rows)} rows"
     ids = [row["id"] for row in rows]
     assert len(set(ids)) == len(ids) and all(re.match(r"^[a-z][a-z_]{1,31}$", i) for i in ids), ids
@@ -470,8 +550,9 @@ def main():
             previous = json.load(handle)
     today = datetime.date.today()
     films, fresh, popular, about = gather(base, today)
-    films = keep_known(films, previous, {f["imdb"] for f in base["films"]})
-    rows, excluded = build_rows(films, fresh, popular, about, today)
+    beside, more = extras(today, {f["imdb"] for f in films})
+    films = keep_known(films + beside, previous, {f["imdb"] for f in base["films"]})
+    rows, excluded = build_rows(films, fresh, popular, about, today, more)
     films = sorted((f for f in films if f["imdb"] not in excluded), key=by_fame)
     feed = {
         "version": VERSION,

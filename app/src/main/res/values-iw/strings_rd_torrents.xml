@@ -18,7 +18,7 @@
     <string name="rd_torrent_invalid">זה לא קישור מגנט.</string>
     <string name="rd_torrent_downloading">Real-Debrid מוריד אותו: %1$d%%. הישארו במסך הזה והוא יתנגן בנגן של SCARY כשיהיה מוכן; הוא מופיע גם למטה.</string>
     <string name="rd_torrent_error_slots">אין בחשבון ה-Real-Debrid שלכם מקום פנוי לטורנט נוסף. מחקו אחד, או חכו שאחד יסתיים.</string>
-    <string name="rd_torrent_error_refused">Real-Debrid סירב לטורנט הזה.</string>
+    <string name="rd_torrent_error_refused">Real-Debrid חוסם את הקובץ הזה, ולכן אי אפשר להוסיף אותו. נסו מהדורה אחרת או סרט אחר.</string>
     <string name="rd_torrent_error_too_big">הטורנט הזה גדול מדי ל-Real-Debrid.</string>
     <string name="rd_torrent_error_no_video">אין בטורנט הזה קובץ וידאו, ולכן הוא לא נשמר.</string>
     <string name="rd_torrent_error_dead">Real-Debrid לא הצליח להוריד את הטורנט הזה, ולכן הוא הוסר מהחשבון.</string>

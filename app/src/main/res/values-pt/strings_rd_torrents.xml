@@ -18,7 +18,7 @@
     <string name="rd_torrent_invalid">Isto não é um link magnet.</string>
     <string name="rd_torrent_downloading">O Real-Debrid está baixando: %1$d%%. Fique nesta tela e ele toca no player do SCARY quando estiver pronto; ele também aparece abaixo.</string>
     <string name="rd_torrent_error_slots">Sua conta Real-Debrid não tem vaga para mais um torrent. Exclua um ou espere um terminar.</string>
-    <string name="rd_torrent_error_refused">O Real-Debrid recusou este torrent.</string>
+    <string name="rd_torrent_error_refused">O Real-Debrid bloqueia este arquivo, então ele não pode ser adicionado. Tente outra versão ou outro filme.</string>
     <string name="rd_torrent_error_too_big">Este torrent é grande demais para o Real-Debrid.</string>
     <string name="rd_torrent_error_no_video">Este torrent não tem arquivo de vídeo, por isso não foi mantido.</string>
     <string name="rd_torrent_error_dead">O Real-Debrid não conseguiu baixar este torrent, por isso ele foi removido da sua conta.</string>

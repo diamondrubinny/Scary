@@ -1,4 +1,4 @@
-# SCARY film feed, trial build of 2026-11-24: 4616 films, 13 rows
+# SCARY film feed, trial build of 2026-11-24: 5106 films, 15 rows
 
 ## new (74)
  1. Clayface (2026) — IMDb 7.5
@@ -97,66 +97,66 @@
 18. The Silence of the Lambs (1991) — IMDb 8.6
 19. 28 Years Later: The Bone Temple (2026) — IMDb 7.2
 20. Leviticus (2026) — IMDb 6.4
-21. Hereditary (2018) — IMDb 7.3
-22. Never After Dark (2026)
-23. It (2017) — IMDb 7.3
-24. Barbarian (2022) — IMDb 7.0
-25. The Shining (1980) — IMDb 8.4
-26. Resident Evil (2002) — IMDb 6.6
-27. The Thing (1982) — IMDb 8.2
-28. The Menu (2022) — IMDb 7.1
-29. Alien (1979) — IMDb 8.4
-30. Cold Storage (2026) — IMDb 6.0
-31. Midsommar (2019) — IMDb 7.1
-32. Carrie (1976) — IMDb 7.4
-33. Lee Cronin's The Mummy (2026) — IMDb 6.1
-34. Shin Godzilla (2016) — IMDb 6.9
-35. Get Out (2017) — IMDb 7.8
-36. They Will Kill You (2026) — IMDb 6.3
-37. The Long Walk (2025) — IMDb 6.6
-38. Scream (1996) — IMDb 7.4
-39. Speak No Evil (2024) — IMDb 6.8
-40. Heel (2026) — IMDb 6.8
-41. Ready or Not 2: Here I Come (2026) — IMDb 6.5
-42. 28 Years Later (2025) — IMDb 6.6
+21. The Menu (2022) — IMDb 7.1
+22. MaXXXine (2024) — IMDb 6.2
+23. Hereditary (2018) — IMDb 7.3
+24. Never After Dark (2026)
+25. It (2017) — IMDb 7.3
+26. Breeder (2026)
+27. Barbarian (2022) — IMDb 7.0
+28. The Shining (1980) — IMDb 8.4
+29. Resident Evil (2002) — IMDb 6.6
+30. The Thing (1982) — IMDb 8.2
+31. Alien (1979) — IMDb 8.4
+32. Cold Storage (2026) — IMDb 6.0
+33. Midsommar (2019) — IMDb 7.1
+34. Carrie (1976) — IMDb 7.4
+35. Lee Cronin's The Mummy (2026) — IMDb 6.1
+36. Shin Godzilla (2016) — IMDb 6.9
+37. Get Out (2017) — IMDb 7.8
+38. They Will Kill You (2026) — IMDb 6.3
+39. The Long Walk (2025) — IMDb 6.6
+40. Scream (1996) — IMDb 7.4
+41. Speak No Evil (2024) — IMDb 6.8
+42. Ready or Not 2: Here I Come (2026) — IMDb 6.5
 43. Longlegs (2024) — IMDb 6.5
-44. The Conjuring (2013) — IMDb 7.5
-45. It Follows (2014) — IMDb 6.8
-46. American Psycho (2000) — IMDb 7.6
-47. Bring Her Back (2025) — IMDb 7.1
-48. Apocalypse Z: The Beginning of the End (2024) — IMDb 6.1
-49. The Night House (2020) — IMDb 6.4
-50. Aliens (1986) — IMDb 8.4
-51. Ready or Not (2019) — IMDb 6.9
-52. The Exorcist (1973) — IMDb 8.1
-53. A Quiet Place (2018) — IMDb 7.5
-54. The Witch (2015) — IMDb 7.0
-55. Heretic (2024) — IMDb 7.0
-56. Doctor Sleep (2019) — IMDb 7.3
-57. Smile (2022) — IMDb 6.5
-58. Thanksgiving (2023) — IMDb 6.2
-59. Psycho (1960) — IMDb 8.5
-60. Prey (2022) — IMDb 7.1
-61. Mother! (2017) — IMDb 6.6
-62. Exit 8 (2025) — IMDb 6.5
-63. 28 Days Later (2003) — IMDb 7.5
-64. The Lost Boys (1987) — IMDb 7.2
-65. Split (2016) — IMDb 7.3
-66. The Mist (2007) — IMDb 7.1
-67. Heart Eyes (2025) — IMDb 6.0
-68. Friday the 13th Part 2 (1981) — IMDb 6.1
-69. The Cabin in the Woods (2012) — IMDb 7.0
-70. Talk to Me (2022) — IMDb 7.1
-71. The Lighthouse (2019) — IMDb 7.3
-72. From Dusk till Dawn (1996) — IMDb 7.2
-73. Pearl (2022) — IMDb 7.0
-74. The Others (2001) — IMDb 7.6
-75. Constantine (2005) — IMDb 7.0
-76. Insidious (2011) — IMDb 6.8
-77. Ghost in the Cell (2026) — IMDb 6.4
-78. Strange Darling (2023) — IMDb 7.0
-79. Halloween (1978) — IMDb 7.7
-80. Shaun of the Dead (2004) — IMDb 7.8
+44. 28 Years Later (2025) — IMDb 6.6
+45. The Conjuring (2013) — IMDb 7.5
+46. It Follows (2014) — IMDb 6.8
+47. American Psycho (2000) — IMDb 7.6
+48. Bring Her Back (2025) — IMDb 7.1
+49. Apocalypse Z: The Beginning of the End (2024) — IMDb 6.1
+50. The Night House (2020) — IMDb 6.4
+51. Aliens (1986) — IMDb 8.4
+52. Ready or Not (2019) — IMDb 6.9
+53. Heel (2026) — IMDb 6.8
+54. The Exorcist (1973) — IMDb 8.1
+55. A Quiet Place (2018) — IMDb 7.5
+56. The Witch (2015) — IMDb 7.0
+57. Heretic (2024) — IMDb 7.0
+58. Doctor Sleep (2019) — IMDb 7.3
+59. Smile (2022) — IMDb 6.5
+60. Thanksgiving (2023) — IMDb 6.2
+61. Psycho (1960) — IMDb 8.5
+62. Prey (2022) — IMDb 7.1
+63. Mother! (2017) — IMDb 6.6
+64. Exit 8 (2025) — IMDb 6.5
+65. 28 Days Later (2003) — IMDb 7.5
+66. The Lost Boys (1987) — IMDb 7.2
+67. Split (2016) — IMDb 7.3
+68. The Mist (2007) — IMDb 7.1
+69. Heart Eyes (2025) — IMDb 6.0
+70. Friday the 13th Part 2 (1981) — IMDb 6.1
+71. The Cabin in the Woods (2012) — IMDb 7.0
+72. Talk to Me (2022) — IMDb 7.1
+73. The Lighthouse (2019) — IMDb 7.3
+74. From Dusk till Dawn (1996) — IMDb 7.2
+75. Pearl (2022) — IMDb 7.0
+76. The Others (2001) — IMDb 7.6
+77. Constantine (2005) — IMDb 7.0
+78. Insidious (2011) — IMDb 6.8
+79. Ghost in the Cell (2026) — IMDb 6.4
+80. Strange Darling (2023) — IMDb 7.0
 
 ## top_rated (80)
  1. The Silence of the Lambs (1991) — IMDb 8.6
@@ -899,3 +899,167 @@
 78. The Black Cat (1934) — IMDb 6.9
 79. Kwaidan (1964) — IMDb 7.9
 80. The Unknown (1927) — IMDb 7.7
+
+## thrillers (80)
+ 1. Gentle Monster (2026) — IMDb 6.6
+ 2. The Housemaid (2025) — IMDb 6.7
+ 3. One Battle After Another (2025) — IMDb 7.6
+ 4. The Departed (2006) — IMDb 8.5
+ 5. Pressure (2026) — IMDb 7.3
+ 6. Fjord (2026) — IMDb 7.6
+ 7. Fight Club (1999) — IMDb 8.8
+ 8. Parasite (2019) — IMDb 8.5
+ 9. Eyes Wide Shut (1999) — IMDb 7.5
+10. The Sixth Sense (1999) — IMDb 8.2
+11. Crime 101 (2026) — IMDb 6.8
+12. The Town (2010) — IMDb 7.5
+13. Memento (2001) — IMDb 8.4
+14. Gone Girl (2014) — IMDb 8.1
+15. Shutter Island (2010) — IMDb 8.2
+16. No Country for Old Men (2007) — IMDb 8.2
+17. Nocturnal Animals (2016) — IMDb 7.4
+18. The Dark Knight Rises (2012) — IMDb 8.4
+19. Red Sparrow (2018) — IMDb 6.6
+20. Mulholland Drive (2001) — IMDb 7.9
+21. Ocean's Eleven (2001) — IMDb 7.7
+22. The Lives of Others (2007) — IMDb 8.4
+23. Reservoir Dogs (1992) — IMDb 8.2
+24. Enemy (2014) — IMDb 6.8
+25. Nightcrawler (2014) — IMDb 7.8
+26. The Game (1997) — IMDb 7.7
+27. Saltburn (2023) — IMDb 7.0
+28. A Few Good Men (1992) — IMDb 7.8
+29. The Ides of March (2011) — IMDb 7.1
+30. Training Day (2001) — IMDb 7.8
+31. Black Swan (2010) — IMDb 8.0
+32. The Devil All the Time (2020) — IMDb 7.1
+33. Zero Dark Thirty (2013) — IMDb 7.4
+34. The Imitation Game (2014) — IMDb 8.0
+35. The Da Vinci Code (2006) — IMDb 6.7
+36. The Last Duel (2021) — IMDb 7.3
+37. Hell or High Water (2016) — IMDb 7.6
+38. Tinker Tailor Soldier Spy (2012) — IMDb 7.0
+39. The Order (2025) — IMDb 6.8
+40. Identity (2003) — IMDb 7.3
+41. Margin Call (2011) — IMDb 7.1
+42. A Time to Kill (1996) — IMDb 7.5
+43. Insomnia (2002) — IMDb 7.2
+44. If I Had Legs I'd Kick You (2025) — IMDb 6.6
+45. Bound (1996) — IMDb 7.3
+46. Uncut Gems (2019) — IMDb 7.4
+47. Wasteman (2026) — IMDb 7.2
+48. Chinatown (1974) — IMDb 8.1
+49. JFK (1991) — IMDb 8.0
+50. Good Time (2017) — IMDb 7.3
+51. Is God Is (2026) — IMDb 6.5
+52. Lost Highway (1997) — IMDb 7.6
+53. Cape Fear (1991) — IMDb 7.3
+54. Now You See Me (2013) — IMDb 7.2
+55. Misery (1990) — IMDb 7.8
+56. Blink Twice (2024) — IMDb 6.5
+57. Fatal Attraction (1987) — IMDb 6.9
+58. I'm Thinking of Ending Things (2020) — IMDb 6.5
+59. The Untouchables (1987) — IMDb 7.8
+60. The Impossible (2013) — IMDb 7.5
+61. The Place Beyond the Pines (2013) — IMDb 7.3
+62. The Machinist (2004) — IMDb 7.6
+63. Rear Window (1954) — IMDb 8.4
+64. The Vanishing (1988) — IMDb 7.6
+65. Room (2016) — IMDb 8.1
+66. Sin City (2005) — IMDb 8.0
+67. A Most Violent Year (2015) — IMDb 6.9
+68. El Camino (2019) — IMDb 7.3
+69. Eastern Promises (2007) — IMDb 7.6
+70. Falling Down (1993) — IMDb 7.5
+71. Conclave (2024) — IMDb 7.4
+72. Crash (2005) — IMDb 7.7
+73. September 5 (2025) — IMDb 7.1
+74. The Road (2009) — IMDb 7.2
+75. Carlito's Way (1993) — IMDb 7.9
+76. Flight (2012) — IMDb 7.3
+77. The Talented Mr. Ripley (1999) — IMDb 7.4
+78. Sleepers (1996) — IMDb 7.5
+79. Fracture (2007) — IMDb 7.2
+80. The Wonder (2022) — IMDb 6.6
+
+## series (80)
+ 1. The Body (2026)
+ 2. Yellowjackets (2021) — IMDb 7.7
+ 3. From (2022) — IMDb 7.7
+ 4. Carrie (2026) — IMDb 7.8
+ 5. Yaga (2026)
+ 6. Supernatural (2005) — IMDb 8.4
+ 7. Below (2026) — IMDb 6.6
+ 8. Crystal Lake (2026) — IMDb 7.8
+ 9. Stranger Things (2016) — IMDb 8.6
+10. The Walking Dead (2010) — IMDb 8.1
+11. Widow's Bay (2026) — IMDb 8.1
+12. The Institute (2025) — IMDb 6.7
+13. American Horror Story (2011) — IMDb 7.9
+14. Dead-End Job (2026)
+15. It: Welcome to Derry (2025) — IMDb 7.9
+16. The Vampire Diaries (2009) — IMDb 7.7
+17. Hannibal (2013) — IMDb 8.5
+18. The Twilight Zone (1959) — IMDb 9.0
+19. The Haunting of Hill House (2018) — IMDb 8.5
+20. Midnight Mass (2021) — IMDb 7.7
+21. What We Do in the Shadows (2019) — IMDb 8.5
+22. Alien: Earth (2025) — IMDb 7.1
+23. The Fall of the House of Usher (2023) — IMDb 7.9
+24. The Outsider (2020) — IMDb 7.6
+25. Interview with the Vampire (2022) — IMDb 7.6
+26. The Originals (2013) — IMDb 8.2
+27. The Terror (2018) — IMDb 7.8
+28. The Beauty (2026) — IMDb 6.6
+29. Evil (2019) — IMDb 7.7
+30. The Sandman (2022) — IMDb 7.6
+31. Something Very Bad Is Going to Happen (2026) — IMDb 6.8
+32. Castle Rock (2018) — IMDb 7.5
+33. Alice in Borderland (2020) — IMDb 7.8
+34. The Haunting of Bly Manor (2020) — IMDb 7.4
+35. Penny Dreadful (2014) — IMDb 8.2
+36. Fear the Walking Dead (2015) — IMDb 6.7
+37. The Walking Dead: Daryl Dixon (2023) — IMDb 7.5
+38. Bates Motel (2013) — IMDb 8.1
+39. Wayward Pines (2015) — IMDb 7.3
+40. Servant (2019) — IMDb 7.4
+41. The Red King (2024) — IMDb 6.7
+42. The Strain (2014) — IMDb 7.3
+43. Them (2021) — IMDb 7.5
+44. IT (1990) — IMDb 6.8
+45. The Following (2013) — IMDb 7.4
+46. The Watcher (2022) — IMDb 6.5
+47. Chucky (2021) — IMDb 7.2
+48. Kingdom (2019) — IMDb 8.3
+49. The Walking Dead: The Ones Who Live (2024) — IMDb 7.7
+50. If Wishes Could Kill (2026)
+51. The Vampire Lestat (2026) — IMDb 8.0
+52. Locke & Key (2020) — IMDb 7.3
+53. Guillermo del Toro's Cabinet of Curiosities (2022) — IMDb 7.0
+54. The Midnight Club (2022) — IMDb 6.5
+55. Ash vs Evil Dead (2015) — IMDb 8.4
+56. Sweet Home (2020) — IMDb 7.2
+57. Archive 81 (2022) — IMDb 7.3
+58. Based on a True Story (2023) — IMDb 7.1
+59. Santa Clarita Diet (2017) — IMDb 7.8
+60. The League of Gentlemen (1999) — IMDb 8.4
+61. Fear Itself (2008) — IMDb 6.9
+62. Death's Game (2023) — IMDb 8.4
+63. Scream Queens (2015) — IMDb 7.1
+64. The Outer Limits (1995) — IMDb 7.7
+65. Black Summer (2019) — IMDb 6.6
+66. Channel Zero (2016) — IMDb 7.1
+67. Hemlock Grove (2013) — IMDb 7.0
+68. Devil in Disguise: John Wayne Gacy (2025) — IMDb 7.4
+69. Masters of Horror (2005) — IMDb 7.4
+70. The Creep Tapes (2024) — IMDb 6.8
+71. Lovecraft Country (2020) — IMDb 7.1
+72. The Silent Sea (2021) — IMDb 6.9
+73. Marianne (2019) — IMDb 7.3
+74. The Purge (2018) — IMDb 6.6
+75. Torchwood (2006) — IMDb 7.7
+76. Are You Afraid of the Dark? (1990) — IMDb 8.2
+77. Siren (2018) — IMDb 7.0
+78. Creepshow (2019) — IMDb 7.0
+79. The Secret of Crickley Hall (2012) — IMDb 6.8
+80. Fortitude (2015) — IMDb 7.3
