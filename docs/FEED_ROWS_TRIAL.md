@@ -1,6 +1,6 @@
 # SCARY film feed, trial build of 2026-11-24: 5106 films, 15 rows
 
-## new (74)
+## new_nightmares (74)
  1. Clayface (2026) — IMDb 7.5
  2. Whalefall (2026)
  3. Apocalypse Z: New World (2026)
@@ -158,7 +158,7 @@
 79. Ghost in the Cell (2026) — IMDb 6.4
 80. Strange Darling (2023) — IMDb 7.0
 
-## top_rated (80)
+## max_fear (80)
  1. The Silence of the Lambs (1991) — IMDb 8.6
  2. Psycho (1960) — IMDb 8.5
  3. Hellblade: Senua's Sacrifice (2017) — IMDb 8.5
@@ -322,7 +322,7 @@
 79. Candyman (1992) — IMDb 6.8
 80. Bride of Chucky (1998) — IMDb 5.7
 
-## ghosts (72)
+## supernatural (72)
  1. The Exorcist (1973) — IMDb 8.1
  2. Constantine (2005) — IMDb 7.0
  3. The Evil Dead (1983) — IMDb 7.3
@@ -678,7 +678,7 @@
 79. The Monster That Challenged the World (1957) — IMDb 5.7
 80. Black Zoo (1963) — IMDb 5.6
 
-## psychological (14)
+## psychological_horror (14)
  1. Backrooms (2026) — IMDb 6.7
  2. Antichrist (2009) — IMDb 6.5
  3. In the Mouth of Madness (1994) — IMDb 7.1
@@ -982,7 +982,7 @@
 79. Fracture (2007) — IMDb 7.2
 80. The Wonder (2022) — IMDb 6.6
 
-## series (80)
+## series_must (80)
  1. The Body (2026)
  2. Yellowjackets (2021) — IMDb 7.7
  3. From (2022) — IMDb 7.7

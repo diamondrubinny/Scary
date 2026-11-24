@@ -406,8 +406,9 @@ class Rule:
         return [f["imdb"] for f in sorted(both, key=by_fame) + sorted(one, key=by_fame)]
 
 
-# The home rows after "new" and "popular", in the order the home screen shows them. The app holds each row's name, in
-# five languages, by its id.
+# The home rows after the new and the popular films, in the order the home screen shows them. The app holds each
+# row's name, in five languages, by its id (core FeedCatalog). A row keeps the id the app's own category of the same
+# kind has (core Categories), so the app goes on filling it from Cinemeta when the viewer reaches its end.
 SUBGENRE_ROWS = [
     ("slashers", Rule(
         ["slasher"],
@@ -415,12 +416,12 @@ SUBGENRE_ROWS = [
               "picks? (?:them|off)", "stalked by", "knife-wielding", "murderous (?:psycho|maniac)", "maniac"),
         words(*SUPERNATURAL, "werewol", "vampir", "zombie", "alien", "creature", "monster"),
         trust_labels=True, never_genres=["Fantasy", "Musical", "Sci-Fi"])),
-    ("ghosts", Rule(["ghost", "supernatural", "possession"], words(*SUPERNATURAL))),
+    ("supernatural", Rule(["ghost", "supernatural", "possession"], words(*SUPERNATURAL))),
     ("haunted_houses", Rule(["haunted_house"], words(*HAUNTED), words(*VAMPIRES), trust_labels=True, trust_words=True, never_labels=["vampire", "comedy"])),
     ("zombies", Rule(["zombie"], words(*ZOMBIES), words(*VAMPIRES))),
     ("vampires", Rule(["vampire"], words(*VAMPIRES), trust_labels=True)),
     ("creatures", Rule(["creature", "animal"], words(*CREATURES), words("vampir", "zombie"), trust_words=True, never_labels=["vampire", "zombie"])),
-    ("psychological", Rule(
+    ("psychological_horror", Rule(
         ["psychological"],
         words("psycholog", "grief", "griev", "madness", "sanity", "insanity", "paranoi", "delusion", "hallucinat", "trauma",
               "unravel", "her mind", "his mind", "losing (?:her|his) mind"),
@@ -448,12 +449,12 @@ def build_rows(films, fresh, popular, about, today, more=None):
     # The horror films: a thriller or a series is in its own row only.
     everyone = [f for f in by_id.values() if "k" not in f]
     # New: out in the last twelve months (never one that is not out yet), in Cinemeta's order of popularity.
-    add("new", [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()])
+    add("new_nightmares", [i for i in fresh if i in by_id and year_ago <= by_id[i].get("rel", "") <= today.isoformat()])
     # Popular now: Cinemeta's order; without it, the best known films of the last five years.
     recent = sorted((f for f in everyone if f["y"] >= today.year - 5 and f.get("r", 0) >= 5.5), key=by_fame)
     add("popular", popular[:POPULAR_ROW] or [f["imdb"] for f in recent])
     best = [f for f in everyone if f.get("r", 0) >= 7.3 and f.get("p", 0) >= 15]
-    add("top_rated", [f["imdb"] for f in sorted(best, key=lambda f: (-f.get("r", 0), -f.get("p", 0), f["imdb"]))])
+    add("max_fear", [f["imdb"] for f in sorted(best, key=lambda f: (-f.get("r", 0), -f.get("p", 0), f["imdb"]))])
     for row_id, rule in SUBGENRE_ROWS:
         add(row_id, rule.films(everyone, about))
     # Comedy: Wikidata's label and IMDb's own genre must both say so.
@@ -462,7 +463,7 @@ def build_rows(films, fresh, popular, about, today, more=None):
     classics = [f for f in everyone if f["y"] <= 1980 and f.get("r", 0) >= 6.8 and f.get("p", 0) >= 15]
     add("classics", [f["imdb"] for f in sorted(classics, key=by_fame)])
     add("thrillers", (more or {}).get("thriller", []))
-    add("series", (more or {}).get("series", []))
+    add("series_must", (more or {}).get("series", []))
     return rows, everywhere
 
 

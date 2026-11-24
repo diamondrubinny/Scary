@@ -5,8 +5,11 @@
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
+import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
 import io.github.diamondrubinny.scary.core.catalog.FilmFeed
+import io.github.diamondrubinny.scary.core.catalog.LegacyLibrary
 import io.github.diamondrubinny.scary.core.model.Genre
+import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.Subgenre
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -127,13 +130,28 @@ class FilmFeedTest {
         assertEquals("No film breaks a rule", 0, result.droppedFilms)
         assertEquals("No row breaks a rule", 0, result.droppedRows)
         assertTrue("Thousands of films: ${result.movies.size}", result.movies.size >= 3_500)
-        assertTrue("New films are there", result.rows.any { it.id == "new" })
-        assertTrue("Thrillers and series have their rows", result.rows.map { it.id }.containsAll(listOf("thrillers", "series")))
-        assertTrue("A horror row holds no thriller and no series", result.rows.filter { it.id !in setOf("thrillers", "series") }.all { row ->
+        assertTrue("New films are there", result.rows.any { it.id == "new_nightmares" })
+        assertTrue("Thrillers and series have their rows", result.rows.map { it.id }.containsAll(listOf("thrillers", "series_must")))
+        assertTrue("A horror row holds no thriller and no series", result.rows.filter { it.id !in setOf("thrillers", "series_must") }.all { row ->
             row.movieIds.all { id -> result.movies.first { it.id == id }.let { !it.isSeries && it.genre == Genre.HORROR } }
         })
         assertTrue("Every row has a dozen films", result.rows.all { it.movieIds.size >= 12 })
         // The best-known horror films, which the hand-picked library used to hold, are in the feed.
         for (imdb in listOf("tt0054215", "tt0081505", "tt0078748", "tt0077651")) assertTrue(imdb, result.movies.any { it.imdbId == imdb })
+    }
+
+    @Test
+    fun `the library made from the bundled feed has every row named and the old fear levels`() {
+        val feed = FilmFeed.parse(File("../app/src/main/assets/feed.json").readText())
+        val legacy = LegacyLibrary.parse(File("../app/src/main/assets/legacy.json").readText())
+        val catalog = FeedCatalog.catalog(feed, legacy)
+        assertEquals("Every row of the feed has a name here", feed.rows.map { it.id }, catalog.collections.map { it.id })
+        assertEquals(FeedCatalog.rowIds, catalog.collections.map { it.id })
+        for (language in Language.entries) assertTrue(language.code, catalog.collections.all { it.title(language).isNotBlank() })
+        // Psycho keeps the fear level the library gave it; a film the library never held has none.
+        assertTrue((catalog.movie("cm_tt0054215")?.fear ?: 0) in 1..5)
+        assertTrue("Most of the feed has no fear level", catalog.movies.count { it.fear == null } > 4_000)
+        assertTrue("The library's films are still there", catalog.movies.count { it.fear != null } >= 400)
+        assertTrue(catalog.collections.all { row -> catalog.moviesOf(row).size == row.movieIds.size })
     }
 }
