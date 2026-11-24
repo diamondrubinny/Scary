@@ -9,6 +9,8 @@ Builds app/src/main/assets/index.json: every well-known horror film on Wikidata 
     python3 -I tools/catalog/build_index.py            # fetch, check, write
     python3 -I tools/catalog/build_index.py --check    # only check the file already there
     python3 -I tools/catalog/build_index.py --prune    # drop the hidden Arab and Indian films from the file there
+    python3 -I tools/catalog/build_index.py --keep-from OLD.json   # put back films an older copy held (see keep_known)
+    python3 -I tools/catalog/build_index.py --with-curated --out BASE.json   # every film, for build_feed.py
 
 "Well-known" means at least MIN_SITELINKS Wikipedias have an article on it; IMDb (through Cinemeta) must call it
 horror too, which drops the films Wikidata mislabels.
@@ -254,7 +256,8 @@ def curated_ids():
 
 
 def build(films):
-    skip = curated_ids() | EXCLUDED
+    # For the feed (build_feed.py) the hand-picked films are wanted too: nothing is left out for being curated.
+    skip = EXCLUDED if "--with-curated" in sys.argv else curated_ids() | EXCLUDED
     this_year = datetime.date.today().year
     by_imdb = {}
     for film in films.values():
@@ -303,7 +306,7 @@ def check(index):
     films = index["films"]
     assert index["version"] == 1 and len(films) >= 1000, "too few films"
     seen = set()
-    skip = curated_ids()
+    skip = set() if "--with-curated" in sys.argv else curated_ids()
     for film in films:
         imdb = film["imdb"]
         assert IMDB.match(imdb), imdb
@@ -346,20 +349,61 @@ def prune():
         handle.write("\n")
 
 
+def keep_known(previous, index):
+    """
+    Films the index held before and Wikidata no longer files directly under a horror genre (its genre statements are
+    edited all the time: The Nun II and Thirteen Ghosts dropped out on 24 Nov 2026). They stay, as they were, while
+    IMDb still calls them horror and none of the other rules leaves them out; so a refresh adds films and corrects
+    them, and a film leaves only for a reason of SCARY's own.
+    """
+    have = {film["imdb"] for film in index["films"]}
+    skip = curated_ids() | EXCLUDED
+    gone = [film for film in previous.get("films", []) if film.get("imdb") not in have and film.get("imdb") not in skip]
+    if not gone:
+        return index
+    info = cinemeta_info(sorted(film["imdb"] for film in gone))
+    kept = []
+    for film in gone:
+        known = info.get(film["imdb"])
+        genres = (known or {}).get("g", [])
+        if "Horror" in genres and not set(genres) & OFF_THEME and not hidden((known or {}).get("c")):
+            kept.append(film)
+    print(f"Kept {len(kept)} of {len(gone)} films Wikidata no longer files under horror (IMDb still does)", file=sys.stderr)
+    index["films"] = sorted(index["films"] + kept, key=lambda f: (-f["p"], f["imdb"]))
+    return index
+
+
 def main():
     if "--prune" in sys.argv:
         prune()
+        return
+    if "--keep-from" in sys.argv:
+        # Only the keeping step, on the file already there, with an older copy of it: no new fetch from Wikidata.
+        with open(sys.argv[sys.argv.index("--keep-from") + 1], encoding="utf-8") as handle:
+            previous = json.load(handle)
+        with open(OUT, encoding="utf-8") as handle:
+            index = keep_known(previous, json.load(handle))
+        check(index)
+        with open(OUT, "w", encoding="utf-8") as handle:
+            json.dump(index, handle, ensure_ascii=False, separators=(",", ":"))
+            handle.write("\n")
+        print(f"Wrote {OUT} ({os.path.getsize(OUT) // 1024} KB)", file=sys.stderr)
         return
     if "--check" in sys.argv:
         with open(OUT, encoding="utf-8") as handle:
             check(json.load(handle))
         return
-    index = build(fetch())
+    out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else OUT
+    previous = {}
+    if os.path.exists(out):
+        with open(out, encoding="utf-8") as handle:
+            previous = json.load(handle)
+    index = keep_known(previous, build(fetch()))
     check(index)
-    with open(OUT, "w", encoding="utf-8") as handle:
+    with open(out, "w", encoding="utf-8") as handle:
         json.dump(index, handle, ensure_ascii=False, separators=(",", ":"))
         handle.write("\n")
-    print(f"Wrote {OUT} ({os.path.getsize(OUT) // 1024} KB)", file=sys.stderr)
+    print(f"Wrote {out} ({os.path.getsize(out) // 1024} KB)", file=sys.stderr)
 
 
 if __name__ == "__main__":

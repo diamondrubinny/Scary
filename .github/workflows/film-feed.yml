@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: Apache-2.0
+# Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
+# Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
+#
+# Once a week: builds SCARY's film feed (docs/CATALOG_REBUILD_PLAN.md) from Wikidata and Cinemeta and publishes it as
+# feed.json on the "film-feed" release, where the TV downloads it. The library then changes without an app update.
+#
+# Nothing is published unless the builder's own checks pass: the file's rules (the same ones the app enforces when it
+# reads it), and that the feed did not shrink against the one published before. A failure here leaves last week's feed
+# in place, which is the safe outcome; the job's log lists what was added and removed.
+#
+# No secrets are used: both sources are public and need no key. The job can write releases and nothing else.
+name: Film feed
+
+on:
+  schedule:
+    - cron: "41 2 * * 4"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: film-feed
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.repository == 'diamondrubinny/Scary'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The feed published before (none the first time)
+        run: |
+          mkdir -p dist
+          gh release download film-feed --pattern feed.json --dir dist/previous || echo "No feed was published yet."
+
+      - name: Every well-known horror film (Wikidata, checked against IMDb through Cinemeta)
+        run: python3 -I tools/catalog/build_index.py --with-curated --out dist/base.json
+
+      - name: Build the feed and its rows
+        run: |
+          previous=()
+          if [ -f dist/previous/feed.json ]; then previous=(--previous dist/previous/feed.json); fi
+          python3 -I tools/catalog/build_feed.py --base dist/base.json --out dist/feed.json "${previous[@]}"
+          python3 -I tools/catalog/build_feed.py --check --out dist/feed.json
+
+      - name: Publish
+        run: |
+          if ! gh release view film-feed > /dev/null 2>&1; then
+            gh release create film-feed --title "Film feed" --prerelease \
+              --notes "SCARY's films and home rows, rebuilt every week from Wikidata (CC0) and Cinemeta. Data only; the app downloads feed.json from here."
+          fi
+          gh release upload film-feed dist/feed.json --clobber
