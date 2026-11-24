@@ -6,6 +6,7 @@ package io.github.diamondrubinny.scary.data
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
 import io.github.diamondrubinny.scary.core.catalog.FilmFeed
 import io.github.diamondrubinny.scary.core.update.Updates
@@ -67,7 +68,7 @@ class FeedRepository(private val context: Context) {
         val now = System.currentTimeMillis()
         val last = prefs.getLong(KEY_TRIED, 0)
         if (!force && now - last in 0 until REFRESH_EVERY_MS) return@withContext null
-        prefs.edit().putLong(KEY_TRIED, now).apply()
+        prefs.edit { putLong(KEY_TRIED, now) }
         val text = download() ?: return@withContext null
         val fresh = read("downloaded") { text } ?: return@withContext null
         val current = load()
