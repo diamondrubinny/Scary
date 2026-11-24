@@ -192,7 +192,7 @@ class OriginQualityTest {
 /** The hand-picked rows: what the quality audit (tools/catalog/audit_rows.py) found once stays fixed. */
 class CuratedRowsQualityTest {
     private val catalog = io.github.diamondrubinny.scary.core.catalog.CatalogParser.parse(
-        java.io.File("../app/src/main/assets/catalog.json").readText(),
+        java.io.File("src/test/fixtures/catalog.json").readText(),
     )
 
     private fun row(id: String) = catalog.collections.single { it.id == id }.movieIds

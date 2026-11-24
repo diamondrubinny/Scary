@@ -23,8 +23,8 @@ import java.io.File
 
 /** The series library, series from Cinemeta, and the bucket list. */
 class SeriesBucketTest {
-    private val moviesText = File("../app/src/main/assets/catalog.json").readText()
-    private val seriesText = File("../app/src/main/assets/series.json").readText()
+    private val moviesText = File("src/test/fixtures/catalog.json").readText()
+    private val seriesText = File("src/test/fixtures/series.json").readText()
 
     @Test
     fun `the bundled series library is valid, all series, and shares no IMDb id with the films`() {

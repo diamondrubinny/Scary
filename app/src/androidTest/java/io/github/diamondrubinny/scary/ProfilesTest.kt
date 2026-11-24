@@ -90,32 +90,32 @@ class ProfilesTest {
         val settings = SettingsRepository(context)
         runBlocking {
             val before = settings.prefs.first()
-            val wasInList = "the_shining" in before.myListIds
+            val wasInList = "cm_tt0081505" in before.myListIds
             val second = settings.addProfile("Test viewer", 1, gentle = true)!!
             try {
                 // With one viewer the top bar names nobody; with two it names the one on screen.
                 rule.waitUntil(20_000) { rule.onAllNodes(hasTestTag(HOME_ROWS_TAG)).fetchSemanticsNodes().isNotEmpty() }
-                if (!wasInList) settings.toggleMyList("the_shining")
+                if (!wasInList) settings.toggleMyList("cm_tt0081505")
                 settings.setActiveProfile(second.id)
                 val asSecond = settings.prefs.first()
                 assertEquals(second.id, asSecond.activeProfileId)
                 assertTrue("A new viewer starts with empty lists", asSecond.myListIds.isEmpty())
                 assertTrue("A gentle profile is family night for whoever is in it", asSecond.familyNight)
                 assertFalse(asSecond.isFirstProfile)
-                settings.toggleMyList("hereditary")
-                assertEquals(listOf("hereditary"), settings.prefs.first().myListIds)
+                settings.toggleMyList("cm_tt7784604")
+                assertEquals(listOf("cm_tt7784604"), settings.prefs.first().myListIds)
                 rule.waitUntil(20_000) { rule.onAllNodes(hasTestTag(PROFILE_NAV_TAG)).fetchSemanticsNodes().isNotEmpty() }
 
                 // Back to the first viewer: their list is as they left it, and the other's film is not in it.
                 settings.setActiveProfile(Profiles.FIRST)
                 val asFirst = settings.prefs.first()
-                assertTrue("the_shining" in asFirst.myListIds)
-                assertFalse("hereditary" in asFirst.myListIds)
+                assertTrue("cm_tt0081505" in asFirst.myListIds)
+                assertFalse("cm_tt7784604" in asFirst.myListIds)
                 assertEquals(before.familyNight, asFirst.familyNight)
             } finally {
                 settings.setActiveProfile(Profiles.FIRST)
                 settings.removeProfile(second.id)
-                if (!wasInList && "the_shining" in settings.prefs.first().myListIds) settings.toggleMyList("the_shining")
+                if (!wasInList && "cm_tt0081505" in settings.prefs.first().myListIds) settings.toggleMyList("cm_tt0081505")
             }
             // Removed with its lists: a profile made again under the same id starts empty.
             val again = settings.addProfile("Test viewer", 1, gentle = false)!!

@@ -191,6 +191,27 @@ class WatchStore(context: Context) {
      * The history as stored, or, the first time, the resume positions SCARY 0.5 kept (file key → position, and
      * "at:" + key → when), carried over without names: they show under "Continue watching" once played again.
      */
+    /**
+     * Once, with the film feed: the film each watched file and each corrected file belongs to gets its new id
+     * ([newId], core LegacyLibrary), for every profile. Positions, names and bookmarks are not touched.
+     */
+    fun migrateLegacyIds(newId: (String) -> String) {
+        if (prefs.getBoolean(IDS_MIGRATED, false)) return
+        prefs.edit {
+            for ((key, value) in prefs.all) {
+                val text = value as? String ?: continue
+                if (key.startsWith(HISTORY)) {
+                    putString(key, WatchHistory.encode(WatchHistory.decode(text).map { entry -> entry.copy(movieId = entry.movieId?.let(newId)) }))
+                } else if (key == FILE_FILMS) {
+                    putString(key, RdMatches.encode(RdMatches.decode(text).mapValues { (_, id) -> if (id.isEmpty()) id else newId(id) }))
+                }
+            }
+            putBoolean(IDS_MIGRATED, true)
+        }
+        _entries.value = load()
+        _fileFilms.value = RdMatches.decode(prefs.getString(FILE_FILMS, null))
+    }
+
     private fun load(): List<WatchEntry> {
         val stored = WatchHistory.decode(prefs.getString(historyKey, null))
         // What SCARY 0.5 kept was the TV's own, so it is carried into the first profile only.
@@ -221,6 +242,7 @@ class WatchStore(context: Context) {
         const val TRACK_MEMORY = "track_memory"
         const val ONLINE_SUBTITLES = "online_subtitles"
         const val FILE_FILMS = "file_films"
+        const val IDS_MIGRATED = "legacy_ids_migrated"
         const val STREMIO_DISMISSED = "stremio_dismissed"
         const val LEGACY_STAMP = "at:"
     }

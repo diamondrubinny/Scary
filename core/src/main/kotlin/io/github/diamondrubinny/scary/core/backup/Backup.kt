@@ -55,6 +55,20 @@ object Backup {
         val hiddenRows: Set<String> = emptySet(),
         val switches: Map<String, Boolean> = emptyMap(),
     ) {
+        /**
+         * The same lists with every film under the id it has now ([newId], LegacyLibrary): a backup made before the
+         * film feed holds the hand-picked library's ids.
+         */
+        fun withIds(newId: (String) -> String): Snapshot = copy(
+            myList = myList.map(newId).distinct(),
+            watched = watched.map(newId).distinct(),
+            watchedDays = watchedDays.mapKeys { newId(it.key) },
+            loved = loved.map(newId).distinct(),
+            disliked = disliked.map(newId).distinct(),
+            bucket = bucket.map(newId).distinct(),
+            series = series.mapTo(LinkedHashSet(), newId),
+        )
+
         val isEmpty: Boolean
             get() = myList.isEmpty() && watched.isEmpty() && loved.isEmpty() && disliked.isEmpty() && bucket.isEmpty() &&
                 hiddenRows.isEmpty() && switches.isEmpty()

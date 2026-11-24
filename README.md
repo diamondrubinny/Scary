@@ -359,7 +359,7 @@ SCARY превращает ваш Android TV в кинозал ужасов. В�
 | `core/` | Pure Kotlin/JVM: catalog model and validation, search, tonight's pick, Cinemeta and TMDB parsing, PIN hashing, deep links. Unit tested. |
 | `app/` | Android app: Jetpack Compose UI, HOME intent filter, Home-button accessibility service, installed apps, launching. |
 | `app/src/main/assets/remote/` | The phone remote's page, served by SCARY on the home network. Its own SHA-256/HMAC (no Web Crypto over plain HTTP), checked byte for byte against `core`'s `RemoteProtocol` by `tools/remote/check-remote-js.cjs` in CI. Design and threat model: [docs/PHONE_REMOTE_PLAN.md](docs/PHONE_REMOTE_PLAN.md). |
-| `app/src/main/assets/catalog.json` | The curated library: synopses in Hebrew, English, Portuguese, Russian and Arabic, collection titles in all five. Validated by the `core` tests on every build. |
+| `app/src/main/assets/feed.json` | The film feed packed with the app: every film and every home row, built from Wikidata and Cinemeta by `tools/catalog/build_feed.py` and rebuilt each week by the "Film feed" workflow; the TV downloads the newest. `legacy.json` beside it keeps the old hand-picked library's ids and fear levels. Both are read as untrusted by `core` and checked by its tests. |
 
 ```bash
 ./gradlew :core:test          # unit tests

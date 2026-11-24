@@ -20,7 +20,7 @@ import java.io.File
 import java.time.LocalDate
 
 class TmdbTest {
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
 
     private val findJson = """
         {"movie_results":[{"id":694,"title":"הניצוץ","original_title":"The Shining",

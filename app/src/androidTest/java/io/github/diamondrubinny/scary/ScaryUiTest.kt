@@ -50,6 +50,9 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
+import io.github.diamondrubinny.scary.core.catalog.FilmFeed
+import io.github.diamondrubinny.scary.core.catalog.LegacyLibrary
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Decades
 import io.github.diamondrubinny.scary.core.catalog.Mood
@@ -200,8 +203,7 @@ class ScaryUiTest {
     private fun isInstalled(packageName: String): Boolean =
         runCatching { rule.activity.packageManager.getPackageInfo(packageName, 0) }.isSuccess
 
-    private fun bundledMovies(): List<Movie> =
-        rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }.movies
+    private fun bundledMovies(): List<Movie> = bundledCatalog().movies
 
     private fun waitForHome() = waitFor(hasText(text(R.string.row_apps)))
 
@@ -466,7 +468,7 @@ class ScaryUiTest {
         backToHome()
     }
 
-    /** The full index (index.json): search finds a well-known film outside the hand-picked library, and it opens. */
+    /** The whole feed: search finds a well-known film outside the hand-picked library, and it opens. */
     @Test
     fun searchFindsAFilmFromTheFullIndex() {
         waitForHome()
@@ -538,7 +540,7 @@ class ScaryUiTest {
     @Test
     fun holdingOkOnAPosterAddsItToMyListAndHoldingAgainRemovesIt() {
         waitForHomeFocus()
-        val catalog = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
+        val catalog = bundledCatalog()
         val collection = catalog.collections.first()
         val movie = catalog.moviesOf(collection).first()
         val rowKey = "collection:${collection.id}"
@@ -1516,7 +1518,7 @@ class ScaryUiTest {
     @Test
     fun goingDownAFilmPageAndBackUpBringsItsTitleBack() {
         waitForHomeFocus()
-        val movie = bundledMovies().first { it.id == "the_shining" }
+        val movie = bundledMovies().first { it.title == "The Shining" }
         rule.activity.startActivity(Intent(rule.activity, MainActivity::class.java).putExtra(DEBUG_OPEN, "details:${movie.id}"))
         val watch = hasText(text(R.string.action_watch_stremio)) and isFocused()
         val title = isHeading() and hasContentDescription(movie.title)
@@ -1572,8 +1574,8 @@ class ScaryUiTest {
     @Test
     fun theSeriesTabShowsTheSeriesLibraryAndTheMoviesTabComesBack() {
         waitForHome()
-        val catalog = rule.activity.assets.open("series.json").bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
-        val collection = catalog.collections.first()
+        val catalog = bundledCatalog()
+        val collection = catalog.collections.first { row -> catalog.moviesOf(row).all { it.isSeries } }
         val series = catalog.moviesOf(collection).first()
         val seriesTab = hasTestTag(tabTag(MediaKind.SERIES))
         val moviesTab = hasTestTag(tabTag(MediaKind.MOVIE))
@@ -1665,7 +1667,11 @@ class ScaryUiTest {
         waitUntilOrDescribe("the home screen") { onHome() }
     }
 
-    private fun bundledCatalog() = rule.activity.assets.open("catalog.json").bufferedReader().use { CatalogParser.parse(it.readText()) }
+    /** The library as the app makes it: the packed film feed, with the old library's fear levels (core FeedCatalog). */
+    private fun bundledCatalog() = FeedCatalog.catalog(
+        rule.activity.assets.open("feed.json").bufferedReader().use { FilmFeed.parse(it.readText()) },
+        rule.activity.assets.open("legacy.json").bufferedReader().use { LegacyLibrary.parse(it.readText()) },
+    )
 
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
     private fun toggleFamilyNightInSettings() {

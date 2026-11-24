@@ -3,8 +3,8 @@
 # Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
 # Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 """
-Writes app/src/main/assets/legacy.json from the hand-picked library (catalog.json and series.json), before that
-library is removed (docs/CATALOG_REBUILD_PLAN.md). Two things of it outlive it:
+Writes app/src/main/assets/legacy.json from the hand-picked library (catalog.json and series.json, kept since its
+removal from the app as fixtures of core's tests; docs/CATALOG_REBUILD_PLAN.md). Two things of it outlive it:
 
   * its ids: viewers' lists (My list, watched, loved, backups) hold them, and the films are "cm_" + IMDb id from now
     on, so each old id needs the IMDb id it stood for;
@@ -27,7 +27,7 @@ ID = re.compile(r"^[a-z0-9][a-z0-9_-]{0,79}$")
 def main():
     films = {}
     for name in ("catalog.json", "series.json"):
-        with open(os.path.join(ROOT, "app/src/main/assets", name), encoding="utf-8") as handle:
+        with open(os.path.join(ROOT, "core/src/test/fixtures", name), encoding="utf-8") as handle:
             for movie in json.load(handle)["movies"]:
                 assert ID.match(movie["id"]) and IMDB.match(movie["imdbId"]), movie["id"]
                 assert movie["id"] not in films, movie["id"]

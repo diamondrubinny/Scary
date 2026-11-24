@@ -127,7 +127,7 @@ class AppContainer(context: Context) {
 
     /** The films and rows that update by themselves (docs/CATALOG_REBUILD_PLAN.md): packed in the app, then downloaded. */
     val feedRepository = io.github.diamondrubinny.scary.data.FeedRepository(appContext)
-    val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
+    val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository, feedRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)
 
@@ -191,6 +191,15 @@ class AppContainer(context: Context) {
 
     /** Where the viewer stopped in each of their files and the spots they marked, kept on this TV only. */
     val watchStore = io.github.diamondrubinny.scary.data.WatchStore(appContext)
+
+    init {
+        // The hand-picked library gave way to the film feed: once, every stored film id becomes the film's new one.
+        catalogRepository.onLegacy = { legacy ->
+            backups.legacyId = legacy::newId
+            settingsRepository.migrateLegacyIds(legacy::newId)
+            watchStore.migrateLegacyIds(legacy::newId)
+        }
+    }
     val launcher = Launcher(appContext, appsRepository)
     val regionDetector = RegionDetector(appContext)
 
