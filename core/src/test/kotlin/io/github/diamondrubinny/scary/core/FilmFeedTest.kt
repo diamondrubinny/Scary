@@ -5,6 +5,7 @@
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
+import io.github.diamondrubinny.scary.core.catalog.NightPick
 import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
 import io.github.diamondrubinny.scary.core.catalog.FilmFeed
 import io.github.diamondrubinny.scary.core.catalog.LegacyLibrary
@@ -152,6 +153,10 @@ class FilmFeedTest {
         assertTrue((catalog.movie("cm_tt0054215")?.fear ?: 0) in 1..5)
         assertTrue("Most of the feed has no fear level", catalog.movies.count { it.fear == null } > 4_000)
         assertTrue("The library's films are still there", catalog.movies.count { it.fear != null } >= 400)
+        // Only a film with a fear level is curated: tonight's pick, the moods and family night choose among those.
+        assertTrue(catalog.movies.all { it.curated == (it.fear != null) })
+        assertTrue("Tonight's pick has films to choose from", NightPick.pick(catalog.movies, java.time.LocalDate.of(2026, 11, 24)) != null)
+        assertTrue("Most films say how long they are", catalog.movies.count { it.runtimeMin > 0 } > catalog.movies.size * 8 / 10)
         assertTrue(catalog.collections.all { row -> catalog.moviesOf(row).size == row.movieIds.size })
     }
 }

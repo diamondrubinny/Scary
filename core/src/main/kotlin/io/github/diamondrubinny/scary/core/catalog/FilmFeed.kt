@@ -65,6 +65,8 @@ object FilmFeed {
         @SerialName("s") val subgenres: List<String> = emptyList(),
         @SerialName("g") val genres: List<String> = emptyList(),
         @SerialName("r") val rating: Double? = null,
+        /** Length in minutes (a series: of one episode); absent when unknown. */
+        @SerialName("m") val minutes: Int = 0,
         /** Absent for a horror film; "thriller" for a thriller, "series" for a horror series. */
         @SerialName("k") val kind: String? = null,
         @SerialName("e") val endYear: Int? = null,
@@ -141,6 +143,7 @@ object FilmFeed {
             titles = titles - Language.EN.code,
             year = entry.year,
             director = director,
+            runtimeMin = entry.minutes.takeIf { it in 1..600 } ?: 0,
             genre = if (thriller) Genre.THRILLER else Genre.HORROR,
             kind = if (series) MediaKind.SERIES else MediaKind.MOVIE,
             endYear = entry.endYear,

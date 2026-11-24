@@ -39,7 +39,9 @@ if [ -f dist/scary-tests.apk ]; then
   cat "$OUT/ui-tests.txt"
   echo "OK key events the app handled during the tests (last 200):"
   adb logcat -d -s ScaryKeys:D | tail -200 || true
-  if ! echo "$result" | grep -q '^OK ('; then
+  # Searched as a whole, not through a pipe: "grep -q" ends at the first match, the "echo" feeding it is then cut
+  # off, and under pipefail the pipe fails although the tests passed (build 449: "OK (77 tests)", then this).
+  if ! grep -q '^OK (' <<< "$result"; then
     echo "UI tests failed."
     exit 1
   fi
@@ -319,7 +321,8 @@ if [ -f dist/scary-release.apk ]; then
   shot 28-release-details 6
   key KEYCODE_BACK
   sleep 2
-  if adb logcat -d -b crash | grep -q "$PKG"; then
+  crashes=$(adb logcat -d -b crash || true)
+  if grep -q "$PKG" <<< "$crashes"; then
     echo "The release build crashed:"
     adb logcat -d -b crash
     exit 1

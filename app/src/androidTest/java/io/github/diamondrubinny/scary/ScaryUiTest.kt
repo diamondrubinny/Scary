@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary
 
+import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.ui.components.BUCKET_BUTTON_TAG
@@ -541,7 +542,7 @@ class ScaryUiTest {
     fun holdingOkOnAPosterAddsItToMyListAndHoldingAgainRemovesIt() {
         waitForHomeFocus()
         val catalog = bundledCatalog()
-        val collection = catalog.collections.first()
+        val collection = stableRow(catalog)
         val movie = catalog.moviesOf(collection).first()
         val rowKey = "collection:${collection.id}"
         val card = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
@@ -1599,7 +1600,7 @@ class ScaryUiTest {
     fun pickingFilmsNumbersThemAndTheBucketListKeepsAndChangesTheirOrder() {
         waitForHome()
         val catalog = bundledCatalog()
-        val collection = catalog.collections.first()
+        val collection = stableRow(catalog)
         val (first, second) = catalog.moviesOf(collection).take(2)
         val rowKey = "collection:${collection.id}"
         fun card(movie: Movie) = hasContentDescription("${movie.title}, ${movie.year}", substring = true) and
@@ -1666,6 +1667,13 @@ class ScaryUiTest {
         waitForGone(prompt)
         waitUntilOrDescribe("the home screen") { onHome() }
     }
+
+    /**
+     * A row whose first films stay where the feed put them: films with a fear level, which no other row takes away and
+     * no online refresh replaces (the row of new films is rewritten from Cinemeta; a film without a fear level is shown
+     * only in the first row that reaches it).
+     */
+    private fun stableRow(catalog: Catalog) = catalog.collections.first { row -> catalog.moviesOf(row).take(2).let { it.size == 2 && it.all(Movie::curated) && it.none(Movie::isSeries) } }
 
     /** The library as the app makes it: the packed film feed, with the old library's fear levels (core FeedCatalog). */
     private fun bundledCatalog() = FeedCatalog.catalog(
