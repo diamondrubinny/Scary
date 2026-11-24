@@ -616,6 +616,7 @@
     <string name="ai_about_title">بلا حرق للأحداث</string>
     <string name="ai_smart_search">بحث ذكي ✦</string>
     <string name="ai_smart_results">وجده الذكاء الاصطناعي</string>
+    <string name="ai_smart_hint">مع ✦ يمكنك أيضًا وصف ما تريد: «شيء مثل الراهبة لكن أقل رعبًا».</string>
     <string name="search_library_results">في المكتبة</string>
     <string name="ai_consent_title">إرسال هذا إلى %1$s؟</string>
     <string name="ai_consent_body">يُرسل سؤالك، وعناوين الأفلام التي يعرضها SCARY للاختيار منها، إلى %1$s، وهي خدمة ذكاء اصطناعي خارج SCARY. تنطبق شروطها وسياسة خصوصيتها: %2$s</string>

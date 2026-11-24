@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.ai
 
+import io.github.diamondrubinny.scary.core.catalog.Recommender
 import io.github.diamondrubinny.scary.core.catalog.Personalize
 import io.github.diamondrubinny.scary.core.catalog.Search
 import io.github.diamondrubinny.scary.core.model.Language
@@ -55,13 +56,21 @@ object AiPrompts {
         return AiPrompt(system, listOf(AiMessage(AiMessage.Role.USER, clip(query, MAX_QUERY_CHARS))), maxTokens = 900)
     }
 
-    /** "Smart search": the viewer describes a film; up to [MAX_SEARCH_PICKS] of [candidates] that match. */
+    /**
+     * "Smart search": the viewer says what they are after in their own words, and gets up to [MAX_SEARCH_PICKS] of
+     * [candidates]. Two kinds of asking: a film they are trying to recall ("the one with the doll in the attic"), or
+     * a kind of film they want ("something like The Nun but less scary").
+     */
     fun smartSearch(description: String, candidates: List<Movie>, language: Language): AiPrompt {
         val lang = languageName(language)
         val system = buildString {
-            append("You are SCARY's search on a TV. The viewer describes a horror or thriller title they are trying to find ")
-            append("(a scene, the plot, an actor, the era). Return up to $MAX_SEARCH_PICKS titles ONLY from the numbered list below ")
-            append("that match the description, best match first; return none if nothing matches. Never invent titles. ")
+            append("You are SCARY's search on a TV. The viewer writes in their own words, in any language. Either they describe ")
+            append("one horror or thriller title they are trying to recall (a scene, the plot, an actor, the era), or they ask for ")
+            append("a kind of title (a mood, \"something like\" a title they name, more or less scary, shorter, older, newer). ")
+            append("Return up to $MAX_SEARCH_PICKS titles ONLY from the numbered list below, best match first; return none if ")
+            append("nothing matches. Never invent titles. When they name a title and ask for something like it, do not return ")
+            append("that title itself, and respect what they want different: \"less scary\" means a lower fear level where the list ")
+            append("gives one (fear 1 is mild, 5 is relentless), otherwise a gentler kind of story; \"shorter\" means fewer minutes. ")
             append("For each, \"why\" is 3 to 8 simple everyday words in $lang saying what matches, with no spoilers. ")
             append(JSON_SHAPE.replace("{lang}", lang))
             append("\n\nTitles:\n").append(numbered(candidates, synopsis = true))
@@ -160,9 +169,14 @@ object AiPrompts {
         "Answer with JSON only, exactly in this shape: {\"picks\":[{\"n\":12,\"why\":\"...\"}],\"reply\":\"one short friendly sentence in {lang}\"}. " +
             "If nothing fits, return an empty picks list and say so in reply."
 
-    /** For smart search: the films the local search finds, then the ones whose plot shares words with the description. */
+    /**
+     * For smart search: the films the local search finds; then, when the description names a film ("something like The
+     * Nun"), the films most like that one, so the AI has its kin to choose from; then the ones whose plot shares words
+     * with the description; then the best rated.
+     */
     fun searchCandidates(movies: List<Movie>, description: String, labels: (Movie) -> List<String>, limit: Int = 120): List<Movie> {
         val local = Search.query(movies, description, labels, limit = 40)
+        val alike = alike(movies, description, limit / 3)
         val terms = AiCandidates.terms(description)
         val byPlot = if (terms.isEmpty()) emptyList() else movies.asSequence()
             .map { it to AiCandidates.textScore(it, terms) }
@@ -172,8 +186,41 @@ object AiPrompts {
             .take(limit)
             .toList()
         val popular = movies.sortedByDescending { it.imdbRating ?: 0.0 }
-        return (local + byPlot + popular).distinctBy { it.id }.take(limit)
+        return (local.take(limit / 3) + alike + local + byPlot + popular).distinctBy { it.id }.take(limit)
     }
+
+    /**
+     * The films most like the ones [description] names: a film is named when its whole title (in any language SCARY
+     * holds, four letters or more) stands in the description as words of its own. The longest titles are tried first,
+     * so "The Conjuring 2" is not taken for "The Conjuring".
+     */
+    internal fun alike(movies: List<Movie>, description: String, limit: Int): List<Movie> {
+        val text = " " + Search.normalize(description) + " "
+        val named = movies.asSequence()
+            .flatMap { movie -> (listOf(movie.title, movie.titleHe) + movie.titles.values).map { Search.normalize(it) to movie } }
+            .filter { (title, _) -> title.length >= MIN_NAMED_TITLE && text.contains(" $title ") }
+            .sortedByDescending { it.first.length }
+            .map { it.second }
+            .distinctBy { it.id }
+            .take(MAX_NAMED)
+            .toList()
+        if (named.isEmpty()) return emptyList()
+        val namedIds = named.mapTo(HashSet()) { it.id }
+        return movies.asSequence()
+            .filter { it.id !in namedIds }
+            .map { movie -> movie to named.maxOf { Recommender.score(it, movie) } }
+            .filter { it.second >= MIN_ALIKE }
+            .sortedWith(compareByDescending<Pair<Movie, Int>> { it.second }.thenByDescending { it.first.imdbRating ?: 0.0 })
+            .map { it.first }
+            .take(limit)
+            .toList()
+    }
+
+    private const val MIN_NAMED_TITLE = 4
+    private const val MAX_NAMED = 2
+
+    /** A shared subgenre at least: the same decade and genre alone make no kinship. */
+    private const val MIN_ALIKE = 3
 }
 
 /**

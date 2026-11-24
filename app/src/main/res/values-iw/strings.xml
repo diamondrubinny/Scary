@@ -594,6 +594,7 @@
     <string name="ai_about_title">בלי ספוילרים</string>
     <string name="ai_smart_search">חיפוש חכם ✦</string>
     <string name="ai_smart_results">נמצא בעזרת AI</string>
+    <string name="ai_smart_hint">עם ✦ אפשר גם לתאר מה מחפשים: \"משהו כמו הנזירה אבל פחות מפחיד\".</string>
     <string name="search_library_results">בספרייה</string>
     <string name="ai_consent_title">לשלוח ל־%1$s?</string>
     <string name="ai_consent_body">השאלה שלכם, ושמות הסרטים ש־SCARY מציע לבחור מהם, נשלחים ל־%1$s, שירות AI מחוץ ל־SCARY. התנאים ומדיניות הפרטיות שלו חלים: %2$s</string>

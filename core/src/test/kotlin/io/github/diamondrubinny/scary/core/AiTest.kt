@@ -157,6 +157,26 @@ class AiTest {
     }
 
     @Test
+    fun `smart search offers the kin of a film the viewer names`() {
+        val shelf = films + listOf(
+            film("nun", "The Nun", Subgenre.SUPERNATURAL, Subgenre.POSSESSION, synopsis = "A priest goes to a Romanian abbey."),
+            film("kin1", "The Convent", Subgenre.SUPERNATURAL, Subgenre.POSSESSION, synopsis = "Something old wakes below a chapel.", rating = 6.1),
+            film("kin2", "Saint Maud", Subgenre.POSSESSION, synopsis = "A nurse believes she is chosen.", rating = 6.7),
+            film("far", "Shark Bay", Subgenre.ANIMAL, synopsis = "A shark circles a reef."),
+        )
+        val alike = AiPrompts.alike(shelf, "something like the nun but less scary", limit = 10).map { it.id }
+        assertEquals("Its kin, the closest first, never the film itself", listOf("kin1", "kin2"), alike)
+        // In Hebrew letters or with no film named, nothing is taken for a title.
+        assertTrue(AiPrompts.alike(shelf, "משהו מפחיד לערב", limit = 10).isEmpty())
+        assertTrue(AiPrompts.alike(shelf, "a film about a doll", limit = 10).isEmpty())
+        // The kin reach the AI even though their words share nothing with the request.
+        val candidates = AiPrompts.searchCandidates(shelf, "something like the nun but less scary", { emptyList() }, limit = 6).map { it.id }
+        assertTrue(candidates.toString(), candidates.containsAll(listOf("nun", "kin1", "kin2")))
+        val prompt = AiPrompts.smartSearch("something like the nun but less scary", shelf, Language.HE).system
+        assertTrue(prompt.contains("something like") && prompt.contains("less scary") && prompt.contains("Never invent titles"))
+    }
+
+    @Test
     fun `request bodies are built as JSON for both shapes, and replies read back`() {
         val prompt = AiPrompts.chat(listOf(AiMessage(AiMessage.Role.USER, "hi \"quoted\" }")), Language.EN, null)
         val openai = Json.parseToJsonElement(AiWire.requestBody(AiProvider.Format.OPENAI, "m", prompt)).jsonObject
