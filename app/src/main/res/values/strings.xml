@@ -589,6 +589,7 @@
     <string name="ai_about_title">Without spoilers</string>
     <string name="ai_smart_search">Smart search ✦</string>
     <string name="ai_smart_results">Found by AI</string>
+    <string name="ai_smart_hint">With ✦ you can also describe what you want: “something like The Nun but less scary”.</string>
     <string name="search_library_results">In the library</string>
     <string name="ai_consent_title">Send this to %1$s?</string>
     <string name="ai_consent_body">Your question, and the titles SCARY offers it to choose from, go to %1$s, an AI service outside SCARY. Its own terms and privacy policy apply: %2$s</string>

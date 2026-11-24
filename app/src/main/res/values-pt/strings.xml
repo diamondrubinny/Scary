@@ -594,6 +594,7 @@
     <string name="ai_about_title">Sem spoilers</string>
     <string name="ai_smart_search">Busca inteligente ✦</string>
     <string name="ai_smart_results">Encontrado pela IA</string>
+    <string name="ai_smart_hint">Com ✦ você também pode descrever o que quer: “algo como A Freira, mas menos assustador”.</string>
     <string name="search_library_results">Na biblioteca</string>
     <string name="ai_consent_title">Enviar para %1$s?</string>
     <string name="ai_consent_body">Sua pergunta, e os títulos que o SCARY oferece para escolher, vão para %1$s, um serviço de IA fora do SCARY. Valem os termos e a política de privacidade dele: %2$s</string>

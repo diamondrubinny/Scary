@@ -18,7 +18,7 @@
     <string name="rd_torrent_invalid">هذا ليس رابطًا مغناطيسيًا.</string>
     <string name="rd_torrent_downloading">Real-Debrid يجلبه الآن: %1$d%%. ابقَ في هذه الشاشة وسيُشغَّل في مشغّل SCARY عند جاهزيته؛ ويظهر أيضًا في الأسفل.</string>
     <string name="rd_torrent_error_slots">لا يوجد في حسابك على Real-Debrid مكان شاغر لتورنت آخر. احذف واحدًا أو انتظر حتى ينتهي أحدها.</string>
-    <string name="rd_torrent_error_refused">رفض Real-Debrid هذا التورنت.</string>
+    <string name="rd_torrent_error_refused">يحظر Real-Debrid هذا الملف، لذلك لا يمكن إضافته. جرّب إصدارًا آخر أو فيلمًا آخر.</string>
     <string name="rd_torrent_error_too_big">هذا التورنت أكبر مما يقبله Real-Debrid.</string>
     <string name="rd_torrent_error_no_video">لا يحتوي هذا التورنت على ملف فيديو، لذلك لم يُحتفظ به.</string>
     <string name="rd_torrent_error_dead">لم يتمكن Real-Debrid من جلب هذا التورنت، لذلك أُزيل من حسابك.</string>

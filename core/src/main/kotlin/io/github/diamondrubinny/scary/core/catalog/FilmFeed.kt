@@ -7,6 +7,7 @@ package io.github.diamondrubinny.scary.core.catalog
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Genre
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.Subgenre
 import kotlinx.serialization.SerialName
@@ -17,8 +18,9 @@ import java.time.Year
 /**
  * The film feed (docs/CATALOG_REBUILD_PLAN.md): every film and every home row, built each week from public data by
  * tools/catalog/build_feed.py and downloaded by the TV, so the library changes without an app update. Facts only:
- * titles, year, director, subgenres, IMDb's rating and other genres, and which films each row holds, in order. No
- * synopsis and no fear level, which are never made up.
+ * titles, year, director, subgenres, IMDb's rating and other genres, and which films each row holds, in order. Beside
+ * the horror films it holds thrillers and horror series, each marked as what it is. No synopsis and no fear level,
+ * which are never made up.
  *
  * The file comes from the network, so it is read as untrusted, whole: a file too large, of another version or with too
  * few films is refused ([CatalogException]) and the copy the TV already has stays. Inside a good file, a film that
@@ -37,6 +39,8 @@ object FilmFeed {
 
     /** A row with fewer films than this after checking is not worth a place on the home screen. */
     const val MIN_ROW_FILMS = 8
+    private const val KIND_THRILLER = "thriller"
+    private const val KIND_SERIES = "series"
     private const val MAX_TITLE = 120
     private const val MAX_NAME = 80
     private const val MAX_GENRES = 6
@@ -61,6 +65,10 @@ object FilmFeed {
         @SerialName("s") val subgenres: List<String> = emptyList(),
         @SerialName("g") val genres: List<String> = emptyList(),
         @SerialName("r") val rating: Double? = null,
+        /** Absent for a horror film; "thriller" for a thriller, "series" for a horror series. */
+        @SerialName("k") val kind: String? = null,
+        @SerialName("e") val endYear: Int? = null,
+        @SerialName("on") val ongoing: Boolean = false,
     )
 
     @Serializable
@@ -120,6 +128,11 @@ object FilmFeed {
         val director = entry.director?.let { clean(it, MAX_NAME) ?: return null }.orEmpty()
         if (entry.genres.size > MAX_GENRES || entry.genres.any { !genrePattern.matches(it) }) return null
         if (entry.rating != null && (entry.rating.isNaN() || entry.rating <= 0.0 || entry.rating > 10.0)) return null
+        // A kind this version does not know is not shown as something it is not.
+        if (entry.kind != null && entry.kind != KIND_THRILLER && entry.kind != KIND_SERIES) return null
+        val series = entry.kind == KIND_SERIES
+        val thriller = entry.kind == KIND_THRILLER
+        if (entry.endYear != null && (!series || entry.endYear !in entry.year..2100)) return null
         return Movie(
             id = Cinemeta.ID_PREFIX + entry.imdb,
             imdbId = entry.imdb,
@@ -128,13 +141,16 @@ object FilmFeed {
             titles = titles - Language.EN.code,
             year = entry.year,
             director = director,
-            genre = Genre.HORROR,
+            genre = if (thriller) Genre.THRILLER else Genre.HORROR,
+            kind = if (series) MediaKind.SERIES else MediaKind.MOVIE,
+            endYear = entry.endYear,
+            ongoing = series && entry.ongoing && entry.endYear == null,
             // Unknown names are skipped, not refused: a newer feed may know subgenres this version does not.
             subgenres = entry.subgenres.mapNotNull(subgenres::get).distinct(),
             hue = Math.floorMod(entry.imdb.hashCode(), 360),
             imdbRating = entry.rating,
             curated = false,
-            genres = listOf("Horror") + entry.genres,
+            genres = listOf(if (thriller) "Thriller" else "Horror") + entry.genres,
         )
     }
 

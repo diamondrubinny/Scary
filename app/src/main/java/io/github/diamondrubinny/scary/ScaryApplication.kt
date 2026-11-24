@@ -125,6 +125,8 @@ class AppContainer(context: Context) {
     /** Asks TMDB (with the viewer's key) for the language of films whose origin is unclear (core Origin). */
     val cinemetaRepository = CinemetaRepository(appContext) { ids -> tmdbRepository.originalLanguages(ids) }
 
+    /** The films and rows that update by themselves (docs/CATALOG_REBUILD_PLAN.md): packed in the app, then downloaded. */
+    val feedRepository = io.github.diamondrubinny.scary.data.FeedRepository(appContext)
     val catalogRepository = CatalogRepository(appContext, cinemetaRepository, tmdbRepository)
     val appsRepository = InstalledAppsRepository(appContext)
     val tvInputsRepository = TvInputsRepository(appContext)

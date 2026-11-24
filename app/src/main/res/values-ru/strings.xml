@@ -601,6 +601,7 @@
     <string name="ai_about_title">Без спойлеров</string>
     <string name="ai_smart_search">Умный поиск ✦</string>
     <string name="ai_smart_results">Найдено ИИ</string>
+    <string name="ai_smart_hint">С ✦ можно и описать, что хочется: «что-то вроде „Проклятия монахини“, но не так страшно».</string>
     <string name="search_library_results">В библиотеке</string>
     <string name="ai_consent_title">Отправить в %1$s?</string>
     <string name="ai_consent_body">Ваш вопрос и названия, из которых SCARY предлагает выбрать, отправляются в %1$s, сервис ИИ вне SCARY. Действуют его условия и политика конфиденциальности: %2$s</string>

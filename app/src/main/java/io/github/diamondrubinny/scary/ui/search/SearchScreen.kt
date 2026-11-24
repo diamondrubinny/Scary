@@ -98,6 +98,7 @@ import io.github.diamondrubinny.scary.ui.theme.ScaryType
 
 /** Test tag of the "Smart search ✦" button. */
 const val SMART_SEARCH_TAG = "smartSearch"
+const val SMART_HINT_TAG = "smartHint"
 const val SEARCH_FILTER_KIND_TAG = "searchFilterKind"
 const val SEARCH_FILTER_YEARS_TAG = "searchFilterYears"
 const val SEARCH_FILTER_FEAR_TAG = "searchFilterFear"
@@ -264,6 +265,14 @@ fun SearchScreen(
             onFilterChange(SearchFilter.NONE)
         }
         FilterRow(filter, onFilterChange, filterFocus, clearFilters)
+        // What smart search is for, where the viewer is about to type: not only names.
+        if (smart != null && query.isBlank()) {
+            BasicText(
+                stringResource(R.string.ai_smart_hint),
+                style = ScaryType.Caption.copy(color = ScaryColors.Ash),
+                modifier = Modifier.padding(horizontal = SidePadding).testTag(SMART_HINT_TAG),
+            )
+        }
 
         val status = when {
             query.isBlank() && !filter.active -> pluralStringResource(R.plurals.search_prompt, movies.size, movies.size)
