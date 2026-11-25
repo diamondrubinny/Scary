@@ -263,6 +263,7 @@ class RealDebridRepository(
         val added = call("POST", RealDebrid.ADD_MAGNET_URL, RealDebrid.addMagnetForm(magnet)) ?: return@withContext Pull.Failed(PullError.UNREACHABLE)
         val id = added.body?.takeIf { added.ok }?.let(RealDebrid::parseAdded)
             ?: return@withContext Pull.Failed(pullError(added))
+        awaitingChoice += id
         val started = SystemClock.elapsedRealtime()
         var chosenAt = 0L
         var progress = 0
@@ -272,20 +273,22 @@ class RealDebridRepository(
             when (status?.state) {
                 null, RealDebrid.TorrentState.CONVERTING -> Unit
                 RealDebrid.TorrentState.CHOOSE_FILES -> if (chosenAt == 0L) {
-                    val ids = RealDebrid.filesToSelect(status.files)
-                    if (ids.isEmpty()) {
-                        deleteTorrent(id)
-                        return@withContext Pull.Failed(PullError.NO_VIDEO)
+                    when (choose(status)) {
+                        Choice.NO_VIDEO -> return@withContext Pull.Failed(PullError.NO_VIDEO)
+                        Choice.CHOSEN -> chosenAt = SystemClock.elapsedRealtime()
+                        Choice.NOT_YET -> Unit
                     }
-                    val chosen = call("POST", RealDebrid.selectFilesUrl(id), RealDebrid.selectFilesForm(ids))
-                    if (chosen?.ok == true) chosenAt = SystemClock.elapsedRealtime()
                 }
                 RealDebrid.TorrentState.QUEUED, RealDebrid.TorrentState.DOWNLOADING, RealDebrid.TorrentState.FINISHING -> {
                     progress = status.progress
+                    // Past the choice without SCARY making it (Real-Debrid chose, or an earlier answer was lost).
+                    awaitingChoice -= id
+                    if (chosenAt == 0L) chosenAt = SystemClock.elapsedRealtime()
                     // Not one Real-Debrid already holds: it stays in the account and shows in the list when done.
                     if (chosenAt != 0L && SystemClock.elapsedRealtime() - chosenAt > CACHED_WAIT_MS) return@withContext Pull.Downloading(progress, id)
                 }
                 RealDebrid.TorrentState.READY -> {
+                    awaitingChoice -= id
                     cachedFiles = null
                     val files = status.finished()?.let { RealDebrid.torrentFiles(it, answer.body) }.orEmpty()
                     return@withContext if (files.isEmpty()) Pull.Failed(PullError.NO_VIDEO) else Pull.Ready(files)
@@ -298,6 +301,44 @@ class RealDebridRepository(
             delay(PULL_POLL_MS)
         }
         Pull.Downloading(progress, id)
+    }
+
+    /**
+     * Torrents SCARY added whose files are not chosen yet. Real-Debrid can take longer to read a magnet link than
+     * [pull] waits (or the viewer leaves the screen first); a torrent left there would sit in the account for ever,
+     * fetching nothing. Whoever asks about it next ([torrentStatus], [recentTorrents]) finishes the choice. Only
+     * SCARY's own additions: a torrent the viewer added elsewhere and left unchosen is theirs to decide.
+     */
+    private val awaitingChoice: MutableSet<String> = java.util.concurrent.ConcurrentHashMap.newKeySet()
+
+    private enum class Choice { CHOSEN, NO_VIDEO, NOT_YET }
+
+    /** Asks for the videos of a torrent that waits for its files to be chosen; one with no video is deleted. */
+    private suspend fun choose(status: RealDebrid.TorrentStatus): Choice {
+        val ids = RealDebrid.filesToSelect(status.files)
+        if (ids.isEmpty()) {
+            deleteTorrent(status.id)
+            return Choice.NO_VIDEO
+        }
+        val chosen = call("POST", RealDebrid.selectFilesUrl(status.id), RealDebrid.selectFilesForm(ids))
+        if (chosen?.ok != true) return Choice.NOT_YET
+        awaitingChoice -= status.id
+        return Choice.CHOSEN
+    }
+
+    /** [status] as it stands after the choice SCARY still owed it, when it owed one. */
+    private suspend fun settled(status: RealDebrid.TorrentStatus): RealDebrid.TorrentStatus {
+        if (status.id !in awaitingChoice) return status
+        return when (status.state) {
+            RealDebrid.TorrentState.CONVERTING -> status
+            RealDebrid.TorrentState.CHOOSE_FILES -> when (choose(status)) {
+                Choice.CHOSEN -> status.copy(state = RealDebrid.TorrentState.QUEUED)
+                Choice.NO_VIDEO -> status.copy(state = RealDebrid.TorrentState.FAILED)
+                Choice.NOT_YET -> status
+            }
+            // Past the choice (or failed): nothing is owed any more.
+            else -> status.also { awaitingChoice -= status.id }
+        }
     }
 
     private fun pullError(answer: Answer): PullError = when (answer.body?.let(RealDebrid::errorCode)) {
@@ -313,7 +354,10 @@ class RealDebridRepository(
         val answer = call("GET", RealDebrid.RECENT_TORRENTS_URL) ?: return@withContext null
         when {
             answer.code == HttpURLConnection.HTTP_NO_CONTENT -> emptyList()
-            answer.ok -> RealDebrid.parseTorrentStatuses(answer.body.orEmpty())
+            answer.ok -> RealDebrid.parseTorrentStatuses(answer.body.orEmpty()).map { listed ->
+                // The list carries no files: one that still waits for SCARY's choice is asked about by itself.
+                if (listed.id in awaitingChoice && listed.state == RealDebrid.TorrentState.CHOOSE_FILES) torrentStatus(listed.id) ?: listed else listed
+            }
             else -> null
         }
     }
@@ -327,7 +371,7 @@ class RealDebridRepository(
 
     /** Where one torrent of the account stands now; null when it could not be asked. */
     suspend fun torrentStatus(id: String): RealDebrid.TorrentStatus? = withContext(Dispatchers.IO) {
-        call("GET", RealDebrid.torrentInfoUrl(id))?.takeIf { it.ok }?.body?.let(RealDebrid::parseTorrentStatus)
+        call("GET", RealDebrid.torrentInfoUrl(id))?.takeIf { it.ok }?.body?.let(RealDebrid::parseTorrentStatus)?.let { settled(it) }
     }
 
     /**
@@ -360,7 +404,7 @@ class RealDebridRepository(
     suspend fun deleteTorrent(id: String): Boolean = withContext(Dispatchers.IO) {
         val answer = call("DELETE", RealDebrid.deleteTorrentUrl(id)) ?: return@withContext false
         if (answer.ok) cachedFiles = null
-        answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND
+        (answer.ok || answer.code == HttpURLConnection.HTTP_NOT_FOUND).also { gone -> if (gone) awaitingChoice -= id }
     }
 
     suspend fun activeCount(): RealDebrid.ActiveCount? = withContext(Dispatchers.IO) {
