@@ -1185,6 +1185,25 @@ class ScaryUiTest {
     private fun firstTasteCardOnScreen(lovedBefore: Set<String>, viewModel: HomeViewModel) =
         firstTasteCardOnScreenOrNull(lovedBefore, viewModel) ?: throw AssertionError("no taste card on screen")
 
+    /**
+     * Waits until the picker's list for [kind] has stopped changing: films keep arriving from the library and the web
+     * for a while after start-up and the grid reorders with them, so a card read off the screen a moment earlier can
+     * be gone before it is pressed.
+     */
+    private fun waitForSettledTaste(kind: MediaKind, viewModel: HomeViewModel) {
+        var last = emptyList<String>()
+        var since = System.currentTimeMillis()
+        waitUntilOrDescribe("the ${kind.name} picker to settle", TIMEOUT_MS * 2) {
+            val now = viewModel.tasteCandidates(kind).map { it.id }
+            if (now != last) {
+                last = now
+                since = System.currentTimeMillis()
+            }
+            now.isNotEmpty() && System.currentTimeMillis() - since >= TASTE_SETTLE_MS
+        }
+        rule.waitForIdle()
+    }
+
     @Test
     fun theTastePickerMarksFilmsAndSeriesAsLovedAndDoneGoesBackToSettings() {
         waitForHome()
@@ -1201,6 +1220,7 @@ class ScaryUiTest {
             waitFor(hasText(text(R.string.taste_done)) and isFocused())
             // A film on screen (the list can reorder while ratings arrive from the web, so it is read off the
             // screen, not recomputed); OK puts a heart on it, read out with its title.
+            waitForSettledTaste(MediaKind.MOVIE, viewModel)
             val film = firstTasteCardOnScreen(lovedBefore, viewModel)
             picked += film.id
             rule.onNodeWithTag(tasteCardTag(film.id)).performScrollTo().performClick()
@@ -1212,6 +1232,7 @@ class ScaryUiTest {
             // The series tab shows series.
             rule.onNodeWithTag(tasteTabTag(MediaKind.SERIES)).performClick()
             waitUntilOrDescribe("a series on the picker") { firstTasteCardOnScreenOrNull(lovedBefore, viewModel)?.kind == MediaKind.SERIES }
+            waitForSettledTaste(MediaKind.SERIES, viewModel)
             val series = firstTasteCardOnScreen(lovedBefore, viewModel)
             assertTrue(series.kind == MediaKind.SERIES)
             picked += series.id
@@ -1695,6 +1716,8 @@ class ScaryUiTest {
 
     private companion object {
         const val TIMEOUT_MS = 20_000L
+        /** How long the taste picker's list must stay the same to count as settled. */
+        const val TASTE_SETTLE_MS = 2_000L
         const val DEBUG_OPEN = "scary.debug.open"
         // Details, the on-screen keyboard (which takes a Back of its own, sometimes twice), search, and a spare.
         const val MAX_BACKS = 6
