@@ -23,4 +23,7 @@
     <string name="torbox_key_note">Подключение — это ваш API-ключ TorBox: он даёт полный доступ к аккаунту и не истекает. Отключение удаляет его с этого ТВ. Чтобы отключить его везде, сбросьте API-ключ в настройках TorBox.</string>
     <string name="torbox_privacy">TorBox видит IP-адрес ТВ, ваши торренты и то, какие из ваших файлов вы смотрите. Подключение хранится зашифрованным только на этом ТВ; в SCARY ничего не отправляется.</string>
     <string name="rd_torrent_error_limit">Аккаунт достиг лимита своего тарифа (месячного, дневного или времени ожидания). Попробуйте позже.</string>
+    <string name="debrid_add_to_rd">Добавить в Real-Debrid</string>
+    <string name="debrid_add_to_torbox">Добавить в TorBox</string>
+    <string name="debrid_pull_confirm">Добавить этот релиз в ваш аккаунт и воспроизвести в плеере SCARY? Выберите аккаунт.</string>
 </resources>

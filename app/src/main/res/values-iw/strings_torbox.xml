@@ -23,4 +23,7 @@
     <string name="torbox_key_note">החיבור הוא מפתח ה־API שלכם ב־TorBox: הוא נותן גישה מלאה לחשבון ואינו פג. התנתקות מוחקת אותו מהטלוויזיה הזו. כדי לנתק אותו בכל מקום, אפסו את מפתח ה־API בהגדרות של TorBox.</string>
     <string name="torbox_privacy">TorBox רואה את כתובת ה־IP של הטלוויזיה, את הטורנטים שלכם ואילו מהקבצים שלכם מנוגנים. החיבור נשמר מוצפן בטלוויזיה הזו בלבד; שום דבר לא נשלח ל־SCARY.</string>
     <string name="rd_torrent_error_limit">החשבון הגיע למגבלה של התוכנית שלו (חודשית, יומית או זמן המתנה). נסו שוב מאוחר יותר.</string>
+    <string name="debrid_add_to_rd">הוספה ל־Real-Debrid</string>
+    <string name="debrid_add_to_torbox">הוספה ל־TorBox</string>
+    <string name="debrid_pull_confirm">להוסיף את התוצאה הזו לחשבון שלכם ולנגן אותה בנגן של SCARY? בחרו את החשבון.</string>
 </resources>

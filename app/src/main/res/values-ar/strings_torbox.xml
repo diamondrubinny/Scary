@@ -23,4 +23,7 @@
     <string name="torbox_key_note">الاتصال هو مفتاح API الخاص بك في TorBox: يمنح وصولًا كاملًا إلى الحساب ولا تنتهي صلاحيته. قطع الاتصال يحذفه من هذا التلفاز. لقطعه في كل مكان، أعد تعيين مفتاح API في إعدادات TorBox.</string>
     <string name="torbox_privacy">يرى TorBox عنوان IP للتلفاز، وتورنتاتك، وأي ملفاتك تُشغَّل. يُحفظ الاتصال مشفّرًا على هذا التلفاز فقط؛ لا يُرسل شيء إلى SCARY.</string>
     <string name="rd_torrent_error_limit">بلغ الحساب حدًّا من حدود خطته (شهري أو يومي أو وقت انتظار). حاول لاحقًا.</string>
+    <string name="debrid_add_to_rd">إضافة إلى Real-Debrid</string>
+    <string name="debrid_add_to_torbox">إضافة إلى TorBox</string>
+    <string name="debrid_pull_confirm">هل تضيف هذا الإصدار إلى حسابك وتشغّله في مشغّل SCARY؟ اختر الحساب.</string>
 </resources>

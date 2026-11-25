@@ -1465,7 +1465,7 @@ class HomeViewModel(
     }
 
     /** The viewer's magnet link: added to their account, and played in SCARY's player as soon as it is ready. */
-    fun pullMagnet(text: String) {
+    fun pullMagnet(text: String, service: io.github.diamondrubinny.scary.data.DebridAccounts.Service? = null) {
         val repository = debrid ?: return
         if (_rdTorrents.value.pull == RdPullState.Working) return
         val magnet = Magnets.parse(text)
@@ -1476,7 +1476,7 @@ class HomeViewModel(
         _rdTorrents.update { it.copy(pull = RdPullState.Working) }
         pullWatch?.cancel()
         pullWatch = viewModelScope.launch {
-            val result = repository.pull(magnet)
+            val result = repository.pull(magnet, service)
             _rdTorrents.update {
                 it.copy(
                     pull = when (result) {

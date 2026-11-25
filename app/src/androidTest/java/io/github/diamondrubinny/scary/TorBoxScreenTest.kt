@@ -20,6 +20,23 @@ import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_SERVICE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
 import io.github.diamondrubinny.scary.ui.realdebrid.TORBOX_OPEN_TAG
+import androidx.compose.ui.test.performTextInput
+import io.github.diamondrubinny.scary.core.realdebrid.Magnets
+import io.github.diamondrubinny.scary.core.sources.Releases
+import io.github.diamondrubinny.scary.data.DebridAccounts.Service
+import io.github.diamondrubinny.scary.ui.home.RdPullState
+import io.github.diamondrubinny.scary.ui.home.RdSearchState
+import io.github.diamondrubinny.scary.ui.home.RdTorrentsState
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_PULL_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_SOURCES_PULL_TORBOX_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_FIELD_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_PULL_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RD_TORRENTS_PULL_TORBOX_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdSourcesScreen
+import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RdTorrentsScreen
+import io.github.diamondrubinny.scary.ui.realdebrid.releaseTag
 import io.github.diamondrubinny.scary.data.RealDebridRepository.Reason
 import io.github.diamondrubinny.scary.data.RealDebridRepository.State
 import io.github.diamondrubinny.scary.ui.realdebrid.TORBOX_CODE_TAG
@@ -127,5 +144,67 @@ class TorBoxScreenTest {
             files = listOf(mine)
         }
         rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG)).assertDoesNotExist()
+    }
+
+    @Test
+    fun withBothAccountsTheViewerSaysWhereALinkGoes() {
+        val magnet = "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
+        val sent = mutableListOf<String>()
+        var services by mutableStateOf(listOf(Service.REAL_DEBRID, Service.TORBOX))
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RdTorrentsScreen(
+                    state = RdTorrentsState(torrents = emptyList()),
+                    actions = RdTorrentsActions(
+                        onPull = { sent += "only" },
+                        onRefresh = {},
+                        onPlay = {},
+                        onDelete = {},
+                        onPullTo = { _, service -> sent += service.name },
+                    ),
+                    services = services,
+                )
+            }
+        } }
+        rule.onNode(hasTestTag(RD_TORRENTS_FIELD_TAG)).performTextInput(magnet)
+        rule.onNode(hasTestTag(RD_TORRENTS_PULL_TORBOX_TAG) and hasText(text(R.string.debrid_add_to_torbox))).performClick()
+        rule.onNode(hasTestTag(RD_TORRENTS_PULL_TAG) and hasText(text(R.string.debrid_add_to_rd))).performClick()
+        assertEquals(listOf("TORBOX", "REAL_DEBRID"), sent)
+
+        // One account: one button, and nothing to choose.
+        rule.runOnUiThread { services = listOf(Service.TORBOX) }
+        rule.onNode(hasTestTag(RD_TORRENTS_PULL_TORBOX_TAG)).assertDoesNotExist()
+        rule.onNode(hasTestTag(RD_TORRENTS_PULL_TAG)).performClick()
+        assertEquals(listOf("TORBOX", "REAL_DEBRID", "only"), sent)
+    }
+
+    @Test
+    fun aReleaseGoesToTheAccountTheViewerChooses() {
+        val release = Releases.Candidate("A.Film.2020.1080p.BluRay", Magnets.Magnet("0123456789abcdef0123456789abcdef01234567"), "Site", 4_000_000_000, 50, Releases.tags("A.Film.2020.1080p.BluRay"))
+        val sent = mutableListOf<String>()
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RdSourcesScreen(
+                    search = RdSearchState.Ready(listOf(release)),
+                    pull = RdPullState.Idle,
+                    indexerHost = "indexer.example",
+                    actions = RdSourcesActions(
+                        onSearch = {},
+                        onPull = { sent += "only" },
+                        onSaveIndexer = { _, _ -> throw AssertionError("not asked for") },
+                        onRemoveIndexer = {},
+                        onPullTo = { _, service -> sent += service.name },
+                    ),
+                    services = listOf(Service.REAL_DEBRID, Service.TORBOX),
+                )
+            }
+        } }
+        rule.onNode(hasTestTag(releaseTag(release.magnet.infoHash))).performClick()
+        // Nothing is added by opening the window; both accounts are offered, by name.
+        rule.onNode(hasText(text(R.string.debrid_pull_confirm))).assertExists()
+        rule.onNode(hasTestTag(RD_SOURCES_PULL_TAG) and hasText(text(R.string.debrid_add_to_rd))).assertExists()
+        assertEquals(emptyList<String>(), sent)
+        rule.onNode(hasTestTag(RD_SOURCES_PULL_TORBOX_TAG)).performClick()
+        assertEquals(listOf("TORBOX"), sent)
     }
 }

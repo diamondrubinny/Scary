@@ -213,6 +213,13 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val aiState by aiStateFlow.collectAsStateWithLifecycle()
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
     val torBoxState by viewModel.torBoxState.collectAsStateWithLifecycle()
+    // The connected accounts, Real-Debrid first: with both, the viewer chooses where each torrent goes.
+    val debridServices = remember(realDebridState, torBoxState) {
+        listOfNotNull(
+            io.github.diamondrubinny.scary.data.DebridAccounts.Service.REAL_DEBRID.takeIf { realDebridState is RealDebridRepository.State.SignedIn },
+            io.github.diamondrubinny.scary.data.DebridAccounts.Service.TORBOX.takeIf { torBoxState is RealDebridRepository.State.SignedIn },
+        )
+    }
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
     val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
@@ -708,9 +715,11 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 )
                 current == Screen.RdTorrents -> RdTorrentsScreen(
                     state = rdTorrents,
+                    services = debridServices,
                     actions = remember(viewModel) {
                         RdTorrentsActions(
-                            onPull = viewModel::pullMagnet,
+                            onPull = { viewModel.pullMagnet(it) },
+                            onPullTo = viewModel::pullMagnet,
                             onRefresh = viewModel::refreshRdTorrents,
                             onPlay = viewModel::playRdTorrent,
                             onDelete = viewModel::deleteRdTorrent,
@@ -725,10 +734,12 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     indexerHost = indexerHost,
                     sources = sourceLabels,
                     throughTor = sourcesThroughTor,
+                    services = debridServices,
                     actions = remember(viewModel) {
                         RdSourcesActions(
                             onSearch = viewModel::searchSources,
                             onPull = { viewModel.pullMagnet(it.magnet.uri) },
+                            onPullTo = { release, service -> viewModel.pullMagnet(release.magnet.uri, service) },
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
                             onCheckSource = viewModel::checkSource,

@@ -23,4 +23,7 @@
     <string name="torbox_key_note">A conexão é a sua chave de API do TorBox: ela dá acesso total à conta e não expira. Desconectar a remove desta TV. Para cortá-la em todo lugar, redefina a chave de API nas configurações do TorBox.</string>
     <string name="torbox_privacy">O TorBox vê o endereço IP da TV, seus torrents e quais dos seus arquivos você reproduz. A conexão fica guardada criptografada só nesta TV; nada é enviado ao SCARY.</string>
     <string name="rd_torrent_error_limit">A conta atingiu um limite do plano (mensal, diário ou um tempo de espera). Tente mais tarde.</string>
+    <string name="debrid_add_to_rd">Adicionar ao Real-Debrid</string>
+    <string name="debrid_add_to_torbox">Adicionar ao TorBox</string>
+    <string name="debrid_pull_confirm">Adicionar este lançamento à sua própria conta e reproduzi-lo no player do SCARY? Escolha a conta.</string>
 </resources>

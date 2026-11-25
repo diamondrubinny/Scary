@@ -23,4 +23,7 @@
     <string name="torbox_key_note">The connection is your TorBox API key: it gives full access to the account and does not run out. Disconnecting removes it from this TV. To cut it off everywhere, reset the API key in TorBox\'s settings.</string>
     <string name="torbox_privacy">TorBox sees the TV\'s IP address, your torrents and which of your files you play. The connection is stored encrypted on this TV only; nothing is sent to SCARY.</string>
     <string name="rd_torrent_error_limit">The account reached a limit of its plan (monthly, daily or a waiting time). Try again later.</string>
+    <string name="debrid_add_to_rd">Add to Real-Debrid</string>
+    <string name="debrid_add_to_torbox">Add to TorBox</string>
+    <string name="debrid_pull_confirm">Add this release to your own account and play it in SCARY\'s player? Choose the account.</string>
 </resources>
