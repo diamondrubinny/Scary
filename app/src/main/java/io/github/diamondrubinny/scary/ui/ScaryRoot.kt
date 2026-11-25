@@ -212,6 +212,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val aiStateFlow = remember(aiAssistant) { aiAssistant?.state ?: kotlinx.coroutines.flow.MutableStateFlow(AiState()) }
     val aiState by aiStateFlow.collectAsStateWithLifecycle()
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
+    val torBoxState by viewModel.torBoxState.collectAsStateWithLifecycle()
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
     val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
@@ -687,6 +688,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
                             onDeleteAll = if (sourcesEnabled) viewModel::deleteAllRdFiles else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
+                            onTorBox = if (sourcesEnabled) viewModel::openTorBox else null,
                         )
                     },
                 )
@@ -696,6 +698,12 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     pinSet = state.parentalEnabled,
                     onChoose = viewModel::chooseProfile,
                     onChange = viewModel::editProfiles,
+                )
+                current == Screen.TorBox -> io.github.diamondrubinny.scary.ui.realdebrid.TorBoxScreen(
+                    state = torBoxState,
+                    onSignIn = viewModel::torBoxSignIn,
+                    onCancel = viewModel::torBoxCancelSignIn,
+                    onSignOut = viewModel::torBoxSignOut,
                 )
                 current == Screen.RdTorrents -> RdTorrentsScreen(
                     state = rdTorrents,

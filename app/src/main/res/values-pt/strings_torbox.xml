@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="torbox_title">TorBox</string>
+    <string name="torbox_open">Conta TorBox</string>
+    <string name="torbox_what">Uma segunda conta ao lado do Real-Debrid. Depois de conectar, os vídeos da sua própria conta TorBox podem ser reproduzidos no player do SCARY, e um torrent que você escolher pode ser adicionado a ela.</string>
+    <string name="torbox_signed_out">Não conectado ao TorBox.</string>
+    <string name="torbox_waiting">Aguardando você aprovar esta TV no TorBox…</string>
+    <string name="torbox_connected">Conectado ao TorBox.</string>
+    <string name="torbox_signed_in">Conectado ao TorBox como %1$s.</string>
+    <string name="torbox_signed_in_until">Conectado ao TorBox como %1$s. O plano vale até %2$s.</string>
+    <string name="torbox_signed_in_free">Conectado ao TorBox como %1$s, no plano gratuito. O TorBox reserva a maior parte disto para planos pagos.</string>
+    <string name="torbox_unreachable">Não foi possível acessar o TorBox. Verifique a rede e tente de novo.</string>
+    <string name="torbox_expired">O código expirou, ou o TorBox não o aceitou. Conectar com um código exige um plano pago do TorBox.</string>
+    <string name="torbox_storage">Não foi possível guardar a conexão com segurança nesta TV.</string>
+    <string name="torbox_session_ended">O TorBox não aceita mais a conexão desta TV. Conecte de novo.</string>
+    <string name="torbox_sign_in">Conectar ao TorBox</string>
+    <string name="torbox_sign_out">Desconectar</string>
+    <string name="torbox_cancel">Cancelar</string>
+    <string name="torbox_step_open">No celular, abra %1$s</string>
+    <string name="torbox_step_code">Entre no TorBox e digite este código:</string>
+    <string name="torbox_qr_description">Código QR que abre a página do TorBox para aprovar esta TV</string>
+    <string name="torbox_key_note">A conexão é a sua chave de API do TorBox: ela dá acesso total à conta e não expira. Desconectar a remove desta TV. Para cortá-la em todo lugar, redefina a chave de API nas configurações do TorBox.</string>
+    <string name="torbox_privacy">O TorBox vê o endereço IP da TV, seus torrents e quais dos seus arquivos você reproduz. A conexão fica guardada criptografada só nesta TV; nada é enviado ao SCARY.</string>
+    <string name="rd_torrent_error_limit">A conta atingiu um limite do plano (mensal, diário ou um tempo de espera). Tente mais tarde.</string>
+</resources>

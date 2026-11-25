@@ -244,7 +244,7 @@ object TorBox {
         val files: List<TorrentFile>,
     ) {
         /** As the screens read a torrent of either account; the id says whose it is. */
-        fun status(): RealDebrid.TorrentStatus = RealDebrid.TorrentStatus("$SCHEME$id", name, state, progress, sizeBytes)
+        fun status(): RealDebrid.TorrentStatus = RealDebrid.TorrentStatus(statusId(id), name, state, progress, sizeBytes)
 
         /**
          * The videos of a finished torrent, without the small ones beside a big one (samples, trailers), each with the
@@ -276,6 +276,9 @@ object TorBox {
         val file = parts[2].toIntOrNull()?.takeIf { it >= 0 } ?: return null
         return torrent to file
     }
+
+    /** A torrent's id as the screens hold it ("torbox42"): letters and digits like Real-Debrid's, and telling whose it is. */
+    fun statusId(torrentId: Long): String = "$SCHEME$torrentId"
 
     /** The torrent id inside the id [Torrent.status] gives the screens; null for a Real-Debrid id. */
     fun parseStatusId(id: String): Long? = id.takeIf { it.startsWith(SCHEME) }?.removePrefix(SCHEME)?.toLongOrNull()?.takeIf { it in 0..MAX_ID }

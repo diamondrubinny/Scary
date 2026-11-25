@@ -95,6 +95,8 @@ class RealDebridActions(
     val onDeleteAll: (() -> Unit)? = null,
     /** Opens "Add a torrent"; null in a build without the sources feature, which then shows no way in. */
     val onTorrents: (() -> Unit)? = null,
+    /** Opens the TorBox account, a second one beside this; null in a build without the sources feature. */
+    val onTorBox: (() -> Unit)? = null,
 )
 
 /** Test tags of the file correction window. */
@@ -176,6 +178,8 @@ fun RealDebridScreen(
                 }
             }
         }
+        // A second account, whatever this one's state: a viewer may have TorBox alone.
+        actions.onTorBox?.let { ScaryButton(stringResource(R.string.torbox_open), onClick = it, quiet = true, modifier = Modifier.testTag(TORBOX_OPEN_TAG)) }
         if (vpnBlocked) {
             BasicText(stringResource(R.string.vpn_blocked_note), style = ScaryType.Caption.copy(color = ScaryColors.Candle), modifier = Modifier.testTag(REAL_DEBRID_VPN_BLOCKED_TAG))
         }

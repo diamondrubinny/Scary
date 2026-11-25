@@ -154,6 +154,8 @@ class HomeViewModel(
     private val vpn: io.github.diamondrubinny.scary.data.VpnWatcher? = null,
     /** SCARY's own WireGuard tunnel; null in tests that do not need it. */
     private val tunnel: io.github.diamondrubinny.scary.data.VpnRepository? = null,
+    /** The viewer's TorBox account, a second one beside Real-Debrid; null in tests that do not need it. */
+    private val torBox: io.github.diamondrubinny.scary.data.TorBoxRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -363,6 +365,7 @@ class HomeViewModel(
                 watchTmdbAccount()
             }
             launch { realDebrid?.load() }
+            launch { torBox?.load() }
             launch { sources?.load() }
             launch { tunnel?.load() }
             launch {
@@ -1357,6 +1360,29 @@ class HomeViewModel(
     /** "Continue from 1:12:40, or from the start?" for a file with a saved spot. */
     private val _resumeChoice = MutableStateFlow<ResumeChoice?>(null)
     val resumeChoice: StateFlow<ResumeChoice?> = _resumeChoice.asStateFlow()
+
+    /** The viewer's TorBox account (docs/TORBOX_PLAN.md); it connects as Real-Debrid does, so its state is the same type. */
+    val torBoxState: StateFlow<RealDebridRepository.State> =
+        torBox?.state ?: MutableStateFlow(RealDebridRepository.State.SignedOut)
+
+    /** Real-Debrid's screen → TorBox account. Reached only from that screen, which the parental lock already guards. */
+    fun openTorBox() {
+        if (backStack.value.last() != Screen.RealDebrid) return
+        push(Screen.TorBox)
+        torBox?.refreshAccount()
+    }
+
+    fun torBoxSignIn() {
+        torBox?.startSignIn()
+    }
+
+    fun torBoxCancelSignIn() {
+        torBox?.cancelSignIn()
+    }
+
+    fun torBoxSignOut() {
+        torBox?.signOut()
+    }
 
     /** Files already counted as watched in this player session (near the end), so it is said once. */
     private val markedWatched = HashSet<String>()
@@ -3015,6 +3041,7 @@ class HomeViewModel(
                     sources = container.sources,
                     vpn = container.vpnWatcher,
                     tunnel = container.vpn,
+                    torBox = container.torBox,
                 )
             }
         }

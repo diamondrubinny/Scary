@@ -307,6 +307,8 @@ sealed interface Screen {
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */
     data object RealDebrid : Screen
+    /** The viewer's TorBox account, a second one beside Real-Debrid: connecting and disconnecting. */
+    data object TorBox : Screen
     /** Adding a magnet link to the viewer's Real-Debrid account, and its newest torrents (the sources feature). */
     data object RdTorrents : Screen
     /** Searching the viewer's own indexer for a release to add (the sources feature); with [movieId], for that film. */

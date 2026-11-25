@@ -90,7 +90,7 @@ class RealDebridRepository(
         data class Failed(val reason: PullError) : Pull
     }
 
-    enum class PullError { UNREACHABLE, SLOTS_FULL, REFUSED, TOO_BIG, NO_VIDEO, DEAD, NOT_ALLOWED }
+    enum class PullError { UNREACHABLE, SLOTS_FULL, REFUSED, TOO_BIG, NO_VIDEO, DEAD, NOT_ALLOWED, LIMIT }
 
     /** What the player opens: a direct link, and how to get the converted stream if the TV cannot play it. */
     class Playable(val url: String, val title: String, private val transcode: suspend () -> String?) {
