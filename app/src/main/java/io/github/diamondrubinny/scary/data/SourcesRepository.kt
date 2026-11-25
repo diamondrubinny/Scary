@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.sources.Relevance
 import java.net.URI
 import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.sources.TorrentFile
@@ -237,14 +238,20 @@ class SourcesRepository(private val secrets: SecretStore) {
      * searches by number). A stream add-on answers by film only: it is asked for [filmImdbId], and without one says
      * [Search.NeedsFilm]. The last answer is kept for [CACHE_MS], so filtering and sorting ask nothing.
      */
-    suspend fun search(query: String, imdbId: String? = null, filmImdbId: String? = imdbId): Search = withContext(Dispatchers.IO) {
+    suspend fun search(
+        query: String,
+        imdbId: String? = null,
+        filmImdbId: String? = imdbId,
+        /** The film or series the search is for, when it is one's own search: only its releases are kept (core Relevance). */
+        wanted: Relevance.Wanted? = null,
+    ): Search = withContext(Dispatchers.IO) {
         val all = configs
         if (all.isEmpty()) return@withContext Search.NotConfigured
         if (blocked()) return@withContext Search.Unreachable
         val words = Torznab.cleanQuery(query)
-        val key = "${imdbId.orEmpty()}|${filmImdbId.orEmpty()}|${words.orEmpty()}"
+        val key = "${imdbId.orEmpty()}|${filmImdbId.orEmpty()}|${words.orEmpty()}|${wanted?.title.orEmpty()}|${wanted?.year ?: 0}"
         cached?.takeIf { cachedQuery == key && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return@withContext Search.Ready(it) }
-        val answers = coroutineScope { all.map { async { askOne(it, words, imdbId, filmImdbId) } }.awaitAll() }
+        val answers = coroutineScope { all.map { async { askOne(it, words, imdbId, filmImdbId, wanted) } }.awaitAll() }
         // A release that is only a link to a .torrent file is offered when its file can be asked for ([magnetOf]).
         val result = merge(answers).let { merged -> if (merged is Search.Ready) Search.Ready(merged.candidates.filter { it.torrentLink == null || fileAddress(it.torrentLink!!) != null }) else merged }
         (result as? Search.Ready)?.let {
@@ -255,12 +262,21 @@ class SourcesRepository(private val secrets: SecretStore) {
         result
     }
 
-    private fun askOne(config: Config, words: String?, imdbId: String?, filmImdbId: String?): Search = when (config) {
+    private fun askOne(config: Config, words: String?, imdbId: String?, filmImdbId: String?, wanted: Relevance.Wanted?): Search = when (config) {
+        // An add-on answers for the film's number alone: what it gives is that film's, and is left as it came.
         is Config.Addon -> filmImdbId?.let { StreamAddon.movieUrl(config.address, it) }?.let(::askAddon) ?: Search.NeedsFilm
         is Config.Indexer -> {
-            var result: Search = imdbId?.let { Torznab.movieUrl(config.address, config.apiKey, it) }?.let(::ask) ?: Search.Ready(emptyList())
+            // An indexer answers loosely (a number it does not know brings its newest releases, a name brings every
+            // film sharing a word with it): only releases that are the film, or hold every word asked for, are kept.
+            // The search by words is tried when the one by number gave none of the film's releases.
+            fun relevant(answer: Search): Search = if (answer !is Search.Ready) answer else Search.Ready(
+                answer.candidates.filter { release ->
+                    if (wanted != null) Relevance.isWanted(release.title, wanted) else words == null || Relevance.holdsWords(release.title, words)
+                },
+            )
+            var result: Search = imdbId?.let { Torznab.movieUrl(config.address, config.apiKey, it) }?.let(::ask)?.let(::relevant) ?: Search.Ready(emptyList())
             if ((result as? Search.Ready)?.candidates?.isEmpty() != false && words != null) {
-                Torznab.searchUrl(config.address, config.apiKey, words)?.let { result = ask(it) }
+                Torznab.searchUrl(config.address, config.apiKey, words)?.let { result = relevant(ask(it)) }
             }
             result
         }

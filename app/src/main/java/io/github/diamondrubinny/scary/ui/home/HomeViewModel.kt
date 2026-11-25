@@ -1695,11 +1695,14 @@ class HomeViewModel(
         // On a film's own search, with the words untouched, the film's IMDb number is asked for first.
         val film = (backStack.value.last() as? Screen.RdSources)?.movieId?.let(::movieById)
         val filmImdbId = film?.takeIf { !it.isSeries }?.imdbId?.takeIf { it.isNotBlank() }
-        val imdbId = filmImdbId?.takeIf { query.trim() == sourceQuery(film.id) }
+        val own = film != null && query.trim() == sourceQuery(film.id)
+        val imdbId = filmImdbId?.takeIf { own }
+        // The film's own search shows only that film's releases; words the viewer typed are searched as words.
+        val wanted = film?.takeIf { own }?.let { io.github.diamondrubinny.scary.core.sources.Relevance.Wanted(it.title, it.year, it.isSeries) }
         _rdSearch.value = RdSearchState.Loading
         viewModelScope.launch {
             // A stream add-on answers by film only, whatever the words say: it is asked for the page's film.
-            _rdSearch.value = when (val result = repository.search(query, imdbId, filmImdbId)) {
+            _rdSearch.value = when (val result = repository.search(query, imdbId, filmImdbId, wanted)) {
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NeedsFilm -> RdSearchState.NeedsFilm
                 is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle
