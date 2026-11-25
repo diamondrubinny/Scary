@@ -112,6 +112,12 @@ import io.github.diamondrubinny.scary.ui.trailer.AutoTrailer
 import io.github.diamondrubinny.scary.ui.trailer.TrailerSettings
 
 /** Callbacks from the home screen, grouped so the composable signature stays readable. */
+/** The studios row under the moods. */
+const val STUDIOS_ROW_TAG = "studiosRow"
+
+/** The horror studios TMDB knows, with their ids; empty without the viewer's TMDB key. Given at the root, read by the moods row. */
+val LocalStudios = androidx.compose.runtime.staticCompositionLocalOf<List<Pair<io.github.diamondrubinny.scary.core.tmdb.Studio, Long>>> { emptyList() }
+
 class HomeActions(
     val onCardFocused: (key: String, movieId: String?) -> Unit,
     val onOpenDetails: (Movie) -> Unit,
@@ -127,6 +133,8 @@ class HomeActions(
     /** Picks a mood in "What do you feel like tonight?", or clears it when chosen again. */
     val onMood: (Mood) -> Unit,
     val onDecade: (Int) -> Unit,
+    /** OK on a studio under the moods: its horror films (TMDB, with the viewer's key). */
+    val onStudio: (id: Long, name: String) -> Unit = { _, _ -> },
     /** The viewer is near the end of a row; endless online rows load their next page. */
     val onNearRowEnd: (rowKey: String) -> Unit = {},
     /** Picks a time budget in "How much time do you have?", or clears it when chosen again. */
@@ -925,6 +933,31 @@ private fun MoodsRowView(
                         label = stringResource(R.string.decade_label, decade),
                         selected = decade == row.decade,
                         onClick = { actions.onDecade(decade) },
+                        onFocused = { actions.onCardFocused(key, null) },
+                        focusRequester = restoreFocus.takeIf { key == restoreKey },
+                    )
+                }
+            }
+        }
+        // Horror studios TMDB knows by name (docs/TMDB_PEOPLE_STUDIOS_PLAN.md): there only with the viewer's TMDB key.
+        val studios = LocalStudios.current
+        if (studios.isNotEmpty()) {
+            BasicText(
+                text = stringResource(R.string.studios_title),
+                style = ScaryType.Caption,
+                modifier = Modifier.padding(horizontal = SidePadding),
+            )
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = SidePadding, vertical = 10.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier.testTag(STUDIOS_ROW_TAG),
+            ) {
+                items(studios, key = { it.second }) { (studio, id) ->
+                    val key = "${row.key}:studio:$id"
+                    MoodChip(
+                        label = studio.label,
+                        selected = false,
+                        onClick = { actions.onStudio(id, studio.query) },
                         onFocused = { actions.onCardFocused(key, null) },
                         focusRequester = restoreFocus.takeIf { key == restoreKey },
                     )

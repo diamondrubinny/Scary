@@ -4,6 +4,15 @@
 
 package io.github.diamondrubinny.scary.ui.person
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import io.github.diamondrubinny.scary.ui.theme.ScaryColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,6 +50,10 @@ import io.github.diamondrubinny.scary.ui.theme.mixedLanguage
 /** Test tags of an actor's screen. */
 const val PERSON_SCREEN_TAG = "personScreen"
 const val PERSON_STATUS_TAG = "personStatus"
+const val PERSON_PHOTO_TAG = "personPhoto"
+
+/** The words of the grid when it shows something other than an actor's films. */
+class PersonWords(val title: String, val loading: String, val note: @Composable (Int) -> String, val emptyTitle: String, val emptyBody: String)
 
 /**
  * "Films with <actor>": the films SCARY holds whose cast names the actor and, with the viewer's TMDB key, the
@@ -58,6 +71,10 @@ fun PersonScreen(
     gridState: LazyGridState = rememberLazyGridState(),
     /** The film opened from this screen, if any: coming back from it, the focus lands on its card. */
     returnTo: String? = null,
+    /** The actor's photo, when the viewer came from a card that had one; decoration beside the title. */
+    photoUrl: String? = null,
+    /** Another heading and other words for the same grid: a company's films (docs/TMDB_PEOPLE_STUDIOS_PLAN.md). */
+    words: PersonWords? = null,
 ) {
     LaunchedEffect(name) { onLoad(name) }
     val shown = person?.takeIf { it.name == name }
@@ -71,16 +88,27 @@ fun PersonScreen(
         if (!runCatching { returnFocus.requestFocus() }.getOrDefault(false)) runCatching { firstFocus.requestFocus() }
     }
     Column(Modifier.fillMaxSize().padding(top = 28.dp).testTag(PERSON_SCREEN_TAG)) {
-        BasicText(
-            stringResource(R.string.person_title, name),
-            style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f).mixedLanguage(),
-            maxLines = 2,
-            modifier = Modifier.padding(horizontal = SidePadding).semantics { heading() },
-        )
+        Row(Modifier.padding(horizontal = SidePadding), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            if (photoUrl != null) {
+                AsyncImage(
+                    model = photoUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.size(72.dp).clip(CircleShape).background(ScaryColors.Void).testTag(PERSON_PHOTO_TAG),
+                )
+            }
+            BasicText(
+                words?.title ?: stringResource(R.string.person_title, name),
+                style = ScaryType.Display.copy(fontSize = ScaryType.Display.fontSize * 0.7f).mixedLanguage(),
+                maxLines = 2,
+                modifier = Modifier.semantics { heading() },
+            )
+        }
         BasicText(
             text = when {
                 shown == null -> ""
-                shown.loading -> stringResource(R.string.person_loading)
+                shown.loading -> words?.loading ?: stringResource(R.string.person_loading)
+                words != null -> words.note(movies.size)
                 shown.fromTmdb -> stringResource(R.string.person_note_tmdb, movies.size.toString())
                 else -> stringResource(R.string.person_note_local, movies.size.toString())
             },
@@ -100,7 +128,7 @@ fun PersonScreen(
         ) {
             if (shown != null && !shown.loading && movies.isEmpty()) {
                 item(span = { GridItemSpan(maxLineSpan) }, key = "empty") {
-                    EmptyState(title = stringResource(R.string.person_empty_title), body = stringResource(R.string.person_empty_body))
+                    EmptyState(title = words?.emptyTitle ?: stringResource(R.string.person_empty_title), body = words?.emptyBody ?: stringResource(R.string.person_empty_body))
                 }
             }
             items(movies, key = { it.id }) { movie ->

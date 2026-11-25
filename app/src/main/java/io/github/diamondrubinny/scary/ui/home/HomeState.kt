@@ -303,6 +303,8 @@ sealed interface Screen {
 
     /** "Films with <actor>", opened from the cast row of a film's page. */
     data class Person(val name: String) : Screen
+    /** "Horror from <company>", opened from a film's page or the studios row (TMDB, with the viewer's key). */
+    data class Company(val id: Long, val name: String) : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */

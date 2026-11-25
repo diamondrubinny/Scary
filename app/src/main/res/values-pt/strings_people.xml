@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="cast_plays">%1$s, como %2$s</string>
+    <string name="companies_label">Produção:</string>
+    <string name="company_title">Terror de %1$s</string>
+    <string name="company_loading">Perguntando ao TMDB pelos filmes desta empresa…</string>
+    <string name="company_note">%1$s filmes de terror, os mais conhecidos primeiro. Do TMDB.</string>
+    <string name="company_empty_title">Nada encontrado</string>
+    <string name="company_empty_body">O TMDB não lista nenhum filme de terror desta empresa, ou não foi possível acessá-lo.</string>
+    <string name="studios_title">Estúdios de terror</string>
+</resources>

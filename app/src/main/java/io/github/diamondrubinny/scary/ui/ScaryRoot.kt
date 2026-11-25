@@ -191,6 +191,9 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val personGrids = remember { HashMap<String, androidx.compose.foundation.lazy.grid.LazyGridState>() }
     var personOpenedId by remember { mutableStateOf<String?>(null) }
     val person by viewModel.person.collectAsStateWithLifecycle()
+    val company by viewModel.company.collectAsStateWithLifecycle()
+    val studios by viewModel.studios.collectAsStateWithLifecycle()
+    val filmPeople by viewModel.filmPeople.collectAsStateWithLifecycle()
     val rowStates = remember { mutableMapOf<String, LazyListState>() }
     LaunchedEffect(resets) {
         if (resets == 0) return@LaunchedEffect
@@ -291,6 +294,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onSurprise = viewModel::surprise,
             onMood = viewModel::toggleMood,
             onDecade = viewModel::toggleDecade,
+            onStudio = viewModel::openCompany,
             onNearRowEnd = viewModel::onNearRowEnd,
             onTimeBudget = viewModel::toggleTimeBudget,
             onSelectTab = viewModel::selectTab,
@@ -644,6 +648,15 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                         personOpenedId = null
                         viewModel.openPerson(it)
                     },
+                    people = filmPeople?.takeIf { it.first == details.movie.id }?.second,
+                    onOpenActor = {
+                        personOpenedId = null
+                        viewModel.openPerson(it)
+                    },
+                    onOpenCompany = {
+                        personOpenedId = null
+                        viewModel.openCompany(it.id, it.name)
+                    },
                     reminded = details.movie.id in state.remindedIds,
                     onToggleReminder = { viewModel.toggleReminder(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
@@ -817,6 +830,28 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     isWatched = state::isWatched,
                     gridState = personGrids.getOrPut(current.name) { androidx.compose.foundation.lazy.grid.LazyGridState() },
                     returnTo = personOpenedId,
+                    photoUrl = viewModel.personPhoto(current.name),
+                )
+                current is Screen.Company -> PersonScreen(
+                    // The grid is keyed by the company's id; its words are the company's own.
+                    name = current.id.toString(),
+                    person = company,
+                    onLoad = { viewModel.loadCompany(current.id) },
+                    onOpenMovie = {
+                        personOpenedId = it.id
+                        viewModel.openDetails(it.id)
+                    },
+                    isLocked = state::isLocked,
+                    isWatched = state::isWatched,
+                    gridState = personGrids.getOrPut("company:${current.id}") { androidx.compose.foundation.lazy.grid.LazyGridState() },
+                    returnTo = personOpenedId,
+                    words = io.github.diamondrubinny.scary.ui.person.PersonWords(
+                        title = stringResource(R.string.company_title, current.name),
+                        loading = stringResource(R.string.company_loading),
+                        note = { count -> stringResource(R.string.company_note, count.toString()) },
+                        emptyTitle = stringResource(R.string.company_empty_title),
+                        emptyBody = stringResource(R.string.company_empty_body),
+                    ),
                 )
                 current == Screen.HomeRows -> HomeRowsScreen(
                     // Asked again whenever a row is turned, or the catalog's rows change.
@@ -843,20 +878,22 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     isLocked = state::isLocked,
                     actions = bucketActions,
                 )
-                else -> HomeScreen(
-                    state = state,
-                    language = language,
-                    listState = homeListState,
-                    rowStates = { key -> rowStates.getOrPut(key) { LazyListState(cacheWindow = CardsCacheWindow) } },
-                    restoreKey = viewModel.lastFocusedKey,
-                    resets = resets,
-                    actions = actions,
-                    // A phone or a tablet keeps its own home screen: SCARY is an ordinary app there.
-                    showSetHome = launcherStatus.needsSetup && scaryLayout.tv,
-                    scrollToRow = scrollToRow,
-                    onScrolledToRow = viewModel::onScrolledToRow,
-                    trailer = trailerSettings,
-                )
+                else -> CompositionLocalProvider(io.github.diamondrubinny.scary.ui.home.LocalStudios provides studios) {
+                    HomeScreen(
+                        state = state,
+                        language = language,
+                        listState = homeListState,
+                        rowStates = { key -> rowStates.getOrPut(key) { LazyListState(cacheWindow = CardsCacheWindow) } },
+                        restoreKey = viewModel.lastFocusedKey,
+                        resets = resets,
+                        actions = actions,
+                        // A phone or a tablet keeps its own home screen: SCARY is an ordinary app there.
+                        showSetHome = launcherStatus.needsSetup && scaryLayout.tv,
+                        scrollToRow = scrollToRow,
+                        onScrolledToRow = viewModel::onScrolledToRow,
+                        trailer = trailerSettings,
+                    )
+                }
             }
 
             if (countryPicker) {

@@ -562,6 +562,80 @@ class HomeViewModel(
         }
     }
 
+    private val _filmPeople = MutableStateFlow<Pair<String, io.github.diamondrubinny.scary.data.TmdbRepository.FilmPeople>?>(null)
+    private var filmPeopleJob: Job? = null
+
+    /** The actors (with their photos) and the companies of the film whose page is open, by its id; null until TMDB answered. */
+    val filmPeople: StateFlow<Pair<String, io.github.diamondrubinny.scary.data.TmdbRepository.FilmPeople>?> = _filmPeople.asStateFlow()
+
+    /**
+     * Asks TMDB for the opened film's actors and companies (docs/TMDB_PEOPLE_STUDIOS_PLAN.md): only with the viewer's
+     * key and online data on, and not on family night, where a film's page leads nowhere beyond the library.
+     */
+    private fun findFilmPeople(movieId: String) {
+        if (_filmPeople.value?.first == movieId) return
+        filmPeopleJob?.cancel()
+        _filmPeople.value = null
+        val prefs = latestPrefs ?: return
+        if (!prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) return
+        val imdbId = movieById(movieId)?.imdbId?.takeIf { it.isNotBlank() } ?: return
+        filmPeopleJob = viewModelScope.launch {
+            tmdb.filmPeople(imdbId)?.let { _filmPeople.value = movieId to it }
+        }
+    }
+
+    /** The photos of actors whose cards the viewer saw, by name: the actor's own screen shows it too. In memory only. */
+    private val personPhotos = HashMap<String, String>()
+
+    fun personPhoto(name: String): String? = personPhotos[name.trim()]
+
+    /** OK on an actor's card on a film's page. */
+    fun openPerson(actor: io.github.diamondrubinny.scary.core.tmdb.CastMember) {
+        actor.photoUrl?.let { personPhotos[actor.name.trim().take(MAX_PERSON_NAME)] = it }
+        openPerson(actor.name)
+    }
+
+    /**
+     * The horror studios under the moods, with the ids TMDB gave for their names: asked for only with the viewer's
+     * key and online data on, and not on family night. Empty otherwise, and the row is not shown.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val studios: StateFlow<List<Pair<io.github.diamondrubinny.scary.core.tmdb.Studio, Long>>> =
+        combine(tmdb.keyMask, settings.prefs.map { it.onlineEnabled && !it.familyNight }.distinctUntilChanged()) { key, allowed -> key != null && allowed }
+            .distinctUntilChanged()
+            .mapLatest { ask -> if (ask) tmdb.studios() else emptyList() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _company = MutableStateFlow<PersonUi?>(null)
+    private var companyJob: Job? = null
+
+    /** The horror films of the company whose screen is open ([PersonUi.name] is "<id>": the screen's own key); null until worked out. */
+    val company: StateFlow<PersonUi?> = _company.asStateFlow()
+
+    /** OK on a company on a film's page, or on a studio of the home row. */
+    fun openCompany(id: Long, name: String) {
+        if (latestPrefs?.familyNight == true || id <= 0) return
+        push(Screen.Company(id, name.trim().take(MAX_PERSON_NAME)))
+    }
+
+    /** The company's horror films from TMDB, for its screen; a film SCARY holds is shown as it holds it. */
+    fun loadCompany(id: Long) {
+        val key = id.toString()
+        if (_company.value?.name == key) return
+        companyJob?.cancel()
+        _company.value = PersonUi(key, emptyList(), loading = true, fromTmdb = true)
+        companyJob = viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            val found = if (prefs.onlineEnabled && !prefs.familyNight) tmdb.companyFilms(id, language.value) else null
+            val shown = visibleCatalog()?.movies.orEmpty()
+            val known = shown.associateBy { it.imdbId }
+            val disliked = prefs.dislikedIds.toHashSet()
+            val films = found.orEmpty().mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }.filter { it.id !in disliked }.distinctBy { it.imdbId }
+            webMovies = webMovies + films.filter { it.imdbId !in known }.associateBy { it.id }
+            _company.value = PersonUi(key, films, loading = false, fromTmdb = true)
+        }
+    }
+
     private val _franchise = MutableStateFlow<FranchiseUi?>(null)
     private var franchiseJob: Job? = null
 
@@ -1989,6 +2063,7 @@ class HomeViewModel(
             is GatedAction.Details -> {
                 fillInIndexFilm(action.movieId)
                 findRealDebridFiles(action.movieId)
+                findFilmPeople(action.movieId)
                 push(Screen.Details(action.movieId))
             }
             is GatedAction.Watch -> {
