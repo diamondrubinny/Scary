@@ -3,8 +3,8 @@
 # Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary
 # Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 """
-Builds app/src/main/assets/index.json: every well-known horror film on Wikidata (CC0), for search, the decade rows,
-"More like this" and Ask SCARY. Run on a developer machine, never on the TV:
+Builds core/src/test/fixtures/index.json: every well-known horror film on Wikidata (CC0). It is the base of the film
+feed (build_feed.py); the app itself reads only the feed. Run on a developer machine, never on the TV:
 
     python3 -I tools/catalog/build_index.py            # fetch, check, write
     python3 -I tools/catalog/build_index.py --check    # only check the file already there
