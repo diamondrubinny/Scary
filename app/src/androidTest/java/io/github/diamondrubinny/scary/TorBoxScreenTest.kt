@@ -14,6 +14,12 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
+import io.github.diamondrubinny.scary.ui.home.RdFilesState
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_SERVICE_TAG
+import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
+import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
+import io.github.diamondrubinny.scary.ui.realdebrid.TORBOX_OPEN_TAG
 import io.github.diamondrubinny.scary.data.RealDebridRepository.Reason
 import io.github.diamondrubinny.scary.data.RealDebridRepository.State
 import io.github.diamondrubinny.scary.ui.realdebrid.TORBOX_CODE_TAG
@@ -80,5 +86,46 @@ class TorBoxScreenTest {
         rule.onNode(hasTestTag(TORBOX_SIGN_IN_TAG)).assertExists()
         rule.runOnUiThread { state = State.Failed(Reason.SESSION_ENDED) }
         rule.onNode(hasText(text(R.string.torbox_session_ended))).assertExists()
+    }
+
+    @Test
+    fun withTorBoxAloneItsFilesAreListedPlayedAndNamedByTheirAccount() {
+        val mine = RealDebrid.RdFile("d:1", "The.Shining.mkv", 4_000_000_000, "https://real-debrid.com/d/1")
+        val theirs = RealDebrid.RdFile("torbox:7:0", "Alien.1979.mkv", 3_000_000_000, "torbox:7:0")
+        val played = mutableListOf<String>()
+        var state by mutableStateOf<State>(State.SignedOut)
+        var files by mutableStateOf(listOf(theirs))
+        var torBox by mutableStateOf(true)
+        rule.runOnUiThread { rule.activity.setContent {
+            ScaryTheme {
+                RealDebridScreen(
+                    state = state,
+                    files = RdFilesState.Ready(files),
+                    actions = RealDebridActions(onSignIn = {}, onCancel = {}, onSignOut = {}, onRefresh = {}, onPlay = { played += it.key }, onTorBox = {}),
+                    torBoxConnected = torBox,
+                )
+            }
+        } }
+        // Real-Debrid is not connected, and the list is there all the same, with the way to connect it still offered.
+        rule.onNode(hasText(text(R.string.rd_sign_in))).assertExists()
+        rule.onNode(hasTestTag(TORBOX_OPEN_TAG)).assertExists()
+        rule.onNode(hasText("Alien.1979.mkv")).performClick()
+        assertEquals(listOf("torbox:7:0"), played)
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title))).assertExists()
+
+        // Both connected: each file says whose it is.
+        rule.runOnUiThread {
+            state = State.SignedIn("viewer", true, "2027-01-01")
+            files = listOf(mine, theirs)
+        }
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.rd_title))).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title))).assertExists()
+
+        // Real-Debrid alone: nothing to tell apart, so no label.
+        rule.runOnUiThread {
+            torBox = false
+            files = listOf(mine)
+        }
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG)).assertDoesNotExist()
     }
 }

@@ -645,7 +645,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onAiSettings = viewModel::openSettings,
                     realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
                     onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
-                    onFindSources = if (sourcesEnabled && realDebridState is RealDebridRepository.State.SignedIn && !state.familyNight) {
+                    onFindSources = if (sourcesEnabled && (realDebridState is RealDebridRepository.State.SignedIn || torBoxState is RealDebridRepository.State.SignedIn) && !state.familyNight) {
                         { viewModel.openSourcesFor(details.movie) }
                     } else {
                         null
@@ -664,6 +664,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
                 current == Screen.RealDebrid -> RealDebridScreen(
                     state = realDebridState,
+                    torBoxConnected = torBoxState is RealDebridRepository.State.SignedIn,
                     files = rdFiles,
                     history = WatchHistory.continueWatching(watchHistory),
                     languages = playerLanguages,

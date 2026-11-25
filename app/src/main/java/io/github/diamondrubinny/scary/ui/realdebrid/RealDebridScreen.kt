@@ -49,6 +49,7 @@ import io.github.diamondrubinny.scary.ui.player.continueDetail
 import io.github.diamondrubinny.scary.core.player.WatchEntry
 import io.github.diamondrubinny.scary.core.brand.Donation
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
+import io.github.diamondrubinny.scary.core.torbox.TorBox
 import io.github.diamondrubinny.scary.data.RealDebridRepository.Reason
 import io.github.diamondrubinny.scary.data.RealDebridRepository.State
 import io.github.diamondrubinny.scary.ui.components.FocusSurface
@@ -65,6 +66,7 @@ import java.util.Locale
 const val REAL_DEBRID_TAG = "realDebrid"
 const val REAL_DEBRID_CODE_TAG = "realDebridCode"
 const val REAL_DEBRID_FILES_TAG = "realDebridFiles"
+const val REAL_DEBRID_SERVICE_TAG = "realDebridService"
 const val REAL_DEBRID_HISTORY_TAG = "realDebridHistory"
 const val REAL_DEBRID_TORRENTS_BUTTON_TAG = "realDebridTorrentsButton"
 const val REAL_DEBRID_VPN_NOTE_TAG = "realDebridVpnNote"
@@ -130,7 +132,11 @@ fun RealDebridScreen(
     vpnActive: Boolean = false,
     /** The VPN's kill switch is holding Real-Debrid back: said here, or nothing would explain the empty screen. */
     vpnBlocked: Boolean = false,
+    /** The viewer's TorBox account is connected: its files are in the list too, whatever Real-Debrid's state. */
+    torBoxConnected: Boolean = false,
 ) {
+    // Files, history and the player's languages are there with either account.
+    val connected = state is State.SignedIn || torBoxConnected
     var correcting by remember { mutableStateOf<RealDebrid.RdFile?>(null) }
     correcting?.let { file ->
         FilmChooser(file, fileFilms[file.key], actions, onDone = { correcting = null })
@@ -170,12 +176,14 @@ fun RealDebridScreen(
                 State.SignedOut, is State.Failed ->
                     ScaryButton(stringResource(R.string.rd_sign_in), onClick = actions.onSignIn, primary = true, focusRequester = firstFocus)
                 is State.Waiting -> ScaryButton(stringResource(R.string.rd_cancel), onClick = actions.onCancel, focusRequester = firstFocus)
-                is State.SignedIn -> {
-                    ScaryButton(stringResource(R.string.rd_refresh), onClick = actions.onRefresh, focusRequester = firstFocus)
-                    actions.onTorrents?.let { ScaryButton(stringResource(R.string.rd_torrent_open), onClick = it, modifier = Modifier.testTag(REAL_DEBRID_TORRENTS_BUTTON_TAG)) }
-                    ScaryButton(stringResource(R.string.rd_sign_out), onClick = actions.onSignOut)
-                    if (history.isNotEmpty()) ScaryButton(stringResource(R.string.rd_clear_history), onClick = actions.onClearHistory)
-                }
+                is State.SignedIn -> Unit
+            }
+            if (connected) {
+                // The focus starts here once Real-Debrid is connected; before that it is on its own button above.
+                ScaryButton(stringResource(R.string.rd_refresh), onClick = actions.onRefresh, focusRequester = if (state is State.SignedIn) firstFocus else null)
+                actions.onTorrents?.let { ScaryButton(stringResource(R.string.rd_torrent_open), onClick = it, modifier = Modifier.testTag(REAL_DEBRID_TORRENTS_BUTTON_TAG)) }
+                if (state is State.SignedIn) ScaryButton(stringResource(R.string.rd_sign_out), onClick = actions.onSignOut)
+                if (history.isNotEmpty()) ScaryButton(stringResource(R.string.rd_clear_history), onClick = actions.onClearHistory)
             }
         }
         // A second account, whatever this one's state: a viewer may have TorBox alone.
@@ -189,7 +197,7 @@ fun RealDebridScreen(
         if (state is State.Waiting) {
             WaitingForCode(state, narrow)
         }
-        if (state is State.SignedIn) {
+        if (connected) {
             // The player's languages, for every film: also in the player's "Audio and subtitles" window.
             BasicText(stringResource(R.string.tracks_every_film), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -199,14 +207,14 @@ fun RealDebridScreen(
             // What leaves the TV when it is on, in plain words.
             BasicText(stringResource(R.string.tracks_online_privacy), style = ScaryType.Caption.copy(color = ScaryColors.Ash))
         }
-        if (state is State.SignedIn && history.isNotEmpty()) {
+        if (connected && history.isNotEmpty()) {
             // Where the viewer stopped, and the spots they marked: on this TV only.
             BasicText(stringResource(R.string.row_continue), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
             Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag(REAL_DEBRID_HISTORY_TAG)) {
                 history.take(HISTORY_SHOWN).forEach { entry -> HistoryRow(entry) { actions.onContinue(entry) } }
             }
         }
-        if (state is State.SignedIn) {
+        if (connected) {
             BasicText(stringResource(R.string.rd_files_title), style = ScaryType.RowTitle, modifier = Modifier.semantics { heading() })
             // How to correct a guess, in plain words (holding OK is the remote's long press).
             if (fileFilms.isNotEmpty() || (files as? RdFilesState.Ready)?.files?.isNotEmpty() == true) {
@@ -232,7 +240,11 @@ fun RealDebridScreen(
                         modifier = Modifier.fillMaxWidth().weight(1f).testTag(REAL_DEBRID_FILES_TAG),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(files.files, key = { it.key }) { file -> FileRow(file, fileFilms[file.key], onLongClick = { correcting = file }) { actions.onPlay(file) } }
+                        items(files.files, key = { it.key }) { file ->
+                            // Whose file it is, said only when TorBox is connected: with one account there is nothing to tell apart.
+                            val service = if (!torBoxConnected) null else stringResource(if (TorBox.parseFileRef(file.key) != null) R.string.torbox_title else R.string.rd_title)
+                            FileRow(file, fileFilms[file.key], service, onLongClick = { correcting = file }) { actions.onPlay(file) }
+                        }
                     }
                 }
             }
@@ -267,7 +279,7 @@ private fun WaitingForCode(state: State.Waiting, narrow: Boolean) {
 }
 
 @Composable
-private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Unit, onClick: () -> Unit) {
+private fun FileRow(file: RealDebrid.RdFile, film: Movie?, service: String?, onLongClick: () -> Unit, onClick: () -> Unit) {
     val language = Language.fromCode(LocalConfiguration.current.locales[0].language)
     val filmLabel = film?.let { "${it.displayTitle(language)} (${it.yearsLabel})" }
     FocusSurface(
@@ -278,7 +290,7 @@ private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Un
         focusedScale = 1.02f,
         containerColor = ScaryColors.Crypt,
         focusedContainerColor = ScaryColors.Bone,
-        contentDescription = listOfNotNull(stringResource(R.string.rd_play_file, file.name), filmLabel?.let { stringResource(R.string.rd_file_is, it) }).joinToString(", "),
+        contentDescription = listOfNotNull(stringResource(R.string.rd_play_file, file.name), filmLabel?.let { stringResource(R.string.rd_file_is, it) }, service).joinToString(", "),
     ) { focused ->
         Row(Modifier.padding(horizontal = 18.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -296,6 +308,13 @@ private fun FileRow(file: RealDebrid.RdFile, film: Movie?, onLongClick: () -> Un
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+            }
+            if (service != null) {
+                BasicText(
+                    service,
+                    style = ScaryType.Caption.copy(color = if (focused) ScaryColors.Void else ScaryColors.Ash, textDirection = TextDirection.Ltr),
+                    modifier = Modifier.padding(start = 12.dp).testTag(REAL_DEBRID_SERVICE_TAG),
+                )
             }
             BasicText(
                 size(file.sizeBytes),
