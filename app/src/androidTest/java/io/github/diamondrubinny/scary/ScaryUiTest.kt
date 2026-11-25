@@ -52,7 +52,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
-import io.github.diamondrubinny.scary.core.catalog.FilmFeed
 import io.github.diamondrubinny.scary.core.catalog.LegacyLibrary
 import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Decades
@@ -1698,9 +1697,14 @@ class ScaryUiTest {
      */
     private fun stableRow(catalog: Catalog) = catalog.collections.first { row -> catalog.moviesOf(row).take(2).let { it.size == 2 && it.all(Movie::curated) && it.none(Movie::isSeries) } }
 
-    /** The library as the app makes it: the packed film feed, with the old library's fear levels (core FeedCatalog). */
+    /**
+     * The library as the app makes it (core FeedCatalog): the film feed this start of the app holds, with the old
+     * library's fear levels. Read from the app, not from the packed file: the emulator is online, so the app may have
+     * downloaded a newer feed than the one it was built with, and that is then the library on screen.
+     */
     private fun bundledCatalog() = FeedCatalog.catalog(
-        rule.activity.assets.open("feed.json").bufferedReader().use { FilmFeed.parse(it.readText()) },
+        runBlocking { (rule.activity.application as ScaryApplication).container.feedRepository.load() }
+            ?: throw AssertionError("the app holds no film feed"),
         rule.activity.assets.open("legacy.json").bufferedReader().use { LegacyLibrary.parse(it.readText()) },
     )
 

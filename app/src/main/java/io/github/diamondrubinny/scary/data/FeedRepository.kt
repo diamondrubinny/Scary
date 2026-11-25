@@ -35,6 +35,9 @@ import javax.net.ssl.HttpsURLConnection
 class FeedRepository(private val context: Context) {
     private val mutex = Mutex()
     private var held: FilmFeed.Result? = null
+
+    /** The date of the newest feed downloaded since this start; it is used from the next one. */
+    @Volatile private var keptGenerated: String? = null
     private val prefs by lazy { context.getSharedPreferences("film_feed", Context.MODE_PRIVATE) }
     private val file: File get() = File(context.filesDir, FILE_NAME)
 
@@ -61,8 +64,8 @@ class FeedRepository(private val context: Context) {
     }
 
     /**
-     * Downloads the feed when the last try was a day ago or more ([force]: now). Returns the feed to use from here on
-     * when a newer good one arrived, null otherwise (nothing new, no network, a file that failed the rules).
+     * Downloads the feed when the last try was a day ago or more ([force]: now). Returns the feed kept for the next start
+     * of the app when a newer good one arrived, null otherwise (nothing new, no network, a file that failed the rules).
      */
     suspend fun refresh(force: Boolean = false): FilmFeed.Result? = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
@@ -72,7 +75,8 @@ class FeedRepository(private val context: Context) {
         val text = download() ?: return@withContext null
         val fresh = read("downloaded") { text } ?: return@withContext null
         val current = load()
-        if (current != null && fresh.generated <= current.generated) return@withContext null
+        val newest = listOfNotNull(current?.generated, keptGenerated).maxOrNull()
+        if (newest != null && fresh.generated <= newest) return@withContext null
         // Written whole or not at all: a file cut short is never left where the next start would read it.
         val temp = File(context.filesDir, "$FILE_NAME.tmp")
         try {
@@ -82,7 +86,9 @@ class FeedRepository(private val context: Context) {
             Log.w(TAG, "The new feed could not be kept: ${e.javaClass.simpleName}")
             temp.delete()
         }
-        mutex.withLock { held = fresh }
+        // The feed in use stays the one this start of the app was built from ([load]): the library never changes under
+        // the viewer, and everything that reads it in this process sees the same films.
+        keptGenerated = fresh.generated
         fresh
     }
 
