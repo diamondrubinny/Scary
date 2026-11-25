@@ -25,7 +25,12 @@ object Releases {
 
     data class Tags(val resolution: Resolution, val origin: Origin, val codec: Codec)
 
-    /** One release the indexer offered: only ones with a magnet link or an info-hash are kept. */
+    /**
+     * One release the indexer offered. Most come with a magnet link or an info-hash. One that comes only as a link to
+     * a .torrent file at the indexer carries that link in [torrentLink], and its [magnet] is a stand-in (its hash is
+     * made from the link, to tell releases apart in a list): the real hash is read from the file when the viewer
+     * chooses the release (core TorrentFile), never before.
+     */
     data class Candidate(
         val title: String,
         val magnet: Magnets.Magnet,
@@ -35,6 +40,8 @@ object Releases {
         /** -1 when the indexer did not say. */
         val seeders: Int,
         val tags: Tags,
+        /** The .torrent file's address at the viewer's own indexer, for a release that gave no magnet link or hash. */
+        val torrentLink: String? = null,
     ) {
         val score: Int get() = score(this)
     }

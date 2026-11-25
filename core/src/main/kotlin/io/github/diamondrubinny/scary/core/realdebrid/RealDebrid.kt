@@ -378,6 +378,16 @@ object RealDebrid {
     /** The API's own error code, when an answer is one ({"error": "...", "error_code": 8}). */
     fun errorCode(text: String): Int? = obj(text)?.long("error_code")?.toInt()
 
+    /**
+     * The API's own short name for what went wrong ("infringing_file"), with its code, to show the viewer exactly what
+     * Real-Debrid answered: "infringing_file (35)". Only a name of lower-case letters, digits and underscores is
+     * shown; null when the answer carries none.
+     */
+    fun errorLabel(text: String): String? {
+        val name = obj(text)?.str("error")?.takeIf { Regex("^[a-z0-9_]{1,48}$").matches(it) } ?: return null
+        return errorCode(text)?.takeIf { it in -1..999 }?.let { "$name ($it)" } ?: name
+    }
+
     // Rules -------------------------------------------------------------------------------------------------------------
 
     private val VIDEO_EXTENSIONS = setOf("mkv", "mp4", "m4v", "avi", "mov", "webm", "ts", "m2ts", "wmv", "mpg", "mpeg")

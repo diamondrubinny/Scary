@@ -26,4 +26,6 @@
     <string name="debrid_add_to_rd">Adicionar ao Real-Debrid</string>
     <string name="debrid_add_to_torbox">Adicionar ao TorBox</string>
     <string name="debrid_pull_confirm">Adicionar este lançamento à sua própria conta e reproduzi-lo no player do SCARY? Escolha a conta.</string>
+    <string name="rd_torrent_error_no_file">A fonte não entregou o arquivo torrent deste lançamento, então nada foi adicionado. Tente outro lançamento.</string>
+    <string name="debrid_answer">A resposta da própria conta: %1$s</string>
 </resources>

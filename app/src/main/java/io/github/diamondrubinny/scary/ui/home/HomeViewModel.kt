@@ -1542,6 +1542,27 @@ class HomeViewModel(
         }
     }
 
+    /**
+     * A release the viewer chose from their source. One that came as a .torrent file's address has that file asked
+     * for at their own indexer first, for its hash (SourcesRepository.magnetOf); nothing is added without it.
+     */
+    fun pullRelease(release: io.github.diamondrubinny.scary.core.sources.Releases.Candidate, service: io.github.diamondrubinny.scary.data.DebridAccounts.Service? = null) {
+        if (release.torrentLink == null) return pullMagnet(release.magnet.uri, service)
+        val from = sources ?: return
+        if (_rdTorrents.value.pull == RdPullState.Working) return
+        _rdTorrents.update { it.copy(pull = RdPullState.Working) }
+        pullWatch?.cancel()
+        pullWatch = viewModelScope.launch {
+            val magnet = from.magnetOf(release)
+            if (magnet == null) {
+                _rdTorrents.update { it.copy(pull = RdPullState.Failed(RealDebridRepository.PullError.NO_FILE)) }
+                return@launch
+            }
+            _rdTorrents.update { it.copy(pull = RdPullState.Idle) }
+            pullMagnet(magnet.uri, service)
+        }
+    }
+
     /** The viewer's magnet link: added to their account, and played in SCARY's player as soon as it is ready. */
     fun pullMagnet(text: String, service: io.github.diamondrubinny.scary.data.DebridAccounts.Service? = null) {
         val repository = debrid ?: return
@@ -1560,7 +1581,7 @@ class HomeViewModel(
                     pull = when (result) {
                         is RealDebridRepository.Pull.Ready -> RdPullState.Idle
                         is RealDebridRepository.Pull.Downloading -> RdPullState.Downloading(result.progress)
-                        is RealDebridRepository.Pull.Failed -> RdPullState.Failed(result.reason)
+                        is RealDebridRepository.Pull.Failed -> RdPullState.Failed(result.reason, result.detail)
                     },
                 )
             }

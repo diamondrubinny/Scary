@@ -26,4 +26,6 @@
     <string name="debrid_add_to_rd">Add to Real-Debrid</string>
     <string name="debrid_add_to_torbox">Add to TorBox</string>
     <string name="debrid_pull_confirm">Add this release to your own account and play it in SCARY\'s player? Choose the account.</string>
+    <string name="rd_torrent_error_no_file">The source did not give this release\'s torrent file, so nothing was added. Try another release.</string>
+    <string name="debrid_answer">The account\'s own answer: %1$s</string>
 </resources>

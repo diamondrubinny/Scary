@@ -335,7 +335,8 @@ sealed interface RdPullState {
     data object Working : RdPullState
     data object Invalid : RdPullState
     data class Downloading(val progress: Int) : RdPullState
-    data class Failed(val reason: io.github.diamondrubinny.scary.data.RealDebridRepository.PullError) : RdPullState
+    /** [detail]: what the account itself answered, shown under the words. */
+    data class Failed(val reason: io.github.diamondrubinny.scary.data.RealDebridRepository.PullError, val detail: String? = null) : RdPullState
 }
 
 /** What the viewer's indexer answered for the last search. */

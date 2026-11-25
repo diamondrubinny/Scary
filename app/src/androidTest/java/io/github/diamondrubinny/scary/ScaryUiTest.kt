@@ -1527,11 +1527,19 @@ class ScaryUiTest {
         }
         // And back up to the hero (Up lands on its nearest button), which comes back whole.
         val inRows = isFocused() and hasAnyAncestor(hasTestTag(HOME_ROWS_TAG))
-        repeat(ROWS_TO_WALK + 1) {
-            if (rule.onAllNodes(inRows).fetchSemanticsNodes().isNotEmpty()) pressKey(KeyEvent.KEYCODE_DPAD_UP)
-        }
         val heroButton = listOf(R.string.action_watch_stremio, R.string.action_trailer, R.string.action_details)
             .map { hasText(text(it)) }.reduce { a, b -> a or b }
+        fun onHero() = rule.onAllNodes(heroButton and isFocused()).fetchSemanticsNodes().isNotEmpty()
+        fun cardInRows() = rule.onAllNodes(inRows).fetchSemanticsNodes().firstOrNull()?.id
+        repeat(ROWS_TO_WALK + 1) {
+            val from = cardInRows()
+            if (!onHero() && from != null) {
+                pressKey(KeyEvent.KEYCODE_DPAD_UP)
+                // The focus lands a moment after the key (the hero grows back first): on a card of the row above, or on
+                // the hero's button. Pressing again before it has landed would carry it past the hero, to the top bar.
+                waitUntilOrDescribe("the focus to land one row up") { onHero() || cardInRows().let { it != null && it != from } }
+            }
+        }
         waitFor(heroButton and isFocused())
         waitFor(donate)
     }

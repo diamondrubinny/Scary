@@ -4,6 +4,9 @@
 
 package io.github.diamondrubinny.scary.data
 
+import java.net.URI
+import io.github.diamondrubinny.scary.core.realdebrid.Magnets
+import io.github.diamondrubinny.scary.core.sources.TorrentFile
 import android.os.SystemClock
 import android.util.Log
 import io.github.diamondrubinny.scary.core.sources.LanHttp
@@ -242,7 +245,8 @@ class SourcesRepository(private val secrets: SecretStore) {
         val key = "${imdbId.orEmpty()}|${filmImdbId.orEmpty()}|${words.orEmpty()}"
         cached?.takeIf { cachedQuery == key && SystemClock.elapsedRealtime() - cachedAt < CACHE_MS }?.let { return@withContext Search.Ready(it) }
         val answers = coroutineScope { all.map { async { askOne(it, words, imdbId, filmImdbId) } }.awaitAll() }
-        val result = merge(answers)
+        // A release that is only a link to a .torrent file is offered when its file can be asked for ([magnetOf]).
+        val result = merge(answers).let { merged -> if (merged is Search.Ready) Search.Ready(merged.candidates.filter { it.torrentLink == null || fileAddress(it.torrentLink!!) != null }) else merged }
         (result as? Search.Ready)?.let {
             cachedQuery = key
             cached = it.candidates
@@ -291,6 +295,81 @@ class SourcesRepository(private val secrets: SecretStore) {
         is Torznab.Answer.Results -> Search.Ready(answer.candidates)
         is Torznab.Answer.Refused -> Search.Refused
         Torznab.Answer.Unreadable -> Search.Unreadable
+    }
+
+    /**
+     * Where the .torrent file behind [link] is asked for: always at one of the viewer's own indexers, whatever host
+     * the link itself names. The indexer whose host the link names is taken, or the only indexer there is; of the
+     * link, only the path and what follows it are used. So an answer cannot send SCARY to an address the viewer did
+     * not set up. Null when there is no such indexer, when it is not reached over HTTPS directly (a home-network
+     * address, or searches going through Tor: neither can fetch a file here), or when the link is not an address.
+     */
+    private fun fileAddress(link: String): String? {
+        if (throughTor) return null
+        val asked = runCatching { URI(link) }.getOrNull() ?: return null
+        val path = asked.rawPath?.takeIf { it.startsWith("/") } ?: return null
+        val indexers = configs.filterIsInstance<Config.Indexer>().mapNotNull { config -> runCatching { URI(config.address) }.getOrNull() }
+            .filter { it.scheme == "https" && !it.host.isNullOrBlank() }
+        val home = indexers.firstOrNull { it.host.equals(asked.host, ignoreCase = true) } ?: indexers.singleOrNull() ?: return null
+        if (LanHttp.target(home.toString()) != null) return null
+        return "https://" + home.rawAuthority + path + (asked.rawQuery?.let { "?$it" }.orEmpty())
+    }
+
+    /**
+     * The magnet link of [release]. One that came with a link or a hash has it already. One that came only as a
+     * .torrent file's address gets its hash from that file, asked for at the viewer's own indexer ([fileAddress]) and
+     * read strictly (core TorrentFile); an indexer that answers with a redirect to a magnet link is taken at its word,
+     * and one to another address is followed only back to the same indexer. Null when the file could not be had.
+     * The address is never logged: it holds the indexer's key.
+     */
+    suspend fun magnetOf(release: Releases.Candidate): Magnets.Magnet? = withContext(Dispatchers.IO) {
+        val link = release.torrentLink ?: return@withContext release.magnet
+        if (blocked()) return@withContext null
+        var address = fileAddress(link) ?: return@withContext null
+        repeat(MAX_FILE_HOPS) {
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URL(address).openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = TIMEOUT_MS
+                    readTimeout = TIMEOUT_MS
+                    instanceFollowRedirects = false
+                    setRequestProperty("Accept", "application/x-bittorrent, application/octet-stream")
+                    setRequestProperty("User-Agent", "SCARY-launcher")
+                }
+                when (connection.responseCode) {
+                    HttpURLConnection.HTTP_OK -> {
+                        val bytes = connection.inputStream.use { stream ->
+                            val out = ByteArrayOutputStream()
+                            val buffer = ByteArray(16 * 1024)
+                            while (true) {
+                                val n = stream.read(buffer)
+                                if (n < 0) break
+                                out.write(buffer, 0, n)
+                                if (out.size() > TorrentFile.MAX_BYTES) return@withContext null
+                            }
+                            out.toByteArray()
+                        }
+                        return@withContext TorrentFile.infoHash(bytes)?.let { Magnets.Magnet(it, release.title.take(255)) }
+                    }
+                    in REDIRECTS -> {
+                        val to = connection.getHeaderField("Location")?.takeIf { it.length <= Magnets.MAX_LENGTH } ?: return@withContext null
+                        if (to.startsWith("magnet:", ignoreCase = true)) return@withContext Magnets.parse(to)?.let { it.copy(name = it.name ?: release.title.take(255)) }
+                        // Anywhere else: only its path, asked for at the same indexer again.
+                        address = fileAddress(runCatching { URI(address).resolve(to).toString() }.getOrNull() ?: return@withContext null) ?: return@withContext null
+                    }
+                    else -> return@withContext null
+                }
+            } catch (e: IOException) {
+                Log.w(TAG, "Torrent file request failed: ${e.javaClass.simpleName}")
+                return@withContext null
+            } catch (e: IllegalArgumentException) {
+                return@withContext null
+            } finally {
+                connection?.disconnect()
+            }
+        }
+        null
     }
 
     enum class Health { OK, NOT_CONFIGURED, UNREACHABLE, REFUSED, UNREADABLE, TOR_OFF }
@@ -461,6 +540,10 @@ class SourcesRepository(private val secrets: SecretStore) {
         private const val LAN_CONNECT_MS = 8_000
         private const val CACHE_MS = 10 * 60_000L
         private const val HTTP_TOO_MANY_REQUESTS = 429
+        private val REDIRECTS = setOf(301, 302, 303, 307, 308)
+
+        /** A .torrent file's address may lead on once or twice (to a magnet link, usually); never further. */
+        private const val MAX_FILE_HOPS = 3
 
         /** Where a Tor app on the device listens for SOCKS (Orbot's and Tor's own default port). */
         private const val TOR_SOCKS_PORT = 9050
