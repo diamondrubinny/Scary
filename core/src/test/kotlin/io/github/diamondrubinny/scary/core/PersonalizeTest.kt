@@ -19,7 +19,7 @@ import java.io.File
 
 /** Sorting by what the viewer watches: watched films last, rows by taste, "Because you watched". */
 class PersonalizeTest {
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
 
     private fun movie(id: String, vararg subs: Subgenre, director: String = "D", year: Int = 2000, genre: Genre = Genre.HORROR) =
         Movie(id = id, imdbId = "tt0000001", title = id, year = year, director = director, genre = genre, subgenres = subs.toList(), fear = 3)

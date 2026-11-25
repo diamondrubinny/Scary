@@ -7,13 +7,12 @@ package io.github.diamondrubinny.scary.data
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
-import io.github.diamondrubinny.scary.core.catalog.CatalogParser
 import io.github.diamondrubinny.scary.core.catalog.Categories
-import io.github.diamondrubinny.scary.core.catalog.HorrorIndex
+import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
+import io.github.diamondrubinny.scary.core.catalog.LegacyLibrary
 import io.github.diamondrubinny.scary.core.cinemeta.Cinemeta
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
-import io.github.diamondrubinny.scary.core.model.MediaKind
 import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.sync.RefreshPolicy
@@ -33,50 +32,59 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
- * The bundled, curated catalog first (instant and offline), then the same catalog enriched with artwork and
- * popular rows from Cinemeta: from the disk cache right away, and from the network when the cache is old.
+ * The film feed first (docs/CATALOG_REBUILD_PLAN.md: packed in the app, instant and offline), then the same library
+ * enriched with artwork and popular rows from Cinemeta: from the disk cache right away, and from the network when the
+ * cache is old.
  */
 class CatalogRepository(
     private val context: Context,
     private val cinemeta: CinemetaRepository,
     private val tmdb: TmdbRepository,
+    private val feed: FeedRepository,
 ) {
     private val mutex = Mutex()
     private var bundled: Catalog? = null
+    private var everything: List<Movie> = emptyList()
 
-    /** The films and the series, in one catalog. Throws CatalogException or IOException when either is broken. */
+    /**
+     * Called once with what outlives the hand-picked library (core LegacyLibrary), before the first library is given
+     * out: the app's container turns the ids in viewers' lists into the ones the films have now.
+     */
+    @Volatile
+    var onLegacy: suspend (LegacyLibrary) -> Unit = {}
+
+    /**
+     * The home rows of the feed, and the first films of each: the ones whose artwork and synopsis are asked for from
+     * Cinemeta ahead of time. The rest of the feed comes through [loadIndex], as films whose details load when opened.
+     * Throws CatalogException when no feed on this TV can be used.
+     */
     suspend fun loadBundled(): Catalog = mutex.withLock {
         bundled ?: withContext(Dispatchers.IO) {
-            val films = context.assets.open(ASSET_PATH).bufferedReader().use { CatalogParser.parse(it.readText()) }
-            val series = context.assets.open(SERIES_PATH).bufferedReader().use { CatalogParser.parse(it.readText(), MediaKind.SERIES) }
-            films.copy(movies = films.movies + series.movies, collections = films.collections + series.collections)
+            val legacy = try {
+                context.assets.open(LEGACY_PATH).bufferedReader().use { LegacyLibrary.parse(it.readText()) }
+            } catch (e: CatalogException) {
+                Log.e(TAG, "The legacy file is invalid: ${e.problems.take(2)}")
+                LegacyLibrary.EMPTY
+            } catch (e: IOException) {
+                Log.e(TAG, "The legacy file could not be read", e)
+                LegacyLibrary.EMPTY
+            }
+            onLegacy(legacy)
+            val result = feed.load() ?: throw CatalogException(listOf("no usable film feed"))
+            val all = FeedCatalog.catalog(result, legacy)
+            everything = all.movies
+            val heads = all.collections.flatMapTo(HashSet()) { it.movieIds.take(ROW_HEAD) }
+            all.copy(movies = all.movies.filter { it.id in heads })
         }.also { bundled = it }
     }
 
-    private var index: List<Movie>? = null
-
     /**
-     * The full horror index (index.json, core HorrorIndex), films not in the library: read once, in the background.
-     * Empty if the file cannot be read; SCARY works as before without it.
+     * Every film of the feed: read with the library, in the background. Empty only if the feed cannot be read, in
+     * which case [loadBundled] has already thrown.
      */
     suspend fun loadIndex(): List<Movie> {
-        val library = loadBundled()
-        return mutex.withLock {
-            index ?: withContext(Dispatchers.Default) {
-                try {
-                    val text = context.assets.open(INDEX_PATH).bufferedReader().use { it.readText() }
-                    val result = HorrorIndex.parse(text, library.movies.mapTo(HashSet()) { it.imdbId })
-                    if (result.dropped > 0) Log.w(TAG, "Index: ${result.dropped} entries dropped")
-                    result.movies
-                } catch (e: CatalogException) {
-                    Log.e(TAG, "Index is invalid: ${e.problems.take(3)}")
-                    emptyList()
-                } catch (e: IOException) {
-                    Log.e(TAG, "Index could not be read", e)
-                    emptyList()
-                }
-            }.also { index = it }
-        }
+        loadBundled()
+        return everything
     }
 
     /**
@@ -136,6 +144,8 @@ class CatalogRepository(
                     var tmdbState = RefreshState()
                     var categoriesState = RefreshState()
                     suspend fun fetchWhatIsDue() {
+                        // The week's new feed, at most one try a day; it is the library from the next start of the app.
+                        feed.refresh()
                         val now = System.currentTimeMillis()
                         // The hidden-films rule changed: hide at once what is held (works offline too), then read all
                         // of it again as if nothing were kept, so films now allowed come in.
@@ -201,9 +211,10 @@ class CatalogRepository(
             }
 
     private companion object {
-        const val ASSET_PATH = "catalog.json"
-        const val SERIES_PATH = "series.json"
-        const val INDEX_PATH = "index.json"
+        const val LEGACY_PATH = "legacy.json"
+
+        /** How many films from the front of each row get their details ahead of time: what a row shows without scrolling, and a few more. */
+        const val ROW_HEAD = 12
         const val TAG = "CatalogRepository"
     }
 }

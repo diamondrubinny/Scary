@@ -19,9 +19,9 @@ class HorrorIndexTest {
 
     @Test
     fun `the bundled index is whole, checked and apart from the hand-picked library`() {
-        val curated = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText()).movies.map { it.imdbId } +
-            CatalogParser.parse(File("../app/src/main/assets/series.json").readText(), MediaKind.SERIES).movies.map { it.imdbId }
-        val raw = HorrorIndex.parse(File("../app/src/main/assets/index.json").readText())
+        val curated = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText()).movies.map { it.imdbId } +
+            CatalogParser.parse(File("src/test/fixtures/series.json").readText(), MediaKind.SERIES).movies.map { it.imdbId }
+        val raw = HorrorIndex.parse(File("src/test/fixtures/index.json").readText())
         assertEquals("No entry breaks a rule", 0, raw.dropped)
         assertTrue("Thousands of films: ${raw.movies.size}", raw.movies.size >= 3500)
         assertTrue("None is hand-picked already", raw.movies.none { it.imdbId in curated })

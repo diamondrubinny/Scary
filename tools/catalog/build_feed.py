@@ -124,7 +124,10 @@ def details(meta):
     country = meta.get("country") if isinstance(meta.get("country"), str) else ""
     name = INDEX.title_of(meta.get("name")) if isinstance(meta.get("name"), str) else None
     description = meta.get("description") if isinstance(meta.get("description"), str) else ""
+    minutes = re.match(r"^(\d{1,3})\s*min", str(meta.get("runtime") or ""))
     return {
+        # The film's length in minutes ("112 min"), 0 when Cinemeta does not say.
+        "m": int(minutes.group(1)) if minutes and 1 <= int(minutes.group(1)) <= 600 else 0,
         # What the film is about, for the rows' word rules only: it is never written to the feed.
         "o": " ".join(description.split())[:MAX_ABOUT],
         "g": genres, "r": rating, "rel": released, "y": year, "c": country[:120], "n": name,
@@ -144,7 +147,7 @@ def cinemeta_details(imdb_ids, known):
         answer = get_json(META.format(imdb))
         return imdb, None if answer is None else details(answer.get("meta") or {})
 
-    missing = [i for i in imdb_ids if "o" not in cache.get(i, {})]
+    missing = [i for i in imdb_ids if "m" not in cache.get(i, {})]
     print(f"Cinemeta details: {len(imdb_ids) - len(missing)} known, {len(missing)} to ask", file=sys.stderr)
     with ThreadPoolExecutor(max_workers=6) as pool:
         for done, (imdb, info) in enumerate(pool.map(one, missing), 1):
@@ -248,6 +251,8 @@ def gather(base, today):
             film["r"] = known_film["r"]
         if known_film.get("rel"):
             film["rel"] = known_film["rel"]
+        if known_film.get("m"):
+            film["m"] = known_film["m"]
         out.append(film)
     about = {imdb: (info.get(imdb) or {}).get("o", "") for imdb in films}
     return out, [i for i in fresh if i in films], [i for i in popular if i in films], about
@@ -311,6 +316,8 @@ def extras(today, taken):
             film["d"] = director
         if info.get("r"):
             film["r"] = info["r"]
+        if info.get("m"):
+            film["m"] = info["m"]
         if span is not None:
             end = int(span.group(1)) if span.group(1) else None
             if end and info["y"] <= end <= 2100:
@@ -502,7 +509,8 @@ def check(feed):
         assert film.get("k") in (None, "thriller", "series"), imdb
         assert "e" not in film or (film.get("k") == "series" and film["y"] <= film["e"] <= 2100), imdb
         assert film.get("on") in (None, True), imdb
-        assert set(film) <= {"imdb", "t", "y", "p", "g", "d", "s", "r", "rel", "k", "e", "on"}, imdb
+        assert "m" not in film or 1 <= film["m"] <= 600, imdb
+        assert set(film) <= {"imdb", "t", "y", "p", "g", "d", "s", "r", "rel", "m", "k", "e", "on"}, imdb
     assert 3 <= len(rows) <= 40, f"{len(rows)} rows"
     ids = [row["id"] for row in rows]
     assert len(set(ids)) == len(ids) and all(re.match(r"^[a-z][a-z_]{1,31}$", i) for i in ids), ids

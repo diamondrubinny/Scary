@@ -27,7 +27,7 @@ import java.time.LocalDate
 
 /** "How much time do you have?", "Because you loved", fear stats, coming soon and "open on your phone". */
 class HandyFeaturesTest {
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
     private val today = LocalDate.of(2026, 10, 28)
 
     private fun movie(id: String, minutes: Int, fear: Int, vararg subs: Subgenre, director: String = "D", year: Int = 2000) =

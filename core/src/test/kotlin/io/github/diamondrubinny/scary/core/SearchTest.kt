@@ -17,7 +17,7 @@ import org.junit.Test
 import java.io.File
 
 class SearchTest {
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
 
     private fun ids(query: String, labels: (Movie) -> List<String> = { emptyList() }) =
         Search.query(catalog.movies, query, labels).map { it.id }

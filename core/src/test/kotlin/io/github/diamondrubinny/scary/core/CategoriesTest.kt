@@ -88,8 +88,8 @@ class CategoriesTest {
 
     @Test
     fun `every rule is for a category the library really has`() {
-        val films = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText()).collections.map { it.id }
-        val series = CatalogParser.parse(File("../app/src/main/assets/series.json").readText(), MediaKind.SERIES).collections.map { it.id }
+        val films = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText()).collections.map { it.id }
+        val series = CatalogParser.parse(File("src/test/fixtures/series.json").readText(), MediaKind.SERIES).collections.map { it.id }
         assertTrue(Categories.ids.toString(), (films + series).containsAll(Categories.ids))
     }
 }
@@ -160,7 +160,7 @@ class NewCategoriesTest {
 
     @Test
     fun `every new category is one the library has, and series stay out of them`() {
-        val films = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText()).collections.map { it.id }.toSet()
+        val films = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText()).collections.map { it.id }.toSet()
         val added = listOf(
             "new_nightmares", "stephen_king", "giallo", "classic_monsters", "horror_comedy", "spanish_horror",
             "european_horror", "max_fear", "witches", "cosmic_horror", "animal_attacks",
@@ -177,7 +177,7 @@ class TmdbCategoryTest {
 
     @Test
     fun `every TMDB category is a library row, and its discover address holds only fixed parameters`() {
-        val films = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText()).collections.map { it.id }.toSet()
+        val films = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText()).collections.map { it.id }.toSet()
         io.github.diamondrubinny.scary.core.tmdb.TmdbCategory.entries.forEach { category ->
             assertTrue(category.collectionId, category.collectionId in films)
             val url = io.github.diamondrubinny.scary.core.tmdb.Tmdb.discoverUrl(category, today, io.github.diamondrubinny.scary.core.model.Language.HE, page = 3)

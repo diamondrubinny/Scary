@@ -19,7 +19,7 @@ import org.junit.Test
 
 /** The new moods and decades, and the bundled library behind every row and mood. */
 class LibraryTest {
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
 
     private fun movie(id: String, year: Int, runtime: Int, slowBurn: Boolean = false, curated: Boolean = true) = Movie(
         id = id, imdbId = "tt$id", title = id, year = year, runtimeMin = runtime, genre = Genre.HORROR,
@@ -71,7 +71,7 @@ class LibraryTest {
         // Family night shows only fear 1-2: there must be plenty of those.
         assertTrue(catalog.movies.count { (it.fear ?: 5) <= 2 } >= 20)
         // Every subgenre has films, in the hand-picked library or the full index (index.json).
-        val index = HorrorIndex.parse(File("../app/src/main/assets/index.json").readText()).movies
+        val index = HorrorIndex.parse(File("src/test/fixtures/index.json").readText()).movies
         Subgenre.entries.forEach { sub ->
             assertTrue("no movie is $sub", catalog.movies.any { sub in it.subgenres } || index.any { sub in it.subgenres })
         }

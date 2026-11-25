@@ -95,7 +95,7 @@ class PhoneLayoutTest {
         waitFor(hasTestTag(HOME_ROWS_TAG))
         val container = (rule.activity.application as ScaryApplication).container
         val viewModel = ViewModelProvider(rule.activity, HomeViewModel.factory(container))[HomeViewModel::class.java]
-        rule.runOnUiThread { viewModel.openDetails("hereditary") }
+        rule.runOnUiThread { viewModel.openDetails("cm_tt7784604") }
         waitFor(hasText(text(R.string.action_watch_stremio)))
         assertFitsTheWidth("Movie page")
         val watch = rule.onNode(hasText(text(R.string.action_watch_stremio)), useUnmergedTree = true).fetchSemanticsNode()

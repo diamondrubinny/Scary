@@ -59,8 +59,12 @@ class BackupRepository(
         null
     }
 
+    /** The id a film of the old hand-picked library has now (core LegacyLibrary); set once the library is read. */
+    @Volatile
+    var legacyId: (String) -> String = { it }
+
     override suspend fun restore(text: String): String {
-        val file = Backup.decode(text) ?: return "restore_invalid"
+        val file = Backup.decode(text)?.withIds(legacyId) ?: return "restore_invalid"
         val restored = try {
             settings.applyBackup(file)
         } catch (e: java.io.IOException) {

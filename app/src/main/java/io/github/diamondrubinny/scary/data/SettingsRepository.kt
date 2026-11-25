@@ -542,6 +542,24 @@ class SettingsRepository(private val context: Context) {
         it[PINNED] = RecentList.encode(change(current))
     }
 
+    /**
+     * Once, when the hand-picked library gave way to the film feed (docs/CATALOG_REBUILD_PLAN.md): every film id the
+     * viewers' lists hold is turned into the id that film has now ([newId], core LegacyLibrary), for every profile.
+     * A film the feed does not have keeps its place in the list and simply is not shown.
+     */
+    suspend fun migrateLegacyIds(newId: (String) -> String) = edit { p ->
+        if (p[IDS_MIGRATED] == true) return@edit
+        for ((key, value) in p.asMap().toList()) {
+            val text = value as? String ?: continue
+            when (key.name.substringBefore('@')) {
+                in LISTS_OF_IDS -> p[stringPreferencesKey(key.name)] = RecentList.encode(RecentList.decode(text).map(newId).distinct())
+                "watched_movie_days" -> p[stringPreferencesKey(key.name)] = encodeDays(decodeDays(text).mapKeys { newId(it.key) })
+                "bucket_playing" -> p[stringPreferencesKey(key.name)] = newId(text)
+            }
+        }
+        p[IDS_MIGRATED] = true
+    }
+
     private suspend fun edit(block: (MutablePreferences) -> Unit) {
         context.settingsStore.edit { block(it) }
     }
@@ -567,6 +585,10 @@ class SettingsRepository(private val context: Context) {
             fun of(suffix: String): Preferences.Key<T> = make(base + suffix)
         }
 
+        private val IDS_MIGRATED = booleanPreferencesKey("legacy_ids_migrated")
+
+        /** The lists that hold film ids, by the first profile's key name; other profiles' end with "@" and their id. */
+        private val LISTS_OF_IDS = setOf("recent_movie_ids", "my_list_movie_ids", "watched_movie_ids", "loved_movie_ids", "disliked_movie_ids", "bucket_movie_ids")
         private val PROFILES = stringPreferencesKey("profiles")
         private val ACTIVE_PROFILE = stringPreferencesKey("active_profile")
 

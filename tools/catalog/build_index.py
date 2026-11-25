@@ -32,9 +32,11 @@ import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "app/src/main/assets/index.json")
-CATALOG = os.path.join(ROOT, "app/src/main/assets/catalog.json")
-SERIES = os.path.join(ROOT, "app/src/main/assets/series.json")
+# The app no longer packs an index of its own: the film feed holds every film (build_feed.py, which uses this script
+# for its base). The old library's files are kept as fixtures of core's tests only.
+OUT = os.path.join(ROOT, "core/src/test/fixtures/index.json")
+CATALOG = os.path.join(ROOT, "core/src/test/fixtures/catalog.json")
+SERIES = os.path.join(ROOT, "core/src/test/fixtures/series.json")
 ENDPOINT = "https://query.wikidata.org/sparql"
 CINEMETA = "https://v3-cinemeta.strem.io/meta/movie/{}.json"
 CACHE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "cinemeta-info.json")
@@ -73,7 +75,7 @@ HORROR_GENRES = {
     "Q12049743": "romantic horror film", "Q108280930": "horror western",
 }
 
-# Wikidata genre or main-subject labels (English, lower case, matched as substrings) -> SCARY subgenre.
+# Wikidata genre or main-subject labels (English, lower case, matched from the start of a word) -> SCARY subgenre.
 SUBGENRES = [
     ("slasher", "slasher"),
     ("giallo", "giallo"),
@@ -222,7 +224,9 @@ def describe(films):
             }}"""):
             label = row["gl"]["value"].lower()
             for needle, subgenre in SUBGENRES:
-                if needle in label:
+                # At the start of a word: "natural horror" is not in "supernatural horror" (which had put The Shining
+                # and Poltergeist among the animal attacks).
+                if re.search(r"(?<![a-z])" + re.escape(needle), label):
                     films[qid(row["f"]["value"])]["s"].add(subgenre)
         time.sleep(1)
     return films
@@ -273,6 +277,8 @@ def cinemeta_info(imdb_ids):
 def curated_ids():
     ids = set()
     for path in (CATALOG, SERIES):
+        if not os.path.exists(path):
+            continue
         with open(path, encoding="utf-8") as handle:
             data = json.load(handle)
         for item in data.get("movies", data.get("series", [])):

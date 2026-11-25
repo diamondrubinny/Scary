@@ -601,82 +601,82 @@
  2. Jaws (1975) — IMDb 8.1
  3. Aliens (1986) — IMDb 8.4
  4. Predator (1987) — IMDb 7.8
- 5. It (2017) — IMDb 7.3
- 6. The Thing (1982) — IMDb 8.2
- 7. Alien³ (1992) — IMDb 6.4
- 8. Alien: Covenant (2017) — IMDb 6.4
- 9. Godzilla (1954) — IMDb 7.6
-10. The Meg (2018) — IMDb 5.7
-11. Alien vs. Predator (2004) — IMDb 5.7
-12. Gremlins (1984) — IMDb 7.3
-13. Cloverfield (2008) — IMDb 7.0
-14. Predator 2 (1990) — IMDb 6.3
-15. An American Werewolf in London (1981) — IMDb 7.5
-16. Alien: Romulus (2024) — IMDb 7.1
-17. Invasion of the Body Snatchers (1956) — IMDb 7.7
-18. Pitch Black (2000) — IMDb 7.0
-19. Jaws 2 (1978) — IMDb 5.8
-20. Species (1995) — IMDb 5.9
-21. The Wolfman (2010) — IMDb 5.9
-22. The Golem: How He Came into the World (1920) — IMDb 7.2
-23. Jeepers Creepers (2001) — IMDb 6.3
-24. The Thing (2011) — IMDb 6.3
-25. The Lost World (1925) — IMDb 7.0
-26. The Host (2006) — IMDb 7.1
-27. Creature from the Black Lagoon (1954) — IMDb 6.9
-28. Tremors (1990) — IMDb 7.2
-29. The Curse of Frankenstein (1957) — IMDb 7.0
-30. Lake Placid (1999) — IMDb 5.8
-31. The Thing from Another World (1951) — IMDb 7.0
-32. The Blob (1958) — IMDb 6.3
-33. Shin Godzilla (2016) — IMDb 6.9
-34. The Blob (1988) — IMDb 6.7
-35. The Beast from 20,000 Fathoms (1953) — IMDb 6.6
-36. Village of the Damned (1995) — IMDb 5.7
-37. Revenge of the Creature (1955) — IMDb 5.6
-38. Them! (1954) — IMDb 7.2
-39. Ginger Snaps (2000) — IMDb 6.8
-40. Godzilla Raids Again (1955) — IMDb 5.7
-41. The Watchers (2024) — IMDb 5.7
-42. Bad Taste (1987) — IMDb 6.4
-43. Deep Rising (1998) — IMDb 6.1
-44. The Return of Godzilla (1984) — IMDb 6.8
-45. Silver Bullet (1985) — IMDb 6.4
-46. Alligator (1980) — IMDb 6.1
-47. Open Water (2003) — IMDb 5.8
-48. This Island Earth (1955) — IMDb 5.9
-49. The Descent Part 2 (2009) — IMDb 5.7
-50. Godzilla vs. Destoroyah (1995) — IMDb 6.9
-51. Feast (2005) — IMDb 6.2
-52. The Curse of the Werewolf (1961) — IMDb 6.5
-53. Nightbreed (1990) — IMDb 6.5
-54. It's Alive (1974) — IMDb 5.8
-55. Gorgo (1961) — IMDb 5.6
-56. Godzilla, King of the Monsters! (1956) — IMDb 6.3
-57. Bad Moon (1996) — IMDb 5.8
-58. Ginger Snaps Back (2004) — IMDb 5.8
-59. La bête (1975) — IMDb 5.7
-60. Eaten Alive (1976) — IMDb 5.5
-61. Ginger Snaps 2: Unleashed (2004) — IMDb 6.3
-62. The Tingler (1959) — IMDb 6.6
-63. The Monolith Monsters (1957) — IMDb 6.4
-64. Behemoth, the Sea Monster (1959) — IMDb 5.7
-65. The Creature Walks Among Us (1956) — IMDb 5.6
-66. Monster on the Campus (1958) — IMDb 5.8
-67. Xtro (1983) — IMDb 5.6
-68. Werewolves Within (2021) — IMDb 6.0
-69. Caltiki – The Immortal Monster (1959) — IMDb 5.9
-70. Dangerous Animals (2005) — IMDb 6.4
-71. Fiend Without a Face (1958) — IMDb 6.1
-72. The Reef (2010) — IMDb 5.8
-73. Die, Monster (1965) — IMDb 5.6
-74. Man Made Monster (1941) — IMDb 6.1
-75. X the Unknown (1956) — IMDb 6.1
-76. The Deadly Spawn (1983) — IMDb 5.9
-77. Kronos (1957) — IMDb 5.7
-78. The Monster and the Girl (1941) — IMDb 6.0
-79. The Monster That Challenged the World (1957) — IMDb 5.7
-80. Black Zoo (1963) — IMDb 5.6
+ 5. The Thing (1982) — IMDb 8.2
+ 6. Alien³ (1992) — IMDb 6.4
+ 7. Alien: Covenant (2017) — IMDb 6.4
+ 8. Godzilla (1954) — IMDb 7.6
+ 9. The Meg (2018) — IMDb 5.7
+10. Alien vs. Predator (2004) — IMDb 5.7
+11. Gremlins (1984) — IMDb 7.3
+12. Cloverfield (2008) — IMDb 7.0
+13. Predator 2 (1990) — IMDb 6.3
+14. An American Werewolf in London (1981) — IMDb 7.5
+15. Alien: Romulus (2024) — IMDb 7.1
+16. Invasion of the Body Snatchers (1956) — IMDb 7.7
+17. Pitch Black (2000) — IMDb 7.0
+18. Jaws 2 (1978) — IMDb 5.8
+19. Species (1995) — IMDb 5.9
+20. The Wolfman (2010) — IMDb 5.9
+21. The Golem: How He Came into the World (1920) — IMDb 7.2
+22. Jeepers Creepers (2001) — IMDb 6.3
+23. The Thing (2011) — IMDb 6.3
+24. The Lost World (1925) — IMDb 7.0
+25. The Host (2006) — IMDb 7.1
+26. Creature from the Black Lagoon (1954) — IMDb 6.9
+27. Tremors (1990) — IMDb 7.2
+28. The Curse of Frankenstein (1957) — IMDb 7.0
+29. Lake Placid (1999) — IMDb 5.8
+30. The Thing from Another World (1951) — IMDb 7.0
+31. The Blob (1958) — IMDb 6.3
+32. Shin Godzilla (2016) — IMDb 6.9
+33. The Blob (1988) — IMDb 6.7
+34. The Beast from 20,000 Fathoms (1953) — IMDb 6.6
+35. Revenge of the Creature (1955) — IMDb 5.6
+36. Them! (1954) — IMDb 7.2
+37. Ginger Snaps (2000) — IMDb 6.8
+38. Godzilla Raids Again (1955) — IMDb 5.7
+39. Bad Taste (1987) — IMDb 6.4
+40. Deep Rising (1998) — IMDb 6.1
+41. The Return of Godzilla (1984) — IMDb 6.8
+42. Silver Bullet (1985) — IMDb 6.4
+43. Alligator (1980) — IMDb 6.1
+44. Open Water (2003) — IMDb 5.8
+45. This Island Earth (1955) — IMDb 5.9
+46. The Descent Part 2 (2009) — IMDb 5.7
+47. Godzilla vs. Destoroyah (1995) — IMDb 6.9
+48. Feast (2005) — IMDb 6.2
+49. The Curse of the Werewolf (1961) — IMDb 6.5
+50. Nightbreed (1990) — IMDb 6.5
+51. It's Alive (1974) — IMDb 5.8
+52. Gorgo (1961) — IMDb 5.6
+53. Godzilla, King of the Monsters! (1956) — IMDb 6.3
+54. Bad Moon (1996) — IMDb 5.8
+55. Ginger Snaps Back (2004) — IMDb 5.8
+56. La bête (1975) — IMDb 5.7
+57. Eaten Alive (1976) — IMDb 5.5
+58. Ginger Snaps 2: Unleashed (2004) — IMDb 6.3
+59. The Tingler (1959) — IMDb 6.6
+60. The Monolith Monsters (1957) — IMDb 6.4
+61. Behemoth, the Sea Monster (1959) — IMDb 5.7
+62. The Creature Walks Among Us (1956) — IMDb 5.6
+63. Monster on the Campus (1958) — IMDb 5.8
+64. Xtro (1983) — IMDb 5.6
+65. Werewolves Within (2021) — IMDb 6.0
+66. Caltiki – The Immortal Monster (1959) — IMDb 5.9
+67. Dangerous Animals (2005) — IMDb 6.4
+68. Fiend Without a Face (1958) — IMDb 6.1
+69. The Reef (2010) — IMDb 5.8
+70. Die, Monster (1965) — IMDb 5.6
+71. Man Made Monster (1941) — IMDb 6.1
+72. X the Unknown (1956) — IMDb 6.1
+73. The Deadly Spawn (1983) — IMDb 5.9
+74. Kronos (1957) — IMDb 5.7
+75. The Monster and the Girl (1941) — IMDb 6.0
+76. The Monster That Challenged the World (1957) — IMDb 5.7
+77. Black Zoo (1963) — IMDb 5.6
+78. The Beast Must Die (1974) — IMDb 5.6
+79. The Beast Within (1982) — IMDb 5.6
+80. Monster Man (2003) — IMDb 5.6
 
 ## psychological_horror (14)
  1. Backrooms (2026) — IMDb 6.7

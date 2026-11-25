@@ -10,7 +10,8 @@ import io.github.diamondrubinny.scary.core.model.MovieCollection
 
 /**
  * The library the app shows, made from the film feed (docs/CATALOG_REBUILD_PLAN.md): the feed's films, each with the
- * fear level the hand-picked library once gave it ([LegacyLibrary]; none for any other film), and the feed's rows under
+ * fear level the hand-picked library once gave it ([LegacyLibrary]; none for any other film, and only a film with one
+ * counts as curated), and the feed's rows under
  * names the app holds here. The feed carries row ids only, so a file from the network can never put its own words on
  * the home screen; a row whose id this version has no name for is left out.
  */
@@ -40,7 +41,9 @@ object FeedCatalog {
     val rowIds: List<String> get() = names.keys.toList()
 
     fun catalog(feed: FilmFeed.Result, legacy: LegacyLibrary = LegacyLibrary.EMPTY): Catalog {
-        val movies = feed.movies.map { movie -> legacy.fear(movie.imdbId)?.let { movie.copy(fear = it) } ?: movie }
+        // A film with a fear level is one somebody watched and rated by hand: it is "curated", which is what tonight's
+        // pick, the moods, family night and the time planner choose from. No other film of the feed is.
+        val movies = feed.movies.map { movie -> legacy.fear(movie.imdbId)?.let { movie.copy(fear = it, curated = true) } ?: movie }
         val collections = feed.rows.mapNotNull { row ->
             names[row.id]?.let { name ->
                 MovieCollection(

@@ -23,7 +23,7 @@ import java.time.LocalDate
 
 class CinemetaTest {
     private val shiningJson = javaClass.getResource("/cinemeta_shining.json")!!.readText()
-    private val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+    private val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
 
     @Test
     fun `parses a real meta response`() {

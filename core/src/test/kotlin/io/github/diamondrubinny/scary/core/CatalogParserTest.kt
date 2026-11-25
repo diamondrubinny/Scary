@@ -33,7 +33,7 @@ class CatalogParserTest {
 
     @Test
     fun `bundled app catalog is valid`() {
-        val file = File("../app/src/main/assets/catalog.json")
+        val file = File("src/test/fixtures/catalog.json")
         assertTrue("catalog not found at ${file.absolutePath}", file.exists())
         val catalog = CatalogParser.parse(file.readText())
         assertTrue(catalog.movies.size >= 40)
@@ -99,7 +99,7 @@ class CatalogParserTest {
 
     @Test
     fun everyCuratedMovieHasItsOwnSynopsisInEveryLanguage() {
-        val catalog = CatalogParser.parse(File("../app/src/main/assets/catalog.json").readText())
+        val catalog = CatalogParser.parse(File("src/test/fixtures/catalog.json").readText())
         val missing = catalog.movies.flatMap { movie ->
             Language.entries.filter { language ->
                 when (language) {
