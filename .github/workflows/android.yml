@@ -171,8 +171,7 @@ jobs:
           cp dist/scary-debug-*.apk dist/scary-debug.apk
           # Release notes in four languages, with this build's number and commit.
           sed -e "s/{{BUILD}}/${GITHUB_RUN_NUMBER}/" -e "s/{{SHA}}/${GITHUB_SHA::7}/" .github/release-notes.md > notes.md
-          gh release delete latest-build --cleanup-tag --yes || true
-          gh release create latest-build dist/scary.apk dist/scary-debug.apk \
+          bash .github/scripts/republish.sh latest-build dist/scary.apk dist/scary-debug.apk \
             --target "${GITHUB_SHA}" \
             --prerelease \
             --title "SCARY build ${GITHUB_RUN_NUMBER}" \
@@ -202,8 +201,7 @@ jobs:
           python3 .github/scripts/update-manifest.py dist/stable-scary.apk "$GITHUB_RUN_NUMBER" "$VERSION_NAME" .github/update-notes.json dist/update.json
           mkdir -p stable && cp dist/stable-scary.apk stable/scary.apk && cp dist/update.json stable/update.json
           printf 'SCARY %s, build %s (%s). Official SCARY on a TV offers it by itself.\n' "$VERSION_NAME" "$GITHUB_RUN_NUMBER" "${GITHUB_SHA::7}" > stable-notes.md
-          gh release delete stable --cleanup-tag --yes || true
-          gh release create stable stable/scary.apk stable/update.json \
+          bash .github/scripts/republish.sh stable stable/scary.apk stable/update.json \
             --target "${GITHUB_SHA}" \
             --latest \
             --title "SCARY ${VERSION_NAME} (build ${GITHUB_RUN_NUMBER})" \

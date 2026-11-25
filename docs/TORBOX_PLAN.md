@@ -5,7 +5,7 @@ Copyright 2026 diamondrubinny. See the LICENSE and NOTICE files.
 -->
 # TorBox לצד Real-Debrid: תוכנית
 
-מצב: **טיוטה לאישור. שום קוד לא נכתב.**
+מצב: **אושר ב־25.11.2026. שלבים 1 עד 4 נבנו על הענף; לא נבדק מול חשבון TorBox אמיתי.**
 
 ## 1. מה מבקשים
 

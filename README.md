@@ -72,6 +72,8 @@ SCARY turns your Android TV into a horror cinema. Instead of a plain home screen
 - ⏱️ **"How much time do you have?"**: up to 90 minutes, an evening, a double feature or a marathon, with the films numbered in the order to watch them.
 - ❤️ **Loved it / Not for me**: love a film and "Because you loved it" brings more like it; "not for me" keeps a film out of every suggestion. **"Your year in fear"** sums up what you watched.
 - 🎟️ **Coming soon to cinemas** (with a TMDB key), and **scan to share**: a QR code on every film page opens its IMDb page on your phone, ready to share.
+- 🎭 **Faces and studios** (with a TMDB key): a film's page shows its actors as cards with their photos and roles, and the companies that made it; a company opens its horror films, and the home screen offers horror studios such as Blumhouse, A24 and Hammer.
+- 📦 **Two accounts of your own**: Real-Debrid and TorBox can both be connected. Their videos share one list, each marked with its account, and when you add a torrent you choose which account it goes to. Nothing moves between them by itself.
 - 📡 **HDMI and live TV** tiles on TVs with inputs, and a **sleep timer** that pauses whatever plays.
 - 📺 **Horror and thriller series**: a Series tab with 40 hand-picked shows (Hill House, Stranger Things, Dark, Kingdom…) and live rows of popular horror, thriller and mystery series.
 - 🍿 **Bucket list**: pick a few films, press Start, and they play one after another: each time you come back from Stremio, SCARY asks whether to play the next.
