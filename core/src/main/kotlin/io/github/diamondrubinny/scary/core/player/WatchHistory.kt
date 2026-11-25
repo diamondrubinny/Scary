@@ -68,11 +68,14 @@ object WatchHistory {
     private const val MAX_NAME_CHARS = 300
     private const val MAX_MOVIE_ID_CHARS = 80
     private const val MAX_POSITION_MS = 48L * 60 * 60 * 1000
-    private val KEY = Regex("^(d:[A-Za-z0-9]{1,64}|t:[A-Za-z0-9]{1,64}:\\d{1,4})$")
+    private val KEY = Regex("^(d:[A-Za-z0-9]{1,64}|t:[A-Za-z0-9]{1,64}:\\d{1,4}|torbox:\\d{1,13}:\\d{1,9})$")
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    /** Whether [key] is a file key as Real-Debrid's lists produce them ("d:<id>" or "t:<id>:<index>"). */
+    /**
+     * Whether [key] is a file key as the accounts' lists produce them: Real-Debrid's "d:<id>" or "t:<id>:<index>", or
+     * TorBox's "torbox:<torrent>:<file>" (core TorBox.fileRef).
+     */
     fun isValidKey(key: String): Boolean = key.length <= MAX_KEY_CHARS && KEY.matches(key)
 
     /** The position to save: none past the credits ([FINISHED_FRACTION]) or before [MIN_RESUME_MS]. */
@@ -134,24 +137,6 @@ object WatchHistory {
     /** The latest entry played for [movieId] that has somewhere to continue from. */
     fun forMovie(entries: List<WatchEntry>, movieId: String): WatchEntry? =
         entries.filter { it.movieId == movieId && it.worthContinuing }.maxByOrNull { it.lastWatched }
-
-    /**
-     * The file after [key] in the same torrent ("t:<id>:<index>" then "t:<id>:<index + 1>"), among [keys] (the account's
-     * files, in any order). Downloads ("d:") have no next file.
-     */
-    fun nextInTorrent(key: String, keys: Collection<String>): String? {
-        val parts = key.split(':')
-        if (parts.size != 3 || parts[0] != "t") return null
-        val index = parts[2].toIntOrNull() ?: return null
-        return keys
-            .mapNotNull { other ->
-                val p = other.split(':')
-                if (p.size == 3 && p[0] == "t" && p[1] == parts[1]) p[2].toIntOrNull()?.let { it to other } else null
-            }
-            .filter { (i, _) -> i > index }
-            .minByOrNull { (i, _) -> i }
-            ?.second
-    }
 
     private fun trim(entries: List<WatchEntry>): List<WatchEntry> =
         if (entries.size <= MAX_ENTRIES) entries else entries.sortedByDescending { it.lastWatched }.take(MAX_ENTRIES)

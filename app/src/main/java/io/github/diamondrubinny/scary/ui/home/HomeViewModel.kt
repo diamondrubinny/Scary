@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.player.Episodes
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.StringRes
@@ -1510,7 +1511,8 @@ class HomeViewModel(
         viewModelScope.launch {
             _rdFiles.value = RdFilesState.Loading
             _rdFiles.value = when (val files = repository.files(force)) {
-                is RealDebridRepository.Files.Ready -> RdFilesState.Ready(files.files)
+                // A series' episodes together and in order, whichever torrents they came in (core Episodes).
+                is RealDebridRepository.Files.Ready -> RdFilesState.Ready(Episodes.ordered(files.files) { Episodes.Item(it.key, it.name) })
                 RealDebridRepository.Files.SignedOut -> RdFilesState.Idle
                 RealDebridRepository.Files.Unreachable -> RdFilesState.Unreachable
             }
@@ -1534,7 +1536,9 @@ class HomeViewModel(
         viewModelScope.launch {
             val torrents = repository.recentTorrents()
             val active = repository.activeCount()
-            _rdTorrents.update { it.copy(torrents = torrents ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
+            // A season added an episode at a time is listed in the episodes' order.
+            val listed = torrents?.let { all -> Episodes.ordered(all) { Episodes.Item("t:${it.id}:0", it.name) } }
+            _rdTorrents.update { it.copy(torrents = listed ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
         }
     }
 
@@ -1786,8 +1790,10 @@ class HomeViewModel(
             // The file is in the history from the start, so a spot can be marked at once.
             val old = watchStore?.entry(file.key)
             watchStore?.update { WatchHistory.progress(it, file.key, file.name, movieId, startAtMs, old?.durationMs ?: 0L, System.currentTimeMillis()) }
+            // The next episode by its number (core Episodes), in this torrent or in another one of the same series,
+            // in either account; for a film in parts, the next part.
             val next = (repository.files() as? RealDebridRepository.Files.Ready)?.files?.let { files ->
-                WatchHistory.nextInTorrent(file.key, files.map { it.key })?.let { key -> files.firstOrNull { it.key == key } }
+                Episodes.next(Episodes.Item(file.key, file.name), files.map { Episodes.Item(it.key, it.name) })?.let { item -> files.firstOrNull { it.key == item.key } }
             }
             // The film SCARY knows this file for (its IMDb id is exact); else the file's name is read when subtitles are searched.
             val film = movieId?.let(::movieById)
@@ -1825,10 +1831,14 @@ class HomeViewModel(
         watchStore?.update { WatchHistory.removeBookmark(it, session.key, positionMs) }
     }
 
-    /** The next file in the same torrent, from where the viewer stopped in it (or its start). */
+    /**
+     * The next episode (or the next part of a film), from where the viewer stopped in it (or its start). It belongs to
+     * the same series as the one that just played, so its subtitles and "Continue watching" stay with that series.
+     */
     fun playNext() {
-        val next = _player.value?.next ?: return
-        play(next, null, watchStore?.entry(next.key)?.positionMs ?: 0L)
+        val session = _player.value ?: return
+        val next = session.next ?: return
+        play(next, rdFileFilms.value[next.key]?.id ?: session.movieId, watchStore?.entry(next.key)?.positionMs ?: 0L)
     }
 
     fun onPlayerClosed() {

@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core
 
+import io.github.diamondrubinny.scary.core.player.WatchHistory
 import io.github.diamondrubinny.scary.core.realdebrid.Magnets
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid.TorrentState
 import io.github.diamondrubinny.scary.core.torbox.TorBox
@@ -187,5 +188,17 @@ class TorBoxTest {
         assertNull(TorBox.parseLink(ok("\"https://cdn.example.net/file.mkv?token=$token\""), token))
         assertNull(TorBox.parseLink(ok("""{"url":"https://cdn.example.net/file.mkv"}"""), token))
         assertNull(TorBox.parseLink("""{"success":false,"error":"LINK_OFFLINE","detail":"x","data":"https://cdn.example.net/f.mkv"}""", token))
+    }
+
+    @Test
+    fun `a TorBox file keeps its place in the watch history like any other`() {
+        val key = TorBox.fileRef(7, 3)
+        assertTrue(WatchHistory.isValidKey(key))
+        val entries = WatchHistory.progress(emptyList(), key, "Show.S01E01.mkv", null, 60_000, 3_600_000, 1)
+        assertEquals(key, entries.single().key)
+        assertEquals(entries, WatchHistory.decode(WatchHistory.encode(entries)))
+        assertFalse(WatchHistory.isValidKey("torbox:7"))
+        assertFalse(WatchHistory.isValidKey("torbox:x:1"))
+        assertFalse(WatchHistory.isValidKey("torbox:7:1:2"))
     }
 }
