@@ -149,6 +149,14 @@ object Torznab {
         return if (handler.isFeed) Answer.Results(handler.candidates) else Answer.Unreadable
     }
 
+    /** An http(s) address of sane length with nothing odd in it: where an indexer says a release's .torrent file is. */
+    private fun isFileLink(link: String): Boolean =
+        link.length in 12..MAX_FIELD && (link.startsWith("https://") || link.startsWith("http://")) && link.none { it.isWhitespace() || it.isISOControl() }
+
+    /** 40 hex digits made from the link: a release without a hash still needs something to be told apart by. */
+    private fun standIn(link: String): String =
+        java.security.MessageDigest.getInstance("SHA-1").digest(link.toByteArray()).joinToString("") { "%02x".format(it) }
+
     private class FeedHandler : DefaultHandler() {
         val candidates = ArrayList<Releases.Candidate>()
         var error: Int? = null
@@ -232,8 +240,13 @@ object Torznab {
                 // A magnet link the indexer gave, or one built from the info-hash alone; a .torrent address is neither.
                 val magnet = links.firstNotNullOfOrNull { it.takeIf { l -> l.startsWith("magnet:", ignoreCase = true) }?.let(Magnets::parse) }
                     ?: infoHash?.let(Magnets::parse)
-                    ?: return
-                candidates += Releases.Candidate(title, magnet.copy(name = magnet.name ?: title.take(255)), source, size, seeders, Releases.tags(title))
+                if (magnet != null) {
+                    candidates += Releases.Candidate(title, magnet.copy(name = magnet.name ?: title.take(255)), source, size, seeders, Releases.tags(title))
+                    return
+                }
+                // Neither: the release is a link to a .torrent file. It is kept with that link, to be read when chosen.
+                val link = links.firstOrNull(::isFileLink) ?: return
+                candidates += Releases.Candidate(title, Magnets.Magnet(standIn(link), title.take(255)), source, size, seeders, Releases.tags(title), torrentLink = link)
             }
         }
     }

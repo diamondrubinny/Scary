@@ -212,8 +212,9 @@ internal fun pullText(pull: RdPullState): String = when (pull) {
             PullError.DEAD -> R.string.rd_torrent_error_dead
             PullError.NOT_ALLOWED -> R.string.rd_torrent_error_not_allowed
             PullError.LIMIT -> R.string.rd_torrent_error_limit
+            PullError.NO_FILE -> R.string.rd_torrent_error_no_file
         },
-    )
+    ) + (pull.detail?.let { "\n" + stringResource(R.string.debrid_answer, it) }.orEmpty())
 }
 
 @Composable

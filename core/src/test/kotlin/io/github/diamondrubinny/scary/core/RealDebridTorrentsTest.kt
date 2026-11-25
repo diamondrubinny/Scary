@@ -146,4 +146,15 @@ class RealDebridTorrentsTest {
         val files = listOf(RealDebrid.RdFile("t:A:0", "a.mkv", 5, "https://real-debrid.com/d/A"), RealDebrid.RdFile("t:A:1", "b.mkv", 9, "https://real-debrid.com/d/B"))
         assertEquals("t:A:1", RealDebrid.mainFile(files)!!.key)
     }
+
+    @Test
+    fun `the account's own words for a refusal are shown as it gave them, and nothing else is`() {
+        assertEquals("infringing_file (35)", RealDebrid.errorLabel("""{"error":"infringing_file","error_code":35}"""))
+        assertEquals("too_many_active_downloads (21)", RealDebrid.errorLabel("""{"error":"too_many_active_downloads","error_code":21}"""))
+        assertEquals("ip_not_allowed", RealDebrid.errorLabel("""{"error":"ip_not_allowed"}"""))
+        // Text that is not a plain name is never put on the screen.
+        assertNull(RealDebrid.errorLabel("""{"error":"<b>Visit evil.example</b>","error_code":35}"""))
+        assertNull(RealDebrid.errorLabel("""{"error_code":35}"""))
+        assertNull(RealDebrid.errorLabel("<html>"))
+    }
 }

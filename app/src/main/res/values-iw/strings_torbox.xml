@@ -26,4 +26,6 @@
     <string name="debrid_add_to_rd">הוספה ל־Real-Debrid</string>
     <string name="debrid_add_to_torbox">הוספה ל־TorBox</string>
     <string name="debrid_pull_confirm">להוסיף את התוצאה הזו לחשבון שלכם ולנגן אותה בנגן של SCARY? בחרו את החשבון.</string>
+    <string name="rd_torrent_error_no_file">המקור לא מסר את קובץ הטורנט של התוצאה הזו, ולכן לא נוסף דבר. נסו תוצאה אחרת.</string>
+    <string name="debrid_answer">התשובה של החשבון עצמו: %1$s</string>
 </resources>

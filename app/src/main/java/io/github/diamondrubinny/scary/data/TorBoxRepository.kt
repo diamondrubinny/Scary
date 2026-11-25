@@ -195,7 +195,8 @@ class TorBoxRepository(
         val boundary = boundary()
         val added = call("POST", TorBox.CREATE_URL, TorBox.createBody(magnet, boundary), TorBox.multipartType(boundary))
             ?: return@withContext Pull.Failed(PullError.UNREACHABLE)
-        val id = added.body?.takeIf { added.ok }?.let(TorBox::parseCreated) ?: return@withContext Pull.Failed(pullError(added))
+        val id = added.body?.takeIf { added.ok }?.let(TorBox::parseCreated)
+            ?: return@withContext Pull.Failed(pullError(added), TorBox.errorName(added.body)?.takeIf { Regex("^[A-Z0-9_]{1,48}$").matches(it) })
         cachedFiles = null
         val started = SystemClock.elapsedRealtime()
         var progress = 0

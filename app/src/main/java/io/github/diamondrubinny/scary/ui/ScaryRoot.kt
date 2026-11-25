@@ -751,8 +751,8 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     actions = remember(viewModel) {
                         RdSourcesActions(
                             onSearch = viewModel::searchSources,
-                            onPull = { viewModel.pullMagnet(it.magnet.uri) },
-                            onPullTo = { release, service -> viewModel.pullMagnet(release.magnet.uri, service) },
+                            onPull = { viewModel.pullRelease(it) },
+                            onPullTo = { release, service -> viewModel.pullRelease(release, service) },
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
                             onCheckSource = viewModel::checkSource,

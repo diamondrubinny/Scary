@@ -26,4 +26,6 @@
     <string name="debrid_add_to_rd">إضافة إلى Real-Debrid</string>
     <string name="debrid_add_to_torbox">إضافة إلى TorBox</string>
     <string name="debrid_pull_confirm">هل تضيف هذا الإصدار إلى حسابك وتشغّله في مشغّل SCARY؟ اختر الحساب.</string>
+    <string name="rd_torrent_error_no_file">لم يقدّم المصدر ملف التورنت لهذا الإصدار، فلم يُضَف شيء. جرّب إصدارًا آخر.</string>
+    <string name="debrid_answer">ردّ الحساب نفسه: %1$s</string>
 </resources>

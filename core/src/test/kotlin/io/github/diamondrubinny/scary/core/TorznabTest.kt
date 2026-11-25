@@ -66,7 +66,7 @@ class TorznabTest {
     }
 
     @Test
-    fun `items with a magnet or a hash are kept, and a torrent file address is not`() {
+    fun `items with a magnet or a hash are kept as they are, and a torrent file address is kept to be read when chosen`() {
         val answer = Torznab.parse(
             feed(
                 """<item><title>Night.of.the.Living.Dead.1968.1080p.BluRay.x264</title><guid>https://indexer.example/t/1</guid>
@@ -81,7 +81,19 @@ class TorznabTest {
                    <item><link>magnet:?xt=urn:btih:$c</link></item>""",
             ),
         ) as Torznab.Answer.Results
-        assertEquals(listOf(a, b), answer.candidates.map { it.magnet.infoHash })
+        assertEquals(listOf(a, b), answer.candidates.take(2).map { it.magnet.infoHash })
+        assertEquals(listOf(null, null), answer.candidates.take(2).map { it.torrentLink })
+        // The third gave neither: it carries its file's address, and a stand-in hash that is not a real one's.
+        assertEquals(3, answer.candidates.size)
+        val linked = answer.candidates[2]
+        assertEquals("https://indexer.example/dl/3.torrent", linked.torrentLink)
+        assertEquals("Only.A.Torrent.File.1080p", linked.title)
+        assertTrue(Regex("^[0-9a-f]{40}$").matches(linked.magnet.infoHash))
+        assertTrue(linked.magnet.infoHash !in setOf(a, b, c))
+        // An address that is not http(s), or has a space in it, is not a file's address.
+        val odd = Torznab.parse(feed("""<item><title>Odd.Link.1080p</title><link>ftp://indexer.example/3.torrent</link></item>
+            <item><title>Broken.Link.1080p</title><link>https://indexer.example/a b.torrent</link></item>""")) as Torznab.Answer.Results
+        assertTrue(odd.candidates.isEmpty())
         val first = answer.candidates[0]
         assertEquals("Site One", first.source)
         assertEquals(8_000_000_000, first.sizeBytes)

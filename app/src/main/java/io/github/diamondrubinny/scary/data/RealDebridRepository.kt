@@ -87,10 +87,11 @@ class RealDebridRepository(
         /** In the account, and Real-Debrid is still fetching it. */
         data class Downloading(val progress: Int, val torrentId: String) : Pull
 
-        data class Failed(val reason: PullError) : Pull
+        /** [detail]: the account's own words for it ("infringing_file (35)"), when it gave any. */
+        data class Failed(val reason: PullError, val detail: String? = null) : Pull
     }
 
-    enum class PullError { UNREACHABLE, SLOTS_FULL, REFUSED, TOO_BIG, NO_VIDEO, DEAD, NOT_ALLOWED, LIMIT }
+    enum class PullError { UNREACHABLE, SLOTS_FULL, REFUSED, TOO_BIG, NO_VIDEO, DEAD, NOT_ALLOWED, LIMIT, NO_FILE }
 
     /** What the player opens: a direct link, and how to get the converted stream if the TV cannot play it. */
     class Playable(val url: String, val title: String, private val transcode: suspend () -> String?) {
@@ -262,7 +263,7 @@ class RealDebridRepository(
     suspend fun pull(magnet: Magnets.Magnet): Pull = withContext(Dispatchers.IO) {
         val added = call("POST", RealDebrid.ADD_MAGNET_URL, RealDebrid.addMagnetForm(magnet)) ?: return@withContext Pull.Failed(PullError.UNREACHABLE)
         val id = added.body?.takeIf { added.ok }?.let(RealDebrid::parseAdded)
-            ?: return@withContext Pull.Failed(pullError(added))
+            ?: return@withContext Pull.Failed(pullError(added), added.body?.let(RealDebrid::errorLabel))
         awaitingChoice += id
         val started = SystemClock.elapsedRealtime()
         var chosenAt = 0L

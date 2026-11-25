@@ -26,4 +26,6 @@
     <string name="debrid_add_to_rd">Добавить в Real-Debrid</string>
     <string name="debrid_add_to_torbox">Добавить в TorBox</string>
     <string name="debrid_pull_confirm">Добавить этот релиз в ваш аккаунт и воспроизвести в плеере SCARY? Выберите аккаунт.</string>
+    <string name="rd_torrent_error_no_file">Источник не выдал торрент-файл этого релиза, поэтому ничего не добавлено. Попробуйте другой релиз.</string>
+    <string name="debrid_answer">Ответ самого аккаунта: %1$s</string>
 </resources>
