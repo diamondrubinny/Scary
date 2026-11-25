@@ -13,9 +13,11 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.diamondrubinny.scary.core.realdebrid.RealDebrid
 import io.github.diamondrubinny.scary.ui.home.RdFilesState
+import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_FILES_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.REAL_DEBRID_SERVICE_TAG
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridActions
 import io.github.diamondrubinny.scary.ui.realdebrid.RealDebridScreen
@@ -136,7 +138,10 @@ class TorBoxScreenTest {
             state = State.SignedIn("viewer", true, "2027-01-01")
             files = listOf(mine, theirs)
         }
+        // The list stays on the file it was showing when another is added above it, so each row is brought into view.
+        rule.onNode(hasTestTag(REAL_DEBRID_FILES_TAG)).performScrollToIndex(0)
         rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.rd_title)), useUnmergedTree = true).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_FILES_TAG)).performScrollToIndex(1)
         rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title)), useUnmergedTree = true).assertExists()
 
         // Real-Debrid alone: nothing to tell apart, so no label.
