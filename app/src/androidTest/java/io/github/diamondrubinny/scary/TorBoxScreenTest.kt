@@ -128,22 +128,23 @@ class TorBoxScreenTest {
         rule.onNode(hasTestTag(TORBOX_OPEN_TAG)).assertExists()
         rule.onNode(hasText("Alien.1979.mkv")).performClick()
         assertEquals(listOf("torbox:7:0"), played)
-        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title))).assertExists()
+        // The label is part of the file's row (one node for a screen reader), so it is looked for inside it.
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title)), useUnmergedTree = true).assertExists()
 
         // Both connected: each file says whose it is.
         rule.runOnUiThread {
             state = State.SignedIn("viewer", true, "2027-01-01")
             files = listOf(mine, theirs)
         }
-        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.rd_title))).assertExists()
-        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title))).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.rd_title)), useUnmergedTree = true).assertExists()
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG) and hasText(text(R.string.torbox_title)), useUnmergedTree = true).assertExists()
 
         // Real-Debrid alone: nothing to tell apart, so no label.
         rule.runOnUiThread {
             torBox = false
             files = listOf(mine)
         }
-        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG)).assertDoesNotExist()
+        rule.onNode(hasTestTag(REAL_DEBRID_SERVICE_TAG), useUnmergedTree = true).assertDoesNotExist()
     }
 
     @Test
