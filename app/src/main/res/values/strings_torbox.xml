@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="torbox_title">TorBox</string>
+    <string name="torbox_open">TorBox account</string>
+    <string name="torbox_what">A second account beside Real-Debrid. Once connected, the videos in your own TorBox account can be played in SCARY\'s player, and a torrent you choose can be added to it.</string>
+    <string name="torbox_signed_out">Not connected to TorBox.</string>
+    <string name="torbox_waiting">Waiting for you to approve this TV at TorBox…</string>
+    <string name="torbox_connected">Connected to TorBox.</string>
+    <string name="torbox_signed_in">Connected to TorBox as %1$s.</string>
+    <string name="torbox_signed_in_until">Connected to TorBox as %1$s. The plan runs until %2$s.</string>
+    <string name="torbox_signed_in_free">Connected to TorBox as %1$s, on the free plan. TorBox keeps most of this for paid plans.</string>
+    <string name="torbox_unreachable">TorBox could not be reached. Check the network and try again.</string>
+    <string name="torbox_expired">The code ran out, or TorBox did not accept it. Connecting with a code needs a paid TorBox plan.</string>
+    <string name="torbox_storage">The connection could not be kept safely on this TV.</string>
+    <string name="torbox_session_ended">TorBox no longer accepts this TV\'s connection. Connect again.</string>
+    <string name="torbox_sign_in">Connect to TorBox</string>
+    <string name="torbox_sign_out">Disconnect</string>
+    <string name="torbox_cancel">Cancel</string>
+    <string name="torbox_step_open">On your phone, open %1$s</string>
+    <string name="torbox_step_code">Sign in to TorBox and enter this code:</string>
+    <string name="torbox_qr_description">QR code that opens TorBox\'s page for approving this TV</string>
+    <string name="torbox_key_note">The connection is your TorBox API key: it gives full access to the account and does not run out. Disconnecting removes it from this TV. To cut it off everywhere, reset the API key in TorBox\'s settings.</string>
+    <string name="torbox_privacy">TorBox sees the TV\'s IP address, your torrents and which of your files you play. The connection is stored encrypted on this TV only; nothing is sent to SCARY.</string>
+    <string name="rd_torrent_error_limit">The account reached a limit of its plan (monthly, daily or a waiting time). Try again later.</string>
+    <string name="debrid_add_to_rd">Add to Real-Debrid</string>
+    <string name="debrid_add_to_torbox">Add to TorBox</string>
+    <string name="debrid_pull_confirm">Add this release to your own account and play it in SCARY\'s player? Choose the account.</string>
+</resources>

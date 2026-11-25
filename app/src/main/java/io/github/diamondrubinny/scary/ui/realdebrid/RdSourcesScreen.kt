@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.realdebrid
 
+import io.github.diamondrubinny.scary.data.DebridAccounts.Service
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.background
@@ -94,6 +95,7 @@ private const val ORBOT_PACKAGE = "org.torproject.android"
 fun sourceRemoveTag(index: Int) = "rdSourcesRemove:$index"
 const val RD_SOURCES_CONFIRM_TAG = "rdSourcesConfirm"
 const val RD_SOURCES_PULL_TAG = "rdSourcesPull"
+const val RD_SOURCES_PULL_TORBOX_TAG = "rdSourcesPullTorBox"
 
 /** A release's row in the results: its info-hash for the test tag. */
 fun releaseTag(infoHash: String) = "release:$infoHash"
@@ -104,6 +106,8 @@ fun filterTag(filter: Releases.Filter) = "filter:${filter.name}"
 class RdSourcesActions(
     val onSearch: (String) -> Unit,
     val onPull: (Releases.Candidate) -> Unit,
+    /** Adds the release to the account the viewer chose, when both are connected. */
+    val onPullTo: (Releases.Candidate, Service) -> Unit = { release, _ -> onPull(release) },
     val onSaveIndexer: suspend (address: String, key: String) -> SaveResult,
     val onRemoveIndexer: () -> Unit,
     /** Asks each source whether it answers, and how fast; only at the viewer's press. */
@@ -131,6 +135,8 @@ fun RdSourcesScreen(
     throughTor: Boolean = false,
     /** The film this search was opened for, already in the line (and already asked for). */
     initialQuery: String = "",
+    /** The connected accounts. With both, the viewer says where a release goes. */
+    services: List<Service> = listOf(Service.REAL_DEBRID),
 ) {
     var query by rememberSaveable(initialQuery) { mutableStateOf(initialQuery) }
     var filter by rememberSaveable { mutableStateOf(Releases.Filter.ALL) }
@@ -138,7 +144,14 @@ fun RdSourcesScreen(
     var settingUp by remember { mutableStateOf(false) }
     var chosen by remember { mutableStateOf<Releases.Candidate?>(null) }
     if (settingUp) IndexerDialog(sources, throughTor, actions, onDone = { settingUp = false })
-    chosen?.let { release -> ReleaseDialog(release, onPull = { actions.onPull(release) }, onDone = { chosen = null }) }
+    chosen?.let { release ->
+        ReleaseDialog(
+            release,
+            choose = services.size > 1,
+            onPull = { service -> if (service == null) actions.onPull(release) else actions.onPullTo(release, service) },
+            onDone = { chosen = null },
+        )
+    }
 
     val firstFocus = remember { FocusRequester() }
     val interaction = remember { MutableInteractionSource() }
@@ -308,7 +321,7 @@ private fun ReleaseRow(release: Releases.Candidate, onClick: () -> Unit) {
 
 /** One release, before anything is added: the viewer says yes, or goes back. */
 @Composable
-private fun ReleaseDialog(release: Releases.Candidate, onPull: () -> Unit, onDone: () -> Unit) {
+private fun ReleaseDialog(release: Releases.Candidate, choose: Boolean, onPull: (Service?) -> Unit, onDone: () -> Unit) {
     val first = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         withFrameNanos { }
@@ -331,14 +344,31 @@ private fun ReleaseDialog(release: Releases.Candidate, onPull: () -> Unit, onDon
                 modifier = Modifier.semantics { heading() },
             )
             BasicText(detail(release), style = ScaryType.Caption.copy(color = ScaryColors.Candle, textDirection = TextDirection.Content))
-            BasicText(stringResource(R.string.rd_sources_pull_confirm), style = ScaryType.Body)
-            ScaryButton(
-                stringResource(R.string.rd_sources_pull_yes),
-                onClick = { onPull(); onDone() },
-                primary = true,
-                focusRequester = first,
-                modifier = Modifier.testTag(RD_SOURCES_PULL_TAG),
-            )
+            BasicText(stringResource(if (choose) R.string.debrid_pull_confirm else R.string.rd_sources_pull_confirm), style = ScaryType.Body)
+            if (choose) {
+                // Both accounts are connected: the viewer says where this release goes, each time.
+                ScaryButton(
+                    stringResource(R.string.debrid_add_to_rd),
+                    onClick = { onPull(Service.REAL_DEBRID); onDone() },
+                    primary = true,
+                    focusRequester = first,
+                    modifier = Modifier.testTag(RD_SOURCES_PULL_TAG),
+                )
+                ScaryButton(
+                    stringResource(R.string.debrid_add_to_torbox),
+                    onClick = { onPull(Service.TORBOX); onDone() },
+                    primary = true,
+                    modifier = Modifier.testTag(RD_SOURCES_PULL_TORBOX_TAG),
+                )
+            } else {
+                ScaryButton(
+                    stringResource(R.string.rd_sources_pull_yes),
+                    onClick = { onPull(null); onDone() },
+                    primary = true,
+                    focusRequester = first,
+                    modifier = Modifier.testTag(RD_SOURCES_PULL_TAG),
+                )
+            }
             ScaryButton(stringResource(R.string.rd_torrent_back), onClick = onDone)
         }
     }

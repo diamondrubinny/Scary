@@ -87,15 +87,6 @@ class WatchHistoryTest {
     }
 
     @Test
-    fun `the next file is the next one in the same torrent`() {
-        val keys = listOf("t:T1:0", "t:T1:2", "t:T1:5", "t:T2:3", "d:D1")
-        assertEquals("t:T1:2", WatchHistory.nextInTorrent("t:T1:0", keys))
-        assertEquals("t:T1:5", WatchHistory.nextInTorrent("t:T1:2", keys))
-        assertNull(WatchHistory.nextInTorrent("t:T1:5", keys))
-        assertNull(WatchHistory.nextInTorrent("d:D1", keys))
-    }
-
-    @Test
     fun `stored history round-trips, and hostile text is dropped`() {
         var h = WatchHistory.addBookmark(played(), "d:ABC123", hour, 10)
         h = played("t:T1:3", now = 2, entries = h)

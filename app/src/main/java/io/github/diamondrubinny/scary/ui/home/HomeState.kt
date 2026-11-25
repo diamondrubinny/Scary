@@ -303,10 +303,14 @@ sealed interface Screen {
 
     /** "Films with <actor>", opened from the cast row of a film's page. */
     data class Person(val name: String) : Screen
+    /** "Horror from <company>", opened from a film's page or the studios row (TMDB, with the viewer's key). */
+    data class Company(val id: Long, val name: String) : Screen
     /** "Ask SCARY": suggestions, or ([chat]) the open conversation. */
     data class Ask(val chat: Boolean = false) : Screen
     /** The viewer's Real-Debrid account and its videos. */
     data object RealDebrid : Screen
+    /** The viewer's TorBox account, a second one beside Real-Debrid: connecting and disconnecting. */
+    data object TorBox : Screen
     /** Adding a magnet link to the viewer's Real-Debrid account, and its newest torrents (the sources feature). */
     data object RdTorrents : Screen
     /** Searching the viewer's own indexer for a release to add (the sources feature); with [movieId], for that film. */

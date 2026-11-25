@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.realdebrid
 
+import io.github.diamondrubinny.scary.data.DebridAccounts.Service
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -72,6 +73,7 @@ const val RD_TORRENTS_DIALOG_TAG = "rdTorrentsDialog"
 const val RD_TORRENTS_DELETE_TAG = "rdTorrentsDelete"
 const val RD_TORRENTS_CONFIRM_TAG = "rdTorrentsConfirm"
 const val RD_TORRENTS_SEARCH_TAG = "rdTorrentsSearch"
+const val RD_TORRENTS_PULL_TORBOX_TAG = "rdTorrentsPullTorBox"
 
 /** A torrent's row in the list: its id for the test tag. */
 fun torrentTag(id: String) = "torrent:$id"
@@ -83,6 +85,8 @@ class RdTorrentsActions(
     val onDelete: (String) -> Unit,
     /** Opens "Search your indexer". */
     val onSearch: () -> Unit = {},
+    /** Adds the link to the account the viewer chose, when both are connected. */
+    val onPullTo: (String, Service) -> Unit = { text, _ -> onPull(text) },
 )
 
 /**
@@ -91,7 +95,12 @@ class RdTorrentsActions(
  * newest torrents: a finished one plays, any one can be deleted (after a second "yes").
  */
 @Composable
-fun RdTorrentsScreen(state: RdTorrentsState, actions: RdTorrentsActions) {
+fun RdTorrentsScreen(
+    state: RdTorrentsState,
+    actions: RdTorrentsActions,
+    /** The connected accounts. With both, the viewer says where each link goes: there is one button for each. */
+    services: List<Service> = listOf(Service.REAL_DEBRID),
+) {
     var input by rememberSaveable { mutableStateOf("") }
     var chosen by remember { mutableStateOf<TorrentStatus?>(null) }
     chosen?.let { torrent -> TorrentDialog(torrent, actions, onDone = { chosen = null }) }
@@ -108,8 +117,13 @@ fun RdTorrentsScreen(state: RdTorrentsState, actions: RdTorrentsActions) {
     LaunchedEffect(state.pull) {
         if (state.pull is RdPullState.Downloading) input = ""
     }
+    val choose = services.size > 1
     fun pull() {
-        if (!working && input.isNotBlank()) actions.onPull(input)
+        // With two accounts the keyboard's "Done" adds nothing: the viewer presses the account's own button.
+        if (!working && input.isNotBlank() && !choose) actions.onPull(input)
+    }
+    fun pullTo(service: Service) {
+        if (!working && input.isNotBlank()) actions.onPullTo(input, service)
     }
     Column(
         modifier = Modifier
@@ -150,7 +164,12 @@ fun RdTorrentsScreen(state: RdTorrentsState, actions: RdTorrentsActions) {
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            ScaryButton(stringResource(R.string.rd_torrent_pull_action), onClick = ::pull, primary = true, modifier = Modifier.testTag(RD_TORRENTS_PULL_TAG))
+            if (choose) {
+                ScaryButton(stringResource(R.string.debrid_add_to_rd), onClick = { pullTo(Service.REAL_DEBRID) }, primary = true, modifier = Modifier.testTag(RD_TORRENTS_PULL_TAG))
+                ScaryButton(stringResource(R.string.debrid_add_to_torbox), onClick = { pullTo(Service.TORBOX) }, primary = true, modifier = Modifier.testTag(RD_TORRENTS_PULL_TORBOX_TAG))
+            } else {
+                ScaryButton(stringResource(R.string.rd_torrent_pull_action), onClick = ::pull, primary = true, modifier = Modifier.testTag(RD_TORRENTS_PULL_TAG))
+            }
             ScaryButton(stringResource(R.string.rd_sources_open), onClick = actions.onSearch, modifier = Modifier.testTag(RD_TORRENTS_SEARCH_TAG))
             ScaryButton(stringResource(R.string.rd_torrent_refresh), onClick = actions.onRefresh)
             state.active?.let { BasicText(stringResource(R.string.rd_torrent_active_slots, it.active, it.limit), style = ScaryType.Caption.copy(color = ScaryColors.Ash)) }
@@ -192,6 +211,7 @@ internal fun pullText(pull: RdPullState): String = when (pull) {
             PullError.NO_VIDEO -> R.string.rd_torrent_error_no_video
             PullError.DEAD -> R.string.rd_torrent_error_dead
             PullError.NOT_ALLOWED -> R.string.rd_torrent_error_not_allowed
+            PullError.LIMIT -> R.string.rd_torrent_error_limit
         },
     )
 }

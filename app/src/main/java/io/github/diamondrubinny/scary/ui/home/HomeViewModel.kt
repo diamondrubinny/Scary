@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.player.Episodes
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.StringRes
@@ -154,6 +155,8 @@ class HomeViewModel(
     private val vpn: io.github.diamondrubinny.scary.data.VpnWatcher? = null,
     /** SCARY's own WireGuard tunnel; null in tests that do not need it. */
     private val tunnel: io.github.diamondrubinny.scary.data.VpnRepository? = null,
+    /** The viewer's TorBox account, a second one beside Real-Debrid; null in tests that do not need it. */
+    private val torBox: io.github.diamondrubinny.scary.data.TorBoxRepository? = null,
 ) : ViewModel() {
 
     private sealed interface CatalogState {
@@ -363,6 +366,18 @@ class HomeViewModel(
                 watchTmdbAccount()
             }
             launch { realDebrid?.load() }
+            launch { torBox?.load() }
+            // A TorBox account connected just now: its files join the list without the viewer asking again.
+            launch {
+                var waiting = false
+                torBox?.state?.collect { now ->
+                    if (waiting && now is RealDebridRepository.State.SignedIn) {
+                        _rdMatches.value = null
+                        loadRealDebridFiles(force = true)
+                    }
+                    waiting = now is RealDebridRepository.State.Waiting
+                }
+            }
             launch { sources?.load() }
             launch { tunnel?.load() }
             launch {
@@ -545,6 +560,80 @@ class HomeViewModel(
             webMovies = webMovies + more.filter { it.imdbId !in known }.associateBy { it.id }
             val all = (local + more).distinctBy { it.imdbId }.sortedWith(compareBy<Movie>({ it.id in watched }, { -it.year }, { it.title }))
             _person.value = PersonUi(name, all, loading = false, fromTmdb = true)
+        }
+    }
+
+    private val _filmPeople = MutableStateFlow<Pair<String, io.github.diamondrubinny.scary.data.TmdbRepository.FilmPeople>?>(null)
+    private var filmPeopleJob: Job? = null
+
+    /** The actors (with their photos) and the companies of the film whose page is open, by its id; null until TMDB answered. */
+    val filmPeople: StateFlow<Pair<String, io.github.diamondrubinny.scary.data.TmdbRepository.FilmPeople>?> = _filmPeople.asStateFlow()
+
+    /**
+     * Asks TMDB for the opened film's actors and companies (docs/TMDB_PEOPLE_STUDIOS_PLAN.md): only with the viewer's
+     * key and online data on, and not on family night, where a film's page leads nowhere beyond the library.
+     */
+    private fun findFilmPeople(movieId: String) {
+        if (_filmPeople.value?.first == movieId) return
+        filmPeopleJob?.cancel()
+        _filmPeople.value = null
+        val prefs = latestPrefs ?: return
+        if (!prefs.onlineEnabled || prefs.familyNight || tmdb.keyMask.value == null) return
+        val imdbId = movieById(movieId)?.imdbId?.takeIf { it.isNotBlank() } ?: return
+        filmPeopleJob = viewModelScope.launch {
+            tmdb.filmPeople(imdbId)?.let { _filmPeople.value = movieId to it }
+        }
+    }
+
+    /** The photos of actors whose cards the viewer saw, by name: the actor's own screen shows it too. In memory only. */
+    private val personPhotos = HashMap<String, String>()
+
+    fun personPhoto(name: String): String? = personPhotos[name.trim()]
+
+    /** OK on an actor's card on a film's page. */
+    fun openPerson(actor: io.github.diamondrubinny.scary.core.tmdb.CastMember) {
+        actor.photoUrl?.let { personPhotos[actor.name.trim().take(MAX_PERSON_NAME)] = it }
+        openPerson(actor.name)
+    }
+
+    /**
+     * The horror studios under the moods, with the ids TMDB gave for their names: asked for only with the viewer's
+     * key and online data on, and not on family night. Empty otherwise, and the row is not shown.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val studios: StateFlow<List<Pair<io.github.diamondrubinny.scary.core.tmdb.Studio, Long>>> =
+        combine(tmdb.keyMask, settings.prefs.map { it.onlineEnabled && !it.familyNight }.distinctUntilChanged()) { key, allowed -> key != null && allowed }
+            .distinctUntilChanged()
+            .mapLatest { ask -> if (ask) tmdb.studios() else emptyList() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    private val _company = MutableStateFlow<PersonUi?>(null)
+    private var companyJob: Job? = null
+
+    /** The horror films of the company whose screen is open ([PersonUi.name] is "<id>": the screen's own key); null until worked out. */
+    val company: StateFlow<PersonUi?> = _company.asStateFlow()
+
+    /** OK on a company on a film's page, or on a studio of the home row. */
+    fun openCompany(id: Long, name: String) {
+        if (latestPrefs?.familyNight == true || id <= 0) return
+        push(Screen.Company(id, name.trim().take(MAX_PERSON_NAME)))
+    }
+
+    /** The company's horror films from TMDB, for its screen; a film SCARY holds is shown as it holds it. */
+    fun loadCompany(id: Long) {
+        val key = id.toString()
+        if (_company.value?.name == key) return
+        companyJob?.cancel()
+        _company.value = PersonUi(key, emptyList(), loading = true, fromTmdb = true)
+        companyJob = viewModelScope.launch {
+            val prefs = settings.prefs.first()
+            val found = if (prefs.onlineEnabled && !prefs.familyNight) tmdb.companyFilms(id, language.value) else null
+            val shown = visibleCatalog()?.movies.orEmpty()
+            val known = shown.associateBy { it.imdbId }
+            val disliked = prefs.dislikedIds.toHashSet()
+            val films = found.orEmpty().mapNotNull { meta -> known[meta.imdbId] ?: Cinemeta.toMovie(meta) }.filter { it.id !in disliked }.distinctBy { it.imdbId }
+            webMovies = webMovies + films.filter { it.imdbId !in known }.associateBy { it.id }
+            _company.value = PersonUi(key, films, loading = false, fromTmdb = true)
         }
     }
 
@@ -1295,6 +1384,10 @@ class HomeViewModel(
 
     // Real-Debrid and the internal player -------------------------------------------------------------------------------
 
+    /** Both of the viewer's accounts as one: each file and torrent goes to the account that holds it. */
+    private val debrid: io.github.diamondrubinny.scary.data.DebridAccounts? =
+        if (realDebrid == null && torBox == null) null else io.github.diamondrubinny.scary.data.DebridAccounts(realDebrid, torBox)
+
     val realDebridState: StateFlow<RealDebridRepository.State> =
         realDebrid?.state ?: MutableStateFlow(RealDebridRepository.State.SignedOut)
 
@@ -1358,6 +1451,33 @@ class HomeViewModel(
     private val _resumeChoice = MutableStateFlow<ResumeChoice?>(null)
     val resumeChoice: StateFlow<ResumeChoice?> = _resumeChoice.asStateFlow()
 
+    /** The viewer's TorBox account (docs/TORBOX_PLAN.md); it connects as Real-Debrid does, so its state is the same type. */
+    val torBoxState: StateFlow<RealDebridRepository.State> =
+        torBox?.state ?: MutableStateFlow(RealDebridRepository.State.SignedOut)
+
+    /** Real-Debrid's screen → TorBox account. Reached only from that screen, which the parental lock already guards. */
+    fun openTorBox() {
+        if (backStack.value.last() != Screen.RealDebrid) return
+        push(Screen.TorBox)
+        torBox?.refreshAccount()
+    }
+
+    fun torBoxSignIn() {
+        torBox?.startSignIn()
+    }
+
+    fun torBoxCancelSignIn() {
+        torBox?.cancelSignIn()
+    }
+
+    fun torBoxSignOut() {
+        torBox?.signOut()
+        // What was watched from the account goes with it; its files leave the list and the film pages at once.
+        watchStore?.clear()
+        _rdMatches.value = null
+        if (debrid?.signedIn == true) loadRealDebridFiles(force = true) else _rdFiles.value = RdFilesState.Idle
+    }
+
     /** Files already counted as watched in this player session (near the end), so it is said once. */
     private val markedWatched = HashSet<String>()
 
@@ -1379,18 +1499,20 @@ class HomeViewModel(
         realDebrid?.signOut()
         // What was watched from the account goes with it.
         watchStore?.clear()
-        _rdFiles.value = RdFilesState.Idle
         _rdMatches.value = null
+        // A TorBox account still connected keeps its files in the list.
+        if (debrid?.signedIn == true) loadRealDebridFiles(force = true) else _rdFiles.value = RdFilesState.Idle
         show(R.string.rd_signed_out_message)
     }
 
     fun loadRealDebridFiles(force: Boolean = false) {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         if (!repository.signedIn) return
         viewModelScope.launch {
             _rdFiles.value = RdFilesState.Loading
             _rdFiles.value = when (val files = repository.files(force)) {
-                is RealDebridRepository.Files.Ready -> RdFilesState.Ready(files.files)
+                // A series' episodes together and in order, whichever torrents they came in (core Episodes).
+                is RealDebridRepository.Files.Ready -> RdFilesState.Ready(Episodes.ordered(files.files) { Episodes.Item(it.key, it.name) })
                 RealDebridRepository.Files.SignedOut -> RdFilesState.Idle
                 RealDebridRepository.Files.Unreachable -> RdFilesState.Unreachable
             }
@@ -1405,22 +1527,24 @@ class HomeViewModel(
     /** Real-Debrid → "Add a torrent". Personal files, so family night leaves it out and the parental lock asks. */
     fun openRdTorrents() {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
-        if (realDebrid?.signedIn != true) return
+        if (debrid?.signedIn != true) return
         guard(null, GatedAction.RdTorrents)
     }
 
     fun refreshRdTorrents() {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         viewModelScope.launch {
             val torrents = repository.recentTorrents()
             val active = repository.activeCount()
-            _rdTorrents.update { it.copy(torrents = torrents ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
+            // A season added an episode at a time is listed in the episodes' order.
+            val listed = torrents?.let { all -> Episodes.ordered(all) { Episodes.Item("t:${it.id}:0", it.name) } }
+            _rdTorrents.update { it.copy(torrents = listed ?: it.torrents.orEmpty(), unreachable = torrents == null, active = active ?: it.active) }
         }
     }
 
     /** The viewer's magnet link: added to their account, and played in SCARY's player as soon as it is ready. */
-    fun pullMagnet(text: String) {
-        val repository = realDebrid ?: return
+    fun pullMagnet(text: String, service: io.github.diamondrubinny.scary.data.DebridAccounts.Service? = null) {
+        val repository = debrid ?: return
         if (_rdTorrents.value.pull == RdPullState.Working) return
         val magnet = Magnets.parse(text)
         if (magnet == null) {
@@ -1430,7 +1554,7 @@ class HomeViewModel(
         _rdTorrents.update { it.copy(pull = RdPullState.Working) }
         pullWatch?.cancel()
         pullWatch = viewModelScope.launch {
-            val result = repository.pull(magnet)
+            val result = repository.pull(magnet, service)
             _rdTorrents.update {
                 it.copy(
                     pull = when (result) {
@@ -1459,7 +1583,7 @@ class HomeViewModel(
      * asked from, and the film starts in SCARY's player by itself when Real-Debrid has it. Leaving the screens ends the
      * wait (the torrent stays in the account and plays from the list); so does [PULL_WATCH_MS].
      */
-    private suspend fun playWhenFetched(repository: RealDebridRepository, torrentId: String) {
+    private suspend fun playWhenFetched(repository: io.github.diamondrubinny.scary.data.DebridAccounts, torrentId: String) {
         val started = SystemClock.elapsedRealtime()
         while (SystemClock.elapsedRealtime() - started < PULL_WATCH_MS) {
             delay(PULL_WATCH_POLL_MS)
@@ -1487,7 +1611,7 @@ class HomeViewModel(
 
     /** One of the viewer's files, deleted from their Real-Debrid account at their word (after a second "yes"). */
     fun deleteRdFile(file: RealDebrid.RdFile) {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         viewModelScope.launch {
             val deleted = repository.deleteFile(file)
             show(if (deleted) R.string.rd_file_deleted else R.string.rd_file_delete_failed)
@@ -1502,7 +1626,7 @@ class HomeViewModel(
 
     /** Every file in the viewer's list, deleted from their Real-Debrid account at their word (after two more "yes"). */
     fun deleteAllRdFiles() {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         val files = (_rdFiles.value as? RdFilesState.Ready)?.files.orEmpty()
         if (files.isEmpty() || deletingAllRdFiles) return
         deletingAllRdFiles = true
@@ -1536,7 +1660,7 @@ class HomeViewModel(
     /** "Find sources" on a film's page. The film's fear level decides whether the parental lock asks. */
     fun openSourcesFor(movie: Movie) {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
-        if (realDebrid?.signedIn != true) return
+        if (debrid?.signedIn != true) return
         guard(movie, GatedAction.RdSourcesFor(movie))
     }
 
@@ -1598,7 +1722,7 @@ class HomeViewModel(
 
     /** A finished torrent from the list, in the internal player. */
     fun playRdTorrent(id: String) {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         viewModelScope.launch {
             val file = repository.torrentVideos(id)?.let(RealDebrid::mainFile)
             if (file == null) show(R.string.rd_play_failed) else playRealDebrid(file, movieId = null)
@@ -1606,7 +1730,7 @@ class HomeViewModel(
     }
 
     fun deleteRdTorrent(id: String) {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         viewModelScope.launch {
             show(if (repository.deleteTorrent(id)) R.string.rd_torrent_deleted else R.string.rd_torrent_delete_failed)
             refreshRdTorrents()
@@ -1616,7 +1740,7 @@ class HomeViewModel(
     /** Looks through the viewer's own files for the film being opened; nothing is searched for anywhere else. */
     private fun findRealDebridFiles(movieId: String) {
         _rdMatches.value = null
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         val prefs = latestPrefs ?: return
         if (!repository.signedIn || !prefs.onlineEnabled || prefs.familyNight) return
         val movie = movieById(movieId) ?: return
@@ -1655,7 +1779,7 @@ class HomeViewModel(
     }
 
     private fun play(file: RealDebrid.RdFile, movieId: String?, startAtMs: Long) {
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         viewModelScope.launch {
             val playable = repository.playable(file)
             if (playable == null) {
@@ -1666,8 +1790,10 @@ class HomeViewModel(
             // The file is in the history from the start, so a spot can be marked at once.
             val old = watchStore?.entry(file.key)
             watchStore?.update { WatchHistory.progress(it, file.key, file.name, movieId, startAtMs, old?.durationMs ?: 0L, System.currentTimeMillis()) }
+            // The next episode by its number (core Episodes), in this torrent or in another one of the same series,
+            // in either account; for a film in parts, the next part.
             val next = (repository.files() as? RealDebridRepository.Files.Ready)?.files?.let { files ->
-                WatchHistory.nextInTorrent(file.key, files.map { it.key })?.let { key -> files.firstOrNull { it.key == key } }
+                Episodes.next(Episodes.Item(file.key, file.name), files.map { Episodes.Item(it.key, it.name) })?.let { item -> files.firstOrNull { it.key == item.key } }
             }
             // The film SCARY knows this file for (its IMDb id is exact); else the file's name is read when subtitles are searched.
             val film = movieId?.let(::movieById)
@@ -1705,10 +1831,14 @@ class HomeViewModel(
         watchStore?.update { WatchHistory.removeBookmark(it, session.key, positionMs) }
     }
 
-    /** The next file in the same torrent, from where the viewer stopped in it (or its start). */
+    /**
+     * The next episode (or the next part of a film), from where the viewer stopped in it (or its start). It belongs to
+     * the same series as the one that just played, so its subtitles and "Continue watching" stay with that series.
+     */
     fun playNext() {
-        val next = _player.value?.next ?: return
-        play(next, null, watchStore?.entry(next.key)?.positionMs ?: 0L)
+        val session = _player.value ?: return
+        val next = session.next ?: return
+        play(next, rdFileFilms.value[next.key]?.id ?: session.movieId, watchStore?.entry(next.key)?.positionMs ?: 0L)
     }
 
     fun onPlayerClosed() {
@@ -1722,7 +1852,7 @@ class HomeViewModel(
      */
     fun continueWatching(entry: WatchEntry) {
         if (latestPrefs?.familyNight == true) return show(R.string.rd_family_night)
-        val repository = realDebrid ?: return
+        val repository = debrid ?: return
         if (!repository.signedIn) return show(R.string.rd_continue_signed_out)
         viewModelScope.launch {
             when (val files = repository.files()) {
@@ -1943,6 +2073,7 @@ class HomeViewModel(
             is GatedAction.Details -> {
                 fillInIndexFilm(action.movieId)
                 findRealDebridFiles(action.movieId)
+                findFilmPeople(action.movieId)
                 push(Screen.Details(action.movieId))
             }
             is GatedAction.Watch -> {
@@ -3015,6 +3146,7 @@ class HomeViewModel(
                     sources = container.sources,
                     vpn = container.vpnWatcher,
                     tunnel = container.vpn,
+                    torBox = container.torBox,
                 )
             }
         }

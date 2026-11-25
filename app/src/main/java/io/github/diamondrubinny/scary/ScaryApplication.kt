@@ -147,6 +147,9 @@ class AppContainer(context: Context) {
     /** The viewer's own Real-Debrid account, only once they connect it (the internal player). */
     val realDebrid = io.github.diamondrubinny.scary.data.RealDebridRepository(secretStore, java.io.File(appContext.cacheDir, "subtitles"))
 
+    /** The viewer's TorBox account, a second one beside Real-Debrid (docs/TORBOX_PLAN.md). */
+    val torBox = io.github.diamondrubinny.scary.data.TorBoxRepository(secretStore, java.io.File(appContext.cacheDir, "subtitles"))
+
     /** The viewer's own Torznab indexer, only in a build with the sources feature and once they set it. */
     val sources = io.github.diamondrubinny.scary.data.SourcesRepository(secretStore)
 
@@ -154,6 +157,7 @@ class AppContainer(context: Context) {
     val vpn = io.github.diamondrubinny.scary.data.VpnRepository(appContext, secretStore).also { repository ->
         // With the kill switch on, nothing goes to Real-Debrid or the viewer's source while the tunnel is not up.
         realDebrid.blocked = { repository.blocked }
+        torBox.blocked = { repository.blocked }
         sources.blocked = { repository.blocked }
         // In a build without the sources feature the phone cannot add one either.
         if (appContext.resources.getBoolean(R.bool.rd_sources_enabled)) {

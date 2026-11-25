@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="cast_plays">%1$s, בתפקיד %2$s</string>
+    <string name="companies_label">הפקה:</string>
+    <string name="company_title">אימה של %1$s</string>
+    <string name="company_loading">שואלים את TMDB על הסרטים של החברה…</string>
+    <string name="company_note">%1$s סרטי אימה, מהמוכר ביותר. מ־TMDB.</string>
+    <string name="company_empty_title">לא נמצא דבר</string>
+    <string name="company_empty_body">ב־TMDB אין סרט אימה של החברה הזו, או שלא הצלחנו להגיע אליו.</string>
+    <string name="studios_title">אולפני אימה</string>
+</resources>

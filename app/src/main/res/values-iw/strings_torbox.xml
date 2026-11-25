@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="torbox_title">TorBox</string>
+    <string name="torbox_open">חשבון TorBox</string>
+    <string name="torbox_what">חשבון שני לצד Real-Debrid. אחרי החיבור אפשר לנגן בנגן של SCARY את הסרטונים שבחשבון ה־TorBox שלכם, ולהוסיף אליו טורנט שבחרתם.</string>
+    <string name="torbox_signed_out">לא מחוברים ל־TorBox.</string>
+    <string name="torbox_waiting">ממתינים שתאשרו את הטלוויזיה הזו ב־TorBox…</string>
+    <string name="torbox_connected">מחוברים ל־TorBox.</string>
+    <string name="torbox_signed_in">מחוברים ל־TorBox בתור %1$s.</string>
+    <string name="torbox_signed_in_until">מחוברים ל־TorBox בתור %1$s. התוכנית בתוקף עד %2$s.</string>
+    <string name="torbox_signed_in_free">מחוברים ל־TorBox בתור %1$s, בתוכנית החינמית. רוב האפשרויות האלה שמורות ב־TorBox לתוכניות בתשלום.</string>
+    <string name="torbox_unreachable">לא הצלחנו להגיע ל־TorBox. בדקו את הרשת ונסו שוב.</string>
+    <string name="torbox_expired">הקוד פג, או ש־TorBox לא קיבל אותו. חיבור בקוד דורש תוכנית בתשלום ב־TorBox.</string>
+    <string name="torbox_storage">לא הצלחנו לשמור את החיבור בצורה בטוחה בטלוויזיה הזו.</string>
+    <string name="torbox_session_ended">TorBox כבר לא מקבל את החיבור של הטלוויזיה הזו. התחברו שוב.</string>
+    <string name="torbox_sign_in">התחברות ל־TorBox</string>
+    <string name="torbox_sign_out">התנתקות</string>
+    <string name="torbox_cancel">ביטול</string>
+    <string name="torbox_step_open">בטלפון, פתחו את %1$s</string>
+    <string name="torbox_step_code">היכנסו ל־TorBox והקלידו את הקוד:</string>
+    <string name="torbox_qr_description">קוד QR שפותח את העמוד של TorBox לאישור הטלוויזיה הזו</string>
+    <string name="torbox_key_note">החיבור הוא מפתח ה־API שלכם ב־TorBox: הוא נותן גישה מלאה לחשבון ואינו פג. התנתקות מוחקת אותו מהטלוויזיה הזו. כדי לנתק אותו בכל מקום, אפסו את מפתח ה־API בהגדרות של TorBox.</string>
+    <string name="torbox_privacy">TorBox רואה את כתובת ה־IP של הטלוויזיה, את הטורנטים שלכם ואילו מהקבצים שלכם מנוגנים. החיבור נשמר מוצפן בטלוויזיה הזו בלבד; שום דבר לא נשלח ל־SCARY.</string>
+    <string name="rd_torrent_error_limit">החשבון הגיע למגבלה של התוכנית שלו (חודשית, יומית או זמן המתנה). נסו שוב מאוחר יותר.</string>
+    <string name="debrid_add_to_rd">הוספה ל־Real-Debrid</string>
+    <string name="debrid_add_to_torbox">הוספה ל־TorBox</string>
+    <string name="debrid_pull_confirm">להוסיף את התוצאה הזו לחשבון שלכם ולנגן אותה בנגן של SCARY? בחרו את החשבון.</string>
+</resources>

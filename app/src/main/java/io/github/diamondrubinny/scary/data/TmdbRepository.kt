@@ -9,7 +9,11 @@ import android.util.Log
 import io.github.diamondrubinny.scary.core.catalog.OriginFilter
 import io.github.diamondrubinny.scary.core.cinemeta.CinemetaMeta
 import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.tmdb.CastMember
+import io.github.diamondrubinny.scary.core.tmdb.ProductionCompany
+import io.github.diamondrubinny.scary.core.tmdb.Studio
 import io.github.diamondrubinny.scary.core.tmdb.Tmdb
+import io.github.diamondrubinny.scary.core.tmdb.TmdbPeople
 import io.github.diamondrubinny.scary.core.tmdb.TmdbAuth
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCache
 import io.github.diamondrubinny.scary.core.tmdb.TmdbCategory
@@ -84,6 +88,10 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
     suspend fun clearKey() = withContext(Dispatchers.IO) {
         secrets.remove(SECRET_NAME)
         cacheFile.delete()
+        // What TMDB told this TV goes with the key.
+        studiosFile.delete()
+        synchronized(filmPeople) { filmPeople.clear() }
+        synchronized(companyFilms) { companyFilms.clear() }
         auth = null
         _keyMask.value = null
     }
@@ -297,6 +305,92 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         result
     }
 
+    /** A film's actors and the companies that made it, by TMDB id. In memory only. */
+    data class FilmPeople(val cast: List<CastMember>, val companies: List<ProductionCompany>)
+
+    private val filmPeople = object : LinkedHashMap<Long, FilmPeople>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Long, FilmPeople>) = size > PEOPLE_KEPT
+    }
+
+    /**
+     * The actors of the film [imdbId] with their photos, and the companies that made it
+     * (docs/TMDB_PEOPLE_STUDIOS_PLAN.md). Asked for with the viewer's own key: the film's id, then its credits and
+     * its details. Nothing about the viewer is sent. Null without a key, when TMDB does not know the film, or when it
+     * cannot be reached. Never throws.
+     */
+    suspend fun filmPeople(imdbId: String): FilmPeople? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        val tmdbId = tmdbIdOf(imdbId) ?: return@withContext null
+        synchronized(filmPeople) { filmPeople[tmdbId] }?.let { return@withContext it }
+        val cast = body(TmdbPeople.creditsUrl(tmdbId), key)?.let(TmdbPeople::parseCast)
+        val companies = body(Tmdb.movieUrl(tmdbId), key)?.let(TmdbPeople::parseCompanies)
+        if (cast == null && companies == null) return@withContext null
+        val result = FilmPeople(cast.orEmpty(), companies.orEmpty())
+        // Kept only when both answered: a half that failed is asked for again on the next visit.
+        if (cast != null && companies != null) synchronized(filmPeople) { filmPeople[tmdbId] = result }
+        result
+    }
+
+    /** A company's horror films by its id and language. In memory only. */
+    private val companyFilms = object : LinkedHashMap<Pair<Long, Language>, List<CinemetaMeta>>(16, 0.75f, true) {
+        override fun removeEldestEntry(eldest: MutableMap.MutableEntry<Pair<Long, Language>, List<CinemetaMeta>>) = size > COMPANIES_KEPT
+    }
+
+    /**
+     * The horror films of the company [companyId], the best known first, in [language]: [COMPANY_PAGES] pages of
+     * TMDB's discover, each film with its IMDb id. Films kept off every shelf stay off this one (core OriginFilter).
+     * Null without a key or when TMDB cannot be reached. Never throws.
+     */
+    suspend fun companyFilms(companyId: Long, language: Language): List<CinemetaMeta>? = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext null
+        if (companyId <= 0) return@withContext null
+        synchronized(companyFilms) { companyFilms[companyId to language] }?.let { return@withContext it }
+        val results = mutableListOf<TmdbResult>()
+        for (page in 1..COMPANY_PAGES) {
+            val found = body(TmdbPeople.companyFilmsUrl(companyId, language, page), key)?.let(Tmdb::parseDiscover)
+                ?: return@withContext if (page == 1) null else break
+            results += found
+            if (found.size < DISCOVER_PAGE_SIZE) break
+        }
+        val shown = results.distinctBy { it.tmdbId }.filterNot { OriginFilter.hidesLanguage(it.originalLanguage) }
+        val metas = withImdbIds(shown, key, language)
+        // A film whose IMDb id did not arrive is missing: shown as it is, asked for again on the next visit.
+        if (metas.size == shown.size) synchronized(companyFilms) { companyFilms[companyId to language] = metas }
+        metas
+    }
+
+    private val studiosFile = File(context.filesDir, "tmdb_studios.json")
+    private val studioLock = kotlinx.coroutines.sync.Mutex()
+
+    /**
+     * The horror studios of the home screen that TMDB knows by exactly their name, with their ids, in the list's
+     * order. Each name is looked up once and its id kept on the TV for a month (TMDB's terms allow six at most); a
+     * studio that is not found, or could not be asked about, is left out. Empty without a key. Never throws.
+     */
+    suspend fun studios(nowMillis: Long = System.currentTimeMillis()): List<Pair<Studio, Long>> = withContext(Dispatchers.IO) {
+        val key = auth ?: return@withContext emptyList()
+        studioLock.lock()
+        try {
+            val known = runCatching { if (studiosFile.exists()) TmdbPeople.decodeStudios(studiosFile.readText()) else emptyMap() }
+                .getOrDefault(emptyMap()).toMutableMap()
+            var changed = false
+            for (studio in TmdbPeople.STUDIOS) {
+                if (known[studio.query]?.isFresh(nowMillis) == true) continue
+                val answer = body(TmdbPeople.companySearchUrl(studio), key) ?: continue
+                val id = TmdbPeople.parseCompanyId(answer, studio)
+                changed = true
+                if (id == null) known.remove(studio.query) else known[studio.query] = TmdbPeople.KnownStudio(id, nowMillis)
+            }
+            if (changed) {
+                runCatching { studiosFile.writeText(TmdbPeople.encodeStudios(known)) }
+                    .onFailure { Log.w(TAG, "Could not save studio ids: ${it.javaClass.simpleName}") }
+            }
+            TmdbPeople.STUDIOS.mapNotNull { studio -> known[studio.query]?.let { studio to it.id } }
+        } finally {
+            studioLock.unlock()
+        }
+    }
+
     private val languagesFile = File(context.filesDir, "origin_languages.json")
     private val languages = LinkedHashMap<Long, String>()
     private var languagesLoaded = false
@@ -498,6 +592,9 @@ class TmdbRepository(context: Context, private val secrets: SecretStore) {
         const val PROVIDERS_KEPT = 40
         const val FRANCHISES_KEPT = 40
         const val PEOPLE_KEPT = 40
+        const val COMPANIES_KEPT = 12
+        const val COMPANY_PAGES = 3
+        const val DISCOVER_PAGE_SIZE = 20
         const val PROVIDERS_MAX_AGE_MS = 24L * 60 * 60 * 1000
         const val MAX_IDS = 20_000
         const val MAX_LANGUAGE_LOOKUPS = 300

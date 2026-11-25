@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="cast_plays">%1$s, в роли %2$s</string>
+    <string name="companies_label">Производство:</string>
+    <string name="company_title">Ужасы от %1$s</string>
+    <string name="company_loading">Спрашиваем TMDB о фильмах этой компании…</string>
+    <string name="company_note">Фильмов ужасов: %1$s, сначала самые известные. Из TMDB.</string>
+    <string name="company_empty_title">Ничего не найдено</string>
+    <string name="company_empty_body">В TMDB нет фильмов ужасов этой компании, или с ним не удалось связаться.</string>
+    <string name="studios_title">Студии ужасов</string>
+</resources>

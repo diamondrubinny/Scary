@@ -137,6 +137,10 @@ fun DetailsScreen(
     onFranchiseToBucket: ((List<Movie>) -> Unit)? = null,
     /** OK on an actor's name: their films. Null where there is nowhere to open them. */
     onOpenPerson: ((String) -> Unit)? = null,
+    /** The film's actors with their photos and its companies, from TMDB; null until it answered, or without a key. */
+    people: io.github.diamondrubinny.scary.data.TmdbRepository.FilmPeople? = null,
+    onOpenActor: ((io.github.diamondrubinny.scary.core.tmdb.CastMember) -> Unit)? = null,
+    onOpenCompany: ((io.github.diamondrubinny.scary.core.tmdb.ProductionCompany) -> Unit)? = null,
     /** "Remind me" is set for this film; its button shows on a film not out yet, or one with a reminder. */
     reminded: Boolean = false,
     onToggleReminder: ((Movie) -> Unit)? = null,
@@ -325,8 +329,13 @@ fun DetailsScreen(
                             )
                         }
                     }
+                    // With TMDB's answer: the actors as cards with their photos, and the companies that made the film.
+                    val castCards = people?.cast.orEmpty().takeIf { it.isNotEmpty() && onOpenActor != null }
+                    if (castCards != null && onOpenActor != null) CastCards(castCards, onOpenActor)
+                    val companies = people?.companies.orEmpty()
+                    if (companies.isNotEmpty() && onOpenCompany != null) CompaniesRow(companies, onOpenCompany)
                     // The cast: each name is a word that takes the focus, and OK opens that actor's films.
-                    if (movie.cast.isNotEmpty() && onOpenPerson != null) {
+                    if (castCards == null && movie.cast.isNotEmpty() && onOpenPerson != null) {
                         LazyRow(
                             modifier = Modifier.testTag(CAST_ROW_TAG),
                             verticalAlignment = Alignment.CenterVertically,

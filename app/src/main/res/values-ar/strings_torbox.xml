@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="torbox_title">TorBox</string>
+    <string name="torbox_open">حساب TorBox</string>
+    <string name="torbox_what">حساب ثانٍ إلى جانب Real-Debrid. بعد الاتصال يمكن تشغيل الفيديوهات الموجودة في حسابك على TorBox في مشغّل SCARY، وإضافة تورنت تختاره إليه.</string>
+    <string name="torbox_signed_out">غير متصل بـ TorBox.</string>
+    <string name="torbox_waiting">في انتظار موافقتك على هذا التلفاز في TorBox…</string>
+    <string name="torbox_connected">متصل بـ TorBox.</string>
+    <string name="torbox_signed_in">متصل بـ TorBox باسم %1$s.</string>
+    <string name="torbox_signed_in_until">متصل بـ TorBox باسم %1$s. الخطة سارية حتى %2$s.</string>
+    <string name="torbox_signed_in_free">متصل بـ TorBox باسم %1$s، على الخطة المجانية. يحتفظ TorBox بمعظم هذه الميزات للخطط المدفوعة.</string>
+    <string name="torbox_unreachable">تعذّر الوصول إلى TorBox. تحقق من الشبكة وحاول مرة أخرى.</string>
+    <string name="torbox_expired">انتهت صلاحية الرمز، أو لم يقبله TorBox. الاتصال برمز يتطلب خطة مدفوعة في TorBox.</string>
+    <string name="torbox_storage">تعذّر حفظ الاتصال بأمان على هذا التلفاز.</string>
+    <string name="torbox_session_ended">لم يعد TorBox يقبل اتصال هذا التلفاز. اتصل من جديد.</string>
+    <string name="torbox_sign_in">الاتصال بـ TorBox</string>
+    <string name="torbox_sign_out">قطع الاتصال</string>
+    <string name="torbox_cancel">إلغاء</string>
+    <string name="torbox_step_open">على هاتفك، افتح %1$s</string>
+    <string name="torbox_step_code">سجّل الدخول إلى TorBox وأدخل هذا الرمز:</string>
+    <string name="torbox_qr_description">رمز QR يفتح صفحة TorBox للموافقة على هذا التلفاز</string>
+    <string name="torbox_key_note">الاتصال هو مفتاح API الخاص بك في TorBox: يمنح وصولًا كاملًا إلى الحساب ولا تنتهي صلاحيته. قطع الاتصال يحذفه من هذا التلفاز. لقطعه في كل مكان، أعد تعيين مفتاح API في إعدادات TorBox.</string>
+    <string name="torbox_privacy">يرى TorBox عنوان IP للتلفاز، وتورنتاتك، وأي ملفاتك تُشغَّل. يُحفظ الاتصال مشفّرًا على هذا التلفاز فقط؛ لا يُرسل شيء إلى SCARY.</string>
+    <string name="rd_torrent_error_limit">بلغ الحساب حدًّا من حدود خطته (شهري أو يومي أو وقت انتظار). حاول لاحقًا.</string>
+    <string name="debrid_add_to_rd">إضافة إلى Real-Debrid</string>
+    <string name="debrid_add_to_torbox">إضافة إلى TorBox</string>
+    <string name="debrid_pull_confirm">هل تضيف هذا الإصدار إلى حسابك وتشغّله في مشغّل SCARY؟ اختر الحساب.</string>
+</resources>

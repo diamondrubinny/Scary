@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="cast_plays">%1$s، بدور %2$s</string>
+    <string name="companies_label">إنتاج:</string>
+    <string name="company_title">رعب من %1$s</string>
+    <string name="company_loading">نسأل TMDB عن أفلام هذه الشركة…</string>
+    <string name="company_note">%1$s من أفلام الرعب، الأشهر أولًا. من TMDB.</string>
+    <string name="company_empty_title">لم يُعثر على شيء</string>
+    <string name="company_empty_body">لا يذكر TMDB فيلم رعب لهذه الشركة، أو تعذّر الوصول إليه.</string>
+    <string name="studios_title">استوديوهات الرعب</string>
+</resources>

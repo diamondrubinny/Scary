@@ -191,6 +191,9 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val personGrids = remember { HashMap<String, androidx.compose.foundation.lazy.grid.LazyGridState>() }
     var personOpenedId by remember { mutableStateOf<String?>(null) }
     val person by viewModel.person.collectAsStateWithLifecycle()
+    val company by viewModel.company.collectAsStateWithLifecycle()
+    val studios by viewModel.studios.collectAsStateWithLifecycle()
+    val filmPeople by viewModel.filmPeople.collectAsStateWithLifecycle()
     val rowStates = remember { mutableMapOf<String, LazyListState>() }
     LaunchedEffect(resets) {
         if (resets == 0) return@LaunchedEffect
@@ -212,6 +215,14 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
     val aiStateFlow = remember(aiAssistant) { aiAssistant?.state ?: kotlinx.coroutines.flow.MutableStateFlow(AiState()) }
     val aiState by aiStateFlow.collectAsStateWithLifecycle()
     val realDebridState by viewModel.realDebridState.collectAsStateWithLifecycle()
+    val torBoxState by viewModel.torBoxState.collectAsStateWithLifecycle()
+    // The connected accounts, Real-Debrid first: with both, the viewer chooses where each torrent goes.
+    val debridServices = remember(realDebridState, torBoxState) {
+        listOfNotNull(
+            io.github.diamondrubinny.scary.data.DebridAccounts.Service.REAL_DEBRID.takeIf { realDebridState is RealDebridRepository.State.SignedIn },
+            io.github.diamondrubinny.scary.data.DebridAccounts.Service.TORBOX.takeIf { torBoxState is RealDebridRepository.State.SignedIn },
+        )
+    }
     val rdFiles by viewModel.rdFiles.collectAsStateWithLifecycle()
     val rdTorrents by viewModel.rdTorrents.collectAsStateWithLifecycle()
     val vpnActive by viewModel.vpnActive.collectAsStateWithLifecycle()
@@ -283,6 +294,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
             onSurprise = viewModel::surprise,
             onMood = viewModel::toggleMood,
             onDecade = viewModel::toggleDecade,
+            onStudio = viewModel::openCompany,
             onNearRowEnd = viewModel::onNearRowEnd,
             onTimeBudget = viewModel::toggleTimeBudget,
             onSelectTab = viewModel::selectTab,
@@ -636,6 +648,15 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                         personOpenedId = null
                         viewModel.openPerson(it)
                     },
+                    people = filmPeople?.takeIf { it.first == details.movie.id }?.second,
+                    onOpenActor = {
+                        personOpenedId = null
+                        viewModel.openPerson(it)
+                    },
+                    onOpenCompany = {
+                        personOpenedId = null
+                        viewModel.openCompany(it.id, it.name)
+                    },
                     reminded = details.movie.id in state.remindedIds,
                     onToggleReminder = { viewModel.toggleReminder(it, language) },
                     about = if (state.aiEnabled) (if (aiState.aboutId == details.movie.id) aiState.about else AiTask.Idle) else null,
@@ -644,7 +665,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onAiSettings = viewModel::openSettings,
                     realDebridFiles = rdMatches?.takeIf { it.first == details.movie.id }?.second.orEmpty(),
                     onPlayRealDebrid = { file -> viewModel.playRealDebrid(file, details.movie.id) },
-                    onFindSources = if (sourcesEnabled && realDebridState is RealDebridRepository.State.SignedIn && !state.familyNight) {
+                    onFindSources = if (sourcesEnabled && (realDebridState is RealDebridRepository.State.SignedIn || torBoxState is RealDebridRepository.State.SignedIn) && !state.familyNight) {
                         { viewModel.openSourcesFor(details.movie) }
                     } else {
                         null
@@ -663,6 +684,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                 current == Screen.Stats -> StatsScreen(language = language, load = viewModel::fearStats)
                 current == Screen.RealDebrid -> RealDebridScreen(
                     state = realDebridState,
+                    torBoxConnected = torBoxState is RealDebridRepository.State.SignedIn,
                     files = rdFiles,
                     history = WatchHistory.continueWatching(watchHistory),
                     languages = playerLanguages,
@@ -687,6 +709,7 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                             onDeleteFile = if (sourcesEnabled) viewModel::deleteRdFile else null,
                             onDeleteAll = if (sourcesEnabled) viewModel::deleteAllRdFiles else null,
                             onTorrents = if (sourcesEnabled) viewModel::openRdTorrents else null,
+                            onTorBox = if (sourcesEnabled) viewModel::openTorBox else null,
                         )
                     },
                 )
@@ -697,11 +720,19 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     onChoose = viewModel::chooseProfile,
                     onChange = viewModel::editProfiles,
                 )
+                current == Screen.TorBox -> io.github.diamondrubinny.scary.ui.realdebrid.TorBoxScreen(
+                    state = torBoxState,
+                    onSignIn = viewModel::torBoxSignIn,
+                    onCancel = viewModel::torBoxCancelSignIn,
+                    onSignOut = viewModel::torBoxSignOut,
+                )
                 current == Screen.RdTorrents -> RdTorrentsScreen(
                     state = rdTorrents,
+                    services = debridServices,
                     actions = remember(viewModel) {
                         RdTorrentsActions(
-                            onPull = viewModel::pullMagnet,
+                            onPull = { viewModel.pullMagnet(it) },
+                            onPullTo = viewModel::pullMagnet,
                             onRefresh = viewModel::refreshRdTorrents,
                             onPlay = viewModel::playRdTorrent,
                             onDelete = viewModel::deleteRdTorrent,
@@ -716,10 +747,12 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     indexerHost = indexerHost,
                     sources = sourceLabels,
                     throughTor = sourcesThroughTor,
+                    services = debridServices,
                     actions = remember(viewModel) {
                         RdSourcesActions(
                             onSearch = viewModel::searchSources,
                             onPull = { viewModel.pullMagnet(it.magnet.uri) },
+                            onPullTo = { release, service -> viewModel.pullMagnet(release.magnet.uri, service) },
                             onSaveIndexer = viewModel::saveIndexer,
                             onRemoveIndexer = viewModel::removeIndexer,
                             onCheckSource = viewModel::checkSource,
@@ -797,6 +830,28 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     isWatched = state::isWatched,
                     gridState = personGrids.getOrPut(current.name) { androidx.compose.foundation.lazy.grid.LazyGridState() },
                     returnTo = personOpenedId,
+                    photoUrl = viewModel.personPhoto(current.name),
+                )
+                current is Screen.Company -> PersonScreen(
+                    // The grid is keyed by the company's id; its words are the company's own.
+                    name = current.id.toString(),
+                    person = company,
+                    onLoad = { viewModel.loadCompany(current.id) },
+                    onOpenMovie = {
+                        personOpenedId = it.id
+                        viewModel.openDetails(it.id)
+                    },
+                    isLocked = state::isLocked,
+                    isWatched = state::isWatched,
+                    gridState = personGrids.getOrPut("company:${current.id}") { androidx.compose.foundation.lazy.grid.LazyGridState() },
+                    returnTo = personOpenedId,
+                    words = io.github.diamondrubinny.scary.ui.person.PersonWords(
+                        title = stringResource(R.string.company_title, current.name),
+                        loading = stringResource(R.string.company_loading),
+                        note = { count -> stringResource(R.string.company_note, count.toString()) },
+                        emptyTitle = stringResource(R.string.company_empty_title),
+                        emptyBody = stringResource(R.string.company_empty_body),
+                    ),
                 )
                 current == Screen.HomeRows -> HomeRowsScreen(
                     // Asked again whenever a row is turned, or the catalog's rows change.
@@ -823,20 +878,22 @@ private fun ScaryScreens(viewModel: HomeViewModel) {
                     isLocked = state::isLocked,
                     actions = bucketActions,
                 )
-                else -> HomeScreen(
-                    state = state,
-                    language = language,
-                    listState = homeListState,
-                    rowStates = { key -> rowStates.getOrPut(key) { LazyListState(cacheWindow = CardsCacheWindow) } },
-                    restoreKey = viewModel.lastFocusedKey,
-                    resets = resets,
-                    actions = actions,
-                    // A phone or a tablet keeps its own home screen: SCARY is an ordinary app there.
-                    showSetHome = launcherStatus.needsSetup && scaryLayout.tv,
-                    scrollToRow = scrollToRow,
-                    onScrolledToRow = viewModel::onScrolledToRow,
-                    trailer = trailerSettings,
-                )
+                else -> CompositionLocalProvider(io.github.diamondrubinny.scary.ui.home.LocalStudios provides studios) {
+                    HomeScreen(
+                        state = state,
+                        language = language,
+                        listState = homeListState,
+                        rowStates = { key -> rowStates.getOrPut(key) { LazyListState(cacheWindow = CardsCacheWindow) } },
+                        restoreKey = viewModel.lastFocusedKey,
+                        resets = resets,
+                        actions = actions,
+                        // A phone or a tablet keeps its own home screen: SCARY is an ordinary app there.
+                        showSetHome = launcherStatus.needsSetup && scaryLayout.tv,
+                        scrollToRow = scrollToRow,
+                        onScrolledToRow = viewModel::onScrolledToRow,
+                        trailer = trailerSettings,
+                    )
+                }
             }
 
             if (countryPicker) {

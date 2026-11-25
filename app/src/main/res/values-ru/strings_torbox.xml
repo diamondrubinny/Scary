@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Powered by SCARY · Open source · https://github.com/diamondrubinny/Scary (Apache-2.0, see NOTICE). -->
+<resources>
+    <string name="torbox_title">TorBox</string>
+    <string name="torbox_open">Аккаунт TorBox</string>
+    <string name="torbox_what">Второй аккаунт рядом с Real-Debrid. После подключения видео из вашего аккаунта TorBox можно смотреть в плеере SCARY и добавлять в него выбранный вами торрент.</string>
+    <string name="torbox_signed_out">Нет подключения к TorBox.</string>
+    <string name="torbox_waiting">Ждём, пока вы подтвердите этот ТВ в TorBox…</string>
+    <string name="torbox_connected">Подключено к TorBox.</string>
+    <string name="torbox_signed_in">Подключено к TorBox как %1$s.</string>
+    <string name="torbox_signed_in_until">Подключено к TorBox как %1$s. Тариф действует до %2$s.</string>
+    <string name="torbox_signed_in_free">Подключено к TorBox как %1$s, бесплатный тариф. Большую часть этого TorBox оставляет платным тарифам.</string>
+    <string name="torbox_unreachable">Не удалось связаться с TorBox. Проверьте сеть и попробуйте снова.</string>
+    <string name="torbox_expired">Код истёк, или TorBox его не принял. Для подключения по коду нужен платный тариф TorBox.</string>
+    <string name="torbox_storage">Не удалось надёжно сохранить подключение на этом ТВ.</string>
+    <string name="torbox_session_ended">TorBox больше не принимает подключение этого ТВ. Подключитесь снова.</string>
+    <string name="torbox_sign_in">Подключиться к TorBox</string>
+    <string name="torbox_sign_out">Отключить</string>
+    <string name="torbox_cancel">Отмена</string>
+    <string name="torbox_step_open">На телефоне откройте %1$s</string>
+    <string name="torbox_step_code">Войдите в TorBox и введите этот код:</string>
+    <string name="torbox_qr_description">QR-код, открывающий страницу TorBox для подтверждения этого ТВ</string>
+    <string name="torbox_key_note">Подключение — это ваш API-ключ TorBox: он даёт полный доступ к аккаунту и не истекает. Отключение удаляет его с этого ТВ. Чтобы отключить его везде, сбросьте API-ключ в настройках TorBox.</string>
+    <string name="torbox_privacy">TorBox видит IP-адрес ТВ, ваши торренты и то, какие из ваших файлов вы смотрите. Подключение хранится зашифрованным только на этом ТВ; в SCARY ничего не отправляется.</string>
+    <string name="rd_torrent_error_limit">Аккаунт достиг лимита своего тарифа (месячного, дневного или времени ожидания). Попробуйте позже.</string>
+    <string name="debrid_add_to_rd">Добавить в Real-Debrid</string>
+    <string name="debrid_add_to_torbox">Добавить в TorBox</string>
+    <string name="debrid_pull_confirm">Добавить этот релиз в ваш аккаунт и воспроизвести в плеере SCARY? Выберите аккаунт.</string>
+</resources>
