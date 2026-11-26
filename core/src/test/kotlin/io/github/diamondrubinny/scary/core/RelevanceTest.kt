@@ -112,4 +112,16 @@ class RelevanceTest {
         assertTrue(Relevance.isWanted("Postmortem.2026.720p", Wanted("Post Mortem", 2026)))
         assertFalse(Relevance.isWanted("Post.Mortems.2026.720p", wanted))
     }
+
+    @Test
+    fun `a search for The Host 2026 does not show the 2006 film or a talk show's episode`() {
+        // What an indexer answered for it (a viewer's screen, 26 Nov 2026).
+        val wanted = Wanted("The Host", 2026)
+        assertFalse(Relevance.isWanted("The Host 2006 2160p UHD BDRip HEVC 10bit DV HDR TrueHD.7.1 Atmos MUSHR00M", wanted))
+        assertFalse(Relevance.isWanted("The-Daily-Show-S31E056-2026-05-05-Paul-W-Downs-Host-Desi-Lydic-1080p-AMZN-WEB-DL", wanted))
+        assertTrue(Relevance.isWanted("The.Host.2026.1080p.WEB-DL.DDP5.1.H.264", wanted))
+        // And the 2006 film's own search finds it, not the new one.
+        assertTrue(Relevance.isWanted("The Host 2006 2160p UHD BDRip HEVC", Wanted("The Host", 2006)))
+        assertFalse(Relevance.isWanted("The.Host.2026.1080p.WEB-DL", Wanted("The Host", 2006)))
+    }
 }
