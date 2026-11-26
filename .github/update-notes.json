@@ -1,7 +1,7 @@
 {
-  "en": "SCARY 0.6.2: TorBox beside Real-Debrid. Connect your own TorBox account with a code, play its videos in SCARY's player, and choose the account each torrent goes to. With a TMDB key, a film's page shows its actors with their photos and the companies that made it, and the home screen offers horror studios.",
-  "he": "SCARY 0.6.2: TorBox לצד Real-Debrid. חברו את חשבון ה־TorBox שלכם בקוד, נגנו את הסרטונים שבו בנגן של SCARY, ובחרו לאיזה חשבון כל טורנט נכנס. עם מפתח TMDB, עמוד הסרט מציג את השחקנים עם תמונות ואת חברות ההפקה, ובמסך הבית יש אולפני אימה.",
-  "ar": "SCARY 0.6.2: TorBox إلى جانب Real-Debrid. اربط حسابك على TorBox برمز، وشغّل فيديوهاته في مشغّل SCARY، واختر الحساب الذي يذهب إليه كل تورنت. مع مفتاح TMDB، تعرض صفحة الفيلم الممثلين مع صورهم والشركات المنتجة، وتعرض الشاشة الرئيسية استوديوهات الرعب.",
-  "pt": "SCARY 0.6.2: TorBox ao lado do Real-Debrid. Conecte sua própria conta TorBox com um código, reproduza seus vídeos no player do SCARY e escolha a conta para onde vai cada torrent. Com uma chave do TMDB, a página do filme mostra os atores com fotos e as produtoras, e a tela inicial traz estúdios de terror.",
-  "ru": "SCARY 0.6.2: TorBox рядом с Real-Debrid. Подключите свой аккаунт TorBox по коду, смотрите его видео в плеере SCARY и выбирайте, в какой аккаунт идёт каждый торрент. С ключом TMDB страница фильма показывает актёров с фото и компании-производители, а на главном экране есть студии ужасов."
+  "en": "SCARY 0.6.2: a film's search now shows only that film's releases, not its sequels, remakes or other films that share a word with it. The library takes up each week's new films by itself, without restarting SCARY.",
+  "he": "SCARY 0.6.2: חיפוש של סרט מציג עכשיו רק את הגרסאות של אותו סרט, בלי המשכים, גרסאות מחודשות או סרטים אחרים שחולקים איתו מילה. הספרייה קולטת את הסרטים החדשים של כל שבוע בעצמה, בלי להפעיל מחדש את SCARY.",
+  "ar": "SCARY 0.6.2: البحث عن فيلم يعرض الآن إصدارات ذلك الفيلم فقط، دون أجزائه التالية أو إعادات إنتاجه أو أفلام أخرى تشاركه كلمة. المكتبة تستقبل أفلام كل أسبوع الجديدة بنفسها، دون إعادة تشغيل SCARY.",
+  "pt": "SCARY 0.6.2: a busca de um filme agora mostra só os lançamentos daquele filme, sem sequências, refilmagens ou outros filmes que compartilham uma palavra com ele. A biblioteca recebe sozinha os filmes novos de cada semana, sem reiniciar o SCARY.",
+  "ru": "SCARY 0.6.2: поиск фильма теперь показывает только релизы этого фильма, без продолжений, ремейков и других фильмов с тем же словом в названии. Библиотека сама подхватывает новые фильмы каждой недели, без перезапуска SCARY."
 }

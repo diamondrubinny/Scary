@@ -386,7 +386,11 @@ class HomeViewModel(
             }
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
             // The full index comes in the background, after the library is on screen.
-            launch { indexMovies.value = catalogRepository.loadIndex() }
+            launch {
+                indexMovies.value = catalogRepository.loadIndex()
+                // A newer feed taken up while the app runs brings its films too.
+                catalogRepository.films.collect { films -> if (films.isNotEmpty()) indexMovies.value = films }
+            }
             val index = indexMovies.combine(enrichedIndex) { films, enriched -> films to enriched }
             catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }
@@ -1695,11 +1699,14 @@ class HomeViewModel(
         // On a film's own search, with the words untouched, the film's IMDb number is asked for first.
         val film = (backStack.value.last() as? Screen.RdSources)?.movieId?.let(::movieById)
         val filmImdbId = film?.takeIf { !it.isSeries }?.imdbId?.takeIf { it.isNotBlank() }
-        val imdbId = filmImdbId?.takeIf { query.trim() == sourceQuery(film.id) }
+        val own = film != null && query.trim() == sourceQuery(film.id)
+        val imdbId = filmImdbId?.takeIf { own }
+        // The film's own search shows only that film's releases; words the viewer typed are searched as words.
+        val wanted = film?.takeIf { own }?.let { io.github.diamondrubinny.scary.core.sources.Relevance.Wanted(it.title, it.year, it.isSeries) }
         _rdSearch.value = RdSearchState.Loading
         viewModelScope.launch {
             // A stream add-on answers by film only, whatever the words say: it is asked for the page's film.
-            _rdSearch.value = when (val result = repository.search(query, imdbId, filmImdbId)) {
+            _rdSearch.value = when (val result = repository.search(query, imdbId, filmImdbId, wanted)) {
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NeedsFilm -> RdSearchState.NeedsFilm
                 is io.github.diamondrubinny.scary.data.SourcesRepository.Search.Ready -> RdSearchState.Ready(result.candidates)
                 io.github.diamondrubinny.scary.data.SourcesRepository.Search.NotConfigured -> RdSearchState.Idle

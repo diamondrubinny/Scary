@@ -48,6 +48,8 @@ class PhoneLayoutTest {
 
     @Before
     fun notATv() {
+        // As in ScaryUiTest: the library does not change during the run.
+        (rule.activity.application as ScaryApplication).container.feedRepository.frozen = true
         val uiMode = rule.activity.resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK
         assumeFalse("A TV keeps the TV layout", uiMode == Configuration.UI_MODE_TYPE_TELEVISION)
     }

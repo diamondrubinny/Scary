@@ -4,6 +4,10 @@
 
 package io.github.diamondrubinny.scary.data
 
+import io.github.diamondrubinny.scary.core.catalog.FilmFeed
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import android.content.Context
 import android.util.Log
 import io.github.diamondrubinny.scary.core.catalog.CatalogException
@@ -70,12 +74,34 @@ class CatalogRepository(
                 LegacyLibrary.EMPTY
             }
             onLegacy(legacy)
-            val result = feed.load() ?: throw CatalogException(listOf("no usable film feed"))
-            val all = FeedCatalog.catalog(result, legacy)
-            everything = all.movies
-            val heads = all.collections.flatMapTo(HashSet()) { it.movieIds.take(ROW_HEAD) }
-            all.copy(movies = all.movies.filter { it.id in heads })
+            this@CatalogRepository.legacy = legacy
+            library(feed.load() ?: throw CatalogException(listOf("no usable film feed")), legacy)
         }.also { bundled = it }
+    }
+
+    private var legacy: LegacyLibrary = LegacyLibrary.EMPTY
+
+    /** The library made of [result]: its rows with their first films, and all of its films for [films]. */
+    private fun library(result: FilmFeed.Result, legacy: LegacyLibrary): Catalog {
+        val all = FeedCatalog.catalog(result, legacy)
+        everything = all.movies
+        _films.value = all.movies
+        val heads = all.collections.flatMapTo(HashSet()) { it.movieIds.take(ROW_HEAD) }
+        return all.copy(movies = all.movies.filter { it.id in heads })
+    }
+
+    private val _films = MutableStateFlow<List<Movie>>(emptyList())
+
+    /** Every film of the feed in use; it changes when a newer feed is taken up while the app runs. */
+    val films: StateFlow<List<Movie>> = _films.asStateFlow()
+
+    /**
+     * Takes up a newer feed downloaded since the last one, if there is one: the library is made again from it, and
+     * given back. Null when there is nothing newer. Called between refreshes of the home screen, never while one runs.
+     */
+    private suspend fun takeNewerFeed(): Catalog? = mutex.withLock {
+        val fresh = feed.takePending() ?: return@withLock null
+        withContext(Dispatchers.IO) { library(fresh, legacy) }.also { bundled = it }
     }
 
     /**
@@ -117,7 +143,7 @@ class CatalogRepository(
             .distinctUntilChanged()
             .flatMapLatest { (online, hasKey, lang) ->
                 flow {
-                    val base = loadBundled()
+                    var base = loadBundled()
                     emit(base)
                     if (!online) return@flow
 
@@ -144,7 +170,13 @@ class CatalogRepository(
                     var tmdbState = RefreshState()
                     var categoriesState = RefreshState()
                     suspend fun fetchWhatIsDue() {
-                        // The week's new feed, at most one try a day; it is the library from the next start of the app.
+                        // A feed downloaded at an earlier refresh becomes the library now, between two refreshes: SCARY
+                        // stays up for weeks, so the app's next start is too long to wait for the week's films.
+                        takeNewerFeed()?.let {
+                            base = it
+                            emit(build())
+                        }
+                        // The week's new feed, at most one try a day; it is taken up at the next refresh.
                         feed.refresh()
                         val now = System.currentTimeMillis()
                         // The hidden-films rule changed: hide at once what is held (works offline too), then read all
