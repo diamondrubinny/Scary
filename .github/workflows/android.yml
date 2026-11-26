@@ -214,7 +214,8 @@ jobs:
           printf 'Latest SCARY APK (release, R8), build %s from %s. scary-debug.apk is the debug build.\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
           git add scary.apk scary-debug.apk README.md
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "SCARY build ${GITHUB_RUN_NUMBER}"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/apk-builds
+          # Two runs for one commit (main and a work branch) can push here at the same moment: the loser tries again.
+          for attempt in 1 2 3; do git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/apk-builds && break || { [ "$attempt" = 3 ] && exit 1; sleep $((attempt * 15)); }; done
 
   screenshots:
     # Runs the real APK on an Android TV emulator and stores the screenshots on the "screenshots" branch.
@@ -288,7 +289,8 @@ jobs:
           printf 'SCARY screenshots from an Android TV emulator, build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
           git add .
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Screenshots for build ${GITHUB_RUN_NUMBER}"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots
+          # Two runs for one commit (main and a work branch) can push here at the same moment: the loser tries again.
+          for attempt in 1 2 3; do git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots && break || { [ "$attempt" = 3 ] && exit 1; sleep $((attempt * 15)); }; done
 
   screenshots-mobile:
     # The same APK on a phone emulator: the phone layout tests, then each main screen as a phone and as a tablet
@@ -351,4 +353,5 @@ jobs:
           printf 'SCARY screenshots from a phone emulator (phone and tablet sizes), build %s (%s).\n' "${GITHUB_RUN_NUMBER}" "${GITHUB_SHA::7}" > README.md
           git add .
           git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Phone and tablet screenshots for build ${GITHUB_RUN_NUMBER}"
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots-mobile
+          # Two runs for one commit (main and a work branch) can push here at the same moment: the loser tries again.
+          for attempt in 1 2 3; do git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/screenshots-mobile && break || { [ "$attempt" = 3 ] && exit 1; sleep $((attempt * 15)); }; done
