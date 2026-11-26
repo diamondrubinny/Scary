@@ -4,6 +4,10 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.animation.core.RepeatMode
@@ -279,12 +283,29 @@ fun HomeScreen(
         if (!restoreFocus.tryRequestFocus()) heroFocus.tryRequestFocus()
     }
 
+    // Up from the rows goes to the hero. Left to itself, the focus goes to whatever stands straight above the card:
+    // from a card at the side of the screen that is a button of the top bar (Settings), over the hero's head, since
+    // the hero's buttons are at the other side. The press is let through, and when it took the focus from the rows
+    // to the top bar, the focus is put on the hero's button; one more Up from there reaches the top bar.
+    var topBarFocused by remember { mutableStateOf(false) }
+    val upFromRows = remember { booleanArrayOf(false) }
+    val heroAbove = !scaryLayout.narrow && !state.picking
+    LaunchedEffect(topBarFocused) {
+        if (!topBarFocused || !heroAbove || !upFromRows[0]) return@LaunchedEffect
+        if (android.os.SystemClock.uptimeMillis() - lastKeyAt[0] > FOCUS_LOSS_KEY_MS) return@LaunchedEffect
+        upFromRows[0] = false
+        heroFocus.tryRequestFocus()
+    }
+
     Column(
         Modifier
             .fillMaxSize()
             .onFocusChanged { screenFocused = it.hasFocus }
-            .onPreviewKeyEvent {
-                lastKeyAt[0] = android.os.SystemClock.uptimeMillis()
+            .onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown) {
+                    lastKeyAt[0] = android.os.SystemClock.uptimeMillis()
+                    upFromRows[0] = event.key == Key.DirectionUp && rowsFocused
+                }
                 false
             },
     ) {
@@ -292,7 +313,9 @@ fun HomeScreen(
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
             onSurprise = actions.onSurprise,
-            modifier = Modifier.padding(horizontal = SidePadding, vertical = if (rowsFocused) 12.dp else 18.dp),
+            modifier = Modifier
+                .onFocusChanged { topBarFocused = it.hasFocus }
+                .padding(horizontal = SidePadding, vertical = if (rowsFocused) 12.dp else 18.dp),
             familyNight = state.familyNight,
             sleepAtMillis = state.sleepAtMillis,
             compact = rowsFocused,
