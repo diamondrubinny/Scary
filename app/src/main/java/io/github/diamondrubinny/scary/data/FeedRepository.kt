@@ -25,7 +25,7 @@ import javax.net.ssl.HttpsURLConnection
  * SCARY's film feed (docs/CATALOG_REBUILD_PLAN.md, core FilmFeed): every film and every home row, built each week from
  * public data and published on the repository's "film-feed" release. The newest good copy is used: the one this TV
  * downloaded, or the one packed in the app when it was built, so there are films at the first start and without a
- * network.
+ * network. A copy downloaded while the app runs becomes the library at the next refresh of the home screen.
  *
  * The download is a plain GET of one fixed address, at most once a day: no query, no cookie, nothing about the viewer;
  * GitHub sees the TV's IP address, as when SCARY checks for an update. Every redirect is checked (HTTPS, GitHub's own
@@ -36,8 +36,29 @@ class FeedRepository(private val context: Context) {
     private val mutex = Mutex()
     private var held: FilmFeed.Result? = null
 
-    /** The date of the newest feed downloaded since this start; it is used from the next one. */
-    @Volatile private var keptGenerated: String? = null
+    /**
+     * A newer feed downloaded since the one in use was taken up. It waits here until the library asks for it at a
+     * quiet moment ([takePending]): never in the middle of the pass that downloaded it.
+     */
+    @Volatile private var pending: FilmFeed.Result? = null
+
+    /**
+     * Keeps the feed in use as it is, whatever is downloaded: for the UI tests, which compare the screen with the
+     * library they read at their start, on an emulator that is online.
+     */
+    @Volatile var frozen = false
+
+    /**
+     * The newer feed that was downloaded, to become the library now; null when there is none. SCARY is a TV's home
+     * screen and stays up for weeks, so waiting for the app's next start would leave the week's films unseen.
+     */
+    suspend fun takePending(): FilmFeed.Result? = mutex.withLock {
+        if (frozen) return@withLock null
+        pending?.also {
+            held = it
+            pending = null
+        }
+    }
     private val prefs by lazy { context.getSharedPreferences("film_feed", Context.MODE_PRIVATE) }
     private val file: File get() = File(context.filesDir, FILE_NAME)
 
@@ -64,8 +85,8 @@ class FeedRepository(private val context: Context) {
     }
 
     /**
-     * Downloads the feed when the last try was a day ago or more ([force]: now). Returns the feed kept for the next start
-     * of the app when a newer good one arrived, null otherwise (nothing new, no network, a file that failed the rules).
+     * Downloads the feed when the last try was a day ago or more ([force]: now). Returns the feed now waiting to be
+     * taken up when a newer good one arrived, null otherwise (nothing new, no network, a file that failed the rules).
      */
     suspend fun refresh(force: Boolean = false): FilmFeed.Result? = withContext(Dispatchers.IO) {
         val now = System.currentTimeMillis()
@@ -75,7 +96,7 @@ class FeedRepository(private val context: Context) {
         val text = download() ?: return@withContext null
         val fresh = read("downloaded") { text } ?: return@withContext null
         val current = load()
-        val newest = listOfNotNull(current?.generated, keptGenerated).maxOrNull()
+        val newest = listOfNotNull(current?.generated, pending?.generated).maxOrNull()
         if (newest != null && fresh.generated <= newest) return@withContext null
         // Written whole or not at all: a file cut short is never left where the next start would read it.
         val temp = File(context.filesDir, "$FILE_NAME.tmp")
@@ -86,9 +107,9 @@ class FeedRepository(private val context: Context) {
             Log.w(TAG, "The new feed could not be kept: ${e.javaClass.simpleName}")
             temp.delete()
         }
-        // The feed in use stays the one this start of the app was built from ([load]): the library never changes under
-        // the viewer, and everything that reads it in this process sees the same films.
-        keptGenerated = fresh.generated
+        // Not in use yet: [load] keeps giving the feed the library was built from, so everything that reads it sees
+        // the same films, until the library takes this one up ([takePending]).
+        pending = fresh
         fresh
     }
 

@@ -386,7 +386,11 @@ class HomeViewModel(
             }
             val online = settings.prefs.map { it.onlineEnabled }.distinctUntilChanged()
             // The full index comes in the background, after the library is on screen.
-            launch { indexMovies.value = catalogRepository.loadIndex() }
+            launch {
+                indexMovies.value = catalogRepository.loadIndex()
+                // A newer feed taken up while the app runs brings its films too.
+                catalogRepository.films.collect { films -> if (films.isNotEmpty()) indexMovies.value = films }
+            }
             val index = indexMovies.combine(enrichedIndex) { films, enriched -> films to enriched }
             catalogRepository.catalog(online, tmdb.keyMask.map { it != null }, language, refreshSignals)
                 .combine(savedMovies.items) { catalog, saved -> catalog to saved }

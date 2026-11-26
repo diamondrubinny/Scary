@@ -165,6 +165,9 @@ class ScaryUiTest {
     @Before
     fun likeATv() {
         InstrumentationRegistry.getInstrumentation().setInTouchMode(false)
+        // The library stays the one the tests read at their start: the emulator is online, and a newer feed downloaded
+        // during the run would otherwise become the library between two tests.
+        (rule.activity.application as ScaryApplication).container.feedRepository.frozen = true
     }
 
     private fun text(id: Int): String = rule.activity.getString(id)

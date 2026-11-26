@@ -96,4 +96,20 @@ class RelevanceTest {
         assertFalse(Relevance.holdsWords("Night.of.the.Living.Dead.1990.1080p", "night living dead 1968"))
         assertTrue(Relevance.holdsWords("anything at all", "  "))
     }
+
+    @Test
+    fun `a search for Postmortem 2026 shows that film and none of the others the indexer gave`() {
+        // What an indexer answered for it (a viewer's screen, 26 Nov 2026).
+        val wanted = Wanted("Postmortem", 2026)
+        assertFalse(Relevance.isWanted("Chicago.Fire.S13E13.Post.Mortem.720p.AMZN.WEB-DL.DDP5.1.H.264", wanted))
+        assertFalse(Relevance.isWanted("Sarah Silverman PostMortem 2025 720p NF WEB-DL DDP5 1 H 264-FLUX", wanted))
+        assertFalse(Relevance.isWanted("Romance.Post.Mortem.2023.1080P.BLURAY.X264-WATCHABLE", wanted))
+        // The film itself, with its name in one word or two.
+        assertTrue(Relevance.isWanted("Postmortem.2026.1080p.WEB-DL.x264", wanted))
+        assertTrue(Relevance.isWanted("Post.Mortem.2026.2160p.WEB.H265", wanted))
+        assertTrue(Relevance.isWanted("Post Mortem (2025) 1080p WEBRip", wanted))
+        // And the other way: a title in two words, a release in one.
+        assertTrue(Relevance.isWanted("Postmortem.2026.720p", Wanted("Post Mortem", 2026)))
+        assertFalse(Relevance.isWanted("Post.Mortems.2026.720p", wanted))
+    }
 }

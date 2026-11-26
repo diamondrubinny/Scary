@@ -63,23 +63,35 @@ object Relevance {
     /**
      * True when [release] names the film or series [wanted]: its name holds the title's words together, what stands
      * beside them is only harmless ("Extended", "Director's Cut") and never a sequel's number, and for a film the
-     * year the release gives is the film's (or the one beside it, since a film's year differs by country). A film's
-     * release that gives no year is taken only when its name is the title and nothing else.
+     * year the release gives is the film's (or the one beside it, since a film's year differs by country; exactly the
+     * film's when the name carries other words). A film's release that gives no year is taken only when its name is
+     * the title and nothing else.
      */
     fun isWanted(release: String, wanted: Wanted): Boolean {
         val title = withoutArticle(words(wanted.title))
         if (title.isEmpty()) return false
         val read = read(release)
         val name = read.name
-        val at = (0..name.size - title.size).firstOrNull { name.subList(it, it + title.size) == title } ?: return false
-        val before = name.take(at)
-        val after = name.drop(at + title.size)
+        // The title's words together, however the release splits them: "Post.Mortem" is "Postmortem", "Se7en" is "Se7en".
+        val joined = title.joinToString("")
+        val span = name.indices.firstNotNullOfOrNull { from ->
+            var text = ""
+            (from until name.size).firstOrNull { to ->
+                text += name[to]
+                text.length >= joined.length
+            }?.takeIf { text == joined }?.let { to -> from..to }
+        } ?: return false
+        val before = name.take(span.first)
+        val after = name.drop(span.last + 1)
         if (after.firstOrNull() in SEQUEL) return false
         val beside = before + after
         val plain = beside.all { it in HARMLESS || it in ARTICLES }
         if (wanted.series) return plain
         if (wanted.year <= 0) return plain
-        return if (read.years.isEmpty()) plain else read.years.any { kotlin.math.abs(it - wanted.year) <= 1 } && (plain || beside.size <= MAX_EXTRA_WORDS)
+        if (read.years.isEmpty()) return plain
+        // A film's year differs by one from country to country, so a plain name may be a year off. A name with more
+        // words in it (a director's name, or another film's) must give the film's own year exactly.
+        return if (plain) read.years.any { kotlin.math.abs(it - wanted.year) <= 1 } else beside.size <= MAX_EXTRA_WORDS && wanted.year in read.years
     }
 
     /**
