@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
@@ -117,6 +118,9 @@ const val STUDIOS_ROW_TAG = "studiosRow"
 
 /** The horror studios TMDB knows, with their ids; empty without the viewer's TMDB key. Given at the root, read by the moods row. */
 val LocalStudios = androidx.compose.runtime.staticCompositionLocalOf<List<Pair<io.github.diamondrubinny.scary.core.tmdb.Studio, Long>>> { emptyList() }
+
+/** A focus that left the rows this soon after a key press was taken away by that press, not lost. */
+private const val FOCUS_LOSS_KEY_MS = 300L
 
 class HomeActions(
     val onCardFocused: (key: String, movieId: String?) -> Unit,
@@ -247,7 +251,43 @@ fun HomeScreen(
     val rowTop = with(LocalDensity.current) { RowTop.toPx() }
     val rowsPivot = remember(rowTop) { WholeRowInView(rowTop) }
 
-    Column(Modifier.fillMaxSize()) {
+    // The focus can be lost from under the remote: the library refreshes while the viewer is in the rows (new films
+    // arrive, a row is put in order again), the focused card is replaced, and nothing holds the focus any more. The
+    // next press would then land on the first thing on the screen, the top bar's buttons. So when the focus leaves
+    // the rows and goes nowhere on this screen, with no key pressed, it is brought back: to the card it was on if
+    // that is still there, else to the hero. A key press that takes the focus away (opening a film, a window) is the
+    // viewer's own doing and is left alone.
+    var screenFocused by remember { mutableStateOf(false) }
+    var wasInRows by remember { mutableStateOf(false) }
+    // When the last key was pressed; only read, never shown, so it is not state.
+    val lastKeyAt = remember { longArrayOf(0L) }
+    LaunchedEffect(rowsFocused, screenFocused, state.loading) {
+        if (rowsFocused) {
+            wasInRows = true
+            return@LaunchedEffect
+        }
+        if (screenFocused) {
+            // On the hero or the top bar: where the viewer went.
+            wasInRows = false
+            return@LaunchedEffect
+        }
+        if (!wasInRows || state.loading) return@LaunchedEffect
+        if (android.os.SystemClock.uptimeMillis() - lastKeyAt[0] < FOCUS_LOSS_KEY_MS) return@LaunchedEffect
+        // Two frames: a card replaced by its new self often takes the focus back by itself.
+        withFrameNanos { }
+        withFrameNanos { }
+        if (!restoreFocus.tryRequestFocus()) heroFocus.tryRequestFocus()
+    }
+
+    Column(
+        Modifier
+            .fillMaxSize()
+            .onFocusChanged { screenFocused = it.hasFocus }
+            .onPreviewKeyEvent {
+                lastKeyAt[0] = android.os.SystemClock.uptimeMillis()
+                false
+            },
+    ) {
         TopBar(
             onOpenSettings = actions.onOpenSettings,
             onOpenSearch = actions.onOpenSearch,
