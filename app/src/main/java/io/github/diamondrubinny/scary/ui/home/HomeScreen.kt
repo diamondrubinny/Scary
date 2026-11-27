@@ -123,6 +123,9 @@ const val STUDIOS_ROW_TAG = "studiosRow"
 /** The horror studios TMDB knows, with their ids; empty without the viewer's TMDB key. Given at the root, read by the moods row. */
 val LocalStudios = androidx.compose.runtime.staticCompositionLocalOf<List<Pair<io.github.diamondrubinny.scary.core.tmdb.Studio, Long>>> { emptyList() }
 
+/** The tag the remote's keys are logged under when a device is set to (the UI tests' emulator prints it). */
+private const val FOCUS_LOG_TAG = "ScaryKeys"
+
 /** An Up that took the focus to the top bar did so within this long of the press. */
 private const val FOCUS_LOSS_KEY_MS = 300L
 
@@ -277,7 +280,18 @@ fun HomeScreen(
         // A few frames: a card replaced by its new self often takes the focus back by itself, and a row that moved
         // has to be laid out again before one of its cards can take it.
         repeat(FOCUS_LOSS_FRAMES) { withFrameNanos { } }
-        if (!restoreFocus.tryRequestFocus()) heroFocus.tryRequestFocus()
+        val toCard = restoreFocus.tryRequestFocus()
+        val toHero = !toCard && heroFocus.tryRequestFocus()
+        // Why the focus was lost is not known yet: what is seen here, on a device set to log it (the UI tests are),
+        // is the trace to find out from. Nothing personal: a row's key and a film's id from the library.
+        if (android.util.Log.isLoggable(FOCUS_LOG_TAG, android.util.Log.DEBUG)) {
+            val rowKey = state.rows.map { it.key }.filter { restoreKey?.startsWith("$it:") == true }.maxByOrNull { it.length }
+            android.util.Log.d(
+                FOCUS_LOG_TAG,
+                "home focus lost: last=$restoreKey rowStillThere=${rowKey != null} rows=${state.rows.size} " +
+                    "msSinceKey=${android.os.SystemClock.uptimeMillis() - lastKeyAt[0]} back=${if (toCard) "card" else if (toHero) "hero" else "nowhere"}",
+            )
+        }
     }
 
     // Up from the rows goes to the hero. Left to itself, the focus goes to whatever stands straight above the card:
@@ -291,7 +305,8 @@ fun HomeScreen(
         if (!topBarFocused || !heroAbove || !upFromRows[0]) return@LaunchedEffect
         if (android.os.SystemClock.uptimeMillis() - lastKeyAt[0] > FOCUS_LOSS_KEY_MS) return@LaunchedEffect
         upFromRows[0] = false
-        heroFocus.tryRequestFocus()
+        val moved = heroFocus.tryRequestFocus()
+        if (android.util.Log.isLoggable(FOCUS_LOG_TAG, android.util.Log.DEBUG)) android.util.Log.d(FOCUS_LOG_TAG, "home: Up from the rows reached the top bar; to the hero=$moved")
     }
 
     Column(

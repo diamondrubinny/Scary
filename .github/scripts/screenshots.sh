@@ -39,6 +39,9 @@ if [ -f dist/scary-tests.apk ]; then
   cat "$OUT/ui-tests.txt"
   echo "OK key events the app handled during the tests (last 200):"
   adb logcat -d -s ScaryKeys:D | tail -200 || true
+  # When the home screen lost the focus and where it was put back (HomeScreen): the trace to find the cause from.
+  echo "Home focus events during the tests:"
+  adb logcat -d -s ScaryKeys:D | grep -E 'ScaryKeys: home' || echo "none"
   # Searched as a whole, not through a pipe: "grep -q" ends at the first match, the "echo" feeding it is then cut
   # off, and under pipefail the pipe fails although the tests passed (build 449: "OK (77 tests)", then this).
   if ! grep -q '^OK (' <<< "$result"; then
