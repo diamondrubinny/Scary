@@ -83,12 +83,20 @@ class CatalogRepository(
 
     /** The library made of [result]: its rows with their first films, and all of its films for [films]. */
     private fun library(result: FilmFeed.Result, legacy: LegacyLibrary): Catalog {
-        val all = FeedCatalog.catalog(result, legacy)
+        // Each row begins where today turns it to (core DailyRotation): the day is kept, to turn again when it changes.
+        val day = java.time.LocalDate.now().toEpochDay()
+        libraryDay = day
+        val all = FeedCatalog.catalog(result, legacy, day)
         everything = all.movies
         _films.value = all.movies
         val heads = all.collections.flatMapTo(HashSet()) { it.movieIds.take(ROW_HEAD) }
         return all.copy(movies = all.movies.filter { it.id in heads })
     }
+
+    /** The day the library's rows were turned for (days since 1970, in the TV's own time); the UI tests read it. */
+    @Volatile
+    var libraryDay: Long = 0
+        private set
 
     private val _films = MutableStateFlow<List<Movie>>(emptyList())
 
@@ -96,11 +104,14 @@ class CatalogRepository(
     val films: StateFlow<List<Movie>> = _films.asStateFlow()
 
     /**
-     * Takes up a newer feed downloaded since the last one, if there is one: the library is made again from it, and
-     * given back. Null when there is nothing newer. Called between refreshes of the home screen, never while one runs.
+     * Takes up a newer feed downloaded since the last one, or a new day: the library is made again, and given back.
+     * Null when there is neither. Called between refreshes of the home screen, never while one runs.
      */
     private suspend fun takeNewerFeed(): Catalog? = mutex.withLock {
-        val fresh = feed.takePending() ?: return@withLock null
+        // A new day turns the rows again, with the feed in use or a newer one. SCARY stays up for weeks: without this
+        // the rows would begin for ever with the films of the day it was started.
+        val newDay = !feed.frozen && bundled != null && java.time.LocalDate.now().toEpochDay() != libraryDay
+        val fresh = feed.takePending() ?: (if (newDay) feed.load() else null) ?: return@withLock null
         withContext(Dispatchers.IO) { library(fresh, legacy) }.also { bundled = it }
     }
 

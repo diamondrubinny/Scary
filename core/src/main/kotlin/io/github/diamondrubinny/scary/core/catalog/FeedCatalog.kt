@@ -40,7 +40,11 @@ object FeedCatalog {
     /** The ids of the rows this version can show, in home-screen order. */
     val rowIds: List<String> get() = names.keys.toList()
 
-    fun catalog(feed: FilmFeed.Result, legacy: LegacyLibrary = LegacyLibrary.EMPTY): Catalog {
+    /**
+     * The library made of [feed]. With a [day] (days since 1970 in the viewer's time), each row begins where that day
+     * turns it to (core DailyRotation); without one, the rows are as the feed gives them.
+     */
+    fun catalog(feed: FilmFeed.Result, legacy: LegacyLibrary = LegacyLibrary.EMPTY, day: Long? = null): Catalog {
         // A film with a fear level is one somebody watched and rated by hand: it is "curated", which is what tonight's
         // pick, the moods, family night and the time planner choose from. No other film of the feed is.
         val movies = feed.movies.map { movie -> legacy.fear(movie.imdbId)?.let { movie.copy(fear = it, curated = true) } ?: movie }
@@ -50,7 +54,7 @@ object FeedCatalog {
                     id = row.id,
                     titleHe = name.he,
                     titleEn = name.en,
-                    movieIds = row.movieIds,
+                    movieIds = if (day == null) row.movieIds else DailyRotation.turned(row.movieIds, row.id, day),
                     titles = mapOf(Language.PT.code to name.pt, Language.RU.code to name.ru, Language.AR.code to name.ar),
                 )
             }

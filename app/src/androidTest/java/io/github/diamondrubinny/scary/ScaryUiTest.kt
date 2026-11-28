@@ -1717,6 +1717,8 @@ class ScaryUiTest {
         runBlocking { (rule.activity.application as ScaryApplication).container.feedRepository.load() }
             ?: throw AssertionError("the app holds no film feed"),
         rule.activity.assets.open("legacy.json").bufferedReader().use { LegacyLibrary.parse(it.readText()) },
+        // The rows begin where the app turned them to for its day (core DailyRotation).
+        (rule.activity.application as ScaryApplication).container.catalogRepository.libraryDay,
     )
 
     /** Opens settings (no PIN on a fresh emulator), switches family night, and goes back home. */
