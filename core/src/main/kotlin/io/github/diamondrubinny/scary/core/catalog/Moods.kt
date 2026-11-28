@@ -42,8 +42,10 @@ enum class Mood(val key: String) {
     fun pick(movies: List<Movie>): List<Movie> {
         val matching = movies.filter { it.curated && matches(it) }
         return when (this) {
-            RELENTLESS -> matching.sortedByDescending { it.fear }
-            SHORT -> matching.sortedBy { it.runtimeMin }
+            // Films that tie are told apart by name, not by where they stand in the list given: the same films give the
+            // same row, whichever of them the library happened to put first today.
+            RELENTLESS -> matching.sortedWith(compareByDescending<Movie> { it.fear }.thenBy { it.title }.thenBy { it.id })
+            SHORT -> matching.sortedWith(compareBy<Movie> { it.runtimeMin }.thenBy { it.title }.thenBy { it.id })
             else -> matching
         }
     }
@@ -112,7 +114,7 @@ object Decades {
         mood == null && decade == null -> emptyList()
         mood == null -> {
             val (curated, more) = movies.filter { of(it) == decade }.partition { it.curated }
-            curated.sortedBy { it.year } + more.take(MAX_MORE)
+            curated.sortedWith(compareBy<Movie> { it.year }.thenBy { it.title }.thenBy { it.id }) + more.take(MAX_MORE)
         }
         decade == null -> mood.pick(movies)
         else -> mood.pick(movies).filter { of(it) == decade }

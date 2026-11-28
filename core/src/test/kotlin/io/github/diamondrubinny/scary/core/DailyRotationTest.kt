@@ -5,6 +5,13 @@
 package io.github.diamondrubinny.scary.core
 
 import io.github.diamondrubinny.scary.core.catalog.DailyRotation
+import io.github.diamondrubinny.scary.core.catalog.Decades
+import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
+import io.github.diamondrubinny.scary.core.catalog.Mood
+import io.github.diamondrubinny.scary.core.model.Genre
+import io.github.diamondrubinny.scary.core.model.Language
+import io.github.diamondrubinny.scary.core.model.Movie
+import io.github.diamondrubinny.scary.core.model.Subgenre
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
@@ -54,5 +61,41 @@ class DailyRotationTest {
         val short = films.take(DailyRotation.MIN_FILMS - 1)
         assertEquals(short, DailyRotation.turned(short, "psychological_horror", 20_003))
         assertEquals(emptyList<String>(), DailyRotation.turned(emptyList<String>(), "slashers", 20_003))
+    }
+
+    @Test
+    fun `a film an online row brought keeps what the feed knows of it`() {
+        val own = Movie(
+            id = "cm_tt0081505", imdbId = "tt0081505", title = "The Shining", year = 1980, genre = Genre.HORROR, fear = 5, curated = true,
+            titles = mapOf("he" to "הניצוץ", "ru" to "Сияние"), subgenres = listOf(Subgenre.HAUNTED_HOUSE), runtimeMin = 144, director = "Stanley Kubrick",
+        )
+        val online = Movie(
+            id = "cm_tt0081505", imdbId = "tt0081505", title = "The Shining", year = 1980, genre = Genre.HORROR, curated = false,
+            posterUrl = "https://images.example/p.jpg", cast = listOf("Jack Nicholson"), titles = mapOf("ru" to "Сияние (ТВ)", "pt" to ""), imdbRating = 8.4,
+        )
+        val shown = FeedCatalog.withOwnFields(online, own)
+        assertEquals("הניצוץ", shown.displayTitle(Language.HE))
+        assertEquals(5, shown.fear)
+        assertTrue(shown.curated)
+        assertEquals(listOf(Subgenre.HAUNTED_HOUSE), shown.subgenres)
+        assertEquals(144, shown.runtimeMin)
+        // What the online row gave is kept, its own translation included; an empty one does not wipe the feed's.
+        assertEquals("https://images.example/p.jpg", shown.posterUrl)
+        assertEquals(listOf("Jack Nicholson"), shown.cast)
+        assertEquals("Сияние (ТВ)", shown.titles["ru"])
+        assertEquals(8.4, shown.imdbRating!!, 0.0)
+        assertEquals("The Shining", shown.displayTitle(Language.PT))
+    }
+
+    @Test
+    fun `films that tie are ordered by name, whichever stood first in the list`() {
+        fun film(id: String, title: String, year: Int, fear: Int) =
+            Movie(id = id, imdbId = id, title = title, year = year, genre = Genre.HORROR, fear = fear, curated = true, runtimeMin = 100)
+        val a = film("tt1", "Alpha", 1980, 5)
+        val b = film("tt2", "Beta", 1980, 5)
+        val c = film("tt3", "Gamma", 1981, 5)
+        assertEquals(Decades.pick(listOf(a, b, c), null, 1980), Decades.pick(listOf(c, b, a), null, 1980))
+        assertEquals(listOf("Alpha", "Beta", "Gamma"), Decades.pick(listOf(c, b, a), null, 1980).map { it.title })
+        assertEquals(Mood.RELENTLESS.pick(listOf(a, b, c)), Mood.RELENTLESS.pick(listOf(b, c, a)))
     }
 }

@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.ui.home
 
+import io.github.diamondrubinny.scary.core.catalog.FeedCatalog
 import io.github.diamondrubinny.scary.core.player.Episodes
 import android.os.SystemClock
 import android.util.Log
@@ -453,7 +454,11 @@ class HomeViewModel(
             val more = extra.asSequence().filter { subgenre in it.subgenres && it.id !in have }.take(INDEX_PER_ROW).map { it.id }.toList()
             if (more.isEmpty()) collection else collection.copy(movieIds = collection.movieIds + more)
         }
-        return catalog.copy(movies = catalog.movies + extra, collections = collections)
+        // A film of the feed that an online row brought first keeps what the feed knows of it (its names, its fear
+        // level, that it is the library's own): the online row's copy carries none of that.
+        val own = films.associateBy { it.imdbId }
+        val shown = catalog.movies.map { movie -> own[movie.imdbId]?.takeIf { it !== movie }?.let { FeedCatalog.withOwnFields(movie, it) } ?: movie }
+        return catalog.copy(movies = shown + extra, collections = collections)
     }
 
     /**

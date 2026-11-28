@@ -4,6 +4,7 @@
 
 package io.github.diamondrubinny.scary.core.catalog
 
+import io.github.diamondrubinny.scary.core.model.Movie
 import io.github.diamondrubinny.scary.core.model.Catalog
 import io.github.diamondrubinny.scary.core.model.Language
 import io.github.diamondrubinny.scary.core.model.MovieCollection
@@ -61,4 +62,26 @@ object FeedCatalog {
         }
         return Catalog(version = FilmFeed.SUPPORTED_VERSION, movies = movies, collections = collections)
     }
+
+    /**
+     * [shown], a film as an online row brought it (Cinemeta, TMDB), with what the feed knows of the same film ([own]):
+     * its names in the viewer's languages, its subgenres, its fear level and that it is one of the library's own.
+     * An online row carries none of these, and a film that reached the screen through one would otherwise show its
+     * English name alone and stay out of the moods, the decades and tonight's pick. What the online row gave
+     * (artwork, cast, a translation of its own) is kept.
+     */
+    fun withOwnFields(shown: Movie, own: Movie): Movie = shown.copy(
+        titleHe = shown.titleHe.ifBlank { own.titleHe },
+        titles = own.titles + shown.titles.filterValues(String::isNotBlank),
+        subgenres = shown.subgenres.ifEmpty { own.subgenres },
+        fear = shown.fear ?: own.fear,
+        curated = shown.curated || own.curated,
+        tags = shown.tags.ifEmpty { own.tags },
+        director = shown.director.ifBlank { own.director },
+        runtimeMin = shown.runtimeMin.takeIf { it > 0 } ?: own.runtimeMin,
+        synopsisHe = shown.synopsisHe.ifBlank { own.synopsisHe },
+        synopsisEn = shown.synopsisEn.ifBlank { own.synopsisEn },
+        synopses = own.synopses + shown.synopses.filterValues(String::isNotBlank),
+        imdbRating = shown.imdbRating ?: own.imdbRating,
+    )
 }
