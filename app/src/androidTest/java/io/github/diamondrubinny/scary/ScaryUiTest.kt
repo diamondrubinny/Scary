@@ -897,7 +897,9 @@ class ScaryUiTest {
                 backToHome()
                 // Films like it get a row of their own on the home screen.
                 rule.waitUntil(TIMEOUT_MS) { runCatching { rows.performScrollToKey("because") }.isSuccess }
-                waitFor(hasText(rule.activity.getString(R.string.row_because_loved, movie.title)))
+                // The row is named after the film in the viewer's language, as the film's own page is.
+                val language = Language.fromCode(rule.activity.resources.configuration.locales[0].language)
+                waitFor(hasText(rule.activity.getString(R.string.row_because_loved, movie.displayTitle(language))))
                 openViaSearch(movie)
                 rule.onNode(loved).performScrollTo().performClick()
                 waitFor(love)
